@@ -7,8 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
+import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
 export interface SamplingCriterion extends EvaluationCriterionStructured {
@@ -39,9 +41,15 @@ export interface KIQueryGenerationScenario {
     expected_categories: string[];
     expected_ground_truth: string;
     expect_stats?: boolean;
+    expect_queries?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
+  /** Eval-only novelty arm: seeds existing_queries, scored against hidden criteria. */
+  rerun?: {
+    existing_queries: ExistingQuerySummary[];
+    criteria: SamplingCriterion[];
+  };
 }
 
 export interface KIFeatureExtractionScenario {
@@ -89,42 +97,42 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export type { ChronicSeedInput };
+
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
+    /**
+     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
+     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     */
+    chronic_seed?: ChronicSeedInput;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
+  /** Memory pages seeded via the memory API before the agent runs (the spec wipes the memory data stream between scenarios). */
+  memoryPages?: Array<{
+    name: string;
+    title: string;
+    content: string;
+    categories?: string[];
+  }>;
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;
-    /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
+    /** Human-readable summary of expected output for quick orientation. */
     expected_ground_truth?: string;
+    /** Expected confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
     /**
-     * The discoveries the agent is expected to generate — same shape as the judge's
-     * `input.discoveries` (signals + causal_features + blast_radius). This is the canonical ground
-     * truth: the grouping check derives its expected groups from these `signals[].metadata.rule_uuid`s,
-     * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
+     * The significant events the agent is expected to generate — signals + causal_features +
+     * blast_radius + status. The grouping check derives its expected groups from these events'
+     * `signals[].metadata.rule_uuid`s.
      */
-    expected_discoveries: Array<Partial<Discovery>>;
-  };
-  metadata: Record<string, unknown> & ScenarioMetadata;
-  snapshot_source?: SnapshotSourceOverride;
-}
-
-export interface DiscoveryJudgeScenario {
-  id?: string;
-  input: {
-    scenario_id: string;
-    discoveries: Array<Partial<Discovery>>;
-  };
-  output: {
-    criteria: SamplingCriterion[];
-    /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
-    expected_ground_truth: string;
-    expect_assessment_note?: boolean;
+    expected_significant_events: Array<Partial<SignificantEvent>>;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
@@ -139,5 +147,4 @@ export interface DatasetConfig {
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
   discovery: DiscoveryScenario[];
-  discoveryJudge: DiscoveryJudgeScenario[];
 }

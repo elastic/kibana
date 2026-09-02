@@ -5,25 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiTextColor,
-  useEuiTheme,
-  type EuiCallOutProps,
-} from '@elastic/eui';
-import type { ReactNode } from 'react';
+import { EuiCallOut, type EuiCallOutProps } from '@elastic/eui';
 import React, { memo } from 'react';
-import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import * as i18n from './translations';
 
 export interface MiniCalloutProps {
   color?: EuiCallOutProps['color'];
   dismissible?: boolean;
-  title: ReactNode | string;
+  title: EuiCallOutProps['title'];
+  text?: EuiCallOutProps['text'];
   'data-test-subj'?: string;
 }
 
@@ -34,58 +25,31 @@ export interface MiniCalloutProps {
  * @param color color for the callout, defaults to 'primary'
  * @param dismissible whether the callout can be dismissed, defaults to 'true'
  * @param title ReactNode or string title text to be displayed
+ * @param text ReactNode or string description text to be displayed
  * @param dataTestSubj data-test-subj attribute for testing purposes, defaults to 'mini-callout'
  */
 export const MiniCallout = memo(function MiniCallout({
   color = 'primary',
   dismissible = true,
   title,
+  text,
   'data-test-subj': dataTestSubj = 'mini-callout',
 }: MiniCalloutProps): JSX.Element | null {
-  const { euiTheme } = useEuiTheme();
   const [isDismissed, { on: dismiss }] = useBoolean(false);
 
   if (isDismissed) {
     return null;
   }
 
-  const calloutTitle = (
-    <EuiFlexGroup
-      justifyContent="spaceBetween"
-      css={css`
-        display: flex;
-      `}
-    >
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="none">
-          <EuiTextColor
-            color="default"
-            css={css`
-              font-weight: ${euiTheme.font.weight.regular};
-            `}
-          >
-            {title}
-          </EuiTextColor>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {dismissible && (
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            css={css`
-              font-weight: ${euiTheme.font.weight.regular};
-            `}
-            onClick={dismiss}
-          >
-            {i18n.DISMISS}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-
   return (
-    <EuiCallOut size="s" color={color} data-test-subj={dataTestSubj}>
-      {calloutTitle}
-    </EuiCallOut>
+    <EuiCallOut
+      size="s"
+      title={title}
+      text={text}
+      color={color}
+      onDismiss={dismissible ? dismiss : undefined}
+      dismissButtonProps={{ 'aria-label': i18n.DISMISS }}
+      data-test-subj={dataTestSubj}
+    />
   );
 });

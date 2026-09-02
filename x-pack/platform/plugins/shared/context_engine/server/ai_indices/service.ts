@@ -8,34 +8,71 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { MAX_AI_INDICES } from '../../common/constants';
+import pRetry from 'p-retry';
+import {
+  AI_INDEX_DATA_STREAM_PREFIX as DATA_STREAM_PREFIX,
+  AI_INDEX_INDEX_PREFIX as INDEX_PREFIX,
+  MAX_AI_INDEX_AUTOMATIONS,
+  MAX_AI_INDICES,
+} from '../../common/constants';
 import type {
   AiIndexDest,
+  AiIndexFeedbackAnalysis,
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
-import { InvalidAiIndexDestError, AiIndexConflictError, AiIndexNotFoundError } from './errors';
+import {
+  InvalidAiIndexDestError,
+  AiIndexConflictError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+  AiIndexIdConflictError,
+  AiIndexAlreadyExistsError,
+} from './errors';
 import type { AiIndexDocument, AiIndexStorageClient } from './storage';
 import { createAiIndexStorageClient } from './storage';
 
-/**
- * Backing data streams and indices follow type-specific naming conventions,
- * both sharing the common `ai-index-` base.
- */
-const DEST_INDEX_PREFIX = 'ai-index-';
-const DATA_STREAM_PREFIX = `${DEST_INDEX_PREFIX}ds-`;
-const INDEX_PREFIX = `${DEST_INDEX_PREFIX}idx-`;
-
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
-  name: document.name,
   ...(document.description !== undefined && { description: document.description }),
+  ...(document.feedback_analysis !== undefined && {
+    feedback_analysis: document.feedback_analysis,
+  }),
+  managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
   date_created: document.date_created,
   date_modified: document.date_modified,
 });
+
+const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
+
+type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
+
+const assertAiIndexAcceptsAutomation = (
+  aiIndexId: string,
+  index: AiIndexAutomationTarget,
+  automation?: { type: 'workflow'; value: string }
+): { alreadyAttached: boolean } => {
+  if (index.managed) {
+    throw new AiIndexManagedError(aiIndexId);
+  }
+
+  const alreadyAttached =
+    automation !== undefined &&
+    index.automations.some(
+      (entry) => entry.type === automation.type && entry.value === automation.value
+    );
+
+  if (!alreadyAttached && index.automations.length >= MAX_AI_INDEX_AUTOMATIONS) {
+    throw new Error(
+      `AI index "${aiIndexId}" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
+    );
+  }
+
+  return { alreadyAttached };
+};
 
 /**
  * Manages the AI index registry stored in the hidden
@@ -51,18 +88,76 @@ export class AiIndexService {
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
   }
 
+  /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
+  async create(aiIndexId: string, properties: AiIndexProperties): Promise<void> {
+    await this.assertValidDest(properties.dest);
+
+    const now = new Date().toISOString();
+    const document: AiIndexDocument = {
+      ...properties,
+      managed: false,
+      date_created: now,
+      date_modified: now,
+    };
+
+    try {
+      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw new AiIndexAlreadyExistsError(aiIndexId);
+      }
+      throw error;
+    }
+  }
+
   /**
    * Creates or fully replaces an AI index, preserving `date_created` on update.
    * Concurrent writes are guarded with optimistic concurrency control; a losing
-   * writer gets a {@link AiIndexConflictError}.
+   * writer gets an {@link AiIndexConflictError}. Managed entries (registered
+   * by a plugin at startup) are immutable via this method.
    */
   async put(aiIndexId: string, properties: AiIndexProperties): Promise<'created' | 'updated'> {
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId);
+    if (existing?.document.managed) {
+      throw new AiIndexManagedError(aiIndexId);
+    }
+
+    return this.writeDocument(aiIndexId, { ...properties, managed: false }, existing);
+  }
+
+  /**
+   * Creates or fully replaces a managed AI index. Managed entries are owned by
+   * the registering plugin and cannot be mutated via the public API.
+   *
+   * This is an idempotent upsert: it is safe to call on every startup, so a
+   * managed entry always reflects the latest registration (the source of truth
+   * lives in code). It will overwrite an existing managed entry, but refuses to
+   * clobber a user-owned (unmanaged) entry that squats the same id, throwing
+   * {@link AiIndexIdConflictError} so the collision surfaces instead of
+   * silently destroying user data.
+   */
+  async putManaged(
+    aiIndexId: string,
+    properties: AiIndexProperties
+  ): Promise<'created' | 'updated'> {
+    await this.assertValidDest(properties.dest);
+    const existing = await this.findDocument(aiIndexId);
+    if (existing && !existing.document.managed) {
+      throw new AiIndexIdConflictError(aiIndexId);
+    }
+    return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
+  }
+
+  private async writeDocument(
+    aiIndexId: string,
+    document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
+    existing: Awaited<ReturnType<typeof this.findDocument>>
+  ): Promise<'created' | 'updated'> {
     const now = new Date().toISOString();
-    const document: AiIndexDocument = {
-      ...properties,
+    const fullDocument: AiIndexDocument = {
+      ...document,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
@@ -71,14 +166,14 @@ export class AiIndexService {
       if (existing) {
         await this.storageClient.index({
           id: aiIndexId,
-          document,
+          document: fullDocument,
           if_seq_no: existing.seqNo,
           if_primary_term: existing.primaryTerm,
         });
         return 'updated';
       }
 
-      await this.storageClient.index({ id: aiIndexId, document, op_type: 'create' });
+      await this.storageClient.index({ id: aiIndexId, document: fullDocument, op_type: 'create' });
       return 'created';
     } catch (error) {
       if (isResponseError(error) && error.statusCode === 409) {
@@ -86,6 +181,37 @@ export class AiIndexService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Replaces only the feedback analysis block, leaving the rest of the entry —
+   * including its `managed` flag and its dest — untouched.
+   *
+   * Unlike {@link put} this is permitted on managed entries. A managed entry's
+   * *definition* is owned by the plugin that registers it, but which agent
+   * analyzes it and how often is operator preference; without this carve-out
+   * the indices that ship by default would be the only ones that could never
+   * be analyzed.
+   */
+  async setFeedbackAnalysis(
+    aiIndexId: string,
+    feedbackAnalysis: AiIndexFeedbackAnalysis
+  ): Promise<AiIndexFeedbackAnalysis> {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+
+    // The dest is unchanged, so it is not re-validated here: an index whose
+    // backing store was deleted after registration must still be switchable
+    // off.
+    await this.writeDocument(
+      aiIndexId,
+      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      existing
+    );
+
+    return feedbackAnalysis;
   }
 
   async get(aiIndexId: string): Promise<AiIndexHttpItem> {
@@ -96,21 +222,92 @@ export class AiIndexService {
     return toAiIndexItem(aiIndexId, existing.document);
   }
 
+  /**
+   * Fail-fast validation before expensive side effects.
+   */
+  async assertCanAcceptAutomation(
+    aiIndexId: string,
+    automation?: { type: 'workflow'; value: string }
+  ): Promise<void> {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+
+    assertAiIndexAcceptsAutomation(aiIndexId, existing.document, automation);
+  }
+
+  /**
+   * Appends a workflow automation to an AI index, retrying on concurrent writes.
+   */
+  async addAutomation(
+    aiIndexId: string,
+    automation: { type: 'workflow'; value: string }
+  ): Promise<'attached' | 'already_attached'> {
+    return pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+
+        const { alreadyAttached } = assertAiIndexAcceptsAutomation(
+          aiIndexId,
+          existing.document,
+          automation
+        );
+        if (alreadyAttached) {
+          return 'already_attached';
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          {
+            ...existing.document,
+            automations: [...existing.document.automations, automation],
+          },
+          existing
+        );
+
+        return 'attached';
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
+  }
+
   async list(): Promise<AiIndexHttpItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
-      sort: [{ name: 'asc' }],
     });
-    return response.hits.hits.flatMap((hit) =>
-      hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []
-    );
+    // Sorted by id in memory: Elasticsearch disallows sorting on `_id`, and the
+    // result set is bounded by MAX_AI_INDICES.
+    return response.hits.hits
+      .flatMap((hit) => (hit._id ? [toAiIndexItem(hit._id, hit._source as AiIndexDocument)] : []))
+      .sort((a, b) => a.id.localeCompare(b.id));
   }
 
   /**
    * Deletes the AI index entry only; backing indices are left untouched.
+   * Managed entries cannot be deleted via the API.
    */
   async delete(aiIndexId: string): Promise<void> {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    if (existing.document.managed) {
+      throw new AiIndexManagedError(aiIndexId);
+    }
+    // Re-check the delete result: the entry may have been removed concurrently
+    // between the existence lookup above and this call.
     const { result } = await this.storageClient.delete({ id: aiIndexId });
     if (result === 'not_found') {
       throw new AiIndexNotFoundError(aiIndexId);

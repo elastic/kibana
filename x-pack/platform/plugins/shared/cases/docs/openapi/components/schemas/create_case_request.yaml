@@ -53,6 +53,8 @@ properties:
         - value
       properties:
         $ref: 'case_customfields.yaml'
+  extended_fields:
+    $ref: 'case_extended_fields.yaml'
   template:
     type: object
     nullable: true
@@ -76,5 +78,3 @@ properties:
         description: >
           The template version to apply. Omit to use (and pin) the latest version.
         minimum: 1
-  extended_fields:
-    $ref: 'case_extended_fields.yaml'

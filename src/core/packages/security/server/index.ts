@@ -14,10 +14,12 @@ export type {
   FakeRequestUserFields,
 } from './src/authc';
 export type { CoreAuditService } from './src/audit';
+export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
+  ServiceAccountsServiceContract,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
@@ -41,7 +43,21 @@ export {
   decodeApiKeyId,
   HTTPAuthorizationHeader,
 } from './src/authentication';
-export { isUiamCredential, isMissingApiKey, isRevokedApiKey } from './src/uiam';
+export {
+  isUiamCredential,
+  isMissingApiKey,
+  isRevokedApiKey,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  deriveInternalCallerAttestation,
+  markExternalUiamCredential,
+  isExternalUiamCredential,
+} from './src/uiam';
 export type { CoreFipsService } from './src/fips';
-export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';
+export {
+  AuthzDisabled,
+  AuthzOptOutReason,
+  unwindNestedSecurityPrivileges,
+  groupSecurityPrivileges,
+  flattenSecurityPrivileges,
+} from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';

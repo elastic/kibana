@@ -18,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiCallOut,
   EuiSpacer,
   EuiSelect,
   type EuiComboBoxOptionOption,
@@ -27,6 +26,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import styled from 'styled-components';
 
@@ -87,6 +87,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
   onIlmPolicyChange?: (ilmPolicy: string | undefined, isInit?: boolean) => void;
   packagePolicyId?: string;
+  deploymentSelector?: React.ReactNode;
+  hideInVarGroupOptions?: Record<string, string[]>;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -102,6 +104,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     onNamespaceCustomizationEnabledChange,
     onIlmPolicyChange,
     packagePolicyId,
+    deploymentSelector,
+    hideInVarGroupOptions,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -125,6 +129,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
         packagePolicy,
+        hideInVarGroupOptions,
+        isEditPage,
       });
 
     const {
@@ -275,7 +281,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       <>
         {isManaged && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -283,7 +289,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   defaultMessage="This is a managed package policy. You cannot modify it here."
                 />
               }
-              iconType="lock"
             />
             <EuiSpacer size="m" />
           </>
@@ -370,72 +375,42 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               </EuiFormRow>
             </EuiFlexItem>
 
-            {/* Var Group Selectors */}
-            {varGroups?.map((varGroup) => (
-              <EuiFlexItem key={varGroup.name}>
-                <VarGroupSelector
-                  varGroup={varGroup}
-                  selectedOptionName={varGroupSelections[varGroup.name]}
-                  onSelectionChange={handleVarGroupSelectionChange}
-                  isAgentlessEnabled={isAgentlessSelected}
-                  disabled={isEditPage && isCloudConnectorSelected}
-                />
-              </EuiFlexItem>
-            ))}
+            {/* Required vars — only shown here when no varGroups; otherwise rendered after VarGroupSelectors */}
+            {!varGroups?.length &&
+              requiredVars.map((varDef) => {
+                const { name: varName, type: varType } = varDef;
+                if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+                const value = packagePolicy.vars[varName].value;
+                const requiredByVarGroup = isVarRequiredByVarGroup(
+                  varName,
+                  varGroups,
+                  varGroupSelections
+                );
 
-            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
-            {isCloudConnectorSelected && cloudProvider && (
-              <EuiFlexItem>
-                <CloudConnectorSetup
-                  newPolicy={packagePolicy}
-                  packageInfo={packageInfo}
-                  updatePolicy={handleCloudConnectorUpdate}
-                  isEditPage={isEditPage}
-                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
-                  cloud={cloud}
-                  cloudProvider={cloudProvider}
-                  templateName={packageInfo.name}
-                  iacTemplateUrl={iacTemplateUrl}
-                  accountType={accountType}
-                />
-              </EuiFlexItem>
-            )}
-
-            {/* Required vars */}
-            {requiredVars.map((varDef) => {
-              const { name: varName, type: varType } = varDef;
-              if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
-              const value = packagePolicy.vars[varName].value;
-              const requiredByVarGroup = isVarRequiredByVarGroup(
-                varName,
-                varGroups,
-                varGroupSelections
-              );
-
-              return (
-                <EuiFlexItem key={varName}>
-                  <PackagePolicyInputVarField
-                    varDef={varDef}
-                    value={value}
-                    onChange={(newValue: any) => {
-                      updatePackagePolicy({
-                        vars: {
-                          ...packagePolicy.vars,
-                          [varName]: {
-                            type: varType,
-                            value: newValue,
+                return (
+                  <EuiFlexItem key={varName}>
+                    <PackagePolicyInputVarField
+                      varDef={varDef}
+                      value={value}
+                      onChange={(newValue: any) => {
+                        updatePackagePolicy({
+                          vars: {
+                            ...packagePolicy.vars,
+                            [varName]: {
+                              type: varType,
+                              value: newValue,
+                            },
                           },
-                        },
-                      });
-                    }}
-                    errors={validationResults?.vars?.[varName] ?? []}
-                    forceShowErrors={submitAttempted}
-                    isEditPage={isEditPage}
-                    isRequiredByVarGroup={requiredByVarGroup}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+                        });
+                      }}
+                      errors={validationResults?.vars?.[varName] ?? []}
+                      forceShowErrors={submitAttempted}
+                      isEditPage={isEditPage}
+                      isRequiredByVarGroup={requiredByVarGroup}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
 
             {/* Advanced options toggle */}
             {!noAdvancedToggle && !isManaged && (
@@ -572,10 +547,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       {showOptInImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
-                          <EuiCallOut
+                          <KbnWarningCallout
                             announceOnMount
-                            iconType="warning"
-                            color="warning"
                             size="s"
                             data-test-subj="packagePolicyNamespaceCustomizationOptInImpactWarning"
                             title={i18n.translate(
@@ -586,25 +559,24 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 values: { count: otherPoliciesCount },
                               }
                             )}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
-                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
-                              values={{
-                                packageTitle: packageInfo.title,
-                                namespace: <strong>{currentNamespace}</strong>,
-                              }}
-                            />
-                          </EuiCallOut>
+                            text={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
+                                defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
+                                values={{
+                                  packageTitle: packageInfo.title,
+                                  namespace: <strong>{currentNamespace}</strong>,
+                                }}
+                              />
+                            }
+                          />
                         </>
                       )}
                       {showOptOutImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
-                          <EuiCallOut
+                          <KbnWarningCallout
                             announceOnMount
-                            iconType="warning"
-                            color="warning"
                             size="s"
                             data-test-subj="packagePolicyNamespaceCustomizationOptOutImpactWarning"
                             title={i18n.translate(
@@ -615,16 +587,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 values: { count: otherPoliciesCount },
                               }
                             )}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
-                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
-                              values={{
-                                packageTitle: packageInfo.title,
-                                namespace: <strong>{currentNamespace}</strong>,
-                              }}
-                            />
-                          </EuiCallOut>
+                            text={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
+                                defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
+                                values={{
+                                  packageTitle: packageInfo.title,
+                                  namespace: <strong>{currentNamespace}</strong>,
+                                }}
+                              />
+                            }
+                          />
                         </>
                       )}
                     </EuiFlexItem>
@@ -916,6 +889,95 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             ) : null}
           </EuiFlexGroup>
         </FormGroupResponsiveFields>
+
+        {deploymentSelector}
+
+        {varGroups && varGroups.length > 0 && (
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {/* Var Group Selectors — each in its own FormGroupResponsiveFields to align with Integration settings and Deployment options.
+                Required vars, cloud connector, and credential fields are included inside the last group's right column. */}
+            {varGroups.map((varGroup, index) => {
+              const isLastGroup = index === varGroups.length - 1;
+              return (
+                <EuiFlexItem key={varGroup.name}>
+                  <FormGroupResponsiveFields
+                    fullWidth
+                    title={<h3>{varGroup.title}</h3>}
+                    description={varGroup.description ?? ''}
+                  >
+                    <EuiFlexGroup direction="column" gutterSize="m">
+                      <EuiFlexItem>
+                        <VarGroupSelector
+                          varGroup={varGroup}
+                          selectedOptionName={varGroupSelections[varGroup.name]}
+                          onSelectionChange={handleVarGroupSelectionChange}
+                          isAgentlessEnabled={isAgentlessSelected}
+                          disabled={isEditPage && isCloudConnectorSelected}
+                          hideTitle={true}
+                          hideInVarGroupOptions={hideInVarGroupOptions}
+                        />
+                      </EuiFlexItem>
+
+                      {/* Cloud connector and required credential vars follow in the same right column */}
+                      {isLastGroup && isCloudConnectorSelected && cloudProvider && (
+                        <EuiFlexItem>
+                          <CloudConnectorSetup
+                            newPolicy={packagePolicy}
+                            packageInfo={packageInfo}
+                            updatePolicy={handleCloudConnectorUpdate}
+                            isEditPage={isEditPage}
+                            hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                            cloud={cloud}
+                            cloudProvider={cloudProvider}
+                            templateName={packageInfo.name}
+                            iacTemplateUrl={iacTemplateUrl}
+                            accountType={accountType}
+                          />
+                        </EuiFlexItem>
+                      )}
+
+                      {isLastGroup &&
+                        requiredVars.map((varDef) => {
+                          const { name: varName, type: varType } = varDef;
+                          if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+                          const value = packagePolicy.vars[varName].value;
+                          const requiredByVarGroup = isVarRequiredByVarGroup(
+                            varName,
+                            varGroups,
+                            varGroupSelections
+                          );
+
+                          return (
+                            <EuiFlexItem key={varName}>
+                              <PackagePolicyInputVarField
+                                varDef={varDef}
+                                value={value}
+                                onChange={(newValue: any) => {
+                                  updatePackagePolicy({
+                                    vars: {
+                                      ...packagePolicy.vars,
+                                      [varName]: {
+                                        type: varType,
+                                        value: newValue,
+                                      },
+                                    },
+                                  });
+                                }}
+                                errors={validationResults?.vars?.[varName] ?? []}
+                                forceShowErrors={submitAttempted}
+                                isEditPage={isEditPage}
+                                isRequiredByVarGroup={requiredByVarGroup}
+                              />
+                            </EuiFlexItem>
+                          );
+                        })}
+                    </EuiFlexGroup>
+                  </FormGroupResponsiveFields>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        )}
       </>
     ) : (
       <Loading />

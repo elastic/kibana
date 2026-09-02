@@ -9,6 +9,7 @@ import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 describe('SavedObjectProviderRegistry', () => {
   beforeEach(() => jest.resetAllMocks());
@@ -97,9 +98,10 @@ describe('SavedObjectProviderRegistry', () => {
       getter.mockResolvedValue(alert);
 
       expect(
-        await registry.getProvidersClientWithRequestInSpace(request, 'custom-space')('alert', [
-          alert.id,
-        ])
+        await registry.getProvidersClientWithRequestInSpace(request, asSpaceId('custom-space'))(
+          'alert',
+          [alert.id]
+        )
       ).toMatchObject(alert);
 
       expect(provider).toHaveBeenCalledWith(request, 'custom-space');
@@ -126,9 +128,10 @@ describe('SavedObjectProviderRegistry', () => {
       getter.mockResolvedValue(action);
 
       expect(
-        await registry.getProvidersClientWithRequestInSpace(request, 'custom-space')('action', [
-          action.id,
-        ])
+        await registry.getProvidersClientWithRequestInSpace(request, asSpaceId('custom-space'))(
+          'action',
+          [action.id]
+        )
       ).toMatchObject(action);
 
       expect(getter).toHaveBeenCalledWith([{ id: action.id, type: 'action' }]);

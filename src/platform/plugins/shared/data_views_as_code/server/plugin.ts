@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type {
   DataViewsAsCodeServerPluginSetupDependencies,
@@ -23,8 +23,22 @@ export class DataViewsAsCodeServerPlugin
       DataViewsAsCodeServerPluginStartDependencies
     >
 {
-  public setup(core: CoreSetup<DataViewsAsCodeServerPluginStartDependencies, void>) {
-    registerRoutes(core);
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  public setup(
+    core: CoreSetup<DataViewsAsCodeServerPluginStartDependencies, void>,
+    deps: DataViewsAsCodeServerPluginSetupDependencies
+  ) {
+    registerRoutes({
+      http: core.http,
+      usageCounter: deps.usageCollection?.createUsageCounter('data_views_as_code_api'),
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+    });
   }
 
   public start() {}

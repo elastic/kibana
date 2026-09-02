@@ -74,8 +74,8 @@ export class EditPanelAction
     return getInheritedViewMode(embeddable) === 'edit';
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
+  public async execute({ embeddable, returnFocus }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    await embeddable.onEdit();
+    await embeddable.onEdit({ returnFocus });
   }
 }

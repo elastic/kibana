@@ -469,7 +469,8 @@
                       },
                       "customFields": {
                         "type": "array",
-                        "description": "Custom fields configuration details.",
+                        "deprecated": true,
+                        "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                         "items": {
                           "type": "object",
                           "properties": {
@@ -729,7 +730,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -993,7 +995,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -1354,6 +1357,129 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Create a case template",
+        "operationId": "createCaseTemplateDefaultSpace",
+        "description": "Creates a case template from a YAML definition. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation (body, YAML definition, name uniqueness, authorization) without creating anything. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, validates the request without creating the template and returns `{\"valid\": true}`.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/template_write_request"
+              },
+              "examples": {
+                "createCaseTemplateRequest": {
+                  "$ref": "#/components/examples/template_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the created template, or `{\"valid\": true}` for a dry run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/template_v2_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/template_dry_run_response"
+                    }
+                  ]
+                },
+                "examples": {
+                  "createCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  },
+                  "dryRunResponse": {
+                    "$ref": "#/components/examples/template_dry_run_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 templates per owner, max 200 fields per template).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_template_limit"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A template with the same name already exists for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/cases/templates/{template_id}": {
@@ -1398,6 +1524,211 @@
                 "examples": {
                   "response401": {
                     "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a case template",
+        "operationId": "updateCaseTemplateDefaultSpace",
+        "description": "Fully replaces a case template. Every accepted update creates a new template version; previous versions stay retrievable with the `version` query parameter of the get template API, and cases keep the version they were created with. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Set `dry_run=true` to run the full validation without writing. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "description": "When true, validates the request without updating the template and returns `{\"valid\": true}`.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/template_write_request"
+              },
+              "examples": {
+                "updateCaseTemplateRequest": {
+                  "$ref": "#/components/examples/template_write_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call. Returns the new template version, or `{\"valid\": true}` for a dry run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/template_v2_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/template_dry_run_response"
+                    }
+                  ]
+                },
+                "examples": {
+                  "updateCaseTemplateResponse": {
+                    "$ref": "#/components/examples/get_case_template_response"
+                  },
+                  "dryRunResponse": {
+                    "$ref": "#/components/examples/template_dry_run_response"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body, YAML definition, or template name is invalid, or a resource limit was exceeded (max 200 fields per template).\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response400": {
+                    "$ref": "#/components/examples/response_400_template_limit"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The template was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response404": {
+                    "$ref": "#/components/examples/response_404"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A template with the same name already exists for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response409": {
+                    "$ref": "#/components/examples/response_409"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a case template",
+        "operationId": "deleteCaseTemplateDefaultSpace",
+        "description": "Soft-deletes a case template (all versions). Existing cases keep their pinned template reference; the template stops appearing in the case creation flow and in find responses. You must have the \"Manage templates\" sub-privilege for the Cases feature of the owning solution. Requires the Cases feature to be enabled in the space.\n",
+        "x-state": "Technical preview",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/template_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The template was deleted."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response401": {
+                    "$ref": "#/components/examples/response_401"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The user does not have the manage templates privilege for the owner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/response_4xx"
+                },
+                "examples": {
+                  "response403": {
+                    "$ref": "#/components/examples/response_403"
                   }
                 }
               }
@@ -3195,6 +3526,22 @@
         "type": "string",
         "maxLength": 160
       },
+      "case_extended_fields": {
+        "title": "Case extended fields",
+        "type": "object",
+        "x-state": "Technical preview; added in 9.5.0",
+        "description": "Case field values keyed by storage key. This replaces `customFields`. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields; any other key is rejected. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key. Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled, field-library fields and templates are unavailable. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).\n",
+        "maxProperties": 500,
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 30000
+        },
+        "example": {
+          "priority_as_keyword": "high",
+          "ticket_number_as_integer": "4287",
+          "escalated_as_boolean": "true"
+        }
+      },
       "create_case_request": {
         "title": "Create case request",
         "description": "The create case API request body varies depending on the type of connector.",
@@ -3259,7 +3606,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -3298,6 +3646,9 @@
                 }
               }
             }
+          },
+          "extended_fields": {
+            "$ref": "#/components/schemas/case_extended_fields"
           },
           "template": {
             "type": "object",
@@ -3731,6 +4082,16 @@
           }
         }
       },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only map from each `extended_fields` storage key to its human-readable label. Populated at response time from the field library and any applied template; it is not persisted and is ignored on write.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
+        }
+      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -3959,7 +4320,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -3992,6 +4354,9 @@
               }
             }
           },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
+          },
           "description": {
             "type": "string",
             "example": "A case description."
@@ -4001,6 +4366,14 @@
             "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
             "nullable": true,
             "example": 120
+          },
+          "extended_fields": {
+            "type": "object",
+            "x-state": "Technical preview; added in 9.5.0",
+            "description": "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "external_service": {
             "$ref": "#/components/schemas/external_service"
@@ -4169,7 +4542,8 @@
                 },
                 "customFields": {
                   "type": "array",
-                  "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+                  "deprecated": true,
+                  "description": "Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n",
                   "minItems": 0,
                   "maxItems": 10,
                   "items": {
@@ -4209,8 +4583,32 @@
                     }
                   }
                 },
+                "template": {
+                  "type": "object",
+                  "nullable": true,
+                  "x-state": "Technical preview",
+                  "description": "The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.\n",
+                  "required": [
+                    "id",
+                    "version"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "description": "The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n",
+                      "minimum": 1
+                    }
+                  }
+                },
                 "description": {
                   "$ref": "#/components/schemas/case_description"
+                },
+                "extended_fields": {
+                  "$ref": "#/components/schemas/case_extended_fields"
                 },
                 "id": {
                   "description": "The identifier for the case.",
@@ -4377,7 +4775,9 @@
       },
       "templates": {
         "type": "array",
+        "deprecated": true,
         "x-state": "Technical preview",
+        "description": "Deprecated. These configuration-embedded templates are superseded by the case templates system. Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via the case `extended_fields`.\n",
         "items": {
           "type": "object",
           "properties": {
@@ -4526,7 +4926,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -4627,7 +5028,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n",
             "items": {
               "type": "object",
               "required": [
@@ -4851,6 +5253,62 @@
           "total": {
             "type": "integer",
             "description": "The total number of templates matching the query."
+          }
+        }
+      },
+      "template_write_request": {
+        "title": "Template write request",
+        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).\n",
+        "type": "object",
+        "required": [
+          "owner",
+          "definition"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "The template identity name, unique per owner (case-insensitive). May be omitted when the YAML definition provides a case-default title (`name:`), which is then used as the identity name.\n"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owner"
+          },
+          "definition": {
+            "type": "string",
+            "maxLength": 30000,
+            "description": "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n",
+            "example": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n  - $ref: risk_score\n"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "A description of the template."
+          },
+          "tags": {
+            "$ref": "#/components/schemas/template_tags"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Disabled templates are hidden from the case creation flow."
+          }
+        }
+      },
+      "template_dry_run_response": {
+        "title": "Template write dry run response",
+        "description": "Returned instead of the template when the request was sent with `dry_run=true`.",
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "description": "Always `true` — validation failures return a 4xx error instead.",
+            "enum": [
+              true
+            ]
           }
         }
       },
@@ -6656,6 +7114,19 @@
           ]
         }
       },
+      "template_write_request": {
+        "summary": "Create or fully replace a case template.",
+        "value": {
+          "name": "Security incident",
+          "owner": "cases",
+          "definition": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n",
+          "description": "Default template for security incidents.",
+          "tags": [
+            "security"
+          ],
+          "isEnabled": true
+        }
+      },
       "get_case_template_response": {
         "summary": "A case template.",
         "value": {
@@ -6668,6 +7139,36 @@
           "deletedAt": null,
           "isLatest": true,
           "latestVersion": 1
+        }
+      },
+      "template_dry_run_response": {
+        "summary": "Dry-run validation succeeded without writing.",
+        "value": {
+          "valid": true
+        }
+      },
+      "response_400_template_limit": {
+        "summary": "A template resource limit was exceeded.",
+        "value": {
+          "error": "Bad Request",
+          "message": "A template cannot define more than 200 fields.",
+          "statusCode": 400
+        }
+      },
+      "response_403": {
+        "summary": "The user does not have access to the requested resource.",
+        "value": {
+          "error": "Forbidden",
+          "message": "Unauthorized to access cases",
+          "statusCode": 403
+        }
+      },
+      "response_409": {
+        "summary": "A resource conflict occurred.",
+        "value": {
+          "error": "Conflict",
+          "message": "Template name \"Security incident\" already exists for owner \"cases\"",
+          "statusCode": 409
         }
       },
       "response_404": {
@@ -6733,14 +7234,6 @@
           "error": "Bad Request",
           "message": "Template [invalid-template-id] not found for owner [cases]",
           "statusCode": 400
-        }
-      },
-      "response_403": {
-        "summary": "The user does not have access to the requested resource.",
-        "value": {
-          "error": "Forbidden",
-          "message": "Unauthorized to access cases",
-          "statusCode": 403
         }
       },
       "get_case_response": {

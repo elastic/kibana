@@ -111,5 +111,5 @@ const configBuilder = new LensConfigBuilder(dataViewsAPI, lensFormulaAPI);
 const lensConfig = configBuilder(config, { 
   timeRange: { from: 'now-30d', to: 'now', type: 'relative' },
   embeddable: true,
-}
+})
 ```

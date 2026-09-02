@@ -182,7 +182,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await retry.try(async () => {
+        const exists = await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 });
+        if (!exists) {
+          throw new Error('chromeNextGlobalHeader is not present');
+        }
+      });
     },
 
     async clickUserAvatar() {

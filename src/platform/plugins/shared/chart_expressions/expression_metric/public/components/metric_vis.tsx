@@ -218,16 +218,16 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // When baseline is 'primary' but the primary value is non-numeric at runtime,
-      // reset the label to use the column name
-      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
-      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
+      const { secondaryNameVisibility } = config.metric;
+      const isLabelHidden = secondaryNameVisibility === 'hidden';
+      const labelPosition = isLabelHidden ? 'before' : secondaryNameVisibility;
 
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
+        secondaryLabel: config.metric.secondaryLabel,
+        showLabel: !isLabelHidden,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
@@ -239,7 +239,7 @@ export const MetricVis = ({
         badgeTextColor: secondaryMetricInfo.badgeTextColor,
         ariaDescription: secondaryMetricInfo.description,
         icon: secondaryMetricInfo.icon,
-        labelPosition: config.metric.secondaryLabelPosition,
+        labelPosition,
         badgeBorderColor: highContrastMode ? { mode: 'auto' } : { mode: 'none' },
       };
     }
@@ -301,7 +301,10 @@ export const MetricVis = ({
     return {
       ...baseMetric,
       // Override the background and main value color when the color is applied to the value
-      ...(config.metric.applyColorTo === 'value' && { color: defaultColor, valueColor: tileColor }),
+      ...(config.metric.applyColorTo === 'value' && {
+        color: defaultColor,
+        valueColor: tileColor === defaultColor ? undefined : tileColor,
+      }),
       ...(config.metric.applyColorTo === 'background' && {
         color: tileColor,
         valueColor: undefined,

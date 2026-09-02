@@ -144,6 +144,7 @@ export const LastResponseSummaryChart: React.FC<LastResponseSummaryChartProps> =
         </EuiText>
         <EuiSpacer size="m" />
         <EuiCallOut
+          announceOnMount
           title={i18n.ERROR_LOADING_DATA}
           color="danger"
           iconType="error"

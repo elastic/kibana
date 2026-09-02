@@ -59,7 +59,7 @@ const TemplateNameWithFields: FC<{ template: TemplateSummary }> = ({ template })
       {template.name}{' '}
       {template.fieldDefinitions && template.fieldDefinitions.length > 0 ? (
         <EuiIconTip
-          type="list"
+          type="listBullet"
           size="s"
           position="top"
           aria-label={redesignI18n.TEMPLATE_FIELDS_TOOLTIP_ARIA(template.name)}

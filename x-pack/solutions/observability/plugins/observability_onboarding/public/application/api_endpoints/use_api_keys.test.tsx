@@ -135,4 +135,26 @@ describe('useApiKeys', () => {
       [ApiEndpointId.Elasticsearch]: true,
     });
   });
+
+  it('ignores a second key creation while one is in flight', async () => {
+    let resolveFirst!: (value: { encodedApiKey: string }) => void;
+    mockCallApi.mockReturnValueOnce(new Promise((resolve) => (resolveFirst = resolve)));
+
+    const { result } = renderHook(() => useApiKeys());
+
+    act(() => {
+      void result.current.createApiKey(ApiEndpointId.Supabase);
+      void result.current.createApiKey(ApiEndpointId.Vercel);
+    });
+
+    expect(mockCallApi).toHaveBeenCalledTimes(1);
+    expect(result.current.creatingEndpointId).toBe(ApiEndpointId.Supabase);
+
+    await act(async () => {
+      resolveFirst({ encodedApiKey: 'encoded-key' });
+    });
+
+    expect(result.current.creatingEndpointId).toBeUndefined();
+    expect(result.current.encodedApiKeys[ApiEndpointId.Supabase]).toBe('encoded-key');
+  });
 });

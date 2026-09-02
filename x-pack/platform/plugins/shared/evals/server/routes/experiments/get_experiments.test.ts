@@ -9,9 +9,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENTS_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENTS_URL, API_VERSIONS, buildSpaceFilter } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetExperimentsRoute } from './get_experiments';
 
@@ -23,7 +24,7 @@ describe('GET /internal/evals/experiments', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -88,7 +89,10 @@ describe('GET /internal/evals/experiments', () => {
         query: {
           bool: {
             must_not: [{ term: { experiment_id: 'kbn-evals-preflight' } }],
-            filter: [{ term: { 'example.dataset.id': 'dataset-123' } }],
+            filter: [
+              { term: { 'example.dataset.id': 'dataset-123' } },
+              buildSpaceFilter('default'),
+            ],
           },
         },
       })
@@ -110,9 +114,15 @@ describe('GET /internal/evals/experiments', () => {
               task_model_id: { buckets: [{ key: 'gpt-4' }] },
               task_model_family: { buckets: [{ key: 'gpt-4' }] },
               task_model_provider: { buckets: [{ key: 'openai' }] },
-              evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
-              evaluator_model_family: { buckets: [{ key: 'claude-3' }] },
-              evaluator_model_provider: { buckets: [{ key: 'anthropic' }] },
+              evaluator_models: {
+                buckets: [
+                  {
+                    key: 'claude-3',
+                    family: { buckets: [{ key: 'claude-3' }] },
+                    provider: { buckets: [{ key: 'anthropic' }] },
+                  },
+                ],
+              },
               git_branch: { buckets: [{ key: 'main' }] },
               git_commit_sha: { buckets: [{ key: 'def456' }] },
               total_repetitions: { value: 2 },
@@ -137,6 +147,7 @@ describe('GET /internal/evals/experiments', () => {
     expect(response.payload.experiments[0].experiment_id).toBe('experiment-abc');
     expect(response.payload.experiments[0].execution_id).toBe('experiment-abc');
     expect(response.payload.experiments[0].task_model.id).toBe('gpt-4');
+    expect(response.payload.experiments[0].evaluator_model.id).toBe('claude-3');
   });
 
   it('returns 500 when evaluationScoreService.search throws', async () => {

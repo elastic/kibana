@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
 import { CANVAS_TYPE } from '../common/lib/constants';
@@ -127,7 +128,7 @@ describe('workpad route context', () => {
 
       const result = await canvasContext.workpad.create(runtimeWorkpad as CanvasWorkpad);
 
-      expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
+      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
         CANVAS_TYPE,
         expectedBody,
         {
@@ -157,7 +158,7 @@ describe('workpad route context', () => {
       const result = await canvasContext.workpad.get(id);
       const { id: ingnoredId, ...expectedAttributes } = runtimeWorkpad;
 
-      expect(mockContext.core.savedObjects.client.get).toBeCalledWith(CANVAS_TYPE, id);
+      expect(mockContext.core.savedObjects.client.get).toHaveBeenCalledWith(CANVAS_TYPE, id);
       expect(result.attributes).toEqual(expectedAttributes);
     });
   });
@@ -179,7 +180,10 @@ describe('workpad route context', () => {
       const result = await canvasContext.workpad.resolve(id);
       const { id: ingnoredId, ...expectedAttributes } = runtimeWorkpad;
 
-      expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
+      expect(mockContext.core.savedObjects.client.resolve).toHaveBeenCalledWith(CANVAS_TYPE, id);
+      if (isSavedObjectErrorResult(result.saved_object)) {
+        throw new Error('Expected a successful saved object result');
+      }
       expect(result.saved_object.attributes).toEqual(expectedAttributes);
     });
   });
@@ -242,7 +246,7 @@ config="${encode({
       };
 
       await canvasContext.workpad.update(id, updatedRuntimeWorkpad as CanvasWorkpad);
-      expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
+      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
         CANVAS_TYPE,
         updatedStoredWorkpad,
         {

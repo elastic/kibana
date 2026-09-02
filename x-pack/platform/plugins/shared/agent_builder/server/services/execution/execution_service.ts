@@ -13,8 +13,12 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  normalizeInteractive,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
@@ -26,6 +30,7 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
+import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -71,10 +76,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     useTaskManager,
     abortSignal,
     metadata,
+    interactive,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const interactivity = normalizeInteractive(interactive, mode);
 
     const executionClient = this.createExecutionClient();
 
@@ -96,9 +103,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         agentParams: validatedParams,
         parentExecutionId: params.parentExecutionId,
         metadata,
+        interactivity,
       });
     } catch (err) {
-      if (err?.meta?.statusCode === 409) {
+      if (isVersionConflictError(err)) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
@@ -111,6 +119,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           if (existing?.status === ExecutionStatus.scheduled) {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
+              cloneApiKey: true,
             });
           }
 
@@ -142,7 +151,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (useScheduledTask) {
       return this.executeWithScheduledTask({ executionId, agentId, request });
     } else {
-      return this.executeLocally({ execution, request });
+      return this.executeLocally({ execution, request, interactivity });
     }
   }
 
@@ -207,7 +216,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }): Promise<ExecuteAgentResult> {
     // ensureScheduled tolerates the task already existing: a concurrent idempotent
     // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+      request,
+      cloneApiKey: true,
+    });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
@@ -224,9 +236,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async executeLocally({
     execution,
     request,
+    interactivity,
   }: {
     execution: AgentExecution;
     request: ExecuteAgentParams['request'];
+    interactivity: InteractivityConfig;
   }): Promise<ExecuteAgentResult> {
     const { executionId } = execution;
     const executionClient = this.createExecutionClient();
@@ -255,6 +269,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         deps: this.deps,
         request,
         execution,
+        interactivity,
         abortSignal: abortMonitor.getSignal(),
       });
 

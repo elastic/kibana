@@ -71,6 +71,56 @@ describe('toStoredDataView', () => {
     });
   });
 
+  it('preserves name on an inline (adhoc) data view spec', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual({
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    });
+  });
+
+  it('omits name on an inline data view spec when not provided', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+    };
+    const result = toStoredDataView(dataView);
+    expect(result).not.toHaveProperty('name');
+  });
+
+  it('maps field_filters to sourceFilters', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      field_filters: ['field_a', 'field_b'],
+    };
+
+    const result = toStoredDataView(dataView);
+    expect(result).toEqual(
+      expect.objectContaining({
+        sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+      })
+    );
+  });
+
+  it('omits sourceFilters when field_filters is undefined', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+    };
+
+    const result = toStoredDataView(dataView);
+    expect((result as DataViewSpec).sourceFilters).toBeUndefined();
+  });
+
   it('converts index-pattern data_source without runtime fields', () => {
     const dataView: AsCodeDataViewSpec = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,

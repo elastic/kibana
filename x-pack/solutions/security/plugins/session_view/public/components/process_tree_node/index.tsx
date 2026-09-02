@@ -215,9 +215,9 @@ export function ProcessTreeNode({
 
   const processIcon = useMemo(() => {
     if (!process.parent) {
-      return 'unlink';
+      return 'linkSlash';
     } else if (hasExec) {
-      return 'console';
+      return 'commandLine';
     } else {
       return 'branch';
     }
@@ -273,7 +273,7 @@ export function ProcessTreeNode({
 
   const showUserEscalation = !isSessionLeader && !!user?.id && user.id !== parent?.user?.id;
   const interactiveSession = !!tty;
-  const sessionIcon = interactiveSession ? 'desktop' : 'gear';
+  const sessionIcon = interactiveSession ? 'display' : 'gear';
   const iconTestSubj = hasExec
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';

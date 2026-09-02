@@ -21,24 +21,25 @@ import {
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import type { EbtTelemetryClient } from '../telemetry';
+import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
 import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools } from './memory_discovery_tools';
+import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
   streamName: string;
   connectorId?: string;
   maxExistingQueriesForContext?: number;
+  maxDurationMs?: number;
   queryValidationTimeoutMs?: number;
 }
 
@@ -48,6 +49,12 @@ export interface GenerateKIQueriesDependencies {
   soClient: SavedObjectsClientContract;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
+  /**
+   * Client used to validate generated ES|QL against the stream's data, always routed across every
+   * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
+   * CPS-connected project, while `esClient` reads the plugin's own (origin-only) indices.
+   */
+  streamDataEsClient: ElasticsearchClient;
   featureFlags: FeatureFlagsStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   request: KibanaRequest;
@@ -60,16 +67,12 @@ export interface GenerateKIQueriesDependencies {
 export async function generateKIQueries(
   params: GenerateKIQueriesParams,
   deps: GenerateKIQueriesDependencies
-): Promise<
-  SignificantEventsQueriesGenerationResult & {
-    toolUsage: SignificantEventsToolUsage;
-    connectorId: string;
-  }
-> {
+): Promise<SignificantEventsQueriesGenerationResult & { connectorId: string }> {
   const {
     streamName,
     connectorId: connectorIdOverride,
     maxExistingQueriesForContext,
+    maxDurationMs,
     queryValidationTimeoutMs,
   } = params;
   const {
@@ -78,6 +81,7 @@ export async function generateKIQueries(
     soClient,
     kiClient,
     esClient,
+    streamDataEsClient,
     featureFlags,
     searchInferenceEndpoints,
     request,
@@ -106,7 +110,7 @@ export async function generateKIQueries(
   ] = await Promise.all([
     streamsClient.getStream(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
-    isSignificantEventsAvailable(featureFlags),
+    isSignificantEventsFeatureFlagEnabled(featureFlags),
     isSignificantEventsSemanticCodeSearchGroundingEnabled(featureFlags),
   ]);
 
@@ -139,6 +143,15 @@ export async function generateKIQueries(
     );
   }
 
+  const kiExtractionContextTools =
+    significantEventsAvailable && agentBuilderTools
+      ? await createKiExtractionContextTools({
+          agentBuilderTools,
+          request,
+          logger: logger.get('ki_extraction_context'),
+        })
+      : undefined;
+
   const startedAt = Date.now();
   const result = await identifyKIQueries(
     {
@@ -146,15 +159,17 @@ export async function generateKIQueries(
       connectorId,
       systemPrompt: significantEventsPromptOverride,
       maxExistingQueriesForContext,
+      maxDurationMs,
       queryValidationTimeoutMs,
     },
     {
       inferenceClient,
-      esClient,
+      esClient: streamDataEsClient,
       kiClient,
       logger: logger.get('significant_events_generation'),
       signal,
       memoryTools,
+      kiExtractionContextTools,
       semanticCodeSearchTools,
     }
   ).catch(async (error) => {
@@ -168,17 +183,20 @@ export async function generateKIQueries(
   });
   const durationMs = Date.now() - startedAt;
 
+  const { queries, tokensUsed, toolUsage, reasoningDiagnostics } = result;
+
   telemetry.trackSignificantEventsQueriesGenerated({
-    count: result.queries.length,
+    count: queries.length,
     connector_id: connectorId,
     stream_name: definition.name,
     stream_type: getStreamTypeFromDefinition(definition),
-    input_tokens_used: result.tokensUsed.prompt,
-    output_tokens_used: result.tokensUsed.completion,
-    cached_tokens_used: result.tokensUsed.cached ?? 0,
+    input_tokens_used: tokensUsed.prompt,
+    output_tokens_used: tokensUsed.completion,
+    cached_tokens_used: tokensUsed.cached ?? 0,
     duration_ms: durationMs,
-    tool_usage: result.toolUsage,
+    tool_usage: toolUsage,
+    external_content_tool_continuations: reasoningDiagnostics.externalContentToolContinuations,
   });
 
-  return { ...result, connectorId };
+  return { queries, tokensUsed, connectorId };
 }

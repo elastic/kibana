@@ -9,6 +9,7 @@
 
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 interface FilterCreationOptions {
   field: string;
@@ -38,36 +39,49 @@ interface FilterStateOptions {
 }
 
 export class FilterBar {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async addFilter(options: FilterCreationOptions) {
+    const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
-    await this.page.testSubj.waitForSelector('addFilterPopover');
-    // set field name
-    await this.page.testSubj.typeWithDelay(
-      'filterFieldSuggestionList > comboBoxSearchInput',
-      options.field
-    );
-    await this.page.testSubj.click(`filterFieldOption-${options.field}`);
-    // set operator
+    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
+    // "stable" while a character-by-character type still times out (overlay / remount race).
+    await this.page.components
+      .comboBox('filterFieldSuggestionList')
+      .setSelectedOptions([options.field]);
     await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
       /euiComboBox-isDisabled/
     );
-    await this.page.testSubj.typeWithDelay(
-      'filterOperatorList > comboBoxSearchInput',
-      options.operator
-    );
-    await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
-    // set value
+    await this.page.components
+      .comboBox('filterOperatorList')
+      .setSelectedOptions([options.operator]);
     await this.fillFilterValue(options.value);
-    // save filter and wait for popover to close
     await this.page.testSubj.click('saveFilter');
     await expect(
       this.page.testSubj.locator('addFilterPopover'),
       'Filter popover should close after saving'
     ).toBeHidden();
 
-    await this.page.testSubj.waitForSelector('^filter-badge', { state: 'visible' });
+    await expect
+      .poll(() => this.getFilterCount(), { message: 'New filter badge should be displayed' })
+      .toBeGreaterThan(previousCount);
+  }
+
+  async addDslFilter(value: string) {
+    await this.page.testSubj.click('addFilter');
+    await this.page.testSubj.click('editQueryDSL');
+    await this.codeEditor.waitCodeEditorReady('addFilterPopover');
+    await this.codeEditor.setCodeEditorValue(value);
+    const saveButton = this.page.testSubj.locator('saveFilter');
+    await saveButton.scrollIntoViewIfNeeded();
+    await saveButton.click();
+    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('^filter-badge').waitFor({ state: 'visible' });
   }
 
   private async fillFilterValue(value: FilterCreationOptions['value']) {

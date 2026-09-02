@@ -10,6 +10,7 @@ import type { Observable } from 'rxjs';
 import type { IconType } from '@elastic/eui';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
 
 export interface IngestFlow {
   id: string;
@@ -24,6 +25,7 @@ export interface IngestFlow {
 export interface IngestHubStartDependencies {
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;
+  fleet: FleetStart;
 }
 
 export type IngestHubSetup = Record<string, never>;

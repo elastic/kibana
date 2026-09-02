@@ -6,15 +6,20 @@
  */
 
 import { esql } from '@elastic/esql';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
-  buildChangePointHistogramBounds,
+  METRIC_SERIES_RUNTIME_MAPPINGS,
+  buildChangePointHistogramWindow,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
+import {
+  RULE_EVENTS_INDEX,
+  buildRuleEventsSignalFilter,
+  projectMetricSeriesColumns,
+} from './rule_events_metric_series';
 import type {
   ChangePointRuleBucket,
   ChangePointTypeMap,
@@ -30,32 +35,69 @@ import {
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
-interface RawSignalCountAggregation {
-  value?: number;
-}
+/**
+ * Returned when the series is too short to judge — most often a rule that has
+ * not been reporting long enough to fill the window. Carries `reason` instead
+ * of `p_value`, and must not reach the Detection workflow, which would treat it
+ * as an observed type and write it as a transition.
+ */
+const INDETERMINABLE_CHANGE_POINT_TYPE = 'indeterminable';
 
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  signal_count?: RawSignalCountAggregation;
   change_points?: { type?: ChangePointTypeMap };
 }
 
+function hitsTotal(total: number | { value: number } | undefined): number {
+  if (total == null) {
+    return 0;
+  }
+  return typeof total === 'number' ? total : total.value;
+}
+
 export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
-  readonly index = '.rule-events';
+  readonly index = RULE_EVENTS_INDEX;
   readonly ruleIdColumn = 'rule_id' as const;
 
-  buildOccurrencesEsqlRequest({ ruleIds, value, esqlUnit, limit, spaceId }: OccurrencesEsqlParams) {
+  /**
+   * Match-document occurrences for the UI: each `metric_value` is COUNT(*) of
+   * source docs in a closed minute. MAX collapses overlapping rule re-emits,
+   * then SUM folds minutes into the chart interval. The time window is applied
+   * to source `bucket` (not write-time `@timestamp`).
+   */
+  buildOccurrencesEsqlRequest({
+    ruleIds,
+    value,
+    esqlUnit,
+    limit,
+    spaceId,
+    rangeFromIso,
+    rangeToIso,
+  }: OccurrencesEsqlParams) {
+    if (typeof rangeFromIso !== 'string' || typeof rangeToIso !== 'string') {
+      throw new Error(
+        'buildOccurrencesEsqlRequest requires rangeFromIso and rangeToIso (UTC ISO-8601 strings)'
+      );
+    }
+
     const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
     const ruleIdCol = esql.col(['rule', 'id']);
     const typeCol = esql.col('type');
     const spaceIdCol = esql.col('space_id');
+    // Same TO_DATETIME(str) pattern as latest_source_query / other SigEvents builders.
+    const rangeStart = esql.str(rangeFromIso);
+    const rangeEnd = esql.str(rangeToIso);
+
+    const scoped = esql.from([this.index]).where`${typeCol} == ${esql.str(
+      'signal'
+    )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`;
 
     return toEsqlRequest(
-      esql.from([this.index]).where`${typeCol} == ${esql.str(
-        'signal'
-      )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`
-        .pipe`STATS count = COUNT_DISTINCT(group_hash) BY rule_id = ${ruleIdCol}, bucket = BUCKET(@timestamp, ${esql.num(
+      projectMetricSeriesColumns(scoped).pipe`WHERE bucket IS NOT NULL AND metric_value IS NOT NULL`
+        .pipe`WHERE bucket >= TO_DATETIME(${rangeStart}) AND bucket <= TO_DATETIME(${rangeEnd})`
+        .pipe`STATS minute_value = MAX(metric_value) BY rule_id = ${ruleIdCol}, source_minute = DATE_TRUNC(1 minute, bucket)`
+        .pipe`STATS count = SUM(minute_value) BY rule_id, bucket = BUCKET(source_minute, ${esql.num(
         value
       )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`.pipe`LIMIT ${esql.num(limit)}`
     );
@@ -65,29 +107,23 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     esClient: TracedElasticsearchClient,
     { lookback, spaceId, ruleUuid }: CountDetectionAlertsParams
   ): Promise<number> {
-    const filter: QueryDslQueryContainer[] = [
-      { term: { type: 'signal' } },
-      { term: { space_id: spaceId } },
-      { range: { '@timestamp': { gte: lookback } } },
-    ];
-    if (ruleUuid) {
-      filter.push({ term: { 'rule.id': ruleUuid } });
-    }
-
+    // The idle gate only needs "any activity" (> 0), so avoid exact-counting the
+    // full window: `terminate_after: 1` stops each shard after its first match and
+    // `track_total_hits: 1` caps the tracked total (0 stays 0, any match reads >= 1).
     const response = await esClient.search('significant_events_alerts_v2_count_alerts', {
       index: this.index,
       ignore_unavailable: true,
       size: 0,
-      track_total_hits: false,
-      query: { bool: { filter } },
-      aggs: {
-        signal_count: {
-          cardinality: { field: 'group_hash' },
+      track_total_hits: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: buildRuleEventsSignalFilter({ lookback, spaceId, ruleUuid }),
         },
       },
     });
 
-    return response.aggregations?.signal_count?.value ?? 0;
+    return hitsTotal(response.hits.total);
   }
 
   async runChangePointScan(
@@ -125,30 +161,30 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     spaceId,
     ruleIds,
   }: ChangePointScanParams) {
-    const filter: Array<Record<string, unknown>> = [
-      { term: { type: 'signal' } },
-      { term: { space_id: spaceId } },
-      { range: { '@timestamp': { gte: lookback } } },
-    ];
-    if (ruleIds?.length) {
-      filter.push({ terms: { 'rule.id': ruleIds } });
-    }
+    const { hardBounds, seriesMax, writeTimeLookback } = buildChangePointHistogramWindow(
+      lookback,
+      bucketInterval
+    );
 
     return {
+      runtime_mappings: METRIC_SERIES_RUNTIME_MAPPINGS,
       query: {
         bool: {
-          filter,
+          filter: buildRuleEventsSignalFilter({
+            lookback: writeTimeLookback,
+            spaceId,
+            ruleIds,
+          }),
         },
       },
       aggs: {
         by_rule: {
           terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
           aggs: {
-            signal_count: {
-              cardinality: { field: 'group_hash' },
-            },
-            ...buildChangePointTimeSeriesAggs(bucketInterval, {
-              extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
+            ...buildChangePointTimeSeriesAggs({
+              bucketInterval,
+              hardBounds,
+              seriesMax,
             }),
           },
         },
@@ -163,17 +199,17 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
     const streamName = meta?.streamName ?? 'unknown';
-    const changePoints = bucket.change_points?.type
-      ? { type: bucket.change_points.type }
-      : { type: EMPTY_CHANGE_POINT_TYPE };
+    const verdict = bucket.change_points?.type ?? EMPTY_CHANGE_POINT_TYPE;
 
     return {
       key: bucket.key,
       severity_score: meta?.severityScore ?? 0,
-      doc_count: bucket.signal_count?.value ?? bucket.doc_count,
+      doc_count: bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
       stream: { buckets: [{ key: streamName }] },
-      change_points: changePoints,
+      change_points: {
+        type: INDETERMINABLE_CHANGE_POINT_TYPE in verdict ? EMPTY_CHANGE_POINT_TYPE : verdict,
+      },
     };
   }
 }

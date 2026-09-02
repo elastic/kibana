@@ -28,6 +28,7 @@ import type {
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
+  ESQLCommand,
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
@@ -177,6 +178,14 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
 }
 
 /**
+ * Converts a single TS command node to an equivalent FROM command node, preserving its
+ * source arguments. Returns the command unchanged if it isn't a TS command.
+ */
+export function convertTimeseriesCommandNodeToFrom<T extends ESQLCommand>(cmd: T): T {
+  return cmd.name === 'ts' ? { ...cmd, name: 'from' } : cmd;
+}
+
+/**
  * Converts timeseries (TS) commands to FROM commands in an ES|QL query
  * @param esql - The ES|QL query string
  * @returns The modified query with TS commands converted to FROM commands
@@ -186,10 +195,7 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
   const timeseriesCommand = Walker.commands(root).find(({ name }) => name === 'ts');
   if (!timeseriesCommand) return esql || '';
 
-  const fromCommand = {
-    ...timeseriesCommand,
-    name: 'from',
-  };
+  const fromCommand = convertTimeseriesCommandNodeToFrom(timeseriesCommand);
 
   // Replace the ts command with the from command in the commands array
   const newCommands = root.commands.map((command) =>
@@ -467,9 +473,12 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   return field?.name !== '*' ? field?.name : undefined;
 };
 
-// this is for backward compatibility, if the query is of fields or functions type
-// and the query is not set with ?? in the query, we should set it
-// https://github.com/elastic/elasticsearch/pull/122459
+/**
+ * Rewrites `?varName` → `??varName` for FIELDS/FUNCTIONS variables.
+ *
+ * **Backward compat only** — unnecessary for new integrations, which have no saved queries
+ * predating the `??` syntax (https://github.com/elastic/elasticsearch/pull/122459).
+ */
 export const fixESQLQueryWithVariables = (
   queryString: string,
   esqlVariables?: ESQLControlVariable[]

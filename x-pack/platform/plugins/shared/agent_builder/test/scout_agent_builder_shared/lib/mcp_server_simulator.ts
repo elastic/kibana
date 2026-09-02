@@ -12,6 +12,7 @@ interface McpTool {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
   handler: (
     args: Record<string, unknown>
   ) => Promise<{ content: Array<{ type: string; text: string }> }>;
@@ -186,6 +187,7 @@ export class McpServerSimulator {
       name: tool.name,
       description: tool.description,
       inputSchema: tool.inputSchema,
+      ...(tool.outputSchema ? { outputSchema: tool.outputSchema } : {}),
     }));
 
     return this.createResponse(id, { tools });
@@ -329,6 +331,29 @@ export function createTestMcpServer(): McpServerSimulator {
     },
     handler: async (args) => ({
       content: [{ type: 'text', text: String(Number(args.a) * Number(args.b)) }],
+    }),
+  });
+
+  simulator.registerTool({
+    name: 'get_weather',
+    description: 'Returns weather information for a given city',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        city: { type: 'string', description: 'City name' },
+      },
+      required: ['city'],
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        temperature: { type: 'number' },
+        condition: { type: 'string' },
+      },
+      required: ['temperature', 'condition'],
+    },
+    handler: async (args) => ({
+      content: [{ type: 'text', text: `Weather for ${args.city}: 22°C, sunny` }],
     }),
   });
 

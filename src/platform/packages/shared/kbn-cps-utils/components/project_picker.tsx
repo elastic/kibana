@@ -7,151 +7,217 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ComponentProps, useMemo, useEffect, useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  EuiPopover,
-  EuiToolTip,
-  EuiTourStep,
-  EuiButton,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiPopoverTitle,
-  EuiTitle,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSkeletonRectangle,
-} from '@elastic/eui';
+import { EuiPopover, EuiTourStep, EuiButton, EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ProjectRouting } from '@kbn/es-query';
-import type { UseFetchProjectsResult } from './use_fetch_projects';
-import { ProjectPickerContent } from './project_picker_content';
-import { useProjectPickerTour } from './use_project_picker_tour';
+import {
+  of,
+  concat,
+  map,
+  catchError,
+  BehaviorSubject,
+  switchMap,
+  distinctUntilChanged,
+  EMPTY,
+  from,
+} from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
+import { useProjectPickerTour, TOUR_STORAGE_KEY } from './use_project_picker_tour';
 import { strings } from './strings';
-import { CPSIconDisabled } from './cps_icon';
+import {
+  ProjectPickerButton,
+  ProjectPickerFrame,
+  ProjectPickerList,
+} from './project_picker_update/blocks';
+import { ProjectPickerStateProvider } from './project_picker_update/state';
+import type { CPSProject, ProjectsData } from '../types';
+import { useProjectPickerState } from './project_picker_update/state';
 
-export interface ProjectPickerProps {
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  projects: UseFetchProjectsResult;
-  totalProjectCount: number;
+export { TOUR_STORAGE_KEY };
+export interface ProjectPickerProps
+  extends Pick<
+      ComponentProps<typeof ProjectPickerStateProvider>,
+      | 'defaultProjectRoutingGetter'
+      | 'onProjectRoutingChange'
+      | 'currentProjectRoutingGetter'
+      | 'fetchProjectsByRouting'
+      | 'projectRoutingStrategy'
+    >,
+    Pick<
+      ComponentProps<typeof ProjectPickerFrame>,
+      'customHeaderContextMenuItems' | 'maxBodyHeight'
+    > {
   isReadonly?: boolean;
+  isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
+  totalProjectCount: number;
+}
+
+function TourTitle() {
+  const state = useProjectPickerState();
+
+  const filteredProjectsCount = useMemo(
+    () => state.selectedProjectIds.length,
+    [state.selectedProjectIds]
+  );
+  const totalProjectsCount = useMemo(() => state.availableProjects.size, [state.availableProjects]);
+
+  return strings.getProjectPickerTourTitle(filteredProjectsCount, totalProjectsCount);
+}
+
+function TourContent() {
+  const state = useProjectPickerState();
+  const totalProjectsCount = useMemo(() => state.availableProjects.size, [state.availableProjects]);
+
+  return strings.getProjectPickerTourContent(totalProjectsCount - 1);
 }
 
 export const ProjectPicker = ({
-  projectRouting,
   onProjectRoutingChange,
-  projects,
-  totalProjectCount,
   isReadonly = false,
-  settingsComponent,
+  isDisabled = false,
+  defaultProjectRoutingGetter,
+  currentProjectRoutingGetter,
+  fetchProjectsByRouting,
+  totalProjectCount,
+  customHeaderContextMenuItems,
+  projectRoutingStrategy,
+  maxBodyHeight = 400,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
-  const { originProject, linkedProjects, isLoading, error } = projects;
+  const [isEnabled$] = useState(() => new BehaviorSubject(!isDisabled));
 
-  if (totalProjectCount <= 1 || (!isLoading && !originProject && !error)) {
-    return null;
+  useEffect(() => {
+    isEnabled$.next(!isDisabled);
+  }, [isDisabled, isEnabled$]);
+
+  const getAvailableProjects$ = useCallback(() => {
+    return from(fetchProjectsByRouting(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
+  }, [fetchProjectsByRouting]);
+
+  const projectsState$ = useMemo(
+    () =>
+      isEnabled$.pipe(
+        distinctUntilChanged(),
+        switchMap((enabled) => {
+          if (!enabled) {
+            return EMPTY;
+          }
+          return concat(
+            of({ isLoading: true, data: null as ProjectsData | null }),
+            getAvailableProjects$().pipe(
+              map((data) => ({ isLoading: false, data })),
+              catchError(() => of({ isLoading: false, data: null }))
+            )
+          );
+        })
+      ),
+    [isEnabled$, getAvailableProjects$]
+  );
+
+  const { isLoading, data: projects } = useObservable(projectsState$, {
+    isLoading: true,
+    data: null,
+  });
+
+  const availableProjects = useMemo((): CPSProject[] | undefined => {
+    if (totalProjectCount <= 1 || !projects?.origin) {
+      return undefined;
+    }
+
+    return [projects?.origin, ...projects.linkedProjects];
+  }, [projects?.origin, projects?.linkedProjects, totalProjectCount]);
+
+  if (isDisabled) {
+    if (totalProjectCount <= 1) {
+      return null;
+    }
+
+    return <ProjectPickerButton size="s" onClick={() => {}} isDisabled />;
   }
 
   if (isLoading) {
     return <ProjectPickerSkeleton />;
   }
 
-  const activeProjectsCount =
-    error || !originProject ? totalProjectCount : linkedProjects.length + 1;
+  if (!availableProjects) {
+    return null;
+  }
 
-  const button = (
-    <EuiToolTip
-      content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjectCount)}
-      disableScreenReaderOutput
+  const originProject = projects!.origin!;
+
+  const projectPickerPopoverTriggerButton = (
+    <ProjectPickerButton size="s" onClick={() => setShowPopover(!showPopover)} />
+  );
+
+  const projectPickerPopover = (
+    <EuiPopover
+      button={projectPickerPopoverTriggerButton}
+      isOpen={showPopover}
+      closePopover={() => setShowPopover(false)}
+      repositionOnScroll
+      anchorPosition="downLeft"
+      ownFocus
+      panelPaddingSize="none"
+      panelProps={{ css: styles.popover }}
+      hasArrow
+      aria-label={strings.getProjectPickerPopoverTitle()}
     >
-      <EuiButtonEmpty
-        aria-label={strings.projectPickerButtonAriaLabel}
-        data-test-subj="project-picker-button"
-        size="s"
-        iconType="crossProjectSearch"
-        onClick={() => setShowPopover(!showPopover)}
-        color="text"
+      <ProjectPickerFrame
+        customHeaderContextMenuItems={customHeaderContextMenuItems}
+        maxBodyHeight={maxBodyHeight}
       >
-        {activeProjectsCount === totalProjectCount
-          ? strings.allButtonLabel
-          : `${activeProjectsCount}/${totalProjectCount}`}
-      </EuiButtonEmpty>
-    </EuiToolTip>
+        <ProjectPickerList />
+      </ProjectPickerFrame>
+    </EuiPopover>
   );
 
   return (
-    <EuiTourStep
-      isStepOpen={isTourOpen}
-      title={strings.getProjectPickerTourTitle()}
-      content={strings.getProjectPickerTourContent()}
-      onFinish={closeTour}
-      step={1}
-      stepsTotal={1}
-      anchorPosition="downLeft"
-      minWidth={300}
-      maxWidth={360}
-      repositionOnScroll
-      offset={2}
-      footerAction={
-        <EuiButton
-          size="s"
-          color="success"
-          onClick={closeTour}
-          data-test-subj="project-picker-tour-close-button"
-        >
-          {strings.getProjectPickerTourCloseButton()}
-        </EuiButton>
-      }
-      panelProps={{
-        'data-test-subj': 'project-picker-tour',
-      }}
+    <ProjectPickerStateProvider
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      originProjectId={originProject._id}
+      availableProjects={availableProjects}
+      onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={fetchProjectsByRouting}
+      controlsState={isReadonly ? 'disabled' : 'enabled'}
+      projectRoutingStrategy={projectRoutingStrategy}
     >
-      <EuiPopover
-        button={button}
-        isOpen={showPopover}
-        closePopover={() => setShowPopover(false)}
-        repositionOnScroll
+      <EuiTourStep
+        isStepOpen={isTourOpen}
+        title={<TourTitle />}
+        content={<TourContent />}
+        onFinish={closeTour}
+        step={1}
+        stepsTotal={1}
         anchorPosition="downLeft"
-        ownFocus
-        panelPaddingSize="none"
-        panelProps={{ css: styles.popover }}
-        hasArrow
-        aria-label={strings.getProjectPickerPopoverTitle()}
-      >
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        {isReadonly && (
-          <EuiCallOut
-            announceOnMount={false}
+        minWidth={300}
+        maxWidth={360}
+        repositionOnScroll
+        offset={2}
+        footerAction={
+          <EuiButton
             size="s"
-            css={styles.callout}
-            title={strings.getProjectPickerReadonlyCallout()}
-            iconType="info"
-          />
-        )}
-        <ProjectPickerContent
-          projectRouting={projectRouting}
-          onProjectRoutingChange={onProjectRoutingChange}
-          projects={projects}
-          controlsState={isReadonly ? 'disabled' : 'enabled'}
-        />
-      </EuiPopover>
-    </EuiTourStep>
+            color="success"
+            onClick={closeTour}
+            data-test-subj="project-picker-tour-close-button"
+          >
+            {strings.getProjectPickerTourCloseButton()}
+          </EuiButton>
+        }
+        panelProps={{
+          'data-test-subj': 'project-picker-tour',
+        }}
+      >
+        {projectPickerPopover}
+      </EuiTourStep>
+    </ProjectPickerStateProvider>
   );
 };
 
@@ -159,27 +225,32 @@ export const ProjectPickerSkeleton = () => (
   <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
 );
 
-export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount: number }) => {
-  const styles = useMemoCss(projectPickerStyles);
+export const DisabledProjectPicker = ({
+  totalProjectCount,
+  customTooltipContent,
+}: {
+  totalProjectCount: number;
+  customTooltipContent?: string;
+}) => {
   if (totalProjectCount <= 1) {
     return null;
   }
+
   return (
-    <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
-      <EuiButtonIcon
-        css={styles.disabledButton}
-        aria-label={strings.projectPickerButtonAriaLabel}
-        data-test-subj="project-picker-button-disabled"
-        size="xs"
-        isDisabled
-        display="fill"
-        iconType={CPSIconDisabled}
-      />
-    </EuiToolTip>
+    <ProjectPickerButton
+      size="s"
+      onClick={() => {}}
+      customTooltipContent={customTooltipContent}
+      isDisabled
+    />
   );
 };
 
 const projectPickerStyles = {
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSubdued,
+    }),
   popover: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: euiTheme.base * 35,
@@ -187,9 +258,5 @@ const projectPickerStyles = {
   disabledButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.s,
-    }),
-  callout: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
     }),
 };

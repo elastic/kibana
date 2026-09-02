@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import globby from 'globby';
+import { globSync } from 'fast-glob';
 
 /**
  *  Find the most recently modified file that matches the pattern pattern
@@ -21,8 +21,7 @@ export function findMostRecentlyChanged(pattern: string) {
 
   const ctime = (p: string) => fs.statSync(p).ctime.getTime();
 
-  return globby
-    .sync(pattern, { onlyFiles: false })
+  return globSync(pattern, { onlyFiles: false })
     .sort((a, b) => ctime(a) - ctime(b))
     .pop();
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry, { AbortError } from 'p-retry';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -23,7 +24,7 @@ import {
   type ToolSelection,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
-import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
+import { getUserFromRequest } from '../../../utils';
 import type {
   AgentAccessControlUpdateRequest,
   AgentCreateRequest,
@@ -33,6 +34,7 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
+import { isVersionConflictError } from '../../../../utils/is_version_conflict_error';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
@@ -47,13 +49,13 @@ import {
   type Document,
   fromEs,
   updateRequestToEs,
+  withPermissions,
 } from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runSkillRefCleanup } from '../skill_reference_cleanup';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
 import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
-  getAgentPermissions,
   hasDeleteAccess,
   hasManageAccessControlAccess,
   hasReadAccess,
@@ -164,6 +166,11 @@ const getAgentDocument = async ({
   return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
 };
 
+/**
+ * Ensures a system agent exists, treating a concurrent create as success. Guarantees
+ * existence, not searchability: the document may not be visible to searches yet when
+ * this resolves.
+ */
 const ensureSystemAgent = async ({
   storage,
   space,
@@ -207,17 +214,9 @@ const ensureSystemAgent = async ({
       document,
     });
   } catch (error) {
-    // Multiple Kibana nodes may attempt the create concurrently. If another node won,
-    // the desired end state already exists and this installation is complete.
-    const concurrentlyCreatedAgent = await getAgentDocument({
-      storage,
-      space,
-      agentId: profile.id,
-    });
-    if (concurrentlyCreatedAgent && fromEs(concurrentlyCreatedAgent).type === expectedType) {
-      return;
+    if (!isVersionConflictError(error)) {
+      throw error;
     }
-    throw error;
   }
 };
 
@@ -242,16 +241,12 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const isAdmin = await isAdminFromRequest({
-    esClient: scopedClient.asCurrentUser,
-  });
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
   return new AgentClientImpl({
     storage,
     user,
-    isAdmin,
     request,
     space,
     toolsService,
@@ -281,14 +276,12 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: CurrentUser;
-  private readonly isAdmin: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
-    isAdmin,
     request,
     space,
     logger,
@@ -296,7 +289,6 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: CurrentUser;
-    isAdmin: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -305,7 +297,6 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.isAdmin = isAdmin;
     this.space = space;
     this.logger = logger;
   }
@@ -374,7 +365,7 @@ class AgentClientImpl implements AgentClient {
   async get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return this.toResponseAgent(document);
+    return withPermissions({ document, user: this.user });
   }
 
   async getWithAccess(
@@ -382,7 +373,7 @@ class AgentClientImpl implements AgentClient {
     access: AgentAccess
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     const document = await this.getDocumentWithAccess({ agentId, access });
-    return this.toResponseAgent(document);
+    return withPermissions({ document, user: this.user });
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -431,13 +422,13 @@ class AgentClientImpl implements AgentClient {
 
     return response.hits.hits.map((hit) => {
       const document = hit as Document;
-      return this.toResponseAgent(document as Required<Document>);
+      return withPermissions({ document: document as Required<Document>, user: this.user });
     });
   }
 
   private getListFilters() {
     const filters = [createSpaceDslFilter(this.space)];
-    if (!this.isAdmin) {
+    if (!this.user.isAdmin) {
       filters.push(buildReadAccessFilter({ user: this.user }));
     }
 
@@ -461,7 +452,7 @@ class AgentClientImpl implements AgentClient {
     assertCanConfigureWorkflows({
       nextWorkflowIds: profile.configuration.workflow_ids,
       currentWorkflowIds: [],
-      isAdmin: this.isAdmin,
+      isAdmin: this.user.isAdmin,
     });
 
     await this.validateAgentToolSelection(profile.configuration.tools);
@@ -480,11 +471,28 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
+  /**
+   * A concurrently created agent may not be searchable right away,
+   * so the read is retried until it becomes visible.
+   */
   async ensureDefaultAgent(
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
-    return this.get(profile.id);
+
+    return pRetry(
+      async () => {
+        try {
+          return await this.get(profile.id);
+        } catch (error) {
+          if (isAgentNotFoundError(error)) {
+            throw error;
+          }
+          throw new AbortError(error);
+        }
+      },
+      { retries: 9, factor: 1, minTimeout: 300 }
+    );
   }
 
   async update(
@@ -499,7 +507,6 @@ class AgentClientImpl implements AgentClient {
         source,
         update: profileUpdate,
         user: this.user,
-        isAdmin: this.isAdmin,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
@@ -510,23 +517,24 @@ class AgentClientImpl implements AgentClient {
     assertCanConfigureWorkflows({
       nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
       currentWorkflowIds: currentConfig?.workflow_ids,
-      isAdmin: this.isAdmin,
+      isAdmin: this.user.isAdmin,
     });
 
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedConversation = updateRequestToEs({
+    const updatedAgent = updateRequestToEs({
       agentId,
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedConversation,
+      document: updatedAgent,
     });
 
     return this.get(agentId);
@@ -548,13 +556,11 @@ class AgentClientImpl implements AgentClient {
     const canManage = hasManageAccessControlAccess({
       source,
       user: this.user,
-      isAdmin: this.isAdmin,
     });
     const definition = redactAccessControlForCaller({
       definition: { access_control: normalizeAccessControl(source) },
       source,
       user: this.user,
-      isAdmin: this.isAdmin,
     });
     return {
       access_control: definition.access_control,
@@ -591,6 +597,7 @@ class AgentClientImpl implements AgentClient {
       currentProps: source,
       access_control: nextAccessControl,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({
@@ -631,22 +638,21 @@ class AgentClientImpl implements AgentClient {
     let allowed = false;
     switch (access) {
       case 'read':
-        allowed = hasReadAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        allowed = hasReadAccess({ source, user: this.user });
         break;
       case 'use':
-        allowed = hasUseAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        allowed = hasUseAccess({ source, user: this.user });
         break;
       case 'write':
-        allowed = hasWriteAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        allowed = hasWriteAccess({ source, user: this.user });
         break;
       case 'delete':
-        allowed = hasDeleteAccess({ source, user: this.user, isAdmin: this.isAdmin });
+        allowed = hasDeleteAccess({ source, user: this.user });
         break;
       case 'manageAccessControl':
         allowed = hasManageAccessControlAccess({
           source,
           user: this.user,
-          isAdmin: this.isAdmin,
         });
         break;
     }
@@ -656,24 +662,6 @@ class AgentClientImpl implements AgentClient {
     }
 
     return document;
-  }
-
-  private toResponseAgent(document: Required<Document>): PersistedAgentDefinitionWithPermissions {
-    const source = document._source;
-    const redactedDefinition = redactAccessControlForCaller({
-      definition: fromEs(document),
-      source,
-      user: this.user,
-      isAdmin: this.isAdmin,
-    });
-    return {
-      ...redactedDefinition,
-      permissions: getAgentPermissions({
-        source,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    };
   }
 
   /**

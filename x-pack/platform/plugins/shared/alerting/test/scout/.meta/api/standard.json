@@ -1,8 +1,7 @@
 {
-  "sha1": "e0328c58b0a11bc1a294e0f9186ac01ce84f355f",
+  "sha1": "e9bf888c812798339b181438d99346faae32516e",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -12,12 +11,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -27,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 134,
+        "column": 16
       }
     },
     {
@@ -38,12 +31,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -53,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 143,
-        "column": 12
+        "line": 141,
+        "column": 6
       }
     },
     {
@@ -64,12 +51,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -79,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 154,
-        "column": 12
+        "line": 149,
+        "column": 10
       }
     },
     {
@@ -90,12 +71,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -105,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 163,
+        "column": 55
       }
     },
     {
@@ -116,12 +91,26 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
+        "line": 181,
+        "column": 27
+      }
+    },
+    {
+      "id": "f8b956f17e7e029-e75638e0c73e102",
+      "title": "Per-alert mute/unmute without connector privilege restricted user can unmute_all without connector privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -132,33 +121,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
         "line": 190,
-        "column": 12
-      }
-    },
-    {
-      "id": "f8b956f17e7e029-e75638e0c73e102",
-      "title": "Per-alert mute/unmute without connector privilege restricted user can unmute_all without connector privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 197,
-        "column": 12
+        "column": 82
       }
     },
     {
@@ -168,12 +131,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -183,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 204,
-        "column": 12
+        "line": 195,
+        "column": 7
       }
     },
     {
@@ -194,12 +151,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -209,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 210,
+        "column": 20
       }
     },
     {
@@ -220,12 +171,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -235,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 252,
-        "column": 12
+        "line": 237,
+        "column": 28
       }
     },
     {
@@ -246,12 +191,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -261,8 +200,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 272,
-        "column": 12
+        "line": 264,
+        "column": 26
       }
     },
     {
@@ -272,12 +211,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -287,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 313,
-        "column": 12
+        "line": 303,
+        "column": 44
       }
     },
     {
@@ -298,12 +231,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -313,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 328,
-        "column": 12
+        "line": 316,
+        "column": 26
       }
     },
     {
@@ -324,12 +251,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -339,8 +260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/alert_actions_authorization.spec.ts",
-        "line": 339,
-        "column": 12
+        "line": 323,
+        "column": 10
       }
     },
     {
@@ -353,8 +274,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 49,
+        "column": 59
       }
     },
     {
@@ -367,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 105,
-        "column": 12
+        "line": 92,
+        "column": 16
       }
     },
     {
@@ -381,8 +302,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 171,
-        "column": 12
+        "line": 156,
+        "column": 28
       }
     },
     {
@@ -395,8 +316,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/api_key_invalidation.spec.ts",
-        "line": 230,
-        "column": 12
+        "line": 211,
+        "column": 22
       }
     },
     {
@@ -404,13 +325,12 @@
       "title": "Connector actions for rules with UIAM-issued API keys index connector scheduled by a UIAM rule writes its document end-to-end",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/connector_action_with_uiam_key.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 65,
+        "column": 25
       }
     },
     {
@@ -420,12 +340,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -435,8 +349,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/find_muted_alerts.spec.ts",
-        "line": 85,
-        "column": 10
+        "line": 77,
+        "column": 14
       }
     },
     {
@@ -446,12 +360,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -461,8 +369,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/find_muted_alerts.spec.ts",
-        "line": 103,
-        "column": 10
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -475,8 +383,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/index_template_roundtrip.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 90,
+        "column": 27
       }
     },
     {
@@ -489,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/index_template_roundtrip.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 104,
+        "column": 13
       }
     },
     {
@@ -503,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 61,
+        "column": 7
       }
     },
     {
@@ -517,8 +425,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 82,
-        "column": 10
+        "line": 69,
+        "column": 40
       }
     },
     {
@@ -531,8 +439,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 79,
+        "column": 12
       }
     },
     {
@@ -545,8 +453,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 127,
-        "column": 10
+        "line": 104,
+        "column": 42
       }
     },
     {
@@ -556,12 +464,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -569,8 +471,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 51,
+        "column": 26
       }
     },
     {
@@ -580,12 +482,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -593,8 +489,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 51,
+        "column": 26
       }
     },
     {
@@ -604,12 +500,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -617,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 69,
+        "column": 46
       }
     },
     {
@@ -628,12 +518,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -642,7 +526,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
         "line": 84,
-        "column": 12
+        "column": 7
       }
     },
     {
@@ -652,12 +536,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -665,8 +543,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 93,
-        "column": 12
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -676,12 +554,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -689,8 +561,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 98,
+        "column": 42
       }
     },
     {
@@ -700,12 +572,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -713,8 +579,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 121,
-        "column": 14
+        "line": 115,
+        "column": 11
       }
     },
     {
@@ -724,12 +590,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -737,8 +597,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 124,
+        "column": 28
       }
     },
     {
@@ -748,12 +608,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -761,8 +615,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 121,
-        "column": 14
+        "line": 115,
+        "column": 11
       }
     },
     {
@@ -772,12 +626,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -785,8 +633,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 124,
+        "column": 28
       }
     },
     {
@@ -796,12 +644,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -809,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 132,
+        "column": 95
       }
     },
     {
@@ -820,12 +662,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -833,8 +669,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_all.spec.ts",
-        "line": 166,
-        "column": 12
+        "line": 151,
+        "column": 23
       }
     },
     {
@@ -844,12 +680,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -857,8 +687,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 51,
+        "column": 28
       }
     },
     {
@@ -868,12 +698,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -881,8 +705,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 59,
+        "column": 82
       }
     },
     {
@@ -892,12 +716,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -905,8 +723,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 51,
+        "column": 28
       }
     },
     {
@@ -916,12 +734,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -929,8 +741,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 59,
+        "column": 82
       }
     },
     {
@@ -940,12 +752,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -954,7 +760,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
         "line": 67,
-        "column": 12
+        "column": 5
       }
     },
     {
@@ -964,12 +770,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -977,8 +777,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_none.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 83,
+        "column": 69
       }
     },
     {
@@ -988,12 +788,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1001,8 +795,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 51,
-        "column": 12
+        "line": 55,
+        "column": 18
       }
     },
     {
@@ -1012,12 +806,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1025,8 +813,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 81,
+        "column": 22
       }
     },
     {
@@ -1036,12 +824,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1049,8 +831,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 95,
+        "column": 23
       }
     },
     {
@@ -1060,12 +842,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1073,8 +849,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 114,
+        "column": 28
       }
     },
     {
@@ -1084,12 +860,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1097,8 +867,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 111,
-        "column": 14
+        "line": 114,
+        "column": 28
       }
     },
     {
@@ -1108,12 +878,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1121,8 +885,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 123,
+        "column": 69
       }
     },
     {
@@ -1132,12 +896,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-security_complete",
@@ -1145,8 +903,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/stack_alerts_privilege_read.spec.ts",
-        "line": 134,
-        "column": 12
+        "line": 136,
+        "column": 46
       }
     }
   ]

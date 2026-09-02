@@ -1,0 +1,45 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "name": "Kibana Sample Data Logs",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-07-27T22:57:06.520Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "7.11.0",
+  "updated_at": "2026-07-27T22:57:06.520Z"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "esqlApproximation": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[{\"meta\":{\"disabled\":false,\"type\":\"custom\",\"field\":\"query\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"error_query\":{\"indices\":[{\"name\":\"*\",\"error_type\":\"warning\",\"message\":\"'Watch out!'\",\"stall_time_seconds\":5}]}}}],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"autoApplyFilters\":true,\"hidePanelBorders\":false,\"hidePanelTitles\":false,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"type\":\"legacy_vis\",\"embeddableConfig\":{\"savedVis\":{\"title\":\"\",\"description\":\"\",\"type\":\"vega\",\"params\":{\"spec\":\"{\\n  \\\"$schema\\\": \\\"https://vega.github.io/schema/vega/v5.json\\\",\\n  \\\"padding\\\": 5,\\n  \\\"data\\\": [\\n    {\\n      \\\"name\\\": \\\"metric\\\",\\n      \\\"url\\\": {\\n        \\\"%type%\\\": \\\"esql\\\",\\n        \\\"%context%\\\": true,\\n        \\\"query\\\": \\\"FROM vega-test-index | STATS total=COUNT()\\\"\\n      }\\n    }\\n  ],\\n  \\\"marks\\\": [\\n    {\\n      \\\"type\\\": \\\"text\\\",\\n      \\\"from\\\": {\\\"data\\\": \\\"metric\\\"},\\n      \\\"encode\\\": {\\n        \\\"enter\\\": {\\n          \\\"x\\\": {\\\"signal\\\": \\\"width / 2\\\"},\\n          \\\"y\\\": {\\\"signal\\\": \\\"height / 2\\\"},\\n          \\\"align\\\": {\\\"value\\\": \\\"center\\\"},\\n          \\\"baseline\\\": {\\\"value\\\": \\\"middle\\\"},\\n          \\\"text\\\": {\\\"field\\\": \\\"total\\\"},\\n          \\\"fontSize\\\": {\\\"value\\\": 48},\\n          \\\"fill\\\": {\\\"value\\\": \\\"#1f77b4\\\"}\\n        }\\n      }\\n    }\\n  ]\\n}\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}},\"drilldowns\":[]},\"panelIndex\":\"119fbb6c-0f04-48e7-87b7-cf2e8defbe04\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"119fbb6c-0f04-48e7-87b7-cf2e8defbe04\"}}]",
+    "timeRestore": false,
+    "title": "Embedded Vega"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-07-27T23:04:51.675Z",
+  "id": "4ad67a93-2f14-4ea3-89cf-b39b0d867773",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-07-27T23:04:51.675Z"
+}

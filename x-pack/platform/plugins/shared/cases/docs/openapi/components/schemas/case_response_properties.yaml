@@ -87,8 +87,6 @@ properties:
       type: object
       properties:
         $ref: 'case_customfields.yaml'
-  extended_fields:
-    $ref: 'case_extended_fields.yaml'
   extended_fields_labels:
     $ref: 'case_extended_fields_labels.yaml'
   description:
@@ -103,6 +101,14 @@ properties:
       zero.
     nullable: true
     example: 120
+  extended_fields:
+    type: object
+    x-state: Technical preview; added in 9.5.0
+    description: >
+      The case's stored field values, keyed by storage key (for example
+      `priority_as_keyword`).
+    additionalProperties:
+      type: string
   external_service:
     $ref: 'external_service.yaml'
   id:

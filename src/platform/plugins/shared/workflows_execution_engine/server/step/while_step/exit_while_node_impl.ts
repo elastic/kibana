@@ -40,9 +40,8 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       this.node.maxIterations !== undefined && nextIteration >= this.node.maxIterations;
 
     if (!maxReached) {
-      // The while scope has already been popped from the execution scope stack by
-      // run_node.ts exitScope() before this node runs, so getContext() won't include
-      // the while context. Inject it explicitly from the step state.
+      // getContext() does not include the enclosing while iteration at the exit node;
+      // inject it explicitly from the step state.
       const whileAdditionalContext: Record<string, unknown> = {
         while: { iteration: nextIteration },
       };

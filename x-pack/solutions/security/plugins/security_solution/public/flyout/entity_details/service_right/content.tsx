@@ -55,6 +55,11 @@ interface ServicePanelContentProps {
    * their `useQueryInspector` registration
    */
   riskScoreQueryId: string;
+  /**
+   * When true, hides the "open in tool" header icons on the section panels. Used by the new EUI
+   * system flyout, where sections are opened via {@link openDetailsPanel} instead.
+   */
+  hideHeaderIcons?: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -74,6 +79,7 @@ export const ServicePanelContent = ({
   prefetchedResolutionRisk,
   onShowEntity,
   riskScoreQueryId,
+  hideHeaderIcons = false,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -98,6 +104,7 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            hideHeaderIcon={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>
@@ -109,6 +116,7 @@ export const ServicePanelContent = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
         </>
@@ -121,6 +129,7 @@ export const ServicePanelContent = ({
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
             onShowEntity={onShowEntity}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule />
         </>

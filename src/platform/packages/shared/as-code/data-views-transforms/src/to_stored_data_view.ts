@@ -49,6 +49,10 @@ export function toStoredDataView(
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
+    ...(dataView.name && { name: dataView.name }),
+    ...(dataView.field_filters !== undefined && {
+      sourceFilters: dataView.field_filters.map((filter) => ({ value: filter })),
+    }),
     ...getSavedDataViewFields(dataView),
   };
 }
@@ -56,14 +60,14 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return 'id' in dataView || 'name' in dataView || 'field_filters' in dataView;
+  return 'id' in dataView;
 }
 
-function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
+function getSavedDataViewFields(
+  dataView: AsCodeDataView | AsCodeSavedDataView
+): Partial<DataViewSpec> {
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
-    name: dataView.name,
-    sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
   };
 }

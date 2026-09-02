@@ -7,24 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { registerCreateRoute } from './register_create_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerGetRoute } from './register_get_route';
 import { registerUpsertRoute } from './register_upsert_route';
 import { registerSearchRoute } from './register_search_route';
+import { registerSanitizeRoute } from './register_sanitize_route';
 
 export const registerRoutes = (
   http: HttpServiceSetup,
+  userActivity: CoreSetup['userActivity'],
   logger: Logger,
   usageCounter: UsageCounter | undefined
 ) => {
   const { versioned } = http.createRouter<RequestHandlerContext>();
 
-  registerCreateRoute(versioned, logger, usageCounter);
-  registerUpsertRoute(versioned, logger, usageCounter);
+  registerCreateRoute(versioned, userActivity, logger, usageCounter);
+  registerUpsertRoute(versioned, userActivity, logger, usageCounter);
   registerGetRoute(versioned, logger, usageCounter);
   registerSearchRoute(versioned, logger, usageCounter);
-  registerDeleteRoute(versioned, logger, usageCounter);
+  registerDeleteRoute(versioned, userActivity, logger, usageCounter);
+  registerSanitizeRoute(versioned, logger);
 };

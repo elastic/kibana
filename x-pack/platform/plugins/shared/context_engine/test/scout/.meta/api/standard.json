@@ -1,8 +1,7 @@
 {
-  "sha1": "85ab442452306f38b00dacc0c8bc364c84bd0989",
+  "sha1": "58b647682dfdb3c3811b61500fc445c668f4df76",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 80,
-        "column": 10
+        "line": 66,
+        "column": 91
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 162,
-        "column": 10
+        "line": 158,
+        "column": 14
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 179,
-        "column": 10
+        "line": 174,
+        "column": 14
       }
     },
     {
@@ -57,22 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 204,
-        "column": 10
-      }
-    },
-    {
-      "id": "69feaf8c9a59bf1-8563f9e63a6176d",
-      "title": "context engine AI indices API rejects a dest that is not a data stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 214,
-        "column": 10
+        "line": 198,
+        "column": 11
       }
     },
     {
@@ -85,8 +70,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 224,
-        "column": 10
+        "line": 207,
+        "column": 29
+      }
+    },
+    {
+      "id": "69feaf8c9a59bf1-fbb4103d779912d",
+      "title": "context engine AI indices API rejects an id with disallowed characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
+        "line": 214,
+        "column": 11
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 236,
-        "column": 10
+        "line": 220,
+        "column": 7
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout/api/tests/ai_indices.spec.ts",
-        "line": 246,
-        "column": 10
+        "line": 228,
+        "column": 27
       }
     }
   ]

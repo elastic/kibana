@@ -18,7 +18,10 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import type { TimeRange } from '../../../../common/time/time_range';
-import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
+import {
+  CategoryJobNoticesSection,
+  JobStoppedCallout,
+} from '../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
@@ -64,6 +67,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
     jobIds,
+    projectRouting,
     categoryQualityWarnings,
     sourceConfiguration: { sourceId: logViewId },
   } = useLogEntryCategoriesModuleContext();
@@ -163,6 +167,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     [hasResults, setupStatus]
   );
 
+  const stoppedJobNames = useMemo(
+    () => (hasStoppedJobs ? [moduleDescriptor.moduleName] : []),
+    [hasStoppedJobs, moduleDescriptor.moduleName]
+  );
+
   useEffect(() => {
     getTopLogEntryCategories();
   }, [
@@ -211,6 +220,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
       logViewReference={{ type: 'log-view-reference', logViewId }}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
+      projectRouting={projectRouting}
     >
       <LogsPageTemplate
         hasData={logViewStatus?.index !== 'missing'}
@@ -251,11 +261,11 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MLJobsAwaitingNodeWarning jobIds={Object.values(jobIds)} />
+            <JobStoppedCallout stoppedJobNames={stoppedJobNames} />
             <CategoryJobNoticesSection
               hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
               hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
               hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
-              hasStoppedJobs={hasStoppedJobs}
               isFirstUse={isFirstUse}
               moduleName={moduleDescriptor.moduleName}
               onRecreateMlJobForReconfiguration={onOpenSetup}

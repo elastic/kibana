@@ -47,8 +47,6 @@ properties:
               - value
             properties:
               $ref: 'case_customfields.yaml'
-        extended_fields:
-          $ref: 'case_extended_fields.yaml'
         template:
           type: object
           nullable: true
@@ -77,6 +75,8 @@ properties:
               minimum: 1
         description:
           $ref: 'case_description.yaml'
+        extended_fields:
+          $ref: 'case_extended_fields.yaml'
         id:
           description: The identifier for the case.
           type: string

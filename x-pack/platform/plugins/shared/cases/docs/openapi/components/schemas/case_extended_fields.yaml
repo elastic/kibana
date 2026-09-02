@@ -1,23 +1,21 @@
+title: Case extended fields
 type: object
-x-state: Technical preview
+x-state: Technical preview; added in 9.5.0
+description: >
+  Case field values keyed by storage key. This replaces `customFields`. Keys follow the
+  `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to
+  the owner's global (library-wide) fields plus, when a template is applied to the case, that
+  template's fields; any other key is rejected. On update, the keys provided are merged into
+  the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into
+  this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key.
+  Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled,
+  field-library fields and templates are unavailable. To discover the writable keys, use the
+  get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an
+  existing case).
+maxProperties: 500
 additionalProperties:
   type: string
-description: >
-  Technical preview. Enabled by default; can be disabled via `xpack.cases.templates.enabled: false`,
-  in which case field-library fields and templates are unavailable.
-  A map of case field values from the field library. This replaces `customFields`.
-  Each entry is keyed by the field's storage key, which follows the
-  `<field_name>_as_<storage_type>` convention, where `storage_type` is `keyword` (text),
-  `integer` (number), or `boolean` (toggle). Values are always strings.
-  Only keys that exist as global (library-wide) field definitions for the case owner — plus
-  the fields of an applied template — are accepted; any other key is rejected.
-  To discover the valid keys and their storage keys, use the get case fields API
-  (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
-  Legacy custom fields are migrated into this map, so a migrated field's value is found under
-  its `<key>_as_<storage_type>` key.
-  The number of fields per owner and per template, template versions retained, and the length of
-  each stored value are bounded; see the templates API (`/api/cases/templates`) for the exact
-  limits.
+  maxLength: 30000
 example:
   priority_as_keyword: high
   ticket_number_as_integer: '4287'

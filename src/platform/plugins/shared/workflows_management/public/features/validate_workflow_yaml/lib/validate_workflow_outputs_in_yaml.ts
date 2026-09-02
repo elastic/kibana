@@ -202,6 +202,7 @@ export function validateWorkflowOutputsInYaml(
           results.push({
             id: `${outputStep.id}-${error.fieldName || 'general'}`,
             owner: 'workflow-output-validation',
+            ruleId: 'invalidWorkflowOutput',
             severity: 'error',
             message,
             hoverMessage: null,

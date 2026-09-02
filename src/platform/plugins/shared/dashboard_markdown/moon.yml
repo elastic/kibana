@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/content-management-plugin'

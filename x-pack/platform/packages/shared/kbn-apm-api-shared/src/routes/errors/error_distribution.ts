@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { Coordinate } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -18,17 +18,19 @@ export interface ErrorDistributionResponse {
 
 export const errorDistributionRoute = defineRoute<ErrorDistributionResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/distribution',
-  params: z.object({
-    path: z.object({ serviceName: z.string() }),
-    query: z
-      .object({
-        groupId: z.string().optional(),
-        transactionName: z.string().optional(),
-        bucketSizeInSeconds: z.coerce.number().optional(),
-      })
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema)
-      .merge(offsetSchema),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: z
+        .object({
+          groupId: z.string().optional(),
+          transactionName: z.string().optional(),
+          bucketSizeInSeconds: z.coerce.number().optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .merge(offsetSchema),
+    })
+  ),
 });

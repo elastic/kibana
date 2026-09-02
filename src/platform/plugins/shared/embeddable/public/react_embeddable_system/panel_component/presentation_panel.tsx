@@ -8,11 +8,15 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
+import type {
+  PublishesFetchOnlyVisible,
+  PublishesHideBorder,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -25,6 +29,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelError } from './presentation_panel_error';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { VisibilityTracker } from './visibility_tracker';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -37,16 +42,16 @@ const PresentationPanelChrome = <
   showShadow,
   showBorder,
   showBadges,
-  showNotifications,
   getActions,
   actionPredicate,
   titleHighlight,
   setDragHandle,
   componentApi,
+  isSharedItem,
 }: React.PropsWithChildren<
   Omit<
     PresentationPanelProps<ApiType, ComponentPropsType>,
-    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps'
+    'hidePanelChrome' | 'setDragHandles' | 'Component' | 'componentProps' | 'componentInternalApi'
   > & {
     setDragHandle: PresentationPanelHoverActionsProps['setDragHandle'];
   }
@@ -69,6 +74,8 @@ const PresentationPanelChrome = <
     defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
+    rendered,
+    renderCount,
   ] = useBatchedPublishingSubjects(
     componentApi.dataLoading$ ?? new BehaviorSubject(false),
     componentApi.blockingError$ ?? new BehaviorSubject(undefined),
@@ -78,7 +85,9 @@ const PresentationPanelChrome = <
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
     viewModeSubject ?? new BehaviorSubject(undefined),
-    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false)
+    (componentApi.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
+    componentApi.rendered$ ?? new BehaviorSubject(true),
+    componentApi.renderCount$ ?? new BehaviorSubject(undefined)
   );
   const viewMode = rawViewMode ?? 'view';
 
@@ -87,16 +96,39 @@ const PresentationPanelChrome = <
     Boolean(parentHidePanelTitle) ||
     !Boolean(panelTitle ?? defaultPanelTitle);
 
-  const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) {
-      attrs['data-loading'] = true;
-    } else {
-      attrs['data-render-complete'] = true;
+  const dataAttributes = useMemo(() => {
+    const dataTitle = panelTitle ?? defaultPanelTitle;
+    const dataDescription = panelDescription ?? defaultPanelDescription;
+
+    return {
+      ['data-render-complete']: Boolean(blockingError) || (!dataLoading && rendered),
+      ...(renderCount !== undefined && { ['data-rendering-count']: renderCount }),
+      ...(isSharedItem && { 'data-shared-item': '' }),
+      ...(dataTitle && { ['data-title']: dataTitle }),
+      ...(dataDescription && { ['data-description']: dataDescription }),
+    };
+  }, [
+    blockingError,
+    defaultPanelDescription,
+    panelDescription,
+    panelTitle,
+    defaultPanelTitle,
+    dataLoading,
+    rendered,
+    renderCount,
+    isSharedItem,
+  ]);
+
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const firstRenderCompleteRef = useRef(false);
+  useEffect(() => {
+    if (!firstRenderCompleteRef.current && dataAttributes['data-render-complete']) {
+      firstRenderCompleteRef.current = true;
+      if (isSharedItem && panelRef.current) {
+        panelRef.current.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+      }
     }
-    if (blockingError) attrs['data-error'] = true;
-    return attrs;
-  }, [dataLoading, blockingError]);
+  }, [dataAttributes, isSharedItem]);
 
   return (
     <PresentationPanelHoverActionsWrapper
@@ -106,7 +138,6 @@ const PresentationPanelChrome = <
         getActions,
         actionPredicate,
         viewMode,
-        showNotifications,
         showBorder,
       }}
       setDragHandle={setDragHandle}
@@ -120,7 +151,8 @@ const PresentationPanelChrome = <
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
-        {...contentAttrs}
+        {...dataAttributes}
+        panelRef={panelRef}
         css={styles.embPanel}
       >
         {!hideHeader && (
@@ -132,7 +164,6 @@ const PresentationPanelChrome = <
             hideTitle={hideTitle}
             showBadges={showBadges}
             getActions={getActions}
-            showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
             titleHighlight={titleHighlight}
@@ -150,18 +181,22 @@ export const PresentationPanel = <
 >({
   Component,
   componentApi,
+  componentInternalApi,
   componentProps,
 
   setDragHandles,
   hidePanelChrome,
   ...rest
 }: PresentationPanelProps<ApiType, ComponentPropsType>) => {
-  const [blockingError, panelHideBorder, parentHideBorder] = useBatchedPublishingSubjects(
-    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
-    componentApi.hideBorder$ ?? new BehaviorSubject(false),
-    (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
-      new BehaviorSubject(false)
-  );
+  const [blockingError, panelHideBorder, parentHideBorder, fetchOnlyVisible] =
+    useBatchedPublishingSubjects(
+      componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+      componentApi.hideBorder$ ?? new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
+        new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesFetchOnlyVisible>)?.fetchOnlyVisible$ ??
+        new BehaviorSubject(false)
+    );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
@@ -177,6 +212,9 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
+        {fetchOnlyVisible && (
+          <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
+        )}
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -188,7 +226,14 @@ export const PresentationPanel = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, Component, componentProps]);
+  }, [
+    blockingError,
+    componentApi,
+    Component,
+    componentProps,
+    componentInternalApi.setVisibility,
+    fetchOnlyVisible,
+  ]);
 
   return hidePanelChrome ? (
     InnerPanel

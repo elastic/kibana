@@ -1,8 +1,7 @@
 {
-  "sha1": "97ed58ac308aed76642d660258f8cbbf07add932",
+  "sha1": "593fc7ac82518ac3f5a41bc3e75f616041ed6dda",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -18,7 +17,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/agents_list.spec.ts",
         "line": 54,
-        "column": 9
+        "column": 49
       }
     },
     {
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 26,
+        "column": 28
       }
     },
     {
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 70,
+        "column": 28
       }
     },
     {
@@ -65,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 91,
+        "column": 13
       }
     },
     {
@@ -81,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 153,
+        "line": 134,
         "column": 9
       }
     },
@@ -97,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 204,
-        "column": 9
+        "line": 184,
+        "column": 13
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 251,
-        "column": 9
+        "line": 226,
+        "column": 16
       }
     },
     {
@@ -129,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 21,
+        "column": 28
       }
     },
     {
@@ -145,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -159,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_history.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 38,
+        "column": 5
       }
     },
     {
@@ -175,8 +174,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_agent.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -191,8 +190,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 42,
+        "column": 48
       }
     },
     {
@@ -207,8 +206,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 53,
+        "column": 25
+      }
+    },
+    {
+      "id": "098a1448dd39b16-63bffa83f24f2ab",
+      "title": "Agent Builder — edit agent from overview page edits the prompt from the overview flyout without a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent_overview.spec.ts",
+        "line": 40,
+        "column": 28
       }
     },
     {
@@ -224,7 +239,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent.spec.ts",
         "line": 48,
-        "column": 9
+        "column": 58
       }
     },
     {
@@ -239,8 +254,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 39
       }
     },
     {
@@ -255,8 +270,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -271,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 39
       }
     },
     {
@@ -287,8 +302,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -303,8 +318,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 66,
+        "column": 25
       }
     },
     {
@@ -319,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 87,
+        "column": 68
       }
     },
     {
@@ -335,86 +350,138 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 109,
+        "column": 25
       }
     },
     {
       "id": "bd9da19748d56a0-522397fe666b178",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the MCP Clients page from the Manage MCP menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 45,
-        "column": 9
+        "line": 31,
+        "column": 7
       }
     },
     {
       "id": "bd9da19748d56a0-50c5d6fe181a557",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a public client and surfaces its details without a secret",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 38,
+        "column": 7
       }
     },
     {
       "id": "bd9da19748d56a0-49fc9bb9dca158a",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a confidential client and reveals its secret in the post-create modal",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 63,
+        "column": 13
       }
     },
     {
       "id": "bd9da19748d56a0-18c9f656e2d023f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management filters the client list by search term and status",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 100,
-        "column": 9
+        "line": 77,
+        "column": 11
       }
     },
     {
       "id": "bd9da19748d56a0-05e3fd96e1d9c5f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the details flyout from a client name link",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 142,
+        "line": 111,
         "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-f38a4af978bc4ca",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management edits a client through the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 132,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-36311f4cb75a3c1",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management prefills the remote redirect type from stored HTTPS URIs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-58854346134b8b7",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management does not offer edit for a revoked client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 193,
+        "column": 95
       }
     },
     {
       "id": "bd9da19748d56a0-8035a9627ab4f43",
       "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 166,
+        "line": 212,
         "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-7ca72e847a3eb59",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management deletes a revoked client through the row actions menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 228,
+        "column": 22
       }
     },
     {
@@ -429,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_tools.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 46,
+        "column": 11
       }
     },
     {
@@ -445,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_agent_switch.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 44,
+        "column": 11
       }
     },
     {
@@ -461,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_flow.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 22,
+        "column": 28
       }
     },
     {
@@ -477,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_history.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 36,
+        "column": 7
       }
     },
     {
@@ -493,8 +560,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 25,
+        "column": 28
+      }
+    },
+    {
+      "id": "68458d257ac9b36-45d6adf763ad160",
+      "title": "Agent Builder — per-space default agent admin sets and clears the space default from the agents list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "68458d257ac9b36-de662ae87232055",
+      "title": "Agent Builder — per-space default agent restricts a non-admin to the space default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 100,
+        "column": 61
+      }
+    },
+    {
+      "id": "68458d257ac9b36-b7847fbf70756d4",
+      "title": "Agent Builder — per-space default agent admin still sees all agents when a space default is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 130,
+        "column": 15
       }
     }
   ]

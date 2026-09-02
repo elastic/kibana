@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/security-mitre-attack-server",
+  "version": "1.0.0",
+  "description": "Server-only MITRE ATT&CK artifact loader and build tooling",
+  "license": "Elastic License 2.0",
+  "private": true
+}

@@ -11,6 +11,14 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE. Toy expression demo (window mouse events → datatable). Not
+ * product coverage. Expression functions in examples/partial_results_example can be unit-tested;
+ * search partial-results UI is already a Scout smoke in
+ * examples/search_examples/test/scout_examples/ui/tests/partial_results_example.spec.ts
+ * (different plugin: Fibonacci progress bar).
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

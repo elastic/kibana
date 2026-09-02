@@ -6,7 +6,10 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../../../../common/constants';
+import {
+  ACTION_RESPONSES_DATA_STREAM_INDEX,
+  AGENT_CARDINALITY_PRECISION,
+} from '../../../../../common/constants';
 import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
 import { buildIndexNamesWithNamespaces } from '../../../../utils/build_index_name_with_namespace';
 import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
@@ -20,13 +23,14 @@ export const buildScheduledActionResultsQuery = ({
   pagination,
   integrationNamespaces,
   ccsEnabled,
+  matchMissingSpaceId,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that
   // the top-level query does not constrain, so it is scoped explicitly here.
-  // Scheduled action_responses emitted by osquerybeat may not carry a `space_id`
-  // field; buildSpaceIdFilter matches a missing field in the default space.
-  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
+    matchMissingSpaceId: matchMissingSpaceId ?? true,
+  });
 
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
@@ -62,13 +66,34 @@ export const buildScheduledActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
-              responses: {
-                terms: {
-                  script: {
-                    lang: 'painless',
-                    source:
-                      "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                  } as const,
+              // Agent cardinality, not `doc_count`: a bucket can hold many
+              // response docs per agent, which rendered as inflated agent counts.
+              responded_agents: {
+                cardinality: {
+                  field: 'agent_id',
+                  precision_threshold: AGENT_CARDINALITY_PRECISION,
+                },
+              },
+              success_agents: {
+                filter: { bool: { must_not: { exists: { field: 'error' } } } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
+                },
+              },
+              error_agents: {
+                filter: { exists: { field: 'error' } },
+                aggs: {
+                  agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
+                    },
+                  },
                 },
               },
             },

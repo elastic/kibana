@@ -96,6 +96,7 @@ import {
   ALLOWED_SCHEDULES_IN_SECONDS,
 } from '../constants';
 import { getDefaultFormFields } from './defaults';
+import { parsePemCertificateEntries } from './parse_pem_certificate_entries';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
@@ -602,6 +603,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }): Omit<EuiComboBoxProps<string>, 'selectedOptions'> & FormattedComboBoxProps => ({
       selectedOptions: field?.value || [],
       isDisabled: readOnly,
+      enableCopy: true,
     }),
   },
   [ConfigKey.TIMEOUT]: {
@@ -1458,6 +1460,33 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         setValue(ConfigKey.IGNORE_HTTPS_ERRORS, !!event.target.checked);
       },
       disabled: readOnly,
+    }),
+  },
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: {
+    fieldKey: ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+    component: TextArea,
+    label: i18n.translate('xpack.synthetics.monitorConfig.certificateErrorSpkiAllowlist.label', {
+      defaultMessage: 'Certificate error SPKI allowlist',
+    }),
+    helpText: i18n.translate(
+      'xpack.synthetics.monitorConfig.certificateErrorSpkiAllowlist.helpText',
+      {
+        defaultMessage:
+          'PEM certificates whose public keys (SPKI) are allowlisted so Chromium bypasses certificate errors for matching presented certificates. This does not add a CA to Chromium’s trust store. Enter one PEM certificate per entry; multiple certificates can be provided as separate PEM blocks.',
+      }
+    ),
+    controlled: true,
+    props: ({ setValue, field }): EuiTextAreaProps => ({
+      id: 'syntheticsMonitorConfigCertificateErrorSpkiAllowlist',
+      readOnly,
+      value: Array.isArray(field?.value) ? field.value.join('\n\n') : field?.value || '',
+      onChange: (event) => {
+        setValue(
+          ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+          parsePemCertificateEntries(event.target.value)
+        );
+      },
+      placeholder: '-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----',
     }),
   },
   [ConfigKey.SYNTHETICS_ARGS]: {

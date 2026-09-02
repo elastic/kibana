@@ -32,6 +32,7 @@ import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
@@ -66,6 +67,8 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   timeout?: number;
   maxContentLength?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -75,6 +78,8 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   temperature?: number;
   model?: string;
   timeout?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -107,6 +112,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected signal?: AbortSignal;
   protected timeout?: number;
   protected maxContentLength?: number;
+  protected sessionId?: string;
+  protected cacheControl?: ChatCompleteCacheControl;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -121,6 +128,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.timeout = args.timeout;
     this.maxContentLength = args.maxContentLength;
     this.maxRetries = args.maxRetries;
+    this.sessionId = args.sessionId;
+    this.cacheControl = args.cacheControl;
   }
 
   static lc_name() {
@@ -135,6 +144,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'tool_choice',
       'temperature',
       'model',
+      'cacheControl',
+      'sessionId',
     ];
   }
 
@@ -208,6 +219,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       metadata: { connectorTelemetry: this.telemetryMetadata },
       timeout: options.timeout ?? this.timeout,
       maxContentLength: this.maxContentLength,
+      cacheControl: options.cacheControl ?? this.cacheControl,
+      sessionId: options.sessionId ?? this.sessionId,
     };
   }
 

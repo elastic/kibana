@@ -135,17 +135,16 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    // The anomalies section sits below the entity risk contributions section in the right
-    // panel and may be off-screen. Wait for the expandable panel to be in the DOM (anomaly
-    // data has loaded), then click.
+    // Attached rather than visible: the section sits below risk contributions and may be
+    // off-screen until the click scrolls to it.
     await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
-    // In rare cases the entity store resolves fast enough that the flyout auto-navigates to
-    // both panels before this click fires. EUI's panel slide-in uses CSS transform, so the
-    // anomalies tab is already Playwright-visible during the animation. Skip the click if so.
+    // The flyout sometimes auto-navigates to both panels before this runs, and clicking then
+    // would toggle the tab back off.
     if (!(await this.anomaliesTab.isVisible())) {
-      // noWaitAfter: true skips Playwright's post-click navigation wait — the URL update that
-      // opens the left panel triggers unmocked API calls that keep the tracker pending.
-      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true });
+      // noWaitAfter: the URL update that opens the left panel triggers unmocked API calls that
+      // keep Playwright's navigation tracker pending. The extended timeout covers the tab mount,
+      // which React flushes synchronously before the browser acknowledges mouseup.
+      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true, timeout: 30000 });
     }
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
@@ -171,6 +170,14 @@ export class EntityFlyoutAnomaliesPage {
    */
   getRowAction(actionKey: string): Locator {
     return this.page.testSubj.locator(`${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${actionKey}`);
+  }
+
+  /**
+   * Click a row-actions menu item. noWaitAfter: add-to-timeline updates the URL
+   * while opening the modal, which otherwise hangs the click after scroll.
+   */
+  async clickRowAction(actionKey: string) {
+    await this.getRowAction(actionKey).click({ noWaitAfter: true });
   }
 
   async selectMitreTactic(tactic: string) {

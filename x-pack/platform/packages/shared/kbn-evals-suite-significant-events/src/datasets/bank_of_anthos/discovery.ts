@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { DatasetConfig } from '../types';
 
-const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>
-  discoveries
-    .flatMap((discovery) => discovery.signals ?? [])
+/**
+ * Incident onset in snapshot-time coordinates — the change point the detection rules fired on.
+ * The eval harness maps it onto the replayed timeline (see `canonicalDetectionsFromGroundTruth`)
+ * so the grounding skill's pre/post rate windows frame the actual incident neighborhood.
+ */
+const SNAPSHOT_CHANGE_POINT = '2026-06-25T14:30:00Z';
+
+const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Partial<Detection>> =>
+  events
+    .flatMap((event) => event.signals ?? [])
     .map((signal) => ({
+      '@timestamp': SNAPSHOT_CHANGE_POINT,
       detection_id: signal.metadata?.detection_id,
       rule_name: signal.metadata?.rule_name,
       rule_uuid: signal.metadata?.rule_uuid,
@@ -21,20 +29,22 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
     }));
 
 /**
- * Canonical cascade discovery — the lean ground truth shared by the discovery (expected output)
- * and the judge (input) agents. Evidences carry the `esql_query` to re-run but are deliberately NOT
- * pre-stamped `confirmed` — the judge must re-verify each query via execute_esql and stamp
- * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
- * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
+ * Canonical cascade significant event — the lean ground truth for the discovery agent eval.
+ * Evidences carry the `esql_query` for grounding but are deliberately NOT pre-stamped with a verdict —
+ * the agent must run execute_esql during KI grounding and stamp `verdict: "confirms"` from its own
+ * query results before promoting. Every field here is seeded by one of the cascade `detections`, so
+ * the canonical input and this expected answer stay self-consistent.
  */
-const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
-  event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
-  title: 'Ledger backends — customer transaction connectivity failure',
+const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhistory-read-timeout';
+
+const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
+  status: 'open',
+  event_id: LEDGER_DB_CASCADE_EVENT_ID,
+  title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
-    'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
+    'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
-    'balancereader, transactionhistory, and ledgerwriter are all returning connection-refused errors to the frontend, with concurrent cache errors in balancereader/transactionhistory and a SQL connection failure (SQLState 08001) in transactionhistory. Users cannot view account balances, cannot view transaction history, and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+    'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
   severity: '80-critical',
   confidence: 0.82,
   stream_names: ['logs'],
@@ -42,9 +52,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Testing: whether transactionhistory cannot obtain SQL connections to the postgresql backend. Expected if true: SQLState 08001 connection-failure errors on the JDBC path. Found: 1 row at 14:34:19Z — SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory. Verdict: confirms — the database backend is unreachable, breaking transaction-history reads.',
+        'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -61,9 +71,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Testing: whether the frontend is actively failing to reach transactionhistory with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to transactionhistory:8080. Found: 1 row at 14:33:36Z — connection refused (Errno 111) to transactionhistory:8080 on the /transactions path. Verdict: confirms — users cannot view transaction history; the backend failure is user-visible.',
+        'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -80,9 +90,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Testing: whether the frontend is actively failing to reach balancereader with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to balancereader:8080. Found: 1 row at 14:33:35Z — connection refused (Errno 111) to balancereader:8080 on the /balances path. Verdict: confirms — earliest confirmed failure in the cascade; users cannot view account balances.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -99,9 +109,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        "Testing: whether the shared cache layer is failing as a downstream effect of the database outage, across both transactionhistory and balancereader. Expected if true: 'Cache error' entries from both services. Found: 2 rows at 14:34:59Z — transactionhistory emitting 'getTransactions | Cache error' and balancereader emitting 'getBalance | Cache error'. Verdict: confirms — cache reads are failing in both services, broadening the blast radius from transaction-history reads to balance lookups.",
+        'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 2',
@@ -118,9 +128,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        "Testing: whether ledgerwriter is blocked from committing transactions because it cannot retrieve account balances from balancereader. Expected if true: ERROR from LedgerWriterController 'Failed to retrieve account balance'. Found: 1 row at 14:34:29Z — ledgerwriter logging 'Failed to retrieve account balance'. Verdict: confirms — ledgerwriter cannot validate balances via balancereader, so payment and deposit submissions fail.",
+        'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -137,9 +147,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Testing: whether the frontend is failing to submit deposit transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:39Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — deposit submissions are failing; users cannot complete deposit transactions.',
+        'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting deposit") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -156,9 +166,9 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Testing: whether the frontend is failing to submit payment transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:38Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — payment submissions are failing; users cannot complete payment transactions.',
+        'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -174,74 +184,88 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
     },
   ],
   causal_features: [
-    { feature_id: 'transactionhistory', name: 'transactionhistory', stream_name: 'logs' },
-    { feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' },
-    { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+    {
+      feature_id: 'transactionhistory',
+      type: 'entity',
+      subtype: 'service',
+      name: 'transactionhistory',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'ledgerwriter',
+      type: 'entity',
+      subtype: 'service',
+      name: 'ledgerwriter',
+      stream_name: 'logs',
+    },
   ],
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      subtype: 'http',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-transactionhistory',
+      subtype: 'http',
+      feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-ledgerwriter',
+      subtype: 'http',
+      feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'ledgerwriter-balancereader',
+      subtype: 'http',
+      feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'ledgerwriter-postgresql',
-      source: 'ledgerwriter',
-      target: 'postgresql',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'transactionhistory-postgresql',
-      source: 'transactionhistory',
-      target: 'postgresql',
+      protocol: 'http',
       stream_name: 'logs',
     },
   ],
 };
 
-/** Benign authentication activity spike — must stay a SEPARATE discovery from the failure cascade. */
-const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_EVENT.signals ?? [])
+  .map((signal) => signal.metadata?.rule_uuid)
+  .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid));
+
+/** Benign login spike — must stay a SEPARATE event from the failure cascade and from signup. */
+const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
+  status: 'dismissed',
   event_id: 'userservice__successful-user-login',
-  title: 'Authentication activity — successful completion volume increase',
-  symptom_hypothesis:
-    'Successful login and account-creation activity increased without an observed failure.',
+  title: 'Authentication — successful login volume increase',
+  symptom_hypothesis: 'Successful login activity increased without an observed failure.',
   summary:
-    'Successful login and account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
+    'Successful login events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
   severity: '20-low',
   confidence: 0.35,
   signals: [
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Testing: whether the spike in successful logins represents a failure or anomalous activity. Expected if true: error logs or credential-stuffing patterns. Found: 1 row at 14:30:05Z — successful login event with no error signature. Verdict: refutes — the spike is a volume increase in successful logins, consistent with load-generator ramp-up.',
+      verdict: 'refutes',
+      description: 'Found: successful login activity. Impact: none observed.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -255,12 +279,25 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
         p_value: 0.0001,
       },
     },
+  ],
+};
+
+/** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
+const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
+  status: 'dismissed',
+  event_id: 'userservice__new-account-created',
+  title: 'Authentication — new account creation volume increase',
+  symptom_hypothesis: 'New account creation activity increased without an observed failure.',
+  summary:
+    'New account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
+  severity: '20-low',
+  confidence: 0.35,
+  signals: [
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Testing: whether the spike in new account creations represents a failure or anomalous activity. Expected if true: error logs or suspicious automated-creation patterns. Found: 1 row at 14:30:12Z — successful account-creation event with no error signature. Verdict: refutes — the spike is a volume increase in successful account creations, consistent with load-generator ramp-up.',
+      verdict: 'refutes',
+      description: 'Found: successful account creation activity. Impact: none observed.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -275,7 +312,111 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
+};
+
+const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
+  status: 'open',
+  event_id: 'frontend__balancereader-connection-refused',
+  title: 'Balance reader — account balance lookup connectivity failure',
+  symptom_hypothesis:
+    'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
+  summary:
+    'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
+  severity: '60-high',
+  confidence: 0.68,
+  stream_names: ['logs'],
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      verdict: 'confirms',
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
+  blast_radius: [
+    {
+      type: 'dependency',
+      subtype: 'http',
+      feature_id: 'frontend-balancereader-http',
+      source: 'frontend',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
+};
+
+/** Same confirmed impact as isolated balancereader failure, but weak detection metadata — severity must still follow grounding. */
+const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-weak-detection',
+  confidence: 0.52,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      verdict: 'confirms',
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-weak',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'stationary',
+        p_value: 0.55,
+      },
+    },
+  ],
+};
+
+/**
+ * Same confirmed impact as the isolated balancereader failure, but a seeded memory page documents
+ * the exact mechanism as known/transient background
+ */
+const BALANCE_READER_KNOWN_CHRONIC_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-known-chronic',
+  severity: '40-medium',
+  confidence: 0.6,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      verdict: 'confirms',
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-chronic',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
 };
 
 export const discovery: DatasetConfig['discovery'] = [
@@ -283,31 +424,33 @@ export const discovery: DatasetConfig['discovery'] = [
     input: {
       scenario_id: 'ledger-db-disconnect',
       stream_name: 'logs',
-      detections: toInputDetections([LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY]),
+      detections: toInputDetections([
+        LEDGER_DB_CASCADE_EVENT,
+        BENIGN_LOGIN_EVENT,
+        BENIGN_SIGNUP_EVENT,
+      ]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
-    // should reuse a single event_id. `semantic` = same service + symptom, no rule_uuid overlap;
-    // `cascade` = upstream → downstreams across services, linked by dependency topology.
+    // should reuse a single event_id. `cascade` = upstream → downstreams across services, linked
+    // by dependency topology.
     continuationChains: {
-      semantic: [
-        'Frontend → Ledger Writer Payment Submission Error',
-        'Frontend → Ledger Writer Deposit Submission Error',
-      ],
       cascade: [
         'Transaction History Database SQL Connection Error',
         'Frontend → Transaction History Connection Failures',
-        'Ledger Writer Failed to Retrieve Account Balance',
       ],
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures), benign-auth (successful login/signup spike, no failures)]',
-      expected_discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, and frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
+      expected_confirmed_rule_uuids: {
+        [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
+      },
+      expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States one evidence-grounded sentence connecting every grouped detection through the literal transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses only signals confirmed for their own operation/path; a found-but-inconclusive row does not establish correlation. Does not introduce another endpoint or claim a final root cause.',
+          text: 'States one sentence connecting every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend connection refusals/timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
@@ -317,17 +460,12 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed postgresql/cache failure hypothesis rather than split into separate service-scoped discoveries.',
-          score: 2,
-        },
-        {
-          id: 'separate-benign-auth',
-          text: 'Keeps the benign authentication activity (successful logins, new account creation) grouped together in a single discovery, separate from the failure cascade — does not lump them into the database incident, and does not emit login and account creation as two separate discoveries.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
           id: 'dependency-chain',
-          text: 'Names the dependency from transactionhistory to postgresql and the downstream impact on the frontend read/write paths across balancereader and ledgerwriter.',
+          text: 'Names KI-grounded dependency paths in the cascade — at minimum frontend→transactionhistory, frontend→balancereader, and frontend→ledgerwriter HTTP impacts, plus ledgerwriter→balancereader where topology supports it — and describes downstream user-journey impact across balance, transaction-history, payment, and deposit flows.',
           score: 1,
         },
         {
@@ -340,47 +478,231 @@ export const discovery: DatasetConfig['discovery'] = [
           text: 'Uses a stable failure-domain title and an objective summary of observed state and potential impact, without recommendations, next actions, or urgency language.',
           score: 1,
         },
+        {
+          id: 'open-active-cascade',
+          text: 'Sets status=open with severity=80-critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          score: 3,
+        },
+        {
+          id: 'grounding-verification',
+          text: 'Verifies key cascade signals via execute_esql during KI grounding and stamps `verdict: "confirms"` from its own query results, rather than trusting pre-collected input evidence alone.',
+          score: 2,
+        },
+        {
+          id: 'reject-unrelated-auth-membership',
+          text: 'Omits Successful User Login and New User Account Created from the cascade event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
+          score: 3,
+        },
+        {
+          id: 'aligned-ledger-narrative',
+          text: 'Keeps title, symptom_hypothesis, and summary scoped to the confirmed ledger database connectivity cascade without incorporating authentication activity.',
+          score: 3,
+        },
+        {
+          id: 'open-confirmed-cascade',
+          text: 'Keeps the cascade event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          score: 2,
+        },
       ],
     },
-    metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+    metadata: { difficulty: 'hard', failure_domain: 'ledger-db', failure_mode: 'cascade' },
   },
-];
-
-export const discoveryJudge: DatasetConfig['discoveryJudge'] = [
   {
-    id: 'ledger-db-disconnect',
     input: {
-      scenario_id: 'ledger-db-disconnect',
-      discoveries: [LEDGER_DB_CASCADE_DISCOVERY, BENIGN_AUTH_DISCOVERY],
+      scenario_id: 'ledger-balancereader-weak-detection',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_WEAK_DETECTION_EVENT]),
     },
     output: {
       expected_ground_truth:
-        'cascade discovery (transactionhistory/balancereader/ledgerwriter → postgresql SQLState 08001, ' +
-        'user-blocking connection-refused failures)=open/80-critical; ' +
-        'benign authentication spike (successful logins/signups only, no failures)=dismissed',
+        'open 60-high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_WEAK_DETECTION_EVENT],
       criteria: [
         {
-          id: 'open-active-cascade',
-          text: 'Sets status=open with severity=80-critical for the cascade discovery because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          id: 'weak-detection-strong-severity',
+          text: 'Sets severity=60-high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
           score: 3,
         },
         {
-          id: 'independent-verification',
-          text: "Independently verifies at least one key signal via execute_esql before deciding — re-runs an evidence.esql_query from the cascade discovery's input signals[] and stamps confirmed: true from its own query results, rather than trusting pre-collected findings at face value.",
+          id: 'weak-detection-confidence-only',
+          text: 'May lower confidence because p_value is weak and change_point_type is stationary, but severity still reflects the confirmed failure impact.',
           score: 2,
         },
         {
-          id: 'dismiss-benign-auth',
-          text: 'Sets status=dismissed for the benign authentication spike: successful login and account-creation volume without failure symptoms, blocked user tasks, or sensitive-data exposure is not an actionable incident.',
-          score: 3,
-        },
-        {
-          id: 'do-not-escalate-benign-auth',
-          text: 'Does not set status=open for the benign authentication spike as if it were part of the ledger-db outage; it stays separate non-incident noise.',
+          id: 'weak-detection-narrative-alignment',
+          text: 'Title, symptom_hypothesis, and summary state the confirmed connection failure and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
           score: 2,
         },
       ],
     },
-    metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'weak_detection_strong_evidence',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-balancereader-known-chronic',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_KNOWN_CHRONIC_EVENT]),
+    },
+    memoryPages: [
+      {
+        name: 'frontend-balancereader-connection-refused',
+        title: 'Frontend → Balance Reader connection refused — known transient background',
+        content: [
+          '## Failure Pattern',
+          'Connection refused from frontend to balancereader:8080 on /balances ("Error getting balance"). This is a long-running, already-tracked background condition on the balance-lookup path; operators are aware of it and it recovers without intervention.',
+          '',
+          '## Normal transient behavior',
+          'Connection-refused bursts recur at a steady background rate without representing a new failure state. This is known ongoing background, not a dismissal or false-positive. When the exact rule fires again and current evidence confirms the failure, keep the event open and cap severity at 40-medium. The balancereader service recovers on its own.',
+          '',
+          '## Detection history',
+          '- rule_uuid: 3c4bf4f9-9ed9-567f-be35-332eb79ee76a (Frontend → Balance Reader Connection Failures)',
+          '- 2026-06-25: rule_uuid 3c4bf4f9-9ed9-567f-be35-332eb79ee76a → status ongoing (known background; current confirmed occurrences remain open at 40-medium)',
+        ].join('\n'),
+        categories: ['services'],
+      },
+    ],
+    output: {
+      expected_ground_truth:
+        'open 40-medium event — grounding confirms the balance-lookup connection refused, but memory documents this exact mechanism as known/transient background, so the known-chronic cap applies',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_KNOWN_CHRONIC_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_KNOWN_CHRONIC_EVENT],
+      criteria: [
+        {
+          id: 'known-chronic-cap',
+          text: 'Sets status=open with severity=40-medium because memory documents this exact frontend→balancereader connection-refused mechanism as already-known/transient background. Does not emit 60-high or 80-critical despite confirmed failure rows.',
+          score: 3,
+        },
+        {
+          id: 'chronic-current-state-verification',
+          text: 'Still runs a current-state ES|QL verification for the detection and stamps the signal verdict from its own query result — memory alone never decides status or verdict.',
+          score: 2,
+        },
+        {
+          id: 'chronic-assessment-note',
+          text: 'States the known/ongoing context in summary and records in assessment_note that the event is a candidate for operator muting or dismissal, without citing memory page names.',
+          score: 2,
+        },
+        {
+          id: 'chronic-not-dismissed',
+          text: 'Keeps the event open rather than dismissing or closing it — failure rows are confirmed, so the known-chronic cap lowers severity, not the lifecycle.',
+          score: 1,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'known_chronic',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    // Positive fixture for the grounding skill's rate gate: a chronic failure pattern seeded at a
+    // steady rate before and after the change point. Mechanism is present (rows found, on-topic)
+    // but not newly elevated, so the correct verdict is inconclusive and the event must not be
+    // promoted as a fresh high-severity incident.
+    input: {
+      scenario_id: 'ledger-chronic-background-noise',
+      stream_name: 'logs',
+      detections: [
+        {
+          detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
+          rule_name: 'User Service Payment Token Cache Refresh Errors',
+          rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
+          stream_name: 'logs',
+          change_point_type: 'non_stationary',
+          p_value: 0.004,
+        },
+      ],
+      chronic_seed: {
+        phrase: 'PaymentTokenCacheRefreshError',
+        service: 'userservice',
+        rate_per_minute: 4,
+        duration_minutes: 240,
+        detection_offset_minutes: 30,
+        ki_title: 'User Service Payment Token Cache Refresh Errors',
+        ki_description:
+          'Detects payment token cache refresh failures in userservice (PaymentTokenCacheRefreshError with connection reset). Failed refreshes are retried; sustained elevation would indicate token distribution degradation.',
+      },
+    },
+    output: {
+      expected_ground_truth:
+        'The matching failure logs run at the same steady rate (~4/min) for hours before and after the change point — a chronic background pattern, not a new incident. Correct outcome: the rate aggregate runs after the on-topic sample, the verdict is inconclusive (rate-flat), and the event is dismissed at 20-low with the background rate noted in assessment_note — a rate-flat background pattern is verified-not-new, never "plausibly unverified", so it must not stay open at any severity; no topology is attached.',
+      expected_significant_events: [
+        {
+          status: 'dismissed',
+          event_id: 'userservice__payment-token-cache-refresh-background',
+          title: 'User service — payment token cache refresh errors at background rate',
+          symptom_hypothesis:
+            'Payment token cache refresh errors occur at a steady background rate, indicating a chronic condition rather than a newly elevated failure.',
+          summary:
+            'Matching failure logs appear at similar pre/post rates around the change point; the mechanism is present but not newly elevated.',
+          severity: '20-low',
+          confidence: 0.4,
+          stream_names: ['logs'],
+          signals: [
+            {
+              type: 'detection',
+              stream_name: 'logs',
+              verdict: 'inconclusive',
+              description:
+                'Found: matching failure logs at similar pre/post rates (~4/min). Impact: not a newly elevated failure.',
+              metadata: {
+                detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
+                rule_name: 'User Service Payment Token Cache Refresh Errors',
+                rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
+                change_point_type: 'non_stationary',
+                p_value: 0.004,
+              },
+            },
+          ],
+          causal_features: [],
+          blast_radius: [],
+        },
+      ],
+      criteria: [
+        {
+          id: 'chronic-rate-aggregate-ran',
+          text: 'Runs the pre/post rate aggregate after the on-topic failure sample (two execute_esql calls for the rule: a bounded row sample, then a STATS aggregate splitting counts at the detection timestamp with time_range from t-60m to now).',
+          score: 3,
+        },
+        {
+          id: 'chronic-rate-flat-inconclusive',
+          text: 'Sets verdict=inconclusive for the rule because pre and post rates are similar (~4/min on both sides of the change point); does not set confirms on mere row presence.',
+          score: 3,
+        },
+        {
+          id: 'chronic-not-promoted-high',
+          text: 'Writes the event as dismissed at 20-low (never open at any severity) with a description and assessment_note stating the rate is not newly elevated.',
+          score: 3,
+        },
+        {
+          id: 'chronic-no-topology-on-inconclusive',
+          text: 'Emits empty causal_features and blast_radius because no signal has verdict=confirms.',
+          score: 2,
+        },
+        {
+          id: 'chronic-description-template',
+          text: 'The signal description follows the background-rate form — names the found failure signature and states the rate is similar pre/post (not a newly elevated failure) — instead of an outage-style Impact.',
+          score: 1,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'medium',
+      failure_domain: 'userservice',
+      failure_mode: 'chronic_background_rate',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },
 ];

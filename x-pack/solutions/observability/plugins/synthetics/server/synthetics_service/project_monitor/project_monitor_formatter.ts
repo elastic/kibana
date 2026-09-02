@@ -5,10 +5,13 @@
  * 2.0.
  */
 import type { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
+import { InvalidMaintenanceWindowError } from '../maintenance_windows/resolve_maintenance_windows';
 import type { SyntheticsServerSetup } from '../../types';
 import type { RouteContext } from '../../routes/types';
 import { getAllLocations } from '../get_all_locations';
@@ -66,6 +69,7 @@ export class ProjectMonitorFormatter {
   private spaceId: string;
   private publicLocations: Locations;
   private privateLocations: SyntheticsPrivateLocations;
+  private maintenanceWindows: MaintenanceWindow[];
   private savedObjectsClient: SavedObjectsClientContract;
   private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
@@ -97,6 +101,7 @@ export class ProjectMonitorFormatter {
     this.projectFilter = `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.publicLocations = [];
     this.privateLocations = [];
+    this.maintenanceWindows = [];
   }
 
   init = async () => {
@@ -107,16 +112,26 @@ export class ProjectMonitorFormatter {
       excludeAgentPolicies: true,
     });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
+    // Only fetch maintenance windows when a monitor actually references one, so
+    // pushes that don't use them avoid the extra alerting lookup.
+    const needsMaintenanceWindows = this.monitors.some(
+      (monitor) => (monitor.maintenanceWindows?.length ?? 0) > 0
+    );
+    const maintenanceWindowsPromise = needsMaintenanceWindows
+      ? this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId)
+      : Promise.resolve([]);
 
-    const [locations, existingMonitors] = await Promise.all([
+    const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
       locationsPromise,
       existingMonitorsPromise,
+      maintenanceWindowsPromise,
     ]);
 
     const { publicLocations, privateLocations } = locations;
 
     this.publicLocations = publicLocations;
     this.privateLocations = privateLocations;
+    this.maintenanceWindows = maintenanceWindows ?? [];
 
     return existingMonitors;
   };
@@ -193,6 +208,7 @@ export class ProjectMonitorFormatter {
         projectId: this.projectId,
         namespace: this.spaceId,
         version: this.server.stackVersion,
+        maintenanceWindows: this.maintenanceWindows,
       });
 
       if (errors.length) {
@@ -229,15 +245,16 @@ export class ProjectMonitorFormatter {
 
       return decodedMonitor;
     } catch (e) {
-      const isInvalidLocation = e instanceof InvalidLocationError;
+      const isUserInputError =
+        e instanceof InvalidLocationError || e instanceof InvalidMaintenanceWindowError;
 
-      // Invalid locations are a user input error that we surface in the API response via
-      // `failedMonitors`; don't log them as a server error (see issue #221378).
-      if (!isInvalidLocation) {
+      // User input errors (e.g. invalid locations or maintenance windows) are surfaced in
+      // the API response via `failedMonitors`; don't log them as a server error (see #221378).
+      if (!isUserInputError) {
         this.server.logger.error(e);
       }
 
-      const reason = isInvalidLocation ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
+      const reason = isUserInputError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
 
       this.failedMonitors.push({
         reason,
@@ -285,23 +302,22 @@ export class ProjectMonitorFormatter {
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
-            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
-            if (journeyId && !monitor.error) {
-              this.createdMonitors.push(journeyId);
-            } else if (monitor.error) {
+            if (isSavedObjectErrorResult(monitor)) {
               this.failedMonitors.push({
                 reason: i18n.translate(
                   'xpack.synthetics.service.projectMonitors.failedToCreateMonitors',
                   {
-                    defaultMessage: 'Failed to create monitor: {journeyId}',
-                    values: {
-                      journeyId,
-                    },
+                    defaultMessage: 'Failed to create monitor',
                   }
                 ),
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];
+            if (journeyId) {
+              this.createdMonitors.push(journeyId);
             }
           });
         }
@@ -437,10 +453,25 @@ export class ProjectMonitorFormatter {
         );
       }
 
+      const successfulMonitors = (editedMonitors ?? []).reduce<
+        Array<SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>>
+      >((acc, monitor) => {
+        if (isSavedObjectErrorResult(monitor)) {
+          this.failedMonitors.push({
+            reason: FAILED_TO_UPDATE_MONITOR,
+            details: monitor.error.message,
+            payload: monitor,
+          });
+        } else {
+          acc.push(monitor);
+        }
+        return acc;
+      }, []);
+
       return {
         errors: [],
-        editedMonitors: editedMonitors ?? [],
-        updatedCount: monitorsToUpdate.length,
+        editedMonitors: successfulMonitors,
+        updatedCount: successfulMonitors.length,
       };
     } catch (e) {
       this.server.logger.error(e);

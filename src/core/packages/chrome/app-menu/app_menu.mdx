@@ -29,7 +29,7 @@ There are two ways of adding the app menu to your application:
 - declaratively: by rendering the `<AppMenu />` component from `@kbn/core-chrome-app-menu` package, passing the configuration and the `setAppMenu` method from the `chrome` service as props
 - imperatively: by calling `setAppMenu` method from the `chrome` service.
 
-It is also possible to use the standalone `<AppMenuComponent />` component by importing it from `@kbn/core-chrome-app-menu-components` package.
+It is also possible to use the standalone `<AppMenuComponent />` component by importing it from `@kbn/app-menu` package.
 
 ## Examples
 
@@ -38,7 +38,7 @@ It is also possible to use the standalone `<AppMenuComponent />` component by im
 ```tsx
 import React, { useEffect } from 'react';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -57,7 +57,7 @@ const Example = ({ config, core }: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { CoreStart } from '@kbn/core/public';
 
 interface Props {
@@ -80,7 +80,7 @@ const Example = ({ config , core}: Props) => {
 
 ```tsx
 import React, { useEffect } from 'react';
-import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/app-menu';
 
 interface Props {
   config: AppMenuConfig;
