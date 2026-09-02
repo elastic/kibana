@@ -38,8 +38,8 @@ describe('RuleCreateOptionsFlyout', () => {
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
-    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('With AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
@@ -55,7 +55,7 @@ describe('RuleCreateOptionsFlyout', () => {
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
@@ -63,7 +63,7 @@ describe('RuleCreateOptionsFlyout', () => {
   it('calls onCreateWithAgent when the AI Agent option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
@@ -102,7 +102,7 @@ describe('RuleCreateOptionsFlyout', () => {
     // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
     expect(agentCard).toHaveAttribute('aria-disabled', 'true');
 
-    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
     expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });
