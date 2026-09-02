@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../mocks';
 
-import { appContextService } from '../services';
+import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 
 import type { Agent } from '../types';
@@ -32,14 +32,6 @@ import {
 jest.mock('../services');
 jest.mock('../services/agents');
 jest.mock('../services/outputs/helpers');
-jest.mock('../services/agent_policy', () => ({
-  getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
-  agentPolicyService: {
-    list: jest.fn().mockResolvedValue({
-      items: [{ id: 'agentless-policy-1', name: 'Agentless Policy 1' } as any],
-    }),
-  },
-}));
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -58,6 +50,13 @@ const MOCK_TASK_INSTANCE = {
 const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
+const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const getMockAgentPolicyFetchAllAgentPolicies = (items: any[]) =>
+  jest.fn().mockImplementation(async () =>
+    (async function* () {
+      yield items;
+    })()
+  );
 const getMockFetchAllAgentsByKuery = (items: Agent[]) =>
   jest.fn(async function* () {
     yield items;
@@ -136,6 +135,29 @@ describe('AgentStatusChangeTask', () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAgentStatusAlerting: true } as any);
+
+      mockAgentPolicyService.fetchAllAgentPolicies.mockImplementation(
+        getMockAgentPolicyFetchAllAgentPolicies([
+          {
+            id: 'agentless-policy-1',
+            name: 'Agentless Policy 1',
+            supports_agentless: true,
+            namespace: 'default',
+          },
+          {
+            id: 'policy-prod',
+            name: 'Prod Policy',
+            supports_agentless: false,
+            namespace: 'production',
+          },
+          {
+            id: 'policy-staging',
+            name: 'Staging Policy',
+            supports_agentless: false,
+            namespace: 'staging',
+          },
+        ])
+      );
     });
 
     afterEach(() => {
@@ -200,7 +222,13 @@ describe('AgentStatusChangeTask', () => {
       );
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
+          index: 'logs-elastic_agent.status_change-default',
           operations: expect.arrayContaining([
+            expect.objectContaining({
+              create: {
+                _id: expect.any(String),
+              },
+            }),
             expect.objectContaining({
               '@timestamp': expect.any(String),
               agent: {
@@ -214,8 +242,14 @@ describe('AgentStatusChangeTask', () => {
               },
               hostname: 'host1',
               policy_id: 'agentless-policy-1',
+              policy_namespace: 'default',
               space_id: ['default'],
               status: 'unhealthy',
+            }),
+            expect.objectContaining({
+              create: {
+                _id: expect.any(String),
+              },
             }),
             expect.objectContaining({
               '@timestamp': expect.any(String),
@@ -230,12 +264,125 @@ describe('AgentStatusChangeTask', () => {
               },
               hostname: 'host2',
               policy_id: 'agent-policy-2',
+              policy_namespace: 'default',
               space_id: ['space1'],
               status: 'online',
             }),
           ]),
         })
       );
+    });
+
+    it('should set policy_namespace field to the resolved policy namespace while always writing to the default data stream', async () => {
+      const agents = [
+        {
+          id: 'agent-prod',
+          policy_id: 'policy-prod',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-prod' } },
+        },
+      ] as unknown as Agent[];
+
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
+      const operations = bulkCall.operations as any[];
+      const doc = operations[1];
+
+      expect(doc.policy_namespace).toBe('production');
+      expect(doc.data_stream.namespace).toBe('default');
+    });
+
+    it('should fallback policy_namespace to default for agent with no policy_id', async () => {
+      const agents = [
+        {
+          id: 'agent-no-policy',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-no-policy' } },
+        },
+      ] as unknown as Agent[];
+
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
+      const operations = bulkCall.operations as any[];
+      const doc = operations[1];
+
+      expect(doc.policy_namespace).toBe('default');
+      expect(doc.data_stream.namespace).toBe('default');
+    });
+
+    it('should fallback policy_namespace to default when policy_id cannot be resolved', async () => {
+      const agents = [
+        {
+          id: 'agent-deleted-policy',
+          policy_id: 'policy-does-not-exist',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-deleted-policy' } },
+        },
+      ] as unknown as Agent[];
+
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
+      const operations = bulkCall.operations as any[];
+      const doc = operations[1];
+
+      expect(doc.policy_namespace).toBe('default');
+      expect(doc.data_stream.namespace).toBe('default');
+    });
+
+    it('should send multiple agents on different-namespace policies in the same batch to the default status_change data stream while recording their respective policy_namespace', async () => {
+      const agents = [
+        {
+          id: 'agent-prod',
+          policy_id: 'policy-prod',
+          status: 'online',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-prod' } },
+        },
+        {
+          id: 'agent-staging',
+          policy_id: 'policy-staging',
+          status: 'offline',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host-staging' } },
+        },
+      ] as unknown as Agent[];
+
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('logs-elastic_agent.status_change-default');
+      const operations = bulkCall.operations as any[];
+
+      expect(operations[1].policy_namespace).toBe('production');
+      expect(operations[1].data_stream.namespace).toBe('default');
+
+      expect(operations[3].policy_namespace).toBe('staging');
+      expect(operations[3].data_stream.namespace).toBe('default');
     });
 
     it('should do nothing when no agents changed status', async () => {
