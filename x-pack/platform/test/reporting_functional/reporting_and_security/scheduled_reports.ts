@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type { FtrProviderContext } from '../ftr_provider_context';
 import moment from 'moment';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const START_DATE_PICKER_FORMAT = 'MMM D, YYYY @ HH:mm';
 
