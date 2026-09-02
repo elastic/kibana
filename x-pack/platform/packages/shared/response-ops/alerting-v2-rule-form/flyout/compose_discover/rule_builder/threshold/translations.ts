@@ -148,9 +148,12 @@ export const SEVERITY_MODE_OPTIONS = [
 ];
 
 export const SEVERITY_VALIDATION_ERRORS: Record<SeverityValidationError, string> = {
-  invalid_threshold: i18n.translate('xpack.alertingV2.ruleBuilder.severity.error.invalidThreshold', {
-    defaultMessage: 'Each severity level needs a valid numeric threshold.',
-  }),
+  invalid_threshold: i18n.translate(
+    'xpack.alertingV2.ruleBuilder.severity.error.invalidThreshold',
+    {
+      defaultMessage: 'Each severity level needs a valid numeric threshold.',
+    }
+  ),
   duplicate_level: i18n.translate('xpack.alertingV2.ruleBuilder.severity.error.duplicateLevel', {
     defaultMessage: 'Each severity level can only be used once.',
   }),

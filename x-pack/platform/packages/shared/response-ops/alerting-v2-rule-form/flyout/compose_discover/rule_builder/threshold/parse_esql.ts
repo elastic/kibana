@@ -311,7 +311,9 @@ const SEVERITY_VALUES = new Set<string>(SEVERITY_LEVELS);
 const isSeverityValue = (value: string): value is AlertEventSeverity => SEVERITY_VALUES.has(value);
 
 const extractStringLiteral = (node: ESQLAstItem): string | null => {
-  const match = printExpr(node).trim().match(/^"(.*)"$/);
+  const match = printExpr(node)
+    .trim()
+    .match(/^"(.*)"$/);
   return match ? match[1] : null;
 };
 

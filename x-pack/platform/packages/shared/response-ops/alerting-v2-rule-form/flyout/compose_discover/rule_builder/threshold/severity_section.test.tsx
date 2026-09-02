@@ -19,10 +19,7 @@ const condition = (overrides: Partial<AlertCondition> = {}): AlertCondition => (
   ...overrides,
 });
 
-const renderSection = (props: {
-  severity?: SeverityConfig;
-  alertConditions: AlertCondition[];
-}) => {
+const renderSection = (props: { severity?: SeverityConfig; alertConditions: AlertCondition[] }) => {
   const onChange = jest.fn<void, [SeverityConfig | undefined]>();
   render(
     <IntlProvider locale="en">
@@ -97,9 +94,7 @@ describe('SeveritySection', () => {
       severity: { mode: 'single', singleLevelSeverity: 'high', levels: [] },
     });
     expect(screen.getByTestId('ruleBuilderSeverityMode-multi')).toBeDisabled();
-    expect(
-      screen.getByText(/Multiple severity levels are not available/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Multiple severity levels are not available/i)).toBeInTheDocument();
   });
 
   it('shows the inherited operator and threshold per level in multi mode', () => {

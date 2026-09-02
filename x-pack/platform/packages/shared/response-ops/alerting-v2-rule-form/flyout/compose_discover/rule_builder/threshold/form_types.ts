@@ -303,8 +303,8 @@ const hasMultiLevels = (severity: SeverityConfig | undefined): severity is Sever
   severity?.mode === 'multi' && severity.levels.length > 0;
 
 /**
- * Mirror the alert condition threshold onto the lowest multi-severity level, 
- * so editing the condition keeps the lowest level — which defines the breach 
+ * Mirror the alert condition threshold onto the lowest multi-severity level,
+ * so editing the condition keeps the lowest level — which defines the breach
  * threshold — in sync.
  */
 export const syncSeverityToConditionThreshold = (
@@ -321,7 +321,7 @@ export const syncSeverityToConditionThreshold = (
 };
 
 /**
- * Mirror the lowest multi-severity level threshold onto the single alert condition, 
+ * Mirror the lowest multi-severity level threshold onto the single alert condition,
  * so editing that level keeps the generated breach WHERE in sync with the UI.
  */
 export const syncConditionToSeverityThreshold = (

@@ -234,10 +234,7 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
         Builder.command({
           name: 'eval',
           args: [
-            Builder.expression.func.binary('=', [
-              Builder.expression.column('severity'),
-              exprAst,
-            ]),
+            Builder.expression.func.binary('=', [Builder.expression.column('severity'), exprAst]),
           ],
         })
       );

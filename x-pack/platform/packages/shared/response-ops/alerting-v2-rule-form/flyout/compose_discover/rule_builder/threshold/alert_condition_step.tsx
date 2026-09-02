@@ -411,7 +411,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       // then keep the lowest multi-severity level in sync with the (single) condition threshold.
       const reconciled = reconcileSeverity(thresholdValues.severity, next);
       const severity =
-        index === 0 ? syncSeverityToConditionThreshold(reconciled, next[0].threshold[0]) : reconciled;
+        index === 0
+          ? syncSeverityToConditionThreshold(reconciled, next[0].threshold[0])
+          : reconciled;
       onThresholdValuesChange({ ...thresholdValues, alertConditions: next, severity });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -432,9 +434,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const removeCondition = useCallback(
     (index: number) => {
       const filtered = thresholdValues.alertConditions.filter((_, i) => i !== index);
-      const next = filtered.length
-        ? filtered
-        : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }];
+      const next = filtered.length ? filtered : [{ id: generateId(), ...DEFAULT_ALERT_CONDITION }];
       onThresholdValuesChange({
         ...thresholdValues,
         alertConditions: next,

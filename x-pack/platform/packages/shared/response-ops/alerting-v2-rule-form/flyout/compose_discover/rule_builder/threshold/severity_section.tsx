@@ -124,7 +124,11 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
       ...severity,
       levels: [
         ...severity.levels,
-        { id: generateId(), severity: nextSeverityLevel(severity.levels), threshold: baseThreshold },
+        {
+          id: generateId(),
+          severity: nextSeverityLevel(severity.levels),
+          threshold: baseThreshold,
+        },
       ],
     });
   };
@@ -149,6 +153,7 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
 
       {!severitySupported ? (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="primary"
           iconType="info"
@@ -336,7 +341,10 @@ export const SeveritySection: React.FC<SeveritySectionProps> = ({
                     />
                   </EuiButtonEmpty>
                   {condition && (
-                    <SeverityValidationCallout severity={severity} comparator={condition.comparator} />
+                    <SeverityValidationCallout
+                      severity={severity}
+                      comparator={condition.comparator}
+                    />
                   )}
                 </>
               )}

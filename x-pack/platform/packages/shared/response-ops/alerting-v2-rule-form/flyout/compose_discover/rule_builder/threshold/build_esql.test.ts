@@ -451,7 +451,9 @@ describe('buildThresholdEsql', () => {
     });
 
     it('omits severity when no severity config is present', () => {
-      const result = buildThresholdEsql(makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] }));
+      const result = buildThresholdEsql(
+        makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] })
+      );
       expect(result).not.toContain('severity');
     });
   });

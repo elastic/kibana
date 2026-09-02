@@ -314,7 +314,10 @@ describe('severity helpers', () => {
     it('flags empty levels and non-finite thresholds', () => {
       expect(getSeverityValidationError(multi([]), Comparator.GT)).toBe('invalid_threshold');
       expect(
-        getSeverityValidationError(multi([{ id: 'a', severity: 'low', threshold: NaN }]), Comparator.GT)
+        getSeverityValidationError(
+          multi([{ id: 'a', severity: 'low', threshold: NaN }]),
+          Comparator.GT
+        )
       ).toBe('invalid_threshold');
     });
 

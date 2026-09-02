@@ -954,7 +954,9 @@ describe('severity round-trip', () => {
   it('round-trips multi severity through build and parse (descending <)', () => {
     const original = makeValues({
       stats: [{ id: 's1', label: 'mem_free', aggregation: Aggregation.AVG, field: 'mem' }],
-      alertConditions: [{ id: 'c1', metric: 'mem_free', comparator: Comparator.LT, threshold: [500] }],
+      alertConditions: [
+        { id: 'c1', metric: 'mem_free', comparator: Comparator.LT, threshold: [500] },
+      ],
       severity: {
         mode: 'multi',
         singleLevelSeverity: 'high',
@@ -978,7 +980,9 @@ describe('severity round-trip', () => {
   });
 
   it('has no severity when the query has no severity EVAL', () => {
-    const query = buildThresholdEsql(makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] }));
+    const query = buildThresholdEsql(
+      makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] })
+    );
     const parsed = parseThresholdEsql(query);
 
     expect(parsed).not.toBeNull();
@@ -989,7 +993,9 @@ describe('severity round-trip', () => {
     // A regular EVAL before the WHERE stays an evaluation, not severity config.
     const original = makeValues({
       evaluations: [{ id: 'e1', label: 'error_rate', expression: 'count / 2' }],
-      alertConditions: [{ id: 'c1', metric: 'error_rate', comparator: Comparator.GT, threshold: [5] }],
+      alertConditions: [
+        { id: 'c1', metric: 'error_rate', comparator: Comparator.GT, threshold: [5] },
+      ],
       severity: { mode: 'single', singleLevelSeverity: 'critical', levels: [] },
     });
 

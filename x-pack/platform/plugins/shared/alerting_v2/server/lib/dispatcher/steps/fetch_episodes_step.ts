@@ -6,13 +6,13 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEpisode,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
