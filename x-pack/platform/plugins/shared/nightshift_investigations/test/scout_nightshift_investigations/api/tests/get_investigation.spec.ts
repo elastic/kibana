@@ -14,9 +14,10 @@ import {
   getInvestigation,
   seedInvestigation,
   deleteInvestigation,
+  uniqueId,
 } from '../fixtures';
 
-const TEST_ID = 'get-test-investigation';
+const TEST_ID = uniqueId('get-test-investigation');
 
 apiTest.describe(
   'GET /internal/nightshift/investigations/{id}',

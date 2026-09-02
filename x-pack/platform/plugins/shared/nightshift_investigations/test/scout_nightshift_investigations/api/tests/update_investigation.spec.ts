@@ -15,13 +15,14 @@ import {
   deleteInvestigation,
   getInvestigation,
   updateInvestigation,
+  uniqueId,
 } from '../fixtures';
 
 apiTest.describe(
   'PATCH /internal/nightshift/investigations/{id}',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const TEST_ID = 'persist-test-investigation';
+    const TEST_ID = uniqueId('persist-test-investigation');
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {

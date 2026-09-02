@@ -14,13 +14,19 @@ import {
   listInvestigations,
   seedInvestigation,
   deleteInvestigation,
+  uniqueId,
 } from '../fixtures';
 
 apiTest.describe(
   'GET /internal/nightshift/investigations',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const IDS = ['list-inv-1', 'list-inv-2', 'list-inv-3', 'list-inv-4'];
+    const IDS = [
+      uniqueId('list-inv-1'),
+      uniqueId('list-inv-2'),
+      uniqueId('list-inv-3'),
+      uniqueId('list-inv-4'),
+    ];
     const SEED_CREATED_RANGE =
       'created_after=2024-06-01T00:00:00Z&created_before=2024-06-05T00:00:00Z';
     let cookieHeader: Record<string, string>;
@@ -122,13 +128,17 @@ apiTest.describe(
 
     apiTest('filters by status', async ({ apiClient }) => {
       const response = await listInvestigations(apiClient, cookieHeader, {
-        query: 'statuses=running',
+        query: `statuses=running&${SEED_CREATED_RANGE}`,
       });
       expect(response).toHaveStatusCode(200);
 
-      const statuses = response.body.results.map((r: { status: string }) => r.status);
-      for (const status of statuses) {
-        expect(status).toBe('running');
+      const results = response.body.results as Array<{
+        investigation_id: string;
+        status: string;
+      }>;
+      expect(results.map((r) => r.investigation_id)).toContain(IDS[1]);
+      for (const result of results) {
+        expect(result.status).toBe('running');
       }
     });
 

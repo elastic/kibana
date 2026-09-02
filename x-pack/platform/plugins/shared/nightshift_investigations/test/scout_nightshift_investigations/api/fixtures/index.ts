@@ -19,4 +19,5 @@ export {
   listInvestigations,
   updateInvestigation,
   ensureInvestigation,
+  uniqueId,
 } from './helpers';

@@ -15,13 +15,14 @@ import {
   seedInvestigation,
   deleteInvestigation,
   getInvestigation,
+  uniqueId,
 } from '../fixtures';
 
 apiTest.describe(
   'POST /internal/nightshift/investigations/{id}/_ensure',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const TEST_ID = 'ensure-test-investigation';
+    const TEST_ID = uniqueId('ensure-test-investigation');
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {

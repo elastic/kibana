@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout';
 import { COMMON_HEADERS } from './constants';
 
@@ -14,6 +15,9 @@ const INVESTIGATIONS_PATH = 'internal/nightshift/investigations';
 
 const spacePath = (path: string, spaceId?: string): string =>
   spaceId ? `s/${spaceId}/${path}` : path;
+
+/** A per-run id so parallel/repeated Scout runs against a shared deployment cannot collide. */
+export const uniqueId = (prefix: string): string => `${prefix}-${randomUUID()}`;
 
 export interface InvestigationRequestOptions {
   spaceId?: string;
@@ -118,6 +122,9 @@ export const seedInvestigation = async (
   });
 };
 
+const hasHttpStatus = (error: unknown): error is { status?: number } =>
+  typeof error === 'object' && error !== null && 'status' in error;
+
 export const deleteInvestigation = async (
   kbnClient: KbnClient,
   id: string,
@@ -125,7 +132,10 @@ export const deleteInvestigation = async (
 ): Promise<void> => {
   try {
     await kbnClient.savedObjects.delete({ type: SO_TYPE, id, space });
-  } catch {
-    // ignore 404s during cleanup
+  } catch (error) {
+    if (hasHttpStatus(error) && error.status === 404) {
+      return;
+    }
+    throw error;
   }
 };

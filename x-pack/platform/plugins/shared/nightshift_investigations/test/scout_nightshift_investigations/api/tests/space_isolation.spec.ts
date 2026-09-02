@@ -15,10 +15,11 @@ import {
   updateInvestigation,
   seedInvestigation,
   deleteInvestigation,
+  uniqueId,
 } from '../fixtures';
 
-const SPACE_ID = 'nightshift-inv-space';
-const TEST_ID = 'space-scoped-investigation';
+const SPACE_ID = uniqueId('nightshift-inv-space');
+const TEST_ID = uniqueId('space-scoped-investigation');
 
 apiTest.describe(
   'investigations are isolated per space',
