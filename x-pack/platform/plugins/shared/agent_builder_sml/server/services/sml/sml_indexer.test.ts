@@ -356,12 +356,13 @@ describe('createSmlIndexer', () => {
       );
 
       expect(captured.client).toBeDefined();
-      // Injected namespace wins even when the caller passes a conflicting one.
+      // Namespace goes to the top-level option; per-object `namespaces` are
+      // dropped so a caller cannot override it (and to stay valid for
+      // space-agnostic types, which core rejects `namespaces` on).
       await captured.client?.bulkGet([{ type: 'lens', id: 'att-11', namespaces: ['wrong-space'] }]);
-      expect(realBulkGet).toHaveBeenCalledWith(
-        [{ type: 'lens', id: 'att-11', namespaces: ['my-space'] }],
-        undefined
-      );
+      expect(realBulkGet).toHaveBeenCalledWith([{ type: 'lens', id: 'att-11' }], {
+        namespace: 'my-space',
+      });
     });
 
     it('non-default space without spaces extension: injects namespace on resolve', async () => {

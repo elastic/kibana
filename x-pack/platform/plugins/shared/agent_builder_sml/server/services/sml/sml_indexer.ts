@@ -105,10 +105,12 @@ const withNamespace = (
 ): SavedObjectsClientContract => {
   const wrapped = Object.create(client) as SavedObjectsClientContract;
   wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
+  // Pass the namespace as the top-level option and drop any per-object
+  // `namespaces`, which core rejects for space-agnostic types.
   wrapped.bulkGet = (objects, opts) =>
     client.bulkGet(
-      objects.map((o) => ({ ...o, namespaces: [namespace] })),
-      opts
+      objects.map(({ namespaces: _namespaces, ...object }) => object),
+      { ...opts, namespace }
     );
   wrapped.resolve = (type, id, opts) => client.resolve(type, id, { ...opts, namespace });
   wrapped.bulkResolve = (objects, opts) => client.bulkResolve(objects, { ...opts, namespace });
