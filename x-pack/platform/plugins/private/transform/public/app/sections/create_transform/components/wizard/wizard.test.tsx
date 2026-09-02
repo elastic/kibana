@@ -144,11 +144,21 @@ const createSearchItems = (id: string, name: string): SearchItems => ({
 
 const renderWizard = (props: React.ComponentProps<typeof Wizard>) => {
   const history = createMemoryHistory();
-  return renderWithI18n(
+  const renderResult = renderWithI18n(
     <Router history={history}>
       <Wizard {...props} />
     </Router>
   );
+
+  return {
+    ...renderResult,
+    rerenderWizard: () =>
+      renderResult.rerender(
+        <Router history={history}>
+          <Wizard {...props} />
+        </Router>
+      ),
+  };
 };
 
 describe('Transform: <Wizard />', () => {
@@ -282,6 +292,84 @@ describe('Transform: <Wizard />', () => {
     expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
     expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
     expect(getDefaultProjectRouting).not.toHaveBeenCalled();
+  });
+
+  test('does not render project scope or inject default routing while Transform CPS support is loading', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: undefined });
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
+        fetchProjects: jest.fn(),
+        getDefaultProjectRouting,
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDefineForm')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
+    expect(getDefaultProjectRouting).not.toHaveBeenCalled();
+  });
+
+  test('renders project scope and injects default routing when Transform CPS support finishes loading', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: undefined });
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
+        fetchProjects: jest.fn().mockResolvedValue({
+          origin: {
+            _id: 'origin-id',
+            _alias: 'local_project',
+            _organisation: 'org',
+            _type: 'security',
+          },
+          linkedProjects: [
+            {
+              _id: 'linked-id',
+              _alias: 'linked_local_project',
+              _organisation: 'org',
+              _type: 'security',
+            },
+          ],
+        }),
+        getDefaultProjectRouting,
+      },
+    } as any;
+    const { rerenderWizard } = renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockStepDefineForm')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
+
+    mockUseGetTransformCpsEnabled.mockReturnValue({ data: true });
+    rerenderWizard();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformProjectScopePicker')).toHaveTextContent('All projects');
+      expect(mockStepDefineFormProps.overrides.projectRouting).toBe(PROJECT_ROUTING.ALL);
+    });
+    expect(getDefaultProjectRouting).toHaveBeenCalled();
   });
 
   test('does not render project scope or inject default routing when there are no linked projects', async () => {

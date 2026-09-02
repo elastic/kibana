@@ -38,14 +38,42 @@ export const isNodes = (arg: unknown): arg is Nodes => {
   );
 };
 
-export const areCrossProjectFeatureFlagsEnabled = (nodes: unknown): boolean => {
+const isFeatureFlagEnabled = ({
+  featureFlag,
+  inputArguments,
+  isSnapshotBuild,
+}: {
+  featureFlag: (typeof REQUIRED_CROSS_PROJECT_FEATURE_FLAGS)[number];
+  inputArguments?: string[];
+  isSnapshotBuild: boolean;
+}): boolean => {
+  const argumentPrefix = `-D${featureFlag}=`;
+
+  for (let index = (inputArguments?.length ?? 0) - 1; index >= 0; index--) {
+    const argument = inputArguments?.[index];
+    if (argument?.startsWith(argumentPrefix)) {
+      return argument.slice(argumentPrefix.length) === 'true';
+    }
+  }
+
+  return isSnapshotBuild;
+};
+
+export const areCrossProjectFeatureFlagsEnabled = (
+  nodes: unknown,
+  isSnapshotBuild: boolean
+): boolean => {
   if (!isNodes(nodes)) {
     return false;
   }
 
   return Object.values(nodes).every(({ jvm }) =>
     REQUIRED_CROSS_PROJECT_FEATURE_FLAGS.every((featureFlag) =>
-      jvm?.input_arguments?.includes(`-D${featureFlag}=true`)
+      isFeatureFlagEnabled({
+        featureFlag,
+        inputArguments: jvm?.input_arguments,
+        isSnapshotBuild,
+      })
     )
   );
 };
@@ -68,9 +96,12 @@ export const routeHandlerFactory: (
       }
     }
 
-    const { nodes } = await esClient.asInternalUser.nodes.info({
-      filter_path: `nodes.*.${NODE_ROLES},nodes.*.jvm.input_arguments`,
-    });
+    const [{ nodes }, { version }] = await Promise.all([
+      esClient.asInternalUser.nodes.info({
+        filter_path: `nodes.*.${NODE_ROLES},nodes.*.jvm.input_arguments`,
+      }),
+      esClient.asInternalUser.info(),
+    ]);
 
     let count = 0;
     if (isNodes(nodes)) {
@@ -84,7 +115,7 @@ export const routeHandlerFactory: (
     return res.ok({
       body: {
         count,
-        isCrossProjectEnabled: areCrossProjectFeatureFlagsEnabled(nodes),
+        isCrossProjectEnabled: areCrossProjectFeatureFlagsEnabled(nodes, version.build_snapshot),
       },
     });
   } catch (e) {
