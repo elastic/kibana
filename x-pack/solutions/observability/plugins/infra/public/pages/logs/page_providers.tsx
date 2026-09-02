@@ -16,7 +16,11 @@ import {
 import { LogSourcesProvider } from '@kbn/logs-data-access-plugin/public';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { MlCpsCapabilityProvider, useIsInfraMlCpsEnabled } from '../../hooks/use_infra_ml_cps';
+import {
+  MlCpsCapabilityProvider,
+  useInfraMlCpsPickerAccess,
+  useIsInfraMlCpsEnabled,
+} from '../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
 
@@ -37,11 +41,13 @@ const LogsPageProvidersContent: FC<PropsWithChildren<unknown>> = ({ children }) 
     },
   } = useKibanaContextForPlugin();
 
-  // The project picker is disabled for this app because project scope is a per-job property of the
-  // ML jobs these pages render, so the picker cannot answer "is there any log data?". Scope the
-  // status query to all projects explicitly, otherwise it would be clamped to the origin project
-  // and an origin without logs would render the "no data" screen despite a linked project having
-  // them. Note that resolving the log view also fetches its data view's fields, which stays
+  useInfraMlCpsPickerAccess();
+
+  // The project picker is read-only for this app because project scope is a per-job property of
+  // the ML jobs these pages render, so the picker cannot answer "is there any log data?". Scope
+  // the status query to all projects explicitly, otherwise it would be clamped to the origin
+  // project and an origin without logs would render the "no data" screen despite a linked project
+  // having them. Note that resolving the log view also fetches its data view's fields, which stays
   // origin-scoped: nothing in this app reads that field list, so it is knowingly left alone.
   const isCpsEnabled = useIsInfraMlCpsEnabled();
   const projectRouting = isCpsEnabled ? PROJECT_ROUTING.ALL : undefined;

@@ -7,12 +7,14 @@
 
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { of } from 'rxjs';
 import { render, renderHook, screen, waitFor } from '@testing-library/react';
 import type { CPSPluginStart } from '@kbn/cps/public';
-import type { ICPSManager } from '@kbn/cps-utils';
+import { type ICPSManager, ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   MlCpsCapabilityContext,
   MlCpsCapabilityProvider,
+  useInfraMlCpsPickerAccess,
   useIsInfraMlCpsEnabled,
   useShouldRenderInfraMlCpsUi,
 } from './use_infra_ml_cps';
@@ -36,6 +38,7 @@ const mockServices = ({
 }) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
     services: {
+      application: { currentAppId$: of('logs') },
       cps,
       featureFlags: { getBooleanValue: jest.fn().mockReturnValue(isFeatureFlagEnabled) },
       ml: mlInfo ? { mlApi: { mlInfo } } : undefined,
@@ -322,5 +325,55 @@ describe('MlCpsCapabilityProvider', () => {
 
     expect(await screen.findByText('cps-disabled')).toBeInTheDocument();
     expect(mlInfo).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useInfraMlCpsPickerAccess', () => {
+  const renderPickerAccessHook = ({
+    isMlCpsCapabilityEnabled,
+  }: {
+    isMlCpsCapabilityEnabled: boolean;
+  }) => {
+    const registerAppAccess = jest.fn();
+    mockServices({
+      cps: {
+        isTierEligible: true,
+        cpsManager: { registerAppAccess } as unknown as CPSPluginStart['cpsManager'],
+      },
+    });
+
+    const rendered = renderHook(() => useInfraMlCpsPickerAccess(), {
+      wrapper: withMlCpsCapability(isMlCpsCapabilityEnabled),
+    });
+
+    return { ...rendered, registerAppAccess };
+  };
+
+  it('registers a read-only picker for the current app when the gate holds', () => {
+    const { registerAppAccess } = renderPickerAccessHook({ isMlCpsCapabilityEnabled: true });
+
+    const [appId, resolver] = registerAppAccess.mock.calls[0];
+    expect(appId).toBe('logs');
+    expect(resolver('any-location')).toBe(ProjectRoutingAccess.READONLY);
+  });
+
+  it('registers a hidden picker when the gate is disabled', () => {
+    const { registerAppAccess } = renderPickerAccessHook({ isMlCpsCapabilityEnabled: false });
+
+    const [appId, resolver] = registerAppAccess.mock.calls[0];
+    expect(appId).toBe('logs');
+    expect(resolver('any-location')).toBe(ProjectRoutingAccess.DISABLED);
+  });
+
+  it('re-registers a hidden picker on unmount', () => {
+    const { registerAppAccess, unmount } = renderPickerAccessHook({
+      isMlCpsCapabilityEnabled: true,
+    });
+
+    unmount();
+
+    const [appId, resolver] = registerAppAccess.mock.calls[registerAppAccess.mock.calls.length - 1];
+    expect(appId).toBe('logs');
+    expect(resolver('any-location')).toBe(ProjectRoutingAccess.DISABLED);
   });
 });

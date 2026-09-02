@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useIsCpsMultiProject } from '@kbn/cps-utils';
+import { ProjectRoutingAccess, useCpsPickerAccess, useIsCpsMultiProject } from '@kbn/cps-utils';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import {
   OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
@@ -127,4 +127,29 @@ export const useShouldRenderInfraMlCpsUi = (): boolean | undefined => {
   const isCpsMultiProject = useIsCpsMultiProject(services.cps?.cpsManager);
 
   return isCpsEnabled ? isCpsMultiProject : false;
+};
+
+/**
+ * Registers the global project picker access for the logs app: read-only when the Logs ML CPS
+ * gate holds — scope is a per-job property on these pages, so the picker only displays the
+ * default scope — and hidden otherwise. Re-registering when the gate value settles makes the
+ * CPS manager re-apply the access immediately for the active app, so this must render under
+ * `MlCpsCapabilityProvider` where the gate is already settled.
+ */
+export const useInfraMlCpsPickerAccess = (): void => {
+  const {
+    services: { application, cps },
+  } = useKibanaContextForPlugin();
+  const isCpsEnabled = useIsInfraMlCpsEnabled();
+
+  const pickerAccessResolver = useCallback(
+    () => (isCpsEnabled ? ProjectRoutingAccess.READONLY : ProjectRoutingAccess.DISABLED),
+    [isCpsEnabled]
+  );
+
+  useCpsPickerAccess({
+    resolver: pickerAccessResolver,
+    currentAppId$: application.currentAppId$,
+    cpsManager: cps?.cpsManager,
+  });
 };
