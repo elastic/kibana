@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/core-saved-objects-common'
   - '@kbn/esql-utils'
+  - '@kbn/esql-types'
   - '@kbn/zod'
   - '@kbn/coloring'
   - '@kbn/content-management-utils'
