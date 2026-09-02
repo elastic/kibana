@@ -90,9 +90,11 @@ describe('AgentContextualServiceMap', () => {
     expect(lastGraphProps).toMatchObject({
       focalServiceId: 'backend',
       environment: 'production',
-      fullMapHref: 'http://localhost/app/apm/service-map',
       showContextControls: true,
     });
+    // The labeled header link is the only full-map entry point: the graph
+    // never gets a href, so its toolbar icon stays hidden.
+    expect(lastGraphProps?.fullMapHref).toBeUndefined();
     expect(lastGraphProps?.nodes.map((node) => node.id).sort()).toEqual([
       '>postgresql',
       'backend',
@@ -169,10 +171,8 @@ describe('AgentContextualServiceMap', () => {
     );
 
     expect(screen.queryByTestId('apmAgentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
-    // The map itself still renders — only the full-map entry points are gated,
-    // including the graph's own "View in Service map" toolbar button.
+    // The map itself still renders — only the link is gated.
     expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
-    expect(lastGraphProps?.fullMapHref).toBeUndefined();
   });
 
   it('hides the Explore link when service map is disabled in config', () => {
@@ -184,7 +184,43 @@ describe('AgentContextualServiceMap', () => {
 
     expect(screen.queryByTestId('apmAgentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
-    expect(lastGraphProps?.fullMapHref).toBeUndefined();
+  });
+
+  it('renders the topology snapshot time when provided', () => {
+    render(
+      <AgentContextualServiceMap
+        data={{ connections, serviceName: 'backend' }}
+        deps={deps}
+        snapshotTime="2026-09-02T08:26:15.000Z"
+      />
+    );
+
+    expect(screen.getByTestId('apmAgentServiceMapSnapshotTime')).toHaveTextContent(
+      /Topology as of/
+    );
+  });
+
+  it('omits the snapshot time when the attachment has no version metadata', () => {
+    render(
+      <AgentContextualServiceMap data={{ connections, serviceName: 'backend' }} deps={deps} />
+    );
+
+    expect(screen.queryByTestId('apmAgentServiceMapSnapshotTime')).not.toBeInTheDocument();
+  });
+
+  it('still renders the snapshot time when the Explore link is gated', () => {
+    mockUseLicenseContext.mockReturnValue(basicLicense);
+
+    render(
+      <AgentContextualServiceMap
+        data={{ connections, serviceName: 'backend' }}
+        deps={deps}
+        snapshotTime="2026-09-02T08:26:15.000Z"
+      />
+    );
+
+    expect(screen.getByTestId('apmAgentServiceMapSnapshotTime')).toBeInTheDocument();
+    expect(screen.queryByTestId('apmAgentServiceMapExploreInServiceMap')).not.toBeInTheDocument();
   });
 
   it('falls back to the static map when serviceName is missing', () => {
