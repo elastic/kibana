@@ -47,7 +47,7 @@ const setup = async ({
 } = {}) => {
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
+    .spyOn(services.discoverSessionPersistence, 'save')
     .mockImplementation((discoverSession) =>
       Promise.resolve({
         ...discoverSession,
