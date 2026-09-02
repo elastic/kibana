@@ -294,6 +294,23 @@ describe('AlertEpisodesListPage', () => {
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
   });
 
+  it.each([
+    ['tags', 'Alert tags'],
+    ['rule_tags', 'Rule tags'],
+  ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    // A sort on either tag column falls back to `@timestamp`, so the control would reorder the
+    // rows without sorting by tags.
+    expect(customize!({ column: { id: columnId, isSortable: true }, headerRowHeight: 1 })).toEqual({
+      id: columnId,
+      displayAsText: label,
+      isSortable: false,
+    });
+  });
+
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
     // The table should be rendered without a dynamic key that causes remounts
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
