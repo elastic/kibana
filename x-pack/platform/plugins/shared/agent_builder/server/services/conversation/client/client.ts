@@ -305,7 +305,30 @@ class ConversationClientImpl implements ConversationClient {
 
     const trimmedQuery = query.trim();
     const titleMatch = trimmedQuery
-      ? [{ match_bool_prefix: { title: { query: trimmedQuery, operator: 'and' as const } } }]
+      ? [
+          {
+            bool: {
+              should: [
+                {
+                  match_bool_prefix: {
+                    title: { query: trimmedQuery, operator: 'and' as const },
+                  },
+                },
+                {
+                  prefix: {
+                    'title.keyword': { value: trimmedQuery, boost: 2, case_insensitive: true },
+                  },
+                },
+                {
+                  term: {
+                    'title.keyword': { value: trimmedQuery, boost: 5, case_insensitive: true },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ]
       : [];
 
     const response = await this.storage.getClient().search({
