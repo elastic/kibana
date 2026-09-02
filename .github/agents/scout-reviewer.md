@@ -35,6 +35,16 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 6. Inspect nearby implementation and tests to confirm whether the concern is real and whether existing fixtures, page objects, or API services already cover the helper being introduced.
 7. If prior review comments are available in the provided context, avoid repeating feedback that already applies to unchanged lines (see **Re-run behavior** below).
 
+### Evidence gate — required before posting
+
+Apply this gate to every finding, especially Critical checks:
+
+1. Read the exact best-practices section linked by the matching skill rule. Copying the rule name or URL from the skill does not count as consulting the source.
+2. Positively verify every premise needed for the finding against repository content. Absence from the PR diff is not evidence that code or configuration is absent elsewhere.
+3. Before claiming that a file, config, helper, or abstraction is missing, inspect its expected parent directory at the PR head SHA. Before suggesting an API or option, verify it in a type definition, implementation, or existing usage.
+4. Treat `404`, `429`, empty results, truncated results, and other failed or incomplete tool responses as unresolved verification — never as evidence of absence. Honor retry guidance or use a materially different read path. If a required premise remains unresolved, omit that finding; if no verified findings remain, call `noop`.
+5. Re-read the final comment payload before submitting it. Ensure code samples preserve their quotes and are valid examples copied or adapted from a verified repository API. When using the shell to construct a multiline body, write the Markdown with a quoted heredoc and encode the file as JSON; do not embed it in a shell single-quoted argument.
+
 ## Output
 
 Inline comments are the **only** output of this review. Do not post a top-level review body, issue comment, or summary of any kind. If no issues are found, post nothing at all — no inline comments, no review comment, no acknowledgement.
@@ -72,7 +82,7 @@ Scout best practices live in three files. Don't guess from keywords — read the
 - API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/api-best-practices`
 - General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices`
 
-When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
+For Critical checks, also read every additional document linked from the matching skill row. When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
 
 ### Always include the section anchor (when you link)
 
