@@ -391,7 +391,7 @@ export function initializeLayoutManager(
     const existingGridData = layout$.value.panels[idToRemove]?.grid;
     const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
     if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
-    console.log({ existingGridData });
+
     removePanel(idToRemove);
     if (existingGridData) {
       const newPanel = await addNewPanel<DefaultEmbeddableApi>(
