@@ -24,11 +24,18 @@ import {
   mockCreateClient as mockCreateDashboardsClient,
   mockStop as mockDashboardsStop,
 } from './dashboards/__mocks__/mocks';
+import {
+  MockSiemWorkflowMigrationsService,
+  mockSetup as mockWorkflowsSetup,
+  mockCreateClient as mockCreateWorkflowsClient,
+  mockStop as mockWorkflowsStop,
+} from './workflows/__mocks__/mocks';
 import type { ConfigType } from '../../config';
 import type { SiemMigrationsClientDependencies } from './common/types';
 
 jest.mock('./rules/siem_rule_migrations_service');
 jest.mock('./dashboards/siem_dashboard_migration_service');
+jest.mock('./workflows/siem_workflow_migrations_service');
 
 const mockReplaySubject$ = { next: jest.fn(), complete: jest.fn() };
 jest.mock('rxjs', () => ({
@@ -117,6 +124,62 @@ describe('SiemMigrationsService', () => {
       it('should not call setup on the dashboard migrations service', async () => {
         siemMigrationsService.setup({ esClusterClient, tasksTimeoutMs: 100 });
         expect(mockDashboardsSetup).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('workflows', () => {
+    describe('with `tinesWorkflowsMigration` experimental flag enabled', () => {
+      beforeEach(() => {
+        siemMigrationsService = new SiemMigrationsService(
+          { experimentalFeatures: { tinesWorkflowsMigration: true } } as ConfigType,
+          logger,
+          kibanaVersion
+        );
+      });
+
+      it('should instantiate the workflow migrations service', async () => {
+        expect(MockSiemWorkflowMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      });
+
+      it('should call setup on the workflow migrations service', async () => {
+        siemMigrationsService.setup({ esClusterClient, tasksTimeoutMs: 100 });
+        expect(mockWorkflowsSetup).toHaveBeenCalledWith({
+          esClusterClient,
+          tasksTimeoutMs: 100,
+          pluginStop$: mockReplaySubject$,
+        });
+      });
+
+      it('should create workflows client', async () => {
+        const createWorkflowsClientParams = {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+          currentUser,
+          dependencies: ruleMigrationDependencies,
+        };
+        siemMigrationsService.createWorkflowsClient(createWorkflowsClientParams);
+        expect(mockCreateWorkflowsClient).toHaveBeenCalledWith(createWorkflowsClientParams);
+      });
+
+      it('should trigger stop on the workflow migrations service', async () => {
+        siemMigrationsService.stop();
+        expect(mockWorkflowsStop).toHaveBeenCalled();
+      });
+    });
+
+    describe('with `tinesWorkflowsMigration` experimental flag disabled', () => {
+      beforeEach(() => {
+        siemMigrationsService = new SiemMigrationsService(
+          { experimentalFeatures: { tinesWorkflowsMigration: false } } as ConfigType,
+          logger,
+          kibanaVersion
+        );
+      });
+
+      it('should not call setup on the workflow migrations service', async () => {
+        siemMigrationsService.setup({ esClusterClient, tasksTimeoutMs: 100 });
+        expect(mockWorkflowsSetup).not.toHaveBeenCalled();
       });
     });
   });

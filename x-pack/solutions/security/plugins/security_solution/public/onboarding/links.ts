@@ -58,6 +58,7 @@ export const launchPadLinks: LinkItem = {
         SecurityPageName.siemMigrationsManage,
         SecurityPageName.siemMigrationsRules,
         SecurityPageName.siemMigrationsDashboards,
+        SecurityPageName.siemMigrationsWorkflows,
       ],
     },
   ],
@@ -70,7 +71,8 @@ export const launchPadLinks: LinkItem = {
 };
 
 /**
- * Ordered entries: Get started, Value reports, Translated rules, Translated dashboards (titles come from link config).
+ * Ordered entries: Get started, Value reports, Translated rules, Translated dashboards,
+ * Translated workflows (titles come from link config).
  */
 export const CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES = Object.freeze([
   { id: SecurityPageName.landing },
@@ -79,4 +81,5 @@ export const CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES = Object.freeze([
   { id: SecurityPageName.siemMigrationsManage },
   { id: SecurityPageName.siemMigrationsRules },
   { id: SecurityPageName.siemMigrationsDashboards },
+  { id: SecurityPageName.siemMigrationsWorkflows },
 ]);

@@ -9,8 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { WorkflowMigrationTaskStats } from '../../../../../common/siem_migrations/workflows/types';
 
-export type SiemMigrationTaskStats = RuleMigrationTaskStats | DashboardMigrationTaskStats;
+export type SiemMigrationTaskStats =
+  | RuleMigrationTaskStats
+  | DashboardMigrationTaskStats
+  | WorkflowMigrationTaskStats;
 export type SiemMigrationDataStats = Omit<SiemMigrationTaskStats, 'name' | 'status'>;
 export type SiemMigrationAllDataStats = SiemMigrationDataStats[];
 

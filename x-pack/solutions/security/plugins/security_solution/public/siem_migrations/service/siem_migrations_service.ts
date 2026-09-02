@@ -10,10 +10,12 @@ import type { StartPluginsDependencies } from '../../types';
 import { SiemRulesMigrationsService } from '../rules/service/rule_migrations_service';
 import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 import { SiemDashboardMigrationsService } from '../dashboards/service/dashboard_migrations_service';
+import { SiemWorkflowMigrationsService } from '../workflows/service/workflow_migrations_service';
 
 export class SiemMigrationsService {
   public rules: SiemRulesMigrationsService;
   public dashboards: SiemDashboardMigrationsService;
+  public workflows: SiemWorkflowMigrationsService;
 
   constructor(
     coreStart: CoreStart,
@@ -22,5 +24,6 @@ export class SiemMigrationsService {
   ) {
     this.rules = new SiemRulesMigrationsService(coreStart, plugins, telemetry);
     this.dashboards = new SiemDashboardMigrationsService(coreStart, plugins, telemetry);
+    this.workflows = new SiemWorkflowMigrationsService(coreStart, plugins, telemetry);
   }
 }

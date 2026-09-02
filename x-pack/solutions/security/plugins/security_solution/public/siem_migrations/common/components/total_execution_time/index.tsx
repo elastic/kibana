@@ -34,10 +34,15 @@ export const TotalExecutionTime: React.FC<TotalExecutionTimeProps> = ({
     return getDurationFomatter().convertToText(milliseconds);
   }, [milliseconds]);
 
-  const toolTipContent = useMemo(
-    () => i18n.TOTAL_EXECUTION_TIME_TOOLTIP(migrationType === 'rule' ? 'rules' : 'dashboards'),
-    [migrationType]
-  );
+  const toolTipContent = useMemo(() => {
+    const entityLabel =
+      migrationType === 'rule'
+        ? 'rules'
+        : migrationType === 'workflow'
+        ? 'workflows'
+        : 'dashboards';
+    return i18n.TOTAL_EXECUTION_TIME_TOOLTIP(entityLabel);
+  }, [migrationType]);
 
   return (
     <EuiFlexGroup

@@ -21,7 +21,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { MigrationType } from '../../../../../common/siem_migrations/types';
-import type { MigrationTaskStats } from '../../../../../common/siem_migrations/model/common.gen';
+import type { MigrationsServiceTaskStats } from '../../service/migrations_service_base';
 import * as i18n from './translations';
 import { MIGRATION_VENDOR_COLOR_CONFIG } from '../../utils/migration_vendor_color_config';
 import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
@@ -29,7 +29,7 @@ import { MIGRATION_VENDOR_DISPLAY_NAME } from '../../constants';
 export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
 
 const migrationStatsToComboBoxOption = (
-  stats: MigrationTaskStats
+  stats: MigrationsServiceTaskStats
 ): EuiComboBoxOptionOption<string> => ({
   key: stats.id,
   value: stats.id,
@@ -41,7 +41,7 @@ export interface HeaderButtonsProps {
   /** The type of migrations (e.g. rule, dashboards)*/
   migrationType: MigrationType;
   /** Available migrations stats */
-  migrationsStats: MigrationTaskStats[];
+  migrationsStats: MigrationsServiceTaskStats[];
   /** Selected migration id */
   selectedMigrationId: string | undefined;
   /** Handles migration selection changes */
@@ -74,6 +74,8 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
       const onboardingCardId =
         migrationType === 'rule'
           ? OnboardingCardId.siemMigrationsRules
+          : migrationType === 'workflow'
+          ? OnboardingCardId.siemMigrationsWorkflows
           : OnboardingCardId.siemMigrationsDashboards;
       return (
         <SecuritySolutionLinkButton

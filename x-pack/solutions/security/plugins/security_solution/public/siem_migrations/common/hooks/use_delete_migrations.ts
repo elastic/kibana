@@ -8,11 +8,11 @@
 import { useCallback } from 'react';
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { MigrationType } from '../../../../common/siem_migrations/types';
+import type { MigrationType, SiemMigrationVendor } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import type { MigrationTaskStats } from '../../../../common/siem_migrations/model/common.gen';
+import type { MigrationsServiceTaskStats } from '../service/migrations_service_base';
 
 export const DELETE_MIGRATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.deleteMigrationSuccess',
@@ -34,19 +34,27 @@ export const useDeleteMigration = (migrationType: MigrationType) => {
   const { addError, addSuccess } = useAppToasts();
   const { siemMigrations } = useKibana().services;
   const deleteMigration = useCallback(
-    (migrationStats: MigrationTaskStats) => {
+    (migrationStats: MigrationsServiceTaskStats) => {
       const { id: migrationId, vendor } = migrationStats;
       if (migrationType === 'rule') {
-        return siemMigrations.rules.deleteMigration({ migrationId, vendor });
-      } else {
-        return siemMigrations.dashboards.deleteMigration({ migrationId, vendor });
+        return siemMigrations.rules.deleteMigration({
+          migrationId,
+          vendor: vendor as SiemMigrationVendor | undefined,
+        });
       }
+      if (migrationType === 'workflow') {
+        return siemMigrations.workflows.deleteMigration({ migrationId });
+      }
+      return siemMigrations.dashboards.deleteMigration({
+        migrationId,
+        vendor: vendor as SiemMigrationVendor | undefined,
+      });
     },
     [siemMigrations, migrationType]
   );
 
   return useMutation({
-    mutationFn: (migrationStats: MigrationTaskStats) => deleteMigration(migrationStats),
+    mutationFn: (migrationStats: MigrationsServiceTaskStats) => deleteMigration(migrationStats),
     onSuccess: () => {
       addSuccess(DELETE_MIGRATION_SUCCESS);
     },

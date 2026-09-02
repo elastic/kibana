@@ -245,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables Tines story → Elastic Workflows YAML migration POC (file upload translate API + UI)
+   */
+  tinesWorkflowsMigration: true,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
