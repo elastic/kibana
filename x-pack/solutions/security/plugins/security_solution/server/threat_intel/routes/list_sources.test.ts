@@ -154,40 +154,22 @@ describe('loadSourceReportStatsByAdapterId', () => {
 // ── Credential exposure ──────────────────────────────────────────────────────
 
 describe('mapSourceHit', () => {
-  // This route is gated on Security Read and lists global sources in every space,
-  // so returning the raw config URL handed feed credentials to anyone who could
-  // read the catalog.
-  it('redacts credentials from the returned URL', () => {
+  it('returns the catalog URL for a known source id', () => {
     const mapped = mapSourceHitForTest({
-      _id: 'default:rss:acme',
+      _id: 'vendor_api:elastic-security-labs',
       _source: {
-        name: 'Acme',
+        name: 'Elastic Security Labs',
         adapter_type: 'rss',
-        config: { url: 'https://feeduser:s3cret@feeds.example/rss.xml' },
       },
     });
 
-    expect(mapped.url).toBe('https://feeds.example/rss.xml');
-    expect(JSON.stringify(mapped)).not.toContain('s3cret');
+    expect(mapped.url).toBe('https://www.elastic.co/security-labs/rss/feed.xml');
   });
 
-  it('leaves a credential-free URL alone', () => {
+  it('omits the url when the source id is outside the catalog', () => {
     const mapped = mapSourceHitForTest({
-      _id: 'default:rss:acme',
-      _source: {
-        name: 'Acme',
-        adapter_type: 'rss',
-        config: { url: 'https://feeds.example/rss.xml' },
-      },
-    });
-
-    expect(mapped.url).toBe('https://feeds.example/rss.xml');
-  });
-
-  it('omits the url when the source has none', () => {
-    const mapped = mapSourceHitForTest({
-      _id: 'default:kev:cisa',
-      _source: { name: 'CISA', adapter_type: 'kev', config: {} },
+      _id: 'rss:unknown',
+      _source: { name: 'Acme', adapter_type: 'rss' },
     });
 
     expect(mapped.url).toBeUndefined();
@@ -197,7 +179,7 @@ describe('mapSourceHit', () => {
 describe('loadSourceForMutation', () => {
   const globalSource = (spaceId?: string) => ({
     get: jest.fn().mockResolvedValue({
-      _source: { name: 'Acme', adapter_type: 'rss', config: {}, space_id: spaceId },
+      _source: { name: 'Acme', adapter_type: 'rss', space_id: spaceId },
     }),
   });
 

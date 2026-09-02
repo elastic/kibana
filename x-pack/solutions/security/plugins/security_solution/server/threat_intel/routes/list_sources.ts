@@ -13,6 +13,7 @@ import {
   THREAT_INTEL_SOURCES_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
   APPROVED_SOURCE_IDS,
+  resolveCatalogSourceUrl,
 } from '../../../common/threat_intel';
 import {
   buildSpaceFilterTerms,
@@ -40,7 +41,6 @@ interface ThreatIntelSourceDoc {
   name?: string;
   adapter_type?: string;
   enabled?: boolean;
-  config?: { url?: unknown };
   tags?: string[];
   created_at?: string;
   updated_at?: string;
@@ -76,18 +76,17 @@ const mapSourceHit = (hit: {
   _source?: ThreatIntelSourceDoc;
 }): Omit<ListSourcesItem, 'report_count' | 'last_ingested_at' | 'env_hits_total'> => {
   const source = hit._source ?? {};
-  // Redacted for display. Feed URLs can embed `user:password@`, and this route is
-  // gated on Security Read and lists global sources in every space, so returning
-  // the raw value handed feed credentials to anyone who could read the catalog.
-  // The stored document keeps the real URL for the adapter to fetch with.
-  const configUrl =
-    typeof source.config?.url === 'string' ? redactUrl(source.config.url) : undefined;
+  const sourceId = hit._id ?? '';
+  // URLs come from the code catalog, not Elasticsearch. Redact userinfo before
+  // returning a URL to Security Read callers listing global sources in every space.
+  const catalogUrl = resolveCatalogSourceUrl(sourceId);
+  const displayUrl = typeof catalogUrl === 'string' ? redactUrl(catalogUrl) : undefined;
   return {
-    source_id: hit._id ?? '',
+    source_id: sourceId,
     name: source.name,
     adapter_type: source.adapter_type,
     enabled: source.enabled,
-    ...(typeof configUrl === 'string' ? { url: configUrl } : {}),
+    ...(typeof displayUrl === 'string' ? { url: displayUrl } : {}),
     tags: source.tags,
     created_at: source.created_at,
     updated_at: source.updated_at,
