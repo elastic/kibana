@@ -140,12 +140,23 @@ export function createTraceBasedEvaluator({
         }
 
         const result = extractResult(response);
-        lastResult = result;
 
         const valid = isResultValid ? isResultValid(result) : result !== null;
         if (!valid) {
+          // A value rejected by a custom `isResultValid` must not become the retry
+          // fallback below, which republishes the last value seen. Remembering it would
+          // resurrect exactly what validation rejected: a `Tool Calls: 0` produced by
+          // unindexed TOOL spans is indistinguishable from a real zero, and 25 published
+          // cells read `0` next to a trace that plainly shows tools running. An unscored
+          // cell is honest; a fabricated zero is not. A plain `null` (no custom validator)
+          // still records, so the existing `potentially_incomplete` path is unchanged.
+          if (!isResultValid) {
+            lastResult = result;
+          }
           throw new Error(`${name} result looks incomplete (value: ${result}), retrying`);
         }
+
+        lastResult = result;
 
         return result as number;
       }
