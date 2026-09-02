@@ -94,11 +94,10 @@ export function getAttachmentTypeTransformers(
   return passThroughTransformer;
 }
 
-// --- Public API boundary: unified request in, legacy response out ---
+// --- Boundary converters: unified request in, legacy response out ---
 //
-// The per-type transformers above convert a single attachment. Everything
-// below is a thin batch/container wrapper around them, used only where a
-// public route still owes callers the v1 wire shape.
+// Thin wrappers around the per-type transformers. Used at public routes,
+// workflow step output, and user-action audit persist.
 
 /**
  * Converts an already-validated v1 (or unified) attachment payload to unified.
