@@ -198,6 +198,8 @@ import type {
   PackagePolicyClientGetOptions,
   PackagePolicyClientListIdsOptions,
   PackagePolicyClientRollbackOptions,
+  PackagePolicyPartialUpdate,
+  PackagePolicyPartialUpdateResult,
   PackagePolicyService,
   PartialPackagePolicy,
   RollbackResult,
@@ -1435,6 +1437,61 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`returning [${packagePolicies.length}] package policies`);
 
     return packagePolicies;
+  }
+
+  public async bulkUpdatePartial(
+    soClient: SavedObjectsClientContract,
+    packagePolicyUpdates: PackagePolicyPartialUpdate[]
+  ): Promise<PackagePolicyPartialUpdateResult> {
+    const logger = this.getLogger('bulkUpdatePartial');
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    if (packagePolicyUpdates.length === 0) {
+      return { updatedPolicies: [], failedPolicies: [] };
+    }
+
+    const { saved_objects: updateResults } = await soClient
+      .bulkUpdate<PackagePolicySOAttributes>(
+        packagePolicyUpdates.map(({ id, version, attributes }) => ({
+          type: savedObjectType,
+          id,
+          version,
+          attributes,
+        }))
+      )
+      .catch(
+        catchAndSetErrorStackTrace.withMessage('bulkUpdate of partial package policies failed')
+      );
+
+    const updatedPolicies: PartialPackagePolicy[] = [];
+    const failedPolicies: PackagePolicyPartialUpdateResult['failedPolicies'] = [];
+
+    updateResults.forEach((result, index) => {
+      const update = packagePolicyUpdates[index];
+      if (isSavedObjectErrorResult(result)) {
+        failedPolicies.push({ update, error: result.error });
+        return;
+      }
+
+      updatedPolicies.push({
+        id: result.id,
+        version: result.version,
+        ...(result.namespaces ? { spaceIds: result.namespaces } : {}),
+        ...result.attributes,
+      });
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'update',
+        id: result.id,
+        name: result.attributes.name,
+        savedObjectType,
+      });
+    });
+
+    logger.debug(
+      `partially updated [${updatedPolicies.length}] package policies with [${failedPolicies.length}] failures`
+    );
+
+    return { updatedPolicies, failedPolicies };
   }
 
   public async list(
@@ -3599,6 +3656,18 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
     return super.bulkCreate(soClient, esClient, packagePolicies, options);
+  }
+
+  async bulkUpdatePartial(
+    soClient: SavedObjectsClientContract,
+    packagePolicyUpdates: PackagePolicyPartialUpdate[]
+  ): Promise<PackagePolicyPartialUpdateResult> {
+    await this.#runPreflight({
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    });
+    return super.bulkUpdatePartial(soClient, packagePolicyUpdates);
   }
 
   async update(
