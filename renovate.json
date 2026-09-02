@@ -1528,7 +1528,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],

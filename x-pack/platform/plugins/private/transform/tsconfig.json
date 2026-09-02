@@ -14,6 +14,7 @@
     "public/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
