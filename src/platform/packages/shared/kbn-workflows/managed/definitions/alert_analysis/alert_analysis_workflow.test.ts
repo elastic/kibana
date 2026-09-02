@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 const findStepByName = (steps: unknown[], name: string): Record<string, unknown> | undefined => {
   for (const step of steps) {
@@ -224,9 +225,34 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       foreach: string;
     };
     expect(techniquesForeachStep).toBeDefined();
-    expect(techniquesForeachStep.foreach).toBe(
-      '{{ foreach.item.technique | default: "[]" | json_parse }}'
-    );
+
+    const expression = techniquesForeachStep.foreach;
+    // The expression is a `{{ }}` template; strip the delimiters to get the inner liquid expression
+    // that the workflow engine evaluates via evalValueSync.
+    expect(expression.startsWith('{{') && expression.endsWith('}}')).toBe(true);
+    const innerExpr = expression.slice(2, -2).trim();
+
+    const engine = createWorkflowLiquidEngine();
+
+    // Tactic-only entry (no technique key): must resolve to [] so the foreach iterates zero times
+    // rather than throwing "Foreach expression must evaluate to an array".
+    const tacticOnly = engine.evalValueSync(innerExpr, {
+      foreach: { item: { framework: 'MITRE ATT&CK', tactic: { id: 'TA0007', name: 'Discovery' } } },
+    });
+    expect(tacticOnly).toEqual([]);
+
+    // Entry with a technique array: must pass the array through unchanged.
+    const techniques = [{ id: 'T1057', name: 'Process Discovery' }];
+    const withTechniques = engine.evalValueSync(innerExpr, {
+      foreach: {
+        item: {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0007', name: 'Discovery' },
+          technique: techniques,
+        },
+      },
+    });
+    expect(withTechniques).toEqual(techniques);
   });
 
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
