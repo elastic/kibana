@@ -49572,8 +49572,6 @@
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonAriaLabel": "{count} weitere Elemente anzeigen",
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription": "+{count} mehr",
     "xpack.securitySolution.threatIntelligence.addToBlockList": "Blocklisteneintrag hinzufügen",
-    "xpack.securitySolution.threatIntelligence.addToExistingCase": "Zu einem bestehenden Ticket hinzufügen",
-    "xpack.securitySolution.threatIntelligence.addToNewCase": "Zu einem neuen Ticket hinzufügen",
     "xpack.securitySolution.threatIntelligence.blocklist.flyoutTitle": "Blockliste hinzufügen",
     "xpack.securitySolution.threatIntelligence.cases.displayName": "Indikatoren",
     "xpack.securitySolution.threatIntelligence.cases.eventDescription": "einen Indikator für Sicherheitsverletzungen hinzugefügt",
