@@ -21,7 +21,7 @@ import domtoimage from 'dom-to-image-more';
 
 export const CAPTURE_TIMEOUT_MS = 30_000;
 
-const GRID_SELECTOR = '[data-shared-items-container]';
+export const DASHBOARD_ELEMENT_SELECTOR = '[data-shared-items-container]';
 const JPEG_QUALITY = 0.8;
 
 export type ImageAttachment = AttachmentInput<typeof AttachmentType.image, ImageAttachmentData>;
@@ -122,7 +122,7 @@ export const captureDashboardScreenshot = async ({
   dashboardApi,
   files,
 }: CaptureDashboardScreenshotDeps): Promise<ImageAttachment> => {
-  const grid = document.querySelector<HTMLElement>(GRID_SELECTOR);
+  const grid = document.querySelector<HTMLElement>(DASHBOARD_ELEMENT_SELECTOR);
   if (!grid) {
     throw new Error('dashboard element not found');
   }

@@ -14,26 +14,39 @@ const rendering = {
   addContext: (node: ReactNode) => node,
 } as unknown as CoreStart['rendering'];
 
+const OVERLAY_SELECTOR = '[data-test-subj="prettifyDashboardScreenshotOverlay"]';
+
 describe('showScreenshotOverlay', () => {
   afterEach(() => {
     document.body.innerHTML = '';
   });
 
-  it('shows a blocking overlay and removes it on hide', () => {
+  it('renders a blocking overlay on the dashboard wrapper and removes it on hide', () => {
+    const wrapper = document.createElement('div');
+    const dashboard = document.createElement('div');
+    dashboard.setAttribute('data-shared-items-container', 'true');
+    wrapper.appendChild(dashboard);
+    document.body.appendChild(wrapper);
+
     let hide!: () => void;
     act(() => {
       hide = showScreenshotOverlay(rendering);
     });
 
-    expect(
-      document.querySelector('[data-test-subj="prettifyDashboardScreenshotOverlay"]')
-    ).not.toBeNull();
+    expect(wrapper.querySelector(OVERLAY_SELECTOR)).not.toBeNull();
+    // the captured element itself must stay untouched
+    expect(dashboard.querySelector(OVERLAY_SELECTOR)).toBeNull();
+    expect(wrapper.style.position).toBe('relative');
 
     act(() => hide());
 
-    expect(
-      document.querySelector('[data-test-subj="prettifyDashboardScreenshotOverlay"]')
-    ).toBeNull();
-    expect(document.body.childElementCount).toBe(0);
+    expect(document.querySelector(OVERLAY_SELECTOR)).toBeNull();
+    expect(wrapper.childElementCount).toBe(1);
+    expect(wrapper.style.position).toBe('');
+  });
+
+  it('is a no-op when the dashboard element is missing', () => {
+    expect(() => showScreenshotOverlay(rendering)()).not.toThrow();
+    expect(document.querySelector(OVERLAY_SELECTOR)).toBeNull();
   });
 });
