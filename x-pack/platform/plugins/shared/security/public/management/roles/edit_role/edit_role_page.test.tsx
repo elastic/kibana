@@ -399,6 +399,9 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Set privileges on your Elasticsearch data and control access to your Kibana spaces.'
+      );
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -910,6 +913,9 @@ describe('<EditRolePage />', () => {
     await waitForRender();
 
     expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Set privileges on your Elasticsearch data and control access to your Project spaces.'
+    );
     expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
     expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
     expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);

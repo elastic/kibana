@@ -76,6 +76,7 @@ import {
   prepareRoleClone,
 } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
+import { reservedBadgeLabel } from '../../badges';
 import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
@@ -102,7 +103,15 @@ const createRoleTitle = i18n.translate('xpack.security.management.editRole.creat
   defaultMessage: 'Create role',
 });
 
-const editRoleDescription = i18n.translate(
+const editRoleDescriptionTraditional = i18n.translate(
+  'xpack.security.management.editRole.setPrivilegesAndKibanaSpacesDescription',
+  {
+    defaultMessage:
+      'Set privileges on your Elasticsearch data and control access to your Kibana spaces.',
+  }
+);
+
+const editRoleDescriptionServerless = i18n.translate(
   'xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription',
   {
     defaultMessage:
@@ -116,10 +125,6 @@ const reservedRoleDescription = i18n.translate(
     defaultMessage: 'Reserved roles are built-in and cannot be removed or modified.',
   }
 );
-
-const reservedRoleBadgeLabel = i18n.translate('xpack.security.management.reservedBadge', {
-  defaultMessage: 'Reserved',
-});
 
 export interface Props extends StartServices {
   action: 'edit' | 'clone';
@@ -494,6 +499,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   };
 
   const listTitle = buildFlavor === 'serverless' ? customRolesListTitle : rolesListTitle;
+  const editRoleDescription =
+    buildFlavor === 'serverless' ? editRoleDescriptionServerless : editRoleDescriptionTraditional;
   const header = (
     <>
       <AppHeader
@@ -503,7 +510,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
           isRoleReserved
             ? [
                 {
-                  label: reservedRoleBadgeLabel,
+                  label: reservedBadgeLabel,
+                  color: 'primary',
                   'data-test-subj': 'reservedRoleBadge',
                 },
               ]
@@ -524,7 +532,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       <div className="editRolePage">
         {header}
         <EuiPageSection alignment="center" color="subdued">
-          <SectionLoading>
+          <SectionLoading inline data-test-subj="sectionLoading">
             <FormattedMessage
               id="xpack.security.management.editRole.loadingRoleDescription"
               defaultMessage="Loading…"
