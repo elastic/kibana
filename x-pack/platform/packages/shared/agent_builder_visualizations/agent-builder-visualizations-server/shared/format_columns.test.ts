@@ -24,10 +24,17 @@ describe('formatColumnsBlock', () => {
     );
   });
 
-  it('falls back to the query text when no executed columns are available', () => {
-    const fallback = `No column information is available; infer fields from the ES|QL query: ${QUERY}`;
+  it('lists an empty columns block when execute returned no columns', () => {
+    expect(formatColumnsBlock([], QUERY)).toBe(
+      `Columns available in the data (reference these EXACT names):
+<columns>
+</columns>`
+    );
+  });
 
-    expect(formatColumnsBlock(undefined, QUERY)).toBe(fallback);
-    expect(formatColumnsBlock([], QUERY)).toBe(fallback);
+  it('falls back to the query text only when columns were never executed', () => {
+    expect(formatColumnsBlock(undefined, QUERY)).toBe(
+      `No column information is available; infer fields from the ES|QL query: ${QUERY}`
+    );
   });
 });

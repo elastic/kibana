@@ -14,12 +14,12 @@ export const formatColumnsBlock = (
   columns: EsqlEsqlColumnInfo[] | undefined,
   query: string
 ): string => {
-  if (!columns || columns.length === 0) {
+  if (columns === undefined) {
     return `No column information is available; infer fields from the ES|QL query: ${query}`;
   }
 
+  const listed = formatColumns(columns);
   return `Columns available in the data (reference these EXACT names):
-<columns>
-${formatColumns(columns)}
+<columns>${listed ? `\n${listed}` : ''}
 </columns>`;
 };

@@ -40,7 +40,7 @@ describe('executeEsql', () => {
     expect(result).toEqual(esqlResponse);
   });
 
-  it('keeps all-null columns when dropNullColumns is false', async () => {
+  it('forwards dropNullColumns: false as drop_null_columns: false', async () => {
     await executeEsql({ query: 'FROM idx', dropNullColumns: false, esClient });
 
     expect(lastRequest()).toEqual({

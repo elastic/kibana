@@ -10,12 +10,9 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import {
-  generateVisualizationEsql,
-} from '../shared/generate_visualization_esql';
+import { executeForAuthoring } from '../shared/execute_for_authoring';
+import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import {
@@ -35,13 +32,6 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
-
-/**
- * Default range used only to bind `?_tstart`/`?_tend` when executing a query
- * server-side to collect its result columns. The live dashboard range is applied
- * by Kibana at render time, so this default never reaches the stored config.
- */
-const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 const parseConfigAuthoringResponse = (
   responseText: string
@@ -159,10 +149,8 @@ export const createVisualizationGraph = async (
       if (query) {
         try {
           logger.debug('Validating provided ES|QL query for Lens visualization');
-          ({ columns } = await executeEsql({
+          ({ columns } = await executeForAuthoring({
             query,
-            params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-            dropNullColumns: false,
             esClient: esClient.asCurrentUser,
           }));
         } catch (providedError) {
@@ -206,10 +194,8 @@ export const createVisualizationGraph = async (
         logger.debug(`Generated ES|QL query: ${query}`);
         columns = generated.columns;
         if (!columns) {
-         ({ columns } = await executeEsql({
+          ({ columns } = await executeForAuthoring({
             query,
-            params: buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE),
-            dropNullColumns: false,
             esClient: esClient.asCurrentUser,
           }));
         }
