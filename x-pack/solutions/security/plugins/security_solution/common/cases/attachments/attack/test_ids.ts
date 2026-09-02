@@ -22,6 +22,7 @@ export const ATTACK_TAB_ROW_SELECT_TEST_ID = 'adCasesAttackTabRowSelect';
 export const ATTACK_TAB_SELECT_ALL_TEST_ID = 'adCasesAttackTabSelectAll';
 export const ATTACK_TAB_BULK_ACTIONS_TEST_ID = 'adCasesAttackTabBulkActions';
 export const ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID = 'adCasesAttackTabBulkActionsButton';
+export const ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID = 'adCasesAttackTabBulkActionsPopover';
 export const ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID = 'adCasesAttackTabRowMoreActions';
 export const ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID = 'adCasesAttackTabRowMoreActionsPopover';
 // One id per grid column, applied to every cell that column renders.

@@ -69,12 +69,10 @@ import { RuleStatus } from '../../../../timelines/components/timeline/body/rende
 import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
 import { AttacksGroupTakeActionItems } from '../../../../detections/components/attacks/table/attacks_group_take_action_items';
-import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
 import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
 import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
 import type { SelectedAttack } from './attack_tab_bulk_actions';
 import { AttackTabBulkActions } from './attack_tab_bulk_actions';
-import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import type { AttackCaseAttachmentRow, AttackTabColumnId } from '../utils';
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
@@ -704,7 +702,7 @@ export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
     );
   }
 
-  return <AttackTabTable attachments={attachments} caseData={caseData} searchTerm={searchTerm} />;
+  return <AttackTabTable attachments={attachments} searchTerm={searchTerm} />;
 };
 
 AttackTabContent.displayName = 'AttackTabContent';
@@ -715,21 +713,16 @@ AttackTabContent.displayName = 'AttackTabContent';
  */
 const AttackTabTable = ({
   attachments,
-  caseData,
   searchTerm,
 }: {
   attachments: AttackCaseAttachmentRow[];
-  caseData: CommonAttachmentListViewProps['caseData'];
   searchTerm: CommonAttachmentListViewProps['searchTerm'];
 }) => {
   const { http, storage } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
-  const { mutate: removeAttack, isLoading: isRemoving } = useRemoveAttackAttachment();
   // Resolved once for the whole grid rather than per row — see the hook.
   const { canInvestigateInTimeline, investigateAttackInTimeline } =
     useInvestigateAttackInTimeline();
-
-  const { id: caseId, comments } = caseData;
 
   // One `_find` request for every attached attack rather than one per row. Memoized because
   // the array is part of the react-query key.
@@ -906,23 +899,9 @@ const AttackTabTable = ({
       selectedRows.map(({ attachmentId, attack, metadata }) => ({
         attackId: attachmentId,
         title: getTitle(attack, metadata),
+        attack,
       })),
     [selectedRows]
-  );
-
-  const onBulkRemoveConfirmed = useCallback(
-    ({ alertAttachmentIds }: RemoveAttackConfirmation) =>
-      removeAttack(
-        {
-          caseId,
-          attackAttachmentIds: selectedRows.map(({ savedObjectId }) => savedObjectId),
-          alertAttachmentIds,
-        },
-        // Only once the removal lands: a selection cleared ahead of a failure would leave the
-        // user with nothing to retry from.
-        { onSuccess: clearSelection }
-      ),
-    [caseId, clearSelection, removeAttack, selectedRows]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(
@@ -932,16 +911,14 @@ const AttackTabTable = ({
         left: {
           append: (
             <AttackTabBulkActions
-              comments={comments}
-              isRemoving={isRemoving}
-              onConfirm={onBulkRemoveConfirmed}
+              onActionSuccess={clearSelection}
               selectedAttacks={selectedAttacks}
             />
           ),
         },
       },
     }),
-    [comments, isRemoving, onBulkRemoveConfirmed, selectedAttacks]
+    [clearSelection, selectedAttacks]
   );
 
   return (

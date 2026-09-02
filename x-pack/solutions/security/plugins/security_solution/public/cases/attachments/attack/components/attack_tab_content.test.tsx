@@ -15,6 +15,7 @@ import { AttackTabContent } from './attack_tab_content';
 import {
   ATTACK_TAB_BULK_ACTIONS_TEST_ID,
   ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID,
+  ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID,
   ATTACK_TAB_COLUMN_ACTIONS_TEST_ID,
   ATTACK_TAB_COLUMN_ALERTS_TEST_ID,
   ATTACK_TAB_COLUMN_ATTACHED_AT_TEST_ID,
@@ -34,7 +35,6 @@ import {
   ATTACK_TAB_SELECT_ALL_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
   INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID,
-  REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
   REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
@@ -43,8 +43,6 @@ import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mock
 import { allCasesPermissions } from '../../../../cases_test_utils';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
-import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
 import { EXPLORE_IN_ATTACKS_TEST_ID } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items';
 import { STATUS_BUTTON_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
@@ -57,8 +55,6 @@ import {
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../../assistant/use_assistant_availability');
-jest.mock('../hooks/use_remove_attack_attachment');
-jest.mock('../hooks/use_removable_alert_attachments');
 jest.mock('../hooks/use_investigate_attack_in_timeline');
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
@@ -91,11 +87,8 @@ let user: UserEvent;
 
 const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
-const useRemoveAttackAttachmentMock = useRemoveAttackAttachment as jest.Mock;
-const useRemovableAlertAttachmentsMock = useRemovableAlertAttachments as jest.Mock;
 const useInvestigateAttackInTimelineMock = useInvestigateAttackInTimeline as jest.Mock;
 const mockedUseKibana = mockUseKibana();
-const removeAttack = jest.fn();
 const investigateAttackInTimeline = jest.fn();
 
 const buildAttachment = (overrides: Record<string, unknown> = {}) => ({
@@ -208,16 +201,9 @@ describe('AttackTabContent', () => {
     mockedUseKibana.services.cases.helpers.canUseCases = jest
       .fn()
       .mockReturnValue(allCasesPermissions());
-    useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: false });
     useInvestigateAttackInTimelineMock.mockReturnValue({
       canInvestigateInTimeline: true,
       investigateAttackInTimeline,
-    });
-    useRemovableAlertAttachmentsMock.mockReturnValue({
-      isLoading: false,
-      isResolvable: true,
-      attachmentIds: ['so-alert-1', 'so-alert-2'],
-      alertIds: ['alert-1', 'alert-2'],
     });
   });
 
@@ -1135,17 +1121,10 @@ describe('AttackTabContent', () => {
         buildAttachment({ id: 'so-2', attachmentId: 'attack-id-2' }),
       ]);
 
-    const selectBothRows = async () => {
-      await user.click(rowCheckbox('so-1'));
-      await user.click(rowCheckbox('so-2'));
-    };
+    const bulkActionsMenu = () => screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID);
 
-    const openBulkRemovalPrompt = async () => {
+    const openBulkActionsMenu = async () => {
       await user.click(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID));
-    };
-
-    const confirmRemoval = async () => {
-      await user.click(screen.getByText('Remove'));
     };
 
     it('stays hidden until a row is selected', () => {
@@ -1177,82 +1156,34 @@ describe('AttackTabContent', () => {
       expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('resolves the related alerts across the whole selection', async () => {
-      renderTwoAttachments();
-
-      await selectBothRows();
-      await openBulkRemovalPrompt();
-
-      expect(useRemovableAlertAttachmentsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ attackIds: ['attack-id-1', 'attack-id-2'] })
-      );
-    });
-
-    it('removes every selected attack in one call rather than one per row', async () => {
-      renderTwoAttachments();
-
-      await selectBothRows();
-      await openBulkRemovalPrompt();
-      await confirmRemoval();
-
-      expect(removeAttack).toHaveBeenCalledTimes(1);
-      expect(removeAttack).toHaveBeenCalledWith(
-        {
-          caseId: 'case-1',
-          attackAttachmentIds: ['so-1', 'so-2'],
-          alertAttachmentIds: [],
-        },
-        expect.anything()
-      );
-    });
-
-    it('takes the selection’s related alert attachments when the prompt opts in', async () => {
-      renderTwoAttachments();
-
-      await selectBothRows();
-      await openBulkRemovalPrompt();
-      await user.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
-      await confirmRemoval();
-
-      expect(removeAttack).toHaveBeenCalledWith(
-        expect.objectContaining({ alertAttachmentIds: ['so-alert-1', 'so-alert-2'] }),
-        expect.anything()
-      );
-    });
-
-    it('clears the selection once the removal lands', async () => {
-      removeAttack.mockImplementationOnce((_params, options) => options?.onSuccess?.());
-
-      renderTwoAttachments();
-
-      await selectBothRows();
-      await openBulkRemovalPrompt();
-      await confirmRemoval();
-
-      expect(rowCheckbox('so-1')).not.toBeChecked();
-      expect(rowCheckbox('so-2')).not.toBeChecked();
-      expect(screen.queryByTestId(ATTACK_TAB_BULK_ACTIONS_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('keeps the selection when the removal does not land', async () => {
-      renderTwoAttachments();
-
-      await selectBothRows();
-      await openBulkRemovalPrompt();
-      await confirmRemoval();
-
-      expect(rowCheckbox('so-1')).toBeChecked();
-      expect(rowCheckbox('so-2')).toBeChecked();
-    });
-
-    it('disables the bulk action while a removal is in flight', async () => {
-      useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: true });
-
+    it('offers the attack take-action verbs across the selection', async () => {
       renderTwoAttachments();
 
       await user.click(rowCheckbox('so-1'));
+      await openBulkActionsMenu();
 
-      expect(screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID)).toBeDisabled();
+      expect(within(bulkActionsMenu()).getByText('Add to existing case')).toBeInTheDocument();
+      expect(within(bulkActionsMenu()).getByText('Add to new case')).toBeInTheDocument();
+    });
+
+    it('opens by keyboard', async () => {
+      renderTwoAttachments();
+
+      await user.click(rowCheckbox('so-1'));
+      screen.getByTestId(ATTACK_TAB_BULK_ACTIONS_BUTTON_TEST_ID).focus();
+      await user.keyboard('{Enter}');
+
+      expect(bulkActionsMenu()).toBeInTheDocument();
+    });
+
+    it('offers no way to remove the selected attachments', async () => {
+      renderTwoAttachments();
+
+      await user.click(rowCheckbox('so-1'));
+      await openBulkActionsMenu();
+
+      expect(within(bulkActionsMenu()).queryByText(/remove/i)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });
