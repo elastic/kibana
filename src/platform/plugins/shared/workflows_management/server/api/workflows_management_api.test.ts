@@ -10,13 +10,19 @@
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  type WorkflowDetailDto,
+  WorkflowsManagementApiActions,
+  type WorkflowYaml,
+} from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -42,6 +48,7 @@ describe('WorkflowsManagementApi', () => {
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
+      getWorkflowsSubscribedToTrigger: jest.fn(),
       getWorkflowsByIds: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
@@ -74,6 +81,164 @@ describe('WorkflowsManagementApi', () => {
       steps: z.array(z.any()).optional(),
     });
   };
+
+  describe('workflow-trigger synchronous execution', () => {
+    const createAroundCompletionTrigger = (
+      condition?: string
+    ): WorkflowYaml['triggers'][number] => {
+      // The static WorkflowYaml type models built-ins only; registered triggers are added dynamically.
+      const trigger: WorkflowYaml['triggers'][number] = { type: 'manual' };
+      Reflect.set(trigger, 'type', 'inference.aroundCompletion');
+      if (condition) {
+        Reflect.set(trigger, 'on', { condition });
+      }
+      return trigger;
+    };
+
+    const createTriggeredWorkflow = ({
+      id,
+      condition,
+    }: {
+      id: string;
+      condition?: string;
+    }): WorkflowDetailDto => ({
+      id,
+      name: id,
+      enabled: true,
+      yaml: `name: ${id}`,
+      valid: true,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      createdBy: 'system',
+      lastUpdatedAt: '2026-01-01T00:00:00.000Z',
+      lastUpdatedBy: 'system',
+      definition: {
+        version: '1',
+        name: id,
+        enabled: true,
+        triggers: [createAroundCompletionTrigger(condition)],
+        steps: [{ name: 'proceed', type: 'call_site.proceed', with: {} }],
+      },
+    });
+
+    it('resolves matching workflows and reports invalid trigger conditions separately', async () => {
+      mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
+        createTriggeredWorkflow({ id: 'unconditional' }),
+        createTriggeredWorkflow({ id: 'matching', condition: 'event.agentId: "agent-a"' }),
+        createTriggeredWorkflow({ id: 'not-matching', condition: 'event.agentId: "agent-b"' }),
+        createTriggeredWorkflow({ id: 'invalid', condition: '(' }),
+      ]);
+
+      await expect(
+        api.resolveWorkflowTriggerMatches(
+          'inference.aroundCompletion',
+          { agentId: 'agent-a' },
+          'space-a'
+        )
+      ).resolves.toEqual({
+        matched: [
+          expect.objectContaining({ id: 'unconditional' }),
+          expect.objectContaining({ id: 'matching' }),
+        ],
+        invalidConditionWorkflows: [{ id: 'invalid', name: 'invalid' }],
+      });
+      expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith(
+        'inference.aroundCompletion',
+        'space-a'
+      );
+    });
+
+    it('executes a saved workflow synchronously with request-local options', async () => {
+      const workflow = createTriggeredWorkflow({ id: 'workflow-1' });
+      const abortSignal = new AbortController().signal;
+      const capabilities = [{ id: 'test-capability', value: { invoke: jest.fn() } }];
+      mockWorkflowsService.getWorkflow.mockResolvedValue(workflow);
+      mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
+        workflowExecutionId: 'execution-1',
+        result: { status: ExecutionStatus.COMPLETED, output: { content: 'restored' } },
+      });
+
+      await api.executeWorkflowSynchronously({
+        workflowId: workflow.id,
+        context: { event: { messages: [] }, spaceId: 'space-a' },
+        spaceId: 'space-a',
+        request: mockRequest,
+        capabilities,
+        abortSignal,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: workflow.id }),
+        { event: { messages: [] }, spaceId: 'space-a' },
+        mockRequest,
+        {
+          executionMode: 'sync',
+          capabilities,
+          abortSignal,
+        }
+      );
+    });
+
+    it('skips the ES re-fetch when a pre-fetched workflow DTO is provided', async () => {
+      const workflow = createTriggeredWorkflow({ id: 'workflow-1' });
+      mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
+        workflowExecutionId: 'execution-1',
+        result: { status: ExecutionStatus.COMPLETED, output: { content: 'restored' } },
+      });
+
+      await api.executeWorkflowSynchronously({
+        workflowId: workflow.id,
+        workflow,
+        context: { event: { messages: [] }, spaceId: 'space-a' },
+        spaceId: 'space-a',
+        request: mockRequest,
+      });
+
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: workflow.id }),
+        expect.any(Object),
+        mockRequest,
+        expect.objectContaining({ executionMode: 'sync' })
+      );
+    });
+
+    it('validates the pre-fetched DTO and throws without an ES fetch when the workflow is disabled, invalid, or missing a definition', async () => {
+      const base = createTriggeredWorkflow({ id: 'wf-guard' });
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, enabled: false },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('disabled');
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, valid: false },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('validation errors');
+
+      await expect(
+        api.executeWorkflowSynchronously({
+          workflowId: base.id,
+          workflow: { ...base, definition: null },
+          context: {},
+          spaceId: 'space-a',
+          request: mockRequest,
+        })
+      ).rejects.toThrow('no definition');
+
+      // All three guard paths use the supplied DTO — no ES re-fetch
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+    });
+  });
 
   describe('cloneWorkflow', () => {
     const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
@@ -299,6 +464,31 @@ enabled: true`;
         spaceId,
         mockRequest,
         { nameFallback: 'Original Workflow Copy' }
+      );
+    });
+
+    it('creates managed clones as disabled user-owned workflows with provenance', async () => {
+      const originalWorkflow = createMockWorkflow({
+        managed: true,
+        managedBy: 'inferenceWorkflows',
+        originManagedWorkflowId: 'system-inference_pii_anonymization',
+      });
+      mockWorkflowsService.createWorkflow.mockResolvedValue({
+        ...originalWorkflow,
+        id: 'workflow-clone-456',
+        managed: false,
+        managedBy: null,
+      });
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
+        {
+          yaml: expect.stringContaining('enabled: false'),
+        },
+        'default',
+        mockRequest,
+        { originManagedWorkflowId: 'system-inference_pii_anonymization' }
       );
     });
   });
@@ -1003,6 +1193,106 @@ steps:
       ).resolves.toBe(updateResult);
 
       expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+
+    describe('inference.aroundCompletion conflict check', () => {
+      const aroundCompletionDefinition = {
+        triggers: [{ type: 'inference.aroundCompletion' }],
+      } as unknown as WorkflowDetailDto['definition'];
+
+      it('rejects enabling when another workflow with inference.aroundCompletion is already enabled', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+        );
+        mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
+          createWorkflowDto({ id: 'wf-other', name: 'Existing Workflow', enabled: true }),
+        ]);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+        ).rejects.toBeInstanceOf(WorkflowConflictError);
+
+        expect(mockWorkflowsService.updateWorkflow).not.toHaveBeenCalled();
+      });
+
+      it('includes the conflicting workflow id in the error', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+        );
+        mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
+          createWorkflowDto({ id: 'wf-conflict', name: 'Conflicting Workflow', enabled: true }),
+        ]);
+
+        const err = await api
+          .updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+          .catch((e) => e);
+
+        expect(err).toBeInstanceOf(WorkflowConflictError);
+        expect((err as WorkflowConflictError).workflowId).toBe('wf-conflict');
+      });
+
+      it('allows enabling when no other workflow with the trigger is already enabled', async () => {
+        const updateResult = { enabled: true } as any;
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: false, definition: aroundCompletionDefinition })
+        );
+        mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([]);
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+      });
+
+      it('allows re-enabling the same workflow (self is excluded from conflict check)', async () => {
+        const updateResult = { enabled: true } as any;
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: true, definition: aroundCompletionDefinition })
+        );
+        // Simulate the workflow appearing in its own subscribed-trigger results
+        mockWorkflowsService.getWorkflowsSubscribedToTrigger.mockResolvedValue([
+          createWorkflowDto({ id: 'wf-1', enabled: true }),
+        ]);
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+      });
+
+      it('skips conflict check when the workflow has no inference.aroundCompletion trigger', async () => {
+        const updateResult = { enabled: true } as any;
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({
+            id: 'wf-1',
+            enabled: false,
+            definition: {
+              triggers: [{ type: 'manual' }],
+            } as unknown as WorkflowDetailDto['definition'],
+          })
+        );
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { enabled: true }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+
+        expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
+      });
+
+      it('skips conflict check when updating a field other than enabled', async () => {
+        const updateResult = { name: 'New Name' } as any;
+        mockWorkflowsService.getWorkflow.mockResolvedValue(
+          createWorkflowDto({ id: 'wf-1', enabled: true, definition: aroundCompletionDefinition })
+        );
+        mockWorkflowsService.updateWorkflow.mockResolvedValue(updateResult);
+
+        await expect(
+          api.updateWorkflow('wf-1', { name: 'New Name' }, 'default', mockRequest)
+        ).resolves.toBe(updateResult);
+
+        expect(mockWorkflowsService.getWorkflowsSubscribedToTrigger).not.toHaveBeenCalled();
+      });
     });
   });
 
