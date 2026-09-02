@@ -2403,12 +2403,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Compute whether the bump deployed asynchronously (same formula as bumpAgentPoliciesRevision).
     // When async, the new .fleet-policies docs are not yet written — skip deletion.
-    const willDeployAsyncBulk =
+    const willDeployAsync =
       (options?.asyncDeploy ?? false) ||
       [...associatedPolicyIds].length > ASYNC_DEPLOY_POLICIES_THRESHOLD;
 
     if (allSecretsToDelete.length) {
-      if (willDeployAsyncBulk) {
+      if (willDeployAsync) {
         logger.warn(
           `[deleteSecretsIfNotReferenced] Agent policy revisions were deployed asynchronously — skipping secret deletion for [${allSecretsToDelete
             .map((s) => s.id)
@@ -2712,15 +2712,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
 
       if (secretsToDelete.length > 0) {
-        // The package policies being deleted are removed from the agent policies above,
-        // so the agent policies still exist with updated compiled docs. Pass their ids
-        // so the .fleet-policies check is scoped correctly.
-        await deleteSecrets({
-          esClient,
-          soClient,
-          ids: secretsToDelete,
-          agentPolicyIds: bumpedAgentPolicyIds,
-        });
+        const willDeployAsync =
+          (options?.asyncDeploy ?? false) ||
+          bumpedAgentPolicyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD;
+
+        if (willDeployAsync) {
+          logger.warn(
+            `[deleteSecretsIfNotReferenced] Agent policy revision was deployed asynchronously — skipping secret deletion for [${secretsToDelete.join(', ')}] to avoid removing a secret still referenced by an in-flight compiled policy.`
+          );
+        } else {
+          // The package policies being deleted are removed from the agent policies above,
+          // so the agent policies still exist with updated compiled docs. Pass their ids
+          // so the .fleet-policies check is scoped correctly.
+          await deleteSecrets({
+            esClient,
+            soClient,
+            ids: secretsToDelete,
+            agentPolicyIds: bumpedAgentPolicyIds,
+          });
+        }
       }
     } else if (secretsToDelete.length > 0) {
       // skipUnassignFromAgentPolicies is set — no agent policy ids available to scope the

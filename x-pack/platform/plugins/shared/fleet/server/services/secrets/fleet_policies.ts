@@ -80,6 +80,8 @@ export async function findFleetPoliciesUsingSecrets(opts: {
           sort: [{ revision_idx: 'asc' }, { policy_id: 'asc' }],
           ...(searchAfter ? { search_after: searchAfter } : {}),
         },
+        // maxRetries: 0 — fail closed immediately on an ES error rather than masking an availability
+        // issue with silent retries. A false "no references" verdict deletes a live secret.
         { maxRetries: 0 }
       );
 
