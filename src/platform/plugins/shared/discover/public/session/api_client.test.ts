@@ -2,6 +2,15 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License, v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
@@ -60,13 +69,16 @@ describe('Discover session API client', () => {
       runRequest: (client: ReturnType<typeof createDiscoverSessionClient>) =>
         client.upsert('session-id', data),
     },
-  ])('uses the server error message when $operation fails', async ({ rejectRequest, runRequest }) => {
-    const http = httpServiceMock.createStartContract();
-    const client = createDiscoverSessionClient(http);
-    rejectRequest(http);
+  ])(
+    'uses the server error message when $operation fails',
+    async ({ rejectRequest, runRequest }) => {
+      const http = httpServiceMock.createStartContract();
+      const client = createDiscoverSessionClient(http);
+      rejectRequest(http);
 
-    await expect(runRequest(client)).rejects.toThrow('chart_interval must be a supported value');
-  });
+      await expect(runRequest(client)).rejects.toThrow('chart_interval must be a supported value');
+    }
+  );
 });
 
 const createBadRequestError = () =>
