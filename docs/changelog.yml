@@ -322,13 +322,9 @@ bundle:
   profiles:
     kibana-release:
       output_products: "kibana {version} {lifecycle}"
-      output: "kibana/{version}.yaml"
     observability-release:
       output_products: "observability {version} {lifecycle}"
-      output: "observability/{version}.yaml"
     security-release:
       output_products: "security {version} {lifecycle}"
-      output: "security/{version}.yaml"
     serverless-release:
       output_products: "cloud-serverless {version} {lifecycle}"
-      output: "cloud-serverless/kibana-{version}.yaml"
