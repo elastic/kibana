@@ -27,6 +27,9 @@ const timelineItemsToCaseEventAttachment = (
   return eventAttachment ? [eventAttachment] : [];
 };
 
+/** Stable key for the bulk "Add to case" item — imported by the menu component's icon map. */
+export const BULK_ADD_TO_CASE_ACTION_ID = 'attach-case' as const;
+
 /**
  * Prepares bulk actions related to case event attachments
  */
@@ -62,8 +65,8 @@ export const useBulkAddEventsToCaseActions = ({
       ? [
           {
             label: ADD_TO_CASE,
-            key: 'attach-case',
-            'data-test-subj': 'attach-case',
+            key: BULK_ADD_TO_CASE_ACTION_ID,
+            'data-test-subj': BULK_ADD_TO_CASE_ACTION_ID,
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE,
             onClick: (events: TimelineItem[] = []) =>

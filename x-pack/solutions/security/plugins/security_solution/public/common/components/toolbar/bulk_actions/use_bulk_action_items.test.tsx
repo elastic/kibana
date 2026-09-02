@@ -97,22 +97,24 @@ describe('useBulkActionItems', () => {
 
   it('exposes custom actions for composed bulk action menus', () => {
     const onClick = jest.fn();
+    // Use a neutral icon value — 'briefcase' is NOT set here because icon decoration for
+    // the add-to-case action is the responsibility of EventsTableBulkActionMenu, not this hook.
     const { result } = renderUseBulkActionItems({
       customBulkActions: [
         {
-          key: 'attach-case',
-          label: 'Add to case',
-          icon: 'briefcase',
+          key: 'some-custom-action',
+          label: 'Custom action',
+          icon: 'gear',
           onClick,
         },
       ],
     });
 
-    const customAction = result.current.items.find(({ key }) => key === 'attach-case');
+    const customAction = result.current.items.find(({ key }) => key === 'some-custom-action');
     customAction?.onClick?.({} as MouseEvent<HTMLHRElement>);
 
     expect(onClick).toHaveBeenCalledWith(['mockEventId']);
-    expect(customAction?.icon).toBe('briefcase');
+    expect(customAction?.icon).toBe('gear');
   });
 
   describe('workflow actions', () => {
