@@ -315,7 +315,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -355,7 +354,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
