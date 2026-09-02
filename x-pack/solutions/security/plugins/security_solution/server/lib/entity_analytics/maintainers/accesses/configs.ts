@@ -161,7 +161,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     // accesses configs.
     customActor: { fields: ['user.name'] },
     esqlWhereClause: `event.action == "UserLogon"
-    AND event.category == "authentication"
+    AND MV_CONTAINS(TO_STRING(event.category), "authentication")
     AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN ("3", "4", "5", "8"))
     AND event.outcome == "success"
     AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})
