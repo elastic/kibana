@@ -59,7 +59,6 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
             label: 'Untitled',
             hide_chart: false,
             hide_table: false,
-            time_restore: false,
             data_source: {
               type: 'esql',
               query: 'FROM logstash-* | WHERE geo.dest == ?geo_dest',

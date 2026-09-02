@@ -22,7 +22,8 @@ export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
 /**
  * Log type identifiers used by the ECF CloudFormation templates.
- * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
+ * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in the
+ * Authenticate & Deploy step (step 3 in the wizard).
  * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 export type EcfLogType =
@@ -72,6 +73,8 @@ export interface DataStreamInfo {
   inputs: string[];
   /** Inputs enabled by default (stream.enabled !== false in the manifest). */
   defaultEnabledInputs: string[];
+  /** Data stream dataset value (e.g. "aws.vpcflow"). Used to build index patterns. */
+  dataset?: string;
   /** Manifest var definitions keyed by input type, then var name. */
   varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>;
   /** Var names the user must configure to activate this data stream. */
@@ -628,6 +631,7 @@ function computeDataStreamInfo(
   return {
     title: ds?.title as string | undefined,
     type: ds?.type as SignalType | undefined,
+    dataset: ds?.dataset as string | undefined,
     inputs: dsEffectiveInputs,
     defaultEnabledInputs: dsDefaultEnabledInputs,
     varDefsByInput: dsVarDefsByInput,
