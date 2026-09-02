@@ -204,8 +204,6 @@ export function loadEmbeddableData(
   ) {
     addLog(`Embeddable reload reason: ${sourceId}`);
 
-    resetMessages();
-
     // reset the render on reload
     internalApi.dispatchRenderStart();
 
@@ -302,6 +300,11 @@ export function loadEmbeddableData(
 
     // Publish the used dataViews on the Lens API
     internalApi.updateDataViews(dataViewIds);
+
+    // Reset here, and not when the reload starts, to also discard whatever the previous
+    // expression reported while this one was being built: those messages belong to a
+    // state that no longer exists and could block the expression about to be rendered.
+    resetMessages();
 
     // This will catch also failed loaded dataViews
     const hasBlockingErrors = dispatchBlockingErrorIfAny();

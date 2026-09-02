@@ -590,6 +590,30 @@ describe('Data Loader', () => {
     );
   });
 
+  it('should clear a runtime blocking error once the attributes change', async () => {
+    await expectRerenderOnDataLoader(async ({ internalApi }) => {
+      await waitForValue(
+        internalApi.expressionParams$,
+        (v: unknown) => isObject(v) && 'expression' in v
+      );
+
+      // the expression pipeline fails at runtime, as it does for an invalid chart config
+      internalApi.expressionParams$.getValue()!.onRuntimeError(new Error('runtime failure'));
+      expect(internalApi.blockingError$.getValue()?.message).toEqual('runtime failure');
+
+      // now fix the config in place, without remounting the panel
+      (internalApi.attributes$ as BehaviorSubject<LensDocument | undefined>).next({
+        ...internalApi.attributes$.getValue(),
+        title: faker.lorem.word(),
+      });
+      jest.advanceTimersByTime(200);
+
+      await waitFor(() => expect(internalApi.blockingError$.getValue()).toBeUndefined());
+
+      return 'attributes';
+    });
+  });
+
   it('should re-render on ES|QL variable changes', async () => {
     const baseAttributes = getLensAttributesMock();
     await expectRerenderOnDataLoader(
