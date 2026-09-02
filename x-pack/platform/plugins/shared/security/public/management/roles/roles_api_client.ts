@@ -8,8 +8,7 @@
 import type { Criteria } from '@elastic/eui';
 
 import type { HttpStart } from '@kbn/core/public';
-import type { RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
-import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
+import type { QueryRolesResult, RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
 import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
@@ -116,13 +115,13 @@ export class RolesAPIClient {
               : entry
           )
         : global.data_source
-          ? {
-              ...global,
-              data_source: global.data_source.filter(
-                (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
-              ),
-            }
-          : global;
+        ? {
+            ...global,
+            data_source: global.data_source.filter(
+              (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
+            ),
+          }
+        : global;
     }
 
     // Remove any placeholder query entries
