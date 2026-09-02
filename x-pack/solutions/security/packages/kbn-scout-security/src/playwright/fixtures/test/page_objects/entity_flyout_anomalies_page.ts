@@ -173,20 +173,20 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   /**
-   * Click a row-actions menu item. noWaitAfter: add-to-timeline updates the URL
-   * while opening the modal, which otherwise hangs the click after scroll.
-   * force: the in-flight URL change from openRowActionsMenu causes a re-render
-   * that repositions the popover; the computed center-point is briefly covered,
-   * so Playwright's obstruction check times out without force.
+   * Click a row-actions menu item. dispatchEvent bypasses Playwright's obstruction
+   * check: the URL change from openRowActionsMenu re-renders the flyout and transiently
+   * repositions the popover, covering the menu item's center point. The click event
+   * source is EuiContextMenuItem (SecuritySolution/public/entity_analytics/components/anomalies).
    */
   async clickRowAction(actionKey: string) {
-    await this.getRowAction(actionKey).click({ noWaitAfter: true, force: true });
+    await this.getRowAction(actionKey).dispatchEvent('click');
   }
 
   async selectMitreTactic(tactic: string) {
-    // force: the tactic dot sits inside a scrollable attack-chain container; after scroll
-    // the computed center is briefly covered by an adjacent element, timing out the click.
-    await this.getMitreTacticDot(tactic).click({ force: true });
+    // dispatchEvent bypasses Playwright's obstruction check: the tactic dot is briefly
+    // occluded after scrollIntoView by the adjacent MitreTacticDotV3 hover chip overlay
+    // (SecuritySolution/public/entity_analytics/components/anomalies/MitreTacticDot).
+    await this.getMitreTacticDot(tactic).dispatchEvent('click');
   }
 
   async clearMitreTacticFilter() {
