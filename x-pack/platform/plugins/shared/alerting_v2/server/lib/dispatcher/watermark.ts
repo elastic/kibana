@@ -39,12 +39,10 @@ export const computeNextWatermark = ({
     // Must be checked before the truncated branch: a truncated batch where all
     // episodes were filtered still advanced through the full window logically.
     nextWatermark = windowEnd;
-  } else if (finalState.truncated) {
-    // EPISODE_QUERY_LIMIT hit: episodes arrive sorted asc by last_event_timestamp,
-    // so the last element is the truncation edge. Advance there; the tail will be
+  } else if (finalState.scan?.truncated) {
+    // EPISODE_QUERY_LIMIT hit: advance to the truncation edge; the tail will be
     // re-read from eventWatermark - OVERLAP on the next tick.
-    const lastEpisode = finalState.episodes?.[finalState.episodes.length - 1];
-    nextWatermark = lastEpisode ? new Date(lastEpisode.last_event_timestamp) : eventWatermark;
+    nextWatermark = finalState.scan.truncationEdge() ?? eventWatermark;
   } else {
     // Window fully consumed (no_episodes, or normal completion).
     nextWatermark = windowEnd;

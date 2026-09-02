@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useId, useMemo } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
 import type { ParsedItem, ParsedPart } from '@kbn/ui-react-assembly';
 import type {
@@ -17,7 +17,13 @@ import type {
   FlyoutTemplateProps,
 } from './types';
 import { flyoutAssembly, partsOf } from './assembly';
-import { FlyoutTemplateConfigProvider } from './context';
+import {
+  FlyoutHeaderCollapseProvider,
+  FlyoutTabsProvider,
+  FlyoutTemplateConfigProvider,
+} from './context';
+import type { FlyoutTabDescriptor, FlyoutTabsState } from './context/tabs_context';
+import { useHeaderCollapse } from './use_header_collapse';
 import { Body, BodyZone, BODY_PART_NAME } from './body/body';
 import { Header, HeaderZone, HEADER_PART_NAME } from './header/header';
 import { Footer, FooterZone, FOOTER_PART_NAME } from './footer/footer';
@@ -41,6 +47,16 @@ const pickZone = (items: ParsedItem[], partName: string): ParsedPart | undefined
   return matches[0];
 };
 
+const resolveDefaultSelectedTabId = (
+  tabs: FlyoutTabDescriptor[],
+  defaultId: string | undefined
+) => {
+  if (defaultId !== undefined && tabs.some((tab) => tab.id === defaultId)) {
+    return defaultId;
+  }
+  return tabs[0]?.id;
+};
+
 /** Root component that renders Header, Body, Footer zones in template order. */
 const FlyoutTemplateRoot = ({
   children,
@@ -62,12 +78,17 @@ const FlyoutTemplateRoot = ({
   outsideClickCloses,
   focusTrapProps,
   closeButtonProps,
+  tabs: tabsProp,
+  defaultSelectedTabId,
+  selectedTabId: controlledSelectedTabId,
+  onTabChange,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
 }: FlyoutTemplateProps) => {
   const htmlIdSuffix = useId().replace(/[^A-Za-z0-9_-]/g, '');
   const flyoutTitleId = useGeneratedHtmlId({ prefix: `flyoutTemplateTitle${htmlIdSuffix}` });
+  const tabIdPrefix = useGeneratedHtmlId({ prefix: `flyoutTemplateTab${htmlIdSuffix}` });
   const items = useMemo(() => flyoutAssembly.parseChildren(children), [children]);
 
   const headerItem = pickZone(items, HEADER_PART_NAME);
@@ -79,18 +100,95 @@ const FlyoutTemplateRoot = ({
     console.warn('[FlyoutTemplate] A <FlyoutTemplate.Body> is required.');
   }
 
+  if (process.env.NODE_ENV !== 'production' && tabsProp?.length && !headerItem) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[FlyoutTemplate] `tabs` is set but no <FlyoutTemplate.Header> is provided. The tab bar cannot render without a header zone.'
+    );
+  }
+
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
+  const bodyAttrs = bodyItem?.attributes as FlyoutBodyProps | undefined;
   const menuTitle = headerAttrs?.title;
   const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
 
+  // Feed string titles to EUI's flyout menu for history/navigation.
   const mergedMenuProps = {
     ...(menuTitleString !== undefined ? { title: menuTitleString } : {}),
     ...flyoutMenuProps,
   };
   const hasMenuProps = Object.keys(mergedMenuProps).length > 0;
+
+  const tabs = useMemo<FlyoutTabDescriptor[]>(() => {
+    const seen = new Set<string>();
+    return (tabsProp ?? [])
+      .filter((tab) => {
+        if (seen.has(tab.id)) return false;
+        seen.add(tab.id);
+        return true;
+      })
+      .map((tab, index) => ({
+        ...tab,
+        tabDomId: `${tabIdPrefix}-${index}`,
+        panelDomId: `${tabIdPrefix}-${index}-panel`,
+      }));
+  }, [tabsProp, tabIdPrefix]);
+
+  const isControlled = controlledSelectedTabId !== undefined;
+
+  const [uncontrolledTabId, setUncontrolledTabId] = useState<string | undefined>(() =>
+    resolveDefaultSelectedTabId(tabs, defaultSelectedTabId)
+  );
+
+  useEffect(() => {
+    if (isControlled) return;
+    const hasSelectedTab = tabs.some((tab) => tab.id === uncontrolledTabId);
+    const nextTabId = hasSelectedTab
+      ? uncontrolledTabId
+      : resolveDefaultSelectedTabId(tabs, defaultSelectedTabId);
+    if (nextTabId !== uncontrolledTabId) {
+      setUncontrolledTabId(nextTabId);
+    }
+  }, [defaultSelectedTabId, isControlled, tabs, uncontrolledTabId]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return;
+    if (
+      isControlled &&
+      tabs.length > 0 &&
+      !tabs.some((tab) => tab.id === controlledSelectedTabId)
+    ) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[FlyoutTemplate] selectedTabId "${controlledSelectedTabId}" does not match any tab. Falling back to the first tab.`
+      );
+    }
+  }, [isControlled, controlledSelectedTabId, tabs]);
+
+  const requestedSelectedTabId = isControlled ? controlledSelectedTabId : uncontrolledTabId;
+  const selectedTabId = tabs.some((tab) => tab.id === requestedSelectedTabId)
+    ? requestedSelectedTabId
+    : resolveDefaultSelectedTabId(tabs, defaultSelectedTabId);
+
+  const selectTab = useCallback(
+    (tabId: string) => {
+      if (!isControlled) {
+        setUncontrolledTabId(tabId);
+      }
+      onTabChange?.(tabId);
+    },
+    [isControlled, onTabChange]
+  );
+
+  const tabsContextValue = useMemo<FlyoutTabsState>(
+    () => ({ tabs, selectedTabId, selectTab }),
+    [tabs, selectedTabId, selectTab]
+  );
+
+  const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
 
   return (
     <EuiFlyout
@@ -118,11 +216,15 @@ const FlyoutTemplateRoot = ({
       data-test-subj={dataTestSubj}
     >
       <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
-        {headerItem && (
-          <HeaderZone {...(headerAttrs as FlyoutHeaderProps)} flyoutTitleId={flyoutTitleId} />
-        )}
-        {bodyItem && <BodyZone {...(bodyItem.attributes as FlyoutBodyProps)} />}
-        {footerItem && <FooterZone {...(footerItem.attributes as FlyoutFooterProps)} />}
+        <FlyoutTabsProvider value={tabsContextValue}>
+          <FlyoutHeaderCollapseProvider value={collapseState}>
+            {headerItem && (
+              <HeaderZone {...(headerAttrs as FlyoutHeaderProps)} flyoutTitleId={flyoutTitleId} />
+            )}
+            {bodyItem && <BodyZone {...(bodyAttrs as FlyoutBodyProps)} />}
+            {footerItem && <FooterZone {...(footerItem.attributes as FlyoutFooterProps)} />}
+          </FlyoutHeaderCollapseProvider>
+        </FlyoutTabsProvider>
       </FlyoutTemplateConfigProvider>
     </EuiFlyout>
   );

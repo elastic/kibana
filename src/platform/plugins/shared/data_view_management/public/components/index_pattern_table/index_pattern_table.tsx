@@ -15,11 +15,11 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
 import React, { useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -68,6 +68,18 @@ const securityDataView = i18n.translate(
 );
 
 const securitySolution = 'security-solution';
+
+const createButtonLabel = i18n.translate('indexPatternManagement.dataViewTable.createBtn', {
+  defaultMessage: 'Create data view',
+});
+
+const listDescription = i18n.translate(
+  'indexPatternManagement.dataViewTable.indexPatternExplanation',
+  {
+    defaultMessage:
+      'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+  }
+);
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
@@ -372,24 +384,34 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     columns.push(alertColumn);
   }
 
-  const createButton = canSave ? (
-    <EuiButton
-      fill={true}
-      iconType="plusCircle"
-      onClick={() => setShowCreateDialog(true)}
-      data-test-subj="createDataViewButton"
-    >
-      <FormattedMessage
-        id="indexPatternManagement.dataViewTable.createBtn"
-        defaultMessage="Create data view"
-      />
-    </EuiButton>
-  ) : (
-    <></>
+  const showCreateInHeader =
+    canSave && hasDataView && !isLoadingIndexPatterns && !isLoadingDataState;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: {
+          id: 'createDataView',
+          label: createButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'createDataViewButton',
+          run: () => setShowCreateDialog(true),
+        },
+      }
+    : undefined;
+
+  const header = (
+    <AppHeader title={title} description={listDescription} menu={menu} spacing="bleed" />
   );
 
-  if (isLoadingIndexPatterns) {
-    return <></>;
+  if (isLoadingIndexPatterns || isLoadingDataState) {
+    return (
+      <>
+        {header}
+        <EuiSpacer size="l" />
+        <div css={{ display: 'flex', justifyContent: 'center' }}>
+          <EuiLoadingSpinner size="xxl" />
+        </div>
+      </>
+    );
   }
 
   const selection = {
@@ -406,18 +428,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
 
   let displayIndexPatternSection = (
     <>
-      <EuiPageHeader
-        pageTitle={title}
-        description={
-          <FormattedMessage
-            id="indexPatternManagement.dataViewTable.indexPatternExplanation"
-            defaultMessage="Create and manage the data views that help you retrieve your data from Elasticsearch."
-          />
-        }
-        bottomBorder
-        rightSideItems={[createButton]}
-      />
-
+      {header}
       <EuiSpacer size="l" />
       <ContextWrapper>
         <EuiInMemoryTable
@@ -464,7 +475,8 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   if (!hasDataView)
     displayIndexPatternSection = (
       <>
-        <EuiSpacer size="xxl" />
+        {header}
+        <EuiSpacer size="l" />
         <NoDataViewsPromptComponent
           onClickCreate={() => setShowCreateDialog(true)}
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
@@ -478,7 +490,8 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   if (!hasDataView && !hasESData)
     displayIndexPatternSection = (
       <>
-        <EuiSpacer size="xxl" />
+        {header}
+        <EuiSpacer size="l" />
         <NoData
           noDataPage={noDataPage}
           docLinks={docLinks}
@@ -491,17 +504,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
       </>
     );
 
-  return (
-    <>
-      {isLoadingDataState ? (
-        <div css={{ display: 'flex', justifyContent: 'center' }}>
-          <EuiLoadingSpinner size="xxl" />
-        </div>
-      ) : (
-        displayIndexPatternSection
-      )}
-    </>
-  );
+  return displayIndexPatternSection;
 };
 
 export const IndexPatternTableWithRouter = withRouter(IndexPatternTable);
