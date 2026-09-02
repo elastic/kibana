@@ -33,7 +33,7 @@ export type RetrievedDocsExtractor<T = unknown> = (output: T) => RetrievedDoc[];
  */
 export type GroundTruthExtractor<T = unknown> = (referenceOutput: T) => GroundTruth;
 
-export interface RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> {
+export interface IrEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> {
   /** Number of top results to evaluate (K in Precision@K, Recall@K). Can be a single value or array for multi-K evaluation */
   k: number | number[];
   /** Minimum score in ground truth to consider a document relevant. Default: 1 */
@@ -42,6 +42,12 @@ export interface RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknow
   extractRetrievedDocs: RetrievedDocsExtractor<TOutput>;
   /** Function to extract ground truth from reference output (expected output) */
   extractGroundTruth: GroundTruthExtractor<TReferenceOutput>;
-  /** Filter evaluation to only indices present in ground truth. Default: from env var INDEX_FOCUSED_RAG_EVAL */
+  /** Filter evaluation to only indices present in ground truth. Default: from env var INDEX_FOCUSED_IR_EVAL */
   filterByGroundTruthIndices?: boolean;
 }
+
+/** @deprecated Use {@link IrEvaluatorConfig} instead. */
+export type RagEvaluatorConfig<TOutput = unknown, TReferenceOutput = unknown> = IrEvaluatorConfig<
+  TOutput,
+  TReferenceOutput
+>;

@@ -230,6 +230,22 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
           [
+            'HitRate@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'MRR@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'NDCG@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'MAP@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
             ESQL_EQUIVALENCE_EVALUATOR_NAME,
             { decimalPlaces: 2, statsToInclude: ['mean', 'stdDev'] },
           ],
@@ -240,8 +256,16 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             combinedColumnName: 'Tokens',
           },
           {
-            evaluatorNames: ['Precision@K', 'F1@K', 'Recall@K'],
-            combinedColumnName: 'RAG',
+            evaluatorNames: [
+              'Precision@K',
+              'F1@K',
+              'Recall@K',
+              'HitRate@K',
+              'MRR@K',
+              'NDCG@K',
+              'MAP@K',
+            ],
+            combinedColumnName: 'IR',
           },
         ],
       });

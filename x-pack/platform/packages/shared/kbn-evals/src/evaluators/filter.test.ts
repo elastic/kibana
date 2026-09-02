@@ -82,7 +82,7 @@ describe('evaluator filter', () => {
       expect(result.map((e) => e.name)).toEqual(['Factuality', 'Relevance']);
     });
 
-    describe('RAG metric pattern matching', () => {
+    describe('IR metric pattern matching', () => {
       it('should match all Precision@{number} evaluators when Precision@K is specified', () => {
         process.env.SELECTED_EVALUATORS = 'Precision@K';
         const result = selectEvaluators(allEvaluators);
@@ -101,7 +101,7 @@ describe('evaluator filter', () => {
         expect(result.map((e) => e.name)).toEqual(['F1@5', 'F1@10', 'F1@20']);
       });
 
-      it('should match all RAG evaluators when all patterns are specified', () => {
+      it('should match all IR evaluators when all patterns are specified', () => {
         process.env.SELECTED_EVALUATORS = 'Precision@K,Recall@K,F1@K';
         const result = selectEvaluators(allEvaluators);
         expect(result.map((e) => e.name)).toEqual([
