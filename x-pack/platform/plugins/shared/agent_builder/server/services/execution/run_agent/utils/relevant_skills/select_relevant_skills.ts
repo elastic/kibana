@@ -29,12 +29,30 @@ export const RELEVANT_SKILLS_TIMEOUT_MS = 10_000;
  */
 export const MAX_SELECTED_SKILLS = 5;
 
+/**
+ * Skill selection is a discrete classification over a fixed catalog, not a generative task: for a
+ * given request there is one best answer, so sampling entropy here is pure noise. Left unpinned, the
+ * selector returns a different skill set across repetitions of an identical request — measured at
+ * ~51% of repeated eval cells, which both perturbs the agent's starting context and shows up as
+ * apparent instability of whatever model is under test (the selector runs on the fast model, so that
+ * noise is not even attributable to the agent model).
+ */
+export const RELEVANT_SKILLS_TEMPERATURE = 0;
+
 /** Upper bound on the recent-context slice handed to the selector, to keep the fast call cheap. */
 const MAX_RECENT_CONTEXT_CHARS = 4_000;
 const MAX_RECENT_CONTEXT_ROUNDS = 3;
 
 export interface RelevantSkillSelection {
   skills: RelevantSkill[];
+  /**
+   * Why the selection is empty, when it is. Absent on a successful selection.
+   *
+   * Without this, a selector timeout, an abort and a genuine "no skill applies" verdict are all
+   * indistinguishable downstream: every one of them surfaces as an empty list, so a silently
+   * degrading fast model looks identical to a correctly-empty catalog match.
+   */
+  fallbackReason?: 'timeout' | 'aborted' | 'error';
 }
 
 export interface SelectRelevantSkillsParams {
@@ -151,7 +169,10 @@ export const selectRelevantSkills = async ({
       'select_relevant_skills',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
       async () => {
-        const { chatModel } = await modelProvider.selectModel({ effortLevel: EffortLevels.low });
+        const { chatModel } = await modelProvider.selectModel({
+          effortLevel: EffortLevels.low,
+          temperature: RELEVANT_SKILLS_TEMPERATURE,
+        });
         const structuredModel = chatModel.withStructuredOutput(selectionSchema, {
           name: 'select_relevant_skills',
         });
@@ -208,10 +229,21 @@ ${catalog}`,
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    logger.warn(
-      `selectRelevantSkills failed; falling back to no relevant-skills notification: ${message}`
+    // Classify the failure so callers can tell a degraded selector from a genuinely empty match.
+    const fallbackReason: NonNullable<RelevantSkillSelection['fallbackReason']> = /timed out/.test(
+      message
+    )
+      ? 'timeout'
+      : /aborted/.test(message)
+      ? 'aborted'
+      : 'error';
+    // A timeout on a best-effort fast path is expected under load and is not warn-worthy; a genuine
+    // error is. Both stay observable via the returned fallbackReason.
+    const log = fallbackReason === 'timeout' ? logger.debug.bind(logger) : logger.warn.bind(logger);
+    log(
+      `selectRelevantSkills failed (${fallbackReason}); falling back to no relevant-skills notification: ${message}`
     );
-    return { skills: [] };
+    return { skills: [], fallbackReason };
   }
 };
 
