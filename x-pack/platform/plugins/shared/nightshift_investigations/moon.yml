@@ -36,6 +36,8 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/agent-builder-server'
   - '@kbn/i18n'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod
