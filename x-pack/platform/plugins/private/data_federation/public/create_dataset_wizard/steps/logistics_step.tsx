@@ -9,10 +9,13 @@ import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control, UseFormSetValue, Validate } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
+import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
+import { DatasetSettingsField } from '../../create_dataset_flyout/dataset_settings_field';
 import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
@@ -23,6 +26,7 @@ import {
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
 import { WizardRegionField } from '../wizard_region_field';
 import { FileStep } from './file_step';
@@ -92,6 +96,21 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
   });
 
   const showRegion = !isDatasetWizardFlow3(flowVariant);
+  const resourceSettingsFieldIds = useMemo(
+    () => getResourceOwnedSettingsFieldIds(flowVariant),
+    [flowVariant]
+  );
+
+  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+  const resourceSettingsFields = resourceSettingsFieldIds.map((fieldId) => (
+    <DatasetSettingsField
+      key={fieldId}
+      control={control}
+      fieldId={fieldId}
+      testSubjPrefix="datasetWizard"
+      variant="step"
+    />
+  ));
 
   const onDataSourceChange = useCallback(
     (selectedValue: string) => {
@@ -209,6 +228,15 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
               inputRef={resourceField.ref}
             />
           </EuiFormRow>
+
+          {/* Naming the defaults needs a format, which the resource decides. */}
+          {format !== '' ? (
+            <DatasetSettingDefaultHintsProvider format={format} isEnabled>
+              {resourceSettingsFields}
+            </DatasetSettingDefaultHintsProvider>
+          ) : (
+            resourceSettingsFields
+          )}
 
           {showRegion ? (
             <WizardRegionField

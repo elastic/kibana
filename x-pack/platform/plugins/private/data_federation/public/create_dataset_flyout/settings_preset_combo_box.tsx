@@ -31,6 +31,8 @@ export interface SettingsPresetComboBoxProps {
   presets: Array<{ value: string; label: string; description?: string }>;
   'data-test-subj': string;
   rules?: RegisterOptions<CreateDatasetFormValues, FieldPath<CreateDatasetFormValues>>;
+  /** Off where the field sits among a step's own fields rather than a settings panel. */
+  isCompressed?: boolean;
 }
 
 /** Rebuilt rather than reused so the default badge stays in the dropdown list. */
@@ -57,6 +59,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
   presets,
   'data-test-subj': dataTestSubj,
   rules,
+  isCompressed = true,
 }) => {
   const { field, fieldState } = useController({ name, control, rules });
   const defaultHint = useDatasetSettingDefaultHint(name);
@@ -109,7 +112,7 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
         onCreateOption={handleCreateOption}
         data-test-subj={dataTestSubj}
         fullWidth
-        compressed
+        compressed={isCompressed}
         isClearable
         isInvalid={Boolean(fieldState.error)}
         aria-label={label}

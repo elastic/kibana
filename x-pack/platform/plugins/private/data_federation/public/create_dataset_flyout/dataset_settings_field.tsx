@@ -43,24 +43,37 @@ export interface DatasetSettingsFieldProps {
   control: Control<CreateDatasetFormValues>;
   fieldId: DatasetSettingsFieldId;
   testSubjPrefix: string;
+  /**
+   * A step that asks for a setting among its own fields marks it as optional and matches
+   * their sizing, rather than the density of the settings panels.
+   */
+  variant?: 'settings' | 'step';
 }
 
 export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> = ({
   control,
   fieldId,
   testSubjPrefix,
+  variant = 'settings',
 }) => {
+  const isStepField = variant === 'step';
+
   switch (fieldId) {
     case 'partition_detection':
       return (
         <SettingsEnumField
           control={control}
           name="settings.partition_detection"
-          label={createDatasetFlyoutStrings.settingsPartitionDetectionLabel()}
+          label={
+            isStepField
+              ? createDatasetFlyoutStrings.settingsPartitionDetectionOptionalLabel()
+              : createDatasetFlyoutStrings.settingsPartitionDetectionLabel()
+          }
           description={createDatasetFlyoutStrings.settingsPartitionDetectionDescription()}
           placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
           options={PARTITION_DETECTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsPartitionDetection`}
+          isCompressed={!isStepField}
         />
       );
     case 'partition_path':
@@ -68,7 +81,11 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
         <SettingsPresetComboBox
           control={control}
           name="settings.partition_path"
-          label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
+          label={
+            isStepField
+              ? createDatasetFlyoutStrings.settingsPartitionPathOptionalLabel()
+              : createDatasetFlyoutStrings.settingsPartitionPathLabel()
+          }
           helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
           placeholder={createDatasetFlyoutStrings.settingsPartitionPathPlaceholder()}
           presets={PARTITION_PATH_PRESETS()}
@@ -77,6 +94,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
               validatePartitionPath(String(value ?? ''), formValues.settings.partition_detection),
           }}
           data-test-subj={`${testSubjPrefix}SettingsPartitionPath`}
+          isCompressed={!isStepField}
         />
       );
     case 'schema_sample_size':

@@ -246,6 +246,14 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Partition detection',
     }),
 
+  settingsPartitionDetectionOptionalLabel: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionOptionalLabel',
+      {
+        defaultMessage: 'Partition detection (optional)',
+      }
+    ),
+
   settingsPartitionDetectionPlaceholder: () =>
     i18n.translate(
       'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionPlaceholder',
@@ -318,6 +326,11 @@ export const createDatasetFlyoutStrings = {
   settingsPartitionPathLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathLabel', {
       defaultMessage: 'Partition path',
+    }),
+
+  settingsPartitionPathOptionalLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathOptionalLabel', {
+      defaultMessage: 'Partition path (optional)',
     }),
 
   settingsPartitionPathHelp: () =>

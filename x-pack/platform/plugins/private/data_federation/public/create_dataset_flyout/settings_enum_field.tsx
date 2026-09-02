@@ -37,6 +37,8 @@ export interface SettingsEnumFieldProps<T extends string> {
   options: Array<SettingsEnumOption<T>>;
   'data-test-subj': string;
   rules?: RegisterOptions<CreateDatasetFormValues, FieldPath<CreateDatasetFormValues>>;
+  /** Off where the field sits among a step's own fields rather than a settings panel. */
+  isCompressed?: boolean;
 }
 
 /**
@@ -53,6 +55,7 @@ export function SettingsEnumField<T extends string>({
   options,
   'data-test-subj': dataTestSubj,
   rules,
+  isCompressed = true,
 }: SettingsEnumFieldProps<T>): ReturnType<FunctionComponent> {
   const { field, fieldState } = useController({ name, control, rules });
   const defaultHint = useDatasetSettingDefaultHint(name);
@@ -143,7 +146,7 @@ export function SettingsEnumField<T extends string>({
           rowHeight={hasDescriptions ? 'auto' : undefined}
           data-test-subj={dataTestSubj}
           fullWidth
-          compressed
+          compressed={isCompressed}
           isClearable
           isInvalid={isInvalid}
           aria-label={label}
@@ -156,7 +159,7 @@ export function SettingsEnumField<T extends string>({
           options={superSelectOptions}
           data-test-subj={dataTestSubj}
           fullWidth
-          compressed
+          compressed={isCompressed}
           aria-label={label}
           placeholder={placeholder}
           valueOfSelected={value || undefined}

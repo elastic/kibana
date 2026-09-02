@@ -22,6 +22,7 @@ import {
   formatSettingsFieldDisplayValue,
   getDatasetSettingsFieldLabel,
 } from '../create_dataset_flyout/dataset_settings_value_labels';
+import type { DatasetSettingsFieldId } from '../create_dataset_flyout/dataset_settings_visibility';
 import {
   DATASET_SETTINGS_FIELD_IDS,
   isFieldVisibleForErrorMode,
@@ -38,6 +39,7 @@ import {
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
+import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
 
 export type ReviewSettingBadge = 'default' | 'modified';
 
@@ -173,13 +175,28 @@ export const getReviewLogisticsRows = (
     });
   }
 
+  // Settings asked for beside the resource are summarized with it rather than with the format
+  // settings, so the summary follows the steps.
+  for (const fieldId of getResourceOwnedSettingsFieldIds(flowVariant)) {
+    const value = values.settings[fieldId];
+    if (!value || value.trim() === '') {
+      continue;
+    }
+
+    rows.push({
+      label: getDatasetSettingsFieldLabel(fieldId),
+      displayValue: formatSettingsFieldDisplayValue(fieldId, value),
+    });
+  }
+
   return rows;
 };
 
 export const getReviewSettingsRows = (
   settings: DatasetWizardFormValues['settings'],
   resource: string,
-  customJson?: string
+  customJson?: string,
+  excludeFieldIds: readonly DatasetSettingsFieldId[] = []
 ): ReviewSummaryRow[] => {
   const format = settings.format;
   if (!format) {
@@ -203,6 +220,9 @@ export const getReviewSettingsRows = (
   ];
 
   for (const fieldId of DATASET_SETTINGS_FIELD_IDS) {
+    if (excludeFieldIds.includes(fieldId)) {
+      continue;
+    }
     if (!isFieldVisibleForFormat(fieldId, format)) {
       continue;
     }

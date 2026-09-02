@@ -152,6 +152,27 @@ describe('dataset_wizard_step_validation', () => {
     );
   });
 
+  it('validates the partition settings with step 1 in flow 3 9.6', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+    };
+
+    expect(getWizardStepFields(LOGISTICS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)).toEqual([
+      'data_source',
+      'name',
+      'resource',
+      'settings.partition_detection',
+      'settings.partition_path',
+    ]);
+    expect(
+      getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    ).not.toEqual(expect.arrayContaining(['settings.partition_path']));
+    expect(
+      getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3)
+    ).toEqual(expect.arrayContaining(['settings.partition_path']));
+  });
+
   it('validates the data source step through its own form, not wizard fields', () => {
     const values = emptyDatasetWizardFormValues();
 

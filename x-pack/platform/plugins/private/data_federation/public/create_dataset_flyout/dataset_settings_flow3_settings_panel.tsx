@@ -29,6 +29,7 @@ import {
   getIndentedDatasetSettingsFieldsWidthCss,
 } from './dataset_settings_fields_layout';
 import { getFlow3CommonFields } from './dataset_settings_flow3_layout';
+import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 
 const accordionButtonCss = css`
@@ -47,6 +48,8 @@ export interface DatasetSettingsFlow3SettingsPanelProps {
   testSubjPrefix?: string;
   /** When false, the fields sit directly on the page instead of a filled panel. */
   hasPanelBackground?: boolean;
+  /** Settings another step asks for, so this one leaves them out. */
+  excludeFieldIds?: readonly DatasetSettingsFieldId[];
 }
 
 export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
@@ -60,6 +63,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   advancedSettingsTitle,
   testSubjPrefix = 'datasetWizard',
   hasPanelBackground = true,
+  excludeFieldIds = [],
 }) => {
   const { euiTheme } = useEuiTheme();
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
@@ -85,7 +89,13 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
     ? undefined
     : getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs]);
 
-  const commonFields = useMemo(() => getFlow3CommonFields(format, errorMode), [errorMode, format]);
+  const commonFields = useMemo(
+    () =>
+      getFlow3CommonFields(format, errorMode).filter(
+        (fieldId) => !excludeFieldIds.includes(fieldId)
+      ),
+    [errorMode, excludeFieldIds, format]
+  );
 
   const commonSettingsAccordionId = useGeneratedHtmlId({
     prefix: 'datasetWizardFlow3CommonSettingsAccordion',
@@ -156,6 +166,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
               errorMode={errorMode}
               testSubjPrefix={testSubjPrefix}
               constrainWidth={hasPanelBackground}
+              excludeFieldIds={excludeFieldIds}
             />
           </div>
         </EuiPanel>

@@ -8,6 +8,7 @@
 import type { FieldPath } from 'react-hook-form';
 
 import type { DatasetFormatFormValue } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import type { DatasetSettingsFieldId } from '../create_dataset_flyout/dataset_settings_visibility';
 import {
   DATASET_SETTINGS_FIELD_IDS,
   isFieldVisibleForErrorMode,
@@ -30,6 +31,7 @@ import {
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
+import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
 import {
   getWizardStepPosition,
   getWizardSteps,
@@ -50,12 +52,19 @@ const LOGISTICS_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
 /** Flow 4 step 1 only asks for the file URI; the data source moves to its own step. */
 const FILE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = ['resource'];
 
+const toSettingsFieldPaths = (
+  fieldIds: readonly DatasetSettingsFieldId[]
+): Array<FieldPath<DatasetWizardFormValues>> =>
+  fieldIds.map((fieldId) => `settings.${fieldId}` as FieldPath<DatasetWizardFormValues>);
+
 const getLogisticsStepFields = (
   flowVariant: DatasetWizardFlowVariant
-): Array<FieldPath<DatasetWizardFormValues>> =>
-  isDatasetWizardFlow3(flowVariant) || !hasDatasetWizardRegionField(flowVariant)
+): Array<FieldPath<DatasetWizardFormValues>> => [
+  ...(isDatasetWizardFlow3(flowVariant) || !hasDatasetWizardRegionField(flowVariant)
     ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION
-    : LOGISTICS_STEP_FIELDS;
+    : LOGISTICS_STEP_FIELDS),
+  ...toSettingsFieldPaths(getResourceOwnedSettingsFieldIds(flowVariant)),
+];
 
 const GLUE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
   'glue_database',
@@ -81,10 +90,15 @@ export const getAdditionalSettingsStepFields = (
     return regionFields;
   }
 
-  const fields = DATASET_SETTINGS_FIELD_IDS.filter(
-    (fieldId) =>
-      isFieldVisibleForFormat(fieldId, format) && isFieldVisibleForErrorMode(fieldId, errorMode)
-  ).map((fieldId) => `settings.${fieldId}` as FieldPath<DatasetWizardFormValues>);
+  const resourceOwnedFieldIds = getResourceOwnedSettingsFieldIds(flowVariant);
+  const fields = toSettingsFieldPaths(
+    DATASET_SETTINGS_FIELD_IDS.filter(
+      (fieldId) =>
+        !resourceOwnedFieldIds.includes(fieldId) &&
+        isFieldVisibleForFormat(fieldId, format) &&
+        isFieldVisibleForErrorMode(fieldId, errorMode)
+    )
+  );
 
   const customJsonField: Array<FieldPath<DatasetWizardFormValues>> = isDatasetWizardFlow3(
     flowVariant

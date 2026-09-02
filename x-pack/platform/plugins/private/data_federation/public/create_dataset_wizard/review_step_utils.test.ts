@@ -12,8 +12,10 @@ import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/c
 import {
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
+import { getResourceOwnedSettingsFieldIds } from './resource_settings_fields';
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestBody,
@@ -218,6 +220,58 @@ describe('review_step_utils', () => {
         expect.objectContaining({ displayValue: 'US West (Oregon)' }),
       ])
     );
+  });
+
+  it('summarizes the partition settings with the resource in flow 3 9.6', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.parquet',
+      settings: {
+        ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+        partition_detection: 'hive' as const,
+        partition_path: 'year/month',
+      },
+    };
+
+    const logisticsRows = getReviewLogisticsRows(
+      values,
+      [s3DataSource],
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+    const settingsRows = getReviewSettingsRows(
+      values.settings,
+      values.resource,
+      undefined,
+      getResourceOwnedSettingsFieldIds(DATASET_WIZARD_FLOW_VARIANT_3_9_6)
+    );
+
+    expect(logisticsRows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: 'Partition detection', displayValue: 'Hive' }),
+        expect.objectContaining({ label: 'Partition path', displayValue: 'year/month' }),
+      ])
+    );
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition detection');
+    expect(settingsRows.map(({ label }) => label)).not.toContain('Partition path');
+  });
+
+  it('summarizes the partition settings with the format settings in flow 3', () => {
+    const settings = {
+      ...applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+      partition_detection: 'hive' as const,
+    };
+    const values = { ...emptyDatasetWizardFormValues(), settings };
+
+    expect(
+      getReviewLogisticsRows(values, [s3DataSource], DATASET_WIZARD_FLOW_VARIANT_3).map(
+        ({ label }) => label
+      )
+    ).not.toContain('Partition detection');
+    expect(
+      getReviewSettingsRows(settings, 's3://obs-logs-prod/**/*.parquet').map(({ label }) => label)
+    ).toContain('Partition detection');
   });
 
   it('marks format defaults and modified settings in summary rows', () => {

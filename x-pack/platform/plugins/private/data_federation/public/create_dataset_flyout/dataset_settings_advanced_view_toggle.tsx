@@ -20,6 +20,7 @@ import type {
 import { buildDatasetSettingsFromFormValues } from './create_dataset_flyout_form_state';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import { getFlow3AdvancedFields } from './dataset_settings_flow3_layout';
+import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import { getVisibleCustomJsonApiKeys } from './settings_custom_json_schema';
 import {
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS,
@@ -85,6 +86,8 @@ export interface DatasetSettingsAdvancedViewToggleProps {
   errorMode: DatasetErrorModeFormValue;
   testSubjPrefix: string;
   constrainWidth?: boolean;
+  /** Settings another step asks for, so this one leaves them out. */
+  excludeFieldIds?: readonly DatasetSettingsFieldId[];
 }
 
 export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
@@ -97,12 +100,16 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   errorMode,
   testSubjPrefix,
   constrainWidth = true,
+  excludeFieldIds = [],
 }) => {
   const prevSettingsDigestRef = useRef<string | null>(null);
 
   const advancedFields = useMemo(
-    () => getFlow3AdvancedFields(format, errorMode),
-    [format, errorMode]
+    () =>
+      getFlow3AdvancedFields(format, errorMode).filter(
+        (fieldId) => !excludeFieldIds.includes(fieldId)
+      ),
+    [errorMode, excludeFieldIds, format]
   );
 
   const visibleJsonApiKeys = useMemo(

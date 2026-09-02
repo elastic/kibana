@@ -45,6 +45,10 @@ import {
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { inferFormatFromResource } from '../infer_format_from_resource';
+import {
+  getResourceOwnedSettingsFieldIds,
+  keepResourceOwnedSettings,
+} from '../resource_settings_fields';
 import { WizardRegionField } from '../wizard_region_field';
 
 const FORMAT_VALUES: DatasetFormatFormValue[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
@@ -88,6 +92,10 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   const format = formatField.value as DatasetFormatFormValue;
   const hasFormatSelected = isKnownFormat(format);
   const showDefaultsAsPlaceholders = isDatasetWizardFlow396(flowVariant);
+  const resourceSettingsFieldIds = useMemo(
+    () => getResourceOwnedSettingsFieldIds(flowVariant),
+    [flowVariant]
+  );
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
   const previousErrorModeRef = useRef<DatasetErrorModeFormValue | undefined>(undefined);
 
@@ -106,9 +114,14 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const applyFormatDefaultsToForm = useCallback(
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
-      const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat, {
-        applyDefaults: !showDefaultsAsPlaceholders,
-      });
+      const currentSettings = getValues('settings');
+      const withDefaults = keepResourceOwnedSettings(
+        applySettingsForFormat(currentSettings, nextFormat, {
+          applyDefaults: !showDefaultsAsPlaceholders,
+        }),
+        currentSettings,
+        resourceSettingsFieldIds
+      );
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
 
       // Seeding the JSON with defaults would write them straight back into the
@@ -118,7 +131,14 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         previousErrorModeRef.current = withDefaults.error_mode;
       }
     },
-    [flowVariant, getValues, setDefaultCustomJson, setValue, showDefaultsAsPlaceholders]
+    [
+      flowVariant,
+      getValues,
+      resourceSettingsFieldIds,
+      setDefaultCustomJson,
+      setValue,
+      showDefaultsAsPlaceholders,
+    ]
   );
 
   const handleFormatSelection = useCallback(
@@ -194,10 +214,18 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       return;
     }
 
-    setValue('settings', emptyCreateDatasetSettingsFormValues(), {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setValue(
+      'settings',
+      keepResourceOwnedSettings(
+        emptyCreateDatasetSettingsFormValues(),
+        getValues('settings'),
+        resourceSettingsFieldIds
+      ),
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      }
+    );
     if (isDatasetWizardFlow3(flowVariant)) {
       setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
         shouldDirty: true,
@@ -211,9 +239,11 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     formatField.onChange,
     formatField.value,
     formatSelectionSource,
+    getValues,
     handleFormatSelection,
     isEditMode,
     resource,
+    resourceSettingsFieldIds,
     setValue,
     syncedResourceRef,
   ]);
@@ -337,6 +367,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
                 advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
                 testSubjPrefix="datasetWizard"
                 hasPanelBackground={!isDatasetWizardFlow396(flowVariant)}
+                excludeFieldIds={resourceSettingsFieldIds}
               />
             ) : (
               <>

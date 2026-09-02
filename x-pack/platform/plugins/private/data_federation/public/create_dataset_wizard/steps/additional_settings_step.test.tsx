@@ -725,6 +725,65 @@ describe('AdditionalSettingsStep', () => {
       });
     });
 
+    it('leaves the partition settings to the resource step in flow 3 9.6', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.parquet"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardSettingsPartitionDetection')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
+    });
+
+    it('keeps the partition settings the resource step collected', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
+          defaultValues: {
+            ...emptyDatasetWizardFormValues(),
+            settings: {
+              ...emptyDatasetWizardFormValues().settings,
+              partition_detection: 'hive',
+              partition_path: 'year/month',
+            },
+          },
+        });
+        const settings = watch('settings');
+
+        return (
+          <TestProviders>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.parquet"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+            />
+            <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
+          </TestProviders>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        const settings = JSON.parse(getByTestId('settingsSnapshot').textContent ?? '{}');
+        expect(settings).toMatchObject({
+          format: 'parquet',
+          partition_detection: 'hive',
+          partition_path: 'year/month',
+        });
+      });
+    });
+
     it('keeps pre-filling defaults in flow 3', async () => {
       const Harness = () => {
         const syncedResourceRef = useRef<string | null>(null);

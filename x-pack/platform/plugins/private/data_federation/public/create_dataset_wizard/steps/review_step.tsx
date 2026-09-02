@@ -41,6 +41,7 @@ import {
   type ReviewSettingBadge,
   type ReviewSummaryRow,
 } from '../review_step_utils';
+import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
 import { TestConfigurationPreviewContent } from '../test_configuration_preview';
 import { getSchemaSamplePreviewTableHeight } from '../schema_sample_preview_table';
 import { TEST_CONFIGURATION_PREVIEW_ROW_COUNT } from '../test_configuration_preview_utils';
@@ -227,8 +228,14 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
     [dataSources, flowVariant, values]
   );
   const settingsRows = useMemo(
-    () => getReviewSettingsRows(values.settings, values.resource, values.settings_custom_json),
-    [values.resource, values.settings, values.settings_custom_json]
+    () =>
+      getReviewSettingsRows(
+        values.settings,
+        values.resource,
+        values.settings_custom_json,
+        getResourceOwnedSettingsFieldIds(flowVariant)
+      ),
+    [flowVariant, values.resource, values.settings, values.settings_custom_json]
   );
   const schemaMappingRows = useMemo(
     () => getReviewSchemaMappingRows(values, flowVariant),
