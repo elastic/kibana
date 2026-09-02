@@ -211,7 +211,7 @@ describe('fetchIndexStats', () => {
       },
     } as any);
 
-    const result = await fetchIndexStats(client, logger);
+    const result = await fetchIndexStats(client, logger, { canMonitorAllIndices: true });
 
     expect(result.vectorCount).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2 of 3 shards'));
