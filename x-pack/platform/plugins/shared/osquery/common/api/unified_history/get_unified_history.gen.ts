@@ -122,7 +122,12 @@ export const UnifiedHistoryRowBase = lazySchema(() =>
     /**
      * For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
      */
-    agentCount: z.number().int().describe('The number of agents targeted by the query.'),
+    agentCount: z
+      .number()
+      .int()
+      .describe(
+        'For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.'
+      ),
     /**
      * The number of successful agent responses.
      */
