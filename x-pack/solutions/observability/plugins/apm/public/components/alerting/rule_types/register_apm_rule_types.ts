@@ -47,7 +47,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          getAlertFieldValue(fields[SERVICE_NAME])!,
+          getAlertFieldValue(fields[SERVICE_NAME]),
           getAlertFieldValue(fields[SERVICE_ENVIRONMENT])
         ),
       };
@@ -77,9 +77,9 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
-          getAlertFieldValue(fields[SERVICE_NAME])!,
+          getAlertFieldValue(fields[SERVICE_NAME]),
           getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
-          getAlertFieldValue(fields[TRANSACTION_TYPE])!
+          getAlertFieldValue(fields[TRANSACTION_TYPE])
         ),
       };
     },
@@ -108,9 +108,9 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        getAlertFieldValue(fields[SERVICE_NAME])!,
+        getAlertFieldValue(fields[SERVICE_NAME]),
         getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
-        getAlertFieldValue(fields[TRANSACTION_TYPE])!
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',
@@ -137,9 +137,9 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        getAlertFieldValue(fields[SERVICE_NAME])!,
+        getAlertFieldValue(fields[SERVICE_NAME]),
         getAlertFieldValue(fields[SERVICE_ENVIRONMENT]),
-        getAlertFieldValue(fields[TRANSACTION_TYPE])!
+        getAlertFieldValue(fields[TRANSACTION_TYPE])
       ),
     }),
     iconClass: 'bell',
