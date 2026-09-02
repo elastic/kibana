@@ -24,6 +24,7 @@ export {
   PND_INVESTIGATIONS_URL,
   PND_INVESTIGATION_URL_TEMPLATE,
   PND_PLUGIN_NAME,
+  ALERTZERO_THIN_AGENT_ID,
   PND_SKILLS_URL,
   PND_SKILL_URL_TEMPLATE,
   PND_WATCHES_URL,
@@ -98,6 +99,7 @@ export {
   WatchWorkerAttachment,
   WorkerRunState,
   WorkflowTriggerType,
+  type TimelineEvent,
 } from './impl/schemas';
 
 export {

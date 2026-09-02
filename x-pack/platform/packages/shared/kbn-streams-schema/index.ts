@@ -82,6 +82,7 @@ export {
   extractBucketColumnName,
   extractBucketIntervalMs,
   extractBucketTargetField,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
   findOverBroadMatchPredicates,

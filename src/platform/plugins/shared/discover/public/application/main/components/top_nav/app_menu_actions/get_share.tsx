@@ -15,10 +15,8 @@ import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType, type TimeRange } from '@kbn/es-query';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
-import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/types';
-import type { IntlShape } from '@kbn/i18n-react';
+import type { SharingData } from '@kbn/share-plugin/public/types';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import {
@@ -272,146 +270,34 @@ export const buildShareOptions = async ({
   };
 };
 
-/**
- * Generates export menu items from available share integrations
- */
-const getExportItems = (
-  buildShareOptionsParams: BuildShareOptionsParams,
-  intl: IntlShape
-): DiscoverAppMenuPopoverItem[] => {
-  const { services } = buildShareOptionsParams;
-
-  if (!services.share) return [];
-
-  const exportIntegrations = services.share.availableIntegrations('search', 'export');
-  const exportDerivatives = services.share.availableIntegrations('search', 'exportDerivatives');
-
-  const hasCsvReports = exportIntegrations.some(
-    (item: ShareActionIntents) =>
-      item.shareType === 'integration' && 'id' in item && item.id === 'csvReports'
-  );
-  const hasScheduledReports = exportDerivatives.some(
-    (item: ShareActionIntents) =>
-      item.shareType === 'integration' && 'id' in item && item.id === 'scheduledReports'
-  );
-
-  const exportItems: DiscoverAppMenuPopoverItem[] = [];
-
-  if (hasCsvReports) {
-    exportItems.push({
-      id: 'csvReports',
-      label: i18n.translate('discover.localMenu.export.csvLabel', {
-        defaultMessage: 'CSV',
-      }),
-      testId: 'exportMenuItem-CSV',
-      iconType: 'table',
-      order: 1,
-      run: async () => {
-        const shareOptions = await buildShareOptions(buildShareOptionsParams);
-        const handler = await services.share?.getExportHandler(shareOptions, 'csvReports', intl);
-        await handler?.();
-      },
-    });
-  }
-
-  if (hasScheduledReports) {
-    exportItems.push({
-      id: 'scheduledReports',
-      label: i18n.translate('discover.localMenu.export.scheduleExportLabel', {
-        defaultMessage: 'Schedule export',
-      }),
-      testId: 'exportMenuItem-scheduledReports',
-      iconType: 'calendar',
-      order: 2,
-      run: async () => {
-        const shareOptions = await buildShareOptions(buildShareOptionsParams);
-        const handler = await services.share?.getExportDerivativeHandler(
-          shareOptions,
-          'scheduledReports'
-        );
-        await handler?.();
-      },
-    });
-  }
-
-  return exportItems;
-};
-
 export const getShareAppMenuItem = ({
   shareAction,
-  discoverParams,
-  services,
-  hasIntegrations,
-  hasUnsavedChanges,
-  currentTab,
-  runtimeStateManager,
-  persistedDiscoverSession,
-  totalHitsState,
-  intl,
 }: {
   shareAction?: AppHeaderShareAction;
-  discoverParams: AppMenuDiscoverParams;
-  services: DiscoverServices;
-  hasIntegrations: boolean;
-  hasUnsavedChanges: boolean;
-  currentTab: TabState;
-  runtimeStateManager: RuntimeStateManager;
-  persistedDiscoverSession: DiscoverSession | undefined;
-  totalHitsState: DataTotalHitsMsg;
-  intl: IntlShape;
-}): DiscoverAppMenuItemType[] => {
-  const menuItems: DiscoverAppMenuItemType[] = [];
-
-  if (shareAction) {
-    menuItems.push({
-      id: AppMenuActionId.share,
-      order: 1,
-      label: i18n.translate('discover.localMenu.shareTitle', {
-        defaultMessage: 'Share',
-      }),
-      tooltipContent:
-        shareAction.tooltip?.content ??
-        i18n.translate('discover.localMenu.shareTooltip', {
-          defaultMessage: 'Share session',
-        }),
-      tooltipTitle: shareAction.tooltip?.title,
-      iconType: 'share',
-      testId: 'shareTopNavButton',
-      disableButton: shareAction.isDisabled,
-      run: (params) => {
-        void shareAction.onClick({
-          returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
-        });
-      },
-    });
+}): DiscoverAppMenuItemType | undefined => {
+  if (!shareAction) {
+    return undefined;
   }
 
-  if (hasIntegrations) {
-    const exportItems = getExportItems(
-      {
-        discoverParams,
-        services,
-        currentTab,
-        runtimeStateManager,
-        persistedDiscoverSession,
-        totalHitsState,
-        hasUnsavedChanges,
-      },
-      intl
-    );
-
-    menuItems.unshift({
-      id: AppMenuActionId.export,
-      order: 8,
-      label: i18n.translate('discover.localMenu.exportTitle', {
-        defaultMessage: 'Export tab results',
+  return {
+    id: AppMenuActionId.share,
+    order: 1,
+    label: i18n.translate('discover.localMenu.shareTitle', {
+      defaultMessage: 'Share',
+    }),
+    tooltipContent:
+      shareAction.tooltip?.content ??
+      i18n.translate('discover.localMenu.shareTooltip', {
+        defaultMessage: 'Share session',
       }),
-      iconType: 'upload',
-      testId: 'exportTopNavButton',
-      items: exportItems,
-      popoverTestId: 'exportPopoverPanel',
-    });
-  }
-
-  return menuItems;
+    tooltipTitle: shareAction.tooltip?.title,
+    iconType: 'share',
+    testId: 'shareTopNavButton',
+    disableButton: shareAction.isDisabled,
+    run: (params) => {
+      void shareAction.onClick({
+        returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
+      });
+    },
+  };
 };

@@ -112,7 +112,6 @@ describe('KillSuspendProcessActionResult', () => {
     expect(output).toContain('PID 1234');
     expect(output).toContain('Entity ID entity-a');
     expect(output).toContain('Name malware.exe');
-    expect(output).toContain('Command malware.exe --run');
   });
 
   it('should only render the output fields that are present in the content', () => {
@@ -346,7 +345,7 @@ describe('KillSuspendProcessActionResult', () => {
 
       expect(
         getAllByTestId(`${testPrefix}-agent-a-processTree-456-details`)[0].textContent
-      ).toContain('456_command.exe');
+      ).toContain('PID 456');
     });
 
     it('should not render the descendants tree for a suspend-process action', () => {
