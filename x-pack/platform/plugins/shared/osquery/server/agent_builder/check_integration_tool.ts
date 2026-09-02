@@ -81,6 +81,13 @@ export const checkIntegrationTool = (
 ): BuiltinToolDefinition<typeof checkIntegrationSchema> => ({
   id: CHECK_INTEGRATION_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Check Osquery Integration',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     'Check whether the Osquery integration is installed and whether osquerybeat agents are enrolled. Use this before any other osquery tool to determine if live host interrogation via Osquery is available. Pass agent_id to check whether one specific host can run Osquery queries. Returns installation status, version, agent enrollment count, and an enrollment_status of enrolled / not_enrolled / unknown.',
   schema: checkIntegrationSchema,

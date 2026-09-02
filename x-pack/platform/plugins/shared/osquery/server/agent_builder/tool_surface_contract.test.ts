@@ -50,6 +50,41 @@ describe('Osquery Agent Builder tool surface', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('every tool declares all five MCP annotations', () => {
+    // `McpToolAnnotations` types these as Required<>, so an omission is also a
+    // type error — but all seven tools survived a clean merge of the commit
+    // that introduced the field with zero annotations and only CI caught it.
+    // Assert the surface structurally so a new tool file cannot repeat that.
+    const REQUIRED = [
+      'title',
+      'readOnlyHint',
+      'destructiveHint',
+      'idempotentHint',
+      'openWorldHint',
+    ];
+    for (const { file, source } of readToolFiles()) {
+      const block = source.match(/^ {2}annotations: \{$([\s\S]*?)^ {2}\},$/m);
+      expect([file, Boolean(block)]).toEqual([file, true]);
+      const missing = REQUIRED.filter((key) => !new RegExp(`^\\s*${key}:`, 'm').test(block![1]));
+      expect([file, missing]).toEqual([file, []]);
+    }
+  });
+
+  it('no tool claims to be both read-only and destructive', () => {
+    // Mutually exclusive per the MCP annotation guide: a tool asserting both
+    // tells the client nothing and silently defeats the classification.
+    const offenders = readToolFiles()
+      .filter(({ source }) => {
+        const block = source.match(/^ {2}annotations: \{$([\s\S]*?)^ {2}\},$/m);
+
+        return (
+          !!block && /readOnlyHint: true/.test(block[1]) && /destructiveHint: true/.test(block[1])
+        );
+      })
+      .map(({ file }) => file);
+    expect(offenders).toEqual([]);
+  });
+
   it('live-query result reads are space-scoped', () => {
     const resultReaders = readToolFiles().filter(
       ({ source }) =>

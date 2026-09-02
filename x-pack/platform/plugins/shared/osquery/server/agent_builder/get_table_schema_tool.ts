@@ -40,6 +40,13 @@ export const getTableSchemaTool = (
 ): BuiltinToolDefinition<typeof getTableSchemaSchema> => ({
   id: GET_TABLE_SCHEMA_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Get Osquery Table Schema',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     'Get the Osquery table schema (columns, types, descriptions) for a specific table. Use this before authoring a custom Osquery query to verify column names and types. The schema is sourced from the installed osquery_manager integration package.',
   schema: getTableSchemaSchema,

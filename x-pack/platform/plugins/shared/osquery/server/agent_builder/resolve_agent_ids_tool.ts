@@ -87,6 +87,13 @@ export const resolveAgentIdsTool = (
 ): BuiltinToolDefinition<typeof resolveAgentIdsSchema> => ({
   id: RESOLVE_AGENT_IDS_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Resolve Osquery Agent IDs',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     "Resolve host names to Elastic Agent IDs for use with osquery.run_live_query's agent_ids parameter. " +
     'Use this instead of querying the .fleet-agents index directly via ES|QL or search — that index requires ' +

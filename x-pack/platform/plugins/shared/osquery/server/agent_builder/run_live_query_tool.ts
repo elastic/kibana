@@ -60,6 +60,13 @@ export const runLiveQueryTool = (
 ): BuiltinToolDefinition<typeof runLiveQuerySchema> => ({
   id: RUN_LIVE_QUERY_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Run Osquery Live Query',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   description:
     'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,

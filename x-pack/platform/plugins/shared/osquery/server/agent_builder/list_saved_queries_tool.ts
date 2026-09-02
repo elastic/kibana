@@ -37,6 +37,13 @@ export const listSavedQueriesTool = (
 ): BuiltinToolDefinition<typeof listSavedQueriesSchema> => ({
   id: LIST_SAVED_QUERIES_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'List Osquery Saved Queries',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     'List available Osquery saved queries (prebuilt and custom). Use this to discover existing queries before authoring a custom one. Returns query text, platform, interval, and prebuilt status.',
   schema: listSavedQueriesSchema,

@@ -39,6 +39,13 @@ export const listPacksTool = (
 ): BuiltinToolDefinition<typeof listPacksSchema> => ({
   id: LIST_PACKS_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'List Osquery Packs',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     'List available Osquery packs (curated query bundles from Elastic and custom packs). Use this when the analyst references a pack by name (e.g. "Windows persistence pack"). Returns pack name, queries, and enabled status. Pack queries can be run with osquery.run_live_query after applying analyst-scope filters.',
   schema: listPacksSchema,

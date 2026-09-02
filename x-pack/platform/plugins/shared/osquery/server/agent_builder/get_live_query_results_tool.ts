@@ -52,6 +52,13 @@ export const getLiveQueryResultsTool = (
 ): BuiltinToolDefinition<typeof getLiveQueryResultsSchema> => ({
   id: GET_LIVE_QUERY_RESULTS_TOOL_ID,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Get Osquery Live Query Results',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   description:
     'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive.',
   schema: getLiveQueryResultsSchema,
