@@ -33,6 +33,6 @@ export const CATALOG_SOURCE_URLS = {
 
 /** Returns the catalog fetch URL for a source id, if it is part of the approved set. */
 export const resolveCatalogSourceUrl = (sourceId: string): string | undefined =>
-  sourceId in CATALOG_SOURCE_URLS
+  Object.hasOwn(CATALOG_SOURCE_URLS, sourceId)
     ? CATALOG_SOURCE_URLS[sourceId as keyof typeof CATALOG_SOURCE_URLS]
     : undefined;

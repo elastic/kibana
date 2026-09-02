@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { normalizedReportSchema } from './fetch_source_common';
+import { GLOBAL_SPACE_ID } from '../../../constants';
+import { CATALOG_SOURCE_URLS } from '../../../catalog_source_urls';
+import { normalizedReportSchema, sourceHitSchema } from './fetch_source_common';
 
 const buildTitleOnlyReport = (): Record<string, unknown> => ({
   '@timestamp': '2026-09-01T00:00:00.000Z',
@@ -41,5 +43,26 @@ describe('normalizedReportSchema', () => {
     };
 
     expect(normalizedReportSchema.parse(report).source.url).toBeUndefined();
+  });
+});
+
+describe('sourceHitSchema', () => {
+  it('accepts a seeded catalog hit without a persisted config field', () => {
+    const sourceId = 'vendor_api:elastic-security-labs';
+    const parsed = sourceHitSchema.parse({
+      _id: sourceId,
+      _index: '.kibana-threat-intel-sources',
+      _source: {
+        adapter_type: 'rss',
+        name: 'Elastic Security Labs',
+        enabled: true,
+        tags: ['vendor', 'elastic', 'research', 'research-tools'],
+        space_id: GLOBAL_SPACE_ID,
+      },
+    });
+
+    expect(parsed._id).toBe(sourceId);
+    expect(parsed._source).not.toHaveProperty('config');
+    expect(CATALOG_SOURCE_URLS[sourceId]).toBe('https://www.elastic.co/security-labs/rss/feed.xml');
   });
 });

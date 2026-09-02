@@ -19,6 +19,10 @@ describe('CATALOG_SOURCE_URLS', () => {
     expect(resolveCatalogSourceUrl('rss:unknown')).toBeUndefined();
   });
 
+  it('returns undefined for Object.prototype names so they are not treated as catalog ids', () => {
+    expect(resolveCatalogSourceUrl('toString')).toBeUndefined();
+  });
+
   it('returns the catalog URL for an approved source id', () => {
     expect(resolveCatalogSourceUrl('vendor_api:elastic-security-labs')).toBe(
       'https://www.elastic.co/security-labs/rss/feed.xml'

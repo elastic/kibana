@@ -7,7 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { GLOBAL_SPACE_ID, CATALOG_SOURCE_URLS } from '../../../common/threat_intel';
-import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
+import {
+  DEFAULT_SOURCES,
+  LEGACY_SOURCE_DISABLE_PAGE_SIZE,
+  seedDefaultSources,
+} from './seed_default_sources';
 
 const TOTAL = DEFAULT_SOURCES.length;
 
@@ -279,5 +283,61 @@ describe('seedDefaultSources', () => {
     expect(logger.info).toHaveBeenCalledWith(
       `Default source reconciliation finished: ${TOTAL} created, 0 updated, 0 unchanged, 0 failed`
     );
+  });
+
+  it('pages through all enabled legacy sources with search_after', async () => {
+    const firstPage = Array.from({ length: LEGACY_SOURCE_DISABLE_PAGE_SIZE }, (_, index) => ({
+      _id: `legacy:page1-${index}`,
+      sort: [`legacy:page1-${index}`],
+      _source: { enabled: true },
+    }));
+    const secondPage = [
+      {
+        _id: 'legacy:page2-0',
+        sort: ['legacy:page2-0'],
+        _source: { enabled: true },
+      },
+    ];
+
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
+    esClient.search
+      .mockResolvedValueOnce({ hits: { hits: firstPage } } as never)
+      .mockResolvedValueOnce({ hits: { hits: secondPage } } as never);
+    esClient.update.mockResolvedValue({} as never);
+
+    const result = await seedDefaultSources({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(esClient.search.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        search_after: ['legacy:page1-999'],
+      })
+    );
+    expect(esClient.update).toHaveBeenCalledTimes(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
+    expect(result.updated).toBe(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
+    expect(result.failed).toBe(0);
+  });
+
+  it('counts a failed legacy-source disable so bootstrap can retry', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [{ _id: 'legacy:custom-feed', sort: ['legacy:custom-feed'], _source: { enabled: true } }],
+      },
+    } as never);
+    esClient.update.mockRejectedValue(new Error('version_conflict_engine_exception'));
+
+    const result = await seedDefaultSources({
+      esClient,
+      logger: loggingSystemMock.createLogger(),
+    });
+
+    expect(result.updated).toBe(0);
+    expect(result.failed).toBe(1);
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   GLOBAL_SPACE_ID,
@@ -267,12 +268,11 @@ export const seedDefaultSources = async ({
   }
 
   if (operations.length === 0) {
-    const legacyDisabled = await disableLegacySources({ esClient, logger, now });
-    if (legacyDisabled > 0) {
-      result.updated += legacyDisabled;
-    }
+    const legacy = await disableLegacySources({ esClient, logger, now });
+    result.updated += legacy.disabled;
+    result.failed += legacy.failed;
     log.debug(
-      `Default source reconciliation finished: 0 created, ${result.updated} updated, ${result.skipped} unchanged, 0 failed`
+      `Default source reconciliation finished: 0 created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`
     );
     return result;
   }
@@ -313,10 +313,9 @@ export const seedDefaultSources = async ({
     await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
   }
 
-  const legacyDisabled = await disableLegacySources({ esClient, logger, now });
-  if (legacyDisabled > 0) {
-    result.updated += legacyDisabled;
-  }
+  const legacy = await disableLegacySources({ esClient, logger, now });
+  result.updated += legacy.disabled;
+  result.failed += legacy.failed;
 
   const summary = `Default source reconciliation finished: ${result.created} created, ${result.updated} updated, ${result.skipped} unchanged, ${result.failed} failed`;
   if (result.created > 0 || result.updated > 0 || result.failed > 0) {
@@ -328,6 +327,9 @@ export const seedDefaultSources = async ({
   return result;
 };
 
+/** Page size for disabling out-of-catalog enabled sources. Exported for multi-page tests. */
+export const LEGACY_SOURCE_DISABLE_PAGE_SIZE = 1000;
+
 const disableLegacySources = async ({
   esClient,
   logger,
@@ -336,41 +338,63 @@ const disableLegacySources = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   now: string;
-}): Promise<number> => {
+}): Promise<{ disabled: number; failed: number }> => {
   const log = logger.get('seed-default-sources');
   let disabled = 0;
+  let failed = 0;
+  let searchAfter: estypes.SortResults | undefined;
 
-  const response = await esClient.search<{ enabled?: boolean }>({
-    index: THREAT_INTEL_SOURCES_INDEX,
-    size: 1000,
-    _source: ['enabled'],
-    query: {
-      bool: {
-        filter: [{ term: { enabled: true } }],
-        must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
+  for (;;) {
+    const response = await esClient.search<{ enabled?: boolean }>({
+      index: THREAT_INTEL_SOURCES_INDEX,
+      size: LEGACY_SOURCE_DISABLE_PAGE_SIZE,
+      sort: [{ _id: 'asc' }],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+      _source: ['enabled'],
+      query: {
+        bool: {
+          filter: [{ term: { enabled: true } }],
+          must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
+        },
       },
-    },
-  });
+    });
 
-  for (const hit of (response.hits.hits ?? []).filter((document) => document._id)) {
-    const sourceId = hit._id as string;
-    try {
-      await esClient.update({
-        index: THREAT_INTEL_SOURCES_INDEX,
-        id: sourceId,
-        doc: { enabled: false, updated_at: now },
-        refresh: false,
-      });
-      disabled += 1;
-      log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
-    } catch (err) {
-      log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
+    const hits = (response.hits.hits ?? []).filter((document) => document._id);
+    if (hits.length === 0) {
+      break;
     }
+
+    for (const hit of hits) {
+      const sourceId = hit._id as string;
+      try {
+        await esClient.update({
+          index: THREAT_INTEL_SOURCES_INDEX,
+          id: sourceId,
+          doc: { enabled: false, updated_at: now },
+          refresh: false,
+        });
+        disabled += 1;
+        log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
+      } catch (err) {
+        failed += 1;
+        log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
+      }
+    }
+
+    if (hits.length < LEGACY_SOURCE_DISABLE_PAGE_SIZE) {
+      break;
+    }
+
+    const lastSort = hits[hits.length - 1]?.sort;
+    if (!lastSort) {
+      throw new Error('Legacy source search page is missing sort values for search_after');
+    }
+    searchAfter = lastSort;
   }
 
   if (disabled > 0) {
     await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
   }
 
-  return disabled;
+  return { disabled, failed };
 };

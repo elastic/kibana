@@ -14,6 +14,12 @@ import { FETCH_ADAPTER_TYPES, REPORT_SOURCE_TYPES, SEVERITY_LEVELS } from '../..
 /** Workflow step: fetch one source hit and return normalized threat reports. */
 export const FETCH_SOURCE_STEP_TYPE = 'threat_intel.fetch_source' as const;
 
+/**
+ * Persisted catalog hit shape for the fetch_source step.
+ *
+ * Feed URLs are not stored on the sources index. Adapters resolve the URL from
+ * the stable `_id` via `resolveCatalogSourceUrl` at fetch time.
+ */
 export const sourceHitSchema = z.object({
   _id: z.string(),
   _index: z.string().optional(),
@@ -21,7 +27,6 @@ export const sourceHitSchema = z.object({
     adapter_type: z.enum(FETCH_ADAPTER_TYPES),
     name: z.string(),
     enabled: z.boolean().optional(),
-    config: z.record(z.string(), z.unknown()),
     tags: z.array(z.string()).optional(),
     space_id: z.string().optional(),
   }),
