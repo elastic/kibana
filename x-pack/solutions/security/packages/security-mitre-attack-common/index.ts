@@ -15,3 +15,18 @@ export type {
 } from './src/schema';
 
 export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+
+export type {
+  MitreEntityStatus,
+  MitreEntityBuckets,
+  MitreEntityCollection,
+  MitreListParams,
+} from './src/api_types';
+
+export { DEFAULT_MITRE_FRAMEWORK, DEFAULT_MITRE_ENTITY_STATUS } from './src/constants';
+
+export {
+  getMockMitreTactic,
+  getMockMitreTechnique,
+  getMockMitreSubtechnique,
+} from './src/mitre_entity_builders';
