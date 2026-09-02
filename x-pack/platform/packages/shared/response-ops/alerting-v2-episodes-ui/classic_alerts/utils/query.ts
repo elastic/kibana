@@ -193,7 +193,7 @@ export const buildClassicAlertsSort = (sortState?: EpisodesSortState): estypes.S
           script: { source: SEVERITY_SORT_SCRIPT, lang: 'painless' },
           order,
         },
-      } as unknown as estypes.SortOptions,
+      },
     ];
   }
 
