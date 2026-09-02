@@ -289,6 +289,6 @@ describe('FlyoutTemplate header blocks', () => {
       { collapsed: true }
     );
 
-    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute('aria-hidden');
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute('aria-hidden', 'true');
   });
 });
