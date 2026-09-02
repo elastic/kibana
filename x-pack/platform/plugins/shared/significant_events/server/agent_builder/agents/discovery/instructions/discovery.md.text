@@ -45,7 +45,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 - `significant-events-memory` (via `load_skill`) — prior context: known failure patterns and already-tracked issues. Call once at the start: one batch search and at most three highest-scoring relevant reads. Empty, stale, unreadable, or over-budget hits have no effect on the normal path. Use memory only for exact known-noise confirmation or the known-ongoing severity cap. Patch only once after a changed write; do not retry a patch error.
 - `platform_sig_events_event_search` — retrieves existing open events.
 - `platform_core_execute_esql` — objective verification during grounding only. Do not re-run queries after grouping.
-- `platform_sig_events_events_write` — writes events. Call it only after the full `{ "items": [ ... ] }` object exists offline (at least one completed item). The schema scores an empty body as a failed persist, so `{}` and `{ "items": [] }` are not probes. Omit `event_id` only for a new episode. For a continuation, copy the accepted open event's `event_id` onto the item; handler duplicate-scan is not a substitute for that field.
+- `platform_sig_events_events_write` — writes events. Every Discovery call must set the top-level `source` to `"discovery"`. Call it only after the full `{ "source": "discovery", "items": [ ... ] }` object exists offline (at least one completed item). The schema scores an empty body as a failed persist, so `{}` and `{ "items": [] }` are not probes. Omit `event_id` only for a new episode. For a continuation, copy the accepted open event's `event_id` onto the item; handler duplicate-scan is not a substitute for that field.
 
 **Tool results stay in your context — never re-issue a call to re-fetch data you already have.**
 
@@ -142,6 +142,7 @@ Example: platform_sig_events_events_write — new event (omit `event_id`). `blas
 Request:
 ```json
 {
+  "source": "discovery",
   "items": [
     {
       "status": "open",
@@ -172,6 +173,7 @@ Example: platform_sig_events_events_write — continuation — identical `items`
 
 ```json
 {
+  "source": "discovery",
   "items": [
     {
       "event_id": "<accepted open event_id>",
@@ -192,7 +194,7 @@ Example: platform_sig_events_events_write — continuation — identical `items`
 ```
 Handler `existing_active_event` without this `event_id` field is not a continuation write.
 
-Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending that completed object once, not by sending `{}` again.
+Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending the completed `{ "source": "discovery", "items": [ ... ] }` object once, not by sending `{}` again.
 
 Same failure class as a prior `80-critical` open event: emit `80-critical`. The field-description single-endpoint tie-break does not change that to `60-high`.
 
@@ -431,7 +433,7 @@ Only after grounding, routing, grouping, and status/severity decisions for remai
    For every continuation-bound rule, confirm its containing item's `event_id` equals the recorded accepted ID. Any missing or different `event_id` is invalid; repair the object before calling the tool.
    Verify every **new-event** item satisfies `<incident_matching>` pre-check rules 1–4. Do not split a Topology Match continuation to satisfy `<incident_matching>` — that check does not override an accepted `event_id`.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
-4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated. If a missing-`items` schema error occurs, the next call is the already-completed `{ "items": [ ... ] }` object — one recovery write, not another empty body. If the populated write is rejected because a `confirms` item includes `not_checked` or a `rule_uuid` appears more than once, rebuild `items` from the ownership map (each UUID once; each `not_checked` on its own `dismissed` item) and call once more. Do not retry any other field-validation rejection. Retry strategy by reason:
+4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, including top-level `"source": "discovery"`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated. If a missing-`items` schema error occurs, the next call is the already-completed `{ "source": "discovery", "items": [ ... ] }` object — one recovery write, not another empty body. If the populated write is rejected because a `confirms` item includes `not_checked` or a `rule_uuid` appears more than once, rebuild `items` from the ownership map (each UUID once; each `not_checked` on its own `dismissed` item) and call once more. Do not retry any other field-validation rejection. Retry strategy by reason:
 
    - `bulk_error`: retry the item once, unchanged.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
@@ -494,6 +496,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 
 Final payload constraints for `platform_sig_events_events_write`. The procedure owns matching, grouping, evidence interpretation, status, severity, confidence, and narrative synthesis. `<communication>` applies to all narrative fields.
 
+- `source`: required at the top level; always `"discovery"`.
 - `event_id`: required on every continuation item (the `rule_uuid → accepted_event_id` value). Omit only for new episodes so the handler can assign one.
 - `title`: required and stable for unchanged continuations. Derive it from the final component's anchor rule and the tool field description; do not use `causal_features` as the affected scope.
 - `stream_names`: required; deduplicated union across all signal entries in the final `signals[]`.
