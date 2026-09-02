@@ -1,0 +1,23 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getDataStreamsHasDataExample:
+            description: 'One entry per requested index pattern'
+            value:
+              results:
+                'logs-aws.cloudtrail-*': true
+                'metrics-aws.ec2-*': false
+  400:
+    description: 'Bad request'
+    content:
+      application/json:
+        examples:
+          getDataStreamsHasDataInvalidPatternExample:
+            description: 'A requested pattern is not a supported data stream wildcard'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'Invalid index pattern: ".security-7"'

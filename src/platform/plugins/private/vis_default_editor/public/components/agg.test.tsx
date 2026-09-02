@@ -95,7 +95,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
     comp.update();
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: false,
       aggId: defaultProps.agg.id,
@@ -117,7 +117,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(true);
     });
     comp.update();
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: true,
       aggId: defaultProps.agg.id,
@@ -130,13 +130,13 @@ describe('DefaultEditorAgg component', () => {
 
   it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-    expect(defaultProps.setAggsState).toBeCalledTimes(0);
+    expect(defaultProps.setAggsState).toHaveBeenCalledTimes(0);
 
     comp.find('.euiAccordion__button').last().simulate('click');
     // make sure that the accordion is collapsed
     expect(comp.find('.euiAccordion-isOpen').exists()).toBeFalsy();
 
-    expect(defaultProps.setAggsState).toBeCalledWith({
+    expect(defaultProps.setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.TOUCHED,
       payload: true,
       aggId: defaultProps.agg.id,
@@ -150,7 +150,7 @@ describe('DefaultEditorAgg component', () => {
       comp.find(DefaultEditorAggParams).props().setValidity(false);
     });
 
-    expect(setAggsState).toBeCalledWith({
+    expect(setAggsState).toHaveBeenCalledWith({
       type: AGGS_ACTION_KEYS.VALID,
       payload: false,
       aggId: defaultProps.agg.id,
@@ -202,7 +202,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn disable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, false);
+      expect(defaultProps.onToggleEnableAgg).toHaveBeenCalledWith(defaultProps.agg.id, false);
     });
 
     it('should disable the disableAggregation button', () => {
@@ -222,7 +222,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="toggleDisableAggregationBtn enable"] button').simulate('click');
 
-      expect(defaultProps.onToggleEnableAgg).toBeCalledWith(defaultProps.agg.id, true);
+      expect(defaultProps.onToggleEnableAgg).toHaveBeenCalledWith(defaultProps.agg.id, true);
     });
 
     it('should call removeAgg', () => {
@@ -230,7 +230,7 @@ describe('DefaultEditorAgg component', () => {
       const comp = mount(<DefaultEditorAgg {...defaultProps} />);
       comp.find('[data-test-subj="removeDimensionBtn"] button').simulate('click');
 
-      expect(defaultProps.removeAgg).toBeCalledWith(defaultProps.agg.id);
+      expect(defaultProps.removeAgg).toHaveBeenCalledWith(defaultProps.agg.id);
     });
   });
 

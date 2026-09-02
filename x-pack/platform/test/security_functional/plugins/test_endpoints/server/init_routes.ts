@@ -18,10 +18,11 @@ import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
-import type {
-  BulkUpdateTaskResult,
-  ConcreteTaskInstance,
-  TaskManagerStartContract,
+import {
+  type BulkUpdateTaskResult,
+  type ConcreteTaskInstance,
+  getUiamApiKeySecret,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';
@@ -957,8 +958,9 @@ export function initRoutes(
       validate: {
         body: schema.object({
           id: schema.string(),
-          authcScheme: schema.string(),
-          credential: schema.string(),
+          authcScheme: schema.string({ defaultValue: 'ApiKey' }),
+          credential: schema.maybe(schema.string()),
+          taskId: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
         }),
       },
       security: {
@@ -972,8 +974,8 @@ export function initRoutes(
     },
     async (context, request, response) => {
       try {
-        const { id, authcScheme, credential } = request.body;
-        const [{ security }] = await core.getStartServices();
+        const { id, authcScheme, credential, taskId } = request.body;
+        const [{ security }, { taskManager }] = await core.getStartServices();
 
         if (!security.authc.apiKeys.uiam) {
           return response.badRequest({
@@ -981,16 +983,29 @@ export function initRoutes(
           });
         }
 
-        // Create a new request with the provided authentication header
-        const requestHeaders: Headers = {
-          ...request.headers,
-          authorization: `${authcScheme} ${credential}`,
-        };
-        const fakeRawRequest: FakeRawRequest = {
-          headers: requestHeaders,
-          path: request.url.pathname,
-        };
-        const requestToUse = kibanaRequestFactory(fakeRawRequest);
+        let credentialToUse = credential;
+        if (taskId) {
+          const task = await taskManager.get(taskId);
+          if (task.userScope?.uiamApiKeyId !== id || !task.uiamApiKey) {
+            return response.badRequest({
+              body: { message: 'Task does not contain the requested UIAM API key' },
+            });
+          }
+          credentialToUse = getUiamApiKeySecret(task.uiamApiKey);
+        }
+
+        let requestToUse = request;
+        if (credentialToUse) {
+          const requestHeaders: Headers = {
+            ...request.headers,
+            authorization: `${authcScheme} ${credentialToUse}`,
+          };
+          const fakeRawRequest: FakeRawRequest = {
+            headers: requestHeaders,
+            path: request.url.pathname,
+          };
+          requestToUse = kibanaRequestFactory(fakeRawRequest);
+        }
 
         const result = await security.authc.apiKeys.uiam.invalidate(requestToUse, { id });
 
