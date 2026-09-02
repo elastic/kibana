@@ -167,7 +167,7 @@ describe('EditSpace', () => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('My Space');
       expect(screen.queryByTestId('editSpacePageLoading')).not.toBeInTheDocument();
       expect(screen.getByTestId('space-solution-badge-es')).toBeInTheDocument();
-      expect(screen.getByText('Current')).toBeInTheDocument();
+      expect(screen.getByTestId('space-current-badge')).toHaveTextContent('Current');
 
       const tabs = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs);
       expect(within(tabs).getByRole('tab', { name: 'General settings' })).toBeInTheDocument();

@@ -27,7 +27,7 @@ import { useTabs } from './hooks/use_tabs';
 import { useEditSpaceServices, useEditSpaceStore } from './provider';
 import { ENTER_SPACE_PATH, type Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { SpaceSolutionBadge } from '../../space_solution_badge';
+import { getSpaceSolutionBadgeLabel, SpaceSolutionBadge } from '../../space_solution_badge';
 
 const spacesListTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
   defaultMessage: 'Spaces',
@@ -99,7 +99,6 @@ export const EditSpace: FC<PageProps> = ({
     space,
     features,
     isRoleManagementEnabled,
-    rolesCount: state.roles.size,
     capabilities,
     history,
     currentSelectedTabId: selectedTabId,
@@ -210,8 +209,7 @@ export const EditSpace: FC<PageProps> = ({
   const badges: AppHeaderBadge[] = [];
   if (shouldShowSolutionBadge) {
     badges.push({
-      label: solution,
-      'data-test-subj': `space-solution-badge-${solution}`,
+      label: getSpaceSolutionBadgeLabel(solution),
       renderCustomBadge: () => (
         <SpaceSolutionBadge
           solution={solution}
@@ -224,6 +222,7 @@ export const EditSpace: FC<PageProps> = ({
     badges.push({
       label: currentSpaceBadgeLabel,
       color: 'primary',
+      'data-test-subj': 'space-current-badge',
     });
   }
 
