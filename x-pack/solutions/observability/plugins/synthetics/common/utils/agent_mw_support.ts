@@ -11,6 +11,11 @@ import semverGte from 'semver/functions/gte';
 /** First Elastic Agent version that honors Maintenance Window scheduling. */
 export const MIN_MW_SUPPORTED_AGENT_VERSION = '8.19.0';
 
+/** Response of `GET …/private_locations/outdated_mw_agents`. */
+export interface OutdatedMwAgentLocationsResponse {
+  outdatedLocationIds: string[];
+}
+
 /**
  * Whether an Elastic Agent version is new enough to honor Maintenance Windows.
  * An unparsable or missing version is treated as compatible so we never warn

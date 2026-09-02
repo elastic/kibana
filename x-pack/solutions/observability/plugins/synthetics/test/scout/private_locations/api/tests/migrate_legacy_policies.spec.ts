@@ -240,7 +240,8 @@ apiTest.describe(
       }
     );
 
-    apiTest(
+    // Skipped due to high failure rate in CI, see https://github.com/elastic/kibana/issues/288494
+    apiTest.fixme(
       'should migrate legacy policies to new format when cleanup runs',
       async ({ apiClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT);
