@@ -10,32 +10,32 @@ import { buildPipelineDisplayGroups, filterEpicsByPipelineScope } from './pipeli
 
 const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhaseSummary =>
   ({
-  id: 'epic:workflows:demo',
-  epicKey: 'DEMO',
-  displayId: 'DEMO-1',
-  title: 'Demo epic',
-  summary: 'Demo',
-  owner: 'owner',
-  status: 'open',
-  coveragePct: 50,
-  deliveryCoveragePct: 50,
-  gatesPassedPct: 50,
-  roadmap: {
-    id: 'workflows',
-    title: 'Elastic Workflows (Automation) Roadmap',
-    product: 'Elastic Workflows',
-  },
-  teams: {
-    ownOrgTeam: 'siem',
-    ownEngineeringTeam: 'One Workflow',
-    contributingOrgTeams: ['siem'],
-    contributingEngineeringTeams: [],
-    crossTeam: false,
-    teamCount: 1,
-  },
-  phases: {},
-  ticketsByRepo: [],
-  ...overrides,
+    id: 'epic:workflows:demo',
+    epicKey: 'DEMO',
+    displayId: 'DEMO-1',
+    title: 'Demo epic',
+    summary: 'Demo',
+    owner: 'owner',
+    status: 'open',
+    coveragePct: 50,
+    deliveryCoveragePct: 50,
+    gatesPassedPct: 50,
+    roadmap: {
+      id: 'workflows',
+      title: 'Elastic Workflows (Automation) Roadmap',
+      product: 'Elastic Workflows',
+    },
+    teams: {
+      ownOrgTeam: 'siem',
+      ownEngineeringTeam: 'One Workflow',
+      contributingOrgTeams: ['siem'],
+      contributingEngineeringTeams: [],
+      crossTeam: false,
+      teamCount: 1,
+    },
+    phases: {},
+    ticketsByRepo: [],
+    ...overrides,
   } as SdlcEpicPhaseSummary);
 
 const roadmaps: SdlcRoadmapGroup[] = [

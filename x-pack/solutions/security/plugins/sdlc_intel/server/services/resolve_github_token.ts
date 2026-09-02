@@ -108,7 +108,6 @@ const resolveTokenFromConnector = async (
     return secrets.token;
   }
 
-
   const axiosInstance = await actionsSetup.getAxiosInstanceWithAuth({
     connectorId: connector.id,
     secrets,

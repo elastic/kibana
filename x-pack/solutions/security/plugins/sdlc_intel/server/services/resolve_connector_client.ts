@@ -100,7 +100,6 @@ export const resolveConnectorAxiosClient = async ({
     request,
   });
 
-
   return actionsSetup.getAxiosInstanceWithAuth({
     connectorId: connector.id,
     secrets,
