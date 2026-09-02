@@ -9,14 +9,14 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { ArtifactTypeRegistry } from './artifact_type_registry';
 import type { RuleArtifactLike } from './types';
 
-const ARTIFACT_REF_PREFIX = 'artifact:';
+const ARTIFACT_REF_NAMESPACE = 'artifact';
 
 /**
  * Builds the framework-owned reference name for an artifact field.
  * Format: `artifact:<field>:<artifactId>` — field first (no colons), artifact id last.
  */
 export function buildArtifactReferenceName(field: string, artifactId: string): string {
-  return `${ARTIFACT_REF_PREFIX}${field}:${artifactId}`;
+  return `${ARTIFACT_REF_NAMESPACE}:${field}:${artifactId}`;
 }
 
 /**
@@ -26,18 +26,12 @@ export function buildArtifactReferenceName(field: string, artifactId: string): s
 export function parseArtifactReferenceName(
   name: string
 ): { field: string; artifactId: string } | undefined {
-  if (!name.startsWith(ARTIFACT_REF_PREFIX)) {
+  const [prefix, field, ...idParts] = name.split(':');
+  const artifactId = idParts.join(':');
+  if (prefix !== ARTIFACT_REF_NAMESPACE || !field || !artifactId) {
     return undefined;
   }
-  const rest = name.slice(ARTIFACT_REF_PREFIX.length);
-  const separatorIndex = rest.indexOf(':');
-  if (separatorIndex <= 0 || separatorIndex === rest.length - 1) {
-    return undefined;
-  }
-  return {
-    field: rest.slice(0, separatorIndex),
-    artifactId: rest.slice(separatorIndex + 1),
-  };
+  return { field, artifactId };
 }
 
 function isArtifactReference(ref: SavedObjectReference): boolean {

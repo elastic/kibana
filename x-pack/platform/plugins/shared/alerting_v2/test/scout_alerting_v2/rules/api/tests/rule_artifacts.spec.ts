@@ -74,22 +74,20 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
   apiTest(
     'get: resolves a dashboard id from references rather than stored artifact data',
     async ({ apiClient, apiServices }) => {
-      const created = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'rule-to-remap' },
           artifacts: [dashboard('pre-import-id')],
-        }),
-      });
-      expect(created).toHaveStatusCode(201);
+        })
+      );
 
       // Emulate what a saved-object import does: rewrite the reference id and
       // leave the stored `data` pointing at the pre-import id.
-      await apiServices.alertingV2.ruleSavedObject.setReferences(created.body.id, [
+      await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
         dashboardReference('post-import-id'),
       ]);
 
-      const response = await apiClient.get(getRuleUrl(created.body.id), {
+      const response = await apiClient.get(getRuleUrl(created.id), {
         headers: writerHeaders,
       });
 
@@ -101,55 +99,51 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
   apiTest(
     'patch: an unrelated update preserves a remapped reference',
     async ({ apiClient, apiServices }) => {
-      const created = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'rule-to-remap-then-edit' },
           artifacts: [dashboard('pre-import-id')],
-        }),
-      });
-      expect(created).toHaveStatusCode(201);
+        })
+      );
 
-      await apiServices.alertingV2.ruleSavedObject.setReferences(created.body.id, [
+      await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
         dashboardReference('post-import-id'),
       ]);
 
       // Rebuilding references from the stale stored `data` here would silently
       // undo the remapping.
-      const response = await apiClient.patch(getRuleUrl(created.body.id), {
+      const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: { metadata: { description: 'unrelated change' } },
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.artifacts).toStrictEqual([dashboard('post-import-id')]);
-      expect(
-        await apiServices.alertingV2.ruleSavedObject.getReferences(created.body.id)
-      ).toStrictEqual([dashboardReference('post-import-id')]);
+      expect(await apiServices.alertingV2.ruleSavedObject.getReferences(created.id)).toStrictEqual([
+        dashboardReference('post-import-id'),
+      ]);
     }
   );
 
   apiTest(
     'patch: replacing the artifacts array drops references for removed artifacts',
     async ({ apiClient, apiServices }) => {
-      const created = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
           metadata: { name: 'rule-with-replaced-artifacts' },
           artifacts: [dashboard('first-dashboard')],
-        }),
-      });
-      expect(created).toHaveStatusCode(201);
+        })
+      );
 
-      const response = await apiClient.patch(getRuleUrl(created.body.id), {
+      const response = await apiClient.patch(getRuleUrl(created.id), {
         headers: writerHeaders,
         body: { artifacts: [runbook('# Only a runbook now')] },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(
-        await apiServices.alertingV2.ruleSavedObject.getReferences(created.body.id)
-      ).toStrictEqual([]);
+      expect(await apiServices.alertingV2.ruleSavedObject.getReferences(created.id)).toStrictEqual(
+        []
+      );
     }
   );
 
@@ -171,6 +165,96 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
       expect(
         await apiServices.alertingV2.ruleSavedObject.getReferences(response.body.id)
       ).toStrictEqual([]);
+    }
+  );
+
+  apiTest(
+    'bulk disable: preserves artifacts and a remapped reference',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-bulk-disable-artifacts' },
+          artifacts: [dashboard('pre-import-id')],
+        })
+      );
+      await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
+        dashboardReference('post-import-id'),
+      ]);
+
+      const response = await apiClient.post(`${testData.RULE_API_PATH}/_bulk_disable`, {
+        headers: writerHeaders,
+        body: { ids: [created.id] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
+
+      const fetched = await apiServices.alertingV2.rules.get(created.id);
+      expect(fetched.enabled).toBe(false);
+      expect(fetched.artifacts).toStrictEqual([dashboard('post-import-id')]);
+      expect(await apiServices.alertingV2.ruleSavedObject.getReferences(created.id)).toStrictEqual([
+        dashboardReference('post-import-id'),
+      ]);
+    }
+  );
+
+  apiTest(
+    'bulk enable: preserves artifacts and a remapped reference',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-bulk-enable-artifacts' },
+          artifacts: [dashboard('pre-import-id')],
+        })
+      );
+      await apiServices.alertingV2.rules.disable(created.id);
+      await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
+        dashboardReference('post-import-id'),
+      ]);
+
+      const response = await apiClient.post(`${testData.RULE_API_PATH}/_bulk_enable`, {
+        headers: writerHeaders,
+        body: { ids: [created.id] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
+
+      const fetched = await apiServices.alertingV2.rules.get(created.id);
+      expect(fetched.enabled).toBe(true);
+      expect(fetched.artifacts).toStrictEqual([dashboard('post-import-id')]);
+      expect(await apiServices.alertingV2.ruleSavedObject.getReferences(created.id)).toStrictEqual([
+        dashboardReference('post-import-id'),
+      ]);
+    }
+  );
+
+  apiTest(
+    'bulk update api key: preserves artifacts and a remapped reference',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-bulk-rotate-artifacts' },
+          artifacts: [dashboard('pre-import-id')],
+        })
+      );
+      await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
+        dashboardReference('post-import-id'),
+      ]);
+
+      const response = await apiClient.post(`${testData.RULE_API_PATH}/_bulk_update_api_key`, {
+        headers: writerHeaders,
+        body: { ids: [created.id] },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
+
+      const fetched = await apiServices.alertingV2.rules.get(created.id);
+      expect(fetched.artifacts).toStrictEqual([dashboard('post-import-id')]);
+      expect(await apiServices.alertingV2.ruleSavedObject.getReferences(created.id)).toStrictEqual([
+        dashboardReference('post-import-id'),
+      ]);
     }
   );
 

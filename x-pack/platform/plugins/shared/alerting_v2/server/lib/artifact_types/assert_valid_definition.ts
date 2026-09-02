@@ -7,6 +7,13 @@
 
 import type { ArtifactTypeDefinition } from './types';
 
+/**
+ * A reference field names the `data` key it mirrors, so it must be a colon-free
+ * identifier (colons delimit the `artifact:<field>:<id>` reference name).
+ * Casing is deliberately not restricted: the field has to match the artifact's
+ * data key exactly, and shipped keys (e.g. the dashboard type's `dashboardId`)
+ * are camelCase.
+ */
 const SAFE_FIELD_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
 
 /**
@@ -39,7 +46,7 @@ export function assertValidDefinition(def: ArtifactTypeDefinition): void {
     }
     if (!SAFE_FIELD_PATTERN.test(descriptor.field)) {
       throw new Error(
-        `Artifact type "${def.type}" reference field "${descriptor.field}" must match ${SAFE_FIELD_PATTERN}`
+        `Artifact type "${def.type}" reference field "${descriptor.field}" is invalid: it must start with a letter and may contain only letters, digits, and underscores`
       );
     }
     if (seenFields.has(descriptor.field)) {
@@ -47,7 +54,6 @@ export function assertValidDefinition(def: ArtifactTypeDefinition): void {
         `Artifact type "${def.type}" declares duplicate reference field "${descriptor.field}"`
       );
     }
-    seenFields.add(descriptor.field);
 
     if (
       typeof descriptor.savedObjectType !== 'string' ||
@@ -57,5 +63,7 @@ export function assertValidDefinition(def: ArtifactTypeDefinition): void {
         `Artifact type "${def.type}" reference field "${descriptor.field}" requires a non-empty savedObjectType`
       );
     }
+
+    seenFields.add(descriptor.field);
   }
 }

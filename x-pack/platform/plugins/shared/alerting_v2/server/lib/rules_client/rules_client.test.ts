@@ -62,6 +62,15 @@ const baseSoAttrs = createRuleSoAttributes({
   query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 });
 
+/** Wraps attributes in the shape the SO client's `find` returns per hit. */
+const soFindResult = (id: string, attributes: RuleSavedObjectAttributes) => ({
+  id,
+  type: RULE_SAVED_OBJECT_TYPE,
+  attributes,
+  references: [],
+  score: 0,
+});
+
 describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
@@ -1560,16 +1569,12 @@ describe('RulesClient', () => {
 
       rulesSavedObjectService.find.mockResolvedValueOnce({
         saved_objects: [
-          {
-            id: 'rule-1',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-1' } }),
-          },
-          {
-            id: 'rule-2',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-2' } }),
-          },
+          soFindResult('rule-1', createRuleSoAttributes({ metadata: { name: 'rule-1' } })),
+          soFindResult('rule-2', createRuleSoAttributes({ metadata: { name: 'rule-2' } })),
         ],
         total: 2,
+        page: 2,
+        per_page: 50,
       });
 
       const res = await client.findRules({ page: 2, perPage: 50 });
@@ -1601,12 +1606,14 @@ describe('RulesClient', () => {
 
       rulesSavedObjectService.find.mockResolvedValueOnce({
         saved_objects: [
-          {
-            id: 'rule-pagination-1',
-            attributes: createRuleSoAttributes({ metadata: { name: 'rule-pagination-1' } }),
-          },
+          soFindResult(
+            'rule-pagination-1',
+            createRuleSoAttributes({ metadata: { name: 'rule-pagination-1' } })
+          ),
         ],
         total: 100,
+        page: 1,
+        per_page: 20,
       });
 
       const res = await client.findRules();

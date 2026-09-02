@@ -704,6 +704,7 @@ export class RulesClient {
       id,
       attrs: nextAttrs,
       version: existingVersion,
+      references,
     });
 
     const rule = this.toRuleApiResponse({
@@ -750,6 +751,7 @@ export class RulesClient {
       id,
       attrs: nextAttrs,
       version: existingVersion,
+      references,
     });
 
     const rule = this.toRuleApiResponse({
@@ -1228,6 +1230,7 @@ export class RulesClient {
         taskId: getRuleExecutorTaskId({ ruleId: doc.id, spaceId }),
         attrs: doc.attributes,
         version: doc.version,
+        references: doc.references ?? [],
       });
     }
 
@@ -1259,6 +1262,7 @@ export class RulesClient {
         updatedAt: nowIso,
       } satisfies RuleSavedObjectAttributes,
       version: candidate.version,
+      references: candidate.references,
     }));
 
     const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
@@ -1274,7 +1278,11 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      const rule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: item.attrs,
+        references: item.references,
+      });
       updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 

@@ -8,7 +8,11 @@
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
@@ -134,10 +138,7 @@ export interface RulesSavedObjectServiceContract {
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{
-    saved_objects: RuleSavedObjectDoc[];
-    total: number;
-  }>;
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
   findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
@@ -349,11 +350,8 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{
-    saved_objects: RuleSavedObjectDoc[];
-    total: number;
-  }> {
-    const result = await this.client.find<RuleSavedObjectAttributes>({
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>> {
+    return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -362,16 +360,6 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       ...(filter ? { filter } : {}),
       ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
-
-    return {
-      total: result.total,
-      saved_objects: result.saved_objects.map((doc) => ({
-        id: doc.id,
-        attributes: doc.attributes,
-        version: doc.version,
-        references: doc.references ?? [],
-      })),
-    };
   }
 
   /**

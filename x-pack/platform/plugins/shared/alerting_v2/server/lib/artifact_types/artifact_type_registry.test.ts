@@ -52,7 +52,7 @@ describe('ArtifactTypeRegistry', () => {
         dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
         references: [{ field: 'dash:board', savedObjectType: 'dashboard' }],
       })
-    ).toThrow(/must match/);
+    ).toThrow(/only letters, digits, and underscores/);
   });
 
   it('is immune to the caller mutating its descriptors after registration', () => {
