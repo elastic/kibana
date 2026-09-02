@@ -20,7 +20,8 @@ const mockProductFeaturesService = {
 } as unknown as ProductFeaturesService;
 
 describe('getRuleMigrationTranslationStatsTool', () => {
-  const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
+  const { mockCore, mockLogger, mockEsClient, mockSecurityStart, mockRequest } =
+    createToolTestMocks();
   const tool = getRuleMigrationTranslationStatsTool(
     mockCore,
     mockLogger,
@@ -30,7 +31,7 @@ describe('getRuleMigrationTranslationStatsTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     mockFetch = jest.fn();
     (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
       fetch: mockFetch,
