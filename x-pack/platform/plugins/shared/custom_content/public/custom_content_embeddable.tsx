@@ -81,6 +81,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -134,6 +135,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...titleManager.api,
       serializeState,
       usesEsql$,
+      approximationApplied$,
       dataViews$,
       dataLoading$,
       getTypeDisplayName: () =>

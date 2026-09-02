@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject, Subject } from 'rxjs';
 import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
@@ -136,6 +136,7 @@ export function initializeFetch({
   refreshTrigger$,
   setDataLoading,
   setBlockingError,
+  approximationApplied$,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -144,6 +145,7 @@ export function initializeFetch({
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
+  approximationApplied$: Subject<boolean | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -233,6 +235,7 @@ export function initializeFetch({
                 : undefined,
               rows: result.records,
               hitCount: result.records.length,
+              approximationApplied: result.approximationApplied,
               fetchContext,
             };
           }
@@ -297,6 +300,9 @@ export function initializeFetch({
       api.fetchContext$.next(next.fetchContext);
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
+      }
+      if (Object.hasOwn(next, 'approximationApplied')) {
+        approximationApplied$.next(next.approximationApplied);
       }
     });
 

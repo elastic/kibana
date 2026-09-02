@@ -168,6 +168,7 @@ export const initializeSearchEmbeddableApi = async ({
     getProjectRoutingOverrides(initialQuery)
   );
   const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(initialQuery));
+  const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const canEditUnifiedSearch = () => false;
 
@@ -291,6 +292,7 @@ export const initializeSearchEmbeddableApi = async ({
     const nextUsesEsql = isOfAggregateQueryType(query);
     if (usesEsql$.getValue() !== nextUsesEsql) {
       usesEsql$.next(nextUsesEsql);
+      if (!nextUsesEsql) approximationApplied$.next(undefined);
     }
   });
 
@@ -309,6 +311,7 @@ export const initializeSearchEmbeddableApi = async ({
       setQuery,
       projectRoutingOverrides$,
       usesEsql$,
+      approximationApplied$,
       canEditUnifiedSearch,
       setColumns,
     },

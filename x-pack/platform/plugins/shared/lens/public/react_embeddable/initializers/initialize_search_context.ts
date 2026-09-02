@@ -88,6 +88,7 @@ export function initializeSearchContext(
   );
 
   const usesEsql$ = new BehaviorSubject<boolean>(isTextBasedAttributes(attributes));
+  const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
 
@@ -120,6 +121,7 @@ export function initializeSearchContext(
       timeslice$,
       projectRoutingOverrides$,
       usesEsql$,
+      approximationApplied$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
     },

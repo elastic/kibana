@@ -15,6 +15,7 @@ import type { PublishingSubject } from '../publishing_subject';
  */
 export interface PublishesEsqlUsage {
   usesEsql$: PublishingSubject<boolean>;
+  approximationApplied$: PublishingSubject<boolean | undefined>;
 }
 
 export const apiPublishesEsqlUsage = (unknownApi: unknown): unknownApi is PublishesEsqlUsage =>
