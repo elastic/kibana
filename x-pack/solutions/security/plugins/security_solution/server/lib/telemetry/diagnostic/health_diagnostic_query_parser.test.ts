@@ -682,3 +682,105 @@ filterlist:
     });
   });
 });
+
+describe('v4 encryptDocument', () => {
+  it('parses a valid v4 index descriptor with encryptDocument and no filterlist', () => {
+    const yaml = [
+      'version: 4',
+      'id: doc-enc-query',
+      'name: Doc Enc Query',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      id: 'doc-enc-query',
+      encryptDocument: true,
+      encryptionKeyId: 'rsa-key-v1',
+      filterlist: {},
+    });
+  });
+
+  it('parses a valid v4 index descriptor with keep and mask filterlist', () => {
+    const yaml = [
+      'version: 4',
+      'id: doc-enc-query',
+      'name: Doc Enc Query',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+      'filterlist:',
+      '  process.name: keep',
+      '  host.ip: mask',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect(result).toMatchObject({
+      kind: 'index',
+      encryptDocument: true,
+      filterlist: { 'process.name': Action.KEEP, 'host.ip': Action.MASK },
+    });
+  });
+
+  it('produces invalid_descriptor when encryptDocument is true and encryptionKeyId is absent', () => {
+    const yaml = [
+      'version: 4',
+      'id: bad-query',
+      'name: Bad',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('produces invalid_descriptor when filterlist contains encrypt action', () => {
+    const yaml = [
+      'version: 4',
+      'id: bad-query',
+      'name: Bad',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+      'filterlist:',
+      '  process.name: encrypt',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    expect((result as ParseFailureQuery).failureReason).toBe('invalid_descriptor');
+  });
+
+  it('does NOT produce unknown_version for version 4', () => {
+    const yaml = [
+      'version: 4',
+      'id: q',
+      'name: Q',
+      'type: DSL',
+      'query: \'{"match_all":{}}\'',
+      "scheduleCron: '0 */1 * * *'",
+      'enabled: true',
+      'integrations: endpoint',
+      'encryptionKeyId: rsa-key-v1',
+      'encryptDocument: true',
+    ].join('\n');
+    const [result] = parseHealthDiagnosticQueries(yaml);
+    const failure = result as ParseFailureQuery;
+    expect(failure.failureReason).not.toBe('unknown_version');
+  });
+});

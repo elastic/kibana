@@ -104,6 +104,7 @@ export interface IndexQuery {
   integrations?: string[];
   datastreamTypes?: string[];
   encryptionKeyId?: string;
+  encryptDocument?: true;
 }
 
 /**
@@ -123,6 +124,7 @@ export interface ApiQuery {
   responsePathKey?: string;
   integrations?: string[];
   encryptionKeyId?: string;
+  encryptDocument?: true;
 }
 
 /**
