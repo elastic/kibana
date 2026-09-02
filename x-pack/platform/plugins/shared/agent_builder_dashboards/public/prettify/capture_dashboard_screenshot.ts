@@ -56,11 +56,6 @@ const expandCollapsedSections = (dashboardApi: DashboardApi): (() => void) => {
   return () => dashboardApi.layout$.next(layout);
 };
 
-const getPageBackgroundColor = (): string => {
-  const color = getComputedStyle(document.body).backgroundColor;
-  return !color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ? '#ffffff' : color;
-};
-
 const encodeCanvas = (
   canvas: HTMLCanvasElement,
   mimeType: SupportedImageMimeType,
@@ -77,8 +72,9 @@ const encodeCanvas = (
 const renderGrid = async (
   grid: HTMLElement
 ): Promise<{ blob: Blob; mimeType: SupportedImageMimeType }> => {
+  // The grid itself is transparent between panels; fill with the wrapper's background to match the screen.
   const canvas: HTMLCanvasElement = await domtoimage.toCanvas(grid, {
-    bgcolor: getPageBackgroundColor(),
+    bgcolor: getComputedStyle(grid.parentElement ?? grid).backgroundColor,
   });
 
   const png = await encodeCanvas(canvas, 'image/png');
