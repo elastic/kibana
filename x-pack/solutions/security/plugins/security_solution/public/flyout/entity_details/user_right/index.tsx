@@ -12,7 +12,7 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -52,6 +52,7 @@ import {
   USER_PANEL_OBSERVED_USER_QUERY_ID,
 } from '../../../flyout_v2/entity/user/main/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
@@ -336,15 +337,13 @@ export const UserPanel = memo(function UserPanel({
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <EuiFlyoutFooter>
-          <EuiPanel color="transparent">
-            <Footer
-              userName={userName}
-              identityFields={documentEntityIdentifiers}
-              entity={entityFromStore}
-            />
-          </EuiPanel>
-        </EuiFlyoutFooter>
+        <FlyoutFooter>
+          <Footer
+            userName={userName}
+            identityFields={documentEntityIdentifiers}
+            entity={entityFromStore}
+          />
+        </FlyoutFooter>
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter
