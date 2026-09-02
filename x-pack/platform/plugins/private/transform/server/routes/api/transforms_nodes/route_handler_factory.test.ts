@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNodes } from './route_handler_factory';
+import { areCrossProjectFeatureFlagsEnabled, isNodes } from './route_handler_factory';
 
 describe('Transform: Nodes API endpoint', () => {
   test('isNodes()', () => {
@@ -39,5 +39,43 @@ describe('Transform: Nodes API endpoint', () => {
         nodeId2: { roles: ['transform'] },
       })
     ).toBe(true);
+  });
+
+  test('requires both cross-project feature flags on every Elasticsearch node', () => {
+    const enabledJvmArguments = [
+      '-Des.transform_cross_project_feature_flag_enabled=true',
+      '-Des.ml_cross_project_feature_flag_enabled=true',
+    ];
+
+    expect(
+      areCrossProjectFeatureFlagsEnabled({
+        nodeId1: { jvm: { input_arguments: enabledJvmArguments }, roles: ['master'] },
+        nodeId2: { jvm: { input_arguments: enabledJvmArguments }, roles: ['transform'] },
+      })
+    ).toBe(true);
+    expect(
+      areCrossProjectFeatureFlagsEnabled({
+        nodeId1: { jvm: { input_arguments: enabledJvmArguments }, roles: ['master'] },
+        nodeId2: {
+          jvm: {
+            input_arguments: ['-Des.transform_cross_project_feature_flag_enabled=true'],
+          },
+          roles: ['transform'],
+        },
+      })
+    ).toBe(false);
+    expect(
+      areCrossProjectFeatureFlagsEnabled({
+        nodeId: {
+          jvm: {
+            input_arguments: [
+              '-Des.transform_cross_project_feature_flag_enabled=true',
+              '-Des.ml_cross_project_feature_flag_enabled=false',
+            ],
+          },
+          roles: ['transform'],
+        },
+      })
+    ).toBe(false);
   });
 });

@@ -15,8 +15,15 @@ import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 
 const NODE_ROLES = 'roles';
+const REQUIRED_CROSS_PROJECT_FEATURE_FLAGS = [
+  'es.transform_cross_project_feature_flag_enabled',
+  'es.ml_cross_project_feature_flag_enabled',
+] as const;
 
 interface NodesAttributes {
+  jvm?: {
+    input_arguments?: string[];
+  };
   roles: string[];
 }
 
@@ -27,6 +34,18 @@ export const isNodes = (arg: unknown): arg is Nodes => {
     isPopulatedObject(arg) &&
     Object.values(arg).every(
       (node) => isPopulatedObject(node, [NODE_ROLES]) && Array.isArray(node.roles)
+    )
+  );
+};
+
+export const areCrossProjectFeatureFlagsEnabled = (nodes: unknown): boolean => {
+  if (!isNodes(nodes)) {
+    return false;
+  }
+
+  return Object.values(nodes).every(({ jvm }) =>
+    REQUIRED_CROSS_PROJECT_FEATURE_FLAGS.every((featureFlag) =>
+      jvm?.input_arguments?.includes(`-D${featureFlag}=true`)
     )
   );
 };
@@ -50,7 +69,7 @@ export const routeHandlerFactory: (
     }
 
     const { nodes } = await esClient.asInternalUser.nodes.info({
-      filter_path: `nodes.*.${NODE_ROLES}`,
+      filter_path: `nodes.*.${NODE_ROLES},nodes.*.jvm.input_arguments`,
     });
 
     let count = 0;
@@ -62,7 +81,12 @@ export const routeHandlerFactory: (
       }
     }
 
-    return res.ok({ body: { count } });
+    return res.ok({
+      body: {
+        count,
+        isCrossProjectEnabled: areCrossProjectFeatureFlagsEnabled(nodes),
+      },
+    });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
   }
