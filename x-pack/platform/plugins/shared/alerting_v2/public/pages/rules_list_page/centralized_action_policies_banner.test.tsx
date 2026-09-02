@@ -15,6 +15,7 @@ import {
 
 const mockNavigateToUrl = jest.fn();
 const mockToursIsEnabled = jest.fn(() => true);
+const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
 let mockCanWriteActionPolicies = true;
 
 jest.mock('@kbn/core-di-browser', () => {
@@ -35,6 +36,13 @@ jest.mock('@kbn/core-di-browser', () => {
         application: { navigateToUrl: mockNavigateToUrl },
         http: { basePath: { prepend: (p: string) => `/mock${p}` } },
         notifications: { tours: { isEnabled: mockToursIsEnabled } },
+        docLinks: {
+          links: {
+            alerting: {
+              actionPolicies: MOCK_ACTION_POLICIES_DOCS_URL,
+            },
+          },
+        },
       };
       return services[token as string] ?? {};
     },
@@ -92,10 +100,7 @@ describe('CentralizedActionPoliciesBanner', () => {
     renderBanner();
 
     const learnMoreBtn = screen.getByTestId('centralizedActionPoliciesLearnMore');
-    expect(learnMoreBtn).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts'
-    );
+    expect(learnMoreBtn).toHaveAttribute('href', MOCK_ACTION_POLICIES_DOCS_URL);
     expect(learnMoreBtn).toHaveAttribute('target', '_blank');
   });
 

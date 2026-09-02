@@ -19,11 +19,6 @@ import illustration from '../../assets/centralized_action_policies.svg';
 export const CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY =
   `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_RULES_APP_ID}.centralizedActionPoliciesBannerDismissed` as const;
 
-// TODO: replace with docLinks.links.alerting.actionPolicies once a dedicated
-// key is added to kbn-doc-links/src/get_doc_links.ts.
-const CENTRALIZED_ACTION_POLICIES_DOCS_URL =
-  'https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts';
-
 const TITLE = i18n.translate('xpack.alertingV2.rulesList.centralizedActionPoliciesBanner.title', {
   defaultMessage: 'Centralized action policies',
 });
@@ -52,6 +47,7 @@ export const CentralizedActionPoliciesBanner = () => {
   const { tours } = useService(CoreStart('notifications'));
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const docLinks = useService(CoreStart('docLinks'));
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
     false
@@ -86,7 +82,7 @@ export const CentralizedActionPoliciesBanner = () => {
           },
           secondary: {
             children: LEARN_MORE_LABEL,
-            href: CENTRALIZED_ACTION_POLICIES_DOCS_URL,
+            href: docLinks.links.alerting.actionPolicies,
             target: '_blank',
             iconType: 'external',
             iconSide: 'right',

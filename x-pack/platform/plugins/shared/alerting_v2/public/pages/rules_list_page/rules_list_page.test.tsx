@@ -72,6 +72,13 @@ jest.mock('@kbn/core-di-browser', () => {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
           tours: { isEnabled: () => mockToursEnabled },
         },
+        docLinks: {
+          links: {
+            alerting: {
+              actionPolicies: 'https://docs.test/action-policies',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};
