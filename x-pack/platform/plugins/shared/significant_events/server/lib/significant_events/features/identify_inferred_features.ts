@@ -697,9 +697,6 @@ export async function identifyInferredFeatures({
     remappedCount,
   } = outcome;
 
-  if (signal.aborted) {
-    throw signal.reason instanceof Error ? signal.reason : new Error('Request was aborted');
-  }
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
     const priorBySlug = new Map(allFeatures.map((f) => [normalizeFeatureSlug(f.id), f]));
