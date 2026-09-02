@@ -14,6 +14,7 @@ import {
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
 } from '../../../state/overview_status';
+import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
 import { useOverviewStatus } from './use_overview_status';
 
 const refreshState = { lastRefresh: 1 };
@@ -132,7 +133,19 @@ describe('useOverviewStatus', () => {
   });
 
   describe('auto-refresh vs infinite-scroll append', () => {
-    const fortyConfigs = Array.from({ length: 40 }, (_, i) => ({ configId: `m${i}` }));
+    const stubConfig = (configId: string): OverviewStatusMetaData => ({
+      configId,
+      monitorQueryId: configId,
+      name: configId,
+      schedule: '3',
+      tags: [],
+      isEnabled: true,
+      type: 'http',
+      isStatusAlertEnabled: false,
+      overallStatus: 'up',
+      locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
+    });
+    const fortyConfigs = Array.from({ length: 40 }, (_, i) => stubConfig(`m${i}`));
 
     const tickRefresh = (rerender: () => void) => {
       dispatchMockFn.mockClear();

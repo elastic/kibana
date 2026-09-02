@@ -188,17 +188,19 @@ const applyMergedPaginated = (
   incoming: PaginatedOverviewStatus
 ) => {
   const existing = state.status;
+  let allConfigs: OverviewStatusMetaData[];
   if (!existing?.configs || !incoming.configs) {
     state.status = incoming;
-    state.allConfigs = incoming.configs ?? buildAllConfigs(incoming);
-    state.total = incoming.total ?? state.allConfigs.length;
+    allConfigs = incoming.configs ?? buildAllConfigs(incoming);
+    state.total = incoming.total ?? allConfigs.length;
   } else {
     const merged = mergePaginatedStatus(existing, incoming);
     state.status = merged;
-    state.allConfigs = merged.configs;
+    allConfigs = merged.configs ?? [];
     state.total = incoming.total;
   }
-  state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
+  state.allConfigs = allConfigs;
+  state.disabledConfigs = allConfigs.filter((monitor) => !monitor.isEnabled);
   state.loaded = true;
   state.loading = false;
   state.settled = true;
@@ -246,14 +248,10 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
 
       state.status = incoming;
 
-      if (incoming.configs) {
-        state.allConfigs = incoming.configs;
-        state.total = incoming.total;
-      } else {
-        state.allConfigs = buildAllConfigs(state.status);
-        state.total = state.allConfigs.length;
-      }
-      state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
+      const allConfigs = incoming.configs ?? buildAllConfigs(state.status);
+      state.allConfigs = allConfigs;
+      state.total = incoming.configs ? incoming.total : allConfigs.length;
+      state.disabledConfigs = allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
       state.loading = false;
       state.settled = true;
