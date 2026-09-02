@@ -44,6 +44,10 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     conversationTemplates: {
       register: jest.fn(),
     },
+    management: {
+      createOrUpdateAgent: jest.fn(),
+      deleteAgent: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };

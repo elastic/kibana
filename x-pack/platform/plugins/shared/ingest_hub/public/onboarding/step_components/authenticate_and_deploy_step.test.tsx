@@ -15,7 +15,7 @@ jest.mock('../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
-jest.mock('./deploy_settings_step/use_deploy', () => ({
+jest.mock('./authenticate_and_deploy_step/use_deploy', () => ({
   useDeploy: jest.fn(),
 }));
 
@@ -39,7 +39,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import { useDeploy } from './deploy_settings_step/use_deploy';
+import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';

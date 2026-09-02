@@ -36,6 +36,5 @@ export {
   pairScores,
   computePairedTTestResults,
   resolveDirection,
-  isImproved,
 } from './impl/statistical_analysis';
-export type { PairedScore } from './impl/statistical_analysis';
+export type { PairedScore, Direction } from './impl/statistical_analysis';

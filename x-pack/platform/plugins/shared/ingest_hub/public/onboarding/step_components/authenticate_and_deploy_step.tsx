@@ -23,7 +23,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
-import { useDeploy } from './deploy_settings_step/use_deploy';
+import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import {
   SERVICE_SETTINGS_SESSION_KEY,

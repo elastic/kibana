@@ -44,6 +44,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import { AgentBuilderManagementApi } from './api/agent_builder_management_api';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
@@ -214,6 +215,11 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
+    const managementApi = new AgentBuilderManagementApi(
+      coreSetup.getStartServices,
+      this.logger
+    );
+
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
@@ -245,6 +251,7 @@ export class AgentBuilderPlugin
           serviceSetups.conversationTemplates
         ),
       },
+      management: managementApi,
       topSnippets: this.config.topSnippets,
     };
   }
