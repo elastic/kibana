@@ -175,12 +175,18 @@ export class ReportingPageObject extends FtrService {
   }
 
   async checkUsePrintLayout() {
-    // The print layout checkbox slides in as part of an animation, and tests can
-    // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
-    // the animation to complete before we attempt a click.
-    const menuAnimationDelay = 500;
-    await this.retry.tryForTime(menuAnimationDelay, () =>
-      this.testSubjects.click('usePrintLayout')
+    // `selectExportItem` opens the export flyout without waiting for it to finish rendering, so a click can land before the switch is interactive and silently no-op; wait for it to be displayed, toggle it once, then confirm the toggle registered.
+    const switchSubj = 'usePrintLayout';
+    const printLayoutSwitch = await this.find.displayedByCssSelector(
+      `[data-test-subj="${switchSubj}"]`
+    );
+    await printLayoutSwitch.moveMouseTo();
+    if ((await printLayoutSwitch.getAttribute('aria-checked')) !== 'true') {
+      await printLayoutSwitch.click();
+    }
+    await this.retry.waitFor(
+      'print format switch to be enabled',
+      async () => (await this.testSubjects.getAttribute(switchSubj, 'aria-checked')) === 'true'
     );
   }
 
