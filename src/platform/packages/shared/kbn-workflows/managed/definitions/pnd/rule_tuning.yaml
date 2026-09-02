@@ -40,16 +40,9 @@ consts:
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
   # Written onto every alert that reached a decision, and filtered out by the harvest,
-  # so a later sweep cannot rediagnose the same alerts into the same proposal.
+  # so a later sweep cannot rediagnose the same alerts into the same proposal. The
+  # mark steps below spell the tag lists inline: setAlertTags validates them statically.
   reviewed_tag: detection-watch:tuning-reviewed
-  dismissed_tag: detection-watch:tuning-dismissed
-  applied_tag: detection-watch:tuning-applied
-  dismissed_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-dismissed
-  applied_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-applied
 steps:
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
@@ -249,7 +242,7 @@ steps:
             {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
             Proposed exception:
             {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
-            - {{ entry.field }} {{ entry.operator }} {{ entry.value }}
+            - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
             {% endfor %}
             Approving adds the exception to the rule's own exception list. It can be removed in the Detection Rules UI.
             {% endif %}
@@ -316,7 +309,8 @@ steps:
               and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
           can_apply_risk_score: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
-              and steps.diagnose_rule.output.structured_output.proposed_risk_score != null }}
+              and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
+              and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
           can_apply_disable: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'disable' }}
 
@@ -338,8 +332,8 @@ steps:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
-      # Stable item_id so a re-approved proposal for the same rule overwrites
-      # its exception item instead of stacking duplicates run after run.
+      # Each approval creates its own item. A rule only returns here on new false
+      # positives, so a later proposal is a different pattern, not a duplicate.
       - name: apply_exception_tuning
         type: security.createRuleException
         if: >-
@@ -349,8 +343,6 @@ steps:
           continue: true
         with:
           rule_id: "{{ foreach.item.0 }}"
-          item_id: "tuning-{{ foreach.item.0 }}"
-          overwrite: true
           name: "Tuning: {{ foreach.item.1 }}"
           description: "Added by the rule tuning workflow."
           entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
@@ -416,15 +408,42 @@ steps:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
 
+      # Each error check is paired with the gate that ran its apply step: a skipped
+      # step leaves no execution record, so `steps.<name>.error` would otherwise
+      # resolve to that step's result from an earlier iteration of the loop.
+      - name: classify_apply_failures
+        type: data.set
+        with:
+          query_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_query == true
+              and steps.apply_query_tuning.error != null }}
+          exception_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_exception == true
+              and steps.apply_exception_tuning.error != null }}
+          suppression_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_suppression == true
+              and steps.apply_suppression_tuning.error != null }}
+          risk_score_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_risk_score == true
+              and steps.apply_risk_score_tuning.error != null }}
+          disable_failed: >-
+            ${{ steps.review_tuning.output.response.approved == true
+              and steps.classify_proposal.output.can_apply_disable == true
+              and steps.apply_disable_tuning.error != null }}
+
       # An approved proposal whose apply step errored must not vanish silently.
       - name: record_failed_apply
         type: data.set
         if: >-
-          ${{ steps.apply_query_tuning.error != null
-            or steps.apply_exception_tuning.error != null
-            or steps.apply_suppression_tuning.error != null
-            or steps.apply_risk_score_tuning.error != null
-            or steps.apply_disable_tuning.error != null }}
+          ${{ steps.classify_apply_failures.output.query_failed == true
+            or steps.classify_apply_failures.output.exception_failed == true
+            or steps.classify_apply_failures.output.suppression_failed == true
+            or steps.classify_apply_failures.output.risk_score_failed == true
+            or steps.classify_apply_failures.output.disable_failed == true }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: >-
@@ -445,9 +464,17 @@ steps:
         on-failure:
           continue: true
 
+      # Alerts behind a failed apply stay untagged on purpose: the change never landed,
+      # so the next sweep re-harvests them and proposes it again.
       - name: mark_alerts_applied
         type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == true }}"
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_apply_failures.output.query_failed != true
+            and steps.classify_apply_failures.output.exception_failed != true
+            and steps.classify_apply_failures.output.suppression_failed != true
+            and steps.classify_apply_failures.output.risk_score_failed != true
+            and steps.classify_apply_failures.output.disable_failed != true }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add:
