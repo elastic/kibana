@@ -39,8 +39,9 @@ const isDashboardRendered = (dashboardApi: DashboardApi, grid: HTMLElement): boo
   const renderedPanels = grid.querySelectorAll(
     '[data-test-subj="embeddablePanel"][data-render-complete="true"]'
   ).length;
-  const drawingVisualizations = grid.querySelectorAll('[data-render-complete="false"]').length;
-  return renderedPanels >= expectedPanels && drawingVisualizations === 0;
+  // Also counts chart renderers nested inside panels, which flag their own render state.
+  const pendingVisualizations = grid.querySelectorAll('[data-render-complete="false"]').length;
+  return renderedPanels >= expectedPanels && pendingVisualizations === 0;
 };
 
 const waitForPanelsToRender = (dashboardApi: DashboardApi, grid: HTMLElement): Promise<number> =>
