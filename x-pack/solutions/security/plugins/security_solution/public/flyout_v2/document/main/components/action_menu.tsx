@@ -19,7 +19,7 @@ import {
   withActionIcons,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
-import { ALERT_STATUS_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import { ALERT_STATUS_ICON_COLORS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import type { ReportActionClickedParams } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
@@ -79,12 +79,6 @@ const FOOTER_ACTIONS_BY_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
   'investigate-in-timeline-action-item': FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
   'explore-in-alerts-or-timeline': FLYOUT_ACTION.EXPLORE,
 };
-
-const ALERT_STATUS_ICON_COLORS = {
-  [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
-  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
-  'close-alert-with-reason': 'subdued',
-} as const;
 
 const ACTION_ICONS_BY_ID = {
   [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
