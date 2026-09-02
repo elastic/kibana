@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ExecutionStatus } from '@kbn/workflows';
-import { NonTerminalExecutionStatuses, type EsWorkflowStepExecution } from '@kbn/workflows';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
@@ -22,7 +22,6 @@ import { MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES } from '../../../common/constant
 import type { WorkerRunBudgetGroupId } from '../../../common/run_quotas';
 
 const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
-const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 
 interface RunQuotaWorkflowExecutionContext {
   parentWorkflowExecutionId?: string;
@@ -37,12 +36,10 @@ export interface RunQuotaWorkflowExecution {
   triggeredBy?: string;
   taskRunAt?: string | null;
   context?: RunQuotaWorkflowExecutionContext;
-  stepExecutionIds?: string[];
 }
 
 export interface RunQuotaExecutionReader {
   getExecution: (executionId: string) => Promise<RunQuotaWorkflowExecution | undefined>;
-  getStepExecutions: (ids: string[]) => Promise<EsWorkflowStepExecution[]>;
 }
 
 const getMgetSources = <T>(response: Awaited<ReturnType<ElasticsearchClient['mget']>>): T[] =>
@@ -58,15 +55,6 @@ export const createRunQuotaExecutionReader = (
       docs: [{ _index: WORKFLOWS_EXECUTIONS_INDEX, _id: executionId }],
     });
     return getMgetSources<RunQuotaWorkflowExecution>(response)[0];
-  },
-  getStepExecutions: async (ids) => {
-    if (ids.length === 0) {
-      return [];
-    }
-    const response = await asInternalUser.mget<EsWorkflowStepExecution>({
-      docs: ids.map((id) => ({ _index: WORKFLOWS_STEP_EXECUTIONS_INDEX, _id: id })),
-    });
-    return getMgetSources<EsWorkflowStepExecution>(response);
   },
 });
 

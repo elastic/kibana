@@ -6,7 +6,6 @@
  */
 
 export { consumeRunQuota } from './consume';
-export { waitForInvestigationEvidence } from './investigation_evidence';
 export {
   createRunQuotaExecutionReader,
   validateHeartbeatProvenance,

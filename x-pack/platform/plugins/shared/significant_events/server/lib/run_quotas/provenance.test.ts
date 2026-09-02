@@ -32,7 +32,6 @@ const makeExecutionReader = (executions: RunQuotaWorkflowExecution[]): RunQuotaE
   const byId = new Map(executions.map((execution) => [execution.id, execution]));
   return {
     getExecution: jest.fn(async (id) => byId.get(id)),
-    getStepExecutions: jest.fn().mockResolvedValue([]),
   };
 };
 

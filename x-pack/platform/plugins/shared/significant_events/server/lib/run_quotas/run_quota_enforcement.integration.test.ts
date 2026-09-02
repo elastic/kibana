@@ -39,7 +39,6 @@ const makeExecutionReader = (executions: RunQuotaWorkflowExecution[]): RunQuotaE
   const byId = new Map(executions.map((execution) => [execution.id, execution]));
   return {
     getExecution: jest.fn(async (id) => byId.get(id)),
-    getStepExecutions: jest.fn().mockResolvedValue([]),
   };
 };
 
@@ -319,7 +318,6 @@ describe('investigation ledger integration', () => {
     info: jest.fn(),
   } as unknown as Logger;
   const executionReader = makeExecutionReader(makeDetectionExecutions());
-  const waitForEvidence = jest.fn().mockResolvedValue(undefined);
 
   const reserve = ({
     repository,
@@ -345,12 +343,36 @@ describe('investigation ledger integration', () => {
       spaceId: 'space-a',
       actor: 'elastic',
       logger,
-      waitForEvidence,
     });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    waitForEvidence.mockResolvedValue(undefined);
+  });
+
+  it('does not resolve an event while the investigation limit is unlimited', async () => {
+    const repository = createInMemoryRunQuotaRepository();
+    await mutateRunQuotaSettings(repository.client, () => ({
+      enforcementEnabled: true,
+      limits: { investigation: { enabled: false, max: 0 } },
+    }));
+    const resolveInvestigatableEvent = jest.fn();
+
+    await expect(
+      reserveInvestigationRunQuota({
+        internalRepository: repository.client,
+        executionReader,
+        eventResolver: { resolveInvestigatableEvent },
+        request: makeRequest('discovery'),
+        executionId: 'discovery',
+        eventId: 'event',
+        eventUuid: 'uuid',
+        spaceId: 'space-a',
+        actor: 'elastic',
+        logger,
+      })
+    ).resolves.toEqual({ granted: true });
+
+    expect(resolveInvestigatableEvent).not.toHaveBeenCalled();
   });
 
   it('never over-grants concurrent regular events', async () => {
@@ -492,7 +514,6 @@ describe('investigation ledger integration', () => {
       spaceId: 'space-a',
       actor: 'elastic',
       logger,
-      waitForEvidence,
     });
 
     expect(result).toEqual({ granted: false, reason: 'ineligible' });

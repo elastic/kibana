@@ -381,58 +381,29 @@ export class EventClient {
     eventUuid: string
   ): Promise<InvestigatableEventResolution> {
     const { esClient, space } = this.clients;
-    const [eventResponse, latestEventResponse, priorInvestigationResponse] = await Promise.all([
-      esClient.search<StoredEvent>({
-        index: EVENTS_DATA_STREAM,
-        size: 1,
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.space_ids': space } },
-              { term: { event_id: eventId } },
-              { term: { event_uuid: eventUuid } },
-            ],
-          },
+    const eventResponse = await esClient.search<StoredEvent>({
+      index: EVENTS_DATA_STREAM,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'kibana.space_ids': space } },
+            { term: { event_id: eventId } },
+            { term: { event_uuid: eventUuid } },
+          ],
         },
-      }),
-      esClient.search<StoredEvent>({
-        index: EVENTS_DATA_STREAM,
-        size: 1,
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        query: {
-          bool: {
-            filter: [{ term: { 'kibana.space_ids': space } }, { term: { event_id: eventId } }],
-          },
-        },
-      }),
-      esClient.count({
-        index: EVENTS_DATA_STREAM,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'kibana.space_ids': space } },
-              { term: { event_id: eventId } },
-              { exists: { field: 'investigations' } },
-            ],
-          },
-        },
-      }),
-    ]);
+      },
+    });
     const event = eventResponse.hits.hits[0]?._source;
-    const latestEvent = latestEventResponse.hits.hits[0]?._source;
     if (
       !event ||
-      !latestEvent ||
-      latestEvent.event_uuid !== eventUuid ||
-      latestEvent.status !== 'open' ||
-      (latestEvent.severity !== '60-high' && latestEvent.severity !== '80-critical') ||
-      priorInvestigationResponse.count > 0
+      event.status !== 'open' ||
+      (event.severity !== '60-high' && event.severity !== '80-critical')
     ) {
       return { eligible: false };
     }
 
-    return { eligible: true, severity: latestEvent.severity };
+    return { eligible: true, severity: event.severity };
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {

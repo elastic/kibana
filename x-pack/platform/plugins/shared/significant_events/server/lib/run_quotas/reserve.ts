@@ -19,7 +19,6 @@ import {
 } from './repository';
 import type { RunQuotaExecutionReader } from './provenance';
 import { validateInvestigationProvenance } from './provenance';
-import { waitForInvestigationEvidence } from './investigation_evidence';
 import { dayKey, resolveDailyWindow } from './window';
 
 export interface RunQuotaEventResolver {
@@ -40,7 +39,6 @@ export const reserveInvestigationRunQuota = async ({
   spaceId,
   actor,
   logger,
-  waitForEvidence = waitForInvestigationEvidence,
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
   executionReader: RunQuotaExecutionReader;
@@ -52,7 +50,6 @@ export const reserveInvestigationRunQuota = async ({
   spaceId: string;
   actor: string;
   logger: Logger;
-  waitForEvidence?: typeof waitForInvestigationEvidence;
 }): Promise<RunQuotaReserveResponse> => {
   const { taskRunAt } = await validateInvestigationProvenance({
     request,
@@ -64,21 +61,15 @@ export const reserveInvestigationRunQuota = async ({
   if (!settings.enforcementEnabled) {
     return { granted: true };
   }
-  await waitForEvidence({
-    executionReader,
-    executionId,
-    eventId,
-    eventUuid,
-  });
-
-  const resolvedEvent = await eventResolver.resolveInvestigatableEvent(eventId, eventUuid);
-  if (!resolvedEvent.eligible) {
-    return { granted: false, reason: 'ineligible' };
-  }
 
   const limit = settings.limits.investigation;
   if (!limit?.enabled) {
     return { granted: true };
+  }
+
+  const resolvedEvent = await eventResolver.resolveInvestigatableEvent(eventId, eventUuid);
+  if (!resolvedEvent.eligible) {
+    return { granted: false, reason: 'ineligible' };
   }
 
   let response: RunQuotaReserveResponse = {
