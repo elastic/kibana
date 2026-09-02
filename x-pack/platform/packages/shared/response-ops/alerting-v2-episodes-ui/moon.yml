@@ -66,6 +66,8 @@ dependsOn:
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
 tags:
   - shared-browser
   - package
