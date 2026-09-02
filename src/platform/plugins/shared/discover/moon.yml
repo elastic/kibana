@@ -167,6 +167,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
