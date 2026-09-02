@@ -16,8 +16,8 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import type { EpisodeDataSource } from '../types/episode_data_source';
 import { fetchFromSources } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
 
@@ -48,7 +48,6 @@ export interface UseEpisodesKpisQueryOptions {
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
-  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 export interface UseEpisodesKpisQueryResult {
@@ -61,8 +60,8 @@ export const useEpisodesKpisQuery = ({
   services,
   filterState,
   timeRange,
-  additionalEpisodesDataSource,
 }: UseEpisodesKpisQueryOptions): UseEpisodesKpisQueryResult => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
 
   // The current user profile is only needed to compute the "assigned to me"

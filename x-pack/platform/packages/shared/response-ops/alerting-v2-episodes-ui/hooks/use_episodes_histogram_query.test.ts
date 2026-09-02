@@ -15,6 +15,7 @@ import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceHistogram } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
@@ -40,12 +41,16 @@ const mockTimeRange = {
   to: '2024-01-01T02:00:00.000Z',
 };
 
-const wrapper = () => {
+const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return ({ children }: { children: React.ReactNode }) => {
+    const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return dataSource
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+      : qcProvider;
+  };
 };
 
 afterEach(() => {
@@ -71,7 +76,7 @@ describe('useEpisodesHistogramQuery', () => {
           timeRange: mockTimeRange,
           bucketInterval: '1h',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -99,7 +104,7 @@ describe('useEpisodesHistogramQuery', () => {
           timeRange: mockTimeRange,
           bucketInterval: '1h',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -118,7 +123,7 @@ describe('useEpisodesHistogramQuery', () => {
           timeRange: mockTimeRange,
           bucketInterval: '1h',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -138,7 +143,7 @@ describe('useEpisodesHistogramQuery', () => {
           bucketInterval: '1h',
           breakdownField: 'rule.id',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -167,7 +172,7 @@ describe('useEpisodesHistogramQuery', () => {
           bucketInterval: '1h',
           breakdownField: 'episode.status',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -196,7 +201,7 @@ describe('useEpisodesHistogramQuery', () => {
           timeRange: mockTimeRange,
           bucketInterval: '1h',
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -226,11 +231,12 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
-          additionalEpisodesDataSource: sourceWithHistogram(
-            jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })
-          ),
         }),
-      { wrapper: wrapper() }
+      {
+        wrapper: createWrapper(
+          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false }))
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -262,11 +268,12 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
-          additionalEpisodesDataSource: sourceWithHistogram(
-            jest.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false })
-          ),
         }),
-      { wrapper: wrapper() }
+      {
+        wrapper: createWrapper(
+          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false }))
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -284,11 +291,12 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
-          additionalEpisodesDataSource: sourceWithHistogram(
-            jest.fn().mockResolvedValue({ rows: [], isCapHit: true })
-          ),
         }),
-      { wrapper: wrapper() }
+      {
+        wrapper: createWrapper(
+          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [], isCapHit: true }))
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -312,11 +320,12 @@ describe('useEpisodesHistogramQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
           bucketInterval: '1h',
-          additionalEpisodesDataSource: sourceWithHistogram(
-            jest.fn().mockRejectedValue(new Error('source fetch failed'))
-          ),
         }),
-      { wrapper: wrapper() }
+      {
+        wrapper: createWrapper(
+          sourceWithHistogram(jest.fn().mockRejectedValue(new Error('source fetch failed')))
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

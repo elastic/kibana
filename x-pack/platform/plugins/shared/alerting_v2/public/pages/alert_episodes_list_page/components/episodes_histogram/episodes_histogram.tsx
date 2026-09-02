@@ -33,7 +33,6 @@ import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/querie
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
-import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -74,7 +73,6 @@ export interface EpisodesHistogramProps {
   onTimeRangeChange: (timeRange: TimeRange) => void;
   breakdownField?: string;
   onBreakdownFieldChange: (field: string | undefined) => void;
-  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 const autoInterval = (timeRange: TimeRange): string => {
@@ -91,7 +89,6 @@ export const EpisodesHistogram = ({
   onTimeRangeChange,
   breakdownField,
   onBreakdownFieldChange,
-  additionalEpisodesDataSource,
 }: EpisodesHistogramProps) => {
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId(services.spaces);
@@ -118,7 +115,6 @@ export const EpisodesHistogram = ({
     timeRange,
     bucketInterval,
     breakdownField,
-    additionalEpisodesDataSource,
   });
 
   const unifiedHistogramServices = useMemo(

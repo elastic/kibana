@@ -17,6 +17,7 @@ import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceKpis } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 
 jest.mock('../utils/execute_esql_query');
@@ -53,12 +54,16 @@ const mockKpisRow = {
   snoozed: 0,
 };
 
-const wrapper = () => {
+const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return ({ children }: { children: React.ReactNode }) => {
+    const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return dataSource
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+      : qcProvider;
+  };
 };
 
 afterEach(() => {
@@ -77,7 +82,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -103,7 +108,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -122,7 +127,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -140,7 +145,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -163,7 +168,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -184,7 +189,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -209,7 +214,10 @@ describe('useEpisodesKpisQuery', () => {
           services: mockServices,
           filterState: {},
           timeRange: mockTimeRange,
-          additionalEpisodesDataSource: sourceWithKpis(
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
             jest.fn().mockResolvedValue({
               alerts_count: 10,
               firing_rules: 3,
@@ -218,9 +226,9 @@ describe('useEpisodesKpisQuery', () => {
               acknowledged: 2,
               snoozed: 1,
             })
-          ),
-        }),
-      { wrapper: wrapper() }
+          )
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -244,11 +252,12 @@ describe('useEpisodesKpisQuery', () => {
           services: mockServices,
           filterState: {},
           timeRange: mockTimeRange,
-          additionalEpisodesDataSource: sourceWithKpis(
-            jest.fn().mockRejectedValue(new Error('source fetch failed'))
-          ),
         }),
-      { wrapper: wrapper() }
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(jest.fn().mockRejectedValue(new Error('source fetch failed')))
+        ),
+      }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -272,9 +281,8 @@ describe('useEpisodesKpisQuery', () => {
           services: mockServices,
           filterState: {},
           timeRange: mockTimeRange,
-          additionalEpisodesDataSource: createTestEpisodeSource(),
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper(createTestEpisodeSource()) }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

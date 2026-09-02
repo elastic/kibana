@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -17,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeDataSource } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');
@@ -224,16 +226,20 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
+    const dataSource = sourceWithEpisodes(jest.fn().mockResolvedValue(sourceEpisodes));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
           services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
-          additionalEpisodesDataSource: sourceWithEpisodes(
-            jest.fn().mockResolvedValue(sourceEpisodes)
-          ),
         }),
-      { wrapper }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -249,16 +255,20 @@ describe('useFetchAlertingEpisodesQuery', () => {
 
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
+    const dataSource = sourceWithEpisodes(jest.fn().mockRejectedValue(new Error('source failure')));
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
           services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
-          additionalEpisodesDataSource: sourceWithEpisodes(
-            jest.fn().mockRejectedValue(new Error('source failure'))
-          ),
         }),
-      { wrapper }
+      { wrapper: Wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

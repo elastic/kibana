@@ -12,8 +12,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { EpisodeDataSource } from '../types/episode_data_source';
 import { queryKeys } from '../query_keys';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
@@ -31,7 +31,6 @@ export interface UseFetchAlertingEpisodesQueryOptions {
   filterState?: EpisodesFilterState;
   sortState?: EpisodesSortState;
   timeRange?: TimeRange | null;
-  additionalEpisodesDataSource?: EpisodeDataSource;
   services: UseAlertingEpisodesDataViewOptions['services'] & {
     expressions: ExpressionsStart;
     http: HttpStart;
@@ -50,8 +49,8 @@ export const useFetchAlertingEpisodesQuery = ({
   filterState,
   sortState = DEFAULT_SORT,
   timeRange,
-  additionalEpisodesDataSource,
 }: UseFetchAlertingEpisodesQueryOptions) => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
 

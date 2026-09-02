@@ -10,15 +10,14 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import useAsync from 'react-use/lib/useAsync';
 import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
-import type { EpisodeDataSource } from '../types/episode_data_source';
 import { fetchFromSources } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 
 export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
   services: {
     http: HttpStart;
   };
-  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 type Rule = FindRulesResponse['items'][number];
@@ -28,11 +27,8 @@ type Rule = FindRulesResponse['items'][number];
  * with the minimum number of find requests possible.
  * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
-export const useAlertingRulesCache = ({
-  ruleIds,
-  services,
-  additionalEpisodesDataSource,
-}: UseAlertingRulesCacheOptions) => {
+export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
   const [missingRuleIds, setMissingRuleIds] = useState<ReadonlySet<string>>(new Set());
 

@@ -11,8 +11,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
-import type { EpisodeDataSource } from '../types/episode_data_source';
 import { fetchFromSources } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import { mergeTagOptions } from '../utils/merge_tag_options';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -20,14 +20,13 @@ import { useSpaceId } from './use_space_id';
 export interface UseFetchEpisodeTagOptionsParams {
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart; http: HttpStart };
   timeRange?: TimeRange | null;
-  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 export const useFetchEpisodeTagOptions = ({
   services,
   timeRange,
-  additionalEpisodesDataSource,
 }: UseFetchEpisodeTagOptionsParams) => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.tagOptions(

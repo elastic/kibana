@@ -38,6 +38,7 @@ import deepEqual from 'fast-deep-equal';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
+import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import {
@@ -138,13 +139,19 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
-export const AlertEpisodesListPage = () => {
+export const AlertEpisodesListPage = () => (
+  <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE}>
+    <AlertEpisodesListPageContent />
+  </EpisodeDataSourceProvider>
+);
+
+const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
     : EPISODE_ACTIONS_PRIVILEGE.read;
-  const invalidateEpisodeQueries = useInvalidateEpisodeQueries(CLASSIC_EPISODES_DATA_SOURCE);
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const timefilter = services.data.query.timefilter.timefilter;
 
@@ -191,20 +198,17 @@ export const AlertEpisodesListPage = () => {
     filterState,
     sortState,
     timeRange,
-    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
   const { data: kpis } = useEpisodesKpisQuery({
     services,
     filterState,
     timeRange,
-    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
   const { data: tagOptions = [], isLoading: isLoadingTagOptions } = useFetchEpisodeTagOptions({
     services,
     timeRange,
-    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
   const alertEpisodesCount = kpis?.alertsCount ?? 0;
@@ -244,7 +248,6 @@ export const AlertEpisodesListPage = () => {
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
-    additionalEpisodesDataSource: CLASSIC_EPISODES_DATA_SOURCE,
   });
 
   const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
@@ -494,12 +497,7 @@ export const AlertEpisodesListPage = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EpisodesKpis
-            services={services}
-            filterState={filterState}
-            timeRange={timeRange}
-            additionalEpisodesDataSource={CLASSIC_EPISODES_DATA_SOURCE}
-          />
+          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram
@@ -510,7 +508,6 @@ export const AlertEpisodesListPage = () => {
             onTimeRangeChange={handleTimeChange}
             breakdownField={histogramBreakdownField}
             onBreakdownFieldChange={setHistogramBreakdownField}
-            additionalEpisodesDataSource={CLASSIC_EPISODES_DATA_SOURCE}
           />
         </EuiFlexItem>
         <EuiFlexItem

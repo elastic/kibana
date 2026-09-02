@@ -18,8 +18,8 @@ import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
 import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import type { EpisodeDataSource } from '../types/episode_data_source';
 import { fetchFromSources } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 import {
   generateTimeBuckets,
   computeOverlapCounts,
@@ -43,7 +43,6 @@ export interface UseEpisodesHistogramQueryOptions {
   timeRange?: TimeRange;
   bucketInterval: string;
   breakdownField?: string;
-  additionalEpisodesDataSource?: EpisodeDataSource;
 }
 
 export interface UseEpisodesHistogramQueryResult {
@@ -60,8 +59,8 @@ export const useEpisodesHistogramQuery = ({
   timeRange,
   bucketInterval,
   breakdownField,
-  additionalEpisodesDataSource,
 }: UseEpisodesHistogramQueryOptions): UseEpisodesHistogramQueryResult => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
 
   const {

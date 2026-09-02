@@ -15,6 +15,7 @@ import { useFetchEpisodeTagOptions } from './use_fetch_episode_tag_options';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeDataSource } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 
 jest.mock('../apis/fetch_episode_tag_options');
@@ -38,23 +39,26 @@ const mockTimeRange = {
 const sourceWithTags = (fetchTagOptions: EpisodeDataSource['fetchTagOptions']) =>
   createTestEpisodeSource({ fetchTagOptions });
 
-const wrapper = () => {
+const createWrapper = (dataSource?: EpisodeDataSource) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return ({ children }: { children: React.ReactNode }) => {
+    const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return dataSource
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+      : qcProvider;
+  };
 };
 
-const renderTagOptions = (additionalEpisodesDataSource?: EpisodeDataSource) =>
+const renderTagOptions = (dataSource?: EpisodeDataSource) =>
   renderHook(
     () =>
       useFetchEpisodeTagOptions({
         services: mockServices,
         timeRange: mockTimeRange,
-        additionalEpisodesDataSource,
       }),
-    { wrapper: wrapper() }
+    { wrapper: createWrapper(dataSource) }
   );
 
 afterEach(() => {

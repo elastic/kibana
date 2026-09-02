@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { queryKeys } from '../query_keys';
-import type { EpisodeDataSource } from '../types/episode_data_source';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
 
 /**
  * Returns a stable callback that invalidates every episode-scoped query key
@@ -19,7 +19,8 @@ import type { EpisodeDataSource } from '../types/episode_data_source';
  * of these queries — including an open details flyout sharing the same
  * `QueryClient` — in sync with the updated state.
  */
-export const useInvalidateEpisodeQueries = (additionalEpisodesDataSource?: EpisodeDataSource) => {
+export const useInvalidateEpisodeQueries = () => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const queryClient = useQueryClient();
 
   return useCallback(
