@@ -437,7 +437,9 @@ steps:
         if: "${{ steps.review_tuning.output.response.approved == false }}"
         with:
           alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.dismissed_tags }}"
+          tags_to_add:
+            - detection-watch:tuning-reviewed
+            - detection-watch:tuning-dismissed
           tags_to_remove: []
         on-failure:
           continue: true
@@ -447,7 +449,9 @@ steps:
         if: "${{ steps.review_tuning.output.response.approved == true }}"
         with:
           alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.applied_tags }}"
+          tags_to_add:
+            - detection-watch:tuning-reviewed
+            - detection-watch:tuning-applied
           tags_to_remove: []
         on-failure:
           continue: true
