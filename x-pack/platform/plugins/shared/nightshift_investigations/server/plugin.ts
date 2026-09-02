@@ -22,6 +22,7 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
@@ -106,7 +107,6 @@ export class NightshiftInvestigationsPlugin
         repository: nightshiftInvestigationsRouteRepository,
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
-          getSearchInferenceEndpoints: () => this.searchInferenceEndpoints,
           getTriggerEmitter,
         },
         core,
@@ -152,6 +152,11 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
+      isAvailable: (request) =>
+        isInvestigationAvailable({
+          request,
+          searchInferenceEndpoints: this.searchInferenceEndpoints,
+        }),
     };
   }
 

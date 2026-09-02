@@ -21,6 +21,7 @@ import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
@@ -30,7 +31,6 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
 import { useInvestigationAvailability } from '../../hooks/use_investigation_availability';
-import { buildAlertSnapshot } from './alert_snapshot';
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -57,7 +57,7 @@ export function AlertActions(
   const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
 
   const canReadAlertRule = authorizedToReadRuleForAlert(alert);
-  const { application, telemetryClient, nightshiftInvestigations } = useKibana().services;
+  const { application, http, telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
@@ -117,11 +117,9 @@ export function AlertActions(
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
   const [isInvestigating, setIsInvestigating] = useState(false);
-  const alertSnapshot = buildAlertSnapshot(observabilityAlert);
+  const alertId = observabilityAlert.fields[ALERT_UUID];
   const canStartInvestigation = Boolean(
-    nightshiftInvestigations &&
-      application.capabilities.agentBuilder?.write === true &&
-      alertSnapshot
+    application.capabilities.agentBuilder?.write === true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
     enabled: canStartInvestigation,
@@ -129,27 +127,13 @@ export function AlertActions(
   const showInvestigateAction = Boolean(canStartInvestigation && isInvestigationAvailable);
 
   const handleInvestigate = async () => {
-    if (!nightshiftInvestigations || !alertSnapshot) return;
+    if (!alertId) return;
 
     setIsInvestigating(true);
     closeActionsPopover();
 
     try {
-      await nightshiftInvestigations.investigationsClient.fetch(
-        'POST /internal/nightshift/investigations',
-        {
-          params: {
-            body: {
-              subject: { type: 'alert', id: alertSnapshot.id },
-              concurrency_key: alertSnapshot.id,
-              context: {
-                alerts: [alertSnapshot],
-              },
-            },
-          },
-          signal: null,
-        }
-      );
+      await http.post(`/internal/observability/alerts/${encodeURIComponent(alertId)}/investigate`);
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.observability.alertsTable.investigateSuccessTitle', {
           defaultMessage: 'Investigation started',

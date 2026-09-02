@@ -50,7 +50,6 @@ import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 import { useInvestigationAvailability } from '../../../hooks/use_investigation_availability';
-import { buildAlertSnapshot } from '../../../components/alert_actions/alert_snapshot';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -102,13 +101,10 @@ export function HeaderActions({
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
     notifications,
-    nightshiftInvestigations,
   } = services;
-  const alertSnapshot = alert ? buildAlertSnapshot(alert) : undefined;
+  const alertId = alert?.fields[ALERT_UUID];
   const canStartInvestigation = Boolean(
-    nightshiftInvestigations &&
-      services.application.capabilities.agentBuilder?.write === true &&
-      alertSnapshot
+    services.application?.capabilities?.agentBuilder?.write === true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
     enabled: canStartInvestigation,
@@ -186,24 +182,12 @@ export function HeaderActions({
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
   const handleInvestigate = async () => {
-    if (!nightshiftInvestigations || !alertSnapshot) return;
+    if (!alertId) return;
 
     setIsInvestigating(true);
     setIsPopoverOpen(false);
     try {
-      await nightshiftInvestigations.investigationsClient.fetch(
-        'POST /internal/nightshift/investigations',
-        {
-          params: {
-            body: {
-              subject: { type: 'alert', id: alertSnapshot.id },
-              concurrency_key: alertSnapshot.id,
-              context: { alerts: [alertSnapshot] },
-            },
-          },
-          signal: null,
-        }
-      );
+      await http.post(`/internal/observability/alerts/${encodeURIComponent(alertId)}/investigate`);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.observability.alertDetails.investigateSuccessTitle', {
           defaultMessage: 'Investigation started',

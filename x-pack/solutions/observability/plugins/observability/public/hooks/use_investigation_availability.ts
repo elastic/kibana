@@ -16,20 +16,16 @@ export const useInvestigationAvailability = ({
   enabled: boolean;
   skipAlertsQueryContext?: boolean;
 }): boolean => {
-  const { nightshiftInvestigations } = useKibana().services;
+  const { http } = useKibana().services;
   const { data } = useQuery({
     queryKey: ['investigationAvailability'],
-    queryFn: ({ signal }) => {
-      if (!nightshiftInvestigations) {
-        return { available: false };
-      }
-      return nightshiftInvestigations.investigationsClient.fetch(
-        'GET /internal/nightshift/investigations/availability',
-        { signal: signal ?? null }
-      );
-    },
+    queryFn: ({ signal }) =>
+      http.get<{ available: boolean }>(
+        '/internal/observability/alerts/investigation/availability',
+        { signal }
+      ),
     context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
-    enabled: enabled && Boolean(nightshiftInvestigations),
+    enabled,
     retry: false,
     staleTime: Infinity,
   });

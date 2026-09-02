@@ -8,10 +8,10 @@
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 export const mockStartInvestigation = async (page: ScoutPage) => {
-  await page.route('**/internal/nightshift/investigations/availability', async (route) => {
+  await page.route('**/internal/observability/alerts/investigation/availability', async (route) => {
     await route.fulfill({ status: 200, json: { available: true } });
   });
-  await page.route('**/internal/nightshift/investigations', async (route) => {
+  await page.route('**/internal/observability/alerts/*/investigate', async (route) => {
     await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
   });
 };

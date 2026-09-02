@@ -16,7 +16,6 @@ export type {
   NightshiftInvestigationsPublicStart,
 } from './plugin';
 export type {
-  NightshiftInvestigationsAPIClientRequestParamsOf,
   NightshiftInvestigationsRepositoryClient,
   NightshiftInvestigationsEndpoint,
 } from './api';

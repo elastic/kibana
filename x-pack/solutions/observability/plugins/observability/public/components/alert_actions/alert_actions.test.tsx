@@ -24,14 +24,12 @@ import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 import { AlertActions } from './alert_actions';
-import { buildAlertSnapshot } from './alert_snapshot';
 import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { createMemoryHistory } from 'history';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../../typings/alerts';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type {
@@ -56,7 +54,6 @@ jest.mock('../../hooks/use_investigation_availability', () => ({
 }));
 
 const refresh = jest.fn();
-const startInvestigation = jest.fn();
 const caseHooksReturnedValue = {
   open: () => {
     refresh();
@@ -80,62 +77,6 @@ mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
 
 mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
 const mockLicensing = licensingMock.createStart();
-
-describe('buildAlertSnapshot', () => {
-  const parsedAlert = {
-    fields: {
-      'kibana.alert.uuid': 'alert-1',
-      'kibana.alert.rule.uuid': 'rule-1',
-      'kibana.alert.rule.name': 'Test rule',
-      'kibana.alert.rule.rule_type_id': 'test.rule',
-      'kibana.alert.rule.category': 'Test rule category',
-      'kibana.alert.status': 'active',
-      'kibana.alert.start': '2026-09-01T10:00:00.000Z',
-      'kibana.alert.flapping': false,
-      'kibana.alert.evaluation.value': 31,
-      'kibana.alert.evaluation.threshold': 5,
-    },
-    reason: 'Threshold exceeded',
-  } as TopAlert;
-
-  it('maps required and available optional fields', () => {
-    expect(buildAlertSnapshot(parsedAlert)).toEqual({
-      id: 'alert-1',
-      rule_id: 'rule-1',
-      rule_name: 'Test rule',
-      rule_type_id: 'test.rule',
-      rule_category: 'Test rule category',
-      reason: 'Threshold exceeded',
-      status: 'active',
-      start: '2026-09-01T10:00:00.000Z',
-      flapping: false,
-      evaluation: { value: 31, threshold: 5 },
-    });
-  });
-
-  it('returns undefined when required fields are missing', () => {
-    expect(
-      buildAlertSnapshot({
-        ...parsedAlert,
-        fields: { ...parsedAlert.fields, 'kibana.alert.flapping': undefined },
-      })
-    ).toBeUndefined();
-  });
-
-  it('omits malformed optional grouping fields', () => {
-    const snapshot = buildAlertSnapshot({
-      ...parsedAlert,
-      fields: {
-        ...parsedAlert.fields,
-        'kibana.alert.grouping': [],
-        'kibana.alert.group': [{ field: 'host.name', value: 42 }],
-      },
-    });
-
-    expect(snapshot).not.toHaveProperty('grouping');
-    expect(snapshot).not.toHaveProperty('group');
-  });
-});
 
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
@@ -199,7 +140,6 @@ describe('ObservabilityActions component', () => {
   });
 
   interface SetupOptions {
-    withInvestigations?: boolean;
     canWriteAgentBuilder?: boolean;
     alert?: Alert;
   }
@@ -207,8 +147,7 @@ describe('ObservabilityActions component', () => {
   const setup = async (
     pageId: string,
     {
-      withInvestigations = false,
-      canWriteAgentBuilder = withInvestigations,
+      canWriteAgentBuilder = false,
       alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
     }: SetupOptions = {}
   ) => {
@@ -284,15 +223,6 @@ describe('ObservabilityActions component', () => {
                 agentBuilder: { write: canWriteAgentBuilder },
               },
             },
-            ...(withInvestigations
-              ? {
-                  nightshiftInvestigations: {
-                    investigationsClient: {
-                      fetch: startInvestigation,
-                    },
-                  },
-                }
-              : {}),
           }}
         >
           <AlertsTableContextProvider value={context}>
@@ -332,20 +262,8 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('hides the investigate action when the investigations plugin is unavailable', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
   it('hides the investigate action without Agent Builder write access', async () => {
-    const wrapper = await setup('nothing', {
-      withInvestigations: true,
-      canWriteAgentBuilder: false,
-    });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
@@ -355,7 +273,7 @@ describe('ObservabilityActions component', () => {
 
   it('hides the investigate action when no investigation connector is available', async () => {
     mockUseInvestigationAvailability.mockReturnValue(false);
-    const wrapper = await setup('nothing', { withInvestigations: true });
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
@@ -363,49 +281,16 @@ describe('ObservabilityActions component', () => {
     );
   });
 
-  it('hides the investigate action when the alert has no flapping state', async () => {
-    const wrapper = await setup('nothing', {
-      withInvestigations: true,
-      alert: inventoryThresholdAlertEs,
-    });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-
-    expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
-      0
-    );
-  });
-
-  it('starts an investigation with the alert snapshot', async () => {
-    startInvestigation.mockResolvedValue({ investigation_id: 'investigation-1' });
-    const wrapper = await setup('nothing', { withInvestigations: true });
+  it('starts an investigation for the alert', async () => {
+    mockKibana.services.http.post.mockResolvedValue({ investigation_id: 'investigation-1' });
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
 
     await waitFor(() => {
-      expect(startInvestigation).toHaveBeenCalledWith('POST /internal/nightshift/investigations', {
-        params: {
-          body: {
-            subject: { type: 'alert', id: '6d4c6d74-d51a-495c-897d-88ced3b95e30' },
-            concurrency_key: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
-            context: {
-              alerts: [
-                expect.objectContaining({
-                  id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
-                  rule_id: '06f53080-0f91-11ed-9d86-013908b232ef',
-                  rule_name: 'Test Alert',
-                  rule_type_id: 'metrics.alert.inventory.threshold',
-                  rule_category: 'Inventory',
-                  reason: 'CPU usage is 106.5% in the last 1 min for host-0. Alert when > 1%.',
-                  status: 'active',
-                  start: '2022-07-29T22:51:51.904Z',
-                  flapping: false,
-                }),
-              ],
-            },
-          },
-        },
-        signal: null,
-      });
+      expect(mockKibana.services.http.post).toHaveBeenCalledWith(
+        '/internal/observability/alerts/6d4c6d74-d51a-495c-897d-88ced3b95e30/investigate'
+      );
       expect(mockKibana.services.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Investigation started',
       });
@@ -413,8 +298,8 @@ describe('ObservabilityActions component', () => {
   });
 
   it('reports an investigation request failure', async () => {
-    startInvestigation.mockRejectedValue(new Error('Request failed'));
-    const wrapper = await setup('nothing', { withInvestigations: true });
+    mockKibana.services.http.post.mockRejectedValue(new Error('Request failed'));
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
 

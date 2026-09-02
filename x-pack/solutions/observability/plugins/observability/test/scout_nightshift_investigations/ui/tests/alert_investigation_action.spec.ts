@@ -78,16 +78,12 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith('/internal/nightshift/investigations')
+          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
       );
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickInvestigate();
 
-      expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
-        concurrency_key: alertId,
-        context: { alerts: [{ id: alertId, rule_id: ruleId }] },
-      });
+      await requestPromise;
     });
 
     test('starts an investigation from the alert detail action menu', async ({
@@ -100,13 +96,11 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith('/internal/nightshift/investigations')
+          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
       );
       await pageObjects.alertPage.clickInvestigate();
 
-      expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
-      });
+      await requestPromise;
     });
   }
 );

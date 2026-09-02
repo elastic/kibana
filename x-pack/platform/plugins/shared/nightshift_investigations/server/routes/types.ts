@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { GetTriggerEmitter } from '../types';
@@ -19,6 +18,5 @@ export type GetInvestigationsClient = (
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
-  getSearchInferenceEndpoints: () => SearchInferenceEndpointsPluginStart | undefined;
   getTriggerEmitter: GetTriggerEmitter;
 }

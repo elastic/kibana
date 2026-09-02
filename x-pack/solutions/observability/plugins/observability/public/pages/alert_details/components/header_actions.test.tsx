@@ -69,9 +69,9 @@ const useFetchRuleMock = useFetchRule as jest.Mock;
 const useAlertSnoozeStateMock = useAlertSnoozeState as jest.Mock;
 const useAlertSnoozeMock = useAlertSnooze as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
-const startInvestigation = jest.fn();
 
 const mockHttp = {
+  post: jest.fn(),
   basePath: {
     prepend: (url: string) => `wow${url}`,
   },
@@ -98,9 +98,6 @@ const mockKibana = () => {
       http: mockHttp,
       application: mockNavigateToApp,
       telemetryClient: createTelemetryClientMock(),
-      nightshiftInvestigations: {
-        investigationsClient: { fetch: startInvestigation },
-      },
     },
   });
 };
@@ -206,7 +203,7 @@ describe('Header Actions', () => {
     });
 
     it('starts an investigation from the alert details menu', async () => {
-      startInvestigation.mockResolvedValue({ investigation_id: 'investigation-1' });
+      mockHttp.post.mockResolvedValue({ investigation_id: 'investigation-1' });
       const { findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}
@@ -221,16 +218,8 @@ describe('Header Actions', () => {
       fireEvent.click(await findByTestId('alertDetailsInvestigate'));
 
       await waitFor(() => {
-        expect(startInvestigation).toHaveBeenCalledWith(
-          'POST /internal/nightshift/investigations',
-          expect.objectContaining({
-            params: {
-              body: expect.objectContaining({
-                subject: { type: 'alert', id: mockAlertUuid },
-                concurrency_key: mockAlertUuid,
-              }),
-            },
-          })
+        expect(mockHttp.post).toHaveBeenCalledWith(
+          `/internal/observability/alerts/${mockAlertUuid}/investigate`
         );
       });
     });
@@ -252,7 +241,7 @@ describe('Header Actions', () => {
     });
 
     it('disables the investigate action while the request is in flight', async () => {
-      startInvestigation.mockReturnValue(new Promise(() => {}));
+      mockHttp.post.mockReturnValue(new Promise(() => {}));
       const { findByTestId } = render(
         <HeaderActions
           alert={alertWithGroupsAndTags}

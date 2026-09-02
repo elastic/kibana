@@ -21,6 +21,7 @@ export type NightshiftInvestigationsServerSetup = void;
 
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
+  isAvailable: (request: KibanaRequest) => Promise<boolean>;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
