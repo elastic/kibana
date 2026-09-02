@@ -71,7 +71,7 @@ describe('CentralizedActionPoliciesBanner', () => {
     expect(screen.getByText('Centralized action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Action Policies let you manage notification channels in one place and reuse them across multiple rules.'
+        'Action policies let you manage notification channels in one place and reuse them across multiple rules.'
       )
     ).toBeInTheDocument();
   });
