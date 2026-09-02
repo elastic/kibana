@@ -9,7 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin } from '@kbn/agent-builder-common';
+import type {
+  ConversationOrigin,
+  ConversationRoundFeedback,
+  FeedbackChipId,
+} from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -33,7 +37,6 @@ import {
 import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
@@ -53,9 +56,11 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
   NormalizedConversation,
+  ConversationListResult,
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../../common/constants';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
@@ -97,7 +102,12 @@ export interface ConversationClient {
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
+  updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -166,21 +176,38 @@ class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
   }
 
-  async list(
-    options: ConversationListOptions = {}
-  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
-    const { agentId } = options;
+  async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
+    const {
+      agentId,
+      page = 1,
+      perPage = MAX_CONVERSATIONS_PER_PAGE,
+      sortOrder = 'desc',
+      pinned,
+    } = options;
+
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
     if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
-      return [];
+      return { results: [], total: 0 };
     }
 
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
+    const pinnedFilter =
+      pinned === undefined
+        ? []
+        : pinned
+        ? [{ term: { pinned: true } }]
+        : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
+          // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
+          [{ bool: { must_not: { term: { pinned: true } } } }];
+
     const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1000,
+      // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
+      track_total_hits: MAX_RESULT_WINDOW,
+      from: (page - 1) * perPage,
+      size: perPage,
+      sort: [{ updated_at: { order: sortOrder } }, { created_at: { order: sortOrder } }],
       seq_no_primary_term: true,
       _source: [
         'agent_id',
@@ -208,12 +235,19 @@ class ConversationClientImpl implements ConversationClient {
             buildReadAccessFilter({ user: this.user, agentIds }),
             // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+            ...pinnedFilter,
           ],
         },
       },
     });
 
-    return response.hits.hits.map((hit) => {
+    const hitsTotal = response.hits.total;
+    const total = Math.min(
+      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      MAX_RESULT_WINDOW
+    );
+
+    const results = response.hits.hits.map((hit) => {
       if (!isConversationDocument(hit)) {
         throw createInternalError('Conversation list search returned an incomplete hit');
       }
@@ -224,6 +258,8 @@ class ConversationClientImpl implements ConversationClient {
         resolveTemplate: getTemplate,
       });
     });
+
+    return { results, total };
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
@@ -458,6 +494,46 @@ class ConversationClientImpl implements ConversationClient {
           currentRead: current.read ?? false,
           nextRead: read,
         }),
+    });
+  }
+
+  async updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      fields: (current) => {
+        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+
+        if (roundIndex === -1) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+
+        const round = current.rounds[roundIndex];
+        const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+        const updatedRound =
+          feedback.vote === null
+            ? roundWithoutFeedback
+            : {
+                ...round,
+                feedback: {
+                  vote: feedback.vote,
+                  chips: feedback.chips ?? [],
+                  comment: feedback.comment ?? '',
+                  submitted_at: new Date().toISOString(),
+                  connector_id: round.model_usage?.connector_id,
+                  model: round.model_usage?.model,
+                } satisfies ConversationRoundFeedback,
+              };
+
+        return {
+          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        };
+      },
     });
   }
 

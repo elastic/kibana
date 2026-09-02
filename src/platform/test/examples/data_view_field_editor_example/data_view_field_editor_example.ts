@@ -11,6 +11,14 @@
 import expect from '@kbn/expect';
 import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
+/**
+ * Migration recommendation: DELETE. Field-editor flyout open/close and preconfigured `fieldToCreate`
+ * (including name `demotestfield`) are covered in
+ * src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/field_editor_flyout_content.test.ts
+ * and public/plugin.test.tsx. Discover Scout already covers runtime-field CRUD
+ * (src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/runtime_field_crud.spec.ts).
+ */
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');

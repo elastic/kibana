@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { compareWatchesForDisplay, coverageFromSchedule, isOnDutyNow } from './watch_helpers';
+import { SYSTEM_SECURITY_WATCH_CATALOG, SYSTEM_SECURITY_WATCH_FLOOR_ID } from '../../constants';
+import {
+  compareWatchesForDisplay,
+  coverageFromSchedule,
+  createCatalogWatchPlaceholder,
+  isOnDutyNow,
+} from './watch_helpers';
 import type { WatchScheduleCoverageInput } from './watch_helpers';
 
 describe('coverageFromSchedule', () => {
@@ -94,5 +100,29 @@ describe('compareWatchesForDisplay', () => {
       'Dark Watch',
       'Custom',
     ]);
+  });
+});
+
+describe('createCatalogWatchPlaceholder', () => {
+  it('uses catalog identity and empty runtime fields', () => {
+    const floor = SYSTEM_SECURITY_WATCH_CATALOG[0];
+    const placeholder = createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID);
+
+    expect(placeholder).toEqual(
+      expect.objectContaining({
+        id: floor.id,
+        name: floor.name,
+        color: floor.color,
+        enabled: false,
+        mandate: '',
+        description: '',
+        skills: [],
+        coverage: [],
+        recentRuns: [],
+        metrics: { lastRun: null },
+      })
+    );
+    expect(placeholder.schedule.set).toBe(false);
+    expect(placeholder.lifecycle).toBeUndefined();
   });
 });

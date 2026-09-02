@@ -1,8 +1,7 @@
 {
-  "sha1": "57c2656820ca1c96dd94e31a806e2fb4b7ea4fd0",
+  "sha1": "a44eebb12cb9053d37be4a080cd8b7da128bb84c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_capabilities.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 24,
+        "column": 1
       }
     },
     {
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_capabilities.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 44,
+        "column": 24
       }
     },
     {
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 30,
-        "column": 7
+        "line": 25,
+        "column": 68
       }
     },
     {
@@ -65,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 27,
+        "column": 23
       }
     },
     {
@@ -81,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 52,
-        "column": 7
+        "line": 40,
+        "column": 16
       }
     },
     {
@@ -97,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 53,
+        "column": 16
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 99,
-        "column": 7
+        "line": 75,
+        "column": 16
       }
     },
     {
@@ -129,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_eligible.spec.ts",
-        "line": 142,
-        "column": 7
+        "line": 115,
+        "column": 24
       }
     },
     {
@@ -145,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 28,
+        "column": 10
       }
     },
     {
@@ -161,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -177,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -193,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 57,
+        "column": 13
       }
     },
     {
@@ -209,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/tests/cps_project_routing_ineligible.spec.ts",
-        "line": 95,
-        "column": 9
+        "line": 70,
+        "column": 23
       }
     }
   ]

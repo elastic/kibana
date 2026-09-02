@@ -19,7 +19,7 @@ import type {
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
-  SmlPermissions,
+  SmlKibanaPrivilegeGroup,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
@@ -124,21 +124,17 @@ class SmlServiceImpl implements SmlServiceInstance {
         constraints,
         filters,
       }) => {
-        const rawResults = await autocompleteSml({
+        return autocompleteSml({
           query,
           size,
           spaceId,
           esClient,
+          request,
+          securityAuthz: this.securityAuthz,
           logger,
           constraints,
           filters,
           registeredTypeIds: this.registry.list().map(({ id }) => id),
-        });
-        return filterResultsByPermissions({
-          searchResult: rawResults,
-          request,
-          securityAuthz: this.securityAuthz,
-          logger,
         });
       },
       checkItemsAccess: async ({ ids, spaceId, esClient, request }) => {
@@ -224,79 +220,124 @@ const getAuthorizedPrivileges = async ({
 };
 
 /**
- * Keyword leaf field enumerated by the pre-aggregation pass. This is the
- * concrete `_terms_enum`-addressable leaf of the `permissions` object
- * (see sml_storage.ts) — the same path the ES|QL authz filter references.
+ * The `nested` privileges field and its leaves (see sml_storage.ts). These paths are shared by the
+ * enumeration aggregation, the authz filter, and the indexer's space-scoped delete.
  */
-const PERM_KIBANA_FIELD = 'permissions.kibana.privileges.name' as const;
+const PRIVILEGES_PATH = 'permissions.kibana.privileges' as const;
+const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name` as const;
+const PERM_SPACE_FIELD = `${PRIVILEGES_PATH}.space` as const;
+const PERM_COUNT_FIELD = `${PRIVILEGES_PATH}.count` as const;
 
 /**
- * Enumerate every distinct value of a keyword permission field across the SML
- * corpus via `_terms_enum`, paginated by `search_after`.
- *
- * Pre-aggregation needs the full universe of permission values present in the
- * corpus so it can resolve, up front, exactly which the caller is authorized
- * for. `_terms_enum` reads the inverted index directly (no doc scan), which is
- * far cheaper than aggregating, and is unaffected by Document Level Security on
- * the SML system index (we always read as the internal user).
- *
- * Fail-closed contract: a `complete: false` response (node error / timeout)
- * means the returned terms are a *subset* of the true universe. Authorizing
- * against a truncated universe would silently grant access to values we never
- * checked, so we throw rather than undercount. Likewise, exceeding the page
- * ceiling throws instead of proceeding with a partial set.
- *
- * A missing index returns `[]` (empty corpus), mirroring the empty-results
- * behavior of the search/autocomplete paths.
- *
- * `index_filter` is intentionally omitted: segment-level pruning is a no-op on
- * our single-primary-shard system index.
+ * The `nested` sub-query selecting elements that apply in `spaceId`: the space's own elements plus
+ * any scoped to the global wildcard. Shared by the enumeration aggregation and the authz filter so
+ * the two cannot drift.
  */
-const enumerateDistinctValues = async ({
-  field,
+const spaceScopeQuery = (spaceId: string) => ({
+  bool: {
+    should: [{ term: { [PERM_SPACE_FIELD]: spaceId } }, { term: { [PERM_SPACE_FIELD]: '*' } }],
+    minimum_should_match: 1,
+  },
+});
+
+/**
+ * Enumerate every distinct action present in the SML corpus that applies in `spaceId`.
+ *
+ * `permissions.kibana.privileges` is a `nested` field, so `_terms_enum` can no longer be used: it
+ * reads one inverted-index field and cannot correlate `.name` with the `.space` on the same
+ * element, which is exactly the correlation the space scoping depends on. Instead we run a
+ * `composite` aggregation under `nested` -> `filter`, a parent chain Elasticsearch explicitly
+ * permits for `composite`.
+ *
+ * `composite` rather than `terms` because enumeration here is a security primitive: `terms` is
+ * approximate and would leave us inferring truncation from `sum_other_doc_count`, whereas
+ * `composite` paginates exhaustively via `after_key`. Authorizing against a truncated universe
+ * would silently grant access to values we never checked.
+ *
+ * Fail-closed contract: any shard failure, or exceeding the page ceiling, throws rather than
+ * returning a partial set. A missing index returns `[]` (empty corpus), mirroring the
+ * search/autocomplete paths.
+ *
+ * Read as the internal user, so DLS on the SML system index does not narrow the universe.
+ */
+const enumerateActionsInSpace = async ({
+  spaceId,
   esClient,
   logger,
   pageSize = 1000,
   maxPages = 100,
 }: {
-  field: string;
+  spaceId: string;
   esClient: IScopedClusterClient;
   logger: Logger;
   pageSize?: number;
   maxPages?: number;
 }): Promise<string[]> => {
   const values: string[] = [];
-  let searchAfter: string | undefined;
+  let afterKey: Record<string, string> | undefined;
 
   try {
     for (let page = 0; page < maxPages; page++) {
-      const response = await esClient.asInternalUser.termsEnum({
+      const response = await esClient.asInternalUser.search({
         index: smlIndexName,
-        field,
-        size: pageSize,
-        ...(searchAfter !== undefined ? { search_after: searchAfter } : {}),
+        size: 0,
+        aggs: {
+          privileges: {
+            nested: { path: PRIVILEGES_PATH },
+            aggs: {
+              in_space: {
+                filter: spaceScopeQuery(spaceId),
+                aggs: {
+                  names: {
+                    composite: {
+                      size: pageSize,
+                      sources: [{ name: { terms: { field: PERM_NAME_FIELD } } }],
+                      ...(afterKey ? { after: afterKey } : {}),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
 
-      if (!response.complete) {
-        logger.warn(`_terms_enum on '${field}' returned complete=false; failing closed`);
+      if ((response._shards?.failed ?? 0) > 0) {
+        logger.warn(`nested privileges aggregation had shard failures; failing closed`);
         throw new SmlAuthzEnumerationIncompleteError(
           `Could not complete permission authorization for this search; please retry.`
         );
       }
 
-      values.push(...response.terms);
+      const names = (
+        response.aggregations as
+          | {
+              privileges?: {
+                in_space?: {
+                  names?: {
+                    buckets?: Array<{ key: { name: string } }>;
+                    after_key?: Record<string, string>;
+                  };
+                };
+              };
+            }
+          | undefined
+      )?.privileges?.in_space?.names;
 
-      if (response.terms.length < pageSize) {
+      const buckets = names?.buckets ?? [];
+      values.push(...buckets.map((b) => b.key.name));
+
+      if (buckets.length < pageSize || !names?.after_key) {
         return values;
       }
-      searchAfter = response.terms[response.terms.length - 1];
+      afterKey = names.after_key;
     }
   } catch (error) {
     if (error instanceof SmlAuthzEnumerationIncompleteError) {
       throw error;
     }
     if (isNotFoundError(error)) {
-      logger.debug(`SML index does not exist yet — '${field}' universe is empty`);
+      logger.debug(`SML index does not exist yet — privilege universe is empty`);
       return [];
     }
     throw error;
@@ -312,131 +353,157 @@ const enumerateDistinctValues = async ({
 /**
  * Result of the request-scoped pre-aggregation pass.
  *
- * `authorizedActions` are the Kibana privilege values the caller is
- * authorized for, intersected against what the corpus actually uses. The
- * `kibanaUniverseNonEmpty` flag distinguishes "the corpus uses this
- * dimension but the caller holds nothing" (restrict to public KIs) from
- * "the corpus does not use this dimension at all" (no filter needed).
+ * `authorizedActions` are the bare Kibana action strings the caller holds, intersected against what
+ * the corpus actually uses in this space. `spaceId` travels with them because the authz filter needs
+ * it to scope the nested clause.
  */
 interface AuthorizedUniverse {
   authorizedActions: string[];
-  kibanaUniverseNonEmpty: boolean;
+  spaceId: string;
 }
 
 /**
- * Pre-aggregation pass: discover the corpus's Kibana-privilege universe and
- * resolve, in a single `_has_privileges` call, which values the caller is
- * authorized for. The resulting set is pushed into the ES|QL search as an
- * in-query authorization filter.
+ * Pre-aggregation pass: enumerate the actions the corpus requires in this space (or globally), then
+ * resolve which of them the caller holds via a single `_has_privileges` call.
  *
- * If the corpus uses no Kibana privileges, the privilege check is skipped
- * entirely.
+ * If the corpus uses no Kibana privileges, the privilege check is skipped entirely.
  */
 const resolveAuthorizedUniverse = async ({
   esClient,
   request,
   securityAuthz,
   logger,
+  spaceId,
 }: {
   esClient: IScopedClusterClient;
   request: KibanaRequest;
   securityAuthz: AuthorizationServiceSetup;
   logger: Logger;
+  spaceId: string;
 }): Promise<AuthorizedUniverse> => {
-  const kibanaUniverse = await enumerateDistinctValues({
-    field: PERM_KIBANA_FIELD,
-    esClient,
-    logger,
-  });
+  const actions = await enumerateActionsInSpace({ spaceId, esClient, logger });
 
-  const kibanaUniverseNonEmpty = kibanaUniverse.length > 0;
-
-  if (!kibanaUniverseNonEmpty) {
-    return {
-      authorizedActions: [],
-      kibanaUniverseNonEmpty,
-    };
-  }
-
-  const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: kibanaUniverse,
+  const authorizedActionsSet = await getAuthorizedPrivileges({
+    permissions: actions,
     request,
     securityAuthz,
     logger,
   });
 
-  return {
-    authorizedActions: [...authorizedPerms],
-    kibanaUniverseNonEmpty,
-  };
+  return { authorizedActions: [...authorizedActionsSet].sort(), spaceId };
 };
 
 /**
- * Filter a single page of results by the current user's Kibana privileges.
- * Every action string an entry lists must be authorized for the user;
- * entries with no `kibana.privileges` pass trivially.
+ * The document-visibility filter, as Query DSL. Applied UNCONDITIONALLY — space scoping must not
+ * depend on the security plugin, because Spaces are available (and space isolation expected) on a
+ * Basic license with security disabled.
  *
- * Used by the search loop (per page) and directly by autocomplete (single
- * pass). When the security plugin is absent (dev / test), the function is
- * a no-op to preserve open-access semantics.
+ * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
+ * privilege elements at all (public), OR when at least one element scoped to this requested space
+ * (or to the global wildcard) matches. What "matches" means depends on `authz`:
+ * - with `authz` (security plugin present), the element must additionally either require no
+ *   actions at all (`count: 0` and no action names — see below) or have ALL of its actions covered
+ *   by what the caller holds (the `terms_set` clause);
+ * - without `authz` (security plugin absent — dev / test), space scoping alone applies:
+ *   privilege enforcement is skipped, matching the open-access semantics of every other
+ *   Kibana surface in that configuration.
+ *
+ * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
+ * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
+ * still gets one element per space stamped, just with an empty action list. That branch also
+ * requires the element to carry no action names, so it is deliberately stricter than the
+ * Elasticsearch-side DLS query: the indexer derives `count` from the action list, so an element
+ * with `count: 0` *and* names is malformed and must fail CLOSED instead of reading as public.
+ *
+ * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
+ * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
+ * would turn the whole filter into a no-op. The `must_not exists` inside the `count: 0` branch is
+ * a different case — it sits *within* the `nested` query, where it is evaluated per child document.
+ *
+ * This is passed to the ES|QL `_query` API's `filter` parameter rather than expressed as a WHERE
+ * clause, because ES|QL's index resolution excludes `nested` fields — they cannot be referenced as
+ * columns at all. A Query DSL filter is pushed down to Lucene and does support them.
+ *
+ * `minimum_should_match: 1` is stated explicitly and MUST NOT be dropped. When ES|QL
+ * pushes this filter into a `FORK` plan (every non-empty search query builds one)
+ * the outer `bool` lands in the filter context, where a `should`-only bool
+ * defaults to `minimum_should_match: 0` and therefore matches every document.
  */
-const filterPageByPermissions = async <T extends { permissions: SmlPermissions }>(
-  items: T[],
-  {
-    request,
-    securityAuthz,
-    logger,
-  }: {
-    request: KibanaRequest;
-    securityAuthz?: AuthorizationServiceSetup;
-    logger: Logger;
-  }
-): Promise<T[]> => {
-  if (!securityAuthz || items.length === 0) return items;
-
-  const allPermissions = [
-    ...new Set(items.flatMap((hit) => hit.permissions.kibana.privileges.map((p) => p.name))),
-  ];
-
-  if (allPermissions.length === 0) {
-    return items;
-  }
-
-  const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: allPermissions,
-    request,
-    securityAuthz,
-    logger,
-  });
-
-  return items.filter((hit) => {
-    const kbnPrivs = hit.permissions.kibana.privileges.map((p) => p.name);
-    return kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p));
-  });
-};
+const buildVisibilityFilter = ({
+  spaceId,
+  authz,
+}: {
+  spaceId: string;
+  authz?: AuthorizedUniverse;
+}): Record<string, unknown> => ({
+  bool: {
+    minimum_should_match: 1,
+    should: [
+      {
+        bool: {
+          must_not: [
+            { nested: { path: PRIVILEGES_PATH, query: { match_all: {} }, score_mode: 'none' } },
+          ],
+        },
+      },
+      {
+        nested: {
+          path: PRIVILEGES_PATH,
+          score_mode: 'none',
+          query: {
+            bool: {
+              filter: [
+                spaceScopeQuery(spaceId),
+                ...(authz
+                  ? [
+                      {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            // `terms_set` cannot express minimum_should_match_field: 0.
+                            // The absent-name half is to be extra defensive: the indexer always writes
+                            // `count: actions.length`, so a `count: 0` element carrying action
+                            // names is malformed and must not be read.
+                            {
+                              bool: {
+                                filter: [
+                                  { term: { [PERM_COUNT_FIELD]: 0 } },
+                                  { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+                                ],
+                              },
+                            },
+                            {
+                              terms_set: {
+                                [PERM_NAME_FIELD]: {
+                                  terms: authz.authorizedActions,
+                                  minimum_should_match_field: PERM_COUNT_FIELD,
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ]
+                  : []),
+              ],
+            },
+          },
+        },
+      },
+    ],
+  },
+});
 
 /**
- * Wrap filterPageByPermissions for callers that hold a `{ results }` object.
- * Used by the autocomplete path.
+ * The action-sets an item requires in a given space: one entry per privilege group scoped to that
+ * space or to the global wildcard. Mirrors the ES-side DLS clause — a caller must hold ALL actions
+ * within a single group, and groups for other spaces are irrelevant.
  */
-const filterResultsByPermissions = async <T extends { permissions: SmlPermissions }>({
-  searchResult,
-  request,
-  securityAuthz,
-  logger,
-}: {
-  searchResult: { results: T[] };
-  request: KibanaRequest;
-  securityAuthz?: AuthorizationServiceSetup;
-  logger: Logger;
-}): Promise<{ results: T[] }> => {
-  const filtered = await filterPageByPermissions(searchResult.results, {
-    request,
-    securityAuthz,
-    logger,
-  });
-  return { results: filtered };
-};
+const requiredActionsInSpace = (
+  privileges: SmlKibanaPrivilegeGroup[],
+  spaceId: string
+): string[][] =>
+  privileges.filter((g) => g.space === spaceId || g.space === '*').map((g) => g.name);
 
 /**
  * Check whether the current user has access to specific SML items.
@@ -472,7 +539,7 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  let docAuthz: Map<string, string[]>;
+  let docAuthz: Map<string, SmlKibanaPrivilegeGroup[]>;
   try {
     const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
@@ -481,15 +548,7 @@ const checkItemsAccess = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { terms: { id: ids } },
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [{ terms: { id: ids } }],
         },
       },
       _source: ['id', 'permissions'],
@@ -500,10 +559,10 @@ const checkItemsAccess = async ({
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [
-            source.id ?? '',
-            source.permissions?.kibana?.privileges?.map((p) => p.name) ?? [],
-          ] as [string, string[]];
+          return [source.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
+            string,
+            SmlKibanaPrivilegeGroup[]
+          ];
         })
     );
   } catch (error) {
@@ -520,22 +579,39 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docAuthz.values()].flat())];
+  const relevantGroupsByDoc = new Map<string, string[][]>();
+  for (const [id, groups] of docAuthz) {
+    relevantGroupsByDoc.set(id, requiredActionsInSpace(groups, spaceId));
+  }
+
+  const uniqueActions = [...new Set([...relevantGroupsByDoc.values()].flat(2))];
 
   const authorizedPerms = await getAuthorizedPrivileges({
-    permissions: allPermissions,
+    permissions: uniqueActions,
     request,
     securityAuthz,
     logger,
   });
 
   for (const id of ids) {
-    const kbnPrivs = docAuthz.get(id);
-    if (!kbnPrivs) {
+    const groups = relevantGroupsByDoc.get(id);
+    if (groups === undefined) {
+      // No such document in the corpus.
       accessMap.set(id, false);
       continue;
     }
-    accessMap.set(id, kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p)));
+    // A document carrying no privilege elements at all is public, matching the ES-side
+    // `must_not nested(match_all)` branch. One with elements but none for this space is not
+    // visible here.
+    if ((docAuthz.get(id) ?? []).length === 0) {
+      accessMap.set(id, true);
+      continue;
+    }
+    // Existential across groups, universal within one — the same shape as the nested DLS query.
+    accessMap.set(
+      id,
+      groups.some((actions) => actions.every((a) => authorizedPerms.has(a)))
+    );
   }
 
   return accessMap;
@@ -569,17 +645,15 @@ const SML_SEMANTIC_FIELDS = ['title.semantic', 'description.semantic', 'content.
  *
  * Empty string or `*`: plain sorted scan — no FORK/FUSE, no relevance signal.
  *
- * Spaces and tag filters use MV_CONTAINS rather than `==` because `==` returns
- * null (not false) on multi-value fields — an ES|QL semantic that would
- * silently drop multi-space / multi-tag documents.
+ * Tag filters use MV_CONTAINS rather than `==` because `==` returns null (not
+ * false) on multi-value fields — an ES|QL semantic that would silently drop
+ * multi-tag documents.
  *
- * Authorization is enforced in-query via the `authz` param (pre-aggregation):
- * a doc is authorized iff its required permissions are a subset of what the
- * caller holds. `MV_CONTAINS(?authorized, permissions...name)` expresses
- * exactly that (the authorized set is bound as a single multivalue param) —
- * and because a null/empty permission field is treated as the empty set,
- * public KIs (no required perms) pass automatically. This replaces the former
- * overfetch + JS post-filter, so the outer LIMIT is just `size`.
+ * Authorization is enforced via a `nested` Query DSL filter pushed into the ES|QL `_query` API's
+ * `filter` parameter (not a WHERE clause). The caller passes `buildVisibilityFilter(...)` to the
+ * `esql.query` call. It has to be a pushed-down filter rather than a WHERE clause because ES|QL's
+ * index resolution excludes `nested` fields, so `permissions.kibana.privileges.*` cannot be
+ * referenced as a column at all. Space scoping lives in the filter's `.space` term.
  *
  * `references.uri` is extracted via EVAL before KEEP so the result column is
  * a flat keyword array that can be reconstructed into Array<{uri}> client-side.
@@ -588,35 +662,18 @@ const buildSmlEsqlQuery = ({
   query,
   size,
   fields,
-  spaceId,
   constraints,
   filters,
-  authz,
 }: {
   query: string;
   size: number;
   fields?: string[];
-  spaceId: string;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
-  authz?: AuthorizedUniverse;
 }): { esql: string; params: unknown[] } => {
   const params: unknown[] = [];
   // METADATA is required for FUSE (which needs _id, _index, _score to compute RRF).
   const lines: string[] = [`FROM ${smlIndexName} METADATA _id, _index, _score`];
-
-  // spaces filter (see docblock for the MV_CONTAINS rationale)
-  params.push(spaceId);
-  lines.push('| WHERE MV_CONTAINS(spaces, ?)');
-
-  // Authorization pre-filter. The authorized set is bound as a single
-  // multivalue param (ES|QL rejects an inline `[?, ?]` list). A clause is
-  // emitted only when the corpus actually uses the Kibana-privileges
-  // dimension. See docblock for the subset semantics.
-  if (authz && authz.kibanaUniverseNonEmpty) {
-    params.push(authz.authorizedActions);
-    lines.push(`| WHERE MV_CONTAINS(?, ${PERM_KIBANA_FIELD})`);
-  }
 
   // runtime-imposed per-type id-allowlist constraints
   if (constraints) {
@@ -681,7 +738,7 @@ const buildSmlEsqlQuery = ({
   lines.push(`| LIMIT ${size}`);
 
   // description is included in the baseline (short summary, useful for triage).
-  // content, tags, references, spaces, permissions are opt-in via the fields param.
+  // content, tags, references, and permissions are opt-in via the fields param.
   const DEFAULT_FIELDS = new Set(['description']);
   const shouldKeep = (f: string) =>
     fields !== undefined ? fields.includes(f) : DEFAULT_FIELDS.has(f);
@@ -692,13 +749,6 @@ const buildSmlEsqlQuery = ({
     lines.push('| EVAL ref_uris = references.uri');
   }
 
-  // permissions is a nested object; its leaf name fields are materialized into
-  // flat keyword columns (mirroring origin_uri / ref_uris) so they can be
-  // reconstructed into the nested shape client-side. Always fetched for
-  // server-side RBAC filtering; only surfaced in the result when requested.
-  lines.push('| EVAL perm_kibana = permissions.kibana.privileges.name');
-
-  // spaces is purely opt-in.
   const keepCols = [
     'id',
     'type',
@@ -707,8 +757,6 @@ const buildSmlEsqlQuery = ({
     ...(shouldKeep('description') ? ['description'] : []),
     ...(shouldKeep('tags') ? ['tags'] : []),
     ...(shouldKeep('references') ? ['ref_uris'] : []),
-    ...(shouldKeep('spaces') ? ['spaces'] : []),
-    'perm_kibana',
     ...(shouldKeep('content') ? ['content'] : []),
   ];
   lines.push(`| KEEP ${keepCols.join(', ')}`);
@@ -824,26 +872,26 @@ const isEsqlIndexMissingError = (error: unknown): boolean => {
  * Search the SML index using ES|QL FORK + FUSE hybrid retrieval, with
  * authorization enforced in-query via pre-aggregation.
  *
- * Before the search, `resolveAuthorizedUniverse` enumerates the corpus's
- * Kibana-privilege universe (`_terms_enum`) and resolves, in a single
- * `_has_privileges` call, which Kibana actions the caller is authorized for.
- * The resulting set is pushed into the ES|QL query as an MV_CONTAINS subset
- * filter, so the index returns only authorized docs — no overfetch, no
- * JS post-filter. The outer LIMIT is exactly `size`.
+ * Before the search, `resolveAuthorizedUniverse` enumerates the corpus's Kibana-privilege
+ * universe for this space (a `composite` aggregation under `nested`) and resolves, in a single
+ * `_has_privileges` call, which Kibana actions the caller is authorized for. The resulting set is
+ * pushed as a `nested` Query DSL filter via the ES|QL `_query` API `filter` param, so the index
+ * returns only authorized docs — no overfetch, no JS post-filter. The outer LIMIT is exactly
+ * `size`.
  *
  * When the security plugin is absent (dev / test), enumeration is skipped and
- * all docs in the space are returned (open-access parity with the prior
- * behavior).
+ * privilege enforcement drops out of the pushed filter — but space scoping is still applied, so
+ * only docs visible in the requested space are returned (Spaces work without security).
  *
  * Non-empty queries: two FORK branches (BM25 over all text fields + semantic
  * over all semantic multi-fields), merged by FUSE with RRF — mirrors the old
  * `retriever.rrf fields` two-retriever structure. Empty string or `*`: plain
  * sorted scan, no relevance signal.
  *
- * Filter composition: spaces (MV_CONTAINS) + authz (MV_CONTAINS) + constraints
- * (runtime-imposed per-type id-allowlist) + agent filters — each component is a
- * separate WHERE clause (ANDed across dimensions); within types and tags,
- * matching is OR (any listed value matches).
+ * Filter composition: authz (`terms_set` via ES|QL `filter` param) +
+ * constraints (runtime-imposed per-type id-allowlist) + agent filters
+ * — authz is a Query DSL filter; constraints and tags are WHERE clauses
+ * (ANDed across dimensions); within types and tags, matching is OR.
  */
 const searchSml = async ({
   query,
@@ -870,12 +918,9 @@ const searchSml = async ({
 }): Promise<{ results: SmlSearchResult[] }> => {
   logger.debug(`SML search: query=${JSON.stringify(query)}, size=${size}, spaceId='${spaceId}'`);
 
-  // Pre-aggregation: resolve the caller's authorized permission universe so the
-  // ES|QL query can filter to authorized docs in-query. Skipped when the
-  // security plugin is absent (dev / test) — open-access parity.
   let authz: AuthorizedUniverse | undefined;
   if (securityAuthz) {
-    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger });
+    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
     logger.debug(`SML search authz: actions=${authz.authorizedActions.length}`);
   }
 
@@ -883,10 +928,8 @@ const searchSml = async ({
     query,
     size,
     fields,
-    spaceId,
     constraints,
     filters,
-    authz,
   });
 
   let response: { columns: Array<{ name: string; type: string }>; values: unknown[][] };
@@ -894,6 +937,8 @@ const searchSml = async ({
     response = await esClient.asInternalUser.esql.query({
       query: esql,
       ...(params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
+      // Always pushed: space scoping must hold even without the security plugin.
+      filter: buildVisibilityFilter({ spaceId, authz }),
     });
   } catch (error) {
     if (isNotFoundError(error) || isEsqlIndexMissingError(error)) {
@@ -911,25 +956,13 @@ const searchSml = async ({
     return Array.isArray(v) ? (v as unknown[]).filter((s) => s != null).map(String) : [String(v)];
   };
 
-  // permissions columns are kept for optional surfacing (fields includes
-  // 'permissions'); authorization itself is enforced in-query. spaces is
-  // surfaced only when requested.
-  type SmlSearchResultInternal = SmlSearchResult & { permissions: SmlPermissions };
-
-  const allResults: SmlSearchResultInternal[] = response.values.map((row) => {
-    const result: SmlSearchResultInternal = {
+  const allResults: SmlSearchResult[] = response.values.map((row) => {
+    const result: SmlSearchResult = {
       id: String(row[colIndex.get('id')!] ?? ''),
       type: String(row[colIndex.get('type')!] ?? ''),
       title: String(row[colIndex.get('title')!] ?? ''),
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
-      permissions: {
-        kibana: {
-          privileges: toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name })),
-        },
-      },
     };
-    const spacesIdx = colIndex.get('spaces');
-    if (spacesIdx !== undefined) result.spaces = toStringArray(row[spacesIdx]);
 
     const contentIdx = colIndex.get('content');
     if (contentIdx !== undefined) {
@@ -958,15 +991,9 @@ const searchSml = async ({
     return result;
   });
 
-  // Authorization is already enforced in-query (MV_CONTAINS subset filters), so
-  // every returned row is authorized and the ES|QL LIMIT bounds it to `size`.
+  // Authorization is enforced via the terms_set filter; LIMIT bounds to `size`.
   logger.debug(`SML search: returned=${response.values.length}, size=${size}`);
-  const includePermissions = fields !== undefined && fields.includes('permissions');
-  return {
-    results: allResults.map(({ permissions, ...rest }) =>
-      includePermissions ? { ...rest, permissions } : rest
-    ),
-  };
+  return { results: allResults };
 };
 
 // Every typed token must match, with the last one matched as a prefix.
@@ -1050,12 +1077,18 @@ const buildSmlAutocompleteQuery = (
 
 /**
  * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
+ *
+ * When the security plugin is absent (dev / test), privilege enforcement is
+ * skipped but space scoping is still applied — only docs visible in the requested space are
+ * returned (Spaces work without security).
  */
 const autocompleteSml = async ({
   query,
   size,
   spaceId,
   esClient,
+  request,
+  securityAuthz,
   logger,
   constraints,
   filters,
@@ -1065,6 +1098,8 @@ const autocompleteSml = async ({
   size: number;
   spaceId: string;
   esClient: IScopedClusterClient;
+  request: KibanaRequest;
+  securityAuthz?: AuthorizationServiceSetup;
   logger: Logger;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
@@ -1077,17 +1112,23 @@ const autocompleteSml = async ({
     )}, size=${size}, spaceId='${spaceId}', index='${smlIndexName}'`
   );
 
+  // Pre-aggregation: resolve the caller's authorized permission universe so
+  // the query can filter to authorized docs in-query. Skipped when the
+  // security plugin is absent (dev / test) — open-access parity.
+  let authz: AuthorizedUniverse | undefined;
+  if (securityAuthz) {
+    authz = await resolveAuthorizedUniverse({ esClient, request, securityAuthz, logger, spaceId });
+    logger.debug(`SML autocomplete authz: actions=${authz.authorizedActions.length}`);
+  }
+
   try {
     const smlQuery = buildSmlAutocompleteQuery(query, registeredTypeIds);
 
+    // Always applied: space scoping must hold even without the security plugin.
     const filterClauses: Array<Record<string, unknown>> = [
-      {
-        bool: {
-          should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-          minimum_should_match: 1,
-        },
-      },
+      buildVisibilityFilter({ spaceId, authz }),
     ];
+
     const constraintsFilter = buildConstraintsFilter(constraints);
     if (constraintsFilter) {
       filterClauses.push(constraintsFilter);
@@ -1109,7 +1150,7 @@ const autocompleteSml = async ({
       },
       // Order will be arbitrary as every result scores the same.
       sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
-      _source: ['id', 'type', 'title', 'origin', 'permissions'],
+      _source: ['id', 'type', 'title', 'origin'],
     });
 
     const results: SmlAutocompleteResult[] = response.hits.hits
@@ -1121,8 +1162,6 @@ const autocompleteSml = async ({
           type: source.type ?? '',
           title: source.title ?? '',
           origin: { uri: source.origin?.uri ?? '' },
-          spaces: source.spaces ?? [],
-          permissions: source.permissions ?? emptyPermissions(),
         };
       });
 
@@ -1164,15 +1203,7 @@ const getDocumentsByIds = async ({
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [
-            { terms: { id: ids } },
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [{ terms: { id: ids } }, buildVisibilityFilter({ spaceId })],
         },
       },
     });
@@ -1208,7 +1239,6 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
     content: source.content ?? '',
     created_at: source.created_at ?? '',
     updated_at: source.updated_at ?? '',
-    spaces: source.spaces ?? [],
     permissions: source.permissions ?? emptyPermissions(),
     ingestion_method: source.ingestion_method ?? 'crawled',
   };
