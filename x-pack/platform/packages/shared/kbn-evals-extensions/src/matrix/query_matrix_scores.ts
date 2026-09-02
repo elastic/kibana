@@ -160,6 +160,12 @@ export interface QueryMatrixScoresOptions {
    * continuous scores, every judge counted.
    */
   scoring?: ScoreAggregationOptions;
+  /**
+   * Per-suite scoring overrides, keyed by suite id. A suite present here uses
+   * its own policy instead of the global `scoring`; suites absent from the map
+   * keep `scoring` unchanged. Mirrors `branchBySuite`.
+   */
+  scoringBySuite?: Record<string, ScoreAggregationOptions>;
 }
 
 /**
@@ -262,7 +268,11 @@ export const scoresByPrefixToDatasets = (
  */
 export const pickLatestExperimentPerModel = (
   experiments: EvaluationExperimentSummary[],
-  { lookbackDays, now = Date.now() }: { lookbackDays?: number; now?: number } = {}
+  {
+    lookbackDays,
+    now = Date.now(),
+    allowSelfJudged = false,
+  }: { lookbackDays?: number; now?: number; allowSelfJudged?: boolean } = {}
 ): Map<string, EvaluationExperimentSummary> => {
   const cutoff = lookbackDays ? now - lookbackDays * 24 * 60 * 60 * 1000 : undefined;
   const latestByModel = new Map<string, { experiment: EvaluationExperimentSummary; at: number }>();
@@ -284,10 +294,17 @@ export const pickLatestExperimentPerModel = (
     // blanks the model outright: its scores are dropped downstream and the
     // older, independently judged runs are never reconsidered. Skip it now so
     // recency cannot silently cost a model every cell it earned.
+    //
+    // `allowSelfJudged` is the audited escape hatch: on a suite where the judge
+    // demonstrably does not favour itself, dropping the run costs a real cell
+    // to prevent a bias that was measured not to occur.
     const judges = experiment.evaluator_models?.length
       ? experiment.evaluator_models
       : [experiment.evaluator_model];
-    if (judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged)) {
+    if (
+      !allowSelfJudged &&
+      judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged)
+    ) {
       continue;
     }
 
@@ -347,6 +364,7 @@ export const queryMatrixScores = async (
     lookbackDays,
     prefixesBySuite = {},
     scoring,
+    scoringBySuite,
   }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
@@ -365,6 +383,7 @@ export const queryMatrixScores = async (
 
   for (const suiteId of suiteIds) {
     const suiteBranch = branchBySuite?.[suiteId] ?? branch;
+    const suiteScoring = scoringBySuite?.[suiteId] ?? scoring;
     for (const modelId of modelIds) {
       const experiments = await evalsClient.listExperiments({
         suiteId,
@@ -372,7 +391,15 @@ export const queryMatrixScores = async (
         branch: suiteBranch,
         limit: MAX_LIST_EXPERIMENTS,
       });
-      const [latest] = [...pickLatestExperimentPerModel(experiments, { lookbackDays }).values()];
+      const [latest] = [
+        ...pickLatestExperimentPerModel(experiments, {
+          lookbackDays,
+          // A suite that opted out of the exclusion must also keep its
+          // self-judged runs through selection, or the cell stays blank no
+          // matter what the scoring policy allows.
+          allowSelfJudged: suiteScoring?.excludeSelfJudged === false,
+        }).values(),
+      ];
 
       log.debug(
         `Suite ${suiteId}, model ${modelId}: ${experiments.length} experiment(s)` +
@@ -427,7 +454,7 @@ export const queryMatrixScores = async (
           const before = datasets.length;
           datasets.push(
             ...scoresByPrefixToDatasets(scores, examplePrefixes, {
-              ...scoring,
+              ...suiteScoring,
               onExcluded: (counts) => {
                 if (counts.selfJudged + counts.nonEis + counts.unmappedVerdict > 0) {
                   excludedByModel.set(modelId, counts);

@@ -284,6 +284,7 @@
         "Criteria"
       ],
       "weight": 1,
+      "allowSelfJudged": true,
       "branch": "patrykkopycinski:feat/attack-discovery-agent-builder-evals"
     },
     {

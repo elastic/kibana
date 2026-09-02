@@ -22,6 +22,32 @@ describe('matrixScoreQuery', () => {
       { suiteIds: ['suite-a'], modelIds: ['model-a'] }
     );
 
+  it('lets a column opt out of the global self-judge exclusion', () => {
+    // gemini-3.1-pro judges the attack-discovery suite and is also ranked in
+    // it. The global policy blanks its cell; measured self-preference on that
+    // suite is absent (it ranks itself 4th of 6), so the column opts out
+    // without relaxing the policy for suites that were never audited.
+    const q = query({
+      scoring: { excludeSelfJudged: true },
+      columns: [
+        { id: 'triage', label: 'Triage', suites: ['suite-a'] },
+        {
+          id: 'kill-chain',
+          label: 'Kill-Chain Discovery',
+          suites: ['attack-discovery-agent-builder'],
+          allowSelfJudged: true,
+        },
+      ],
+    });
+
+    // The audited suite opts out...
+    expect(q.scoringBySuite?.['attack-discovery-agent-builder']?.excludeSelfJudged).toBe(false);
+    // ...while every other suite is left out of the map entirely and falls
+    // back to the strict global policy at the suite loop.
+    expect(q.scoringBySuite?.['suite-a']).toBeUndefined();
+    expect(q.scoring?.excludeSelfJudged).toBe(true);
+  });
+
   it('forwards the opted-in scoring policy to the aggregator', () => {
     expect(query({ scoring: { useVerdictLadder: true, requireEisJudge: true } }).scoring).toEqual({
       useVerdictLadder: true,

@@ -79,6 +79,14 @@ const columnSchema = schema.object({
    * single global branch renders every column that is absent from it blank.
    */
   branch: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH })),
+  /**
+   * Opt this column's suites out of the global `scoring.excludeSelfJudged`.
+   *
+   * Set only where self-preference has been measured and found absent: a judge
+   * that also appears as a ranked model normally has its own row dropped, which
+   * blanks a real cell. Leave unset to keep the strict global policy.
+   */
+  allowSelfJudged: schema.maybe(schema.boolean()),
   /** Relative weight of this column in the legacy Overall score. Defaults to 1. */
   weight: schema.number({ defaultValue: 1, min: 0 }),
 });

@@ -29,6 +29,24 @@ const experiment = (
 };
 
 describe('pickLatestExperimentPerModel', () => {
+  it('keeps a self-judged experiment when allowSelfJudged is set', () => {
+    const experiments = [
+      {
+        experiment_id: 'newer-self-judged',
+        task_model: { id: 'google-gemini-3.1-pro' },
+        evaluator_model: { id: 'google-gemini-3.1-pro' },
+        timestamp: '2026-09-01T00:00:00.000Z',
+      },
+    ] as unknown as Parameters<typeof pickLatestExperimentPerModel>[0];
+
+    // Default policy drops it: a self-judged run must not silently win selection.
+    expect(pickLatestExperimentPerModel(experiments).size).toBe(0);
+
+    // Opting in recovers the row rather than leaving the cell blank.
+    const kept = pickLatestExperimentPerModel(experiments, { allowSelfJudged: true });
+    expect(kept.get('google-gemini-3.1-pro')?.experiment_id).toBe('newer-self-judged');
+  });
+
   it('keeps the most recent experiment per model', () => {
     const result = pickLatestExperimentPerModel([
       experiment({ experiment_id: 'old', modelId: 'm1', timestamp: '2026-06-01T00:00:00.000Z' }),
@@ -555,6 +573,57 @@ describe('queryMatrixScores with examplePrefixes', () => {
     const datasetIds = result[0].suites[0].datasets.map((d) => d.datasetId);
     expect(datasetIds).toContain('d1');
     expect(datasetIds).toContain('prefix:alert-analysis');
+  });
+
+  it('applies the per-suite scoring policy, not the global one, to prefix scores', async () => {
+    // The graded model IS the judge. Globally self-judged scores are dropped;
+    // the audited suite opts out via scoringBySuite and must keep its cell.
+    const selfJudged = [
+      {
+        example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name: 'correctness', score: 0.6, model: { id: 'm1' } },
+        metadata: {},
+      },
+    ];
+
+    const build = () => {
+      const listExperiments = jest.fn().mockResolvedValue([
+        {
+          experiment_id: 'e1',
+          execution_id: 'x1',
+          timestamp: new Date().toISOString(),
+          task_model: { id: 'm1' },
+        },
+      ]);
+      return {
+        listExperiments,
+        getExperimentStats: jest.fn().mockResolvedValue(stats),
+        getExperimentScores: jest.fn().mockResolvedValue(selfJudged),
+      } as unknown as EvalsClient;
+    };
+
+    const prefixIds = (r: Awaited<ReturnType<typeof queryMatrixScores>>) =>
+      r[0].suites[0].datasets.map((d) => d.datasetId);
+
+    // Strict global policy: the self-judged prefix score is thrown away.
+    const strict = await queryMatrixScores(build(), log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+      scoring: { excludeSelfJudged: true },
+    });
+    expect(prefixIds(strict)).not.toContain('prefix:alert-analysis');
+
+    // Same global policy, but this suite opted out -> the cell survives.
+    const opted = await queryMatrixScores(build(), log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      prefixesBySuite: { 'suite-a': ['alert-analysis'] },
+      scoring: { excludeSelfJudged: true },
+      scoringBySuite: { 'suite-a': { excludeSelfJudged: false } },
+    });
+    expect(prefixIds(opted)).toContain('prefix:alert-analysis');
   });
 
   it('does not fetch per-example scores when no prefixes requested', async () => {

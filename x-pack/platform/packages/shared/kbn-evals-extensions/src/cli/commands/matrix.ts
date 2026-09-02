@@ -20,7 +20,10 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { loadMatrixConfig, applyModelOverrides } from '../../matrix/load_matrix_config';
 import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
-import type { QueryMatrixScoresOptions } from '../../matrix/query_matrix_scores';
+import type {
+  QueryMatrixScoresOptions,
+  ScoreAggregationOptions,
+} from '../../matrix/query_matrix_scores';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { renderMatrixHtml } from '../../matrix/render_matrix_html';
@@ -47,7 +50,10 @@ export const matrixScoreQuery = (
     modelIds,
     branch,
     lookbackDays,
-  }: Omit<QueryMatrixScoresOptions, 'prefixesBySuite' | 'scoring' | 'branchBySuite'>
+  }: Omit<
+    QueryMatrixScoresOptions,
+    'prefixesBySuite' | 'scoring' | 'branchBySuite' | 'scoringBySuite'
+  >
 ): QueryMatrixScoresOptions => ({
   suiteIds,
   modelIds,
@@ -56,7 +62,32 @@ export const matrixScoreQuery = (
   lookbackDays,
   prefixesBySuite: prefixesBySuiteFromColumns(config),
   scoring: config.scoring,
+  scoringBySuite: scoringBySuiteFromColumns(config),
 });
+
+/**
+ * Collapses per-column `allowSelfJudged` into a suite-keyed scoring policy.
+ *
+ * A judge that is also a ranked model has its own row dropped by the global
+ * `excludeSelfJudged`, blanking a cell it genuinely earned. Opting out is
+ * scoped to the suite whose judge was actually audited: gemini-3.1-pro also
+ * self-judges 100% of security-automatic-migrations, so a global flip would
+ * admit self-judged scores for suites nobody measured.
+ */
+export const scoringBySuiteFromColumns = (
+  config: MatrixConfig
+): Record<string, ScoreAggregationOptions> => {
+  const bySuite: Record<string, ScoreAggregationOptions> = {};
+  for (const column of config.columns) {
+    if (column.allowSelfJudged === undefined) {
+      continue;
+    }
+    for (const suiteId of column.suites ?? []) {
+      bySuite[suiteId] = { ...config.scoring, excludeSelfJudged: !column.allowSelfJudged };
+    }
+  }
+  return bySuite;
+};
 
 /**
  * Collapses per-column `examplePrefixes` into a suite-keyed map.
