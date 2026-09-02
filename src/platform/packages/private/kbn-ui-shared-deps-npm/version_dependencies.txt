@@ -16,7 +16,6 @@
 @elastic/apm-rum-core@5.25.3
 @elastic/charts@73.0.0
 @elastic/esql-ast@4.23.0
-@elastic/esql-definitions@4.22.0
 @elastic/esql-definitions@4.23.0
 @elastic/esql-grammar@4.23.0
 @elastic/esql-parser@4.23.0
