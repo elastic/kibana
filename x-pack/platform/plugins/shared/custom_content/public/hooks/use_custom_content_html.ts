@@ -123,6 +123,7 @@ export function useCustomContentHtml({
     query,
     filters,
     esqlVariables,
+    setApproximationApplied,
   ]);
 
   const html = useMemo(
