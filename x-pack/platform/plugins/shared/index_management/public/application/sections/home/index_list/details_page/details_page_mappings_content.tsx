@@ -104,7 +104,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const { enableSemanticText: isSemanticTextEnabled } = config;
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
   const semanticTextInfo = {
-    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
+    isSemanticTextEnabled: isSemanticTextEnabled && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
