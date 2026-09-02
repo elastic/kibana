@@ -9,7 +9,7 @@ import {
   getMockMitreTactic,
   getMockMitreTechnique,
   getMockMitreSubtechnique,
-} from '@kbn/security-mitre-attack-common';
+} from '../mocks/mitre_entities.mock';
 import type { MitreEntityType } from '@kbn/security-mitre-attack-common';
 import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../saved_objects';
 import {

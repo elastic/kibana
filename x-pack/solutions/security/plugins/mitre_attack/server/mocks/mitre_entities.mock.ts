@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { MitreTactic, MitreTechnique, MitreSubtechnique } from './schema';
+import type {
+  MitreTactic,
+  MitreTechnique,
+  MitreSubtechnique,
+} from '@kbn/security-mitre-attack-common';
 
 /** Returns a complete realistic MitreTactic for use in tests. */
 export const getMockMitreTactic = (overrides?: Partial<MitreTactic>): MitreTactic => ({

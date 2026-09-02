@@ -28,7 +28,7 @@ export interface MitreEntityCollection extends MitreEntityBuckets {
   framework: MitreFramework;
   /**
    * Resolved framework version. Absent when the index holds no data for the
-   * requested framework; a future feature that filters on version must handle this case.
+   * requested framework
    */
   frameworkVersion?: string;
 }

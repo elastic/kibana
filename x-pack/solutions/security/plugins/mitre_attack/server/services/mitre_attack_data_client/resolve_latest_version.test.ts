@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { getMockMitreTactic } from '@kbn/security-mitre-attack-common';
+import { getMockMitreTactic } from '../../mocks/mitre_entities.mock';
 import { resolveLatestVersion } from './resolve_latest_version';
 import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../saved_objects';
 

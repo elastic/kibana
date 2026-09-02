@@ -10,7 +10,7 @@ import {
   getMockMitreTactic,
   getMockMitreTechnique,
   getMockMitreSubtechnique,
-} from '@kbn/security-mitre-attack-common';
+} from '../mocks/mitre_entities.mock';
 import { validateMitreEntity, validateMitreEntities } from './mitre_entity_validation';
 
 describe('validateMitreEntity', () => {

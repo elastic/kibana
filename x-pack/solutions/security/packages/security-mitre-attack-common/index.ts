@@ -21,12 +21,6 @@ export type {
   MitreEntityBuckets,
   MitreEntityCollection,
   MitreListParams,
-} from './src/api_types';
+} from './src/types';
 
 export { DEFAULT_MITRE_FRAMEWORK, DEFAULT_MITRE_ENTITY_STATUS } from './src/constants';
-
-export {
-  getMockMitreTactic,
-  getMockMitreTechnique,
-  getMockMitreSubtechnique,
-} from './src/mitre_entity_builders';

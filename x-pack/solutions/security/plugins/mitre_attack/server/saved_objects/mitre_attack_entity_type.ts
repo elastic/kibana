@@ -40,10 +40,6 @@ export const mitreAttackEntityType: SavedObjectsType = {
   // sort, or aggregate on. `reference` and `superseded_by_id` are intentionally
   // left unindexed: they are display-only values that are still stored in `_source`
   // and returned by reads, they just cannot be filtered or sorted on in ES.
-  // Indexing either of them after this type ships requires a new model version
-  // with a `mappings_addition` change: the migrator compares the recorded
-  // `mappingVersions` against the registered one, so editing an existing
-  // version's mappings is silently skipped on any index that already has it.
   mappings: {
     dynamic: false,
     properties: {

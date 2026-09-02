@@ -6,7 +6,7 @@
  */
 
 import type { MitreFramework } from './schema';
-import type { MitreEntityStatus } from './api_types';
+import type { MitreEntityStatus } from './types';
 
 /** Framework applied when a caller does not specify one. */
 export const DEFAULT_MITRE_FRAMEWORK: MitreFramework = 'enterprise';

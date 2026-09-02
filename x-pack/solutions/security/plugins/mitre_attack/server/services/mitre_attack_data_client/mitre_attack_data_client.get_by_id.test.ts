@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { MitreTactic, MitreTechnique } from '@kbn/security-mitre-attack-common';
-import { getMockMitreTactic, getMockMitreTechnique } from '@kbn/security-mitre-attack-common';
+import { getMockMitreTactic, getMockMitreTechnique } from '../../mocks/mitre_entities.mock';
 import { createMitreAttackDataClient } from './mitre_attack_data_client';
 import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../saved_objects';
 import { mitreAttackDataServiceMock } from '../__mocks__/mitre_attack_data_service';
