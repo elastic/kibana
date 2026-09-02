@@ -7,6 +7,10 @@
 
 export type { AgentBuilderEvent } from './base/events';
 export {
+  ConversationMetadataUpdatedTriggerId,
+  type ConversationMetadataUpdatedEvent,
+} from './triggers';
+export {
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
@@ -140,6 +144,7 @@ export {
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
   agentIdRegexp,
+  agentIdMaxLength,
   AgentExecutionMode,
   SubagentExecutionMode,
   SubagentMode,
@@ -175,6 +180,7 @@ export {
   type ConversationRound,
   type ConversationRoundFeedback,
   type FeedbackChipId,
+  getConversationRoundAuthorDisplayName,
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
@@ -183,6 +189,7 @@ export {
   type ConversationPermissions,
   type ConversationWithPermissions,
   type ConversationWithoutRoundsWithPermissions,
+  type ConversationListResult,
   type ToolCallStep,
   type ConversationRoundStep,
   type ReasoningStepData,

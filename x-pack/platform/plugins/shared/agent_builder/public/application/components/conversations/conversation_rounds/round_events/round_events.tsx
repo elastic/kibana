@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isBackgroundAgentCompleteStep,
@@ -41,7 +41,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   return (
     <EuiFlexGroup direction="column" data-test-subj="agentBuilderThinkingPanel">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="l" direction="column">
+        <EuiFlexGroup gutterSize="m" direction="column">
           {displayItems.map((item) => {
             if (item.kind === 'group') {
               return (
@@ -67,7 +67,6 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
             );
           })}
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

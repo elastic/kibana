@@ -407,7 +407,14 @@ steps:
       it('should throw error when YAML validation fails', async () => {
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -548,7 +555,14 @@ steps:
         });
         mockWorkflowsService.validateWorkflow.mockResolvedValue({
           valid: false,
-          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+          diagnostics: [
+            {
+              severity: 'error',
+              message: 'Invalid YAML',
+              source: 'schema',
+              ruleId: 'schemaViolation',
+            },
+          ],
         });
 
         await expect(
@@ -892,7 +906,13 @@ steps:
       const expectedResult = {
         valid: false,
         diagnostics: [
-          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+          {
+            severity: 'error' as const,
+            message: 'Required',
+            source: 'schema',
+            path: ['name'],
+            ruleId: 'schemaViolation' as const,
+          },
         ],
       };
       mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
