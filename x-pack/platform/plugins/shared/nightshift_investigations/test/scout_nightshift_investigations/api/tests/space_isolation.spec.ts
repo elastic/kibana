@@ -20,6 +20,9 @@ import {
 
 const SPACE_ID = uniqueId('nightshift-inv-space');
 const TEST_ID = uniqueId('space-scoped-investigation');
+const CONTROL_ID = uniqueId('space-isolation-default');
+const SUITE_CREATED_RANGE =
+  'created_after=2024-07-01T00:00:00Z&created_before=2024-07-02T00:00:00Z';
 
 apiTest.describe(
   'investigations are isolated per space',
@@ -40,12 +43,14 @@ apiTest.describe(
         subject_type: 'alert',
         subject_id: 'alert-space',
         trigger_type: 'automatic',
+        created_at: '2024-07-01T10:00:00Z',
         summary: 'Space-scoped investigation.',
       });
     });
 
     apiTest.afterEach(async ({ kbnClient }) => {
       await deleteInvestigation(kbnClient, TEST_ID, SPACE_ID);
+      await deleteInvestigation(kbnClient, CONTROL_ID);
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -85,13 +90,25 @@ apiTest.describe(
 
     apiTest(
       'LIST in the default space does not include the investigation',
-      async ({ apiClient }) => {
-        const response = await listInvestigations(apiClient, cookieHeader);
+      async ({ apiClient, kbnClient }) => {
+        await seedInvestigation(kbnClient, {
+          id: CONTROL_ID,
+          status: 'running',
+          subject_type: 'alert',
+          subject_id: 'alert-default-space',
+          trigger_type: 'automatic',
+          created_at: '2024-07-01T10:00:00Z',
+        });
+
+        const response = await listInvestigations(apiClient, cookieHeader, {
+          query: SUITE_CREATED_RANGE,
+        });
         expect(response).toHaveStatusCode(200);
 
         const ids = response.body.results.map(
           (result: { investigation_id: string }) => result.investigation_id
         );
+        expect(ids).toContain(CONTROL_ID);
         expect(ids).not.toContain(TEST_ID);
       }
     );

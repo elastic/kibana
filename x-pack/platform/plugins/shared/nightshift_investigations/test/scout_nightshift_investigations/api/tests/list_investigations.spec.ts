@@ -172,7 +172,7 @@ apiTest.describe(
 
     apiTest('matches a pending investigation on created_after only', async ({ apiClient }) => {
       const createdOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: 'created_after=2024-06-04T00:00:00Z',
+        query: `created_after=2024-06-04T00:00:00Z&created_before=2024-06-05T00:00:00Z`,
       });
       expect(createdOnly).toHaveStatusCode(200);
       expect(
@@ -180,12 +180,16 @@ apiTest.describe(
       ).toContain(IDS[3]);
 
       const startedOnly = await listInvestigations(apiClient, cookieHeader, {
-        query: 'started_after=2024-06-04T00:00:00Z',
+        query: `started_after=2024-06-01T00:00:00Z&${SEED_CREATED_RANGE}`,
       });
       expect(startedOnly).toHaveStatusCode(200);
-      expect(
-        startedOnly.body.results.map((r: { investigation_id: string }) => r.investigation_id)
-      ).not.toContain(IDS[3]);
+      const startedOnlyIds = startedOnly.body.results.map(
+        (r: { investigation_id: string }) => r.investigation_id
+      );
+      expect(startedOnlyIds).toContain(IDS[0]);
+      expect(startedOnlyIds).toContain(IDS[1]);
+      expect(startedOnlyIds).toContain(IDS[2]);
+      expect(startedOnlyIds).not.toContain(IDS[3]);
     });
 
     apiTest('returns 400 for a non-datetime created_after value', async ({ apiClient }) => {
