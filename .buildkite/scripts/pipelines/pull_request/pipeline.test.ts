@@ -243,6 +243,27 @@ describe('pull_request pipeline generation', () => {
     expect(output).not.toContain('security_solution_investigations.sh');
   });
 
+  it('does not trigger Cypress suites for a Jest-tests-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/public/application/app.test.tsx',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('security_serverless_explore.sh');
+    expect(output).not.toContain('security_solution_explore.sh');
+  });
+
   it('triggers Cypress suites for product changes in the same plugin', async () => {
     const changes = [
       { filename: 'x-pack/platform/plugins/shared/triggers_actions_ui/public/application/app.tsx' },
