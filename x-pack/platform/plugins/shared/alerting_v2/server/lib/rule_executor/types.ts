@@ -31,8 +31,6 @@ export interface RulePipelineState {
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
   readonly dataPresentGroupHashes?: ReadonlySet<string>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
-  /** Map from alert-type events to their deterministic `_id`. Populated only when deduplication_strategy is 'rule_event'. */
-  readonly deduplicationIds?: ReadonlyMap<AlertEvent, string>;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

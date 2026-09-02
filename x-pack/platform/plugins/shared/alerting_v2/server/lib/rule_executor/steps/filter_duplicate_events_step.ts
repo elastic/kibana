@@ -14,6 +14,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { resolveRuleEventId } from '../build_alert_events';
 import { guardedMapStep } from '../stream_utils';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 
@@ -29,50 +30,45 @@ export class FilterDuplicateEventsStep implements RuleExecutionStep {
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
-    return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
-      const { deduplicationIds, alertEventsBatch } = state;
+    return guardedMapStep(streamState, ['rule', 'alertEventsBatch'], async (state) => {
+      const { rule, alertEventsBatch } = state;
 
-      if (!deduplicationIds || deduplicationIds.size === 0) {
+      if ((rule.deduplication_strategy ?? 'rule_event') !== 'rule_event') {
         return { type: 'continue', state };
       }
 
-      const candidateEvents = alertEventsBatch.filter((e) => deduplicationIds.has(e));
-      if (candidateEvents.length === 0) {
+      // Compute deterministic ids directly from event fields — safe across
+      // director transformations because space_id, rule.id, group_hash, and
+      // data are not mutated by any downstream step.
+      const candidateIds = new Map<AlertEvent, string>();
+      for (const event of alertEventsBatch) {
+        const id = resolveRuleEventId(event);
+        if (id != null) candidateIds.set(event, id);
+      }
+
+      if (candidateIds.size === 0) {
         return { type: 'continue', state };
       }
 
-      const allIds = candidateEvents.map((e) => deduplicationIds.get(e)!);
-      const existingIds = await this.fetchExistingIds(allIds);
+      const existingIds = await this.fetchExistingIds([...candidateIds.values()]);
 
       if (existingIds.size === 0) {
         return { type: 'continue', state };
       }
 
       const filteredBatch = alertEventsBatch.filter((e) => {
-        const id = deduplicationIds.get(e as AlertEvent);
+        const id = candidateIds.get(e);
         return id == null || !existingIds.has(id);
       });
 
       const removedCount = alertEventsBatch.length - filteredBatch.length;
       this.logger.debug({
-        message: `[${this.name}] Pre-filtered ${removedCount} duplicate event(s) for rule ${state.rule?.id}`,
+        message: `[${this.name}] Pre-filtered ${removedCount} duplicate event(s) for rule ${rule.id}`,
       });
-
-      const filteredDeduplicationIds = new Map<AlertEvent, string>();
-      for (const event of filteredBatch) {
-        const id = deduplicationIds.get(event as AlertEvent);
-        if (id != null) {
-          filteredDeduplicationIds.set(event as AlertEvent, id);
-        }
-      }
 
       return {
         type: 'continue',
-        state: {
-          ...state,
-          alertEventsBatch: filteredBatch,
-          deduplicationIds: filteredDeduplicationIds,
-        },
+        state: { ...state, alertEventsBatch: filteredBatch },
       };
     });
   }

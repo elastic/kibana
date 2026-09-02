@@ -218,7 +218,8 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
+    noDataStrategy:
+      rule.no_data_strategy ?? (rule.kind === 'alert' ? 'last_known_status' : undefined),
     deduplicationStrategy: rule.deduplication_strategy ?? undefined,
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,

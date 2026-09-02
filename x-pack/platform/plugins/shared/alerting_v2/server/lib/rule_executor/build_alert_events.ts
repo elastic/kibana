@@ -105,27 +105,22 @@ export function buildRuleEventId({
 }
 
 /**
- * Builds a Map from each alert-type `AlertEvent` to its deterministic
- * document id. Only `type === 'alert'` events are mapped — signal events
- * don't use episode state and don't participate in the rule-event dedup path.
+ * Returns the deterministic `_id` for an alert event if it should be
+ * deduplicated, or `undefined` if it should receive an ES-generated id.
+ *
+ * Only events that carry actual ES|QL row data participate — events with
+ * empty `data` (e.g. continued-breach synthetic events) are excluded so they
+ * continue to be written on every run as intended.
  */
-export function buildDeduplicationIds(
-  events: readonly AlertEvent[]
-): ReadonlyMap<AlertEvent, string> {
-  const map = new Map<AlertEvent, string>();
-  for (const event of events) {
-    if (event.type !== 'alert') continue;
-    map.set(
-      event,
-      buildRuleEventId({
-        spaceId: event.space_id,
-        ruleId: event.rule.id,
-        groupHash: event.group_hash,
-        rowDoc: event.data,
-      })
-    );
-  }
-  return map;
+export function resolveRuleEventId(event: AlertEvent): string | undefined {
+  if (event.type !== 'alert') return undefined;
+  if (!event.data || Object.keys(event.data as object).length === 0) return undefined;
+  return buildRuleEventId({
+    spaceId: event.space_id,
+    ruleId: event.rule.id,
+    groupHash: event.group_hash,
+    rowDoc: event.data as Record<string, unknown>,
+  });
 }
 
 export const buildExecutionUuid = ({
