@@ -11,6 +11,7 @@ jobs:
   check_reviewable_commit:
     runs-on: ubuntu-slim
     permissions:
+      actions: read
       contents: read
     outputs:
       should_review: ${{ steps.check_commit.outputs.should_review }}
@@ -31,6 +32,56 @@ jobs:
               repo: head.repo.name,
               ref: head.sha,
             });
-            const shouldReview = commit.parents.length <= 1;
-            core.info(shouldReview ? 'Reviewing code push.' : 'Skipping merge commit.');
-            core.setOutput('should_review', String(shouldReview));
+            if (commit.parents.length <= 1) {
+              core.info('Reviewing code push.');
+              core.setOutput('should_review', 'true');
+              return;
+            }
+
+            // Merge-only syncs skip the review to save cost. But the caller's
+            // concurrency lane uses cancel-in-progress, so starting this run may
+            // have just killed an in-flight review that will now never finish.
+            // Self-heal: review anyway unless a previous run of the caller
+            // workflow on this branch completed its agent job.
+            try {
+              const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                event: 'pull_request_target',
+                branch: head.ref,
+                per_page: 20,
+              });
+              const priorRuns = runs.workflow_runs.filter(
+                (run) => run.id !== context.runId && run.name === context.workflow
+              );
+              for (const run of priorRuns) {
+                // Activation-skipped runs never entered the lane and cancelled nothing.
+                if (run.conclusion === 'skipped') continue;
+                if (run.conclusion !== 'success') {
+                  core.info(
+                    `Reviewing merge commit: previous run ${run.id} ended as '${run.conclusion}' before completing a review.`
+                  );
+                  core.setOutput('should_review', 'true');
+                  return;
+                }
+                const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id,
+                  per_page: 100,
+                });
+                const agentJob = jobs.jobs.find((job) => job.name === 'agent');
+                if (agentJob && agentJob.conclusion === 'success') {
+                  core.info(`Skipping merge commit: run ${run.id} already completed a review.`);
+                  core.setOutput('should_review', 'false');
+                  return;
+                }
+                // A successful run whose agent was skipped is an earlier
+                // merge-commit skip; it decided against even older runs, so keep walking.
+              }
+              core.info('Skipping merge commit.');
+              core.setOutput('should_review', 'false');
+            } catch (error) {
+              core.warning(`Prior-run check failed; keeping merge-commit skip. ${error}`);
+              core.setOutput('should_review', 'false');
+            }
