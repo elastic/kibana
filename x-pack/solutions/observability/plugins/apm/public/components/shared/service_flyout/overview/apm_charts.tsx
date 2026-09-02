@@ -94,14 +94,19 @@ export function ServiceFlyoutApmCharts({
             gap: ${euiTheme.size.m};
           `}
         >
+          {/* Distinct chart ids: the flyout globally pushes the page charts' tooltip
+              portals (latencyChart/throughput/errorRate) below the flyout, and the
+              tooltip portal is named after the chart id — reusing those ids here
+              would hide the flyout's own tooltips. */}
           <LatencyChart
             {...commonProps}
+            chartId="serviceFlyoutLatencyChart"
             latencyAggregationType={latencyAggregationType}
             setLatencyAggregationType={setLatencyAggregationType}
             latencySelectEbt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.CHART_CONTROLS }}
           />
-          <FailedTransactionChart {...commonProps} />
-          <ThroughputChart {...commonProps} />
+          <FailedTransactionChart {...commonProps} chartId="serviceFlyoutErrorRate" />
+          <ThroughputChart {...commonProps} chartId="serviceFlyoutThroughput" />
         </div>
       </ChartPointerEventContextProvider>
     </Router>

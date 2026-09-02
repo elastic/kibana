@@ -102,6 +102,20 @@ describe('ServiceFlyoutApmCharts', () => {
     expect(screen.getByTestId('throughputChartMock')).toBeInTheDocument();
   });
 
+  it('uses flyout-specific chart ids so the flyout tooltip z-index override does not hide them', () => {
+    renderCharts();
+
+    expect(mockLatencyChart).toHaveBeenCalledWith(
+      expect.objectContaining({ chartId: 'serviceFlyoutLatencyChart' })
+    );
+    expect(mockFailedTransactionChart).toHaveBeenCalledWith(
+      expect.objectContaining({ chartId: 'serviceFlyoutErrorRate' })
+    );
+    expect(mockThroughputChart).toHaveBeenCalledWith(
+      expect.objectContaining({ chartId: 'serviceFlyoutThroughput' })
+    );
+  });
+
   it('passes the flyout query scope to every chart without alert annotations', () => {
     renderCharts();
 

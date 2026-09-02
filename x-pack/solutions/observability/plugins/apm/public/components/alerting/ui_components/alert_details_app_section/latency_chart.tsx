@@ -67,6 +67,7 @@ export function LatencyChart({
   showAlertAnnotations,
   latencySelectEbt,
   showChartActions = true,
+  chartId = 'latencyChart',
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -100,6 +101,11 @@ export function LatencyChart({
   latencySelectEbt?: EbtClickAttrsWithoutAction;
   /** When false, hide the "Open" chart actions popover. */
   showChartActions?: boolean;
+  /**
+   * Elastic Charts id, which also names the tooltip portal. Hosts that restyle
+   * tooltip portals by id (e.g. the service flyout) need a distinct value.
+   */
+  chartId?: string;
 }) {
   const {
     services: { uiSettings },
@@ -255,7 +261,7 @@ export function LatencyChart({
           )}
           <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
-              id="latencyChart"
+              id={chartId}
               annotations={alertAnnotations}
               height={200}
               comparisonEnabled={comparisonEnabled}
