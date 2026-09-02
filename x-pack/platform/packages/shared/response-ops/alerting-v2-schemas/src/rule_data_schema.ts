@@ -541,6 +541,36 @@ export const isNoDataQueryProvidedForStrategy = (data: {
 export const isNoDataStrategyNotEmit = (data: {
   no_data_strategy?: NoDataStrategy | null;
 }): boolean => data.no_data_strategy !== noDataStrategy.emit;
+
+/**
+ * A recovery delay is inert when recovery is disabled (`recovery_strategy` is
+ * `none` or unset), so we reject it. Only a positive delay counts
+ * (`recovering_count > 0` or any `recovering_timeframe`); `recovering_count: 0`
+ * means "recover immediately" and is always allowed.
+ */
+export const isRecoveryDelayAllowed = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  state_transition?: {
+    recovering_count?: number | null;
+    recovering_timeframe?: string | null;
+  } | null;
+}): boolean => {
+  const recoveryEnabled =
+    data.recovery_strategy != null && data.recovery_strategy !== recoveryStrategy.none;
+  if (recoveryEnabled) {
+    return true;
+  }
+
+  const stateTransition = data.state_transition;
+  if (stateTransition == null) {
+    return true;
+  }
+
+  const hasRecoveryDelay =
+    (stateTransition.recovering_count != null && stateTransition.recovering_count > 0) ||
+    stateTransition.recovering_timeframe != null;
+  return !hasRecoveryDelay;
+};
 const rejectEmitNoDataStrategy = {
   message: 'no_data_strategy "emit" is not currently supported.',
   path: ['no_data_strategy'],
@@ -577,6 +607,11 @@ export const createRuleDataSchema = createRuleDataBaseSchema
     path: ['query', 'no_data'],
   })
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy)
+  .refine(isRecoveryDelayAllowed, {
+    message:
+      'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+    path: ['state_transition', 'recovering_count'],
+  })
   .meta({ id: 'alerting_new_rule' });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
