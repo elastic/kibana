@@ -630,14 +630,36 @@ export const queryMatrixTraces = async (
   // Runaway tool-loop report. `Tool Calls` is deliberately excluded from
   // quality scoring and thrashing cells do NOT score worse (measured 0.70 vs
   // 0.62 trajectory), so this is a COST signal, never a penalty: without it a
-  // 115-call/3.78M-token cell is indistinguishable from an 8-call one in every
+  // 44-call/3.78M-token cell is indistinguishable from an 8-call one in every
   // rendered artifact.
   if (toolCallWarnAbove > 0) {
-    const runaway = Object.entries(traces)
-      .map(([key, trace]) => ({ key, calls: trace.scores?.['Tool Calls'] }))
-      .filter((c): c is { key: string; calls: number } => typeof c.calls === 'number')
+    // Corroborate the score against the trail the same document recorded. The
+    // evaluator counts OTel TOOL spans, which is a DIFFERENT source from
+    // `task.output.steps`, so a score far above the trail is measurement error
+    // (stale/duplicated spans), not a longer loop. Golden bears this out: over
+    // 313 recent scored docs the ratio is median 1.00 / mean 0.98, yet one
+    // 2026-08-22 cell reported 115 against a 29-call trail and became the
+    // headline "worst offender" in every report built off this warning.
+    // Reporting an uncorroborated count as a tool-loop length publishes a
+    // number no trace supports, so those cells are named separately.
+    const SUSPECT_RATIO = 2;
+    const withTrail = Object.entries(traces).map(([key, trace]) => ({
+      key,
+      calls: trace.scores?.['Tool Calls'],
+      trail: trace.toolTrail?.length ?? 0,
+    }));
+
+    const above = withTrail
+      .filter(
+        (c): c is { key: string; calls: number; trail: number } => typeof c.calls === 'number'
+      )
       .filter((c) => c.calls > toolCallWarnAbove)
       .sort((a, b) => b.calls - a.calls);
+
+    // A trail of 0 cannot corroborate or refute the count (the cell may simply
+    // have no cached steps), so it stays in the reportable set.
+    const suspect = above.filter((c) => c.trail > 0 && c.calls > c.trail * SUSPECT_RATIO);
+    const runaway = above.filter((c) => !suspect.includes(c));
 
     if (runaway.length > 0) {
       log.warning(
@@ -646,6 +668,18 @@ export const queryMatrixTraces = async (
             .slice(0, 10)
             .map((c) => `${c.key}=${c.calls}`)
             .join(', ')
+      );
+    }
+
+    if (suspect.length > 0) {
+      log.warning(
+        `'Tool Calls' exceeds the recorded tool trail by more than ${SUSPECT_RATIO}x in ` +
+          `${suspect.length} cell(s): ` +
+          suspect
+            .slice(0, 10)
+            .map((c) => `${c.key}=${c.calls} (trail ${c.trail})`)
+            .join(', ') +
+          ` — the count is not corroborated by the trace; do not cite these as tool-loop lengths`
       );
     }
 

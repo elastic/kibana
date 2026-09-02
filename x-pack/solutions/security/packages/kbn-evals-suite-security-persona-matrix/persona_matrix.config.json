@@ -417,6 +417,12 @@
       "id": "zai-glm-5-2",
       "label": "GLM-5.2",
       "openSource": true
+    },
+    {
+      "id": "openrouter-zai-glm-5-3-flash",
+      "label": "GLM-5.3 Flash",
+      "openSource": true,
+      "matchIds": ["z-ai/glm-5.3-flash"]
     }
   ],
   "tokenCost": {},

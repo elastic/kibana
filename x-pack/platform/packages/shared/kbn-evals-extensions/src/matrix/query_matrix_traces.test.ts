@@ -176,14 +176,20 @@ describe('queryMatrixTraces example fetching', () => {
   });
 
   it('reports runaway tool loops above the configured threshold', async () => {
-    const heavy = (calls: number): EvaluationScoreDocument =>
+    const heavy = (calls: number, trail: number): EvaluationScoreDocument =>
       ({
         example: { id: 'example-1' },
         evaluator: { name: 'Tool Calls', score: calls },
         metadata: { execution_id: 'exec-a' },
         task: {
           model: { id: 'model-x' },
-          output: { messages: [{ message: 'done' }] },
+          output: {
+            messages: [{ message: 'done' }],
+            steps: Array.from({ length: trail }, () => ({
+              type: 'tool_call',
+              tool_id: 'platform.core.search',
+            })),
+          },
           repetition_index: 0,
         },
       } as unknown as EvaluationScoreDocument);
@@ -192,7 +198,90 @@ describe('queryMatrixTraces example fetching', () => {
       getExperimentScores: jest.fn(
         async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
       ),
-      getExampleScores: jest.fn(async () => [heavy(115)]),
+      getExampleScores: jest.fn(async () => [heavy(44, 44)]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      40
+    );
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Possible runaway tool loops')
+    );
+  });
+
+  it('does not cite a tool-call count the recorded trail cannot corroborate', async () => {
+    // The real shape from golden: openai-gpt-5.2:alert-analysis-c scored 115
+    // against a 29-call trail (ratio 4.0) on 2026-08-22, while its five sibling
+    // executions of the same cell scored ~1.2x their trails. Reported as a loop
+    // length it became the headline "115 calls" in downstream summaries — a
+    // number no trace supports.
+    const scoredWithTrail = (calls: number, trail: number): EvaluationScoreDocument =>
+      ({
+        example: { id: 'example-1' },
+        evaluator: { name: 'Tool Calls', score: calls },
+        metadata: { execution_id: 'exec-a' },
+        task: {
+          model: { id: 'model-x' },
+          output: {
+            messages: [{ message: 'done' }],
+            steps: Array.from({ length: trail }, () => ({
+              type: 'tool_call',
+              tool_id: 'platform.core.search',
+            })),
+          },
+          repetition_index: 0,
+        },
+      } as unknown as EvaluationScoreDocument);
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [scoredWithTrail(115, 29)]),
+    };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+    await queryMatrixTraces(
+      client as never,
+      log as never,
+      aggregatedFor('exec-a') as never,
+      undefined,
+      40
+    );
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining("'Tool Calls' exceeds the recorded tool trail")
+    );
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('=115 (trail 29)'));
+    // It must NOT also be presented as a genuine loop length.
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Possible runaway tool loops')
+    );
+  });
+
+  it('still reports a high count when no trail is available to refute it', async () => {
+    // A cell with no cached steps cannot corroborate OR refute the count, so it
+    // must stay reportable rather than being silently dropped as suspect.
+    const noTrailDoc = {
+      example: { id: 'example-1' },
+      evaluator: { name: 'Tool Calls', score: 115 },
+      metadata: { execution_id: 'exec-a' },
+      task: {
+        model: { id: 'model-x' },
+        output: { messages: [{ message: 'done' }] },
+        repetition_index: 0,
+      },
+    } as unknown as EvaluationScoreDocument;
+
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [noTrailDoc]),
     };
     const log = { debug: jest.fn(), warning: jest.fn() };
     await queryMatrixTraces(
