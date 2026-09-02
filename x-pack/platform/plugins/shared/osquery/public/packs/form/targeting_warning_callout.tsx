@@ -102,11 +102,6 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     [agentPoliciesById, untargetedPolicyIds]
   );
 
-  const messageValues = useMemo(
-    () => ({ count: untargetedNames.length, names: untargetedNames.join(', ') }),
-    [untargetedNames]
-  );
-
   if (!untargetedNames.length) return null;
 
   return (
@@ -125,7 +120,11 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
           <FormattedMessage
             id="xpack.osquery.pack.form.targetingWarning.body"
             defaultMessage="The Osquery Manager integration is shared with {count, plural, one {an agent policy} other {agent policies}} that this pack does not target, and a shared integration delivers the same configuration to every policy that uses it. This pack will therefore also run on: {names}. To limit it to the policies you selected, give each agent policy its own Osquery Manager integration policy in Fleet."
-            values={messageValues}
+            // Inline literal: the i18n validator resolves `values` statically and
+            // cannot see through a variable reference. Same pattern as
+            // agents_table.tsx — the render is gated on a non-empty list above.
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{ count: untargetedNames.length, names: untargetedNames.join(', ') }}
           />
         </EuiCallOut>
       </div>
