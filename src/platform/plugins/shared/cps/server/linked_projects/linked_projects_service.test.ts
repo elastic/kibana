@@ -107,6 +107,19 @@ describe('LinkedProjectsService', () => {
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
+  it('returns undefined and logs at debug on 401 without throwing', async () => {
+    mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(createResponseError(401));
+
+    const request = httpServerMock.createKibanaRequest();
+
+    await expect(service.getLinkedProjects(request)).resolves.toBeUndefined();
+    await expect(service.isCpsActive(request)).resolves.toBe(false);
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Elasticsearch rejected the credential forwarded')
+    );
+    expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+
   it('returns undefined and logs at warn on unexpected errors without throwing', async () => {
     mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(new Error('boom'));
 

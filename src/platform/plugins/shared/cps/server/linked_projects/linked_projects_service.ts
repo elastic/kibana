@@ -66,12 +66,23 @@ export class LinkedProjectsService {
         : [];
     } catch (error) {
       const statusCode = (error as { statusCode?: number })?.statusCode;
-      if (statusCode === 401 || statusCode === 403) {
-        // The request principal cannot list linked projects. This typically means they lack the
-        // `read_project_routing` cluster privilege, so they cannot search linked projects either.
-        // Leave linked projects unresolved rather than misreporting an empty scope.
+      // Both rejections below are expected in normal operation and are re-evaluated on every
+      // request, so they are logged at `debug`: at `warn` they would repeat on each read for as
+      // long as the principal keeps making them. Either way the scope stays unresolved rather than
+      // being misreported as empty.
+      if (statusCode === 403) {
+        // The principal lacks the `read_project_routing` cluster privilege, so it cannot search
+        // linked projects either.
         this.logger.debug(
-          `The request principal is not authorized to resolve linked projects via /_project/tags (status ${statusCode}); the principal lacks the read_project_routing cluster privilege so cross-project reads are not available to it.`
+          `The request principal is not authorized to resolve linked projects via /_project/tags (status 403); it lacks the read_project_routing cluster privilege, so cross-project reads are not available to it.`
+        );
+      } else if (statusCode === 401) {
+        // Not a Kibana authentication failure - those are rejected by the HTTP layer long before a
+        // route handler runs. Elasticsearch refused the credential Kibana forwarded on
+        // `asCurrentUser`, which is what happens when the request carries no cross-project-capable
+        // cloud identity.
+        this.logger.debug(
+          `Elasticsearch rejected the credential forwarded while resolving linked projects via /_project/tags (status 401); the request principal has no cross-project-capable cloud identity.`
         );
       } else {
         this.logger.warn(
