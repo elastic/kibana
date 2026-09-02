@@ -1902,10 +1902,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.16.0.tgz#b04061d2f598511bed61a86f02a5ad8e48012a5b"
-  integrity sha512-G59/ubflm7Z+9XoFpub9JdV7tYWdmH0cEu2/yAcQjY+RO5Y+IMR9hDMz9zN3YBUsTvD2w21cPLWkzVXL2OgNbQ==
+"@elastic/eslint-plugin-eui@3.0.0-snapshot.1788256915206":
+  version "3.0.0-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-3.0.0-snapshot.1788256915206.tgz#3975547882f477f511902ede660470cc2c34fa06"
+  integrity sha512-4732MUJk8WglkizXuj5Gfoiy6PVYFmTosQc/+ykaxQ4Y/dclqQO0VkexrWplkByMqOB3z/z3Ws8G4AdB/1QvOQ==
   dependencies:
     "@typescript-eslint/typescript-estree" "^8.64.0"
     "@typescript-eslint/utils" "^8.64.0"
@@ -1989,39 +1989,39 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-illustrations@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.1.tgz#a4bd17393daaa708cadafc1e9fa325f99c869b4a"
-  integrity sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==
+"@elastic/eui-illustrations@1.0.2-snapshot.1788256915206":
+  version "1.0.2-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.2-snapshot.1788256915206.tgz#53f2bac64458323c1d34646f5edb4d675ad49d7f"
+  integrity sha512-R57C1aWAS2iU13gdXdtNbtga7rpx8h/tJuG5ZjCuwkukfwvYkp/Dp28+k/A3EM13YzqBi33DEpGIhZQBA+MLvw==
 
-"@elastic/eui-test-helpers@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0.tgz#2d1aaddcbf5a4aadf10278ae47c2faa395211455"
-  integrity sha512-oW20Eaw3w1OzXbiRA2Dj0XPmYN9dkshFZHkM8atrcaHu8NcvspKijzDfw84rTaWGG6AnZEHMfyau08TKhrdZVw==
+"@elastic/eui-test-helpers@1.5.0-snapshot.1788256915206":
+  version "1.5.0-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.5.0-snapshot.1788256915206.tgz#67573766411cd890fd0654df9ec29036c4bbe086"
+  integrity sha512-mUoAYeiRQ+4uO55N3I8dCfBVaYsoHfFbdUmSVRjQs3XqCHHuz7gnvs0kC/RosHiX+PqEth/dP7k9MJuebKWBQQ==
 
-"@elastic/eui-theme-borealis@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0.tgz#51b11163728fc634bea4848586642eecc0b6b39c"
-  integrity sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==
+"@elastic/eui-theme-borealis@8.0.0-snapshot.1788256915206":
+  version "8.0.0-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0-snapshot.1788256915206.tgz#61674d9224dddf8ecfcdc3ae3f3b1fb7c25a6387"
+  integrity sha512-H9Q+jVZ496hY1LCFYWaBgnwr6EepaHfe++eptMhfkPGXNZtFNgffjZoaCh2mAmPfjwH+wAVLSKX3tRHHykYx8w==
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
+    "@elastic/eui-theme-common" "10.0.0-snapshot.1788256915206"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@10.0.0":
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-10.0.0.tgz#d2f71b0863e026ca55b06c1cecc5f6f130aefa37"
-  integrity sha512-cnUZx3S6XlDcm3ArkEGB3Q5Ehq+E5g4gB+a74ob0+Csjglvus0QO4Fyr5UwYHLJqueSMuV9YefVtKDC41lh16g==
+"@elastic/eui-theme-common@10.0.0-snapshot.1788256915206":
+  version "10.0.0-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-10.0.0-snapshot.1788256915206.tgz#2f47899641d77373b53c2095205a73eb47ec7d65"
+  integrity sha512-ER9vIX2BrtmB9jK6hxVT1fuSOBHfVKTE3zck+Mq9/eGNSPEcbWr8HYlziokHDv3uvkyh4+2Y+rnNmJHIEs4H7g==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@119.1.0":
-  version "119.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-119.1.0.tgz#fe950711b75ad95a3b733fff43e97b9ef8659d51"
-  integrity sha512-655h0HmMSqcWcdF1BYaFgx35/OmHgRTdlHAYwlt4MEYfRo4PJgxwXM8xfQ7crNl/9jXYF6cbt2RM/azkpEChRg==
+"@elastic/eui@120.0.0-snapshot.1788256915206":
+  version "120.0.0-snapshot.1788256915206"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-120.0.0-snapshot.1788256915206.tgz#6f1a8dc931824cf06a43fa1608f51f4956ef6c02"
+  integrity sha512-AWUKFsOkBXOAJDxwzyWBIxQ4Q2lE/RCemFx0PAj2YtS4b0Fs0O9NcKKFxLSjXdibjUELr4Vngp0QqoHQcM+njQ==
   dependencies:
-    "@elastic/eui-theme-common" "10.0.0"
+    "@elastic/eui-theme-common" "10.0.0-snapshot.1788256915206"
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2030,6 +2030,7 @@
     "@types/refractor" "^3.4.0"
     chroma-js "^2.4.2"
     classnames "^2.5.1"
+    diff-match-patch "^1.0.5"
     lodash "^4.17.21"
     mdast-util-to-hast "^10.2.0"
     numeral "^2.0.6"
@@ -2050,7 +2051,6 @@
     remark-parse-no-trim "^8.0.4"
     remark-rehype "^8.1.0"
     tabbable "^5.3.3"
-    text-diff "^1.0.1"
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
@@ -32580,11 +32580,6 @@ text-decoder@^1.1.0:
   integrity sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==
   dependencies:
     b4a "^1.6.4"
-
-text-diff@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/text-diff/-/text-diff-1.0.1.tgz#6c105905435e337857375c9d2f6ca63e453ff565"
-  integrity sha1-bBBZBUNeM3hXN1ydL2ymPkU/9WU=
 
 text-hex@1.0.x:
   version "1.0.0"

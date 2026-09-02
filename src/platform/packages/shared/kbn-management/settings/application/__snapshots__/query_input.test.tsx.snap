@@ -54,7 +54,7 @@ exports[`Search should render normally 1`] = `
           class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiFilterButton__wrapper css-ln4f6z-wrapper"
+            class="euiFilterButton__wrapper css-xcxo9u-wrapper"
           >
             <button
               aria-expanded="false"
