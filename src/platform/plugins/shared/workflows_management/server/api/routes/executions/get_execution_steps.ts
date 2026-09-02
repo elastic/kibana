@@ -9,8 +9,9 @@
 
 import path from 'path';
 import { schema } from '@kbn/config-schema';
+import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../common';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
@@ -50,8 +51,8 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
               }),
               size: schema.number({
                 min: 1,
-                max: MAX_PAGE_SIZE,
-                defaultValue: 100,
+                max: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+                defaultValue: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
                 meta: { description: 'Number of step executions per page.' },
               }),
             }),

@@ -10,9 +10,12 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
+import { WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE } from './load_execution_step_pages';
 import { loadExecutionThunk } from './load_execution_thunk';
+import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+import { setExecution } from '../slice';
 
 const mockGetExecution = jest.fn();
 const mockGetExecutionSteps = jest.fn();
@@ -60,7 +63,7 @@ const mockStepsPage = {
   results: mockExecution.stepExecutions,
   total: 0,
   page: 1,
-  size: 100,
+  size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
 };
 
 describe('loadExecutionThunk', () => {
@@ -85,7 +88,10 @@ describe('loadExecutionThunk', () => {
       includeOutput: false,
       omitStepExecutions: true,
     });
-    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', { page: 1, size: 100 });
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 1,
+      size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+    });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);
   });
@@ -136,6 +142,45 @@ describe('loadExecutionThunk', () => {
     const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
 
     expect(result.payload).not.toHaveProperty('stepExecutionsTruncatedCount');
+  });
+
+  it('should skip a completed poll batch and fetch the next page', async () => {
+    const completedBatch = Array.from(
+      { length: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE },
+      (_, i) => ({
+        id: `s${i}`,
+        stepId: `s${i}`,
+        status: ExecutionStatus.COMPLETED,
+      })
+    );
+    store.dispatch(
+      setExecution({
+        ...mockExecution,
+        status: ExecutionStatus.RUNNING,
+        stepExecutions: completedBatch as WorkflowExecutionDto['stepExecutions'],
+      })
+    );
+    mockGetExecution.mockResolvedValue({ ...mockExecution, status: ExecutionStatus.RUNNING });
+    mockGetExecutionSteps.mockResolvedValue({
+      results: [{ id: 'next', stepId: 'next', status: ExecutionStatus.RUNNING }],
+      total: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE + 1,
+      page: 2,
+      size: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE,
+    });
+
+    const result = await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));
+
+    expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
+    expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
+      page: 2,
+      size: WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE,
+    });
+    expect(result.payload).toMatchObject({
+      stepExecutions: [
+        ...completedBatch,
+        { id: 'next', stepId: 'next', status: ExecutionStatus.RUNNING },
+      ],
+    });
   });
 
   it('should handle HTTP error with body message', async () => {

@@ -11,6 +11,8 @@ import { createAsyncThunk } from 'redux-toolkit-v1';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { loadExecutionStepPages } from './load_execution_step_pages';
+import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { _setComputedExecution, setExecution } from '../slice';
@@ -33,19 +35,29 @@ export const loadExecutionThunk = createAsyncThunk<
     const api = new WorkflowApi(http);
     try {
       const previousExecution = getState().detail.execution;
+      const cachedSteps = previousExecution?.id === id ? previousExecution.stepExecutions : [];
+      const cachedTotal =
+        previousExecution?.id === id
+          ? cachedSteps.length + (previousExecution.stepExecutionsTruncatedCount ?? 0)
+          : 0;
 
-      const [execution, steps] = await Promise.all([
+      const [execution, stepsPage] = await Promise.all([
         api.getExecution(id, {
           includeInput: false,
           includeOutput: false,
           omitStepExecutions: true,
         }),
-        api.getExecutionSteps(id, { page: 1, size: 100 }),
+        loadExecutionStepPages({
+          fetchPage: (page, size) => api.getExecutionSteps(id, { page, size }),
+          cachedSteps,
+          cachedTotal,
+          maxSteps: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+        }),
       ]);
-      const truncatedCount = steps.total - steps.results.length;
+      const truncatedCount = stepsPage.total - stepsPage.steps.length;
       const response: WorkflowExecutionDto = {
         ...execution,
-        stepExecutions: steps.results,
+        stepExecutions: stepsPage.steps,
         ...(truncatedCount > 0 ? { stepExecutionsTruncatedCount: truncatedCount } : {}),
       };
       dispatch(setExecution(response));

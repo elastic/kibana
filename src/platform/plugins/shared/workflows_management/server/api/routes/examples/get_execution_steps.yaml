@@ -25,13 +25,13 @@ responses:
                   scopeStack: []
               total: 1
               page: 1
-              size: 100
+              size: 1000
 x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=100" \
+        -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps?page=1&size=1000" \
         -H "Authorization: ApiKey ${API_KEY}"
   - lang: Console
     source: |
-      GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=100
+      GET kbn://api/workflows/executions/{executionId}/steps?page=1&size=1000
