@@ -100,34 +100,12 @@ describe('RuleSummaryFlyout', () => {
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when the cancel button is clicked', () => {
+  it('calls onClose when the footer close button is clicked', () => {
     const { props } = renderFlyout();
 
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutCancelButton'));
+    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton'));
 
     expect(props.onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders the open details button with a basePath-prefixed rule details href', () => {
-    renderFlyout();
-
-    const openDetailsButton = screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton');
-    expect(openDetailsButton).toHaveAttribute(
-      'href',
-      '/base/app/management/alertingV2/rules/rule-1'
-    );
-  });
-
-  it('url-encodes the rule id when building the details href', () => {
-    renderFlyout({
-      rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
-    });
-
-    const openDetailsButton = screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton');
-    expect(openDetailsButton).toHaveAttribute(
-      'href',
-      `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
-    );
   });
 
   it('does not render any rule actions in the header', () => {
@@ -138,6 +116,80 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     // The close control remains in the header.
     expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
+  });
+
+  describe('Take action menu', () => {
+    const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+    it('opens the View details item with a basePath-prefixed rule details href', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/base/app/management/alertingV2/rules/rule-1'
+      );
+    });
+
+    it('url-encodes the rule id when building the details href', () => {
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
+
+      expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
+        'href',
+        `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
+      );
+    });
+
+    it('forwards write action callbacks with the rule', () => {
+      const { props } = renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
+
+      fireEvent.click(screen.getByTestId('editRule-rule-1'));
+      expect(props.onEdit).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
+      expect(props.onClone).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+      expect(props.onRun).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+      expect(props.onUpdateApiKey).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+      expect(props.onDelete).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('omits the update API key action when onUpdateApiKey is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('updateRuleApiKey-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('shows only read actions when canWrite is false', () => {
+      renderFlyout({ canWrite: false });
+      openMenu();
+
+      // View details (read) stays available.
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
+      // Write actions are hidden.
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+      // Close still available.
+      expect(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton')).toBeInTheDocument();
+    });
   });
 
   describe('Agent Builder auto-attach', () => {

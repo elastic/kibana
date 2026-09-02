@@ -7,7 +7,6 @@
 
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -26,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { paths } from '../../../constants';
+import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
+import { TakeActionButton } from './take_action_button';
 import { RuleProvider } from '../../rule_details/rule_context';
 import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/rule_summary_header';
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
@@ -39,7 +40,6 @@ export interface RuleSummaryFlyoutProps {
   rule: RuleApiResponse;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
-  onQuickEdit?: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
@@ -55,7 +55,6 @@ export const RuleSummaryFlyout = ({
   rule,
   onClose,
   onEdit,
-  onQuickEdit,
   onClone,
   onDelete,
   onToggleEnabled,
@@ -157,24 +156,32 @@ export const RuleSummaryFlyout = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose} data-test-subj="ruleSummaryFlyoutCancelButton">
+                <EuiButtonEmpty
+                  onClick={onClose}
+                  data-test-subj="ruleSummaryFlyoutFooterCloseButton"
+                >
                   <FormattedMessage
-                    id="xpack.alertingV2.ruleSummaryFlyout.cancel"
-                    defaultMessage="Cancel"
+                    id="xpack.alertingV2.ruleSummaryFlyout.close"
+                    defaultMessage="Close"
                   />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  href={detailsHref}
-                  data-test-subj="ruleSummaryFlyoutOpenDetailsButton"
-                >
-                  <FormattedMessage
-                    id="xpack.alertingV2.ruleSummaryFlyout.openDetails"
-                    defaultMessage="Open details"
-                  />
-                </EuiButton>
+                <RuleActionsMenu
+                  rule={rule}
+                  canWrite={canWrite}
+                  detailsHref={detailsHref}
+                  anchorPosition="upRight"
+                  onEdit={onEdit}
+                  onClone={onClone}
+                  onDelete={onDelete}
+                  onToggleEnabled={onToggleEnabled}
+                  onRun={onRun}
+                  onUpdateApiKey={onUpdateApiKey}
+                  renderButton={({ isOpen, toggle }) => (
+                    <TakeActionButton isOpen={isOpen} onClick={toggle} />
+                  )}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

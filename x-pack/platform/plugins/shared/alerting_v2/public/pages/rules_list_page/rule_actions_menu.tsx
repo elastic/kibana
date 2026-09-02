@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
   EuiButtonIcon,
@@ -29,6 +30,14 @@ export interface RuleActionsMenuProps {
   onRun?: (rule: RuleApiResponse) => void;
   /** When provided, adds a menu entry that opens change history for the rule. */
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
+  /** When provided, adds a leading "View details" read action linking to the rule details page. */
+  detailsHref?: string;
+  /**
+   * Renders the popover trigger. Defaults to the kebab "More actions" icon button used in the
+   * rules list. The flyout footer passes a "Take action" button instead.
+   */
+  renderButton?: (args: { isOpen: boolean; toggle: () => void }) => React.ReactElement;
+  anchorPosition?: EuiPopoverProps['anchorPosition'];
 }
 
 export const RuleActionsMenu = ({
@@ -41,8 +50,27 @@ export const RuleActionsMenu = ({
   onUpdateApiKey,
   onRun,
   onViewChangeHistory,
+  detailsHref,
+  renderButton,
+  anchorPosition = 'downRight',
 }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const viewDetailsItems = detailsHref
+    ? [
+        <EuiContextMenuItem
+          key="viewDetails"
+          icon={<EuiIcon type="eye" size="m" aria-hidden={true} />}
+          href={detailsHref}
+          onClick={() => setIsOpen(false)}
+          data-test-subj={`viewRuleDetails-${rule.id}`}
+        >
+          {i18n.translate('xpack.alertingV2.rulesList.action.viewDetails', {
+            defaultMessage: 'View details',
+          })}
+        </EuiContextMenuItem>,
+      ]
+    : [];
 
   const viewChangeHistoryItems = onViewChangeHistory
     ? [
@@ -63,6 +91,7 @@ export const RuleActionsMenu = ({
     : [];
 
   const menuItems = [
+    ...viewDetailsItems,
     ...(canWrite
       ? [
           // Run
@@ -203,30 +232,36 @@ export const RuleActionsMenu = ({
     return null;
   }
 
+  const toggle = () => setIsOpen((open) => !open);
+
+  const button = renderButton ? (
+    renderButton({ isOpen, toggle })
+  ) : (
+    <EuiToolTip
+      content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+        defaultMessage: 'More actions',
+      })}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
+          defaultMessage: 'More actions',
+        })}
+        color="text"
+        onClick={toggle}
+        data-test-subj={`ruleActionsButton-${rule.id}`}
+      />
+    </EuiToolTip>
+  );
+
   return (
     <EuiPopover
-      button={
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
-            defaultMessage: 'More actions',
-          })}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
-              defaultMessage: 'More actions',
-            })}
-            color="text"
-            onClick={() => setIsOpen((open) => !open)}
-            data-test-subj={`ruleActionsButton-${rule.id}`}
-          />
-        </EuiToolTip>
-      }
+      button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
-      anchorPosition="downRight"
+      anchorPosition={anchorPosition}
       aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
         defaultMessage: 'Rule actions',
       })}

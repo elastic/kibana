@@ -254,10 +254,6 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           rule={expandedRule}
           canWrite={canWrite}
           onClose={() => setExpandedRuleId(null)}
-          onQuickEdit={(r) => {
-            setExpandedRuleId(null);
-            onEditInFlyout(r);
-          }}
           onEdit={(r) => {
             setExpandedRuleId(null);
             onEditInFlyout(r);
