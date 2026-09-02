@@ -103,6 +103,7 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   '@img/sharp-win32-ia32@0.35.2': ['Apache-2.0 AND LGPL-3.0-or-later'],
   '@img/sharp-win32-x64@0.35.2': ['Apache-2.0 AND LGPL-3.0-or-later'],
   'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.4.14': ['(MPL-2.0 OR Apache-2.0)'],
   'node-liblzma@2.2.0': ['LGPL-3.0'],
 };
 // Globally overrides a license for a given package@version
