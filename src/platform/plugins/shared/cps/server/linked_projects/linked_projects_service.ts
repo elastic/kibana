@@ -33,11 +33,14 @@ export class LinkedProjectsService {
   }
 
   /**
-   * Unresolved deliberately means "not active": the caller falls back to origin-only reads rather
-   * than failing. See `fetchLinkedProjects` for why that is the safe direction on a 403.
+   * `undefined` when the linked projects could not be resolved. It is not collapsed to `false`
+   * here: whether an unresolved scope should read origin-only or fan out and let Elasticsearch
+   * scope the result is a consumer policy, and this service does not have the standing to pick one
+   * for every consumer.
    */
-  public async isCpsActive(request: KibanaRequest): Promise<boolean> {
-    return (await this.getLinkedProjects(request))?.length ? true : false;
+  public async isCpsActive(request: KibanaRequest): Promise<boolean | undefined> {
+    const linkedProjects = await this.getLinkedProjects(request);
+    return linkedProjects === undefined ? undefined : linkedProjects.length > 0;
   }
 
   private async fetchLinkedProjects(
@@ -73,13 +76,10 @@ export class LinkedProjectsService {
       if (statusCode === 403) {
         // The principal lacks the `read_project_routing` cluster privilege. That does not mean it
         // cannot search linked projects — Elasticsearch scopes cross-project results by index
-        // authorization, not by this privilege — so treating 403 as "not active" is a deliberate
-        // fail-closed choice, not an inference. Flipping it would move principals whose index
-        // grants we cannot inspect (custom roles) onto `asCurrentUser`, which is exactly the
-        // exposure this signal exists to shrink. The cost is that a custom role without
-        // `read_project_routing` reads origin-only.
+        // authorization, not by this privilege — so this is reported as unresolved rather than as
+        // "no linked projects". What to do about an unresolved scope is left to the consumer.
         this.logger.debug(
-          `The request principal is not authorized to resolve linked projects via /_project/tags (status 403); it lacks the read_project_routing cluster privilege, so this request reads origin-only.`
+          `The request principal is not authorized to resolve linked projects via /_project/tags (status 403); it lacks the read_project_routing cluster privilege.`
         );
       } else if (statusCode === 401) {
         // Not a Kibana authentication failure - those are rejected by the HTTP layer long before a

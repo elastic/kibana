@@ -96,24 +96,24 @@ describe('LinkedProjectsService', () => {
     await expect(service.isCpsActive(request)).resolves.toBe(false);
   });
 
-  it('returns undefined and logs at debug on 403 without throwing', async () => {
+  it('reports 403 as unresolved rather than inactive, and logs at debug without throwing', async () => {
     mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(createResponseError(403));
 
     const request = httpServerMock.createKibanaRequest();
 
     await expect(service.getLinkedProjects(request)).resolves.toBeUndefined();
-    await expect(service.isCpsActive(request)).resolves.toBe(false);
+    await expect(service.isCpsActive(request)).resolves.toBeUndefined();
     expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('read_project_routing'));
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and logs at debug on 401 without throwing', async () => {
+  it('reports 401 as unresolved rather than inactive, and logs at debug without throwing', async () => {
     mockScopedClient.asCurrentUser.transport.request.mockRejectedValue(createResponseError(401));
 
     const request = httpServerMock.createKibanaRequest();
 
     await expect(service.getLinkedProjects(request)).resolves.toBeUndefined();
-    await expect(service.isCpsActive(request)).resolves.toBe(false);
+    await expect(service.isCpsActive(request)).resolves.toBeUndefined();
     expect(mockLogger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Elasticsearch rejected the credential forwarded')
     );
@@ -126,7 +126,7 @@ describe('LinkedProjectsService', () => {
     const request = httpServerMock.createKibanaRequest();
 
     await expect(service.getLinkedProjects(request)).resolves.toBeUndefined();
-    await expect(service.isCpsActive(request)).resolves.toBe(false);
+    await expect(service.isCpsActive(request)).resolves.toBeUndefined();
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
     expect(mockLogger.debug).not.toHaveBeenCalled();
   });

@@ -26,13 +26,18 @@ export interface CPSServerStart {
    */
   getLinkedProjects(request: KibanaRequest): Promise<CpsLinkedProject[] | undefined>;
   /**
-   * `true` only when a cross-project read is both possible and meaningful for this request, i.e.
-   * at least one linked project is visible to the principal. Unresolved resolves to `false`, so a
-   * principal that cannot list linked projects reads origin-only rather than failing. That is
-   * fail-closed rather than exact: a principal without the `read_project_routing` cluster
-   * privilege may still be authorized to search linked projects, but this returns `false` for it.
+   * `true` when at least one linked project is visible to the request principal, `false` when none
+   * are, and `undefined` when that could not be determined — most often because the principal
+   * lacks the `read_project_routing` cluster privilege.
+   *
+   * `undefined` is not a synonym for `false`. A principal without `read_project_routing` may still
+   * be authorized to search linked projects, since Elasticsearch scopes cross-project results by
+   * index authorization rather than by that privilege. Deciding whether an unresolved scope should
+   * read origin-only or fan out and let Elasticsearch scope the result is the consumer's call, so
+   * it is left to the consumer. Note that a plain truthiness check reads `undefined` as "do not
+   * fan out"; use `=== false` if you want to fan out on unresolved.
    */
-  isCpsActive(request: KibanaRequest): Promise<boolean>;
+  isCpsActive(request: KibanaRequest): Promise<boolean | undefined>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
