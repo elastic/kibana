@@ -125,6 +125,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'List Confluence pages. Use when you need to find pages, optionally filtered by space, title, or status. Supports pagination via cursor.',
       isTool: true,
+      scope: 'read',
       input: ListPagesInputSchema,
       handler: async (ctx, input: ListPagesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -151,6 +152,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'Fetch full details of a single Confluence page by its ID. Use when you already have the page ID and need the complete record including its content.',
       isTool: true,
+      scope: 'read',
       input: GetPageInputSchema,
       handler: async (ctx, input: GetPageInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -167,6 +169,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'List Confluence spaces. Use when you need to discover available spaces or find a specific space by ID, key, type, or status. Supports pagination via cursor.',
       isTool: true,
+      scope: 'read',
       input: ListSpacesInputSchema,
       handler: async (ctx, input: ListSpacesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -193,6 +196,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'Fetch full details of a single Confluence space by its ID. Use when you already have the space ID and need the complete record.',
       isTool: true,
+      scope: 'read',
       input: GetSpaceInputSchema,
       handler: async (ctx, input: GetSpaceInput) => {
         const baseUrl = buildBaseUrl(ctx);
