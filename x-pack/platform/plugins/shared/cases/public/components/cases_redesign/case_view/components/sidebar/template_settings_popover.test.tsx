@@ -75,7 +75,11 @@ const otherParsedTemplate = {
   deletedAt: null,
   isLatest: true,
   latestVersion: 1,
-  definition: { name: otherTemplate.name, fields: [{ name: 'severity', control: 'INPUT_TEXT' }] },
+  definition: {
+    name: otherTemplate.name,
+    fields: [{ name: 'severity', control: 'INPUT_TEXT' }],
+    settings: { syncAlerts: true, extractObservables: true },
+  },
 };
 
 const mockTemplatesList = { templates: [appliedTemplate, otherTemplate] };
