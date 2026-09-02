@@ -35,13 +35,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Developer tools**:
 * Raise the Dev Tools Console **Copy to curl** limit so a request-body string of up to `100000` characters copies successfully [#287526]({{kib-pull}}287526).
 
-**{{product.observability}} solution**:
-For the {{product.observability}} 9.5.3 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-
-**{{elastic-sec}} solution**:
-For the {{elastic-sec}} 9.5.3 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.3-8832a483 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Cancel in-flight async searches when you leave Discover or Dashboard by closing the browser or entering a new URL [#287949]({{kib-pull}}287949).
 
 ### Fixes [kibana-9.5.3-fixes]
 
@@ -72,8 +65,8 @@ For the {{elastic-sec}} 9.5.3 release information, refer to [{{elastic-sec}} Sol
 % * Relabel the top-level **Alerting** privilege as **Alerting V2** in the Roles UI and mark it experimental [#288163]({{kib-pull}}288163).
 
 **Dashboards and Visualizations**:
-* Fix by-reference Lens panels disappearing from dashboards when the panel's `savedObjectRef` reference is missing [#285476]({{kib-pull}}285476).
-* Fix Lens metric background trendlines failing for {{esql}} time-series queries that use `TBUCKET(...)` [#284839]({{kib-pull}}284839).
+* Fix by-reference visualization panels disappearing from dashboards when the panel's `savedObjectRef` reference is missing [#285476]({{kib-pull}}285476).
+* Fix metric chart background trendlines failing for {{esql}} time-series queries that use `TBUCKET(...)` [#284839]({{kib-pull}}284839).
 * Fix the Maps timeslider close button registering clicks only on the top quarter of the control [#287441]({{kib-pull}}287441).
 * Fix Canvas functions API creating data tables with more than 50 columns per row [#287935]({{kib-pull}}287935).
 
