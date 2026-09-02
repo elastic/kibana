@@ -18,6 +18,7 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_sc
 import type { TimeRange } from '@kbn/es-query';
 import type { ServiceSchemaType } from '@kbn/apm-types';
 import type { Environment } from '../../../../common/environment_rt';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import type { ServiceFlyoutService } from './types';
 
 export interface ServiceFlyoutCapabilities {
@@ -68,6 +69,13 @@ export interface ServiceFlyoutContextValue {
     // OTel-optional: APM services have transaction types, OTel services do not
     transactionType?: string;
     setTransactionType?: (transactionType: string) => void;
+    // Initial values inherited from the host (read-only — the flyout owns changes)
+    latencyAggregationType?: LatencyAggregationType;
+    comparisonEnabled?: boolean;
+    offset?: string;
+    // Display-only: the host context is scoped to this transaction name, but the
+    // flyout charts are NOT filtered by it — they show service-level metrics
+    transactionName?: string;
   };
 }
 

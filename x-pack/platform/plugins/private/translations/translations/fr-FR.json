@@ -13983,7 +13983,6 @@
     "xpack.apm.serviceFlyout.actionsButtonLabel": "Actions",
     "xpack.apm.serviceFlyout.alertsActionsGroupLabel": "Alertes",
     "xpack.apm.serviceFlyout.cpuUsageChartTitle": "Utilisation CPU",
-    "xpack.apm.serviceFlyout.failedTransactionRateChartTitle": "Taux de transactions ayant échoué",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTitle": "Métriques d'infrastructure",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip": "Les indicateurs d’infrastructure reflètent les données au niveau système et ne sont pas filtrés par type de transaction.",
     "xpack.apm.serviceFlyout.keyMetricsSectionTitle": "Indicateurs clés",

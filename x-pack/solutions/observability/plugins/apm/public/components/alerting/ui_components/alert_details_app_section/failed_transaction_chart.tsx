@@ -69,8 +69,11 @@ export function FailedTransactionChart({
   ruleTypeId,
   compact,
   showAlertAnnotations,
+  showChartActions = true,
 }: {
-  alert: TopAlert;
+  // Optional so the chart can render outside an alert context (e.g. the service flyout);
+  // without it the alert annotations are simply omitted.
+  alert?: TopAlert;
   transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
@@ -93,6 +96,8 @@ export function FailedTransactionChart({
   compact?: boolean;
   /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
   showAlertAnnotations?: boolean;
+  /** When false, hide the "Open" chart actions popover. */
+  showChartActions?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -206,25 +211,27 @@ export function FailedTransactionChart({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <RedMetricsChartActions
-                  queryParams={{
-                    serviceName,
-                    environment,
-                    transactionName,
-                    transactionType,
-                    kuery,
-                  }}
-                  timeRange={{ from: start, to: end }}
-                  ruleTypeId={ruleTypeId}
-                  element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
-                  anomaly={anomaly}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {showChartActions && (
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RedMetricsChartActions
+                    queryParams={{
+                      serviceName,
+                      environment,
+                      transactionName,
+                      transactionType,
+                      kuery,
+                    }}
+                    timeRange={{ from: start, to: end }}
+                    ruleTypeId={ruleTypeId}
+                    element={APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE}
+                    anomaly={anomaly}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && !compact && (

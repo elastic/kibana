@@ -25,6 +25,7 @@ import {
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../../common/es_fields/apm';
 
 /** Shared outer height for failed-rate and service-map panels on transaction details row 2. */
@@ -42,6 +43,7 @@ export function TransactionCharts({
   isServerlessContext,
   comparisonEnabled,
   offset,
+  latencyAggregationType,
 }: {
   kuery: string;
   environment: string;
@@ -54,6 +56,7 @@ export function TransactionCharts({
   isServerlessContext?: boolean;
   comparisonEnabled?: boolean;
   offset?: string;
+  latencyAggregationType?: LatencyAggregationType;
 }) {
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200
   const { isLarge } = useBreakpoints();
@@ -76,6 +79,20 @@ export function TransactionCharts({
     }
     return pills;
   }, [transactionName, transactionType]);
+
+  // Seed the service flyout with the page's filters so its charts match the
+  // page charts. transactionName is display-only — the flyout indicates the
+  // transaction scope without filtering its service-level charts by it.
+  const serviceMapFlyoutOptions = useMemo(
+    () => ({
+      transactionType,
+      latencyAggregationType,
+      comparisonEnabled,
+      offset,
+      transactionName,
+    }),
+    [transactionType, latencyAggregationType, comparisonEnabled, offset, transactionName]
+  );
 
   const latencyChart = (
     <EuiFlexItem data-cy={`transaction-duration-charts`}>
@@ -133,6 +150,7 @@ export function TransactionCharts({
         environment={environment}
         kuery={kuery}
         filterPills={transactionFilterPills}
+        flyoutOptions={serviceMapFlyoutOptions}
         sectionHeight={TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT}
         embeddableMinHeight={0}
         sectionTestSubj="apmTransactionDetailsServiceMapSection"

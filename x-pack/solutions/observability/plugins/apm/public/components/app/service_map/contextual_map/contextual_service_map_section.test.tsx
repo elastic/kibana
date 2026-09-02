@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { LicenseContext } from '../../../../context/license/license_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
@@ -17,8 +18,12 @@ import { ContextualServiceMapSection } from './contextual_service_map_section';
 import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
+const mockServiceMapEmbeddable = jest.fn((_props: unknown) => (
+  <div data-test-subj="mockServiceMapEmbeddable" />
+));
+
 jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
+  ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
 }));
 
 const mockGetServiceMapUrl = jest.fn(
@@ -78,6 +83,20 @@ describe('ContextualServiceMapSection', () => {
     expect(screen.getByTestId('apmContextualServiceMapExploreInServiceMap')).toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapControls')).toBeInTheDocument();
     expect(screen.getByTestId('mockServiceMapEmbeddable')).toBeInTheDocument();
+  });
+
+  it('forwards flyoutOptions to the service map embeddable', () => {
+    const flyoutOptions = {
+      transactionType: 'request',
+      latencyAggregationType: LatencyAggregationType.p95,
+      comparisonEnabled: true,
+      offset: '1d',
+    };
+    renderSection({ flyoutOptions });
+
+    expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({ flyoutOptions })
+    );
   });
 
   it('instruments the Explore in Service map link with EBT click attributes', () => {

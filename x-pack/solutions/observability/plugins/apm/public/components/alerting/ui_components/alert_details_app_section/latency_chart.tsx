@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
+import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -64,8 +65,12 @@ export function LatencyChart({
   ruleTypeId,
   compact,
   showAlertAnnotations,
+  latencySelectEbt,
+  showChartActions = true,
 }: {
-  alert: TopAlert;
+  // Optional so the chart can render outside an alert context (e.g. the service flyout);
+  // without it the alert annotations are simply omitted.
+  alert?: TopAlert;
   transactionType?: string;
   transactionTypes?: string[];
   transactionName?: string;
@@ -91,6 +96,10 @@ export function LatencyChart({
   compact?: boolean;
   /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
   showAlertAnnotations?: boolean;
+  /** EBT click attributes for the latency aggregation type select. */
+  latencySelectEbt?: EbtClickAttrsWithoutAction;
+  /** When false, hide the "Open" chart actions popover. */
+  showChartActions?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -203,6 +212,7 @@ export function LatencyChart({
               <LatencyAggregationTypeSelect
                 latencyAggregationType={latencyAggregationType}
                 onChange={setLatencyAggregationType}
+                ebt={latencySelectEbt}
               />
             </EuiFlexItem>
           )}
@@ -215,25 +225,27 @@ export function LatencyChart({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <RedMetricsChartActions
-                  queryParams={{
-                    serviceName,
-                    environment,
-                    transactionName,
-                    transactionType,
-                    kuery,
-                  }}
-                  timeRange={{ from: start, to: end }}
-                  ruleTypeId={ruleTypeId}
-                  element={APM_CHART_EBT_ELEMENTS.LATENCY}
-                  anomaly={anomaly}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {showChartActions && (
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <RedMetricsChartActions
+                    queryParams={{
+                      serviceName,
+                      environment,
+                      transactionName,
+                      transactionType,
+                      kuery,
+                    }}
+                    timeRange={{ from: start, to: end }}
+                    ruleTypeId={ruleTypeId}
+                    element={APM_CHART_EBT_ELEMENTS.LATENCY}
+                    anomaly={anomaly}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           {!!threshold && !compact && (

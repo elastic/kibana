@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { Node } from '@xyflow/react';
 import type { ServiceNodeData } from '../../../../common/service_map';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 
 function makeNode(overrides: Partial<ServiceNodeData> = {}): Node<ServiceNodeData> {
@@ -81,6 +82,33 @@ describe('useServiceMapFlyoutProps', () => {
       rangeFrom: 'now-1h',
       rangeTo: 'now',
       transactionType: 'request',
+    });
+  });
+
+  it('forwards the inherited chart inputs from flyoutOptions', () => {
+    const node = makeNode();
+    const { result } = renderHook(() =>
+      useServiceMapFlyoutProps({
+        ...BASE_ARGS,
+        selectedServiceNodeForFlyout: node,
+        flyoutOptions: {
+          latencyAggregationType: LatencyAggregationType.p95,
+          comparisonEnabled: true,
+          offset: '1d',
+          transactionName: 'GET /checkout',
+        },
+      })
+    );
+
+    expect(result.current?.filters).toEqual({
+      environment: 'production',
+      rangeFrom: BASE_ARGS.start,
+      rangeTo: BASE_ARGS.end,
+      transactionType: undefined,
+      latencyAggregationType: LatencyAggregationType.p95,
+      comparisonEnabled: true,
+      offset: '1d',
+      transactionName: 'GET /checkout',
     });
   });
 

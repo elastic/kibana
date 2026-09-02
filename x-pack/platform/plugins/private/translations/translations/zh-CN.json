@@ -14044,7 +14044,6 @@
     "xpack.apm.serviceFlyout.actionsButtonLabel": "操作",
     "xpack.apm.serviceFlyout.alertsActionsGroupLabel": "告警",
     "xpack.apm.serviceFlyout.cpuUsageChartTitle": "CPU 使用",
-    "xpack.apm.serviceFlyout.failedTransactionRateChartTitle": "失败事务率",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTitle": "基础架构指标",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip": "基础设施指标反映系统级数据，不按事务类型过滤。",
     "xpack.apm.serviceFlyout.keyMetricsSectionTitle": "关键指标",

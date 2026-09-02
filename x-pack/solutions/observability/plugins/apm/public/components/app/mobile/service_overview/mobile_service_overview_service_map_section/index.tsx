@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { getKueryWithMobileFilters } from '../../../../../../common/utils/get_kuery_with_mobile_filters';
@@ -13,7 +13,7 @@ import { ContextualServiceMapSection } from '../../../service_map/contextual_map
 import { SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT } from '../../../service_map/contextual_map/constants';
 
 export function MobileServiceOverviewServiceMapSection() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, transactionType } = useApmServiceContext();
   const {
     query: {
       environment,
@@ -24,6 +24,8 @@ export function MobileServiceOverviewServiceMapSection() {
       osVersion,
       appVersion,
       netConnectionType,
+      comparisonEnabled,
+      offset,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -34,6 +36,17 @@ export function MobileServiceOverviewServiceMapSection() {
     netConnectionType,
     kuery,
   });
+
+  // Seed the service flyout with the page's filters so its charts match the
+  // mobile service overview charts.
+  const flyoutOptions = useMemo(
+    () => ({
+      transactionType,
+      comparisonEnabled,
+      offset,
+    }),
+    [transactionType, comparisonEnabled, offset]
+  );
 
   if (!serviceName || !rangeFrom || !rangeTo) {
     return null;
@@ -46,6 +59,7 @@ export function MobileServiceOverviewServiceMapSection() {
       rangeTo={rangeTo}
       environment={environment}
       kuery={kueryWithMobileFilters}
+      flyoutOptions={flyoutOptions}
       panelHeight={SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT}
       embeddableMinHeight={0}
       sectionTestSubj="apmMobileServiceOverviewServiceMapSection"

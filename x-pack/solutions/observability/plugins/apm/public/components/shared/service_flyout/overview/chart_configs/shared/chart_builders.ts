@@ -89,9 +89,11 @@ export function getLatencyChart({
       {
         label,
         value: aggregation,
-        format: 'number',
-        decimals: 0,
-        suffix: ' ms',
+        // The queries EVAL a `duration_ms` column; let Lens auto-scale the unit
+        // (µs/ms/s) like the APM duration formatter instead of a fixed ms suffix.
+        format: 'duration',
+        fromUnit: 'ms',
+        toUnit: 'auto',
         seriesColor: seriesColor(getLatencyChartType(latencyAggregationType)),
       },
     ],

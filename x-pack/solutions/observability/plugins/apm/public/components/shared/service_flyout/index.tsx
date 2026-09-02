@@ -10,6 +10,7 @@ import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -67,6 +68,16 @@ interface ServiceFlyoutProps {
     rangeFrom: string;
     rangeTo: string;
     transactionType?: string;
+    /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
+    latencyAggregationType?: LatencyAggregationType;
+    /** Previous-period comparison, matching the host page's comparison toggle. */
+    comparisonEnabled?: boolean;
+    offset?: string;
+    /**
+     * Display-only: the host context is scoped to this transaction name, but the
+     * flyout charts are NOT filtered by it — they show service-level metrics.
+     */
+    transactionName?: string;
   };
   telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
@@ -85,6 +96,7 @@ export function ServiceFlyout({
 }: ServiceFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
+  const { latencyAggregationType, comparisonEnabled, offset, transactionName } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
@@ -152,6 +164,10 @@ export function ServiceFlyout({
             onRefresh: () => setRefreshToken(Date.now()),
             transactionType: flyoutTransactionType,
             setTransactionType: setFlyoutTransactionType,
+            latencyAggregationType,
+            comparisonEnabled,
+            offset,
+            transactionName,
           },
         }}
       >
