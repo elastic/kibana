@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -202,9 +203,11 @@ export const RuleActionsMenu = ({
       }}
       data-test-subj={`deleteRule-${rule.id}`}
     >
-      {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-        defaultMessage: 'Delete rule',
-      })}
+      <EuiTextColor color="danger">
+        {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
+          defaultMessage: 'Delete rule',
+        })}
+      </EuiTextColor>
     </EuiContextMenuItem>
   ) : null;
 
