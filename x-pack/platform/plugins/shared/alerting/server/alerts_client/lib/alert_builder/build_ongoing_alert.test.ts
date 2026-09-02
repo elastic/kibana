@@ -35,6 +35,7 @@ import {
   ALERT_SNOOZED,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from '../test_fixtures';
 
@@ -76,6 +77,7 @@ for (const flattened of [true, false]) {
         // @ts-ignore - ALERT_MUTED appears both here and in the flattened conditional below
         // The duplicate is intentional - the second occurrence overwrites the first for flattened alerts.
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -146,6 +148,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -235,6 +238,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-xyz-name'],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_SNOOZED]: false,
@@ -326,6 +330,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: ['maint-xyz-name'],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_SNOOZED]: false,
@@ -408,6 +413,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -509,6 +515,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -575,6 +582,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_DURATION]: 36000,
@@ -680,6 +688,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_SNOOZED]: false,
@@ -792,6 +801,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -883,6 +893,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_STATUS]: 'active',
@@ -990,6 +1001,7 @@ for (const flattened of [true, false]) {
         [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
         // @ts-ignore
         [ALERT_MUTED]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'error',
         [ALERT_SNOOZED]: false,

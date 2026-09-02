@@ -15,6 +15,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_TRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
@@ -22,6 +23,7 @@ import { get, omit } from 'lodash';
 import type { RuleAlertData } from '../../../types';
 import type { AlertRule } from '../../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
+import { shouldKeepTrackingRecovered } from '../../../lib/flapping/optimize_task_state_for_flapping';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;
@@ -57,9 +59,12 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
-    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
-    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
+    // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
+    [ALERT_TRACKED]: shouldKeepTrackingRecovered({
+      flapping: legacyRawAlert.meta?.flapping,
+      flappingHistory: legacyRawAlert.meta?.flappingHistory,
+    }),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 
