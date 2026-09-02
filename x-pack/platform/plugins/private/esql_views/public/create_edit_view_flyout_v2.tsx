@@ -308,6 +308,19 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
                   })}
             </h2>
           </EuiTitle>
+          {mode === 'edit' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate('esqlViews.flyout.editDescription', {
+                    defaultMessage:
+                      'Changes to this view apply wherever it is used, including dashboards, alerts, and other saved objects.',
+                  })}
+                </p>
+              </EuiText>
+            </>
+          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiTitle size="xs">
