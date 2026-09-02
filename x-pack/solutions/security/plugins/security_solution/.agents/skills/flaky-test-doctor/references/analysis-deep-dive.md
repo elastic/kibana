@@ -66,12 +66,14 @@ Scout runs on stateful (ESS / classic Cloud) and on serverless, including MKI. S
 `tags.stateful.classic` expands to `@local-stateful-classic` + `@cloud-stateful-classic`.
 `tags.serverless.security.complete` expands to `@local-serverless-security_complete` + `@cloud-serverless-security_complete`.
 
+Apply the **first matching row**. `@serverlessQA` wins over delete.
+
 | Cypress tags | Scout `tag:` | Recommendation |
 |--------------|--------------|----------------|
-| `@serverless` | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
+| has `@serverlessQA` | any | Keep Cypress until Scout is in the Kibana QA gate |
+| `@serverless` (no `@serverlessQA`) | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
 | `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
-| `@serverlessQA` | any Scout tags | Keep Cypress until QA gate is Scout |
-| `@ess` + `@serverless` | only `tags.stateful.classic` | Keep Cypress for serverless, or add Scout serverless tags first |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.stateful.classic` | Keep Cypress for serverless, or recommend a Scout **migration** that adds serverless coverage. Do not edit an existing Scout spec's tags to turn on MKI. |
 
 **Format:**
 - Delete Cypress: `[path]` — Reason: Scout spec `[path]` uses `tags.…` covering the same env

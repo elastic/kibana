@@ -60,7 +60,7 @@ If the test is skipped (`.skip`, `@skipInServerless`, etc.), verify the feature 
 | Feature unchanged, test valid | Investigate flakiness; recommend migrate / move layer / delete (Cypress fix only if `@serverlessQA`) |
 | Feature changed, test outdated | Update destination coverage (Scout / API / unit), not a Cypress rewrite — unless `@serverlessQA` |
 | Feature removed / redesigned | Delete the test |
-| Skipped for temp infra issue | Check if resolved; unskip only if `@serverlessQA`, otherwise migrate or delete |
+| Skipped for temp infra issue | If the issue is gone: unskip `@ess`-only tests; unskip `@serverlessQA` so the QA gate stays covered; otherwise migrate or delete |
 
 ### Step 1: Environment context
 
@@ -70,7 +70,7 @@ Establish which environment(s) the test fails in. Check test tags:
 |-----|---------|
 | `@ess` | Runs in ESS (on-prem) PR CI |
 | `@serverless` | Runs in simulated serverless PR CI + periodic pipeline |
-| `@serverlessQA` | Runs in Kibana QA quality gate |
+| `@serverlessQA` | Kibana QA quality gate. When `KIBANA_MKI_QUALITY_GATE` is set, `parallel_serverless.ts` overrides grep to `@serverlessQA` (not the `@serverless` default in `cypress_ci_serverless_qa.config.ts`) |
 | `@skipInEss` | Skipped for ESS |
 | `@skipInServerless` | Skipped from **all** serverless (simulated PR CI + periodic + QA), even if `@serverless` is present |
 | `@skipInServerlessMKI` | Skipped from MKI only (periodic + QA). Still runs simulated serverless PR CI if `@serverless` is present |
@@ -90,12 +90,13 @@ Search for existing coverage of the same behavior:
 
 Don't rely on test names — check what the test actually asserts.
 
-**If duplicate in API/unit:** Recommend deleting Cypress — lower layers are faster and more reliable.
+**If duplicate in API/unit:** Recommend deleting Cypress — lower layers are faster and more reliable. Exception: do not delete `@serverlessQA` Cypress until Scout is in the Kibana QA gate.
 
 **If duplicate in Scout:**
-- Compare Cypress `@ess` / `@serverless` to the Scout spec's `tags.stateful.*` / `tags.serverless.security.*` (see `references/analysis-deep-dive.md`)
+- Compare Cypress `@ess` / `@serverless` to the Scout spec's `tags.stateful.*` / `tags.serverless.security.*` (see `references/analysis-deep-dive.md`; apply the first matching row — `@serverlessQA` wins)
 - Do not grep for `@local-stateful-classic` or `@*-serverless-security_*` in source — those are runtime tags
 - Cypress `@serverlessQA` is not covered by Scout yet — do not delete for that tag alone
+- Do not edit an existing Scout spec's tags to add MKI coverage
 
 **If duplicate in another Cypress test:** Compare quality, keep the better-written one.
 
@@ -197,7 +198,7 @@ If the root cause is an app bug, fix the app before writing Scout. If it is a Cy
 
 **Guidelines:**
 1. Self-investigate first — code, git, GitHub issue, then CI in the browser
-2. If CI asks for login or permissions, prompt the user there — do not treat the link as unreachable
+2. If CI asks for login or permissions, prompt the user there — do not treat the link as unreachable. Buildkite may use Okta SSO; if the agent browser cannot finish login, ask for pasted logs/screenshots instead of retrying the login page.
 3. Ask efficiently — combine leftover questions into one message
 4. Don't ask for logs you can open yourself
 5. Frame questions clearly — when you do ask, be specific about what you need and why
