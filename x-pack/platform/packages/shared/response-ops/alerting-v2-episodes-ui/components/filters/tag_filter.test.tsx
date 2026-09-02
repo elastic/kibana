@@ -9,15 +9,32 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { AlertEpisodesTagFilter } from './tag_filter';
 import * as inlineFilterPopoverModule from './inline_filter_popover';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { createMockSpaces } from '../../hooks/test_utils';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import * as useFetchEpisodeTagOptionsModule from '../../hooks/use_fetch_episode_tag_options';
 import userEvent from '@testing-library/user-event';
 
 const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
+
+jest.mock('../../hooks/use_fetch_episode_tag_options', () => ({
+  useFetchEpisodeTagOptions: jest.fn(),
+}));
+
+const mockUseFetchEpisodeTagOptions = jest.mocked(
+  useFetchEpisodeTagOptionsModule.useFetchEpisodeTagOptions
+);
 
 describe('TagFilter', () => {
   const defaultProps = {
     selectedTags: null as string[] | null,
     onTagsChange: jest.fn(),
-    tagOptions: ['alpha', 'beta'],
+    services: {
+      expressions: {} as ExpressionsStart,
+      http: httpServiceMock.createStartContract(),
+      spaces: createMockSpaces(),
+    },
+    timeRange: { from: 'now-24h', to: 'now' },
     'data-test-subj': 'test-tag-filter',
   };
 
@@ -25,6 +42,10 @@ describe('TagFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFetchEpisodeTagOptions.mockReturnValue({
+      data: ['alpha', 'beta'],
+      isLoading: false,
+    } as unknown as ReturnType<typeof useFetchEpisodeTagOptionsModule.useFetchEpisodeTagOptions>);
   });
 
   describe('rendering', () => {
@@ -43,7 +64,7 @@ describe('TagFilter', () => {
   const openPopover = () => user.click(screen.getByTestId('test-tag-filter-button'));
 
   describe('InlineFilterPopover props', () => {
-    it('passes tag options through to the popover', async () => {
+    it('passes tag options from the hook', async () => {
       render(<AlertEpisodesTagFilter {...defaultProps} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(

@@ -51,7 +51,6 @@ import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hoo
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
-import { useFetchEpisodeTagOptions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -217,11 +216,6 @@ const AlertEpisodesListPageContent = () => {
   const { data: kpis } = useEpisodesKpisQuery({
     services,
     filterState,
-    timeRange,
-  });
-
-  const { data: tagOptions = [], isLoading: isLoadingTagOptions } = useFetchEpisodeTagOptions({
-    services,
     timeRange,
   });
 
@@ -515,8 +509,6 @@ const AlertEpisodesListPageContent = () => {
             timeRange={timeRange}
             onTimeChange={handleTimeChange}
             ruleOptions={ruleOptions}
-            tagOptions={tagOptions}
-            isTagOptionsLoading={isLoadingTagOptions}
             assigneeUids={assigneeUids}
             onRefresh={invalidateEpisodeQueries}
             isLoading={isLoading}

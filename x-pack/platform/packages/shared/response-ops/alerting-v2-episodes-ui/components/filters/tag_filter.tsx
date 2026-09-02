@@ -7,26 +7,32 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { useFetchEpisodeTagOptions } from '../../hooks/use_fetch_episode_tag_options';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
 interface AlertEpisodesTagFilterProps {
   selectedTags?: string[] | null;
   onTagsChange: (tags: string[] | undefined) => void;
-  tagOptions: string[];
-  isLoading?: boolean;
+  services: { expressions: ExpressionsStart; http: HttpStart; spaces: SpacesPluginStart };
+  timeRange: TimeRange;
   'data-test-subj'?: string;
 }
 
 export function AlertEpisodesTagFilter({
   selectedTags,
   onTagsChange,
-  tagOptions,
-  isLoading = false,
+  services,
+  timeRange,
   'data-test-subj': dataTestSubj = 'tagFilter',
 }: AlertEpisodesTagFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const { data: tagOptions = [], isLoading } = useFetchEpisodeTagOptions({ services, timeRange });
 
   const allOptions = useMemo(() => {
     const fromApi = tagOptions.map((t) => ({ label: t, value: t }));
