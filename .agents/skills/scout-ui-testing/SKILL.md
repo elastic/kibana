@@ -29,6 +29,22 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
+- **Never suppress a lint rule**: no `eslint-disable` comments in Scout tests, page objects, or fixtures. A suppression makes CI green without fixing anything, so it is a review blocker rather than a fix. This applies doubly to file-level `/* eslint-disable <rule> */`, which silences the rest of the file including code written later.
+- **No positional selectors**: `playwright/no-nth-methods` forbids `.first()`, `.nth()`, and `.last()`. See below for the replacement to use in each situation.
+
+### Replacing `.first()` / `.nth()` / `.last()`
+
+`.first()` is almost always a symptom, not a solution. If you reached for it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one. Scope the locator to a container (`page.testSubj.locator('panel').getByRole('button')`), or add a `data-test-subj` to the component.
+
+For the other cases, use the replacement instead of an index:
+
+| You need | Use |
+| --- | --- |
+| To confirm at least one item rendered | `await expect(items).not.toHaveCount(0)`, or assert the value you actually care about |
+| To assert the order of a list or table | `await expect(rows).toHaveText([...])` / `toContainText([...])` — an ordered array needs no index |
+| One row identified by its content | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })` |
+| To act on every item in a collection | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so the loop races the UI |
+| A genuinely positional element | The third legend entry, the failed step at the end of a run. `.nth()` / `.last()` is acceptable here, but only after ruling out the rows above, and only with a single-line justified disable: `// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one` |
 
 ## Auth (UI)
 
@@ -59,8 +75,6 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.
 - **EUI components — prefer published EUI Test Helpers over raw selectors and legacy wrappers.** Drive EUI widgets through `page.components.*` (e.g. `page.components.comboBox(testSubj)`) — Scout's factories over `@elastic/eui-test-helpers`. Don't 1:1-map an old wrapper API: use only the interactions the test needs and push data-correctness checks to API/unit tests.
 - **Compatibility fallback only.** When no equivalent EUI test helper exists, fallback to using locators. Do not add or extend wrappers in a test suite. Route missing Component Object capabilities through the shared Apps DX/EUI contribution workflow.
-- **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
-- **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
 ## Parallel UI specifics (spaceTest)
 

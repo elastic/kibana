@@ -129,17 +129,68 @@ await page.click('[data-test-subj="myButton"]');
 await page.getByText('Delete').click();
 ```
 
-❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices)), as they break on non-clean environments where tests run without server restart and extra data may exist:
-
-```ts
-await page.testSubj.locator('tableRow').nth(0).click();
-```
-
 ✔️ **Do:** use `page.testSubj` or scoped `getByRole`:
 
 ```ts
 await page.testSubj.click('myButton');
 await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'Delete' }).click();
+```
+
+:::::
+
+## Don't select elements by index [dont-select-elements-by-index]
+
+`.first()`, `.nth()`, and `.last()` are forbidden by the `playwright/no-nth-methods` ESLint rule. Positional selectors break on non-clean environments, where tests run without a server restart and extra data may exist.
+
+`.first()` in particular is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one. Scope the locator to a container, or add a `data-test-subj` to the component.
+
+For every other case, there is a replacement that doesn't need an index:
+
+| You need                               | Use                                                                                                                                                                         |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| To confirm at least one item rendered  | `await expect(items).not.toHaveCount(0)`, or assert the value you actually care about                                                                                       |
+| To assert the order of a list or table | `await expect(rows).toHaveText([...])` or `toContainText([...])` — an ordered array needs no index                                                                          |
+| One row identified by its content      | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })`                                                                                              |
+| To act on every item in a collection   | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so it races the UI |
+| A genuinely positional element         | The third legend entry, the last step of a run. `.nth()` / `.last()` is fine here, but only after ruling out the rows above, and only with a single-line justified disable  |
+
+**Never suppress the rule to get past it.** A file-level `/* eslint-disable playwright/no-nth-methods */` silences the rest of the file, including code added later, and turns CI green without fixing anything. Suppressions are a review blocker. The one exception is a genuinely ordered collection, which needs a scoped, justified disable:
+
+```ts
+// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one
+const failedStep = stepButtons.last();
+```
+
+:::::{dropdown} Examples
+❌ **Don’t:** index into a collection to reach an element you can identify by content:
+
+```ts
+await page.testSubj.locator('tableRow').nth(0).click();
+```
+
+✔️ **Do:** identify it:
+
+```ts
+await page.testSubj.locator('tableRow').filter({ hasText: 'nginx-logs' }).click();
+```
+
+❌ **Don’t:** loop on a live count while clicking, and don’t reach for `.first()` because the locator matches several elements:
+
+```ts
+const removeBtn = page.testSubj.locator('indexPattern-dimension-remove');
+while ((await removeBtn.count()) > 0) {
+  await removeBtn.first().click();
+}
+```
+
+✔️ **Do:** snapshot the collection once, then act on each element:
+
+```ts
+const metricsPanel = page.testSubj.locator('lnsDatatable_metrics');
+const removeBtn = metricsPanel.locator('[data-test-subj="indexPattern-dimension-remove"]');
+for (const button of await removeBtn.all()) {
+  await button.click();
+}
 ```
 
 :::::
