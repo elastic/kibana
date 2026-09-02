@@ -53,29 +53,37 @@ Compare both tests and recommend keeping the better-written one.
 
 ### Duplicate in Scout tests
 
-Scout runs on MKI and supports both stateful (`@local-stateful-classic`) and serverless environments. Scout tests can replace Cypress tests for both ESS and MKI coverage.
+Scout runs on MKI (stateful and serverless). Scout can replace Cypress for both ESS and MKI.
 
-**Check the test tags:**
-- Cypress test: Does it have `@serverless` tag? `@ess` tag?
-- Scout test: Does it have tags that cover the same environments?
+**Read the `tag:` argument in the Scout spec** — do not grep for `@local-…` / `@cloud-…` strings. Those are runtime expansions of the `tags.*` helpers and almost never appear in source.
 
-**Decision logic:**
+| Cypress tag | Matching Scout coverage |
+|-------------|-------------------------|
+| `@ess` | `tags.stateful.classic` |
+| `@serverless` | `tags.serverless.security.complete` (or `.essentials` / `.ease` / `.all` if that was the intended tier) |
+| `@serverlessQA` | Do **not** delete Cypress for this tag alone — Kibana QA gate is still Cypress; Scout QA is not a replacement yet |
 
-| Cypress Tags | Scout Tags | Recommendation |
-|--------------|------------|----------------|
-| `@serverless` | `@*-serverless-security_*` | Delete Cypress — Scout covers MKI |
-| `@ess` only | `@*-stateful-*` | Delete Cypress — Scout covers ESS |
+`tags.stateful.classic` expands to `@local-stateful-classic` + `@cloud-stateful-classic`.
+`tags.serverless.security.complete` expands to `@local-serverless-security_complete` + `@cloud-serverless-security_complete`.
+
+| Cypress tags | Scout `tag:` | Recommendation |
+|--------------|--------------|----------------|
+| `@serverless` | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
+| `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
+| `@serverlessQA` | any Scout tags | Keep Cypress until QA gate is Scout |
+| `@ess` + `@serverless` | only `tags.stateful.classic` | Keep Cypress for serverless, or add Scout serverless tags first |
 
 **Format:**
-- Delete Cypress: `[path]` — Reason: Scout covers this environment (including MKI)
+- Delete Cypress: `[path]` — Reason: Scout spec `[path]` uses `tags.…` covering the same env
 
 ## Step 3: Layer recommendation format
 
 > **Layer Analysis**
 > - Current: E2E (Cypress)
 > - Tests: [what the test actually validates]
-> - Recommendation: [keep at E2E / move to API / move to unit]
-> - Reason: [why this layer is appropriate or not]
+> - Destination: [Scout UI / API / unit / delete]
+> - Cypress fix allowed?: [yes — `@serverlessQA` / no]
+> - Reason: [why this destination]
 
 **Real Example:** [#246754](https://github.com/elastic/kibana/pull/246754) — Flaky Cypress test using CSS class selector was deleted and coverage moved to a more appropriate layer. The test "opens alerts page when alerts count is clicked" was testing navigation logic that doesn't require E2E testing.
 
@@ -193,5 +201,6 @@ Before proposing ANY fix, verify:
 | **Step 0: Functionality Valid?** | [ ] | Go back and verify the feature still exists and works |
 | **Step 1: Environment Context?** | [ ] | Ask user which environment(s) are failing |
 | **Step 2: Duplicate Coverage?** | [ ] | Search for API/unit tests covering same functionality |
+| **Step 3: Destination layer?** | [ ] | Scout UI / API / unit / delete — Cypress fix only if `@serverlessQA` |
 
 Do NOT skip these steps. Proposing a fix for an invalid or redundant test wastes time.

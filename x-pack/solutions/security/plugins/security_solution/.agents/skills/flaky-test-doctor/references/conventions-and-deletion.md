@@ -100,8 +100,9 @@ If you never see your test fail, you don't know if it's testing the right thing.
 
 ## Flaky Test Runner
 
-Use the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner) to verify fixes:
-1. Go to the CI Stats website
+Trigger runs from the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner). Docs: [Flaky Test Runner](https://codex.elastic.dev/r/kibana-team/testing/flaky-and-skipped-tests/flaky-test-runner).
+
+1. Go to the CI Stats trigger page
 2. Pick a PR or branch
 3. Select which test(s) to run
 4. Use the default number of executions

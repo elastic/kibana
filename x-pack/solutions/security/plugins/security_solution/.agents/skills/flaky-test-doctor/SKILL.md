@@ -12,7 +12,7 @@ description: >
 
 ## Overview
 
-Analyze flaky or skipped Security Solution Cypress tests to determine root cause and recommend the right action: fix the test, fix the app, delete the test, or migrate to Scout.
+Analyze flaky or skipped Security Solution Cypress tests to determine root cause and recommend the right action: migrate to Scout, move to API/unit, delete, or fix the app. Propose a Cypress code fix only when the test is tagged `@serverlessQA`.
 
 **Security Solution Domain:** Detection Engine, Timeline, Cases, Entity Analytics, AI Assistant, Attack Discovery, Endpoint/Defend Workflows, Cloud Security.
 
@@ -35,10 +35,11 @@ Path relative to this skill's directory.
 
 ## Boundaries
 
-- Always: Analyze test code, search for duplicates, propose fixes
+- Always: Analyze test code, search for duplicates, propose a destination (Scout / API / unit / delete)
 - Always: Self-investigate before asking the user questions
 - Ask first: Before suggesting major refactors or layer changes
 - Never: Delete tests without explicit approval
+- Never: Propose a Cypress code fix unless the test is tagged `@serverlessQA`
 - Never: Assume the problem is with the test — it might be a real bug
 
 ## Analysis framework
@@ -56,10 +57,10 @@ If the test is skipped (`.skip`, `@skipInServerless`, etc.), verify the feature 
 
 | Finding | Action |
 |---------|--------|
-| Feature unchanged, test valid | Investigate flakiness and fix |
-| Feature changed, test outdated | Update test to match new implementation |
+| Feature unchanged, test valid | Investigate flakiness; recommend migrate / move layer / delete (Cypress fix only if `@serverlessQA`) |
+| Feature changed, test outdated | Update destination coverage (Scout / API / unit), not a Cypress rewrite — unless `@serverlessQA` |
 | Feature removed / redesigned | Delete the test |
-| Skipped for temp infra issue | Check if resolved, unskip if so |
+| Skipped for temp infra issue | Check if resolved; unskip only if `@serverlessQA`, otherwise migrate or delete |
 
 ### Step 1: Environment context
 
@@ -71,8 +72,8 @@ Establish which environment(s) the test fails in. Check test tags:
 | `@serverless` | Runs in simulated serverless PR CI + periodic pipeline |
 | `@serverlessQA` | Runs in Kibana QA quality gate |
 | `@skipInEss` | Skipped for ESS |
-| `@skipInServerless` | Skipped for all serverless quality gates + periodic pipeline |
-| `@skipInServerlessMKI` | Skipped from MKI environments only |
+| `@skipInServerless` | Skipped from **all** serverless (simulated PR CI + periodic + QA), even if `@serverless` is present |
+| `@skipInServerlessMKI` | Skipped from MKI only (periodic + QA). Still runs simulated serverless PR CI if `@serverless` is present |
 
 A test can be flaky in one environment but stable in another.
 
@@ -92,19 +93,29 @@ Don't rely on test names — check what the test actually asserts.
 **If duplicate in API/unit:** Recommend deleting Cypress — lower layers are faster and more reliable.
 
 **If duplicate in Scout:**
-- Scout runs on MKI and supports both stateful and serverless environments
-- Cypress has `@serverless` and Scout covers serverless → delete Cypress
-- Cypress is ESS-only and Scout covers ESS → delete Cypress
+- Compare Cypress `@ess` / `@serverless` to the Scout spec's `tags.stateful.*` / `tags.serverless.security.*` (see `references/analysis-deep-dive.md`)
+- Do not grep for `@local-stateful-classic` or `@*-serverless-security_*` in source — those are runtime tags
+- Cypress `@serverlessQA` is not covered by Scout yet — do not delete for that tag alone
 
 **If duplicate in another Cypress test:** Compare quality, keep the better-written one.
 
 ### Step 3: Layer analysis
 
-| Current Layer | Question | Consider Moving To |
-|---------------|----------|-------------------|
-| E2E (Cypress) | Tests UI-specific behavior? | Keep at E2E |
-| E2E (Cypress) | Flakiness from network/timing? | API test |
-| E2E (Cypress) | Testing a component in isolation? | Unit/integration test |
+Decide the destination layer from what the test asserts. Cypress is not a destination.
+
+| What the test validates | Destination |
+|-------------------------|-------------|
+| Data / API / rule CRUD / engine setup | API test |
+| Component in isolation | Unit/integration test |
+| User workflow, RBAC, alert table, Timeline UI | Scout UI |
+| Navigation / page-loads-without-error | Delete |
+
+Typical Security examples (full map: `security-cypress-to-scout-migration` Gate 2):
+- Detection rules CRUD, rule execution, exception/cases CRUD, entity-store setup → API
+- Alert table, Timeline editing, Cases UI workflows, RBAC on buttons → Scout UI
+- Navigation / page loading → delete
+
+If the test is already Cypress and the destination is Scout UI: recommend migration, not a Cypress patch — unless it is tagged `@serverlessQA`.
 
 ### Step 4: Bug vs flakiness classification
 
@@ -121,7 +132,16 @@ Check [Elastic Security docs](https://www.elastic.co/docs/solutions/security) to
 
 ### Step 5: Fix proposal
 
-All fixes must follow team conventions:
+**Do not propose a Cypress code fix** unless the test is tagged `@serverlessQA`.
+
+| Destination (Step 3) | Recommendation |
+|----------------------|----------------|
+| API / unit | Move coverage there; delete Cypress |
+| Delete | Delete Cypress (ask first) |
+| Scout UI | Migrate — read `cypress-to-scout-migration` then `security-cypress-to-scout-migration` |
+| Scout UI **and** `@serverlessQA` | Cypress fix allowed so the QA gate stays green. Also recommend migrating when Scout QA exists. |
+
+`@serverlessQA` Cypress fixes must follow team conventions (see `references/conventions-and-deletion.md`):
 - No hardcoded waits (`cy.wait(ms)`)
 - No forced actions (`{ force: true }`) without justification
 - No index-based selectors (`.eq(0)`)
@@ -130,14 +150,14 @@ All fixes must follow team conventions:
 - Use `.find()` over `.within()` when elements may re-render
 - Ensure proper cleanup in `beforeEach`/`afterEach`
 
-**Before fixing, audit data & cleanup:**
+**Before any Cypress (`@serverlessQA`) or Scout rewrite, audit data & cleanup:**
 - Identify all resources the test creates/modifies
 - Verify every resource has explicit cleanup (API-based, not UI-based)
-- Ensure `beforeEach` handles crashed previous runs
+- Ensure setup handles crashed previous runs
 
-**For flakiness:** Provide root cause, before/after code, why the fix works.
-**For bugs:** Describe the bug, affected environments, next steps.
-**For migration candidates:** Read the general `cypress-to-scout-migration` skill at the repository root first, then the additive `security-cypress-to-scout-migration` skill co-located in this plugin's `.agents/skills/`.
+**For flakiness:** Provide root cause and why migrate / move / delete (or the `@serverlessQA` Cypress patch) addresses it.
+**For bugs:** Describe the bug, affected environments, next steps — do not paper over with a Cypress wait.
+**For migration:** Read the general `cypress-to-scout-migration` skill at the repository root first, then the additive `security-cypress-to-scout-migration` skill co-located in this plugin's `.agents/skills/`.
 
 ## Information gathering strategy
 
@@ -193,13 +213,13 @@ All fixes must follow team conventions:
 
 ## Recommendation
 
-[Primary recommendation]
+[Primary: migrate to Scout / move to API or unit / delete / fix the app]
 
-### Option A: [Fix in Cypress]
-[Code and explanation]
+### Option A: [Migrate to Scout / Move to API / Delete]
+[How and why]
 
-### Option B: [Migrate to Scout] (if applicable)
-[Migration guide]
+### Option B: [Cypress fix] (only if `@serverlessQA`)
+[Code and explanation. Also note: migrate when Scout QA exists.]
 
 ## Related Files
 [List of files to check or modify]
