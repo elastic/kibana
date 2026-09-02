@@ -47,27 +47,27 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import {
-  fetchV1AlertById,
-  type V1AlertFields,
+  fetchClassicAlertById,
+  type ClassicAlertFields,
 } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
 import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../episode_sources';
 import * as i18n from '../translations';
 
 /**
- * Bridges V1AlertFields (Record<string, unknown>) to the Alert type that
+ * Bridges ClassicAlertFields (Record<string, unknown>) to the Alert type that
  * AlertFieldsTable expects. The component only iterates Object.entries, so
  * the shapes are compatible at runtime; the cast is needed because Alert
  * types known fields as JsonValue[] (the ES fields-API convention) while
  * _source returns plain values.
  */
 type AlertFieldsTableAlert = React.ComponentProps<typeof AlertFieldsTable>['alert'];
-const toAlertFieldsTableAlert = (fields: V1AlertFields): AlertFieldsTableAlert =>
+const toAlertFieldsTableAlert = (fields: ClassicAlertFields): AlertFieldsTableAlert =>
   fields as unknown as AlertFieldsTableAlert;
 
 type TabId = 'overview' | 'fields';
 
-export interface V1AlertDetailsFlyoutProps {
+export interface ClassicAlertDetailsFlyoutProps {
   alertId: string;
   onClose: () => void;
   services: { http: HttpStart };
@@ -91,7 +91,7 @@ const OBSERVABILITY_ALERT_DETAILS_BASE_PATH = '/app/observability/alerts';
  */
 const resolveAlertDetailsHref = (
   alertId: string,
-  alert: V1AlertFields,
+  alert: ClassicAlertFields,
   http: HttpStart
 ): string | null => {
   const ruleTypeId = Array.isArray(alert[ALERT_RULE_TYPE_ID])
@@ -126,22 +126,26 @@ const formatDurationUs = (value: unknown): string => {
 };
 
 /**
- * Classic (v1) alert details flyout. Chrome (push size, header/footer/tabs) matches
+ * Classic alert details flyout. Chrome (push size, header/footer/tabs) matches
  * the v2 episode flyout so rows in the unified table feel consistent; content stays
  * classic-alert specific (overview fields + fields table).
  */
-export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDetailsFlyoutProps) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'v1AlertDetailsFlyout' });
+export const ClassicAlertDetailsFlyout = ({
+  alertId,
+  onClose,
+  services,
+}: ClassicAlertDetailsFlyoutProps) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'classicAlertDetailsFlyout' });
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
 
   const {
     data: alert,
     isLoading,
     isError,
-  } = useQuery<V1AlertFields, Error>({
+  } = useQuery<ClassicAlertFields, Error>({
     queryKey: classicAlertQueryKeys.alert(alertId),
     queryFn: ({ signal }) =>
-      fetchV1AlertById({
+      fetchClassicAlertById({
         ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
         id: alertId,
         services,
@@ -153,7 +157,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
   const title = useMemo(() => {
     const fetchedName = alert ? asDisplayValue(alert[ALERT_RULE_NAME]) : undefined;
     return (
-      (fetchedName && fetchedName !== '—' ? fetchedName : null) ?? i18n.EPISODE_V1_DETAILS_TITLE
+      (fetchedName && fetchedName !== '—' ? fetchedName : null) ?? i18n.CLASSIC_ALERT_DETAILS_TITLE
     );
   }, [alert]);
 
@@ -163,35 +167,35 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
     }
     return [
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_STATUS,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_STATUS,
         description: asDisplayValue(alert[ALERT_STATUS]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_RULE,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_RULE,
         description: asDisplayValue(alert[ALERT_RULE_NAME]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_SEVERITY,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_SEVERITY,
         description: asDisplayValue(alert[ALERT_SEVERITY]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_REASON,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_REASON,
         description: asDisplayValue(alert[ALERT_REASON]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_STARTED,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_STARTED,
         description: asDisplayValue(alert[ALERT_START]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_LAST_UPDATED,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_LAST_UPDATED,
         description: asDisplayValue(alert[TIMESTAMP]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_DURATION,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_DURATION,
         description: formatDurationUs(alert[ALERT_DURATION]),
       },
       {
-        title: i18n.EPISODE_V1_DETAILS_FIELD_TAGS,
+        title: i18n.CLASSIC_ALERT_DETAILS_FIELD_TAGS,
         description: asDisplayValue(alert[ALERT_RULE_TAGS]),
       },
     ];
@@ -212,7 +216,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
       paddingSize="none"
       size="35%"
       aria-labelledby={flyoutTitleId}
-      data-test-subj="alertEpisodeV1DetailsFlyout"
+      data-test-subj="classicAlertEpisodeDetailsFlyout"
     >
       <EuiPanel
         paddingSize="xs"
@@ -228,13 +232,13 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
           alignItems="center"
         >
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.EPISODE_V1_DETAILS_CLOSE} disableScreenReaderOutput>
+            <EuiToolTip content={i18n.CLASSIC_ALERT_DETAILS_CLOSE} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="cross"
                 color="text"
                 onClick={onClose}
-                aria-label={i18n.EPISODE_V1_DETAILS_CLOSE}
-                data-test-subj="alertEpisodeV1DetailsCloseIcon"
+                aria-label={i18n.CLASSIC_ALERT_DETAILS_CLOSE}
+                data-test-subj="classicAlertEpisodeDetailsCloseIcon"
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -258,20 +262,20 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
           {!isLoading && !isError && alert ? (
             <>
               <EuiSpacer size="s" />
-              <EuiTabs bottomBorder={false} data-test-subj="alertEpisodeV1DetailsTabs">
+              <EuiTabs bottomBorder={false} data-test-subj="classicAlertEpisodeDetailsTabs">
                 <EuiTab
                   isSelected={selectedTabId === 'overview'}
                   onClick={() => setSelectedTabId('overview')}
-                  data-test-subj="alertEpisodeV1OverviewTab"
+                  data-test-subj="classicAlertEpisodeOverviewTab"
                 >
-                  {i18n.EPISODE_V1_DETAILS_OVERVIEW_TAB}
+                  {i18n.CLASSIC_ALERT_DETAILS_OVERVIEW_TAB}
                 </EuiTab>
                 <EuiTab
                   isSelected={selectedTabId === 'fields'}
                   onClick={() => setSelectedTabId('fields')}
-                  data-test-subj="alertEpisodeV1FieldsTab"
+                  data-test-subj="classicAlertEpisodeFieldsTab"
                 >
-                  {i18n.EPISODE_V1_DETAILS_FIELDS_TAB}
+                  {i18n.CLASSIC_ALERT_DETAILS_FIELDS_TAB}
                 </EuiTab>
               </EuiTabs>
             </>
@@ -284,8 +288,8 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner
                 size="xl"
-                aria-label={i18n.EPISODE_V1_DETAILS_LOADING}
-                data-test-subj="alertEpisodeV1DetailsLoading"
+                aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
+                data-test-subj="classicAlertEpisodeDetailsLoading"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -295,9 +299,9 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
           <EuiEmptyPrompt
             iconType="alert"
             color="danger"
-            title={<h3>{i18n.EPISODE_V1_DETAILS_ERROR_TITLE}</h3>}
-            body={<p>{i18n.EPISODE_V1_DETAILS_ERROR_BODY}</p>}
-            data-test-subj="alertEpisodeV1DetailsError"
+            title={<h3>{i18n.CLASSIC_ALERT_DETAILS_ERROR_TITLE}</h3>}
+            body={<p>{i18n.CLASSIC_ALERT_DETAILS_ERROR_BODY}</p>}
+            data-test-subj="classicAlertEpisodeDetailsError"
           />
         </EuiFlyoutBody>
       ) : (
@@ -318,7 +322,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
               hasBorder={false}
               paddingSize="m"
               color="transparent"
-              data-test-subj="alertEpisodeV1OverviewTabPanel"
+              data-test-subj="classicAlertEpisodeOverviewTabPanel"
             >
               <EuiDescriptionList
                 listItems={overviewItems}
@@ -333,7 +337,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
               hasBorder={false}
               paddingSize="m"
               color="transparent"
-              data-test-subj="alertEpisodeV1FieldsTabPanel"
+              data-test-subj="classicAlertEpisodeFieldsTabPanel"
             >
               <AlertFieldsTable alert={toAlertFieldsTableAlert(alert)} />
             </EuiPanel>
@@ -353,9 +357,9 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
               <EuiButtonEmpty
                 onClick={onClose}
                 flush="left"
-                data-test-subj="alertEpisodeV1DetailsCloseButton"
+                data-test-subj="classicAlertEpisodeDetailsCloseButton"
               >
-                {i18n.EPISODE_V1_DETAILS_CLOSE}
+                {i18n.CLASSIC_ALERT_DETAILS_CLOSE}
               </EuiButtonEmpty>
             </EuiFlexItem>
             {alertDetailsHref ? (
@@ -366,9 +370,9 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
                   target="_blank"
                   rel="noopener noreferrer"
                   iconType="eye"
-                  data-test-subj="alertEpisodeV1DetailsViewDetailsButton"
+                  data-test-subj="classicAlertEpisodeDetailsViewDetailsButton"
                 >
-                  {i18n.EPISODE_V1_DETAILS_VIEW_DETAILS}
+                  {i18n.CLASSIC_ALERT_DETAILS_VIEW_DETAILS}
                 </EuiButton>
               </EuiFlexItem>
             ) : null}

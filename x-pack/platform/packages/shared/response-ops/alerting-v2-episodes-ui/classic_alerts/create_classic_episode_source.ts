@@ -7,10 +7,10 @@
 
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import {
-  fetchV1AlertsAsEpisodes,
-  fetchV1AlertsHistogram,
-  fetchV1AlertsKpis,
-  fetchV1AlertsTags,
+  fetchClassicAlertsAsEpisodes,
+  fetchClassicAlertsHistogram,
+  fetchClassicAlertsKpis,
+  fetchClassicAlertsTags,
 } from '../apis/classic_alerts_api';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
@@ -29,7 +29,7 @@ export const createClassicEpisodeSource = ({
   queryKeyPrefix: classicAlertQueryKeys.all(),
 
   fetchEpisodes: ({ services, pageSize, filterState, sortState, timeRange, abortSignal }) =>
-    fetchV1AlertsAsEpisodes({
+    fetchClassicAlertsAsEpisodes({
       ruleTypeIds,
       services,
       pageSize,
@@ -40,7 +40,7 @@ export const createClassicEpisodeSource = ({
     }),
 
   fetchKpis: async ({ services, filterState, timeRange, abortSignal }) => {
-    const kpis = await fetchV1AlertsKpis({
+    const kpis = await fetchClassicAlertsKpis({
       ruleTypeIds,
       services,
       filterState,
@@ -56,7 +56,7 @@ export const createClassicEpisodeSource = ({
   },
 
   fetchHistogram: async ({ services, filterState, timeRange, breakdownField, abortSignal }) => {
-    const rows = await fetchV1AlertsHistogram({
+    const rows = await fetchClassicAlertsHistogram({
       ruleTypeIds,
       services,
       filterState,
@@ -69,7 +69,7 @@ export const createClassicEpisodeSource = ({
   },
 
   fetchTagOptions: ({ services, timeRange, abortSignal }) =>
-    fetchV1AlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
+    fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ http: services.http, ids }),
 });

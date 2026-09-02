@@ -107,8 +107,8 @@ const buildTimeRangeFilter = (
 
 /**
  * Translates the shared episodes filter state (plus time range) into an ES DSL
- * query for classic (v1) alerts. Filters without a v1 equivalent (e.g. assignee)
- * intentionally exclude all v1 rows.
+ * query for classic alerts. Filters without a classic equivalent (e.g. assignee)
+ * intentionally exclude all classic rows.
  *
  * The authorized RAC alerts API adds the space + authorization filter on top of
  * this query, so this builder never needs to scope by space itself.
@@ -204,7 +204,7 @@ export const buildClassicAlertsSort = (sortState?: EpisodesSortState): estypes.S
 };
 
 /**
- * Aggregations that compute the classic (v1) KPI counts with a v2 equivalent.
+ * Aggregations that compute the classic KPI counts with a v2 equivalent.
  *
  * Shaped to satisfy the `/internal/rac/alerts/find` route's aggregation schema,
  * whose `filter` aggregation only accepts a single `term` (no `bool`). Because of

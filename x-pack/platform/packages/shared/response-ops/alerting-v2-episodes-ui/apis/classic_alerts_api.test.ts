@@ -7,11 +7,11 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
-  fetchV1AlertsAsEpisodes,
-  fetchV1AlertsKpis,
-  fetchV1AlertsHistogram,
-  fetchV1AlertsTags,
-  fetchV1AlertById,
+  fetchClassicAlertsAsEpisodes,
+  fetchClassicAlertsKpis,
+  fetchClassicAlertsHistogram,
+  fetchClassicAlertsTags,
+  fetchClassicAlertById,
 } from './classic_alerts_api';
 import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../classic_alerts/map_alert';
 import { CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS } from '../classic_alerts/map_alert';
@@ -31,7 +31,7 @@ describe('classic_alerts_api', () => {
     jest.clearAllMocks();
   });
 
-  describe('fetchV1AlertsAsEpisodes', () => {
+  describe('fetchClassicAlertsAsEpisodes', () => {
     it('calls the RAC find endpoint and maps hits to episodes', async () => {
       mockHttp.post.mockResolvedValue({
         hits: {
@@ -47,7 +47,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const episodes = await fetchV1AlertsAsEpisodes({
+      const episodes = await fetchClassicAlertsAsEpisodes({
         pageSize: 100,
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
@@ -67,7 +67,7 @@ describe('classic_alerts_api', () => {
         hits: { hits: [{ _id: 'no-source' }] },
       });
 
-      const episodes = await fetchV1AlertsAsEpisodes({
+      const episodes = await fetchClassicAlertsAsEpisodes({
         pageSize: 100,
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
@@ -77,7 +77,7 @@ describe('classic_alerts_api', () => {
     });
   });
 
-  describe('fetchV1AlertsKpis', () => {
+  describe('fetchClassicAlertsKpis', () => {
     it('returns KPI counts from aggregations', async () => {
       mockHttp.post.mockResolvedValue({
         hits: { total: { value: 42 }, hits: [] },
@@ -89,7 +89,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const kpis = await fetchV1AlertsKpis({
+      const kpis = await fetchClassicAlertsKpis({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
@@ -105,7 +105,7 @@ describe('classic_alerts_api', () => {
         hits: { total: 0, hits: [] },
       });
 
-      const kpis = await fetchV1AlertsKpis({
+      const kpis = await fetchClassicAlertsKpis({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
@@ -117,7 +117,7 @@ describe('classic_alerts_api', () => {
     });
   });
 
-  describe('fetchV1AlertsHistogram', () => {
+  describe('fetchClassicAlertsHistogram', () => {
     it('fetches alert documents and requests the histogram source projection', async () => {
       mockHttp.post.mockResolvedValue({
         hits: {
@@ -133,7 +133,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const rows = await fetchV1AlertsHistogram({
+      const rows = await fetchClassicAlertsHistogram({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
@@ -164,7 +164,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const rows = await fetchV1AlertsHistogram({
+      const rows = await fetchClassicAlertsHistogram({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
         breakdownField: 'rule.id',
@@ -174,7 +174,7 @@ describe('classic_alerts_api', () => {
     });
   });
 
-  describe('fetchV1AlertsTags', () => {
+  describe('fetchClassicAlertsTags', () => {
     it('extracts tag keys from the terms aggregation', async () => {
       mockHttp.post.mockResolvedValue({
         hits: { hits: [] },
@@ -188,7 +188,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const tags = await fetchV1AlertsTags({
+      const tags = await fetchClassicAlertsTags({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
@@ -202,7 +202,7 @@ describe('classic_alerts_api', () => {
         aggregations: { tags: { buckets: [] } },
       });
 
-      const tags = await fetchV1AlertsTags({
+      const tags = await fetchClassicAlertsTags({
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
       });
@@ -210,7 +210,7 @@ describe('classic_alerts_api', () => {
     });
   });
 
-  describe('fetchV1AlertById', () => {
+  describe('fetchClassicAlertById', () => {
     it('returns the full source with _index and _id', async () => {
       mockHttp.post.mockResolvedValue({
         hits: {
@@ -224,7 +224,7 @@ describe('classic_alerts_api', () => {
         },
       });
 
-      const result = await fetchV1AlertById({
+      const result = await fetchClassicAlertById({
         id: 'target-uuid',
         ruleTypeIds: TEST_RULE_TYPE_IDS,
         services: { http: mockHttp },
@@ -239,7 +239,7 @@ describe('classic_alerts_api', () => {
       mockHttp.post.mockResolvedValue({ hits: { hits: [] } });
 
       await expect(
-        fetchV1AlertById({
+        fetchClassicAlertById({
           id: 'missing',
           ruleTypeIds: TEST_RULE_TYPE_IDS,
           services: { http: mockHttp },

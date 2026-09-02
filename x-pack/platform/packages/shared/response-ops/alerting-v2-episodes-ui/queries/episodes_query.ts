@@ -19,23 +19,23 @@ export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-co
 
 /**
  * Extension of the base AlertEpisode type with client-only capability flags
- * used to differentiate classic (v1) alert rows from v2 episode rows.
+ * used to differentiate classic alert rows from v2 episode rows.
  * These fields are never set by the v2 pipeline.
  */
 export interface AlertEpisode extends BaseAlertEpisode {
   /**
    * Whether the row supports v2 episode actions (ack, assign, snooze). Classic
-   * (v1) alert rows set this to `false`; v2 episodes default to `true`.
+   * alert rows set this to `false`; v2 episodes default to `true`.
    */
   supports_actions?: boolean;
   /**
    * Whether the row supports the v2 episode timeline/events flyout. Classic
-   * (v1) alert rows set this to `false` (they use a simpler fields flyout);
+   * alert rows set this to `false` (they use a simpler fields flyout);
    * v2 episodes default to `true`.
    */
   supports_timeline?: boolean;
   /**
-   * Rule name embedded from the v1 alert document. Used as a display fallback
+   * Rule name embedded from the classic alert document. Used as a display fallback
    * when the rules API cannot resolve the name (e.g. due to RBAC restrictions).
    * V2 episodes never set this — they always resolve via the rules cache.
    */

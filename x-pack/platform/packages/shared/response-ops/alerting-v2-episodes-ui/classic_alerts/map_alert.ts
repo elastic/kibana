@@ -106,8 +106,8 @@ export const mapClassicStatusToEpisodeStatus = (status: string | undefined): Ale
   status === ALERT_STATUS_ACTIVE ? ALERT_EPISODE_STATUS.ACTIVE : ALERT_EPISODE_STATUS.INACTIVE;
 
 /**
- * Reshapes a classic (v1) alert `_source` document into the v2 `AlertEpisode` row
- * shape so it can be merged into the v2 alerting (episodes) table. Each v1 alert
+ * Reshapes a classic alert `_source` document into the v2 `AlertEpisode` row
+ * shape so it can be merged into the v2 alerting (episodes) table. Each classic alert
  * maps to one episode. v2-only fields (ack / assignee / snooze / episode data) are
  * emitted as `null`. Capability flags are set to `false`.
  */
@@ -168,7 +168,7 @@ const resolveBreakdownValue = (
 };
 
 /**
- * Reshapes a classic (v1) alert `_source` document into the lightweight histogram
+ * Reshapes a classic alert `_source` document into the lightweight histogram
  * row shape used for client-side overlap counting.
  */
 export const mapClassicAlertToHistogramRow = (

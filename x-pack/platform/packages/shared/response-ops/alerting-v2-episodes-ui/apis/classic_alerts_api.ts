@@ -37,18 +37,18 @@ import {
 } from '../classic_alerts/constants';
 
 /**
- * Classic (v1) alert KPI counts that have a v2 equivalent, merged additively with
+ * Classic alert KPI counts that have a v2 equivalent, merged additively with
  * the v2 KPI counts on the client.
  */
-export interface V1AlertsKpisRow {
+export interface ClassicAlertsKpisRow {
   alerts_count: number;
   firing_rules: number;
   acknowledged: number;
   snoozed: number;
 }
 
-/** Raw `kibana.alert.*` fields (plus `_index` / `_id`) of a single classic (v1) alert. */
-export type V1AlertFields = Record<string, unknown>;
+/** Raw `kibana.alert.*` fields (plus `_index` / `_id`) of a single classic alert. */
+export type ClassicAlertFields = Record<string, unknown>;
 
 /** Body accepted by the authorized RAC alerts find route (`POST /internal/rac/alerts/find`). */
 interface RacFindBody {
@@ -97,7 +97,7 @@ const getTotalHits = (total: RacFindResponse['hits']['total']): number => {
 };
 
 /**
- * Reads classic (v1) observability + stack alerts through the authorized RAC
+ * Reads classic observability + stack alerts through the authorized RAC
  * alerts API (so Kibana alerting RBAC is enforced) and returns the raw response.
  */
 const findClassicAlerts = <TAggs = undefined>(
@@ -115,7 +115,7 @@ interface ClassicRuleTypeIdsOption {
   ruleTypeIds: string[];
 }
 
-export interface FetchV1AlertsAsEpisodesOptions extends ClassicRuleTypeIdsOption {
+export interface FetchClassicAlertsAsEpisodesOptions extends ClassicRuleTypeIdsOption {
   pageSize: number;
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
@@ -125,11 +125,11 @@ export interface FetchV1AlertsAsEpisodesOptions extends ClassicRuleTypeIdsOption
 }
 
 /**
- * Reads classic (v1) observability + stack alerts (RBAC enforced by the RAC alerts
+ * Reads classic observability + stack alerts (RBAC enforced by the RAC alerts
  * API) reshaped into the v2 `AlertEpisode` row shape, so they can be merged into
  * the v2 alerting (episodes) table.
  */
-export const fetchV1AlertsAsEpisodes = async ({
+export const fetchClassicAlertsAsEpisodes = async ({
   ruleTypeIds,
   pageSize,
   timeRange,
@@ -137,7 +137,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   sortState,
   abortSignal,
   services: { http },
-}: FetchV1AlertsAsEpisodesOptions): Promise<AlertEpisode[]> => {
+}: FetchClassicAlertsAsEpisodesOptions): Promise<AlertEpisode[]> => {
   const response = await findClassicAlerts(
     http,
     {
@@ -156,21 +156,21 @@ export const fetchV1AlertsAsEpisodes = async ({
   );
 };
 
-export interface FetchV1AlertsKpisOptions extends ClassicRuleTypeIdsOption {
+export interface FetchClassicAlertsKpisOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
-/** Computes the classic (v1) alert KPI counts (RBAC enforced by the RAC alerts API). */
-export const fetchV1AlertsKpis = async ({
+/** Computes the classic alert KPI counts (RBAC enforced by the RAC alerts API). */
+export const fetchClassicAlertsKpis = async ({
   ruleTypeIds,
   timeRange,
   filterState,
   abortSignal,
   services: { http },
-}: FetchV1AlertsKpisOptions): Promise<V1AlertsKpisRow> => {
+}: FetchClassicAlertsKpisOptions): Promise<ClassicAlertsKpisRow> => {
   const response = await findClassicAlerts<ClassicKpiAggregations>(
     http,
     {
@@ -194,7 +194,7 @@ export const fetchV1AlertsKpis = async ({
   };
 };
 
-export interface FetchV1AlertsHistogramOptions extends ClassicRuleTypeIdsOption {
+export interface FetchClassicAlertsHistogramOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   breakdownField?: string;
@@ -202,15 +202,15 @@ export interface FetchV1AlertsHistogramOptions extends ClassicRuleTypeIdsOption 
   services: { http: HttpStart };
 }
 
-/** Returns classic (v1) alert histogram rows (RBAC enforced by the RAC alerts API). */
-export const fetchV1AlertsHistogram = async ({
+/** Returns classic alert histogram rows (RBAC enforced by the RAC alerts API). */
+export const fetchClassicAlertsHistogram = async ({
   ruleTypeIds,
   timeRange,
   filterState,
   breakdownField,
   abortSignal,
   services: { http },
-}: FetchV1AlertsHistogramOptions): Promise<HistogramEpisodeRow[]> => {
+}: FetchClassicAlertsHistogramOptions): Promise<HistogramEpisodeRow[]> => {
   const response = await findClassicAlerts(
     http,
     {
@@ -235,19 +235,19 @@ export const fetchV1AlertsHistogram = async ({
   );
 };
 
-export interface FetchV1AlertsTagsOptions extends ClassicRuleTypeIdsOption {
+export interface FetchClassicAlertsTagsOptions extends ClassicRuleTypeIdsOption {
   timeRange?: TimeRange | null;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
-/** Returns distinct classic (v1) alert rule tags (RBAC enforced by the RAC alerts API). */
-export const fetchV1AlertsTags = async ({
+/** Returns distinct classic alert rule tags (RBAC enforced by the RAC alerts API). */
+export const fetchClassicAlertsTags = async ({
   ruleTypeIds,
   timeRange,
   abortSignal,
   services: { http },
-}: FetchV1AlertsTagsOptions): Promise<string[]> => {
+}: FetchClassicAlertsTagsOptions): Promise<string[]> => {
   const response = await findClassicAlerts<ClassicTagsAggregations>(
     http,
     {
@@ -271,24 +271,24 @@ export const fetchV1AlertsTags = async ({
     .filter((key): key is string => typeof key === 'string');
 };
 
-export interface FetchV1AlertByIdOptions extends ClassicRuleTypeIdsOption {
+export interface FetchClassicAlertByIdOptions extends ClassicRuleTypeIdsOption {
   id: string;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
 /**
- * Reads a single classic (v1) alert document by its alert uuid (RBAC enforced by
+ * Reads a single classic alert document by its alert uuid (RBAC enforced by
  * the RAC alerts API) so the classic alert fields flyout can be rendered from the
  * v2 episodes table. Returns the raw `kibana.alert.*` fields plus `_index` (used
  * to decide whether an observability details-page deep link applies).
  */
-export const fetchV1AlertById = async ({
+export const fetchClassicAlertById = async ({
   ruleTypeIds,
   id,
   abortSignal,
   services: { http },
-}: FetchV1AlertByIdOptions): Promise<V1AlertFields> => {
+}: FetchClassicAlertByIdOptions): Promise<ClassicAlertFields> => {
   const response = await findClassicAlerts(
     http,
     {
@@ -305,5 +305,5 @@ export const fetchV1AlertById = async ({
     throw new Error(`Classic alert not found: ${id}`);
   }
 
-  return { ...hit._source, _index: hit._index ?? '', _id: hit._id ?? '' } as V1AlertFields;
+  return { ...hit._source, _index: hit._index ?? '', _id: hit._id ?? '' } as ClassicAlertFields;
 };

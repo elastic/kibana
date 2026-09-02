@@ -93,7 +93,7 @@ describe('buildClassicAlertsQuery', () => {
     expect(severityFilter).toBeDefined();
   });
 
-  it('returns MATCH_NONE when assigneeUid is set (no v1 equivalent)', () => {
+  it('returns MATCH_NONE when assigneeUid is set (no classic equivalent)', () => {
     const query = buildClassicAlertsQuery({ assigneeUid: 'user-1' });
 
     expect(getFilters(query)).toEqual(

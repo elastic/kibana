@@ -75,7 +75,7 @@ import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
-import { V1AlertDetailsFlyout } from './components/v1_alert_details_flyout';
+import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -347,7 +347,7 @@ const AlertEpisodesListPageContent = () => {
     (hit) => {
       if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
         return (
-          <V1AlertDetailsFlyout
+          <ClassicAlertDetailsFlyout
             alertId={hit.flattened['episode.id'] as string}
             onClose={closeFlyout}
             services={{ http: services.http }}

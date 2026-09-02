@@ -279,7 +279,7 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('renders v1 rule via rules cache when resolved by v1 fallback', () => {
+  it('renders classic rule via rules cache when resolved by classic fallback', () => {
     const row = makeRow({
       'rule.id': 'v1-rule-id',
       supports_actions: false,
@@ -298,7 +298,7 @@ describe('EpisodeRuleCell', () => {
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
   });
 
-  it('renders v1 rule name without query when rowHeight > 1 and rule has no query', () => {
+  it('renders classic rule name without query when rowHeight > 1 and rule has no query', () => {
     const v1Rule = {
       metadata: { name: 'Classic CPU Rule' },
     } as unknown as Rule;
