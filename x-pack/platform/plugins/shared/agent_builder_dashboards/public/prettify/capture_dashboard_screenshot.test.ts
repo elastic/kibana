@@ -9,11 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MAX_IMAGE_BYTES } from '@kbn/agent-builder-common/attachments';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { FilesStart } from '@kbn/files-plugin/public';
-import {
-  CAPTURE_TIMEOUT_MS,
-  captureDashboardScreenshot,
-  SCREENSHOT_PREVIEW_STORAGE_KEY,
-} from './capture_dashboard_screenshot';
+import { CAPTURE_TIMEOUT_MS, captureDashboardScreenshot } from './capture_dashboard_screenshot';
 
 jest.mock('dom-to-image-more', () => ({
   toCanvas: jest.fn(),
@@ -21,12 +17,7 @@ jest.mock('dom-to-image-more', () => ({
 
 const { toCanvas } = jest.requireMock('dom-to-image-more') as { toCanvas: jest.Mock };
 
-// kbn-test's jsdom polyfill provides URL.createObjectURL but not revokeObjectURL
-if (!Object.hasOwn(URL, 'revokeObjectURL')) {
-  Object.defineProperty(URL, 'revokeObjectURL', { value: () => {} });
-}
-
-const DEBOUNCE_MS = 300;
+const POLL_MS = 100;
 
 const smallBlob = (type: string) => new Blob(['image-bytes'], { type });
 const hugeBlob = (type: string) => new Blob([new Uint8Array(MAX_IMAGE_BYTES + 1)], { type });
@@ -37,23 +28,27 @@ const fakeCanvas = (blobsByType: Record<string, Blob>) => ({
   },
 });
 
-const createLayout = (collapsed: boolean) => ({
-  panels: {},
-  sections: { sec: { collapsed, title: 'Section', grid: { y: 0 } } },
-  pinnedPanels: {},
-});
-
-const createDashboardApi = ({
-  dataLoading = false as boolean | undefined,
-  collapsed = false,
-} = {}) => {
-  const dataLoading$ = new BehaviorSubject<boolean | undefined>(dataLoading);
-  const layout$ = new BehaviorSubject(createLayout(collapsed));
-  return { api: { dataLoading$, layout$ } as unknown as DashboardApi, dataLoading$, layout$ };
+const createDashboardApi = ({ collapsed = false, panelCount = 0 } = {}) => {
+  const layout$ = new BehaviorSubject({
+    panels: Object.fromEntries(
+      Array.from({ length: panelCount }, (_, index) => [`panel-${index}`, { grid: {} }])
+    ),
+    sections: { sec: { collapsed, title: 'Section', grid: { y: 0 } } },
+    pinnedPanels: {},
+  });
+  return { api: { layout$ } as unknown as DashboardApi, layout$ };
 };
 
-const createFiles = (fileId = 'file-1') => {
-  const create = jest.fn().mockResolvedValue({ file: { id: fileId } });
+const addRenderedPanel = (grid: HTMLElement) => {
+  const panel = document.createElement('div');
+  panel.setAttribute('data-test-subj', 'embeddablePanel');
+  panel.setAttribute('data-render-complete', 'true');
+  grid.appendChild(panel);
+  return panel;
+};
+
+const createFiles = () => {
+  const create = jest.fn().mockResolvedValue({ file: { id: 'file-1' } });
   const upload = jest.fn().mockResolvedValue(undefined);
   return {
     files: {
@@ -61,21 +56,17 @@ const createFiles = (fileId = 'file-1') => {
         asScoped: jest.fn(() => ({ create, upload })),
       },
     } as unknown as FilesStart,
-    create,
     upload,
   };
 };
 
 describe('captureDashboardScreenshot', () => {
-  const grid = document.createElement('div');
-  grid.setAttribute('data-shared-items-container', 'true');
+  let grid: HTMLElement;
 
   beforeEach(() => {
     jest.useFakeTimers();
-    Object.defineProperty(crypto, 'randomUUID', {
-      configurable: true,
-      value: () => 'image-1',
-    });
+    grid = document.createElement('div');
+    grid.setAttribute('data-shared-items-container', 'true');
     document.body.appendChild(grid);
     toCanvas.mockReset();
     toCanvas.mockResolvedValue(fakeCanvas({ 'image/png': smallBlob('image/png') }));
@@ -83,60 +74,72 @@ describe('captureDashboardScreenshot', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    grid.innerHTML = '';
     document.body.innerHTML = '';
-    localStorage.clear();
   });
 
   it('uploads a PNG of the dashboard and returns an image attachment', async () => {
     const { api } = createDashboardApi();
-    const { files, create, upload } = createFiles('uploaded-1');
+    const { files, upload } = createFiles();
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
 
     await expect(pending).resolves.toEqual({
-      id: 'image-1',
+      id: expect.any(String),
       type: 'image',
       description: 'Dashboard screenshot',
       data: {
-        file_id: 'uploaded-1',
+        file_id: 'file-1',
         name: 'dashboard-screenshot.png',
         mime_type: 'image/png',
       },
     });
     expect(toCanvas).toHaveBeenCalledWith(grid, expect.any(Object));
-    expect(create).toHaveBeenCalledWith({
-      name: 'dashboard-screenshot.png',
-      mimeType: 'image/png',
-    });
     expect(upload).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'uploaded-1', contentType: 'image/png' })
+      expect.objectContaining({ id: 'file-1', contentType: 'image/png' })
     );
   });
 
-  it('waits until panels finish loading before rendering', async () => {
-    const { api, dataLoading$ } = createDashboardApi({ dataLoading: true });
+  it('waits until every panel is rendered before capturing', async () => {
+    const { api } = createDashboardApi({ panelCount: 2 });
     const { files } = createFiles();
+    addRenderedPanel(grid);
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS * 4);
+    await jest.advanceTimersByTimeAsync(POLL_MS * 4);
     expect(toCanvas).not.toHaveBeenCalled();
 
-    dataLoading$.next(false);
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    addRenderedPanel(grid);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
 
     await expect(pending).resolves.toMatchObject({ type: 'image' });
     expect(toCanvas).toHaveBeenCalledTimes(1);
   });
 
-  it('rejects when panels never finish loading', async () => {
-    const { api } = createDashboardApi({ dataLoading: true });
+  it('waits for visualizations that are still drawing after their data loaded', async () => {
+    const { api } = createDashboardApi({ panelCount: 1 });
+    const { files } = createFiles();
+    const chart = document.createElement('div');
+    chart.setAttribute('data-render-complete', 'false');
+    addRenderedPanel(grid).appendChild(chart);
+
+    const pending = captureDashboardScreenshot({ dashboardApi: api, files });
+    await jest.advanceTimersByTimeAsync(POLL_MS * 4);
+    expect(toCanvas).not.toHaveBeenCalled();
+
+    chart.setAttribute('data-render-complete', 'true');
+    await jest.advanceTimersByTimeAsync(POLL_MS);
+
+    await expect(pending).resolves.toMatchObject({ type: 'image' });
+  });
+
+  it('rejects when panels never finish rendering', async () => {
+    const { api } = createDashboardApi({ panelCount: 1 });
     const { files } = createFiles();
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
     const assertion = expect(pending).rejects.toThrow();
-    await jest.advanceTimersByTimeAsync(CAPTURE_TIMEOUT_MS + DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(CAPTURE_TIMEOUT_MS + POLL_MS);
 
     await assertion;
     expect(toCanvas).not.toHaveBeenCalled();
@@ -150,17 +153,13 @@ describe('captureDashboardScreenshot', () => {
       })
     );
     const { api } = createDashboardApi();
-    const { files, create } = createFiles();
+    const { files } = createFiles();
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
 
     await expect(pending).resolves.toMatchObject({
       data: { name: 'dashboard-screenshot.jpg', mime_type: 'image/jpeg' },
-    });
-    expect(create).toHaveBeenCalledWith({
-      name: 'dashboard-screenshot.jpg',
-      mimeType: 'image/jpeg',
     });
   });
 
@@ -172,14 +171,14 @@ describe('captureDashboardScreenshot', () => {
       })
     );
     const { api } = createDashboardApi();
-    const { files, create } = createFiles();
+    const { files, upload } = createFiles();
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
     const assertion = expect(pending).rejects.toThrow('size limit');
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
 
     await assertion;
-    expect(create).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
   });
 
   it('expands collapsed sections for the capture and restores them afterwards', async () => {
@@ -192,7 +191,7 @@ describe('captureDashboardScreenshot', () => {
     });
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
     await pending;
 
     expect(collapsedDuringRender).toBe(false);
@@ -206,7 +205,7 @@ describe('captureDashboardScreenshot', () => {
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
     const assertion = expect(pending).rejects.toThrow('boom');
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
 
     await assertion;
     expect(layout$.getValue().sections.sec.collapsed).toBe(true);
@@ -218,39 +217,10 @@ describe('captureDashboardScreenshot', () => {
     const { files } = createFiles();
 
     const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    await jest.advanceTimersByTimeAsync(POLL_MS);
     await pending;
 
     expect(next).not.toHaveBeenCalled();
-  });
-
-  it('shows a click-to-dismiss preview overlay when the dev flag is set', async () => {
-    localStorage.setItem(SCREENSHOT_PREVIEW_STORAGE_KEY, 'true');
-    const { api } = createDashboardApi();
-    const { files } = createFiles();
-
-    const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
-    await pending;
-
-    const overlay = document.querySelector<HTMLElement>(
-      '[data-test-subj="dashboardScreenshotPreview"]'
-    );
-    expect(overlay?.querySelector('img')).not.toBeNull();
-
-    overlay?.click();
-    expect(document.querySelector('[data-test-subj="dashboardScreenshotPreview"]')).toBeNull();
-  });
-
-  it('does not show a preview overlay by default', async () => {
-    const { api } = createDashboardApi();
-    const { files } = createFiles();
-
-    const pending = captureDashboardScreenshot({ dashboardApi: api, files });
-    await jest.advanceTimersByTimeAsync(DEBOUNCE_MS);
-    await pending;
-
-    expect(document.querySelector('[data-test-subj="dashboardScreenshotPreview"]')).toBeNull();
   });
 
   it('rejects when the dashboard element is missing', async () => {

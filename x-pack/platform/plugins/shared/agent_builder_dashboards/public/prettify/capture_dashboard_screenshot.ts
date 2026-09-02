@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { debounceTime, first, firstValueFrom, timeout } from 'rxjs';
+import { first, firstValueFrom, interval, timeout } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AttachmentType,
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
@@ -23,6 +24,7 @@ export const CAPTURE_TIMEOUT_MS = 30_000;
 
 export const DASHBOARD_ELEMENT_SELECTOR = '[data-shared-items-container]';
 const JPEG_QUALITY = 0.8;
+const RENDER_POLL_MS = 100;
 
 export type ImageAttachment = AttachmentInput<typeof AttachmentType.image, ImageAttachmentData>;
 
@@ -31,12 +33,20 @@ export interface CaptureDashboardScreenshotDeps {
   files: FilesStart;
 }
 
-const waitForPanelsToLoad = (dashboardApi: DashboardApi): Promise<boolean | undefined> =>
+// Mirrors how reporting decides a dashboard is ready.
+const isDashboardRendered = (dashboardApi: DashboardApi, grid: HTMLElement): boolean => {
+  const expectedPanels = Object.keys(dashboardApi.layout$.getValue().panels).length;
+  const renderedPanels = grid.querySelectorAll(
+    '[data-test-subj="embeddablePanel"][data-render-complete="true"]'
+  ).length;
+  const drawingVisualizations = grid.querySelectorAll('[data-render-complete="false"]').length;
+  return renderedPanels >= expectedPanels && drawingVisualizations === 0;
+};
+
+const waitForPanelsToRender = (dashboardApi: DashboardApi, grid: HTMLElement): Promise<number> =>
   firstValueFrom(
-    dashboardApi.dataLoading$.pipe(
-      // give panels a moment to start loading before trusting an idle signal
-      debounceTime(300),
-      first((loading) => loading !== true),
+    interval(RENDER_POLL_MS).pipe(
+      first(() => isDashboardRendered(dashboardApi, grid)),
       timeout(CAPTURE_TIMEOUT_MS)
     )
   );
@@ -125,7 +135,7 @@ export const captureDashboardScreenshot = async ({
 
   const restoreCollapsedSections = expandCollapsedSections(dashboardApi);
   try {
-    await waitForPanelsToLoad(dashboardApi);
+    await waitForPanelsToRender(dashboardApi, grid);
 
     const { blob, mimeType } = await renderGrid(grid);
     maybePreviewScreenshot(blob);
@@ -141,7 +151,7 @@ export const captureDashboardScreenshot = async ({
     });
 
     return {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       type: AttachmentType.image,
       description: 'Dashboard screenshot',
       data: { file_id: file.id, name, mime_type: mimeType },
