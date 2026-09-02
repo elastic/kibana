@@ -438,6 +438,7 @@ steps:
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.dismissed_tags }}"
+          tags_to_remove: []
         on-failure:
           continue: true
 
@@ -447,6 +448,7 @@ steps:
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.applied_tags }}"
+          tags_to_remove: []
         on-failure:
           continue: true
 
