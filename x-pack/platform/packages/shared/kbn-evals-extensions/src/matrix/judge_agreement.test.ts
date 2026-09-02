@@ -61,6 +61,33 @@ describe('judgeAgreementForModel', () => {
     expect(row.verdictAgreement).toBe(1);
   });
 
+  it('reports how many cells only one judge scored', () => {
+    // The 4.8-opus shape: the second judge returned `unavailable` for work the
+    // first judge did score. Those cells cannot be compared, and the row must
+    // say so rather than presenting a thinner sample as a full one.
+    const verdicts = [
+      verdict('gemini', 'ex-1', 0, 'Relevance', 1),
+      verdict('sonnet', 'ex-1', 0, 'Relevance', 1),
+      verdict('sonnet', 'ex-2', 0, 'Relevance', 1),
+      verdict('sonnet', 'ex-3', 0, 'Relevance', 0),
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.pairs).toBe(1);
+    expect(row.unpaired).toBe(2);
+  });
+
+  it('reports no unpaired cells when both judges scored identical work', () => {
+    const verdicts = [
+      verdict('gemini', 'ex-1', 0, 'Relevance', 1),
+      verdict('sonnet', 'ex-1', 0, 'Relevance', 1),
+      verdict('gemini', 'ex-2', 0, 'Relevance', 0),
+      verdict('sonnet', 'ex-2', 0, 'Relevance', 0),
+    ];
+    const row = judgeAgreementForModel(verdicts, 'model-a');
+    expect(row.pairs).toBe(2);
+    expect(row.unpaired).toBe(0);
+  });
+
   it('counts a pass/fail flip across the 0.5 midpoint', () => {
     const verdicts = [
       verdict('gemini', 'ex-1', 0, 'Relevance', 0.9),

@@ -36,6 +36,13 @@ export interface JudgeAgreementRow {
   judges: string[];
   /** Cells where two judges scored the identical example+rep+evaluator. */
   pairs: number;
+  /**
+   * Cells the leading judge scored that the other judge did not, so a row built
+   * on partial overlap cannot be read as though both judges covered everything.
+   * A high value means the agreement figure rests on less evidence than a
+   * fully-paired row with the same `pairs` count would.
+   */
+  unpaired: number;
   /** Pass/fail concordance, the verdict-level view. */
   verdictAgreement?: number;
   interval?: ConfidenceInterval;
@@ -76,12 +83,27 @@ export const judgeAgreementForModel = (
   const judges = [...new Set(mine.map((v) => v.judgeId))].sort();
 
   if (judges.length === 0) {
-    return { modelId, status: 'unmeasured', judges: [], pairs: 0, worstEvaluators: [] };
+    return {
+      modelId,
+      status: 'unmeasured',
+      judges: [],
+      pairs: 0,
+      unpaired: 0,
+      worstEvaluators: [],
+    };
   }
   if (judges.length === 1) {
     // Scored, but by one judge only. This is NOT agreement of 100%; it is the
     // absence of a second opinion, and must never render as a high score.
-    return { modelId, status: 'single-judge', judges, pairs: 0, worstEvaluators: [] };
+    const soleCoverage = new Set(mine.map(cellKey)).size;
+    return {
+      modelId,
+      status: 'single-judge',
+      judges,
+      pairs: 0,
+      unpaired: soleCoverage,
+      worstEvaluators: [],
+    };
   }
 
   // Choose the judge pair with the largest true overlap.
@@ -102,7 +124,15 @@ export const judgeAgreementForModel = (
 
   if (!best || best.keys.length === 0) {
     // Two judges exist but scored disjoint work — no comparison is possible.
-    return { modelId, status: 'single-judge', judges, pairs: 0, worstEvaluators: [] };
+    const disjointCoverage = new Set(mine.map(cellKey)).size;
+    return {
+      modelId,
+      status: 'single-judge',
+      judges,
+      pairs: 0,
+      unpaired: disjointCoverage,
+      worstEvaluators: [],
+    };
   }
 
   const scoreOf = new Map<string, { a?: number; b?: number; evaluator: string }>();
@@ -123,6 +153,10 @@ export const judgeAgreementForModel = (
   const paired = [...scoreOf.values()].filter(
     (e): e is { a: number; b: number; evaluator: string } => e.a !== undefined && e.b !== undefined
   );
+  // Cells only one of the two judges scored. 4.8-opus surfaced this: Gemini
+  // returned `unavailable` for ~130 cells Sonnet did score, so the row is
+  // computed over materially less work than a fully-paired model's row.
+  const unpaired = scoreOf.size - paired.length;
 
   let concordant = 0;
   let sumA = 0;
@@ -159,6 +193,7 @@ export const judgeAgreementForModel = (
     status: 'measured',
     judges,
     pairs: paired.length,
+    unpaired,
     verdictAgreement: concordant / paired.length,
     interval: wilsonInterval(concordant, paired.length),
     bias: sumA / paired.length - sumB / paired.length,

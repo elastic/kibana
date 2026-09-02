@@ -144,7 +144,15 @@ const judgeHtml = (row: JudgeAgreementRow): string => {
         )
         .join(', ')}</small>`
     : '';
-  return `${agreementPct}${ci}<small>${row.pairs} paired verdicts</small>${bias}${worst}`;
+  // Disclose one-sided coverage. Without this a row computed over 395 of 531
+  // cells reads identically to one where both judges scored everything.
+  const coverage =
+    row.unpaired > 0
+      ? `<small class="caveat">${row.unpaired} cell${
+          row.unpaired === 1 ? '' : 's'
+        } scored by one judge only, excluded</small>`
+      : '';
+  return `${agreementPct}${ci}<small>${row.pairs} paired verdicts</small>${coverage}${bias}${worst}`;
 };
 
 const rowHtml = (
@@ -254,6 +262,7 @@ export const renderReliabilityHtml = (
           status: 'unmeasured',
           judges: [],
           pairs: 0,
+          unpaired: 0,
           worstEvaluators: [],
         }
       )

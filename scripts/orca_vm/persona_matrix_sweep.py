@@ -701,11 +701,30 @@ def main() -> int:
                 az("network", "public-ip", "delete", "-g", RG, "-n", p["name"])
                 print(f"[teardown] deleting public-ip {p['name']}")
 
+        # `az vm create` also auto-creates one NSG per VM. Nothing deleted these,
+        # so they accumulated one-per-sweep (68 found on 2026-09-02, every one
+        # detached). They cost nothing, but they bury real resources in the RG
+        # and make "is this group clean?" unanswerable at a glance. Only ever
+        # delete NSGs that belong to a sweep VM AND are attached to nothing --
+        # the shared vnet and the orca-eval-base-* image must survive.
+        for g in json.loads(az("network", "nsg", "list", "-g", RG, "-o", "json")):
+            detached = not g.get("networkInterfaces") and not g.get("subnets")
+            if g["name"].startswith("orca-sweep-") and detached:
+                az("network", "nsg", "delete", "-g", RG, "-n", g["name"])
+                print(f"[teardown] deleting nsg {g['name']}")
+
         left = {
             "vms": len(json.loads(az("vm", "list", "-g", RG, "-o", "json"))),
             "disks": len(json.loads(az("disk", "list", "-g", RG, "-o", "json"))),
             "nics": len(json.loads(az("network", "nic", "list", "-g", RG, "-o", "json"))),
             "pubips": len(json.loads(az("network", "public-ip", "list", "-g", RG, "-o", "json"))),
+            "sweep_nsgs": len(
+                [
+                    g
+                    for g in json.loads(az("network", "nsg", "list", "-g", RG, "-o", "json"))
+                    if g["name"].startswith("orca-sweep-")
+                ]
+            ),
         }
         print(f"[teardown] remaining: {left}")
         return

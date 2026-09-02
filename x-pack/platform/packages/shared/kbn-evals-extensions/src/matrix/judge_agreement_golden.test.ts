@@ -41,10 +41,20 @@ maybe('reliability board over real golden verdicts', () => {
     expect(haiku.verdictAgreement).toBeCloseTo(457 / 531, 6);
   });
 
-  it('refuses to score the model only one judge covered', () => {
+  it('now scores 4.8-opus, and discloses its one-sided coverage', () => {
+    // The Sonnet judge sweep closed this hole: 4.8-opus was single-judge until
+    // 2026-09-02. Gemini still returned `unavailable` on part of the run, so the
+    // row is measured over fewer cells than the fully-paired models and must
+    // report that shortfall rather than hide it behind a comparable-looking rate.
     const row = judgeAgreementForModel(verdicts, 'anthropic-claude-4.8-opus');
-    expect(row.status).toBe('single-judge');
-    expect(row.verdictAgreement).toBeUndefined();
+    expect(row.status).toBe('measured');
+    expect(row.judges).toEqual(['anthropic-claude-4.6-sonnet', 'google-gemini-3.1-pro']);
+    // Python: 395 paired cells, 329/395 = 83.3%, CI [79.3, 86.6]
+    expect(row.pairs).toBe(395);
+    expect(row.verdictAgreement).toBeCloseTo(329 / 395, 6);
+    expect(row.unpaired).toBeGreaterThan(0);
+    // Materially thinner than the 531-pair rows it sits beside.
+    expect(row.pairs).toBeLessThan(531);
   });
 
   it('agrees that Relevance is the one hotspot clearing noise on both models', () => {
