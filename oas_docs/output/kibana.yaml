@@ -114888,7 +114888,7 @@ components:
           maxLength: 255
           type: string
         policy_id:
-          maxLength: 50
+          maxLength: 512
           type: string
       required:
         - policy_id
