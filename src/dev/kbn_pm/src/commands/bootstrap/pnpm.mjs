@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import ChildProcess from 'child_process';
 
@@ -21,31 +22,71 @@ export async function areNodeModulesPresent() {
 }
 
 /**
- * Fail fast with an actionable message when pnpm isn't on the PATH. The version
- * is pinned via package.json "packageManager", which corepack (and pnpm itself)
- * read to enforce the exact version, so enabling corepack is all a developer needs.
+ * Verify pnpm is available before we spawn it, and warn on version drift.
+ * We deliberately don't ship a package.json "packageManager" field: while the
+ * repo is mid-migration it still relies on yarn (the `yarn kbn` entrypoint and
+ * many CI scripts), and that field makes yarn refuse to run. So we detect pnpm
+ * ourselves and point devs at corepack, pinning from "engines.pnpm".
  *
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  */
 export function ensurePnpmAvailable(log) {
-  const { error, status } = ChildProcess.spawnSync('pnpm', ['--version'], { encoding: 'utf8' });
-  if (!error && status === 0) {
-    return;
+  const required = getRequiredPnpmVersion();
+  const { error, status, stdout } = ChildProcess.spawnSync('pnpm', ['--version'], {
+    encoding: 'utf8',
+  });
+
+  if (error || status !== 0) {
+    log.error(
+      dedent`
+        pnpm is required to bootstrap Kibana but wasn't found on your PATH.
+
+        Kibana provisions pnpm through corepack (bundled with Node.js), pinning the version from
+        package.json "engines". Enable it once with:
+
+          corepack enable
+          corepack prepare pnpm@${required} --activate
+
+        then re-run '(yarn|pnpm) kbn bootstrap'.
+      `
+    );
+    process.exit(1);
   }
 
-  log.error(
-    dedent`
-      pnpm is required to bootstrap Kibana but wasn't found on your PATH.
+  // ponytail: only compares the major version, not the full `~` range, to avoid
+  // pulling a semver parser into kbn_pm (which must run before bootstrap installs deps).
+  const current = stdout.trim();
+  if (required && majorOf(current) !== majorOf(required)) {
+    log.warning(
+      dedent`
+        Detected pnpm v${current} but Kibana expects v${required} (package.json "engines.pnpm").
+        A mismatched major version can cause lockfile/install incompatibilities. Pin it with:
 
-      Kibana pins pnpm via package.json "packageManager" and runs it through corepack
-      (bundled with Node.js). Enable it once with:
+          corepack prepare pnpm@${required} --activate
+      `
+    );
+  }
+}
 
-        corepack enable
+/**
+ * Read the pinned pnpm version from package.json "engines" (e.g. "~11.21.0" -> "11.21.0").
+ * @returns {string}
+ */
+function getRequiredPnpmVersion() {
+  try {
+    const pkg = JSON.parse(Fs.readFileSync(Path.resolve(REPO_ROOT, 'package.json'), 'utf8'));
+    return String(pkg.engines?.pnpm ?? '').replace(/^\D*/, '');
+  } catch {
+    return '';
+  }
+}
 
-      then re-run 'yarn kbn bootstrap' — corepack fetches the pinned pnpm automatically.
-    `
-  );
-  process.exit(1);
+/**
+ * @param {string} version
+ * @returns {string}
+ */
+function majorOf(version) {
+  return version.split('.')[0];
 }
 
 /**
