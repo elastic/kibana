@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { ApprovalRequirement } from '@kbn/pnd-common';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
@@ -47,11 +47,6 @@ export const WatchDetailPage: React.FC = () => {
 
   const onToggleWorker = useCallback(
     (workerId: string, enabled: boolean) => updateWatch({ worker: { workerId, enabled } }),
-    [updateWatch]
-  );
-
-  const onToggleSkill = useCallback(
-    (skillId: string, enabled: boolean) => updateWatch({ skill: { skillId, enabled } }),
     [updateWatch]
   );
 
@@ -190,23 +185,25 @@ export const WatchDetailPage: React.FC = () => {
       });
     }
 
-    if (settings.skills && settings.skills.length > 0) {
+    if (watch.skills && watch.skills.length > 0) {
       sections.push({
         key: 'skills',
         node: (
           <SettingsSection
             title={settingsI18n.SKILLS_SECTION_TITLE}
             subtitle={settingsI18n.SKILLS_SECTION_SUBTITLE}
+            rightAction={
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                onClick={() => history.push('/watches/skills')}
+              >
+                {settingsI18n.SKILLS_VIEW_ALL}
+              </EuiButtonEmpty>
+            }
             data-test-subj="pndWatchSkillsSection"
           >
-            <KbnWarningCallout
-              announceOnMount
-              title={settingsI18n.SKILL_DEPENDENCIES_CALLOUT_TITLE}
-              text={<p>{settingsI18n.SKILL_DEPENDENCIES_CALLOUT_BODY}</p>}
-              size="s"
-            />
-            <EuiSpacer size="m" />
-            <WatchSkillsTable attachments={settings.skills} onToggle={onToggleSkill} />
+            <WatchSkillsTable attachments={watch.skills} />
           </SettingsSection>
         ),
       });
