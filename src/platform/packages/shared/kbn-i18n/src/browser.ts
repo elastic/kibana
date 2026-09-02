@@ -16,6 +16,5 @@ export {
   toCanonicalLocaleId,
   setAvailableLocales,
   getAvailableLocales,
-  getBrowserPreferredLocale,
 } from './locales';
 export type { AvailableLocale, SupportedLocaleId } from './locales';
