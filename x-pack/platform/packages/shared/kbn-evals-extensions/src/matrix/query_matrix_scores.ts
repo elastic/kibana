@@ -107,6 +107,13 @@ export interface AggregatedSuiteScores {
   suiteId: string;
   experimentId: string;
   timestamp?: string;
+  /**
+   * Commit the graded run executed against, straight from the experiment
+   * summary. The artifact's top-level provenance records the *generator's*
+   * commit; this records the *subject's*. They diverge as soon as a model is
+   * added to an existing matrix, which is the normal way this board grows.
+   */
+  commitSha?: string;
   datasets: AggregatedDatasetScores[];
 }
 
@@ -490,6 +497,7 @@ export const queryMatrixScores = async (
         suiteId,
         experimentId: latest.experiment_id,
         timestamp: latest.timestamp,
+        commitSha: latest.git_commit_sha ?? undefined,
         datasets,
       });
     }

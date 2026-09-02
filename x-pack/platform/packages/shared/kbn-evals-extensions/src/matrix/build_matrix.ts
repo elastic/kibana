@@ -64,6 +64,14 @@ export interface MatrixRow {
    */
   coverage: { covered: number; total: number };
   /**
+   * Distinct commits this row's scores were produced against. A row spanning
+   * several suites can legitimately carry more than one: suites run on their
+   * own schedules. Published so a reader can tell which codebase a given model
+   * was measured on -- essential once models are appended to an existing board
+   * rather than swept together.
+   */
+  commitShas?: string[];
+  /**
    * 1-based tier. Runs of the same model on an unchanged commit move the
    * overall score by ~0.2 (stdev over 7 haiku runs on golden), so adjacent
    * ranks are not distinguishable. Rows within a tier are statistically
@@ -451,6 +459,24 @@ const assignTiers = (rows: MatrixRow[], config: MatrixConfig): MatrixRow[] => {
   });
 };
 
+/**
+ * Distinct commits behind one model's scores, newest experiment first. Suites
+ * run on independent schedules, so more than one is normal and not an error.
+ */
+export const rowCommitShas = (
+  modelScores: AggregatedModelScores | undefined
+): string[] | undefined => {
+  if (!modelScores) {
+    return undefined;
+  }
+  const ordered = [...modelScores.suites].sort((a, b) =>
+    String(b.timestamp ?? '').localeCompare(String(a.timestamp ?? ''))
+  );
+  const shas = ordered.map((suite) => suite.commitSha).filter((sha): sha is string => !!sha);
+  const unique = [...new Set(shas)];
+  return unique.length ? unique : undefined;
+};
+
 export const buildMatrix = (
   aggregated: AggregatedModelScores[],
   config: MatrixConfig,
@@ -533,6 +559,7 @@ export const buildMatrix = (
         covered: scoredColumns,
         total: config.columns.length,
       },
+      commitShas: rowCommitShas(modelScores),
     };
 
     (modelConfig.openSource ? openSource : proprietary).push(row);
@@ -566,6 +593,28 @@ export const buildMatrix = (
           `Column "${column.label}" has scores for only ${scored} of ${allRows.length} models -- too sparse to rank, and the models that did run it are averaged over a different column set than the rest. Check whether the suite is scheduled in the weekly pipeline before reading these cells as model differences.`
         );
       }
+    }
+
+    // Rows appended over time are graded against whatever the codebase was
+    // that week. That is legitimate -- it is how a model gets added to an
+    // existing board -- but it stops being comparable if nobody says so, and
+    // a single top-level provenance stamp actively hides it.
+    const shaByRow = allRows
+      .map((row) => ({ label: row.modelLabel, shas: row.commitShas ?? [] }))
+      .filter((entry) => entry.shas.length > 0);
+    const distinctShas = new Set(shaByRow.flatMap((entry) => entry.shas));
+    if (distinctShas.size > 1) {
+      const sample = shaByRow
+        .slice(0, 6)
+        .map((entry) => `${entry.label}=${entry.shas.map((sha) => sha.slice(0, 12)).join('+')}`)
+        .join(', ');
+      log.warning(
+        `Matrix spans ${distinctShas.size} commits across ${
+          shaByRow.length
+        } scored rows -- rows were graded against different codebases and are only loosely comparable. ${sample}${
+          shaByRow.length > 6 ? ', ...' : ''
+        }`
+      );
     }
 
     // The per-prefix fetch is what fills individual cells. If it returns

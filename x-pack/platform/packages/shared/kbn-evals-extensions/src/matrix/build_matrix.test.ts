@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildMatrix } from './build_matrix';
+import { buildMatrix, rowCommitShas } from './build_matrix';
 import { parseMatrixConfig, type MatrixConfig } from './load_matrix_config';
 import type { AggregatedModelScores } from './query_matrix_scores';
 
@@ -730,5 +730,66 @@ describe('buildMatrix total-score-loss guard', () => {
     expect(log.warning).not.toHaveBeenCalledWith(
       expect.stringContaining('No column produced a single scored cell')
     );
+  });
+});
+
+describe('per-row commit provenance', () => {
+  const scores = (suites: Array<{ sha?: string; ts?: string }>): AggregatedModelScores => ({
+    modelId: 'model-good',
+    suites: suites.map((s, i) => ({
+      suiteId: `suite-${i}`,
+      experimentId: `run-${i}`,
+      timestamp: s.ts,
+      commitSha: s.sha,
+      datasets: [{ datasetId: 'd', datasetName: 'D', evaluators: [evaluator(0.9)] }],
+    })),
+  });
+
+  it('reports the commits a row was graded against, newest run first', () => {
+    expect(
+      rowCommitShas(
+        scores([
+          { sha: 'oldsha0000000', ts: '2026-08-01T00:00:00.000Z' },
+          { sha: 'newsha1111111', ts: '2026-09-01T00:00:00.000Z' },
+        ])
+      )
+    ).toEqual(['newsha1111111', 'oldsha0000000']);
+  });
+
+  it('collapses repeats so one codebase reads as one commit', () => {
+    expect(rowCommitShas(scores([{ sha: 'same111' }, { sha: 'same111' }]))).toEqual(['same111']);
+  });
+
+  it('stays undefined when the experiment summary carried no commit', () => {
+    expect(rowCommitShas(scores([{}]))).toBeUndefined();
+    expect(rowCommitShas(undefined)).toBeUndefined();
+  });
+
+  it('warns when rows were graded against different codebases', () => {
+    const log = { warning: jest.fn() };
+    buildMatrix(
+      [
+        { ...scores([{ sha: 'aaaaaaaaaaaa1' }]), modelId: 'model-good' },
+        { ...scores([{ sha: 'bbbbbbbbbbbb2' }]), modelId: 'model-oss' },
+      ],
+      config,
+      log
+    );
+
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('spans 2 commits'));
+  });
+
+  it('stays quiet when every row came from one codebase', () => {
+    const log = { warning: jest.fn() };
+    buildMatrix(
+      [
+        { ...scores([{ sha: 'aaaaaaaaaaaa1' }]), modelId: 'model-good' },
+        { ...scores([{ sha: 'aaaaaaaaaaaa1' }]), modelId: 'model-oss' },
+      ],
+      config,
+      log
+    );
+
+    expect(log.warning).not.toHaveBeenCalledWith(expect.stringContaining('spans'));
   });
 });

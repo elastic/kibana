@@ -283,7 +283,8 @@
         "Rubric",
         "Criteria"
       ],
-      "weight": 1
+      "weight": 1,
+      "branch": "main"
     },
     {
       "id": "migrations-rules",
@@ -304,7 +305,7 @@
         "NL Description Faithfulness"
       ],
       "weight": 1,
-      "branch": "feat/evals-extensions-matrix-v3"
+      "branch": "elastic:fix/weekly-evals-matrix"
     },
     {
       "id": "migrations-dashboards",
@@ -323,7 +324,7 @@
         "translation_fidelity"
       ],
       "weight": 1,
-      "branch": "feat/evals-extensions-matrix-v3"
+      "branch": "elastic:fix/weekly-evals-matrix"
     }
   ],
   "models": [
@@ -405,6 +406,11 @@
     {
       "id": "openai-gpt-5.5",
       "label": "GPT-5.5"
+    },
+    {
+      "id": "openai-gpt-oss-120b",
+      "label": "GPT-OSS 120B",
+      "openSource": true
     },
     {
       "id": "zai-glm-5-2",

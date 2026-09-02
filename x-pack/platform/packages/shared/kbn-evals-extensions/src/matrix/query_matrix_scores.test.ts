@@ -205,6 +205,44 @@ describe('queryMatrixScores', () => {
     expect(result.map((model) => model.modelId).sort()).toEqual(['m1', 'm2']);
   });
 
+  it("carries the graded run's commit onto the suite so rows can be traced to a codebase", async () => {
+    // The artifact's top-level provenance is the GENERATOR's commit. When a
+    // model is appended to an existing board months later, the only honest
+    // answer to "which code was this row measured on" is the experiment's own
+    // git_commit_sha -- so it has to survive the query layer.
+    const { client } = createClient({
+      m1: [
+        experiment({
+          experiment_id: 'exp-m1',
+          modelId: 'm1',
+          git_commit_sha: 'deadbeefcafe1234',
+        }),
+      ],
+    });
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+    });
+
+    expect(result[0].suites[0].commitSha).toBe('deadbeefcafe1234');
+  });
+
+  it('leaves the commit undefined when the experiment summary has none', async () => {
+    const { client } = createClient({
+      m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
+    });
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+    });
+
+    expect(result[0].suites[0].commitSha).toBeUndefined();
+  });
+
   it('reports self-judged exclusions so a rejected model is not mistaken for one that never ran', async () => {
     // Reproduces the 2026-08-29 persona-matrix incident: claude-4.6-sonnet was
     // its own judge, so every score was dropped by `excludeSelfJudged` and the
