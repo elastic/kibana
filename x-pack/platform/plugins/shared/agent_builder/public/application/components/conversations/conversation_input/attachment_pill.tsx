@@ -37,6 +37,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         color="hollow"
         data-test-subj={`agentBuilderAttachmentPill-${attachment.id}`}
         iconType="cross"
+        iconSide="right"
         iconOnClick={onRemoveAttachment}
         iconOnClickAriaLabel={removeAriaLabel}
         {...getEbtProps({

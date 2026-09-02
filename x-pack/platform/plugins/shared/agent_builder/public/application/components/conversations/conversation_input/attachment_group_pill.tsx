@@ -26,6 +26,7 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
         color="hollow"
         data-test-subj={`agentBuilderAttachmentGroupPill-${group.id}`}
         iconType="cross"
+        iconSide="right"
         iconOnClick={onRemove}
         iconOnClickAriaLabel={removeAriaLabel}
       >
