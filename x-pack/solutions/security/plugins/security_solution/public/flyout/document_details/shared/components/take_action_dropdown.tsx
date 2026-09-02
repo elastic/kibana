@@ -337,25 +337,48 @@ export const TakeActionDropdown = memo(
     const showEventFilter = Boolean(
       !showAlertActions && isEndpointEvent && canCreateEndpointEventFilters
     );
-    const hasItems = getDocumentActionGroups({
-      addToCaseItems: addToCaseActionItems,
-      alertAssigneeItems: alertAssigneesItems,
-      alertTagItems: alertTagsItems,
-      documentWorkflowItems: documentWorkflowMenuItem,
-      endpointResponseItems: endpointResponseActionsConsoleItems,
-      eventFilterItems: eventFilterActionItems,
-      exceptionItems: exceptionActionItems,
-      hostIsolationItems: hostIsolationActionItems,
-      investigateInTimelineItems: investigateInTimelineActionItems,
-      isAlert,
-      isRemoteDocument,
-      osqueryAvailable: Boolean(osqueryAvailable),
-      osqueryItems: osqueryItemsArray,
-      runAlertWorkflowItems: alertWorkflowMenuItem,
-      showAlertActions,
-      showEventFilter,
-      statusItems: statusActionItems,
-    }).some((group) => group.length > 0);
+    const osqueryAvailableFlag = Boolean(osqueryAvailable);
+    const hasItems = useMemo(
+      () =>
+        getDocumentActionGroups({
+          addToCaseItems: addToCaseActionItems,
+          alertAssigneeItems: alertAssigneesItems,
+          alertTagItems: alertTagsItems,
+          documentWorkflowItems: documentWorkflowMenuItem,
+          endpointResponseItems: endpointResponseActionsConsoleItems,
+          eventFilterItems: eventFilterActionItems,
+          exceptionItems: exceptionActionItems,
+          hostIsolationItems: hostIsolationActionItems,
+          investigateInTimelineItems: investigateInTimelineActionItems,
+          isAlert,
+          isRemoteDocument,
+          osqueryAvailable: osqueryAvailableFlag,
+          osqueryItems: osqueryItemsArray,
+          runAlertWorkflowItems: alertWorkflowMenuItem,
+          showAlertActions,
+          showEventFilter,
+          statusItems: statusActionItems,
+        }).some((group) => group.length > 0),
+      [
+        addToCaseActionItems,
+        alertAssigneesItems,
+        alertTagsItems,
+        documentWorkflowMenuItem,
+        endpointResponseActionsConsoleItems,
+        eventFilterActionItems,
+        exceptionActionItems,
+        hostIsolationActionItems,
+        investigateInTimelineActionItems,
+        isAlert,
+        isRemoteDocument,
+        osqueryAvailableFlag,
+        osqueryItemsArray,
+        alertWorkflowMenuItem,
+        showAlertActions,
+        showEventFilter,
+        statusActionItems,
+      ]
+    );
 
     const takeActionButton = useMemo(
       () => (

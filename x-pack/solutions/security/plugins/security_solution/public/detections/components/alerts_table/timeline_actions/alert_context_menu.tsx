@@ -264,21 +264,40 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   });
 
   const isAlertActionMenu = !isEvent && Boolean(ruleId);
-  const hasItems = getAlertRowActionGroups({
-    addToCaseItems: addToCaseActionItems,
-    addToChatItems: addToChatActionItems,
-    alertAssigneeItems: alertAssigneesItems,
-    alertTagItems: alertTagsItems,
-    canCreateEndpointEventFilters,
-    eventFilterItems: eventFilterActionItems,
-    exceptionItems: exceptionActionItems,
-    hasAgent: Boolean(agentId),
-    isAlert: isAlertActionMenu,
-    osqueryItems: osqueryActionItems,
-    runAlertWorkflowItems: runWorkflowMenuItem,
-    runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
-    statusItems: statusActionItems,
-  }).some((group) => group.length > 0);
+  const hasAgent = Boolean(agentId);
+  const hasItems = useMemo(
+    () =>
+      getAlertRowActionGroups({
+        addToCaseItems: addToCaseActionItems,
+        addToChatItems: addToChatActionItems,
+        alertAssigneeItems: alertAssigneesItems,
+        alertTagItems: alertTagsItems,
+        canCreateEndpointEventFilters,
+        eventFilterItems: eventFilterActionItems,
+        exceptionItems: exceptionActionItems,
+        hasAgent,
+        isAlert: isAlertActionMenu,
+        osqueryItems: osqueryActionItems,
+        runAlertWorkflowItems: runWorkflowMenuItem,
+        runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
+        statusItems: statusActionItems,
+      }).some((group) => group.length > 0),
+    [
+      addToCaseActionItems,
+      addToChatActionItems,
+      alertAssigneesItems,
+      alertTagsItems,
+      canCreateEndpointEventFilters,
+      eventFilterActionItems,
+      exceptionActionItems,
+      hasAgent,
+      isAlertActionMenu,
+      osqueryActionItems,
+      runWorkflowMenuItem,
+      runDocumentWorkflowMenuItem,
+      statusActionItems,
+    ]
+  );
 
   const panels = useMemo(
     () => [
@@ -353,7 +372,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
               canCreateEndpointEventFilters={canCreateEndpointEventFilters}
               eventFilterItems={eventFilterActionItems}
               exceptionItems={exceptionActionItems}
-              hasAgent={Boolean(agentId)}
+              hasAgent={hasAgent}
               isAlert={isAlertActionMenu}
               osqueryItems={osqueryActionItems}
               panels={panels}

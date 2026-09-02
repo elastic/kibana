@@ -63,7 +63,13 @@ export const getAlertRowActionGroups = ({
   ];
   return isAlert
     ? [statusItems, alertManagementItems, exceptionItems, responseActionItems, addToChatItems]
-    : [addToCaseItems, canCreateEndpointEventFilters ? eventFilterItems : [], responseActionItems];
+    : [
+        [],
+        addToCaseItems,
+        canCreateEndpointEventFilters ? eventFilterItems : [],
+        responseActionItems,
+        [],
+      ];
 };
 
 interface AlertRowActionMenuProps extends AlertRowActionGroupsProps {

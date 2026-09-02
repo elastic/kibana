@@ -12,6 +12,8 @@ export interface CustomBulkAction {
   key: string;
   label: string;
   icon?: IconType;
+  /** Optional group to place this action in within the bulk-action menu (e.g. 'cases', 'timeline'). */
+  groupId?: string;
   disableOnQuery?: boolean;
   disabledLabel?: string;
   onClick: (items?: TimelineItem[]) => void;

@@ -152,7 +152,7 @@ describe('getAlertRowActionGroups', () => {
     expect(groups[4]).toHaveLength(1); // chat
   });
 
-  it('document mode: only addToCase, eventFilter (when enabled), response groups', () => {
+  it('document mode: returns a 5-tuple with empty status group at index 0', () => {
     const groups = getAlertRowActionGroups({
       ...emptyProps,
       isAlert: false,
@@ -161,9 +161,13 @@ describe('getAlertRowActionGroups', () => {
       eventFilterItems: oneItem('filter'),
       runDocumentWorkflowItems: oneItem('doc-workflow'),
     });
-    expect(groups[0]).toHaveLength(1); // addToCase
-    expect(groups[1]).toHaveLength(1); // eventFilter (canCreateEndpointEventFilters=true)
-    expect(groups[2]).toHaveLength(1); // response (docWorkflow)
+    // groups: [statusItems(empty), addToCase, eventFilter, response, chat(empty)]
+    expect(groups).toHaveLength(5);
+    expect(groups[0]).toHaveLength(0); // status — always empty for events
+    expect(groups[1]).toHaveLength(1); // addToCase
+    expect(groups[2]).toHaveLength(1); // eventFilter (canCreateEndpointEventFilters=true)
+    expect(groups[3]).toHaveLength(1); // response (docWorkflow)
+    expect(groups[4]).toHaveLength(0); // chat — always empty for events
   });
 
   it('hasItems agrees with the menu rendering across gate permutations', () => {
