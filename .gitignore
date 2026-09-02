@@ -199,6 +199,7 @@ oas_docs/bundle.serverless.json
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+**/version_dependencies.txt
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
