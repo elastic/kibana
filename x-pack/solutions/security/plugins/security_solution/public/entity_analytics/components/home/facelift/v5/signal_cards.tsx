@@ -63,30 +63,6 @@ const SPARKLINE_FILL = 'rgba(43, 57, 79, 0.08)';
 /** Active-state sparkline fill: #002D80 at 12% opacity. */
 const SPARKLINE_FILL_ACTIVE = 'rgba(0, 45, 128, 0.12)';
 
-/**
- * v.5-only mock trends / deltas (kept out of shared `v2/data` so v.2 charts
- * stay unchanged).
- */
-const V3_CARD_TRENDS: Record<SignalCardId, number[]> = {
-  entitiesWithAlerts: [14, 16, 15, 18, 19, 21, 23],
-  entitiesWithAnomalies: [52, 48, 45, 41, 44, 39, 37],
-  riskMovers: [6, 8, 7, 9, 11, 10, 14],
-  newlyHighCritical: [2, 3, 3, 4, 5, 5, 6],
-  hiddenRisk: [18, 16, 15, 14, 13, 13, 12],
-  watchlisted: [8, 9, 9, 10, 11, 11, 12],
-  newEntity: [1, 2, 2, 3, 3, 4, 4],
-};
-
-const V3_CARD_DELTAS: Partial<Record<SignalCardId, number>> = {
-  entitiesWithAlerts: 3,
-  entitiesWithAnomalies: -5,
-  riskMovers: 4,
-  newlyHighCritical: 2,
-  hiddenRisk: -2,
-  watchlisted: 1,
-  newEntity: 1,
-};
-
 /** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
   entitiesWithAlerts: 'Entities with alerts',
@@ -328,12 +304,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   // Active keeps a white tile; only the border (and sparkline tint) mark selection.
   const tileBackground = selected ? defaultBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
-  const sparklineFill = selected ? SPARKLINE_FILL_ACTIVE : SPARKLINE_FILL;
-
-  const delta = V3_CARD_DELTAS[card.id] ?? card.delta;
-  const showDelta = interactive && !isZero && delta !== undefined && delta !== 0;
-  const trendKeyframes = V3_CARD_TRENDS[card.id] ?? card.trend;
-  const showTrend = interactive && Boolean(trendKeyframes && trendKeyframes.length > 1);
+  const showDelta = false;
+  const showTrend = false;
   const displayTitle = displayTitleFor(card);
   const displayDescription = displayDescriptionFor(card);
 
