@@ -412,6 +412,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           dataLoading$.next(isLoading);
         }, []);
 
+        const setApproximationApplied = useCallback((value: boolean | undefined) => {
+          if (approximationApplied$.getValue() !== value) {
+            approximationApplied$.next(value);
+          }
+        }, []);
+
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
@@ -443,6 +449,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             esqlVariables={esqlVariables}
             previewHtml={previewHtml}
             onLoadingChange={handleLoadingChange}
+            setApproximationApplied={setApproximationApplied}
             onGenerateWithChat={handleGenerateWithChat}
           />
         );
