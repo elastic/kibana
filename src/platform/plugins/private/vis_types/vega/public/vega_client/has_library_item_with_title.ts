@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VegaByReferenceState, VegaByValueState } from './schema';
+import { vegaClient } from './vega_client';
 
-type StoredVegaByReferenceState = Omit<VegaByReferenceState, 'ref_id'>;
-type StoredVegaByValueState = VegaByValueState;
-
-export type StoredVegaEmbeddableState = StoredVegaByReferenceState | StoredVegaByValueState;
+export const hasLibraryItemWithTitle = async (title: string) => {
+  const { data } = await vegaClient.search({ query: `"${title}"` });
+  return data.some((item) => item.data.title.toLowerCase() === title.toLowerCase());
+};

@@ -62,6 +62,8 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-http-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/content-management-plugin'
 tags:
   - plugin
   - prod

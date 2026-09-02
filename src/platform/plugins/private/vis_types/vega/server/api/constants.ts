@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const VEGA_API_PATH = '/api/vega';
-
 /** Used in response body `id` fields (create, read, update). */
 export const VEGA_LIBRARY_ITEM_ID_DESCRIPTION =
   'The unique ID of the Vega library item, as returned by the create or search endpoints.';
@@ -16,8 +14,6 @@ export const VEGA_LIBRARY_ITEM_ID_DESCRIPTION =
 /** Used in request params `id` fields (read, update, delete). */
 export const VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION =
   'The Vega library item ID, as returned by the create or search endpoints.';
-
-export const PUBLIC_API_VERSION = '2023-10-31';
 
 export const commonRouteConfig = {
   access: 'public',

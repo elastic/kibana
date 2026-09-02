@@ -13,7 +13,8 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { VEGA_API_PATH, commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
+import { PUBLIC_API_VERSION, VEGA_API_PATH } from '../../../common/constants';
+import { commonRouteConfig } from '../constants';
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { readVegaOASOperationObject } from '../oas_examples';
 import { read } from './read';

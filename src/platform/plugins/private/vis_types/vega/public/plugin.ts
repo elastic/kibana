@@ -44,8 +44,16 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import type { VegaEmbeddableState } from '../server/embeddable/schema';
+import type { StoredVegaLibraryItemState } from '../server/vega_saved_object/types';
+import { VegaIcon } from './vega_icon';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -114,12 +122,36 @@ export class VegaPlugin implements Plugin<void, void> {
       return vegaVisType;
     });
 
+    const startServices = core.getStartServices();
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
-      const [startCore, startDeps] = await core.getStartServices();
+      const [startCore, startDeps] = await startServices;
       const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
       return vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
         visualizationDependencies,
+      });
+    });
+
+    void startServices.then(([startCore]) => {
+      const standaloneEnabled = startCore.featureFlags.getBooleanValue(
+        VEGA_STANDALONE_EMBEDDABLE_FLAG,
+        false
+      );
+      const apiEnabled = startCore.featureFlags.getBooleanValue(VEGA_API_ENABLED_FLAG, false);
+      if (!standaloneEnabled || !apiEnabled) return;
+      embeddable.registerAddFromLibraryType<StoredVegaLibraryItemState>({
+        onAdd: async (container, savedObject) => {
+          container.addNewPanel<VegaEmbeddableState>(
+            {
+              panelType: VEGA_EMBEDDABLE_TYPE,
+              serializedState: { ref_id: savedObject.id },
+            },
+            { displaySuccessMessage: true }
+          );
+        },
+        savedObjectType: VEGA_SAVED_OBJECT_TYPE,
+        savedObjectName: 'Vega',
+        getIconForSavedObject: () => VegaIcon,
       });
     });
   }

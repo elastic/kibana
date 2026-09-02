@@ -14,6 +14,10 @@ export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
 export const VEGA_SAVED_OBJECT_TYPE = 'vega';
 
+export const VEGA_API_PATH = '/api/vega';
+
+export const PUBLIC_API_VERSION = '2023-10-31';
+
 export const VEGA_SUPPORTED_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
 
 /**

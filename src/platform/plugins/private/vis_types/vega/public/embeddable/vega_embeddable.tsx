@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -32,6 +33,7 @@ import {
   initializeTimeRangeManager,
   initializeTitleManager,
   type HasEditCapabilities,
+  type HasLibraryTransforms,
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
   type PublishesDataLoading,
@@ -50,6 +52,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
+  VEGA_API_ENABLED_FLAG,
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
   VEGA_SUPPORTED_TRIGGERS,
@@ -63,7 +66,13 @@ import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_o
 import { getPublishedEsqlQuery, specUsesEsql } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
-import type { VegaByValueState } from '../../server';
+import type {
+  VegaByReferenceState,
+  VegaByValueState,
+  VegaEmbeddableState,
+} from '../../server/embeddable/schema';
+import { vegaClient } from '../vega_client/vega_client';
+import { hasLibraryItemWithTitle } from '../vega_client/has_library_item_with_title';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -80,15 +89,18 @@ interface VegaRenderInput {
 }
 
 /**
- * By-value state for the dedicated Dashboard Vega panel.
+ * Public API for the dedicated Dashboard Vega panel.
  *
- * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
- * participates in public dashboards-as-code validation and OpenAPI generation.
+ * The standalone flag enables by-value panels and Dashboard API serialization. When the Vega API
+ * flag is also enabled, panels can link to and load Vega library items by reference.
  */
-export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
   HasDrilldowns &
   HasEditCapabilities &
   HasInspectorAdapters &
+  // TODO: Remove Partial and always attach library transforms when the standaloneEmbeddable and
+  // apiEnabled feature flags are removed.
+  Partial<HasLibraryTransforms<VegaByReferenceState, VegaByValueState>> &
   HasSupportedTriggers &
   SupportsJsonExport &
   PublishesBlockingError &
@@ -109,7 +121,7 @@ interface VegaEmbeddableDependencies {
 export const vegaEmbeddableFactory = (
   core: CoreStart,
   deps: VegaEmbeddableDependencies
-): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
+): EmbeddablePublicDefinition<VegaEmbeddableState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
@@ -118,10 +130,23 @@ export const vegaEmbeddableFactory = (
     parentApi,
     uuid,
   }) => {
+    const standaloneEnabled = core.featureFlags.getBooleanValue(
+      VEGA_STANDALONE_EMBEDDABLE_FLAG,
+      false
+    );
+    const apiEnabled = core.featureFlags.getBooleanValue(VEGA_API_ENABLED_FLAG, false);
+    const byReferenceEnabled = standaloneEnabled && apiEnabled;
+    const libraryId = (initialState as VegaByReferenceState).ref_id;
+    const isByReference = libraryId !== undefined;
+    const initialLibraryState = isByReference ? (await vegaClient.get(libraryId)).data : undefined;
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
-    const spec$ = new BehaviorSubject(initialState.spec);
+    const spec$ = new BehaviorSubject(
+      initialLibraryState?.spec ?? (initialState as VegaByValueState).spec
+    );
+    const defaultTitle$ = new BehaviorSubject(initialLibraryState?.title);
+    const defaultDescription$ = new BehaviorSubject(initialLibraryState?.description);
     const usesEsql$ = new BehaviorSubject(false);
     const query$ = new BehaviorSubject<AggregateQuery | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
@@ -155,15 +180,24 @@ export const vegaEmbeddableFactory = (
     const inspectorAdapters = createInspectorAdapters();
     let abortController = new AbortController();
 
-    const stateApi = initializeStateApi<VegaByValueState>({
+    const serializePanelOwnedState = () => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      ...drilldownsManager.getLatestState(),
+    });
+    const serializeByValue = (): VegaByValueState => ({
+      ...serializePanelOwnedState(),
+      spec: spec$.getValue(),
+    });
+    const serializeByReference = (refId: string): VegaByReferenceState => ({
+      ...serializePanelOwnedState(),
+      ref_id: refId,
+    });
+
+    const stateApi = initializeStateApi<VegaEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-        spec: spec$.getValue(),
-      }),
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -177,13 +211,14 @@ export const vegaEmbeddableFactory = (
         ...titleComparators,
         ...timeRangeComparators,
         ...drilldownsManager.comparators,
-        spec: 'deepEquality',
+        spec: isByReference ? 'skip' : 'deepEquality',
+        ref_id: 'skip',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
-        spec$.next(nextState.spec);
+        if (!isByReference) spec$.next((nextState as VegaByValueState).spec);
       },
     });
 
@@ -192,6 +227,8 @@ export const vegaEmbeddableFactory = (
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...stateApi,
+      defaultTitle$,
+      defaultDescription$,
       blockingError$,
       dataLoading$,
       rendered$,
@@ -220,9 +257,31 @@ export const vegaEmbeddableFactory = (
                 ariaLabelledBy={ariaLabelledBy}
                 closeFlyout={closeFlyout}
                 initialSpec={initialSpec}
+                isByReference={isByReference}
                 isNewPanel={isNewPanel}
                 onPreview={(spec) => spec$.next(spec)}
-                onSave={(spec) => spec$.next(spec)}
+                onSave={async (spec) => {
+                  if (!isByReference) {
+                    spec$.next(spec);
+                    return;
+                  }
+                  try {
+                    const latest = (await vegaClient.get(libraryId)).data;
+                    await vegaClient.update(libraryId, {
+                      title: latest.title,
+                      description: latest.description,
+                      spec,
+                    });
+                  } catch (error) {
+                    core.notifications.toasts.addError(error as Error, {
+                      title: i18n.translate('visTypeVega.dashboard.updateLibraryItemErrorMessage', {
+                        defaultMessage: 'Unable to update Vega library item',
+                      }),
+                    });
+                    throw error;
+                  }
+                  spec$.next(spec);
+                }}
                 onRevert={() => {
                   if (isNewPanel && apiIsPresentationContainer(parentApi)) {
                     parentApi.removePanel(api.uuid);
@@ -239,6 +298,23 @@ export const vegaEmbeddableFactory = (
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
       // exported JSON can be round-tripped through the REST API.
       supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+      ...(byReferenceEnabled
+        ? {
+            saveToLibrary: async (title: string) => {
+              const { id } = await vegaClient.create({
+                title,
+                description: titleManager.getLatestState().description,
+                spec: spec$.getValue(),
+              });
+              return id;
+            },
+            getSerializedStateByValue: serializeByValue,
+            getSerializedStateByReference: serializeByReference,
+            canLinkToLibrary: async () => !isByReference,
+            canUnlinkFromLibrary: async () => isByReference,
+            hasLibraryItemWithTitle,
+          }
+        : {}),
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`

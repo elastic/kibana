@@ -11,7 +11,11 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 
 describe('VisTypeVegaPlugin (server)', () => {
   test('registers a server definition for vega', async () => {
@@ -78,5 +82,53 @@ describe('VisTypeVegaPlugin (server)', () => {
     expect(() => schema!.parse({ spec: '' })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'hjson', value: '' } })).toThrow();
     expect(() => schema!.parse({ spec: { format: 'json', value: 'not-an-object' } })).toThrow();
+  });
+
+  test('exposes by-reference state only when both flags are enabled', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
+      key === VEGA_STANDALONE_EMBEDDABLE_FLAG || key === VEGA_API_ENABLED_FLAG ? true : fallback
+    );
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    const embeddable = createEmbeddableSetupMock();
+    new VisTypeVegaPlugin(initializerContext).setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
+
+    const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
+    const schema = serverDefinition.getSchema(mockGetDrilldownsSchema);
+    const panelFields = {
+      title: 'Panel title',
+      time_range: { from: 'now-1h', to: 'now' },
+      drilldowns: [] as Array<{ id: string }>,
+    };
+    expect(schema?.parse({ ...panelFields, ref_id: 'vega-id' })).toEqual({
+      ...panelFields,
+      ref_id: 'vega-id',
+    });
+    expect(
+      schema?.parse({ ...panelFields, spec: { format: 'hjson', value: '{ mark: point }' } })
+    ).toMatchObject(panelFields);
+  });
+
+  test('does not expose by-reference state when only the standalone flag is enabled', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
+      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? true : fallback
+    );
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    const embeddable = createEmbeddableSetupMock();
+    new VisTypeVegaPlugin(initializerContext).setup(coreSetup, { embeddable });
+    await new Promise(process.nextTick);
+
+    const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
+    expect(() =>
+      serverDefinition.getSchema(mockGetDrilldownsSchema)?.parse({ ref_id: 'vega-id' })
+    ).toThrow();
   });
 });

@@ -14,14 +14,21 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms/get_transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
 import { registerRoutes } from './api/register_routes';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
+  // TODO: Remove when VEGA_STANDALONE_EMBEDDABLE_FLAG is removed.
   private standaloneEmbeddableEnabled = false;
+  // TODO: Remove when VEGA_STANDALONE_EMBEDDABLE_FLAG and VEGA_API_ENABLED_FLAG are removed.
+  private byReferenceEnabled = false;
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
 
@@ -36,18 +43,22 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
     void core
       .getStartServices()
-      .then(([coreStart]) =>
-        coreStart.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      )
-      .then((enabled) => {
-        this.standaloneEmbeddableEnabled = enabled;
+      .then(async ([coreStart]) => {
+        const [standaloneEnabled, apiEnabled] = await Promise.all([
+          coreStart.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+          coreStart.featureFlags.getBooleanValue(VEGA_API_ENABLED_FLAG, false),
+        ]);
+        this.standaloneEmbeddableEnabled = standaloneEnabled;
+        this.byReferenceEnabled = standaloneEnabled && apiEnabled;
       })
       .catch(() => {});
 
     embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
       title: 'Vega',
       getSchema: (getDrilldownsSchema) =>
-        this.standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+        this.standaloneEmbeddableEnabled
+          ? getVegaEmbeddableSchema(getDrilldownsSchema, this.byReferenceEnabled)
+          : undefined,
       getTransforms,
     });
 

@@ -8,22 +8,25 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { VegaByReferenceState } from '../schema';
+import type { VegaByReferenceState, VegaEmbeddableState } from '../schema';
 import type { StoredVegaEmbeddableState } from '../types';
 
 export const VEGA_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export const getTransformIn = () => {
+export const getTransformIn = (transformDrilldownsIn: DrilldownTransforms['transformIn']) => {
   const transformIn = (
-    state: StoredVegaEmbeddableState | (StoredVegaEmbeddableState & { ref_id: string })
+    state: VegaEmbeddableState
   ): {
     state: StoredVegaEmbeddableState;
     references: SavedObjectReference[];
   } => {
+    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
+
     // by ref
-    if ((state as VegaByReferenceState).ref_id) {
-      const { ref_id, ...rest } = state as VegaByReferenceState;
+    if ((storedState as VegaByReferenceState).ref_id) {
+      const { ref_id, ...rest } = storedState as VegaByReferenceState;
       return {
         state: rest as StoredVegaEmbeddableState,
         references: [
@@ -32,14 +35,15 @@ export const getTransformIn = () => {
             type: VEGA_SAVED_OBJECT_TYPE,
             id: ref_id,
           },
+          ...drilldownReferences,
         ],
       };
     }
 
     // by value
     return {
-      state,
-      references: [],
+      state: storedState,
+      references: drilldownReferences,
     };
   };
   return transformIn;

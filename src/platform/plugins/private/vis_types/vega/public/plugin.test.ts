@@ -22,7 +22,11 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
@@ -36,13 +40,18 @@ jest.mock('./async_module', () => ({
 }));
 
 describe('VegaPlugin', () => {
-  const setup = () => {
+  const setup = ({ standalone = false, api = false } = {}) => {
     const core = coreMock.createSetup();
     const startCore = coreMock.createStart();
     const startDeps = {
       expressions: { getFunction: jest.fn() },
       uiActions: { executeTriggerActions: jest.fn() },
     };
+    startCore.featureFlags.getBooleanValue.mockImplementation((key, fallback) => {
+      if (key === VEGA_STANDALONE_EMBEDDABLE_FLAG) return standalone;
+      if (key === VEGA_API_ENABLED_FLAG) return api;
+      return fallback;
+    });
     core.getStartServices.mockResolvedValue([startCore, startDeps, {}]);
 
     const embeddable = embeddablePluginMock.createSetupContract();
@@ -84,6 +93,19 @@ describe('VegaPlugin', () => {
 
     expect(expressions.registerFunction).toHaveBeenCalledTimes(1);
     expect(expressions.registerRenderer).toHaveBeenCalledTimes(1);
+  });
+
+  it('registers Add from library only when both Vega flags are enabled', async () => {
+    const enabled = setup({ standalone: true, api: true }).embeddable;
+    const standaloneOnly = setup({ standalone: true }).embeddable;
+    const apiOnly = setup({ api: true }).embeddable;
+    await new Promise(process.nextTick);
+
+    expect(enabled.registerAddFromLibraryType).toHaveBeenCalledWith(
+      expect.objectContaining({ savedObjectType: 'vega', savedObjectName: 'Vega' })
+    );
+    expect(standaloneOnly.registerAddFromLibraryType).not.toHaveBeenCalled();
+    expect(apiOnly.registerAddFromLibraryType).not.toHaveBeenCalled();
   });
 
   describe('Vega add action feature flag', () => {

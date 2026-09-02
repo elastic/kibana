@@ -9,16 +9,18 @@
 
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { VEGA_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredVegaEmbeddableState } from '../types';
+import type { VegaEmbeddableState } from '../schema';
 
-export const getTransformOut = () => {
+export const getTransformOut = (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
   const transformOut = (
     storedState: StoredVegaEmbeddableState,
     panelReferences?: SavedObjectReference[]
-  ) => {
-    const state = transformTitlesOut(storedState);
+  ): VegaEmbeddableState => {
+    const state = transformDrilldownsOut(transformTitlesOut(storedState), panelReferences);
 
     // by ref
     const savedObjectRef = (panelReferences ?? []).find(
@@ -33,7 +35,7 @@ export const getTransformOut = () => {
     }
 
     // by value
-    return state;
+    return state as VegaEmbeddableState;
   };
   return transformOut;
 };
