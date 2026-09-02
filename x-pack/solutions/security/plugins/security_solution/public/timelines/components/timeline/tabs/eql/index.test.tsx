@@ -59,10 +59,6 @@ jest.mock('../../../../../common/lib/kibana');
 
 jest.mock('../../../../../common/components/user_privileges');
 
-jest.mock('../../body/unified_timeline_body', () => ({
-  UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
-}));
-
 let useTimelineEventsMock = jest.fn();
 
 const loadPageMock = jest.fn();
