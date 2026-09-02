@@ -253,7 +253,10 @@ export const ActionPolicyDetailsFlyout = ({
               <EuiFlexItem grow={false}>
                 <ActionPolicyActionsMenu
                   policy={policy}
-                  onEdit={(id) => { onClose(); onEdit(id); }}
+                  onEdit={(id) => {
+                    onClose();
+                    onEdit(id);
+                  }}
                   onClone={onClone}
                   onDelete={onDelete}
                   onEnable={onEnable}
