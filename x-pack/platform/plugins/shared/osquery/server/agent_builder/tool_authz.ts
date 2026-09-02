@@ -28,6 +28,9 @@ export const OSQUERY_TOOL_PRIVILEGES = {
   /**
    * `GET /api/osquery/live_queries/{id}/results/{actionId}`. The route accepts
    * only `readLiveQueries`; adding `read` here would widen the tool past it.
+   * `run_live_query` also checks this before returning inline result rows —
+   * dispatching (`writeLiveQueries`) must not become a second path to rows a
+   * caller couldn't read via this route.
    */
   readLiveQueries: [`${PLUGIN_ID}-readLiveQueries`],
   readSavedQueries: [`${PLUGIN_ID}-readSavedQueries`],
