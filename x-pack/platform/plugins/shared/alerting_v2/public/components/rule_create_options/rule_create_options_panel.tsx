@@ -39,13 +39,13 @@ interface RuleCreateOptionsPanelProps {
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
   /**
-   * When `true`, the "Create with AI Agent" option is rendered disabled (click is a no-op). Independent
+   * When `true`, the "With AI Agent" option is rendered disabled (click is a no-op). Independent
    * of `createWithAgentTooltipText` — a disabled option need not have a tooltip, and a tooltip can be
    * shown without disabling.
    */
   createWithAgentDisabled?: boolean;
   /**
-   * Optional tooltip text for the "Create with AI Agent" option (e.g. explaining a missing
+   * Optional tooltip text for the "With AI Agent" option (e.g. explaining a missing
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
@@ -55,7 +55,7 @@ interface RuleCreateOptionsPanelProps {
 
 const ESQL_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle',
-  { defaultMessage: 'Create ES|QL rule' }
+  { defaultMessage: 'ES|QL rule' }
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
@@ -63,7 +63,7 @@ const ESQL_RULE_DESCRIPTION = i18n.translate(
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
-  { defaultMessage: 'Create with AI Agent' }
+  { defaultMessage: 'With AI Agent' }
 );
 const AI_AGENT_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',

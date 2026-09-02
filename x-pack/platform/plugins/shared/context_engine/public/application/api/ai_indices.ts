@@ -7,12 +7,20 @@
 
 import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { AI_INDEX_API_VERSION, aiIndexByIdPath, aiIndexPath } from '../../../common/constants';
+import {
+  AI_INDEX_API_VERSION,
+  AI_INDEX_INTERNAL_API_VERSION,
+  aiIndexByIdPath,
+  aiIndexFeedbackAnalysisPath,
+  aiIndexPath,
+} from '../../../common/constants';
 import type {
+  AiIndexFeedbackAnalysis,
   AiIndexProperties,
   CreateAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
+  PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../../common/http_api/ai_indices';
 
@@ -79,3 +87,24 @@ export const putAiIndex = (
     version: AI_INDEX_API_VERSION,
     body: JSON.stringify(properties),
   });
+
+interface PutAiIndexFeedbackAnalysisArgs {
+  aiIndexId: string;
+  feedbackAnalysis: AiIndexFeedbackAnalysis;
+}
+
+/**
+ * Replaces the feedback analysis configuration without touching the rest of the
+ * AI index. Unlike {@link putAiIndex} this also works on managed AI indices.
+ */
+export const putAiIndexFeedbackAnalysis = (
+  http: HttpStart,
+  { aiIndexId, feedbackAnalysis }: PutAiIndexFeedbackAnalysisArgs
+): Promise<PutAiIndexFeedbackAnalysisResponse> =>
+  http.put<PutAiIndexFeedbackAnalysisResponse>(
+    buildPath(aiIndexFeedbackAnalysisPath, { aiIndexId }),
+    {
+      version: AI_INDEX_INTERNAL_API_VERSION,
+      body: JSON.stringify(feedbackAnalysis),
+    }
+  );
