@@ -162,7 +162,7 @@ export const eventsWriteSchema = z
       .literal('discovery')
       .optional()
       .describe(
-        'Source producing the severity assessment. Discovery calls must set this to "discovery".'
+        'Identifies the caller of this write. Discovery calls must set this to "discovery".'
       ),
     items: eventsWriteItemsSchema,
   })
@@ -300,8 +300,9 @@ export function createEventsWriteTool({
        already-completed object once. Do not retry a populated payload rejected for
        ownership or field validation.
 
-      Set source to discovery when Discovery calls this tool. Every item written with that source
-      appends a discovery severity assessment and returns the server-materialized severity.
+      Discovery calls must set top-level \`source\` to \`"discovery"\`. Every item written with
+      that source appends a discovery severity assessment and returns the server-materialized
+      severity.
 
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. A fresh investigation assessment can

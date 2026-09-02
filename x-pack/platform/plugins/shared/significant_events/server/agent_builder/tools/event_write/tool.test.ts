@@ -234,7 +234,7 @@ describe('events_write tool', () => {
     expect(result.success).toBe(true);
   });
 
-  it('accepts only discovery as the optional assessment source', () => {
+  it('accepts only discovery as the optional caller source', () => {
     expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
     expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
       false
