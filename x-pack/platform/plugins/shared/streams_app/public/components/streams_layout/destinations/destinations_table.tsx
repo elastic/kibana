@@ -38,7 +38,9 @@ import { getFormattedError } from '../../../util/errors';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { FilterGroup } from '../../stream_list_view/filter_group';
 import type { EntityTableSortDirection } from '../entity_table';
+import { AddDestinationModal } from './add_destination_modal';
 import { buildDestinationRows, getEffectiveSortField } from './build_destination_rows';
+import { createPrototypeDestination } from './canvas_destinations';
 import {
   createDestinationActionsColumn,
   createDestinationCellRenderer,
@@ -50,18 +52,23 @@ import {
   useDestinationsTableSelector,
 } from './state_management/use_destinations_table';
 import {
+  ADD_DESTINATION_BUTTON_LABEL,
   DATA_QUALITY_DEGRADED_LABEL,
   DATA_QUALITY_FILTER_LABEL,
   DATA_QUALITY_GOOD_LABEL,
   DATA_QUALITY_POOR_LABEL,
   ERROR_PROMPT_TITLE,
+  EXTERNAL_BADGE_LABEL,
+  INTERNAL_BADGE_LABEL,
   LOADING_PROMPT_TITLE,
   NO_DESTINATIONS_MESSAGE,
   RETRY_BUTTON_LABEL,
   SEARCH_ARIA_LABEL,
   SEARCH_PLACEHOLDER,
   TABLE_CAPTION,
+  TYPE_FILTER_LABEL,
 } from './translations';
+import type { Destination } from './types';
 import { useDestinationMetrics } from './use_destination_metrics';
 
 const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
@@ -156,6 +163,7 @@ export function DestinationsTable() {
 function DestinationsTableContent() {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const { euiTheme } = useEuiTheme();
 
   const xsFontSize = useEuiFontSize('xs');
   const gridClassName = css`
@@ -167,6 +175,14 @@ function DestinationsTableContent() {
       text-align: right;
       justify-content: flex-end;
     }
+    /* Control columns render their content wrapper as a shrink-to-fit inline-flex
+       pinned to the cell's start, which leaves the row actions floating away from
+       the right edge. Stretch it and pin the actions to the end instead. */
+    [data-gridcell-column-id='destinationActions'] .euiDataGridRowCell__content {
+      width: 100%;
+      justify-content: flex-end;
+      align-items: center;
+    }
   `;
 
   const destinations = useDestinationsTableSelector((state) => state.context.items);
@@ -174,9 +190,22 @@ function DestinationsTableContent() {
   const { changeSearch, changeSort, changePage } = useDestinationsTableEvents();
   const [searchText, setSearchText] = useState(urlState.query);
   const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [addedDestinations, setAddedDestinations] = useState<Destination[]>([]);
+  const [hiddenDestinationNames, setHiddenDestinationNames] = useState<string[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE_COLUMNS);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const { run: debouncedChangeSearch } = useDebounceFn(changeSearch, SEARCH_DEBOUNCE_OPTIONS);
+
+  const allDestinations = useMemo(() => {
+    const hidden = new Set(hiddenDestinationNames);
+    const liveNames = new Set(destinations.map((destination) => destination.name));
+    return [
+      ...destinations,
+      ...addedDestinations.filter((destination) => !liveNames.has(destination.name)),
+    ].filter((destination) => !hidden.has(destination.name));
+  }, [addedDestinations, destinations, hiddenDestinationNames]);
 
   const {
     hasFailureStoreAccess,
@@ -192,7 +221,7 @@ function DestinationsTableContent() {
     ingestionError,
     storageByStream,
     storageLoaded,
-  } = useDestinationMetrics(destinations);
+  } = useDestinationMetrics(allDestinations);
 
   const sortField = getEffectiveSortField(urlState.sortField, {
     documentsCount: docCountsLoaded,
@@ -204,9 +233,10 @@ function DestinationsTableContent() {
   const rows = useMemo(
     () =>
       buildDestinationRows({
-        destinations,
+        destinations: allDestinations,
         searchText,
         selectedQualities,
+        selectedTypes,
         docsByStream,
         ingestionByStream,
         storageByStream,
@@ -215,9 +245,10 @@ function DestinationsTableContent() {
         sortDirection: urlState.sortDirection,
       }),
     [
-      destinations,
+      allDestinations,
       searchText,
       selectedQualities,
+      selectedTypes,
       docsByStream,
       ingestionByStream,
       storageByStream,
@@ -247,6 +278,35 @@ function DestinationsTableContent() {
       }),
     [router, rangeFrom, rangeTo]
   );
+
+  const getCanvasHref = useCallback(
+    (destinationName: string) =>
+      router.link('/new-experience/{tab}', {
+        path: { tab: 'canvas' },
+        query: { rangeFrom, rangeTo, focus: destinationName },
+      }),
+    [router, rangeFrom, rangeTo]
+  );
+
+  const handleDeleteDestination = useCallback((destinationName: string) => {
+    setHiddenDestinationNames((current) =>
+      current.includes(destinationName) ? current : [...current, destinationName]
+    );
+    setAddedDestinations((current) =>
+      current.filter((destination) => destination.name !== destinationName)
+    );
+  }, []);
+
+  const handleAddDestination = useCallback((details: { name: string; isInternal: boolean }) => {
+    setAddedDestinations((current) => {
+      if (current.some((destination) => destination.name === details.name)) {
+        return current;
+      }
+      return [...current, createPrototypeDestination(details)];
+    });
+    setHiddenDestinationNames((current) => current.filter((name) => name !== details.name));
+    setIsAddModalOpen(false);
+  }, []);
 
   const handleColumnResize = useCallback<EuiDataGridOnColumnResizeHandler>(
     ({ columnId, width }) => {
@@ -311,95 +371,144 @@ function DestinationsTableContent() {
     ]
   );
 
-  const trailingControlColumns = useMemo(() => [createDestinationActionsColumn(rows)], [rows]);
+  const trailingControlColumns = useMemo(
+    () => [
+      createDestinationActionsColumn({
+        rows,
+        getCanvasHref,
+        onDelete: handleDeleteDestination,
+      }),
+    ],
+    [getCanvasHref, handleDeleteDestination, rows]
+  );
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="m"
-      className={css`
-        flex: 1;
-        min-height: 0;
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              compressed
-              incremental
-              placeholder={SEARCH_PLACEHOLDER}
-              aria-label={SEARCH_ARIA_LABEL}
-              value={searchText}
-              onChange={(event) => {
-                const nextQuery = event.target.value;
-                setSearchText(nextQuery);
-                debouncedChangeSearch(nextQuery);
-              }}
-              data-test-subj="streamsDestinationsSearch"
-            />
-          </EuiFlexItem>
-          {qualityLoaded && hasFailureStoreAccess && (
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup compressed>
-                <FilterGroup
-                  label={DATA_QUALITY_FILTER_LABEL}
-                  options={[
-                    { key: 'good', label: DATA_QUALITY_GOOD_LABEL },
-                    { key: 'degraded', label: DATA_QUALITY_DEGRADED_LABEL },
-                    { key: 'poor', label: DATA_QUALITY_POOR_LABEL },
-                  ]}
-                  onChange={setSelectedQualities}
-                />
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow
+    <>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
         className={css`
+          flex: 1;
           min-height: 0;
         `}
       >
-        <EuiThemeProvider modify={TRANSPARENT_COLUMN_SEPARATORS} wrapperProps={GRID_WRAPPER_PROPS}>
-          <EuiDataGrid
-            data-test-subj="streamsDestinationsTable"
-            aria-label={TABLE_CAPTION}
-            className={gridClassName}
-            columns={columns}
-            columnVisibility={{
-              visibleColumns,
-              setVisibleColumns,
-              canDragAndDropColumns: false,
-            }}
-            trailingControlColumns={trailingControlColumns}
-            onColumnResize={handleColumnResize}
-            rowCount={rows.length}
-            renderCellValue={renderCellValue}
-            renderCustomGridBody={rows.length === 0 ? EmptyGridBody : undefined}
-            gridStyle={GRID_STYLE}
-            rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
-            toolbarVisibility={TOOLBAR_VISIBILITY}
-            sorting={{
-              columns: [{ id: sortField, direction: urlState.sortDirection }],
-              onSort: handleSort,
-            }}
-            pagination={{
-              pageIndex: urlState.pageIndex,
-              pageSize: urlState.pageSize,
-              pageSizeOptions: [...ENTITY_TABLE_PAGE_SIZES],
-              onChangePage: (pageIndex) => changePage(pageIndex, urlState.pageSize),
-              onChangeItemsPerPage: (pageSize) => changePage(0, pageSize as EntityTablePageSize),
-            }}
-          />
-        </EuiThemeProvider>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                compressed
+                incremental
+                placeholder={SEARCH_PLACEHOLDER}
+                aria-label={SEARCH_ARIA_LABEL}
+                value={searchText}
+                onChange={(event) => {
+                  const nextQuery = event.target.value;
+                  setSearchText(nextQuery);
+                  debouncedChangeSearch(nextQuery);
+                }}
+                data-test-subj="streamsDestinationsSearch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup compressed>
+                <FilterGroup
+                  label={TYPE_FILTER_LABEL}
+                  options={[
+                    { key: 'internal', label: INTERNAL_BADGE_LABEL },
+                    { key: 'external', label: EXTERNAL_BADGE_LABEL },
+                  ]}
+                  onChange={setSelectedTypes}
+                />
+                {qualityLoaded && hasFailureStoreAccess && (
+                  <FilterGroup
+                    label={DATA_QUALITY_FILTER_LABEL}
+                    options={[
+                      { key: 'good', label: DATA_QUALITY_GOOD_LABEL },
+                      { key: 'degraded', label: DATA_QUALITY_DEGRADED_LABEL },
+                      { key: 'poor', label: DATA_QUALITY_POOR_LABEL },
+                    ]}
+                    onChange={setSelectedQualities}
+                  />
+                )}
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <StreamsAppSearchBar showDatePicker />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div
+                role="presentation"
+                className={css`
+                  width: ${euiTheme.border.width.thin};
+                  height: ${euiTheme.size.l};
+                  background-color: ${euiTheme.colors.borderBaseSubdued};
+                `}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                size="s"
+                iconType="plus"
+                onClick={() => setIsAddModalOpen(true)}
+                data-test-subj="streamsDestinationsAddButton"
+              >
+                {ADD_DESTINATION_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow
+          className={css`
+            min-height: 0;
+          `}
+        >
+          <EuiThemeProvider
+            modify={TRANSPARENT_COLUMN_SEPARATORS}
+            wrapperProps={GRID_WRAPPER_PROPS}
+          >
+            <EuiDataGrid
+              data-test-subj="streamsDestinationsTable"
+              aria-label={TABLE_CAPTION}
+              className={gridClassName}
+              columns={columns}
+              columnVisibility={{
+                visibleColumns,
+                setVisibleColumns,
+                canDragAndDropColumns: false,
+              }}
+              trailingControlColumns={trailingControlColumns}
+              onColumnResize={handleColumnResize}
+              rowCount={rows.length}
+              renderCellValue={renderCellValue}
+              renderCustomGridBody={rows.length === 0 ? EmptyGridBody : undefined}
+              gridStyle={GRID_STYLE}
+              rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+              toolbarVisibility={TOOLBAR_VISIBILITY}
+              sorting={{
+                columns: [{ id: sortField, direction: urlState.sortDirection }],
+                onSort: handleSort,
+              }}
+              pagination={{
+                pageIndex: urlState.pageIndex,
+                pageSize: urlState.pageSize,
+                pageSizeOptions: [...ENTITY_TABLE_PAGE_SIZES],
+                onChangePage: (pageIndex) => changePage(pageIndex, urlState.pageSize),
+                onChangeItemsPerPage: (pageSize) => changePage(0, pageSize as EntityTablePageSize),
+              }}
+            />
+          </EuiThemeProvider>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isAddModalOpen && (
+        <AddDestinationModal
+          onClose={() => setIsAddModalOpen(false)}
+          onAdd={handleAddDestination}
+        />
+      )}
+    </>
   );
 }
 

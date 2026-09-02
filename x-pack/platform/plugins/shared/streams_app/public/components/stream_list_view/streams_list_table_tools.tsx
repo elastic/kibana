@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { YAML_BUTTON_LABEL } from './translations';
 
 const DEFAULT_NEW_BUTTON_LABEL = i18n.translate(
@@ -41,17 +38,29 @@ export function StreamsListTableTools({
   newButtonIconType = 'plus',
   newButtonDisabled = false,
 }: StreamsListTableToolsProps) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
-          iconType="editorCodeBlock"
+          iconType="code"
           color="text"
           data-test-subj="streamsListYamlButton"
         >
           {YAML_BUTTON_LABEL}
         </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <div
+          role="presentation"
+          className={css`
+            width: ${euiTheme.border.width.thin};
+            height: ${euiTheme.size.l};
+            background-color: ${euiTheme.colors.borderBaseSubdued};
+          `}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton

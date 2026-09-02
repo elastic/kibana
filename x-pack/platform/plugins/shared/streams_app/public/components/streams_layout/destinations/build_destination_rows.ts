@@ -112,6 +112,7 @@ export const buildDestinationRows = ({
   destinations,
   searchText,
   selectedQualities,
+  selectedTypes,
   docsByStream,
   ingestionByStream,
   storageByStream,
@@ -122,6 +123,7 @@ export const buildDestinationRows = ({
   destinations: Destination[];
   searchText: string;
   selectedQualities: string[];
+  selectedTypes: string[];
   docsByStream: Record<string, number>;
   ingestionByStream: Record<string, number>;
   storageByStream: Record<string, number>;
@@ -134,6 +136,13 @@ export const buildDestinationRows = ({
 
   return destinations
     .filter((destination) => matchesDestinationQuery(destination, query))
+    .filter((destination) => {
+      if (selectedTypes.length === 0) {
+        return true;
+      }
+      const typeKey = destination.isInternal ? 'internal' : 'external';
+      return selectedTypes.includes(typeKey);
+    })
     .map((destination) => ({
       ...destination,
       documentsCount: docsByStream[destination.name] ?? 0,

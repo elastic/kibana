@@ -14,9 +14,9 @@ import {
   useStreamDocCountsFetch,
 } from '../../../hooks/use_streams_doc_counts_fetch';
 import { useStreamsIngestionRates } from '../../../hooks/use_streams_ingestion_rates';
-import { useStreamsStorageStats } from '../../../hooks/use_streams_storage_stats';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { calculateDataQuality } from '../../../util/calculate_data_quality';
+import { getDestinationMockMetadata } from './destination_mock_metadata';
 import type { Destination } from './types';
 
 const indexCountsByStream = (stats: StreamDocsStat[] | undefined): Record<string, number> => {
@@ -92,7 +92,13 @@ export const useDestinationMetrics = (destinations: Destination[]) => {
     timeEnd: timeState.end,
   });
 
-  const { storageByStream, storageLoaded } = useStreamsStorageStats();
+  const storageByStream = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const { name } of destinations) {
+      map[name] = getDestinationMockMetadata(name).storageSizeBytes;
+    }
+    return map;
+  }, [destinations]);
 
   return {
     hasFailureStoreAccess,
@@ -109,6 +115,6 @@ export const useDestinationMetrics = (destinations: Destination[]) => {
     ingestionLoaded,
     ingestionError,
     storageByStream,
-    storageLoaded,
+    storageLoaded: true,
   };
 };

@@ -70,6 +70,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { useLocation } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 
 import { DestinationFlyout } from './destination_flyout';
@@ -175,8 +176,14 @@ function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosi
 
 function StreamsCanvasInner() {
   const { euiTheme } = useEuiTheme();
-  const { screenToFlowPosition, getNodes, getEdges, getIntersectingNodes, fitView } =
+  const { screenToFlowPosition, getNodes, getEdges, getIntersectingNodes, fitView, setCenter } =
     useReactFlow();
+
+  // Destination name the caller (e.g. the destinations table's "View on canvas"
+  // action) wants brought into view. Read from the URL so it works whichever
+  // route hosts the canvas.
+  const location = useLocation();
+  const focusName = new URLSearchParams(location.search).get('focus') ?? undefined;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
@@ -1174,16 +1181,50 @@ function StreamsCanvasInner() {
 
   // Center the canvas content (at 100% zoom) once React Flow has mounted and
   // measured the nodes, so the elements appear in the middle on load.
-  const handleInit = useCallback((instance: ReactFlowInstance<Node, Edge>) => {
-    const currentNodes = instance.getNodes();
-    if (currentNodes.length === 0) {
+  const handleInit = useCallback(
+    (instance: ReactFlowInstance<Node, Edge>) => {
+      // When a destination is being focused, the focus effect owns the viewport
+      // so we don't fight it by first centering on everything.
+      if (focusName) {
+        return;
+      }
+      const currentNodes = instance.getNodes();
+      if (currentNodes.length === 0) {
+        return;
+      }
+      const bounds = getNodesBounds(currentNodes);
+      const centerX = bounds.x + bounds.width / 2;
+      const centerY = bounds.y + bounds.height / 2;
+      instance.setCenter(centerX, centerY, { zoom: 1 });
+    },
+    [focusName]
+  );
+
+  // Arriving from the destinations table's "View on canvas" action centers the
+  // viewport on the requested destination node and selects it so the stream
+  // stands out among the rest of the graph.
+  useEffect(() => {
+    if (!focusName) {
       return;
     }
-    const bounds = getNodesBounds(currentNodes);
-    const centerX = bounds.x + bounds.width / 2;
-    const centerY = bounds.y + bounds.height / 2;
-    instance.setCenter(centerX, centerY, { zoom: 1 });
-  }, []);
+    const timer = setTimeout(() => {
+      const target = getNodes().find(
+        (node) =>
+          node.type === 'destination' && (node.data as DestinationNodeData).title === focusName
+      );
+      if (!target) {
+        return;
+      }
+      const width = target.measured?.width ?? target.width ?? SEED_NODE_WIDTH;
+      const height = target.measured?.height ?? target.height ?? SEED_NODE_HEIGHT;
+      setCenter(target.position.x + width / 2, target.position.y + height / 2, {
+        zoom: 1.2,
+        duration: 600,
+      });
+      setNodes((current) => current.map((node) => ({ ...node, selected: node.id === target.id })));
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [focusName, getNodes, setCenter, setNodes]);
 
   // While dragging a connection (new or reconnect), light up the anchors of every
   // node the connection could legally land on — nodes of a valid target type,
@@ -1317,301 +1358,303 @@ function StreamsCanvasInner() {
     <DestinationFlyoutContext.Provider value={openDestinationFlyout}>
       <AttachedRoutingFlyoutContext.Provider value={openAttachedRoutingFlyout}>
         <SourceFlyoutContext.Provider value={openSourceFlyout}>
-        <PipelineFlyoutContext.Provider value={openPipelineFlyout}>
-          <EdgeRoutingFlyoutContext.Provider value={openEdgeRoutingFlyout}>
-            <EdgeSegmentsContext.Provider value={segmentRegistry}>
-              <EdgeHopsContext.Provider value={edgeHops}>
-                <div
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                    width: 100%;
-                    gap: ${euiTheme.size.m};
-                  `}
-                >
-                  {/* Toolbar mirrors the search + filters row on the list table tabs, but the
-          primary action saves the canvas instead of creating a new entity. */}
-                  <EuiFlexGroup
-                    gutterSize="s"
-                    alignItems="center"
-                    responsive={false}
+          <PipelineFlyoutContext.Provider value={openPipelineFlyout}>
+            <EdgeRoutingFlyoutContext.Provider value={openEdgeRoutingFlyout}>
+              <EdgeSegmentsContext.Provider value={segmentRegistry}>
+                <EdgeHopsContext.Provider value={edgeHops}>
+                  <div
                     className={css`
-                      flex-grow: 0;
-                      max-height: 32px;
+                      display: flex;
+                      flex-direction: column;
+                      height: 100%;
+                      width: 100%;
+                      gap: ${euiTheme.size.m};
                     `}
                   >
-                    <EuiFlexItem>
-                      <EuiFieldSearch
-                        compressed
-                        incremental
-                        fullWidth
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search streams — e.g. kafka, source:nginx, destination:archive"
-                        aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
-                        data-test-subj="streamsCanvasSearch"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {/* Vertical separator between the search box and the See YAML button. */}
-                      <div
-                        role="presentation"
-                        className={css`
-                          width: ${euiTheme.border.width.thin};
-                          height: ${euiTheme.size.l};
-                          background-color: ${euiTheme.border.color};
-                        `}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <StreamsListTableTools
-                        newButtonIconType={null}
-                        newButtonDisabled={!hasChanges}
-                        newButtonLabel={i18n.translate(
-                          'xpack.streams.streamsCanvas.saveChangesButtonLabel',
-                          {
-                            defaultMessage: 'Save changes',
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <div
-                    ref={wrapperRef}
-                    role="presentation"
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
-                    onMouseMove={onMouseMove}
-                    onKeyDown={onKeyDown}
-                    className={`${css`
-                      position: relative;
-                      flex: 1;
-                      min-height: 0;
-                      width: 100%;
-                      /* Canvas surface — Figma "canvas-background" swatch:
+                    {/* Toolbar mirrors the search + filters row on the list table tabs, but the
+          primary action saves the canvas instead of creating a new entity. */}
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                      className={css`
+                        flex-grow: 0;
+                        max-height: 32px;
+                      `}
+                    >
+                      <EuiFlexItem>
+                        <EuiFieldSearch
+                          compressed
+                          incremental
+                          fullWidth
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search streams — e.g. kafka, source:nginx, destination:archive"
+                          aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
+                          data-test-subj="streamsCanvasSearch"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {/* Vertical separator between the search box and the See YAML button. */}
+                        <div
+                          role="presentation"
+                          className={css`
+                            width: ${euiTheme.border.width.thin};
+                            height: ${euiTheme.size.l};
+                            background-color: ${euiTheme.border.color};
+                          `}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <StreamsListTableTools
+                          newButtonIconType={null}
+                          newButtonDisabled={!hasChanges}
+                          newButtonLabel={i18n.translate(
+                            'xpack.streams.streamsCanvas.saveChangesButtonLabel',
+                            {
+                              defaultMessage: 'Save changes',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <div
+                      ref={wrapperRef}
+                      role="presentation"
+                      onDragOver={onDragOver}
+                      onDrop={onDrop}
+                      onMouseMove={onMouseMove}
+                      onKeyDown={onKeyDown}
+                      className={`${css`
+                        position: relative;
+                        flex: 1;
+                        min-height: 0;
+                        width: 100%;
+                        /* Canvas surface — Figma "canvas-background" swatch:
                          Backgrounds/Base/Subdued fill + Radii/Panel/Medium corners. */
-                      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-                      border: none;
-                      border-radius: ${euiTheme.border.radius.medium};
-                      overflow: hidden;
-                     ${placementType ? 'cursor: copy;' : ''}
+                        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                        border: none;
+                        border-radius: ${euiTheme.border.radius.medium};
+                        overflow: hidden;
+                        ${placementType ? 'cursor: copy;' : ''}
 
-         /* React Flow's native edge reconnect anchors sit on top of the handle
+                        /* React Flow's native edge reconnect anchors sit on top of the handle
              dots at each connector end; show a grab cursor over their hit area so
              the connection ends feel draggable. */
           .react-flow__edgeupdater {
-                        cursor: grab;
-                      }
+                          cursor: grab;
+                        }
 
-                      /* Selected state. Our nodes are custom EUI cards (every node type
+                        /* Selected state. Our nodes are custom EUI cards (every node type
              renders an EuiPanel), so React Flow's default selection outline
              lands on the transparent, zero-border node wrapper and is
              invisible — selecting a stream looked like nothing happened. Draw an
              on-brand primary ring on the card itself, which covers both the
              "Select stream" action and drag-marquee selections. Group
              containers (no EuiPanel) keep React Flow's own selected styling. */
-                      .react-flow__node.selected .euiPanel {
-                        box-shadow: 0 0 0 2px ${euiTheme.colors.primary},
-                          0 2px 8px ${euiTheme.colors.primary}40;
-                        border-radius: ${euiTheme.border.radius.medium};
-                        transition: box-shadow 120ms ease;
-                      }
-                    `} ${
-                      connectingTargetTypes.length > 0 ? connectingHighlightClassName : dimClassName
-                    } ${searchClassName}`}
-                  >
-                    <ReactFlow
-                      nodes={nodes}
-                      edges={edges}
-                      nodeTypes={nodeTypes}
-                      edgeTypes={edgeTypes}
-                      defaultEdgeOptions={defaultEdgeOptions}
-                      onNodesChange={onNodesChangeSnapped}
-                      onEdgesChange={onEdgesChange}
-                      onNodeClick={onNodeClick}
-                      onNodeMouseEnter={onNodeMouseEnter}
-                      onNodeMouseLeave={onNodeMouseLeave}
-                      onNodeContextMenu={onNodeContextMenu}
-                      onSelectionContextMenu={onSelectionContextMenu}
-                      onPaneContextMenu={onPaneContextMenu}
-                      nodeDragThreshold={4}
-                      onNodeDragStart={onNodeDragStart}
-                      onNodeDrag={onNodeDrag}
-                      onNodeDragStop={onNodeDragStop}
-                      onBeforeDelete={onBeforeDelete}
-                      onConnect={onConnect}
-                      onConnectStart={onConnectStart}
-                      onConnectEnd={onConnectEnd}
-                      onReconnect={onReconnect}
-                      onReconnectStart={onReconnectStart}
-                      onReconnectEnd={onReconnectEnd}
-                      isValidConnection={isValidConnection}
-                      connectionLineType={ConnectionLineType.SmoothStep}
-                      connectionRadius={60}
-                      reconnectRadius={14}
-                      onPaneClick={onPaneClick}
-                      onInit={handleInit}
-                      defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-                      // Keep the viewport near the streams: bound panning to the seed
-                      // footprint + padding, and don't allow zooming out into the void.
-                      translateExtent={CANVAS_TRANSLATE_EXTENT}
-                      minZoom={0.4}
-                      maxZoom={2}
-                      // Node snapping is done in onNodeDrag (center-snap), not snapToGrid,
-                      // so dragged cards step on the same grid the connectors align to.
-                      // Figma-style trackpad navigation: two-finger scroll (any direction)
-                      // pans the canvas; pinch still zooms. Disabling zoomOnScroll keeps the
-                      // wheel/trackpad mapped to panning rather than zooming.
-                      panOnScroll
-                      zoomOnScroll={false}
-                      nodesConnectable
-                      edgesReconnectable
-                      // Standard React Flow interaction: left-drag on the pane pans the
-                      // canvas, dragging a node moves it, and a plain click selects a node
-                      // (and opens its flyout). Holding Shift switches left-drag to a
-                      // selection box and lets Shift+click add nodes to the selection, so
-                      // several nodes can be picked at once.
-                      nodesDraggable
-                      selectNodesOnDrag={false}
-                      selectionOnDrag={false}
-                      selectionMode={SelectionMode.Partial}
-                      selectionKeyCode="Shift"
-                      multiSelectionKeyCode="Shift"
-                      panOnDrag
-                      proOptions={{ hideAttribution: true }}
+                        .react-flow__node.selected .euiPanel {
+                          box-shadow: 0 0 0 2px ${euiTheme.colors.primary},
+                            0 2px 8px ${euiTheme.colors.primary}40;
+                          border-radius: ${euiTheme.border.radius.medium};
+                          transition: box-shadow 120ms ease;
+                        }
+                      `} ${
+                        connectingTargetTypes.length > 0
+                          ? connectingHighlightClassName
+                          : dimClassName
+                      } ${searchClassName}`}
                     >
-                      <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
-                      <CanvasMinimap hoveredFlow={hoveredFlow} />
-                    </ReactFlow>
-                    <CanvasZoomControls />
-                    {placementType && shadowPosition ? (
-                      <ShadowNode type={placementType} position={shadowPosition} />
-                    ) : null}
-                    {search.noResult ? (
-                      <div
-                        className={css`
-                          position: absolute;
-                          inset: 0;
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                          pointer-events: none;
-                          z-index: 6;
-                        `}
+                      <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        defaultEdgeOptions={defaultEdgeOptions}
+                        onNodesChange={onNodesChangeSnapped}
+                        onEdgesChange={onEdgesChange}
+                        onNodeClick={onNodeClick}
+                        onNodeMouseEnter={onNodeMouseEnter}
+                        onNodeMouseLeave={onNodeMouseLeave}
+                        onNodeContextMenu={onNodeContextMenu}
+                        onSelectionContextMenu={onSelectionContextMenu}
+                        onPaneContextMenu={onPaneContextMenu}
+                        nodeDragThreshold={4}
+                        onNodeDragStart={onNodeDragStart}
+                        onNodeDrag={onNodeDrag}
+                        onNodeDragStop={onNodeDragStop}
+                        onBeforeDelete={onBeforeDelete}
+                        onConnect={onConnect}
+                        onConnectStart={onConnectStart}
+                        onConnectEnd={onConnectEnd}
+                        onReconnect={onReconnect}
+                        onReconnectStart={onReconnectStart}
+                        onReconnectEnd={onReconnectEnd}
+                        isValidConnection={isValidConnection}
+                        connectionLineType={ConnectionLineType.SmoothStep}
+                        connectionRadius={60}
+                        reconnectRadius={14}
+                        onPaneClick={onPaneClick}
+                        onInit={handleInit}
+                        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                        // Keep the viewport near the streams: bound panning to the seed
+                        // footprint + padding, and don't allow zooming out into the void.
+                        translateExtent={CANVAS_TRANSLATE_EXTENT}
+                        minZoom={0.4}
+                        maxZoom={2}
+                        // Node snapping is done in onNodeDrag (center-snap), not snapToGrid,
+                        // so dragged cards step on the same grid the connectors align to.
+                        // Figma-style trackpad navigation: two-finger scroll (any direction)
+                        // pans the canvas; pinch still zooms. Disabling zoomOnScroll keeps the
+                        // wheel/trackpad mapped to panning rather than zooming.
+                        panOnScroll
+                        zoomOnScroll={false}
+                        nodesConnectable
+                        edgesReconnectable
+                        // Standard React Flow interaction: left-drag on the pane pans the
+                        // canvas, dragging a node moves it, and a plain click selects a node
+                        // (and opens its flyout). Holding Shift switches left-drag to a
+                        // selection box and lets Shift+click add nodes to the selection, so
+                        // several nodes can be picked at once.
+                        nodesDraggable
+                        selectNodesOnDrag={false}
+                        selectionOnDrag={false}
+                        selectionMode={SelectionMode.Partial}
+                        selectionKeyCode="Shift"
+                        multiSelectionKeyCode="Shift"
+                        panOnDrag
+                        proOptions={{ hideAttribution: true }}
                       >
-                        <EuiPanel
-                          hasShadow
-                          paddingSize="l"
+                        <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
+                        <CanvasMinimap hoveredFlow={hoveredFlow} />
+                      </ReactFlow>
+                      <CanvasZoomControls />
+                      {placementType && shadowPosition ? (
+                        <ShadowNode type={placementType} position={shadowPosition} />
+                      ) : null}
+                      {search.noResult ? (
+                        <div
                           className={css`
-                            text-align: center;
-                            border-radius: ${euiTheme.border.radius.medium};
+                            position: absolute;
+                            inset: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            pointer-events: none;
+                            z-index: 6;
                           `}
                         >
-                          <EuiText size="s">
-                            <strong>No results</strong>
-                          </EuiText>
-                          <EuiText size="xs" color="subdued">
-                            {i18n.translate('xpack.streams.streamsCanvas.noResultsHint', {
-                              defaultMessage: 'No streams match your search.',
-                            })}
-                          </EuiText>
-                        </EuiPanel>
-                      </div>
-                    ) : null}
-                    <CanvasControls
-                      placementType={placementType}
-                      onActivatePlacement={activatePlacement}
-                      onUndo={undo}
-                      onRedo={redo}
-                      canUndo={canUndo}
-                      canRedo={canRedo}
-                    />
-                    <CanvasContextMenu
-                      menu={contextMenu}
-                      onClose={() => setContextMenu(null)}
-                      onSelectStream={selectStream}
-                      onDeleteNodes={deleteNodes}
-                      onAddRoutingWithInheritance={(nodeIds) =>
-                        setInheritanceRoutingNodeId(nodeIds[0] ?? null)
-                      }
-                      onCleanupAll={cleanup}
-                      onCleanupSelected={cleanupSelected}
-                    />
+                          <EuiPanel
+                            hasShadow
+                            paddingSize="l"
+                            className={css`
+                              text-align: center;
+                              border-radius: ${euiTheme.border.radius.medium};
+                            `}
+                          >
+                            <EuiText size="s">
+                              <strong>No results</strong>
+                            </EuiText>
+                            <EuiText size="xs" color="subdued">
+                              {i18n.translate('xpack.streams.streamsCanvas.noResultsHint', {
+                                defaultMessage: 'No streams match your search.',
+                              })}
+                            </EuiText>
+                          </EuiPanel>
+                        </div>
+                      ) : null}
+                      <CanvasControls
+                        placementType={placementType}
+                        onActivatePlacement={activatePlacement}
+                        onUndo={undo}
+                        onRedo={redo}
+                        canUndo={canUndo}
+                        canRedo={canRedo}
+                      />
+                      <CanvasContextMenu
+                        menu={contextMenu}
+                        onClose={() => setContextMenu(null)}
+                        onSelectStream={selectStream}
+                        onDeleteNodes={deleteNodes}
+                        onAddRoutingWithInheritance={(nodeIds) =>
+                          setInheritanceRoutingNodeId(nodeIds[0] ?? null)
+                        }
+                        onCleanupAll={cleanup}
+                        onCleanupSelected={cleanupSelected}
+                      />
+                    </div>
                   </div>
-                </div>
-                {flyoutDestination !== null ? (
-                  <DestinationFlyout
-                    destinationName={flyoutDestination}
-                    hasProcessing={flyoutDestinationHasProcessing}
-                    onClose={() => setFlyoutDestination(null)}
-                  />
-                ) : null}
-                {destinationConfigNodeId !== null ? (
-                  <DestinationConfigurationFlyout
-                    onClose={closeDestinationConfigurationFlyout}
-                    onSave={saveDestinationConfiguration}
-                  />
-                ) : null}
-                {flyoutSource !== null ? (
-                  <SourceFlyout
-                    sourceName={flyoutSource}
-                    onClose={closeSourceFlyout}
-                    isConfiguring={flyoutSourceConfiguring}
-                    onSave={saveSourceConfiguration}
-                    onDelete={deleteSource}
-                  />
-                ) : null}
-                {pipelineFlyoutEdgeId !== null ? (
-                  <PipelineFlyout onClose={closePipelineFlyout} onApply={applyPipeline} />
-                ) : null}
-                {pipelineNodeName !== null ? (
-                  <CreatePipelineFlyout
-                    pipelineName={pipelineNodeName}
-                    initialPopulated
-                    onClose={() => setPipelineNodeName(null)}
-                    onApply={() => setPipelineNodeName(null)}
-                  />
-                ) : null}
-                {routingFlyoutEdgeId !== null ? (
-                  <CreateRoutingFlyout
-                    onClose={closeEdgeRoutingFlyout}
-                    onApply={applyEdgeRouting}
-                  />
-                ) : null}
-                {routingNodeFlyoutOpen ? (
-                  <CreateRoutingFlyout
-                    initialStep="applied"
-                    onClose={() => setRoutingNodeFlyoutOpen(false)}
-                    onApply={() => setRoutingNodeFlyoutOpen(false)}
-                  />
-                ) : null}
-                {attachedRoutingFlyoutOpen ? (
-                  <CreateRoutingFlyout
-                    opinionated
-                    initialStep="applied"
-                    onClose={() => setAttachedRoutingFlyoutOpen(false)}
-                    onApply={() => setAttachedRoutingFlyoutOpen(false)}
-                  />
-                ) : null}
-                {inheritanceRoutingNodeId !== null ? (
-                  <CreateRoutingFlyout
-                    opinionated
-                    inheritedDestinationName={
-                      (
-                        getNodes().find((node) => node.id === inheritanceRoutingNodeId)?.data as
-                          | DestinationNodeData
-                          | undefined
-                      )?.title
-                    }
-                    onClose={() => setInheritanceRoutingNodeId(null)}
-                    onApply={applyInheritanceRouting}
-                  />
-                ) : null}
-              </EdgeHopsContext.Provider>
-            </EdgeSegmentsContext.Provider>
-          </EdgeRoutingFlyoutContext.Provider>
-        </PipelineFlyoutContext.Provider>
+                  {flyoutDestination !== null ? (
+                    <DestinationFlyout
+                      destinationName={flyoutDestination}
+                      hasProcessing={flyoutDestinationHasProcessing}
+                      onClose={() => setFlyoutDestination(null)}
+                    />
+                  ) : null}
+                  {destinationConfigNodeId !== null ? (
+                    <DestinationConfigurationFlyout
+                      onClose={closeDestinationConfigurationFlyout}
+                      onSave={saveDestinationConfiguration}
+                    />
+                  ) : null}
+                  {flyoutSource !== null ? (
+                    <SourceFlyout
+                      sourceName={flyoutSource}
+                      onClose={closeSourceFlyout}
+                      isConfiguring={flyoutSourceConfiguring}
+                      onSave={saveSourceConfiguration}
+                      onDelete={deleteSource}
+                    />
+                  ) : null}
+                  {pipelineFlyoutEdgeId !== null ? (
+                    <PipelineFlyout onClose={closePipelineFlyout} onApply={applyPipeline} />
+                  ) : null}
+                  {pipelineNodeName !== null ? (
+                    <CreatePipelineFlyout
+                      pipelineName={pipelineNodeName}
+                      initialPopulated
+                      onClose={() => setPipelineNodeName(null)}
+                      onApply={() => setPipelineNodeName(null)}
+                    />
+                  ) : null}
+                  {routingFlyoutEdgeId !== null ? (
+                    <CreateRoutingFlyout
+                      onClose={closeEdgeRoutingFlyout}
+                      onApply={applyEdgeRouting}
+                    />
+                  ) : null}
+                  {routingNodeFlyoutOpen ? (
+                    <CreateRoutingFlyout
+                      initialStep="applied"
+                      onClose={() => setRoutingNodeFlyoutOpen(false)}
+                      onApply={() => setRoutingNodeFlyoutOpen(false)}
+                    />
+                  ) : null}
+                  {attachedRoutingFlyoutOpen ? (
+                    <CreateRoutingFlyout
+                      opinionated
+                      initialStep="applied"
+                      onClose={() => setAttachedRoutingFlyoutOpen(false)}
+                      onApply={() => setAttachedRoutingFlyoutOpen(false)}
+                    />
+                  ) : null}
+                  {inheritanceRoutingNodeId !== null ? (
+                    <CreateRoutingFlyout
+                      opinionated
+                      inheritedDestinationName={
+                        (
+                          getNodes().find((node) => node.id === inheritanceRoutingNodeId)?.data as
+                            | DestinationNodeData
+                            | undefined
+                        )?.title
+                      }
+                      onClose={() => setInheritanceRoutingNodeId(null)}
+                      onApply={applyInheritanceRouting}
+                    />
+                  ) : null}
+                </EdgeHopsContext.Provider>
+              </EdgeSegmentsContext.Provider>
+            </EdgeRoutingFlyoutContext.Provider>
+          </PipelineFlyoutContext.Provider>
         </SourceFlyoutContext.Provider>
       </AttachedRoutingFlyoutContext.Provider>
     </DestinationFlyoutContext.Provider>

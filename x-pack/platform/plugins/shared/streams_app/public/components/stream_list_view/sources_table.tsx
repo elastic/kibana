@@ -294,7 +294,7 @@ export function SourcesTable() {
           toolsRight: (
             <StreamsListTableTools
               newButtonLabel={i18n.translate('xpack.streams.sourcesTable.newButtonLabel', {
-                defaultMessage: 'New source',
+                defaultMessage: 'Add source',
               })}
             />
           ),

@@ -59,7 +59,7 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
     }),
     Component: PipelinesTab,
     disabledReason: i18n.translate('xpack.streams.streamsLayout.pipelinesTabDisabledTooltip', {
-      defaultMessage: 'Not part of this milestone',
+      defaultMessage: 'Not part of V1 milestone',
     }),
   },
   destinations: {

@@ -44,6 +44,8 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../hooks/use_time_range';
 
 const CHART_HEIGHT = 200;
 
@@ -408,7 +410,9 @@ function ChartPanel() {
           style={{
             line: { stroke: euiTheme.colors.danger, strokeWidth: 2, opacity: 1 },
           }}
-          marker={<EuiIcon type="warning" color={euiTheme.colors.danger} size="s" />}
+          marker={
+            <EuiIcon type="warning" color={euiTheme.colors.danger} size="s" aria-hidden={true} />
+          }
           markerPosition={Position.Top}
         />
         <Axis
@@ -546,7 +550,7 @@ function CompletenessBadge() {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+        <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="success">
@@ -650,7 +654,7 @@ function ProcessingStepsPanel() {
       <EuiPanel hasBorder paddingSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowDown" size="s" color="subdued" />
+            <EuiIcon type="arrowDown" size="s" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
@@ -691,7 +695,7 @@ function ProcessingStepsPanel() {
         <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+              <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
@@ -716,7 +720,7 @@ function ProcessingStepsPanel() {
       <EuiPanel hasBorder paddingSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+            <EuiIcon type="checkInCircleFilled" color="success" size="s" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
@@ -911,7 +915,7 @@ function ProcessingDataPreviewPanel() {
           <div className={cellPadding}>
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
               <EuiFlexItem grow={false} style={{ width: 16 }}>
-                <EuiIcon type="expand" size="s" color="subdued" />
+                <EuiIcon type="expand" size="s" color="subdued" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem
                 className={css`
@@ -966,6 +970,12 @@ export function DestinationFlyout({
 }) {
   const titleId = useGeneratedHtmlId({ prefix: 'destinationFlyoutTitle' });
   const [selectedTab, setSelectedTab] = useState('overview');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const destinationHref = router.link('/{key}', {
+    path: { key: destinationName },
+    query: { rangeFrom, rangeTo },
+  });
 
   const tabs = useMemo(() => {
     if (!hasProcessing) {
@@ -1004,12 +1014,14 @@ export function DestinationFlyout({
               content={i18n.translate('xpack.streams.destinationFlyout.viewDestination', {
                 defaultMessage: 'View destination',
               })}
+              disableScreenReaderOutput
             >
               <EuiButtonIcon
                 iconType="fullScreen"
                 display="base"
                 size="s"
                 color="text"
+                href={destinationHref}
                 data-test-subj="destinationFlyoutViewDestinationButton"
                 aria-label={i18n.translate('xpack.streams.destinationFlyout.viewDestination', {
                   defaultMessage: 'View destination',

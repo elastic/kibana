@@ -29,6 +29,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsAppHeaderBack } from '../../../../hooks/use_streams_app_header_back';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
@@ -72,6 +73,7 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const back = useStreamsAppHeaderBack();
   const { definition } = useStreamDetail();
   const {
     core: {
@@ -282,9 +284,6 @@ export function Wrapper({
     navigateToApp('/streams');
   }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
 
-  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
-    defaultMessage: 'Streams',
-  });
   const viewInDiscoverLabel = i18n.translate('xpack.streams.streamDetailView.viewInDiscoverLabel', {
     defaultMessage: 'View in Discover',
   });
@@ -349,7 +348,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={back}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

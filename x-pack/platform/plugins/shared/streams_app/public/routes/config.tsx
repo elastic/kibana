@@ -31,6 +31,7 @@ const timeRangeQueryParams = t.partial({
 const flyoutParams = t.partial({
   flyoutName: t.string,
   flyoutTab: t.string,
+  focus: t.string,
 });
 
 /**

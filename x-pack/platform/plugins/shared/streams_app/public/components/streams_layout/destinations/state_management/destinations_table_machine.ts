@@ -16,11 +16,8 @@ import {
   type EntityTableImplementations,
   type EntityTableUrlState,
 } from '../../entity_table';
-import {
-  MOCK_EXTERNAL_S3_DESTINATION,
-  isDestinationStream,
-  streamToDestination,
-} from '../stream_to_destination';
+import { mergeLiveAndCanvasDestinations } from '../canvas_destinations';
+import { isDestinationStream, streamToDestination } from '../stream_to_destination';
 import type { Destination } from '../types';
 
 export const destinationsTableMachine = createEntityTableMachine<Destination>();
@@ -56,10 +53,9 @@ export function createDestinationsTableImplementations({
         signal,
       });
 
-      return [
-        ...response.streams.filter(isDestinationStream).map(streamToDestination),
-        MOCK_EXTERNAL_S3_DESTINATION,
-      ];
+      return mergeLiveAndCanvasDestinations(
+        response.streams.filter(isDestinationStream).map(streamToDestination)
+      );
     }),
   });
 }

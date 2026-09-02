@@ -144,7 +144,7 @@ export function CanvasControls({
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {toolButton(
-            'editorUndo',
+            'undo',
             i18n.translate('xpack.streams.streamsCanvas.undo', {
               defaultMessage: 'Undo',
             }),
@@ -153,7 +153,7 @@ export function CanvasControls({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {toolButton(
-            'editorRedo',
+            'redo',
             i18n.translate('xpack.streams.streamsCanvas.redo', {
               defaultMessage: 'Redo',
             }),

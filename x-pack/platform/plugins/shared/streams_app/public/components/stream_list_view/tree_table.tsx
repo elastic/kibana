@@ -64,13 +64,12 @@ import {
 } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsIngestionRates } from '../../hooks/use_streams_ingestion_rates';
-import { useStreamsStorageStats } from '../../hooks/use_streams_storage_stats';
+import { calculateDataQuality } from '../../util/calculate_data_quality';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { IngestionColumn } from './ingestion_column';
 import { StorageColumn } from './storage_column';
 import { RetentionColumn } from './retention_column';
 import { FilterGroup } from './filter_group';
-import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
   NAME_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
@@ -101,7 +100,6 @@ import {
   TechnicalPreviewBadge,
 } from '../stream_badges';
 import { getDestinationMockMetadata } from './destination_mock_metadata';
-
 
 /**
  * Prototype tags row shown under the destination name (internal/external,
@@ -336,7 +334,14 @@ export function StreamsTreeTable({
     timeEnd: timeState.end,
   });
 
-  const { storageByStream, storageLoaded } = useStreamsStorageStats();
+  const storageByStream = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const { stream } of streams) {
+      map[stream.name] = getDestinationMockMetadata(stream.name).storageSizeBytes;
+    }
+    return map;
+  }, [streams]);
+  const storageLoaded = true;
 
   // Sort order for data quality
   const qualityRank: Record<QualityIndicators, number> = {
