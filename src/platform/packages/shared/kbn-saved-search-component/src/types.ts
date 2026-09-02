@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/common';
@@ -54,6 +54,12 @@ export interface SavedSearchComponentProps extends SavedSearchTableConfig {
    */
   nonHighlightingFilters?: Filter[];
   timestampField?: string;
+  /**
+   * CPS project scope the embedded search runs with, overriding any default value.
+   * While search interceptors will strip the property from the request on non-CPS contexts,
+   * consumers should strive to be CPS aware and not omit the prop (or pass as undefined) in these cases
+   */
+  projectRouting?: ProjectRouting;
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
   onTableConfigChange?: (config: SavedSearchTableConfig) => void;
