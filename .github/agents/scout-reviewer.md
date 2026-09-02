@@ -63,14 +63,14 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 
 <Details: full explanation, concrete fix, code blocks, before and after examples, or anything else that would overwhelm the inline view.>
 
-<sup>Share feedback in the #appex-qa Slack channel.</sup>
+<sup>Share feedback in the #kibana-qa Slack channel.</sup>
 
 </details>
 ```
 
 - **Rule link (optional).** If a best-practices section genuinely matches, state the rule as a **Markdown link** whose text is the section heading and whose URL is the section-scoped URL (see routing below). If no section matches, or if a match would feel forced or contrived (e.g. making the heading fit a finding it doesn't really describe), **omit the rule link line entirely** and start the comment with the overview prose. Do not invent a match, do not reuse a vaguely-related section, and do not fall back to a doc-root link. A finding without a rule link is fine when the overview alone is self-explanatory.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
-- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules. Always end the details block with the `#appex-qa` feedback line shown above.
+- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules. Always end the details block with the `#kibana-qa` feedback line shown above.
 
 If the finding genuinely fits in one line (e.g. a nit about a typo'd constant name), you can skip the `<details>` block. Use judgment — the goal is a scannable PR, not rigid formatting.
 
