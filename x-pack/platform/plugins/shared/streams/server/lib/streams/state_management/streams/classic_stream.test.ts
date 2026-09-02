@@ -669,6 +669,78 @@ describe('ClassicStream', () => {
 
       expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
     });
+
+    it('does not emit update_data_stream_mappings for undefined to empty object', async () => {
+      const existingDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      });
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: {} },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinition, newDefinition);
+
+      expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
+    });
+
+    it('emits a reset action when overrides are removed as undefined', async () => {
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: undefined },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinitionWithOverride(), newDefinition);
+
+      expect(actions).toContainEqual({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: 'logs-test-default',
+          mappings: undefined,
+        },
+      });
+    });
+
+    it('does not emit update_data_stream_mappings when only system fields are cleared', async () => {
+      const existingDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: { 'foo.bar': { type: 'system' } } },
+          failure_store: { inherit: {} },
+        },
+      });
+      const newDefinition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          classic: { field_overrides: {} },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const actions = await determineUpdateActions(existingDefinition, newDefinition);
+
+      expect(actions.map((action) => action.type)).not.toContain('update_data_stream_mappings');
+    });
   });
 
   describe('getEffectiveSettings - replicated streams', () => {
