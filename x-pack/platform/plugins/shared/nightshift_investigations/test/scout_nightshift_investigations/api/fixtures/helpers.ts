@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/kbn-client';
-import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientResponse, KbnClient } from '@kbn/scout';
 import { COMMON_HEADERS } from './constants';
 
 const SO_TYPE = 'nightshift-investigation';
