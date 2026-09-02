@@ -42,7 +42,9 @@ jest.mock('../../../entity_analytics/components/ai_assistant_button/ai_assistant
 }));
 
 jest.mock('../../../cases/attachments/entity/components/add_to_case', () => ({
-  AddToCase: () => <div data-test-subj="eaCasesAddToCase" />,
+  AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
+    <div data-test-subj={testSubj} />
+  ),
 }));
 
 const SERVICE_IDENTITY_FIELDS = { 'service.name': 'service-alice' };

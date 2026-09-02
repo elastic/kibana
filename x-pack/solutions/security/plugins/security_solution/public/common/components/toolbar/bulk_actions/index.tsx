@@ -10,7 +10,7 @@ import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
-import type { BulkActionGroups, BulkActionMenuItem } from './use_bulk_action_items';
+import type { BulkActionGroups } from './use_bulk_action_items';
 
 interface OwnProps {
   selectText: string;
@@ -18,10 +18,8 @@ interface OwnProps {
   showClearSelection: boolean;
   onSelectAll: () => void;
   onClearSelection: () => void;
-  bulkActionItems: BulkActionMenuItem[];
   bulkActionPanels: EuiContextMenuPanelDescriptor[];
-  /** Structured groups for proper separator insertion. When present, preferred over `bulkActionItems`. */
-  bulkActionGroups?: BulkActionGroups;
+  bulkActionGroups: BulkActionGroups;
   closePopoverRef?: React.MutableRefObject<() => void>;
 }
 
@@ -41,7 +39,6 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   showClearSelection,
   onSelectAll,
   onClearSelection,
-  bulkActionItems,
   bulkActionPanels,
   bulkActionGroups,
   closePopoverRef,
@@ -92,11 +89,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         }
         closePopover={closeActionPopover}
       >
-        <EventsTableBulkActionMenu
-          items={bulkActionItems}
-          panels={bulkActionPanels}
-          groups={bulkActionGroups}
-        />
+        <EventsTableBulkActionMenu panels={bulkActionPanels} groups={bulkActionGroups} />
       </EuiPopover>
 
       <EuiButtonEmpty

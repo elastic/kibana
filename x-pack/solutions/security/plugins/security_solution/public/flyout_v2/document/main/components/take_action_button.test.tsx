@@ -16,6 +16,7 @@ import { useAlertTagsActions } from '../../../../detections/components/alerts_ta
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FLYOUT_ACTION, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
@@ -284,7 +285,7 @@ describe('<TakeActionButton />', () => {
     mockUseAlertAssigneesActions.mockReturnValue({
       alertAssigneesItems: [
         {
-          key: 'assign-alert',
+          key: ALERT_ASSIGNEE_ACTION_IDS.assign,
           name: 'Assign alert',
           'data-test-subj': 'alert-assignees-context-menu-item',
         },
