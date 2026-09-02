@@ -1121,34 +1121,46 @@ const identifyServiceRoute = createServerRoute({
     // grep + classification for them only produces a result that is discarded.
     let loggingChunks: Awaited<ReturnType<typeof classifyLoggingSites>> = [];
     if (!hasOtel) {
-      const profileGreps = await readProfileGreps({
-        kiClient,
-        spaceId,
-        repository,
-        gitSha,
-        logger: routeLogger,
-      });
-      const candidates = await discoverLoggingSites({
-        codebox,
-        repository,
-        gitSha,
-        serviceRoot: service.serviceRoot,
-        language: service.language,
-        logger: routeLogger,
-        profileGreps,
-      });
-      const classifierConnectorId = await resolveConnectorForFeature({
-        searchInferenceEndpoints: server.searchInferenceEndpoints,
-        featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
-        featureName: 'logging-site classification',
-        request,
-      });
-      loggingChunks = await classifyLoggingSites({
-        inferenceClient,
-        connectorId: classifierConnectorId,
-        candidates,
-        logger: routeLogger,
-      });
+      const requestAbortController = new AbortController();
+      const abortSubscription = request.events.aborted$.subscribe(() =>
+        requestAbortController.abort()
+      );
+      try {
+        const profileGreps = await readProfileGreps({
+          kiClient,
+          spaceId,
+          repository,
+          gitSha,
+          logger: routeLogger,
+        });
+        const candidates = await discoverLoggingSites({
+          codebox,
+          repository,
+          gitSha,
+          serviceRoot: service.serviceRoot,
+          language: service.language,
+          logger: routeLogger,
+          profileGreps,
+        });
+        const classifierConnectorId = await resolveConnectorForFeature({
+          searchInferenceEndpoints: server.searchInferenceEndpoints,
+          featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+          featureName: 'logging-site classification',
+          request,
+        });
+        loggingChunks = await classifyLoggingSites({
+          inferenceClient,
+          connectorId: classifierConnectorId,
+          candidates,
+          logger: routeLogger,
+          abortSignal: requestAbortController.signal,
+        });
+        if (requestAbortController.signal.aborted) {
+          throw new Error('Code Intelligence service identification request was aborted');
+        }
+      } finally {
+        abortSubscription.unsubscribe();
+      }
     }
 
     // Stage 1: derive code Feature KIs (repo type, language, predicted service name).
@@ -1190,12 +1202,10 @@ const identifyServiceRoute = createServerRoute({
       authorizedStreamNames,
     });
 
-    // Reconcile code- and log-derived Query KIs on each ingesting stream that
-    // now carries code queries (semantic dedup merges the two sources).
-    for (const streamName of queryResult.streams ?? []) {
-      await assertNotPaused({ maintenanceService, request });
-      await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
-    }
+    // Semantic cross-source reconciliation is intentionally not part of this
+    // per-service request. The standalone reconcile route batches that global
+    // stream operation separately; rescanning every query on root `logs` for
+    // every service makes extraction cost grow quadratically.
 
     // Represent the service as an entity/service KI on the ingesting stream(s),
     // merging with any matching log-derived entity. Runs every time (even on a

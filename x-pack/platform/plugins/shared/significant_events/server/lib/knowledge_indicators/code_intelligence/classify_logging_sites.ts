@@ -72,6 +72,7 @@ const classifySchema = {
 const VALID_LEVELS = new Set(['fatal', 'error', 'warn', 'warning', 'info', 'debug', 'trace']);
 const CLASSIFY_BATCH_SIZE = 200;
 const CLASSIFY_BATCH_CONCURRENCY = 5;
+const CLASSIFY_BATCH_TIMEOUT_MS = 60_000;
 
 export interface ClassifyLoggingSitesOptions {
   inferenceClient: InferenceClient;
@@ -79,6 +80,8 @@ export interface ClassifyLoggingSitesOptions {
   candidates: LoggingCandidate[];
   logger: Logger;
   abortSignal?: AbortSignal;
+  /** Per-inference-call deadline. Exposed for focused timeout tests. */
+  batchTimeoutMs?: number;
 }
 
 /**
@@ -93,6 +96,7 @@ export async function classifyLoggingSites({
   candidates,
   logger,
   abortSignal,
+  batchTimeoutMs = CLASSIFY_BATCH_TIMEOUT_MS,
 }: ClassifyLoggingSitesOptions): Promise<LoggingChunk[]> {
   if (candidates.length === 0) {
     return [];
@@ -123,6 +127,12 @@ export async function classifyLoggingSites({
             })
             .join('\n');
 
+        const batchAbortController = new AbortController();
+        const abortBatch = () => batchAbortController.abort();
+        if (abortSignal?.aborted) abortBatch();
+        else abortSignal?.addEventListener('abort', abortBatch, { once: true });
+        const timeout = setTimeout(abortBatch, batchTimeoutMs);
+
         try {
           const { output } = await inferenceClient.output({
             id: 'classify_logging_sites',
@@ -130,7 +140,7 @@ export async function classifyLoggingSites({
             system: CLASSIFY_SYSTEM,
             input,
             schema: classifySchema,
-            abortSignal,
+            abortSignal: batchAbortController.signal,
             metadata: {
               connectorTelemetry: {
                 pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
@@ -168,6 +178,9 @@ export async function classifyLoggingSites({
               error instanceof Error ? error.message : String(error)
             })`
           );
+        } finally {
+          clearTimeout(timeout);
+          abortSignal?.removeEventListener('abort', abortBatch);
         }
       })
     )

@@ -343,25 +343,26 @@ export const getCodeExtractionRunDetails = (
     const { repository, service } = getIdentity(step);
     return `${repository ?? ''}:${service ?? ''}:${step.stepId}`;
   };
+  const getAttemptCount = (step: WorkflowStepExecutionDto): number =>
+    Math.max(
+      1,
+      steps.filter(
+        (candidate) => candidate.stepType !== 'retry' && failureKey(candidate) === failureKey(step)
+      ).length
+    );
   // Filter after selecting the latest outcome so a successful retry removes an
   // earlier failure from the status response.
   const failures = latestByKey(steps, failureKey)
     .filter((step) => [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(step.status))
     .sort((a, b) => stepOrder(b) - stepOrder(a))
     .slice(0, MAX_RECENT_FAILURES);
-  details.recentFailures = failures.map((step) => {
-    const key = failureKey(step);
-    const attempts = steps.filter(
-      (candidate) => candidate.stepType !== 'retry' && failureKey(candidate) === key
-    ).length;
-    return {
-      repository: getIdentity(step).repository,
-      service: getIdentity(step).service,
-      step: step.stepId as CodeExtractionStepId,
-      attempts: Math.max(1, attempts),
-      error: asString(step.error?.message) ?? 'Unknown error',
-    };
-  });
+  details.recentFailures = failures.map((step) => ({
+    repository: getIdentity(step).repository,
+    service: getIdentity(step).service,
+    step: step.stepId as CodeExtractionStepId,
+    attempts: getAttemptCount(step),
+    error: asString(step.error?.message) ?? 'Unknown error',
+  }));
 
   const repositorySummaries: CodeExtractionRunDetails['perRepository'] = [];
   for (const repository of repositories) {
@@ -408,7 +409,7 @@ export const getCodeExtractionRunDetails = (
       step: current.stepId as CodeExtractionStepId,
       ...(getIdentity(current).repository ? { repository: getIdentity(current).repository } : {}),
       ...(getIdentity(current).service ? { service: getIdentity(current).service } : {}),
-      attempt: current.stepExecutionIndex + 1,
+      attempt: getAttemptCount(current),
       ...(current.startedAt ? { stepStartedAt: current.startedAt } : {}),
     };
   }

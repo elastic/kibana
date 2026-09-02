@@ -226,13 +226,14 @@ describe('discoverLoggingSites', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('limit 1'));
   });
 
-  it('stops issuing greps once the aggregate candidate ceiling is reached', async () => {
+  it('runs every idiom and evenly samples the aggregate candidate set', async () => {
     const codebox = createMockCodeboxClient();
     const logger = loggerMock.create();
-    codebox.grep.mockResolvedValue([
-      { ref: 'abc123', path: 'src/a.ts', lineNumber: 1, content: 'logger.info("hi")' },
-      { ref: 'abc123', path: 'src/b.ts', lineNumber: 2, content: 'logger.warn("hi")' },
-    ]);
+    let call = 0;
+    codebox.grep.mockImplementation(async () => {
+      const path = `src/file-${call++}.ts`;
+      return [{ ref: 'abc123', path, lineNumber: 1, content: 'logger.info("hi")' }];
+    });
     codebox.show.mockResolvedValue('logger.info("hi")');
 
     const candidates = await discoverLoggingSites({
@@ -244,11 +245,12 @@ describe('discoverLoggingSites', () => {
       maxCandidates: 2,
     });
 
-    // First grep alone fills the ceiling
-    const grepCalls = codebox.grep.mock.calls.length;
-    expect(grepCalls).toBe(1);
-    expect(candidates).toHaveLength(2);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2-candidate ceiling'));
+    expect(codebox.grep).toHaveBeenCalledTimes(LOGGER_IDIOM_PATTERNS.length);
+    expect(candidates.map(({ location }) => location)).toEqual([
+      'src/file-0.ts:1',
+      `src/file-${Math.floor(LOGGER_IDIOM_PATTERNS.length / 2)}.ts:1`,
+    ]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('sampled 2 of'));
   });
 
   it('drops hits whose own line cannot emit', async () => {

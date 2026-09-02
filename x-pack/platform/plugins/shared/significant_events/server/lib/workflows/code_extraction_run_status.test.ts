@@ -106,7 +106,7 @@ describe('getCodeExtractionRunDetails', () => {
         step: 'identify_service',
         repository: 'org/repo',
         service: 'worker',
-        attempt: 2,
+        attempt: 1,
       },
       progress: {
         repositoriesTotal: 1,

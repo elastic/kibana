@@ -176,9 +176,9 @@ export interface DiscoverLoggingSitesOptions {
   /** Max lines per grep pattern (defaults to 500). */
   perPatternLimit?: number;
   /**
-   * Ceiling on distinct candidate locations across ALL patterns (defaults to
-   * 3000). `perPatternLimit` bounds one grep; this bounds the union, which is
-   * what the window fetch and the LLM classifier actually pay for.
+   * Ceiling on candidate locations sent to window fetch and classification
+   * (defaults to 500). All patterns still run; an evenly-spaced deterministic
+   * sample prevents early broad patterns from starving later idioms.
    */
   maxCandidates?: number;
   /**
@@ -213,7 +213,7 @@ export async function discoverLoggingSites({
   language,
   logger,
   perPatternLimit = 500,
-  maxCandidates = 3000,
+  maxCandidates = 500,
   profileGreps = [],
   useLoggingProfile = true,
 }: DiscoverLoggingSitesOptions): Promise<LoggingCandidate[]> {
@@ -263,31 +263,33 @@ export async function discoverLoggingSites({
     }
   };
 
-  const runGrepsUnderCeiling = async (regexes: readonly string[]): Promise<number> => {
-    let ran = 0;
-    for (const regex of regexes) {
-      if (locations.size >= maxCandidates) {
-        logger.warn(
-          `logging_sites: "${repository}" @ "${root}" reached the ${maxCandidates}-candidate ceiling; ` +
-            `remaining pattern(s) skipped. Discovery is biased toward the patterns that ran first.`
-        );
-        break;
-      }
-      await runGrep(regex);
-      ran += 1;
-    }
-    return ran;
+  const runGreps = async (regexes: readonly string[]): Promise<void> => {
+    for (const regex of regexes) await runGrep(regex);
   };
 
-  await runGrepsUnderCeiling(LOGGER_IDIOM_PATTERNS);
-
+  await runGreps(LOGGER_IDIOM_PATTERNS);
   const idiomLocations = locations.size;
-  const profileRan = await runGrepsUnderCeiling(profileGrepsToRun);
+  await runGreps(profileGrepsToRun);
   const profileContributed = locations.size - idiomLocations;
 
-  // Fetch +/-1 windows for all hits (batched per file).
+  const allLocations = [...locations];
+  const selectedLocations =
+    allLocations.length <= maxCandidates
+      ? allLocations
+      : Array.from(
+          { length: maxCandidates },
+          (_, index) => allLocations[Math.floor((index * allLocations.length) / maxCandidates)]
+        );
+  if (selectedLocations.length < allLocations.length) {
+    logger.warn(
+      `logging_sites: "${repository}" @ "${root}" sampled ${selectedLocations.length} of ` +
+        `${allLocations.length} distinct candidate locations before window fetch and classification`
+    );
+  }
+
+  // Fetch +/-1 windows for selected hits (batched per file).
   const hitsByFile = new Map<string, Set<number>>();
-  for (const location of locations) {
+  for (const location of selectedLocations) {
     const idx = location.lastIndexOf(':');
     const path = location.slice(0, idx);
     const lineNumber = Number(location.slice(idx + 1));
@@ -306,7 +308,7 @@ export async function discoverLoggingSites({
 
   const candidates: LoggingCandidate[] = [];
   let nonEmitting = 0;
-  for (const location of locations) {
+  for (const location of selectedLocations) {
     const idx = location.lastIndexOf(':');
     const path = location.slice(0, idx);
     const lineNumber = Number(location.slice(idx + 1));
@@ -333,7 +335,7 @@ export async function discoverLoggingSites({
       (nonEmitting > 0 ? ` (${nonEmitting} non-emitting line(s) dropped)` : '') +
       (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '') +
       (profileGrepsToRun.length > 0
-        ? ` (${profileRan}/${profileGrepsToRun.length} profile grep(s) ran, contributed ${profileContributed} location(s))`
+        ? ` (${profileGrepsToRun.length} profile grep(s) ran, contributed ${profileContributed} location(s))`
         : '')
   );
   return candidates;

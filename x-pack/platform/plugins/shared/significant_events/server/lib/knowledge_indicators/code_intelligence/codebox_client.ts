@@ -89,6 +89,8 @@ import { MAX_GREP_HITS } from './constants';
  * stable across installs so the plugin can reference it without a runtime lookup.
  */
 export const CODEBOX_CONNECTOR_ID = '20c92e6c-8b1a-5f3e-9d2a-6b7c8e9f0a1b';
+const TREE_PAGE_SIZE = 2_000;
+const MAX_TREE_PATHS = 1_000_000;
 
 /**
  * Minimal interface for executing an HTTP connector action. Matches the
@@ -194,9 +196,35 @@ export class CodeboxClient {
     const query = new URLSearchParams();
     if (recursive) query.set('recursive', 'true');
     if (nameOnly) query.set('nameOnly', 'true');
+    const treePath = `/repos/${org}/${repo}/tree/${encodedRef}${pathSuffix}`;
+
+    if (recursive && nameOnly) {
+      const paths: string[] = [];
+      for (let offset = 0; ; offset += TREE_PAGE_SIZE) {
+        query.set('offset', String(offset));
+        query.set('limit', String(TREE_PAGE_SIZE));
+        const page = await this.request('GET', `${treePath}?${query}`);
+        if (!Array.isArray(page) || !page.every((entry) => typeof entry === 'string')) {
+          throw new Error(`Codebox returned an invalid tree page for ${org}/${repo}`);
+        }
+        if (offset > 0 && page[0] === paths[0]) {
+          throw new Error(
+            `Codebox tree pagination is not supported by the server for ${org}/${repo}`
+          );
+        }
+        paths.push(...page);
+        if (paths.length > MAX_TREE_PATHS) {
+          throw new Error(`Codebox tree for ${org}/${repo} exceeds ${MAX_TREE_PATHS} paths`);
+        }
+        if (page.length < TREE_PAGE_SIZE) break;
+      }
+      return paths;
+    }
+
     const qs = query.toString();
-    const url = `/repos/${org}/${repo}/tree/${encodedRef}${pathSuffix}${qs ? `?${qs}` : ''}`;
-    return this.request('GET', url) as Promise<CodeboxTreeEntry[] | string[]>;
+    return this.request('GET', `${treePath}${qs ? `?${qs}` : ''}`) as Promise<
+      CodeboxTreeEntry[] | string[]
+    >;
   }
 
   /**

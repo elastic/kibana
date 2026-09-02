@@ -178,6 +178,30 @@ describe('classifyLoggingSites', () => {
     expect(chunks[1_199].location).toBe('src/main.ts:1199');
   });
 
+  it('aborts a slow batch at its deadline and keeps that batch unjudged', async () => {
+    const candidates = [candidate({ location: 'a:1' })];
+    const output = jest.fn(
+      ({ abortSignal }: { abortSignal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          abortSignal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+        })
+    );
+    const logger = loggerMock.create();
+
+    const chunks = await classifyLoggingSites({
+      inferenceClient: { output } as unknown as InferenceClient,
+      connectorId: 'c',
+      candidates,
+      logger,
+      batchTimeoutMs: 1,
+    });
+
+    expect(chunks.map(({ location }) => location)).toEqual(['a:1']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('keeping its idiom candidates')
+    );
+  });
+
   it('degrades only a failed batch and merges successful batch decisions by global id', async () => {
     const candidates = Array.from({ length: 450 }, (_, index) =>
       candidate({ location: `src/main.ts:${index}` })
