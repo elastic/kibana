@@ -147,6 +147,7 @@ describe('vegaEmbeddableFactory', () => {
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
     apiEnabled = false,
+    afterFactoryCreated,
     initialState = {
       spec: { format: 'hjson', value: '{ mark: point }' },
       title: 'Initial title',
@@ -154,6 +155,7 @@ describe('vegaEmbeddableFactory', () => {
   }: {
     standaloneEmbeddableEnabled?: boolean;
     apiEnabled?: boolean;
+    afterFactoryCreated?: (coreStart: ReturnType<typeof coreMock.createStart>) => void;
     initialState?: VegaEmbeddableState;
   } = {}) => {
     const coreStart = coreMock.createStart();
@@ -166,6 +168,7 @@ describe('vegaEmbeddableFactory', () => {
       uiActions: { executeTriggerActions },
       visualizationDependencies,
     });
+    afterFactoryCreated?.(coreStart);
     const uuid = 'vega-panel';
 
     const embeddable = await factory.buildEmbeddable({
@@ -239,6 +242,18 @@ describe('vegaEmbeddableFactory', () => {
       expect(api.supportsJsonExport).toBe(supportsJsonExport);
     }
   );
+
+  it('uses the feature flag values captured when the embeddable definition is created', async () => {
+    const { api } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      afterFactoryCreated: (coreStart) =>
+        coreStart.featureFlags.getBooleanValue.mockReturnValue(false),
+    });
+
+    expect(api.supportsJsonExport).toBe(true);
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+  });
 
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -99,7 +98,11 @@ describe('VegaPlugin', () => {
     const enabled = setup({ standalone: true, api: true }).embeddable;
     const standaloneOnly = setup({ standalone: true }).embeddable;
     const apiOnly = setup({ api: true }).embeddable;
-    await new Promise(process.nextTick);
+    await Promise.all(
+      [enabled, standaloneOnly, apiOnly].map((embeddable) =>
+        jest.mocked(embeddable.registerEmbeddablePublicDefinition).mock.calls[0][1]()
+      )
+    );
 
     expect(enabled.registerAddFromLibraryType).toHaveBeenCalledWith(
       expect.objectContaining({ savedObjectType: 'vega', savedObjectName: 'Vega' })
@@ -109,9 +112,11 @@ describe('VegaPlugin', () => {
   });
 
   describe('Vega add action feature flag', () => {
-    const startPlugin = (flag$: BehaviorSubject<boolean>) => {
+    const startPlugin = (standaloneEnabled: boolean) => {
       const core = coreMock.createStart();
-      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$);
+      core.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
+        key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEnabled : fallback
+      );
 
       const uiActions = uiActionsPluginMock.createStartContract();
       const deps: VegaPluginStartDependencies = {
@@ -130,11 +135,11 @@ describe('VegaPlugin', () => {
         coreMock.createPluginInitializerContext({ enableExternalUrls: false })
       );
       plugin.start(core, deps);
-      return { plugin, uiActions };
+      return uiActions;
     };
 
     it('attaches the legacy Visualize-navigation action to add menus when the flag is disabled', () => {
-      const { uiActions } = startPlugin(new BehaviorSubject(false));
+      const uiActions = startPlugin(false);
       // Legacy action swapped onto the Dashboard Add-panel menu; the standalone action is not.
       expect(uiActions.attachAction).toHaveBeenCalledWith(
         ADD_PANEL_TRIGGER,
@@ -152,7 +157,7 @@ describe('VegaPlugin', () => {
     });
 
     it('swaps in the standalone action and detaches the legacy action when the flag is enabled', () => {
-      const { uiActions } = startPlugin(new BehaviorSubject(true));
+      const uiActions = startPlugin(true);
       expect(uiActions.attachAction).toHaveBeenCalledWith(
         ADD_PANEL_TRIGGER,
         ADD_VEGA_EMBEDDABLE_ACTION_ID
@@ -168,19 +173,6 @@ describe('VegaPlugin', () => {
       expect(uiActions.detachAction).toHaveBeenCalledWith(
         ADD_CANVAS_ELEMENT_TRIGGER,
         ADD_VEGA_PANEL_ACTION_ID
-      );
-    });
-
-    it('stops swapping actions after the plugin stops', () => {
-      const flag$ = new BehaviorSubject(false);
-      const { plugin, uiActions } = startPlugin(flag$);
-
-      plugin.stop();
-      flag$.next(true);
-
-      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_EMBEDDABLE_ACTION_ID
       );
     });
   });
