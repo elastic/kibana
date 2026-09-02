@@ -41,7 +41,6 @@ const createSavedSearch = async (
           view_mode: VIEW_MODE.DOCUMENT_LEVEL,
           hide_chart: false,
           hide_table: false,
-          time_restore: false,
         },
       ],
     } satisfies DiscoverSessionApiDataInput,
