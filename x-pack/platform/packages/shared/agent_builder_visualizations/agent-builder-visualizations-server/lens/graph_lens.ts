@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
-import { executeForAuthoring } from '../shared/execute_for_authoring';
+import { executeForAuthoring, tryExecuteForAuthoring } from '../shared/execute_for_authoring';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
@@ -147,19 +147,18 @@ export const createVisualizationGraph = async (
       // through to self-correcting generation rather than author a config around
       // a query that can never render.
       if (query) {
-        try {
-          logger.debug('Validating provided ES|QL query for Lens visualization');
-          ({ columns } = await executeForAuthoring({
-            query,
-            esClient: esClient.asCurrentUser,
-          }));
-        } catch (providedError) {
-          const message =
-            providedError instanceof Error ? providedError.message : String(providedError);
+        logger.debug('Validating provided ES|QL query for Lens visualization');
+        const executed = await tryExecuteForAuthoring({
+          query,
+          esClient: esClient.asCurrentUser,
+        });
+        if (!executed.ok) {
           logger.warn(
-            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
+            `Provided ES|QL query failed to execute (${executed.error}); regenerating a corrected query`
           );
           query = '';
+        } else {
+          columns = executed.columns;
         }
       }
 

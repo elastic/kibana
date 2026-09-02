@@ -15,6 +15,7 @@ import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import {
   DEFAULT_VALIDATION_TIME_RANGE,
   executeForAuthoring,
+  tryExecuteForAuthoring,
 } from '../shared/execute_for_authoring';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
@@ -149,19 +150,18 @@ export const createVegaGraph = async (
       // through to self-correcting generation rather than author a spec around a
       // query that can never render.
       if (query) {
-        try {
-          logger.debug('Validating provided ES|QL query for Vega visualization');
-          ({ columns } = await executeForAuthoring({
-            query,
-            esClient: esClient.asCurrentUser,
-          }));
-        } catch (providedError) {
-          const message =
-            providedError instanceof Error ? providedError.message : String(providedError);
+        logger.debug('Validating provided ES|QL query for Vega visualization');
+        const executed = await tryExecuteForAuthoring({
+          query,
+          esClient: esClient.asCurrentUser,
+        });
+        if (!executed.ok) {
           logger.warn(
-            `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
+            `Provided ES|QL query failed to execute (${executed.error}); regenerating a corrected query`
           );
           query = '';
+        } else {
+          columns = executed.columns;
         }
       }
 

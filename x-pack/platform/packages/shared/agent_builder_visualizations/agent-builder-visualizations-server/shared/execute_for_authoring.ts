@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
@@ -30,3 +31,19 @@ export const executeForAuthoring = ({
     dropNullColumns: false,
     esClient,
   });
+
+/** Execute a provided query, or return the error so the caller can regenerate. */
+export const tryExecuteForAuthoring = async ({
+  query,
+  esClient,
+}: {
+  query: string;
+  esClient: ElasticsearchClient;
+}): Promise<{ ok: true; columns: EsqlEsqlColumnInfo[] } | { ok: false; error: string }> => {
+  try {
+    const { columns } = await executeForAuthoring({ query, esClient });
+    return { ok: true, columns };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+};
