@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIXED. Saved-query CRUD through the popover is already covered in
+ * Scout by src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts;
+ * only the cross-space sharing case is unique to this file.
+ */
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -47,6 +53,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Manage saved queries', () => {
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Deleting a saved query that is shared into a
+       * second space is a real multi-space saved-object contract with no other coverage. Belongs
+       * next to the existing saved-query specs in
+       * src/platform/plugins/shared/unified_search/test/scout/ui/tests. The Saved Objects
+       * management leg (navigate to settings, open the share-to-space flyout) can be replaced by a
+       * `kbnClient` share call so only the Discover delete + reload stays in the browser.
+       */
       it('delete saved query shared in multiple spaces', async () => {
         // Navigate to Discover & create a saved query
         await common.navigateToApp('discover');
@@ -74,6 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryMissingOrFail(savedQueryName);
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by the 'update the loaded query and re-load it'
+       * step of saved_query_menu_crud.spec.ts, which additionally asserts the persisted query
+       * string — this test only asserts the query still appears in the list.
+       */
       it('updates a saved query', async () => {
         const name = `${savedQueryName}-update`;
 

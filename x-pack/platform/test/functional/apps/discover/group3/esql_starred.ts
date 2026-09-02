@@ -4,6 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/**
+ * Migration recommendation: MIXED, mostly cover below the browser. The starred-queries UI is
+ * already unit tested in
+ * src/platform/packages/private/kbn-esql-editor/src/editor_footer/history_starred_queries.test.tsx
+ * and esql_starred_queries_service.test.tsx, and the favorites persistence API is covered by
+ * src/platform/plugins/shared/content_management/test/scout/api/tests/favorites_esql_query.spec.ts.
+ * Keep at most one Scout test for the end-to-end wiring (star from history, survive a reload, load
+ * back into the editor).
+ *
+ * Also note: the `discover_read_user` / `discover_read_role` setup adds a role + user + two logins
+ * to every run, but no test here asserts anything read-only specific. Drop it during migration and
+ * use a standard Scout `browserAuth` role.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -72,6 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await securityService.role.delete(role);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT, merged with the three tests below into a single
+     * spec using `test.step`. Each test currently re-navigates to Discover and re-opens the history
+     * panel from scratch, so four browser sessions pay for what is one continuous flow.
+     */
     it('should star a query from the editor query history', async () => {
       await common.navigateToApp('discover');
       await discover.selectTextBaseLang();
@@ -91,6 +110,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', starredItems);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as a step of the merged spec). Persistence across
+     * a reload is the one thing here that genuinely needs a browser plus the favorites backend.
+     */
     it('should persist the starred query after a browser refresh', async () => {
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
@@ -103,6 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', starredItems);
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT (as a step of the merged spec). Clicking a starred
+     * item must push the query into the Monaco editor, which the jest tests do not exercise.
+     */
     it('should select a query from the starred and submit it', async () => {
       await common.navigateToApp('discover');
       await discover.selectTextBaseLang();
@@ -120,6 +147,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(editorValue).to.eql(`FROM logstash-* | SORT @timestamp DESC`);
     });
 
+    /**
+     * Migration recommendation: Cover with unit tests. Unstarring plus the discard-confirmation
+     * modal is component behavior; extend history_starred_queries.test.tsx. Removal is already
+     * verified against the backend by the favorites_esql_query API spec.
+     */
     it('should delete a query from the starred queries tab', async () => {
       await common.navigateToApp('discover');
       await discover.selectTextBaseLang();

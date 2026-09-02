@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: DELETE (whole file). Already covered in Scout by
+ * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_non_time_based.spec.ts
+ * ('shows all auto-suggest options for a filter in discover context app'), which asserts the same
+ * suggestion count and value.
+ */
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

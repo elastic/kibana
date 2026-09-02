@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: DELETE (whole file). Both tests already exist in Scout as
+ * near-verbatim ports:
+ * - x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts
+ *   'should customize time range on dashboards'
+ * - the same spec's `should unselect saved search when navigating to a 'new'`
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 

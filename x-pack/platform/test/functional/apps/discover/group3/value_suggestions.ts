@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: DELETE (whole file). Every block below is already covered in Scout;
+ * see the per-block notes. The Scout ports also drop the `settings` page-object round trip by
+ * setting `autocomplete:useTimeRange` through `scoutSpace.uiSettings`, which is much cheaper.
+ */
+
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -54,6 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('discover');
       });
 
+      /**
+       * Migration recommendation: DELETE. All three tests are ported verbatim in
+       * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts
+       * ('dont show up if outside of range', 'show up if in range',
+       * 'also displays descriptions for operators').
+       */
       describe('discover', () => {
         afterEach(async () => {
           await queryBar.clearQuery();
@@ -82,6 +94,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      /**
+       * Migration recommendation: DELETE. The test name promises autosuggest coverage but the body
+       * has no assertion — it only checks that navigating to the context view and calling
+       * `addFilter` does not throw. The suggestion behavior itself is covered by the `discover`
+       * block above, and context-view navigation is covered in
+       * src/platform/plugins/shared/discover/test/scout/surrounding_docs.
+       */
       describe('context', () => {
         after(async () => {
           await filterBar.removeFilter('geo.dest');
@@ -103,6 +122,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: DELETE. Both tests are ported in
+     * x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts
+     * ('show up if outside of range', 'show up if in range').
+     */
     describe('useTimeRange disabled', () => {
       before(async () => {
         await setAutocompleteUseTimeRange(false);
