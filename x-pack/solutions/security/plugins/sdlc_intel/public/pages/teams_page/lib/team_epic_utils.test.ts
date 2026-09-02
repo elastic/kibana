@@ -21,6 +21,7 @@ const createEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhas
   teams: {
     ownOrgTeam: 'siem',
     contributingOrgTeams: ['siem', 'si'],
+    contributingEngineeringTeams: [],
     crossTeam: true,
     teamCount: 2,
   },
@@ -68,6 +69,7 @@ describe('team_epic_utils', () => {
             teams: {
               ownOrgTeam: 'siem',
               contributingOrgTeams: ['siem'],
+              contributingEngineeringTeams: [],
               crossTeam: false,
               teamCount: 1,
             },
@@ -79,6 +81,7 @@ describe('team_epic_utils', () => {
             teams: {
               ownOrgTeam: 'siem',
               contributingOrgTeams: ['siem', 'si'],
+              contributingEngineeringTeams: [],
               crossTeam: true,
               teamCount: 2,
             },
@@ -88,6 +91,7 @@ describe('team_epic_utils', () => {
             teams: {
               ownOrgTeam: 'si',
               contributingOrgTeams: ['si'],
+              contributingEngineeringTeams: [],
               crossTeam: false,
               teamCount: 1,
             },

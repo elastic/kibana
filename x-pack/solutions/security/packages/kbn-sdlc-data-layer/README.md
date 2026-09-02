@@ -2,7 +2,7 @@
 
 Shared Elasticsearch index definitions, team-dimension reference data, roadmap mappings, and analytics helpers for the SDLC intelligence platform.
 
-**PRD & architecture traceability:** see [PRD_TRACEABILITY.md](./PRD_TRACEABILITY.md). **Architecture v1.1 delta** (draft update to `sdlc-platform-architecture.docx`): [ARCHITECTURE_v1.1_DELTA.md](./ARCHITECTURE_v1.1_DELTA.md).
+**PRD & architecture traceability:** see [PRD_TRACEABILITY.md](./PRD_TRACEABILITY.md). **Architecture v1.1 delta** (draft update to `sdlc-platform-architecture.docx`): [architecture_v1.1_delta.md](./architecture_v1.1_delta.md).
 
 ## Indices
 

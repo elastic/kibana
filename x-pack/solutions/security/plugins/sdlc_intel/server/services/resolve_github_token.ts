@@ -16,7 +16,6 @@ import type { AuthMode } from '@kbn/connector-specs';
 import { normalizeAuthorizationHeaderValue } from '@kbn/connector-specs';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import type { RawAction } from '@kbn/actions-plugin/server/types';
 import { getSdlcIntelServices } from './sdlc_intel_services';
 
@@ -89,7 +88,7 @@ const resolveTokenFromConnector = async (
   request: KibanaRequest,
   connectorIdOrName: string
 ): Promise<string> => {
-  const { actionsSetup, actionsStart, coreStart, logger } = getSdlcIntelServices();
+  const { actionsSetup, actionsStart } = getSdlcIntelServices();
   const actionsClient = await actionsStart.getActionsClientWithRequest(request);
   const connectorRef = await resolveGithubConnector(actionsClient, connectorIdOrName);
 
@@ -109,21 +108,11 @@ const resolveTokenFromConnector = async (
     return secrets.token;
   }
 
-  const encryptedSavedObjectsClient = getSdlcIntelServices().encryptedSavedObjects.getClient({
-    includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
-  });
-  const unsecuredSavedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-  const connectorTokenClient = new ConnectorTokenClient({
-    encryptedSavedObjectsClient,
-    unsecuredSavedObjectsClient,
-    logger,
-  });
 
   const axiosInstance = await actionsSetup.getAxiosInstanceWithAuth({
     connectorId: connector.id,
     secrets,
     authMode: authMode ?? connector.authMode,
-    connectorTokenClient,
     additionalHeaders: GITHUB_GLOBAL_AUTH_HEADERS,
   });
 

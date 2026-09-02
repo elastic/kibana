@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate PLATFORM_GAPS_REQUIREMENTS.docx for SDLC Fleet package platform asks."""
+"""Generate platform_gaps_requirements.docx for SDLC Fleet package platform asks."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from docx.shared import Inches, Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
-OUTPUT = Path(__file__).with_name('PLATFORM_GAPS_REQUIREMENTS.docx')
+OUTPUT = Path(__file__).with_name('platform_gaps_requirements.docx')
 
 GAPS = [
     # Fleet

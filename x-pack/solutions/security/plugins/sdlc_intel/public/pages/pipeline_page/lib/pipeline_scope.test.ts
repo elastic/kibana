@@ -8,7 +8,8 @@
 import type { SdlcEpicPhaseSummary, SdlcRoadmapGroup } from '../../../../common/api/types';
 import { buildPipelineDisplayGroups, filterEpicsByPipelineScope } from './pipeline_scope';
 
-const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhaseSummary => ({
+const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhaseSummary =>
+  ({
   id: 'epic:workflows:demo',
   epicKey: 'DEMO',
   displayId: 'DEMO-1',
@@ -35,7 +36,7 @@ const sampleEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhas
   phases: {},
   ticketsByRepo: [],
   ...overrides,
-});
+  } as SdlcEpicPhaseSummary);
 
 const roadmaps: SdlcRoadmapGroup[] = [
   {
@@ -60,6 +61,7 @@ const roadmaps: SdlcRoadmapGroup[] = [
         roadmap: { id: 'unmapped', title: '(fips): Legal requirements', product: 'Unknown' },
         teams: {
           contributingOrgTeams: [],
+          contributingEngineeringTeams: [],
           crossTeam: false,
           teamCount: 0,
         },

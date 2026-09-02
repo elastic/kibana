@@ -72,18 +72,19 @@ const filterEpicsBySubteamScope = (
     return [];
   }
 
-  const subteamEpics = groupEpicsBySubteam(epics, teamRecord, orgTeamKey);
+  const matchInputs = epics.map((epic) => ({ ...toEpicOrgTeamInput(epic), epic }));
+  const subteamEpics = groupEpicsBySubteam(matchInputs, teamRecord);
 
   if (subteamKey === 'unassigned') {
     const assignedIds = new Set(
       Object.values(subteamEpics)
         .flat()
-        .map((epic) => epic.id)
+        .map((entry) => entry.epic.id)
     );
     return epics.filter((epic) => !assignedIds.has(epic.id));
   }
 
-  return subteamEpics[subteamKey] ?? [];
+  return (subteamEpics[subteamKey] ?? []).map((entry) => entry.epic);
 };
 
 export const filterEpicsByPipelineScope = (

@@ -141,6 +141,7 @@ describe('executive_filters', () => {
             title: 'FIPS binaries',
             teams: {
               contributingOrgTeams: [],
+              contributingEngineeringTeams: [],
               crossTeam: false,
               teamCount: 0,
             },

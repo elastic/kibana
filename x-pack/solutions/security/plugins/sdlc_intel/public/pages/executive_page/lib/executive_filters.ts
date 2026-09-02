@@ -234,7 +234,10 @@ export const groupRoadmapsByOrgTeamSubteam = (
       continue;
     }
 
-    const subteamEpicsMap = groupEpicsBySubteam(orgEpics, teamRecord);
+    const subteamEpicsMap = groupEpicsBySubteam(
+      orgEpics.map((epic) => ({ ...toEpicSubteamMatchInput(epic), epic })),
+      teamRecord
+    );
     const subteamDefinitions = resolveSubteamDefinitionsForOrg(orgTeamKey, teamRecord.subteams);
     const subteams: ExecutiveSubteamGroup[] = [];
     const assignedEpicIds = new Set<string>();
@@ -246,14 +249,14 @@ export const groupRoadmapsByOrgTeamSubteam = (
         continue;
       }
 
-      for (const epic of subteamEpics) {
-        assignedEpicIds.add(epic.id);
+      for (const entry of subteamEpics) {
+        assignedEpicIds.add(entry.epic.id);
       }
 
       subteams.push({
         subteamKey,
         subteamName: subteam.name,
-        roadmaps: groupEpicsIntoRoadmaps(subteamEpics),
+        roadmaps: groupEpicsIntoRoadmaps(subteamEpics.map((entry) => entry.epic)),
       });
     }
 

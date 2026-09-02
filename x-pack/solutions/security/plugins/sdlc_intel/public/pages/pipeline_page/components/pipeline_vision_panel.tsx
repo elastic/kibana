@@ -54,7 +54,7 @@ export const PipelineVisionPanel = () => {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: ${euiTheme.colors.ghost};
+                color: ${euiTheme.colors.emptyShade};
               `}
             >
               <EuiIcon type="globe" size="s" aria-hidden={true} />
