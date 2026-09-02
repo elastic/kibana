@@ -102,14 +102,14 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
 );
 
 export const ADD_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.detections.hooks.attacks.bulkActions.addToNewCase',
+  'xpack.securitySolution.visualizationActions.addToNewCase',
   {
     defaultMessage: 'Add to new case',
   }
 );
 
 export const ADD_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.detections.hooks.attacks.bulkActions.addToExistingCase',
+  'xpack.securitySolution.visualizationActions.addToExistingCase',
   {
     defaultMessage: 'Add to existing case',
   }

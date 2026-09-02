@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import type { CasesPermissions } from '@kbn/cases-plugin/common';
+import { APP_ID } from '../../../../../common/constants';
 import { EMPTY_VALUE } from '../../../../threat_intelligence/constants/common';
-import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
+import { useKibana } from '../../../../common/lib/kibana';
 
 /**
- * Decides if the add-to-case action should be disabled.
- * The action is available when the user can attach the indicator to a case.
+ * Decides if we enable or disable the add to existing and add to new case features.
+ * If the Indicator has no name the features will be disabled.
+ * If the user doesn't have the correct permissions the features will be disabled.
  * Owner is scoped to `APP_ID` (`securitySolution`) so permissions match what the Cases API enforces.
  *
  * @param indicatorName the name of the indicator
- * @return true if the action should be disabled
+ * @return true if the features are enabled
  */
 export const useCaseDisabled = (indicatorName: string): boolean => {
-  const canAttach = useCanAttachToCase();
+  const { cases } = useKibana().services;
+  const permissions: CasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   // disable the item if there is no indicator name or if the user doesn't have the right permission
   // in the case's attachment, the indicator name is the link to open the flyout
   const invalidIndicatorName: boolean = indicatorName === EMPTY_VALUE;
+  const hasPermission: boolean = permissions.createComment && permissions.update;
 
-  return invalidIndicatorName || !canAttach;
+  return invalidIndicatorName || !hasPermission;
 };

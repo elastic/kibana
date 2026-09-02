@@ -12,8 +12,6 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
-import { ATTACK_STATUS_ICON_COLORS } from '../../../../detections/hooks/attacks/bulk_actions/bulk_action_items/use_bulk_attack_workflow_status_items';
-import { withStatusDotIcons } from '../../../../common/utils/action_menu_items';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import type { inputsModel } from '../../../../common/store';
@@ -100,11 +98,6 @@ export const StatusPopoverButton = memo(
 
     const statusPopoverVisible = useMemo(() => items.length > 0 && !disabled, [items, disabled]);
 
-    const decoratedItems = useMemo(
-      () => withStatusDotIcons(items, ATTACK_STATUS_ICON_COLORS),
-      [items]
-    );
-
     const button = useMemo(
       () => (
         <FormattedFieldValue
@@ -144,7 +137,7 @@ export const StatusPopoverButton = memo(
           )}
         </EuiPopoverTitle>
         <EuiContextMenu
-          panels={[{ id: 0, items: decoratedItems }, ...panels]}
+          panels={[{ id: 0, items }, ...panels]}
           initialPanelId={0}
           data-test-subj={STATUS_POPOVER_BUTTON_TEST_ID}
         />
