@@ -101,10 +101,17 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
 
     // Compute the EUID for each event and group events by EUID. Stamp all events with a derivable
     // EUID immediately — store membership is not required for the stamp.
+    //
+    // `applyPostAggFilter: false` because this resolves which entity an alert refers to; it never
+    // creates one. `postAggFilter` gates on `idpGate`, which no alert can satisfy — the detection
+    // engine rewrites `event.kind` to `signal` — so keeping it would leave IdP-namespace users
+    // unstamped and unenriched even when their entity is in the store.
     const eventsMapByEuid: Record<string, Array<EventsForEnrichment<T>>> = {};
     const eventsMapById: EventsMapByEnrichments = {};
     for (const event of events) {
-      const computedEuid = euid.getEuidFromObject(entityType, event._source);
+      const computedEuid = euid.getEuidFromObject(entityType, event._source, {
+        applyPostAggFilter: false,
+      });
       if (computedEuid) {
         (eventsMapByEuid[computedEuid] ??= []).push(event);
         eventsMapById[event._id] = [buildEuidStampEnrichment(computedEuid)];

@@ -278,4 +278,34 @@ describe('getEuidFromObject', () => {
       expect(getEuidFromObject('service', obj)).toBe('service:api-gateway');
     });
   });
+
+  describe('applyPostAggFilter', () => {
+    // A detection alert raised on an okta user: the detection engine rewrites event.kind to
+    // 'signal', which no arm of postAggFilter accepts. Creation must reject it; resolution must
+    // not, or the alert can never be tied back to an entity that is already in the store.
+    const idpAlert = {
+      user: { email: 'alice@example.com' },
+      event: { kind: 'signal', module: 'okta' },
+    };
+
+    it('rejects an IdP-namespace alert by default', () => {
+      expect(getEuidFromObject('user', idpAlert)).toBeUndefined();
+    });
+
+    it('resolves an IdP-namespace alert when applyPostAggFilter is false', () => {
+      expect(getEuidFromObject('user', idpAlert, { applyPostAggFilter: false })).toBe(
+        'user:alice@example.com@okta'
+      );
+    });
+
+    it('still enforces documentsFilter when applyPostAggFilter is false', () => {
+      expect(
+        getEuidFromObject(
+          'user',
+          { ...idpAlert, event: { ...idpAlert.event, outcome: 'failure' } },
+          { applyPostAggFilter: false }
+        )
+      ).toBeUndefined();
+    });
+  });
 });

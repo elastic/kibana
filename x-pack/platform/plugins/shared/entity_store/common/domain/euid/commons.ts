@@ -120,6 +120,24 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
   return false;
 }
 
+export interface EuidGateOptions {
+  /**
+   * Whether to gate the EUID on `postAggFilter` as well as `documentsFilter`.
+   *
+   * `postAggFilter` decides whether a document may create or keep an entity. One of its arms
+   * (`entity.id` exists) only becomes true after the extraction pipeline's LOOKUP JOIN has
+   * attached the stored entity.
+   *
+   * Pass `false` when resolving which existing entity a document refers to. Those callers have
+   * no LOOKUP JOIN, so that arm never fires and the gate rejects identifiers whose entities are
+   * already in the store. Alerts need this: the detection engine rewrites `event.kind` to
+   * `signal`, so `idpGate` cannot match and IdP-namespace users resolve to nothing.
+   *
+   * @default true
+   */
+  applyPostAggFilter?: boolean;
+}
+
 /**
  * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
  * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
@@ -130,15 +148,20 @@ export function evaluateStreamlangCondition(doc: any, condition: unknown): boole
  */
 export function documentPassesCalculatedIdentityPipelineGate(
   doc: any,
-  entityDefinition: EntityDefinitionWithoutId
+  entityDefinition: EntityDefinitionWithoutId,
+  options?: EuidGateOptions
 ): boolean {
   const { identityField, postAggFilter } = entityDefinition;
+  const { applyPostAggFilter = true } = options ?? {};
   if (isSingleFieldIdentity(identityField)) {
     return true;
   }
   return evaluateStreamlangCondition(
     doc,
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, postAggFilter)
+    mergeDocumentsFilterAndPostAgg(
+      identityField.documentsFilter,
+      applyPostAggFilter ? postAggFilter : undefined
+    )
   );
 }
 

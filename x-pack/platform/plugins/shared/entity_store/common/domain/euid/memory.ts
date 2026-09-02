@@ -8,6 +8,7 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import type { EuidGateOptions } from './commons';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -36,9 +37,11 @@ import { applyFieldEvaluations } from './field_evaluations';
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
+ * @param options - See {@link EuidGateOptions}; pass `applyPostAggFilter: false` to resolve which
+ * existing entity a document refers to rather than deciding whether one may be created.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidFromObject(entityType: EntityType, doc: any) {
+export function getEuidFromObject(entityType: EntityType, doc: any, options?: EuidGateOptions) {
   if (!doc) {
     return undefined;
   }
@@ -70,7 +73,7 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
   }
 
-  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
+  if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition, options)) {
     return undefined;
   }
 

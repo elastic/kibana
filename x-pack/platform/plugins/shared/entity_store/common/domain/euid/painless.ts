@@ -15,25 +15,8 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import type { EuidGateOptions } from './commons';
 import { isEuidField } from './commons';
-
-export interface EuidPainlessOptions {
-  /**
-   * Whether to gate the EUID on `postAggFilter` as well as `documentsFilter`.
-   *
-   * `postAggFilter` decides whether a document may create or keep an entity. One of its arms
-   * (`entity.id` exists) only becomes true after the extraction pipeline's LOOKUP JOIN has
-   * attached the stored entity.
-   *
-   * Pass `false` when resolving which existing entity a document refers to. Those callers have
-   * no LOOKUP JOIN, so that arm never fires and the gate rejects identifiers whose entities are
-   * already in the store. Risk scoring needs this: alerts always carry `event.kind: signal`, so
-   * `idpGate` cannot match and IdP-namespace users get no scores.
-   *
-   * @default true
-   */
-  applyPostAggFilter?: boolean;
-}
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -94,7 +77,7 @@ function buildPreAggEvaluatedVarOverridesPreamble(
  */
 export function getEuidPainlessRuntimeMapping(
   entityType: EntityType,
-  options?: EuidPainlessOptions
+  options?: EuidGateOptions
 ): {
   type: 'keyword';
   script: { source: string };
@@ -124,7 +107,7 @@ export function getEuidPainlessRuntimeMapping(
  */
 export function getEuidPainlessEvaluation(
   entityType: EntityType,
-  options?: EuidPainlessOptions
+  options?: EuidGateOptions
 ): string {
   const { applyPostAggFilter = true } = options ?? {};
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
