@@ -97,7 +97,7 @@ const formatEpisodeDescription = ({
     `Use the ${ruleToolId} tool to fetch the alert rule associated with this episode, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
   );
   lines.push(
-    `Use the ${ruleEventsToolId} tool to fetch this episode's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window.`
+    `Use the ${ruleEventsToolId} tool to fetch this episode's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows.`
   );
 
   return lines.join('\n');

@@ -91,6 +91,8 @@ describe('getRuleEventsTool', () => {
       expect(tool.description).toContain('or status to filter');
       expect(tool.description).not.toContain('or episode.status to filter');
       expect(tool.description).toContain('no arguments');
+      expect(tool.description).toContain('100 rows');
+      expect(tool.description).toContain('event data');
       expect(tool.schema.safeParse(validArgs).success).toBe(true);
       expect(tool.schema.safeParse({}).success).toBe(true);
       expect(tool.schema.safeParse({ start: validArgs.start }).success).toBe(true);
@@ -103,7 +105,7 @@ describe('getRuleEventsTool', () => {
 
       const result = await createTool().handler({}, agentBuilderMocks.tools.createHandlerContext());
 
-      expect(getEvents).toHaveBeenCalledWith('ep-1', { limit: 1001 });
+      expect(getEvents).toHaveBeenCalledWith('ep-1', { limit: 101 });
       expect(get).not.toHaveBeenCalled();
       expect(result).toEqual({
         results: [
@@ -129,7 +131,7 @@ describe('getRuleEventsTool', () => {
 
       expect(getEvents).toHaveBeenCalledWith('ep-1', {
         timeRange: validArgs,
-        limit: 1001,
+        limit: 101,
       });
       expect(get).not.toHaveBeenCalled();
       expect(result).toEqual({
@@ -170,7 +172,7 @@ describe('getRuleEventsTool', () => {
 
     it('does not set truncated when the result fills the page exactly', async () => {
       getEvents.mockResolvedValueOnce(
-        Array.from({ length: 1000 }, (_, i) => ({
+        Array.from({ length: 100 }, (_, i) => ({
           ...eventRow,
           '@timestamp': `2026-04-10T11:${String(i % 60).padStart(2, '0')}:00.000Z`,
         }))
@@ -185,7 +187,7 @@ describe('getRuleEventsTool', () => {
         results: [
           expect.objectContaining({
             data: expect.objectContaining({
-              count: 1000,
+              count: 100,
               truncated: false,
             }),
           }),
@@ -195,7 +197,7 @@ describe('getRuleEventsTool', () => {
 
     it('sets truncated and returns the page when one extra row is fetched', async () => {
       getEvents.mockResolvedValueOnce(
-        Array.from({ length: 1001 }, (_, i) => ({
+        Array.from({ length: 101 }, (_, i) => ({
           ...eventRow,
           '@timestamp': `2026-04-10T11:${String(i % 60).padStart(2, '0')}:00.000Z`,
         }))
@@ -210,7 +212,7 @@ describe('getRuleEventsTool', () => {
         results: [
           expect.objectContaining({
             data: expect.objectContaining({
-              count: 1000,
+              count: 100,
               truncated: true,
             }),
           }),
@@ -254,7 +256,7 @@ describe('getRuleEventsTool', () => {
       expect(getEvents).toHaveBeenCalledWith('ep-1', {
         timeRange: validArgs,
         status: ALERT_EPISODE_STATUS.ACTIVE,
-        limit: 1001,
+        limit: 101,
       });
     });
 
