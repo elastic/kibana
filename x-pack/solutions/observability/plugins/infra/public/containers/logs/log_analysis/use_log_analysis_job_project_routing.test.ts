@@ -19,6 +19,7 @@ const mockCpsEnabled = (isCpsEnabled: boolean) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
     services: {
       cps: isCpsEnabled ? { isTierEligible: true, cpsManager: {} } : undefined,
+      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(true) },
     },
   });
 };

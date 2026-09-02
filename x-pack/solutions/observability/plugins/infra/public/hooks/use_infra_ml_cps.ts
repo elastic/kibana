@@ -6,16 +6,29 @@
  */
 
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../../common/cps_feature_flag';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 /**
  * Whether CPS project scope routing applies to the Logs ML apps. Single source of truth for the
- * gate. Gates behaviour only — scope UI should render behind `useShouldRenderInfraMlCpsUi`,
- * which additionally waits for linked projects count.
+ * gate: the infra CPS feature flag, tier eligibility, and CPS manager availability. Gates
+ * behaviour only — scope UI should render behind `useShouldRenderInfraMlCpsUi`, which
+ * additionally waits for linked projects count.
  */
 export const useIsInfraMlCpsEnabled = (): boolean => {
   const { services } = useKibanaContextForPlugin();
-  return Boolean(services.cps?.isTierEligible && services.cps?.cpsManager);
+
+  const isCpsFeatureFlagEnabled = services.featureFlags.getBooleanValue(
+    OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+  );
+
+  return Boolean(
+    isCpsFeatureFlagEnabled && services.cps?.isTierEligible && services.cps?.cpsManager
+  );
 };
 
 /**

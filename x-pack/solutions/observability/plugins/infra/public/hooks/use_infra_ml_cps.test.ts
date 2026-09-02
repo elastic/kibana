@@ -16,9 +16,15 @@ jest.mock('./use_kibana', () => ({
   useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
 }));
 
-const mockCpsService = (cps: Partial<CPSPluginStart> | undefined) => {
+const mockCpsService = (
+  cps: Partial<CPSPluginStart> | undefined,
+  { isFeatureFlagEnabled = true }: { isFeatureFlagEnabled?: boolean } = {}
+) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
-    services: { cps },
+    services: {
+      cps,
+      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(isFeatureFlagEnabled) },
+    },
   });
 };
 
@@ -75,6 +81,17 @@ describe('useIsInfraMlCpsEnabled', () => {
 
     expect(result.current).toBe(true);
   });
+
+  it('returns false when the feature flag is disabled, regardless of tier and manager', () => {
+    mockCpsService(
+      { isTierEligible: true, cpsManager: {} as CPSPluginStart['cpsManager'] },
+      { isFeatureFlagEnabled: false }
+    );
+
+    const { result } = renderHook(() => useIsInfraMlCpsEnabled());
+
+    expect(result.current).toBe(false);
+  });
 });
 
 describe('useShouldRenderInfraMlCpsUi', () => {
@@ -91,6 +108,20 @@ describe('useShouldRenderInfraMlCpsUi', () => {
       isTierEligible: false,
       cpsManager: createCpsManager({ hasLinkedProjects: true, isReady: false }),
     });
+
+    const { result } = renderHook(() => useShouldRenderInfraMlCpsUi());
+
+    expect(result.current).toBe(false);
+  });
+
+  it('is false when the feature flag is disabled, without waiting for readiness', () => {
+    mockCpsService(
+      {
+        isTierEligible: true,
+        cpsManager: createCpsManager({ hasLinkedProjects: true, isReady: false }),
+      },
+      { isFeatureFlagEnabled: false }
+    );
 
     const { result } = renderHook(() => useShouldRenderInfraMlCpsUi());
 
