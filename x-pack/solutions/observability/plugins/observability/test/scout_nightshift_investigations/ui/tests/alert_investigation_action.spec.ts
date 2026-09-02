@@ -83,7 +83,9 @@ test.describe(
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickInvestigate();
 
-      await requestPromise;
+      expect((await requestPromise).url()).toContain(
+        `/internal/observability/alerts/${alertId}/investigate`
+      );
     });
 
     test('starts an investigation from the alert detail action menu', async ({
@@ -100,7 +102,9 @@ test.describe(
       );
       await pageObjects.alertPage.clickInvestigate();
 
-      await requestPromise;
+      expect((await requestPromise).url()).toContain(
+        `/internal/observability/alerts/${alertId}/investigate`
+      );
     });
   }
 );
