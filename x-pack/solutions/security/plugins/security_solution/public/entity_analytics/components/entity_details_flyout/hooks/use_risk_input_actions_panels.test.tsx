@@ -183,7 +183,7 @@ describe('useRiskInputActionsPanels', () => {
     );
 
     if (timelineAction && 'onClick' in timelineAction) {
-      timelineAction.onClick?.();
+      timelineAction.onClick?.({} as React.MouseEvent<HTMLHRElement>);
     }
 
     expect(mockSendBulkEvents).toHaveBeenCalledWith([

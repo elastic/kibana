@@ -61,20 +61,25 @@ describe('EventsTableBulkActionMenu', () => {
   it('decorates alert-status items with colored dot icons', () => {
     render(
       <EventsTableBulkActionMenu
-        items={[
-          { key: 'open', name: 'Mark as open', 'data-test-subj': 'open-alert-status' },
-          {
-            key: 'acknowledge',
-            name: 'Mark as acknowledged',
-            'data-test-subj': 'acknowledged-alert-status',
-          },
-          {
-            key: 'close-alert-with-reason',
-            name: 'Close',
-            'data-test-subj': 'alert-close-context-menu-item',
-          },
-        ]}
+        items={[]}
         panels={[]}
+        groups={{
+          statusItems: [
+            { key: 'open', name: 'Mark as open', 'data-test-subj': 'open-alert-status' },
+            {
+              key: 'acknowledge',
+              name: 'Mark as acknowledged',
+              'data-test-subj': 'acknowledged-alert-status',
+            },
+            {
+              key: 'close-alert-with-reason',
+              name: 'Close',
+              'data-test-subj': 'alert-close-context-menu-item',
+            },
+          ],
+          customItems: [],
+          workflowItems: [],
+        }}
       />
     );
 
@@ -86,9 +91,7 @@ describe('EventsTableBulkActionMenu', () => {
       screen.getByTestId('acknowledged-alert-status').querySelector('[data-euiicon-type="dot"]')
     ).toBeInTheDocument();
     expect(
-      screen
-        .getByTestId('alert-close-context-menu-item')
-        .querySelector('[data-euiicon-type="dot"]')
+      screen.getByTestId('alert-close-context-menu-item').querySelector('[data-euiicon-type="dot"]')
     ).toBeInTheDocument();
 
     // Dot icons are not overwritten by withActionIcons (no entry in ACTION_ICONS_BY_ID)
@@ -116,5 +119,59 @@ describe('EventsTableBulkActionMenu', () => {
     expect(
       screen.getByTestId('custom-action').querySelector('[data-euiicon-type]')
     ).not.toBeInTheDocument();
+  });
+
+  it('inserts group separators between non-empty status / custom / workflow groups and preserves order', () => {
+    render(
+      <EventsTableBulkActionMenu
+        items={[]}
+        panels={[]}
+        groups={{
+          statusItems: [{ key: 'open', name: 'Mark as open', 'data-test-subj': 'open-status' }],
+          customItems: [{ key: 'attach-case', name: 'Add to case', 'data-test-subj': 'add-case' }],
+          workflowItems: [
+            {
+              key: 'run-document-workflow-action',
+              name: 'Run workflow',
+              'data-test-subj': 'run-workflow',
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Mark as open',
+      'Add to case',
+      'Run workflow',
+    ]);
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(2);
+  });
+
+  it('omits separators when a group is empty', () => {
+    render(
+      <EventsTableBulkActionMenu
+        items={[]}
+        panels={[]}
+        groups={{
+          statusItems: [{ key: 'open', name: 'Mark as open', 'data-test-subj': 'open-status' }],
+          customItems: [],
+          workflowItems: [
+            {
+              key: 'run-document-workflow-action',
+              name: 'Run workflow',
+              'data-test-subj': 'run-workflow',
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getAllByRole('menuitem').map(({ textContent }) => textContent)).toEqual([
+      'Mark as open',
+      'Run workflow',
+    ]);
+    // Only one separator between two non-empty groups
+    expect(screen.getAllByTestId('securityActionMenuGroupSeparator')).toHaveLength(1);
   });
 });
