@@ -903,7 +903,10 @@ const identifyOtelSignalsRoute = createServerRoute({
       routeLogger.warn(
         `OTel signal extraction failed for service "${name}"; using template query fallback`
       );
-      return runTemplateFallbackOrThrow('failed source extraction');
+      return {
+        ...(await runTemplateFallbackOrThrow('failed source extraction')),
+        otelSignalsFound: 0,
+      };
     }
     const resolved = await resolveSignalStreams({
       streams,
@@ -924,7 +927,10 @@ const identifyOtelSignalsRoute = createServerRoute({
     // typed/message-string result for this OTel service.
     if (generated.gateBypassed) {
       routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
-      return runTemplateFallbackOrThrow('had no typed stream coverage');
+      return {
+        ...(await runTemplateFallbackOrThrow('had no typed stream coverage')),
+        otelSignalsFound: extraction.signals.length,
+      };
     }
 
     let classified = generated.queries;
@@ -987,7 +993,11 @@ const identifyOtelSignalsRoute = createServerRoute({
         authorizedStreamNames,
       });
     }
-    return { status: 'generated' as const, queriesGenerated };
+    return {
+      status: 'generated' as const,
+      queriesGenerated,
+      otelSignalsFound: extraction.signals.length,
+    };
   },
 });
 
@@ -1599,7 +1609,15 @@ const codeIntelligenceRunStatusRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({ executionId: codeIntelligenceInput.optional() }).optional(),
+    query: z
+      .object({
+        executionId: codeIntelligenceInput.optional(),
+        details: z
+          .enum(['true', 'false'])
+          .transform((value) => value === 'true')
+          .optional(),
+      })
+      .optional(),
   }),
   handler: async ({
     params,
@@ -1621,6 +1639,7 @@ const codeIntelligenceRunStatusRoute = createServerRoute({
     return codeExtractionClient.getStatus({
       spaceId,
       executionId: params?.query?.executionId,
+      details: params?.query?.details,
     });
   },
 });

@@ -54,11 +54,14 @@ const resetRoute = internalKICodeFeaturesRoutes['POST /internal/streams/code_int
 const runRoute = internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_run'];
 const identifyOtelSignalsRoute =
   internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_identify_otel_signals'];
+const runStatusRoute =
+  internalKICodeFeaturesRoutes['GET /internal/streams/code_intelligence/_run_status'];
 
 type ListHandlerParams = Parameters<typeof listRoute.handler>[0];
 type ResetHandlerParams = Parameters<typeof resetRoute.handler>[0];
 type RunHandlerParams = Parameters<typeof runRoute.handler>[0];
 type IdentifyOtelHandlerParams = Parameters<typeof identifyOtelSignalsRoute.handler>[0];
+type RunStatusHandlerParams = Parameters<typeof runStatusRoute.handler>[0];
 
 const codeFeature = (streamName: string, uuid: string): Feature =>
   ({
@@ -250,6 +253,53 @@ describe('Code Intelligence routes', () => {
     expect(result).toEqual({ executionId: 'exec-1', isNew: true });
   });
 
+  it('preserves the small run-status response unless details are requested', async () => {
+    const getStatus = jest.fn().mockResolvedValue({
+      status: 'in_progress',
+      executionId: 'exec-1',
+    });
+    const result = await runStatusRoute.handler({
+      params: { query: { executionId: 'exec-1' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      workflowClients: { codeExtractionClient: { getStatus } },
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: {},
+    } as unknown as RunStatusHandlerParams);
+
+    expect(result).toEqual({ status: 'in_progress', executionId: 'exec-1' });
+    expect(getStatus).toHaveBeenCalledWith({
+      spaceId: 'default',
+      executionId: 'exec-1',
+      details: undefined,
+    });
+  });
+
+  it('parses the details query string as a boolean', () => {
+    expect(runStatusRoute.params.parse({ query: { details: 'true' } }).query?.details).toBe(true);
+    expect(runStatusRoute.params.parse({ query: { details: 'false' } }).query?.details).toBe(false);
+  });
+
+  it('requests detailed run status only when details=true', async () => {
+    const getStatus = jest
+      .fn()
+      .mockResolvedValue({ status: 'in_progress', executionId: 'exec-1', details: {} });
+    await runStatusRoute.handler({
+      params: { query: { details: true } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      workflowClients: { codeExtractionClient: { getStatus } },
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: {},
+    } as unknown as RunStatusHandlerParams);
+
+    expect(getStatus).toHaveBeenCalledWith({
+      spaceId: 'default',
+      executionId: undefined,
+      details: true,
+    });
+  });
+
   it('does not fall back to message-string queries after a typed write fails', async () => {
     const typedCandidate = {
       stream: 'traces.visible',
@@ -354,7 +404,7 @@ describe('Code Intelligence routes', () => {
         logger: { get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn() }) },
         maintenanceService: createMaintenanceService(),
       } as unknown as IdentifyOtelHandlerParams)
-    ).resolves.toEqual({ status: 'gate_bypassed', queriesGenerated: 1 });
+    ).resolves.toEqual({ status: 'gate_bypassed', queriesGenerated: 1, otelSignalsFound: 0 });
 
     expect(mockExtractOtelSignalsResult).toHaveBeenCalledWith(
       expect.objectContaining({ repository: 'repository' })

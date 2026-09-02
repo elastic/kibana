@@ -11,6 +11,10 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
+import {
+  getCodeExtractionRunDetails,
+  type CodeExtractionRunDetails,
+} from './code_extraction_run_status';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 interface CodeExtractionWorkflowInputPayload {
@@ -69,10 +73,22 @@ export class SignificantEventsCodeExtractionClient {
   async getStatus({
     spaceId,
     executionId,
+    details = false,
   }: {
     spaceId: string;
     executionId?: string;
-  }): Promise<SignificantEventsWorkflowStatusResult> {
-    return this.workflowExecutionService.getStatus({ spaceId, executionId });
+    details?: boolean;
+  }): Promise<SignificantEventsWorkflowStatusResult & { details?: CodeExtractionRunDetails }> {
+    const status = await this.workflowExecutionService.getStatus({ spaceId, executionId });
+    if (!details || !status.executionId) {
+      return details ? { ...status, details: getCodeExtractionRunDetails(null) } : status;
+    }
+
+    const execution = await this.workflowExecutionService.getExecution({
+      id: status.executionId,
+      spaceId,
+      options: { includeInput: true, includeOutput: true },
+    });
+    return { ...status, details: getCodeExtractionRunDetails(execution) };
   }
 }
