@@ -34,6 +34,8 @@ describe('alertsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
+    // Existing handler tests assume the space alerts alias is present.
+    (mockEsClient.asInternalUser.indices.exists as jest.Mock).mockResolvedValue(true);
   });
 
   describe('schema', () => {
@@ -111,6 +113,34 @@ describe('alertsTool', () => {
   });
 
   describe('handler', () => {
+    it('returns 0 alerts without searching when the space alerts alias does not exist', async () => {
+      (mockEsClient.asInternalUser.indices.exists as jest.Mock).mockResolvedValue(false);
+
+      const result = await tool.handler(
+        { query: 'how many alerts', isCount: true },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'testing',
+        })
+      );
+
+      expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+        index: `${DEFAULT_ALERTS_INDEX}-testing`,
+      });
+      expect(runSearchTool).not.toHaveBeenCalled();
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).toMatchObject({
+        type: ToolResultType.other,
+        data: {
+          count: 0,
+          spaceId: 'testing',
+          index: `${DEFAULT_ALERTS_INDEX}-testing`,
+          message: expect.stringContaining('There are 0 security alerts'),
+        },
+      });
+    });
+
     it('calls runSearchTool with the current space alerts alias', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
@@ -123,6 +153,9 @@ describe('alertsTool', () => {
         })
       );
 
+      expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+        index: `${DEFAULT_ALERTS_INDEX}-default`,
+      });
       expect(runSearchTool).toHaveBeenCalledWith({
         nlQuery: expect.stringContaining('find all alerts'),
         index: `${DEFAULT_ALERTS_INDEX}-default`,

@@ -6,9 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
@@ -77,10 +78,33 @@ export const alertsTool = (
     ) => {
       // Always use the current space's exact alerts alias. Cross-space patterns such as
       // `.alerts-security.alerts-*` (and prefix wildcards like `-<space>*`) are not accepted
-      // because they can return alerts from other spaces. When the space has no alerts index
-      // yet, runSearchTool returns "Could not figure out which data source to use", still
-      // scoped to this space.
+      // because they can return alerts from other spaces.
       const searchIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+
+      // Check with the internal user: analysts often lack `view_index_metadata`, so
+      // asCurrentUser.indices.exists can falsely report missing. A missing space alias
+      // must return a successful 0-alert result (not an error), otherwise the model
+      // retries and may fall back to platform search tools against another space's index.
+      const indexExists = await esClient.asInternalUser.indices.exists({ index: searchIndex });
+      if (!indexExists) {
+        logger.debug(
+          `alerts tool: space alerts alias ${searchIndex} does not exist; returning 0 alerts`
+        );
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                message: `There are 0 security alerts in this Kibana space (${spaceId}). The alerts index for this space does not exist yet.`,
+                count: 0,
+                index: searchIndex,
+                spaceId,
+              },
+            },
+          ],
+        };
+      }
 
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, isCount);
 
