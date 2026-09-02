@@ -219,6 +219,14 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   const availableRoles = rolesState.value ?? [];
   const selectedRoleNames = form.values.roles ?? [];
+  const avatarUser = {
+    username: form.values.username ?? '',
+    full_name: form.values.full_name,
+    email: form.values.email,
+  };
+  const hasAvatarIdentity = Boolean(
+    avatarUser.username || avatarUser.full_name || avatarUser.email
+  );
   const deprecatedRoles = selectedRoleNames.reduce<Role[]>((roles, name) => {
     const role = availableRoles.find((r) => r.name === name);
     if (role && isRoleDeprecated(role)) {
@@ -321,11 +329,14 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
               <UserAvatar
-                user={{
-                  username: form.values.username ?? '',
-                  full_name: form.values.full_name,
-                  email: form.values.email,
-                }}
+                user={hasAvatarIdentity ? avatarUser : undefined}
+                aria-label={
+                  hasAvatarIdentity
+                    ? undefined
+                    : i18n.translate('xpack.security.management.users.userForm.avatarAriaLabel', {
+                        defaultMessage: 'User avatar',
+                      })
+                }
                 size="xl"
                 data-test-subj="userFormAvatar"
               />

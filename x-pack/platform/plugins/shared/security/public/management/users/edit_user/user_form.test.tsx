@@ -68,6 +68,15 @@ describe('UserForm', () => {
     unmount();
   });
 
+  it('gives the empty create-user avatar an accessible name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: true,
+      defaultValues: { ...userMock, username: '', full_name: '', email: '' },
+    });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'User avatar');
+    unmount();
+  });
+
   it('uses email for the avatar when the user has no full name', () => {
     const { unmount } = renderUserForm({
       isNewUser: false,
