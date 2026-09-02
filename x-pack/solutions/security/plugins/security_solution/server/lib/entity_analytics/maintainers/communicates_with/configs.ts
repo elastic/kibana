@@ -121,28 +121,6 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
   },
   {
     kind: 'standard',
-    id: 'windows_forwarded',
-    name: 'Windows Forwarded Events',
-    indexPattern: (ns) => `logs-windows.forwarded-${ns}`,
-    relationshipKey: 'communicates_with',
-    targetEntityType: 'host',
-    requireTargetEntityIdExists: true,
-    // Mirrors system_security exactly — Windows Event Forwarding produces the
-    // same ECS field shape as system.security for 4624/4648 events.
-    customActor: { fields: ['user.name'] },
-    esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
-    AND event.code IN ("4624", "4648")
-    AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
-    AND event.outcome == "success"
-    AND NOT user.name IN (${EXCLUDED_USERNAMES.map((u) => `"${u}"`).join(', ')})`,
-    compositeAggAdditionalFilters: [
-      { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
-      SUCCESSFUL_OUTCOME_FILTER,
-    ],
-    hostScopedUsersOnly: true,
-  },
-  {
-    kind: 'standard',
     id: 'crowdstrike_fdr',
     name: 'CrowdStrike FDR',
     indexPattern: (ns) => `logs-crowdstrike.fdr-${ns}`,

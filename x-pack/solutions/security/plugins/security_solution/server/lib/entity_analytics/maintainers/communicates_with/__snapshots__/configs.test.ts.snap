@@ -46,7 +46,7 @@ exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots cro
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-crowdstrike.fdr-__namespace__
 | WHERE event.action == \\"UserLogon\\"
-    AND event.category == \\"authentication\\"
+    AND MV_CONTAINS(TO_STRING(event.category), \\"authentication\\")
     AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN (\\"3\\", \\"4\\", \\"5\\", \\"8\\"))
     AND event.outcome == \\"success\\"
     AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
@@ -179,24 +179,6 @@ FROM logs-system.auth-__namespace__
 exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.security-__namespace__
-| WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
-    AND event.code IN (\\"4624\\", \\"4648\\")
-    AND winlog.logon.type IN (\\"Interactive\\", \\"RemoteInteractive\\", \\"CachedInteractive\\")
-    AND event.outcome == \\"success\\"
-    AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
-    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
-| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
-| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
-| MV_EXPAND targetEntityId
-| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
-| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
-| LIMIT 3500"
-`;
-
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots windows_forwarded: targets-per-actor ES|QL is locked 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-FROM logs-windows.forwarded-__namespace__
 | WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
     AND event.code IN (\\"4624\\", \\"4648\\")
     AND winlog.logon.type IN (\\"Interactive\\", \\"RemoteInteractive\\", \\"CachedInteractive\\")

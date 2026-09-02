@@ -16,7 +16,7 @@ const standardConfigs = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.filte
 );
 
 describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the seven expected integrations', () => {
+  it('ships exactly the six expected integrations', () => {
     expect(COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'aws_cloudtrail',
       'crowdstrike_fdr',
@@ -24,7 +24,6 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       'jamf_pro',
       'system_auth',
       'system_security',
-      'windows_forwarded',
     ]);
   });
 
@@ -76,7 +75,6 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         'jamf_pro',
         'system_auth',
         'system_security',
-        'windows_forwarded',
       ]);
     });
 
@@ -180,13 +178,6 @@ describe('COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         (c) => c.id === 'elastic_defend'
       );
       expect(cfg?.hostScopedUsersOnly).toBeUndefined();
-    });
-
-    it('windows_forwarded has hostScopedUsersOnly: true', () => {
-      const cfg = COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS.find(
-        (c) => c.id === 'windows_forwarded'
-      );
-      expect(cfg?.hostScopedUsersOnly).toBe(true);
     });
 
     it('crowdstrike_fdr has hostScopedUsersOnly: true', () => {
