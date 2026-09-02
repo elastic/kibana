@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -39,12 +39,25 @@ const RedirectToV1Rules = ({ coreStart }: { coreStart: CoreStart }) => {
   return null;
 };
 
-/** Placeholder until Alerting exports page components for Observability to compose. */
-const SurfacePlaceholder = ({ testSubj }: { testSubj: string }) => (
-  <div className={APP_WRAPPER_CLASS} data-test-subj={testSubj} />
-);
+interface ObservabilityAlertingAppProps {
+  coreStart: CoreStart;
+  alertingVTwo: AlertingV2PublicStart;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[], appHistory?: unknown) => void;
+}
 
-export const ObservabilityAlertingApp = ({ coreStart }: { coreStart: CoreStart }) => {
+export const ObservabilityAlertingApp = ({
+  coreStart,
+  alertingVTwo,
+  setBreadcrumbs,
+}: ObservabilityAlertingAppProps) => {
+  const {
+    RulesPage,
+    RuleLibraryPage,
+    EpisodesPage,
+    ActionPoliciesPage,
+    ExecutionHistoryPage,
+  } = alertingVTwo;
+
   return (
     <Routes>
       <Route exact path="/">
@@ -54,19 +67,19 @@ export const ObservabilityAlertingApp = ({ coreStart }: { coreStart: CoreStart }
         <RedirectToV1Rules coreStart={coreStart} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
-        <SurfacePlaceholder testSubj="observabilityAlertingInbox" />
+        <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
-        <SurfacePlaceholder testSubj="observabilityAlertingRulesV2" />
+        <RulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
-        <SurfacePlaceholder testSubj="observabilityAlertingRuleLibrary" />
+        <RuleLibraryPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH}>
-        <SurfacePlaceholder testSubj="observabilityAlertingActionPolicies" />
+        <ActionPoliciesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH}>
-        <SurfacePlaceholder testSubj="observabilityAlertingExecutionHistory" />
+        <ExecutionHistoryPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route>
         <RedirectToPath to={OBSERVABILITY_ALERTING_INBOX_PATH} />

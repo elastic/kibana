@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
+import type { Container } from 'inversify';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -15,6 +15,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MemoryRouter } from 'react-router-dom';
+import { EuiPageSection } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -38,58 +40,72 @@ export interface AlertingV2PageProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
-const useAlertingV2Providers = (coreStart: CoreStart) => {
-  const [queryClient] = useState(() => new QueryClient());
-  const container = coreStart.injection.getContainer();
-  return { queryClient, container };
-};
+/** Internal props — includes the DI container injected by the lazy wrapper. */
+interface InternalPageProps extends AlertingV2PageProps {
+  container: Container;
+}
 
 const StandardProviders = ({
-  coreStart,
+  container,
   setBreadcrumbs,
   children,
-}: AlertingV2PageProps & { children: React.ReactNode }) => {
-  const { queryClient, container } = useAlertingV2Providers(coreStart);
+}: {
+  container: Container;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  children: React.ReactNode;
+}) => {
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
         <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            <MemoryRouter>
+              <EuiPageSection paddingSize="m">{children}</EuiPageSection>
+            </MemoryRouter>
+          </I18nProvider>
         </BreadcrumbProvider>
       </QueryClientProvider>
     </Context.Provider>
   );
 };
 
-export const AlertingV2RulesPage = (props: AlertingV2PageProps) => (
-  <StandardProviders {...props}>
+export const AlertingV2RulesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <RulesApp />
   </StandardProviders>
 );
 
-export const AlertingV2RuleLibraryPage = (props: AlertingV2PageProps) => (
-  <StandardProviders {...props}>
+export const AlertingV2RuleLibraryPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <RuleLibraryApp />
   </StandardProviders>
 );
 
-export const AlertingV2ActionPoliciesPage = (props: AlertingV2PageProps) => (
-  <StandardProviders {...props}>
+export const AlertingV2ActionPoliciesPage = ({
+  container,
+  setBreadcrumbs,
+}: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <ActionPoliciesApp />
   </StandardProviders>
 );
 
-export const AlertingV2ExecutionHistoryPage = (props: AlertingV2PageProps) => (
-  <StandardProviders {...props}>
+export const AlertingV2ExecutionHistoryPage = ({
+  container,
+  setBreadcrumbs,
+}: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <ExecutionHistoryApp />
   </StandardProviders>
 );
 
 export const AlertingV2EpisodesPage = ({
   coreStart,
+  container,
   setBreadcrumbs,
-}: AlertingV2PageProps) => {
-  const { queryClient, container } = useAlertingV2Providers(coreStart);
+}: InternalPageProps) => {
+  const [queryClient] = useState(() => new QueryClient());
 
   const kibanaReactServices: AlertEpisodesKibanaServices = {
     ...coreStart,
@@ -113,11 +129,13 @@ export const AlertingV2EpisodesPage = ({
         <QueryClientProvider client={queryClient}>
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
-              <div className={APP_WRAPPER_CLASS}>
-                <RedirectAppLinks coreStart={coreStart}>
-                  <EpisodesApp />
-                </RedirectAppLinks>
-              </div>
+              <MemoryRouter>
+                <EuiPageSection paddingSize="m">
+                  <RedirectAppLinks coreStart={coreStart}>
+                    <EpisodesApp />
+                  </RedirectAppLinks>
+                </EuiPageSection>
+              </MemoryRouter>
             </I18nProvider>
           </BreadcrumbProvider>
         </QueryClientProvider>

@@ -10,22 +10,36 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
+import { createObservabilityAlertingSetBreadcrumbs } from './breadcrumbs';
 
 export const mountObservabilityAlertingApp = ({
   coreStart,
+  alertingVTwo,
   params,
 }: {
   coreStart: CoreStart;
+  alertingVTwo: AlertingV2PublicStart;
   params: AppMountParameters;
 }): AppUnmount => {
   const { element, history } = params;
   element.classList.add(APP_WRAPPER_CLASS);
 
+  const setBreadcrumbs = createObservabilityAlertingSetBreadcrumbs({
+    application: coreStart.application,
+    chrome: coreStart.chrome,
+    history,
+  });
+
   ReactDOM.render(
     coreStart.rendering.addContext(
       <Router history={history}>
-        <ObservabilityAlertingApp coreStart={coreStart} />
+        <ObservabilityAlertingApp
+          coreStart={coreStart}
+          alertingVTwo={alertingVTwo}
+          setBreadcrumbs={setBreadcrumbs}
+        />
       </Router>
     ),
     element

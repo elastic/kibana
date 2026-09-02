@@ -60,10 +60,6 @@ export class ObservabilityAlertingPlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoObservability',
       keywords: ['alerting', 'alerts', 'rules', 'episodes', 'inbox'],
-      // Inaccessible until `alerting:v2:enabled` is on. Core also hides inaccessible
-      // apps from navigation surfaces while this status is set.
-      status: AppStatus.inaccessible,
-      visibleIn: [],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
           coreStart.settings.globalClient.get$<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false).pipe(
@@ -83,16 +79,16 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Alerts (Inbox)',
           }),
           path: OBSERVABILITY_ALERTING_INBOX_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'episodes', 'inbox'],
         },
         {
           id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
           title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV2Title', {
-            defaultMessage: 'Rules (ES|QL)',
+            defaultMessage: 'Rules',
           }),
           path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'rules', 'esql'],
         },
         {
@@ -101,7 +97,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Rule Library',
           }),
           path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'templates', 'library'],
         },
         {
@@ -110,7 +106,7 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Action Policies',
           }),
           path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'actions', 'policies'],
         },
         {
@@ -119,15 +115,16 @@ export class ObservabilityAlertingPlugin
             defaultMessage: 'Execution History',
           }),
           path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-          visibleIn: [],
+          visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'history', 'executions'],
         },
       ],
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await startServices;
+        const [coreStart, depsStart] = await startServices;
         const { mountObservabilityAlertingApp } = await import('./application/mount');
         return mountObservabilityAlertingApp({
           coreStart,
+          alertingVTwo: depsStart.alertingVTwo,
           params,
         });
       },
