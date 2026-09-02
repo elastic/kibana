@@ -47,9 +47,9 @@ import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics'
 import { getAgentStatusForAgentPolicy } from '../../services/agents';
 import { isAgentInNamespace } from '../../services/spaces/agent_namespaces';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
-import { getNormalizedDataStreams, packageInfoHasOtelInputs } from '../../../common/services';
+import { packageInfoHasOtelInputs } from '../../../common/services';
 import { getPackageInfo } from '../../services/epm/packages';
-import { getCustomDatasetStreams } from '../../services/epm/packages/input_type_packages';
+import { getNormalizedDataStreamsFromPackagePolicy } from '../../services/epm/packages/input_type_packages';
 import {
   generateTemplateIndexPattern,
   generateNamespaceTemplateIndexPattern,
@@ -59,7 +59,7 @@ import { buildAgentStatusRuntimeField } from '../../services/agents/build_status
 import { appContextService, agentPolicyService } from '../../services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentClient } from '../../services';
-import type { PackageInfo, PackagePolicy, RegistryDataStream } from '../../types';
+import type { PackageInfo, RegistryDataStream } from '../../types';
 
 async function verifyNamespace(agent: Agent, namespace?: string) {
   if (!(await isAgentInNamespace(agent, namespace))) {
@@ -379,21 +379,6 @@ export const getAgentStatusForAgentPolicyHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
-/** Same normalization the template installer uses, so query patterns match the installed templates. */
-function getOtelDataStreamsFromPackagePolicy(
-  packagePolicy: PackagePolicy,
-  packageInfo: PackageInfo
-): RegistryDataStream[] {
-  return getCustomDatasetStreams(packagePolicy, packageInfo)
-    .flatMap(({ datasetName, dataStreamType }) =>
-      getNormalizedDataStreams(packageInfo, datasetName, dataStreamType).slice(0, 1)
-    )
-    .filter(
-      (dataStream): dataStream is RegistryDataStream =>
-        !!dataStream.type && isOtelDataStream(dataStream, packageInfo)
-    );
-}
-
 /**
  * Resolves the namespace-scoped OTel pattern for the identity-free incoming-data path, or
  * undefined if any condition of the gate (agent, policy, namespace) does not hold. The pattern
@@ -449,7 +434,9 @@ async function resolveAgentlessOtelDataStreamPattern({
 
   const dataStreams =
     packageInfo.type === 'input'
-      ? getOtelDataStreamsFromPackagePolicy(matchingPackagePolicy, packageInfo)
+      ? getNormalizedDataStreamsFromPackagePolicy(matchingPackagePolicy, packageInfo).filter((ds) =>
+          isOtelDataStream(ds, packageInfo)
+        )
       : manifestOtelDataStreams;
   if (dataStreams.length === 0) {
     return undefined;

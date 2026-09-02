@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  InstallablePackage,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -125,6 +126,17 @@ export const getCustomDatasetStreams = (
 
   return results;
 };
+
+export const getNormalizedDataStreamsFromPackagePolicy = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  packageInfo: PackageInfo | InstallablePackage
+): RegistryDataStream[] =>
+  getCustomDatasetStreams(packagePolicy, packageInfo).flatMap(({ datasetName, dataStreamType }) =>
+    getNormalizedDataStreams(packageInfo, datasetName, dataStreamType)
+      .filter((ds): ds is RegistryDataStream => !!ds.type)
+      .slice(0, 1)
+      .map((ds) => ({ ...ds, path: datasetName }))
+  );
 
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
