@@ -126,11 +126,12 @@ const prepareInferredSamplingRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, streamsClient, tuningConfig, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
     const routeLogger = logger.get('features_identification', 'prepare', streamName);
