@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ChromeNextGlobalHeader, ChromeNextGlobalHeaderShell } from './global_header';
-export type { ChromeNextGlobalHeaderShellProps } from './global_header';
+export {
+  ChromeNextGlobalHeader,
+  ChromeNextGlobalHeaderShell,
+  GlobalHeaderRightGroup,
+  GLOBAL_HEADER_HEIGHT_PX,
+  MilestoneBadge,
+  MILESTONE_PANEL_HEIGHT_PX,
+} from './global_header';
+export type {
+  ChromeNextGlobalHeaderShellProps,
+  GlobalHeaderRightGroupProps,
+} from './global_header';

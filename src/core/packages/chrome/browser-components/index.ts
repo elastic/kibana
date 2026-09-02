@@ -11,7 +11,12 @@ export { ChromeComponentsProvider } from './src/context';
 export type { ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
-export { ChromeNextGlobalHeader } from './src/chrome_next';
+export {
+  ChromeNextGlobalHeader,
+  GLOBAL_HEADER_HEIGHT_PX,
+  MilestoneBadge,
+  MILESTONE_PANEL_HEIGHT_PX,
+} from './src/chrome_next';
 export { ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';

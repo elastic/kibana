@@ -37,31 +37,34 @@ const READ_MORE_LABEL = i18n.translate('core.ui.chrome.milestone.readMoreLabel',
   defaultMessage: 'Read more',
 });
 
+export const MILESTONE_PANEL_HEIGHT_PX = 36;
+
 const useMilestoneStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(
     () => ({
-      pill: css`
-        display: inline-flex;
+      bar: css`
+        display: flex;
         align-items: center;
-        min-width: 0;
-        max-width: 100%;
-        gap: ${euiTheme.size.xs};
-        padding: ${euiTheme.size.xxs} ${euiTheme.size.s} ${euiTheme.size.xxs} ${euiTheme.size.s};
-        border-radius: ${euiTheme.border.radius.medium};
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        min-height: ${MILESTONE_PANEL_HEIGHT_PX}px;
+        gap: ${euiTheme.size.s};
+        padding: 0 ${euiTheme.size.m};
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHoverAssistance};
         color: ${euiTheme.colors.textAssistance};
       `,
       text: css`
         min-width: 0;
+        flex: 1 1 auto;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       `,
       readMore: css`
         flex-shrink: 0;
-        margin-inline-start: ${euiTheme.size.xs};
       `,
     }),
     [euiTheme]
@@ -69,9 +72,9 @@ const useMilestoneStyles = () => {
 };
 
 /**
- * A prototype milestone indicator rendered in the global header. It shows the
- * current milestone as a compact pill and opens a flyout with details about the
- * prototype's scope and limitations.
+ * A prototype milestone panel rendered in the chrome banner slot, above the
+ * global header. It spans the full viewport width and opens a flyout with
+ * details about the prototype's scope and limitations.
  */
 export const MilestoneBadge = React.memo(() => {
   const styles = useMilestoneStyles();
@@ -84,7 +87,7 @@ export const MilestoneBadge = React.memo(() => {
 
   return (
     <>
-      <div css={styles.pill} data-test-subj="chromeNextGlobalHeaderMilestonePill">
+      <div css={styles.bar} data-test-subj="chromeNextGlobalHeaderMilestone">
         <EuiIcon type="flask" size="s" color={euiTheme.colors.textAssistance} aria-hidden />
         <EuiText size="xs" color={euiTheme.colors.textAssistance} css={styles.text}>
           <strong>{MILESTONE_LABEL}</strong>
