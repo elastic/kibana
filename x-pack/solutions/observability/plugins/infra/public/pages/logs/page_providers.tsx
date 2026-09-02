@@ -16,6 +16,7 @@ import {
 import { LogSourcesProvider } from '@kbn/logs-data-access-plugin/public';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
+import { useIsInfraMlCpsEnabled } from '../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../containers/kbn_url_state_context';
 
@@ -23,7 +24,6 @@ export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) 
   const {
     services: {
       notifications: { toasts: toastsService },
-      cps,
       logsShared,
       logsDataAccess,
     },
@@ -35,7 +35,7 @@ export const LogsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) 
   // and an origin without logs would render the "no data" screen despite a linked project having
   // them. Note that resolving the log view also fetches its data view's fields, which stays
   // origin-scoped: nothing in this app reads that field list, so it is knowingly left alone.
-  const isCpsEnabled = Boolean(cps?.isTierEligible && cps?.cpsManager);
+  const isCpsEnabled = useIsInfraMlCpsEnabled();
   const projectRouting = isCpsEnabled ? PROJECT_ROUTING.ALL : undefined;
 
   const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
