@@ -53,10 +53,15 @@ export const MEMORY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 ] as const;
 
-/** Scheduled discovery workflows installed per space (`-${spaceId}` document suffix). */
-export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
+/** Scheduled discovery workflows controlled by the per-space Settings toggle. */
+export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+] as const;
+
+/** Scheduled workflows included in per-space maintenance sweeps. */
+export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
+  ...SCHEDULED_DISCOVERY_WORKFLOW_IDS,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
 ] as const;
 

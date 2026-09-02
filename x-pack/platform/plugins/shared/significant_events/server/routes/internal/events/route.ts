@@ -371,7 +371,7 @@ const cleanupStaleEventsRoute = createServerRoute({
       .object({
         candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
       })
-      .optional(),
+      .nullish(),
   }),
   handler: async ({
     params,
