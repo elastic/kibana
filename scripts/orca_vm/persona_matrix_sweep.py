@@ -47,6 +47,57 @@ IMAGE = json.load(open(Path(__file__).parent / ".azure-state.json"))["imageId"]
 RG = "orca-eval-farm"
 VM_SIZE = "Standard_D8s_v5"
 
+# ---------------------------------------------------------------------------
+# Suite profiles.
+#
+# This sweeper began as persona-matrix-only and hardcoded that suite in ~35
+# places. AD and automatic-migrations need the same VM fan-out but differ in
+# suite id, source overlays, and completeness gate, so the per-suite facts live
+# here instead of being threaded through every call site.
+#
+# `overlays` is a list of (local_path_relative_to_worktree, remote_path) pairs.
+# The persona-matrix entries are the historical PATCHED_* constants; the other
+# suites deliberately start EMPTY -- the base image carries their sources, and
+# inventing overlays we have not proven necessary would ship untested patches
+# to 27 VMs. Add one only when a canary run shows it is needed.
+# ---------------------------------------------------------------------------
+SUITE_PROFILES = {
+    "security-persona-matrix": {
+        "cli_suite": "security-persona-matrix",
+        "gate_suite_id": "security-persona-matrix",
+        "vm_prefix": "orca-sweep",
+        # 21 prompts x 7 categories x 3 variants
+        "n_examples": 21,
+    },
+    "attack-discovery-agent-builder": {
+        "cli_suite": "attack-discovery-agent-builder",
+        "gate_suite_id": "attack-discovery-agent-builder",
+        "vm_prefix": "orca-ad",
+        # 5 examples in src/dataset.ts (one per fixture slice), counted from
+        # source -- NOT guessed. Golden runs land 8-13 score docs per experiment.
+        "n_examples": 5,
+    },
+    "security-automatic-migrations": {
+        "cli_suite": "security-automatic-migrations",
+        "gate_suite_id": "security-automatic-migrations",
+        "vm_prefix": "orca-mig",
+        # 22 = 10 standard_dashboards + 6 splunk + 6 qradar, counted from the
+        # dataset sources. Golden runs land 32-48 score docs per experiment.
+        "n_examples": 22,
+    },
+}
+
+# Selected by --suite; mutated once in main() before any VM work.
+SUITE = "security-persona-matrix"
+
+
+def suite_profile(suite: Optional[str] = None) -> dict:
+    name = suite or SUITE
+    if name not in SUITE_PROFILES:
+        raise KeyError(f"unknown suite {name!r}; known: {sorted(SUITE_PROFILES)}")
+    return SUITE_PROFILES[name]
+
+
 # Per-model env for run_model.sh. Slow reasoning models blow the default 30-min
 # cap. Measured on golden (15 GLM runs, 2026-08-11..30): mean 341s per example,
 # max 1198s. 21 examples therefore need ~119 min, so the old 60-min cap could
@@ -59,7 +110,7 @@ MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATR
 # default — a judge-panel sweep would then grade with the incumbent judge and still
 # pass its doc-count gate.
 FORWARDED_ENV_VARS = ("EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES", "EVAL_CONNECTOR_ID",
-                      "KBN_EVALS_HTTP_RETRIES")
+                      "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE")
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
@@ -240,6 +291,27 @@ MODELS = [
 ]
 
 
+def is_sweep_resource(name: str) -> bool:
+    """True when an Azure resource belongs to any suite's sweep VMs.
+
+    Disk/NIC/public-IP/NSG names are all derived from the VM name, so every
+    teardown pass must test the SAME set of prefixes. Hardcoding one prefix per
+    pass is how a teardown reports success while another suite's disks keep
+    billing.
+    """
+    return any(name.startswith(pf["vm_prefix"] + "-") for pf in SUITE_PROFILES.values())
+
+
+def model_dir(model: str, suite: Optional[str] = None) -> Path:
+    """Per-suite, per-model run directory.
+
+    Namespaced by suite: the same model is swept for persona-matrix, AD and
+    migrations, and a flat layout would let the second sweep overwrite the
+    first one's run.log and status.json.
+    """
+    return SWEEP_DIR / (suite or SUITE) / model
+
+
 def ssh(ip: str, cmd: str, timeout: int = 30) -> str:
     r = subprocess.run(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
@@ -267,7 +339,9 @@ def vm_name(model: str) -> str:
     # Azure Linux VM names allow 64 chars. Do NOT truncate harder than that —
     # a [:24] truncation collided gemini-2-5-flash-lite onto gemini-2-5-flash's
     # VM (dirty ES → 409 dataset conflict).
-    return ("orca-sweep-" + model.replace("eis-", "").replace(".", "-").replace("_", "-"))[:64].rstrip("-")
+    prefix = suite_profile()["vm_prefix"]
+    slug = model.replace("eis-", "").replace(".", "-").replace("_", "-")
+    return f"{prefix}-{slug}"[:64].rstrip("-")
 
 
 def provision(model: str) -> str:
@@ -324,14 +398,17 @@ def deploy(ip: str) -> None:
     # Overlay the patched SkillInvoked evaluator (PR #286165) and the 50MB
     # maxPayload scout config (PR #286201). The eval runs from TS source via
     # the dev CLI, so copying the files is sufficient — no build step.
-    scp(str(PATCHED_EVALUATOR), ip, PATCHED_EVALUATOR_REMOTE)
-    scp(str(PATCHED_SCOUT_CONFIG), ip, PATCHED_SCOUT_CONFIG_REMOTE)
+    persona_only = SUITE == "security-persona-matrix"
+    if persona_only:
+        scp(str(PATCHED_EVALUATOR), ip, PATCHED_EVALUATOR_REMOTE)
+        scp(str(PATCHED_SCOUT_CONFIG), ip, PATCHED_SCOUT_CONFIG_REMOTE)
     # Per-example failure isolation — see PATCHED_EXECUTOR_CLIENT.
     scp(str(PATCHED_EXECUTOR_CLIENT), ip, EXECUTOR_CLIENT_REMOTE)
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
-    scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
+    if persona_only:
+        scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
@@ -343,26 +420,34 @@ def deploy(ip: str) -> None:
         "Projects/kibana/x-pack/solutions/security/packages/"
         "kbn-evals-suite-security-persona-matrix/playwright.config.ts"
     )
-    scp(str(PATCHED_PW_CONFIG), ip, PW_CONFIG_REMOTE)
-    scp(str(PATCHED_RULE_SKILL), ip, PATCHED_RULE_SKILL_REMOTE)
+    if persona_only:
+        scp(str(PATCHED_PW_CONFIG), ip, PW_CONFIG_REMOTE)
+        scp(str(PATCHED_RULE_SKILL), ip, PATCHED_RULE_SKILL_REMOTE)
     # Env-truth fixtures (PR #286421): seeds + idempotent tool reinstall + spec wiring.
-    ssh(ip, f"mkdir -p ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures ~/{FIXTURES_REMOTE_PREFIX}/evals")
-    scp(str(PATCHED_ENV_SEEDS), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/env_seeds.ts")
-    scp(str(PATCHED_TOOLS_SEED), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/persona_matrix_tools_seed.ts")
-    scp(str(PATCHED_SPEC), ip, f"{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts")
-    scp(str(PATCHED_TOOL_CHECK), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts")
-    out = ssh(ip, f"grep -q seedPersonaMatrixEnvironment ~/{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts && "
-                  f"grep -q assertPersonaMatrixToolsRegistered ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts && "
-                  f"echo ENVSEEDS_OK")
-    if "ENVSEEDS_OK" not in out:
-        raise RuntimeError(f"env-truth overlay verification failed on {ip}: {out}")
-    out = ssh(ip, f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE} && "
-                  f"grep -q MAX_PAYLOAD_BYTES ~/{PATCHED_SCOUT_CONFIG_REMOTE} && "
-                  f"grep -q SCOUT_READY_TIMEOUT_MS ~/{EVAL_STACK_REMOTE} && "
-                  f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE} && "
-                  f"grep -q FinalAnswerPresent ~/{PATCHED_EVALUATOR_REMOTE} && "
-                  f"grep -q 'NEVER finish the turn' ~/{PATCHED_RULE_SKILL_REMOTE} && "
-                  f"echo OVERLAY_OK")
+    if persona_only:
+        ssh(ip, f"mkdir -p ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures ~/{FIXTURES_REMOTE_PREFIX}/evals")
+        scp(str(PATCHED_ENV_SEEDS), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/env_seeds.ts")
+        scp(str(PATCHED_TOOLS_SEED), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/persona_matrix_tools_seed.ts")
+        scp(str(PATCHED_SPEC), ip, f"{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts")
+        scp(str(PATCHED_TOOL_CHECK), ip, f"{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts")
+        out = ssh(ip, f"grep -q seedPersonaMatrixEnvironment ~/{FIXTURES_REMOTE_PREFIX}/evals/persona_matrix.spec.ts && "
+                      f"grep -q assertPersonaMatrixToolsRegistered ~/{FIXTURES_REMOTE_PREFIX}/src/fixtures/tool_registration_check.ts && "
+                      f"echo ENVSEEDS_OK")
+        if "ENVSEEDS_OK" not in out:
+            raise RuntimeError(f"env-truth overlay verification failed on {ip}: {out}")
+    infra_checks = [
+        f"grep -q SCOUT_READY_TIMEOUT_MS ~/{EVAL_STACK_REMOTE}",
+        f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE}",
+        f"grep -q getStatusCode ~/{RETRY_UTILS_REMOTE}",
+    ]
+    persona_checks = [
+        f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
+        f"grep -q MAX_PAYLOAD_BYTES ~/{PATCHED_SCOUT_CONFIG_REMOTE}",
+        f"grep -q FinalAnswerPresent ~/{PATCHED_EVALUATOR_REMOTE}",
+        f"grep -q 'NEVER finish the turn' ~/{PATCHED_RULE_SKILL_REMOTE}",
+    ]
+    checks = infra_checks + (persona_checks if persona_only else [])
+    out = ssh(ip, " && ".join(checks) + " && echo OVERLAY_OK")
     if "OVERLAY_OK" not in out:
         raise RuntimeError(f"patched overlay verification failed on {ip}: {out}")
     print(f"[deploy] assets + patched evaluator/config on {ip}", flush=True)
@@ -420,6 +505,58 @@ def self_test() -> int:
     # Shell-quoting: a value with a space must not split into two words.
     check("value quoted", "'a b'" in build_env_prefix(m, {"EVAL_CONNECTOR_ID": "a b"}), True)
 
+    # --- suite port -------------------------------------------------------
+    # Every check below pins a defect that would otherwise cost real VM time or
+    # silently grade the wrong suite.
+    global SUITE
+    saved = SUITE
+    try:
+        # VM names must not collide across suites: same model, two sweeps.
+        SUITE = "security-persona-matrix"
+        persona_vm = vm_name("eis-openai-gpt-5-4")
+        SUITE = "attack-discovery-agent-builder"
+        ad_vm = vm_name("eis-openai-gpt-5-4")
+        check("vm names differ per suite", persona_vm != ad_vm, True)
+        check("ad vm prefix", ad_vm.startswith("orca-ad-"), True)
+        check("vm name length", len(ad_vm) <= 64, True)
+
+        # Teardown must claim every suite's resources, or they keep billing.
+        check("teardown claims persona", is_sweep_resource(persona_vm + "_OsDisk"), True)
+        check("teardown claims ad", is_sweep_resource(ad_vm + "_OsDisk"), True)
+        SUITE = "security-automatic-migrations"
+        check("teardown claims migrations",
+              is_sweep_resource(vm_name("eis-openai-gpt-5-4") + "-nic"), True)
+        check("teardown ignores foreign", is_sweep_resource("unrelated-vm_OsDisk"), False)
+
+        # Run dirs are namespaced, so a second suite cannot clobber the first.
+        SUITE = "security-persona-matrix"
+        d1 = model_dir("eis-openai-gpt-5-4")
+        SUITE = "attack-discovery-agent-builder"
+        d2 = model_dir("eis-openai-gpt-5-4")
+        check("model dirs differ per suite", d1 != d2, True)
+
+        # EVAL_SUITE must reach the VM: without it run_model.sh falls back to
+        # persona-matrix and grades the wrong suite while its gate still passes.
+        check("EVAL_SUITE forwarded", "EVAL_SUITE" in FORWARDED_ENV_VARS, True)
+        prefix = build_env_prefix("eis-openai-gpt-5-4", {"EVAL_SUITE": "attack-discovery-agent-builder"})
+        check("EVAL_SUITE exported",
+              "export EVAL_SUITE=attack-discovery-agent-builder && " in prefix, True)
+
+        # Doc-count gate: expected docs are per-suite, counted from the datasets.
+        check("persona n_examples", SUITE_PROFILES["security-persona-matrix"]["n_examples"], 21)
+        check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 5)
+        check("migrations n_examples",
+              SUITE_PROFILES["security-automatic-migrations"]["n_examples"], 22)
+
+        # Unknown suite must fail loudly rather than silently sweeping persona.
+        try:
+            suite_profile("no-such-suite")
+            check("unknown suite rejected", False, True)
+        except KeyError:
+            pass
+    finally:
+        SUITE = saved
+
     print(f"self-test: {len(failures)} failure(s)")
     for f in failures:
         print(f"  FAIL {f}")
@@ -427,13 +564,15 @@ def self_test() -> int:
 
 
 def launch(ip: str, model: str) -> subprocess.Popen:
-    log = SWEEP_DIR / model / "run.log"
+    log = model_dir(model) / "run.log"
     log.parent.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ)
+    env["EVAL_SUITE"] = suite_profile()["cli_suite"]
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
          "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=60",
-         "-i", SSH_KEY, f"{SSH_USER}@{ip}", f"{build_env_prefix(model)}bash /tmp/run_model.sh {model}"],
+         "-i", SSH_KEY, f"{SSH_USER}@{ip}", f"{build_env_prefix(model, env)}bash /tmp/run_model.sh {model}"],
         stdout=open(log, "w"), stderr=subprocess.STDOUT)
 
 
@@ -462,7 +601,7 @@ def _resolve_from_golden(model: str, ip: str) -> dict:
                 {"match_phrase": {"task.model.id": c}}
                 for c in _score_id_candidates(canon)
             ], "minimum_should_match": 1}},
-            {"term": {"metadata.suite_id": "security-persona-matrix"}},
+            {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
         ]}},
         "aggs": {
             "m": {"terms": {"field": "task.model.id", "size": 1}},
@@ -612,14 +751,15 @@ def check_golden(model: str, ip: str) -> dict:
         except Exception:
             return {"count": -1, "error": out[:200]}
     reps = int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
-    result["expected"] = 21 * n_evaluators * reps
+    result["expected"] = suite_profile()["n_examples"] * n_evaluators * reps
     result["execution_id"] = exec_id
     return result
 
 
 def status() -> None:
-    for model in os.listdir(SWEEP_DIR) if SWEEP_DIR.exists() else []:
-        p = SWEEP_DIR / model / "status.json"
+    root = SWEEP_DIR / SUITE
+    for model in sorted(os.listdir(root)) if root.exists() else []:
+        p = model_dir(model) / "status.json"
         if p.exists():
             s = json.load(open(p))
             print(f"  {model:45} {s.get('state', '?'):10} docs={s.get('docs', '?')}")
@@ -645,7 +785,7 @@ def prepare(model: str) -> tuple[str, str]:
 def _model_state(model: str) -> str:
     """Read the state a model last wrote, so skips count as failures too."""
     try:
-        with open(SWEEP_DIR / model / "status.json") as fh:
+        with open(model_dir(model) / "status.json") as fh:
             return json.load(fh).get("state", "UNKNOWN")
     except Exception:
         return "UNKNOWN"
@@ -654,11 +794,17 @@ def _model_state(model: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", default="all")
+    ap.add_argument("--suite", default="security-persona-matrix",
+                    choices=sorted(SUITE_PROFILES),
+                    help="eval suite to sweep; selects overlays, VM prefix and doc gate")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--teardown", action="store_true")
     ap.add_argument("--self-test", action="store_true",
                     help="offline checks for the pure helpers; no Azure or SSH")
     args = ap.parse_args()
+
+    global SUITE
+    SUITE = args.suite
 
     if args.self_test:
         return self_test()
@@ -668,7 +814,8 @@ def main() -> int:
         return
     if args.teardown:
         for vm in json.loads(az("vm", "list", "-g", RG, "-o", "json")):
-            if vm["name"].startswith("orca-sweep-"):
+            if any(vm["name"].startswith(pf["vm_prefix"] + "-")
+                   for pf in SUITE_PROFILES.values()):
                 az("vm", "delete", "-g", RG, "-n", vm["name"], "--yes", "--no-wait")
                 print(f"[teardown] deleting {vm['name']}")
         # `az vm delete` removes ONLY the VM. Its disk, NIC and public IP
@@ -681,23 +828,23 @@ def main() -> int:
         print("[teardown] waiting for disks to detach...")
         for _ in range(60):
             disks = json.loads(az("disk", "list", "-g", RG, "-o", "json"))
-            sweep = [d for d in disks if d["name"].startswith("orca-sweep-")]
+            sweep = [d for d in disks if is_sweep_resource(d["name"])]
             if not sweep or all(d.get("diskState") == "Unattached" for d in sweep):
                 break
             time.sleep(5)
 
         for d in json.loads(az("disk", "list", "-g", RG, "-o", "json")):
-            if d["name"].startswith("orca-sweep-") and d.get("diskState") == "Unattached":
+            if is_sweep_resource(d["name"]) and d.get("diskState") == "Unattached":
                 az("disk", "delete", "-g", RG, "-n", d["name"], "--yes", "--no-wait")
                 print(f"[teardown] deleting disk {d['name']}")
 
         for n in json.loads(az("network", "nic", "list", "-g", RG, "-o", "json")):
-            if n["name"].startswith("orca-sweep-") and not n.get("virtualMachine"):
+            if is_sweep_resource(n["name"]) and not n.get("virtualMachine"):
                 az("network", "nic", "delete", "-g", RG, "-n", n["name"])
                 print(f"[teardown] deleting nic {n['name']}")
 
         for p in json.loads(az("network", "public-ip", "list", "-g", RG, "-o", "json")):
-            if p["name"].startswith("orca-sweep-") and not p.get("ipConfiguration"):
+            if is_sweep_resource(p["name"]) and not p.get("ipConfiguration"):
                 az("network", "public-ip", "delete", "-g", RG, "-n", p["name"])
                 print(f"[teardown] deleting public-ip {p['name']}")
 
@@ -709,7 +856,7 @@ def main() -> int:
         # the shared vnet and the orca-eval-base-* image must survive.
         for g in json.loads(az("network", "nsg", "list", "-g", RG, "-o", "json")):
             detached = not g.get("networkInterfaces") and not g.get("subnets")
-            if g["name"].startswith("orca-sweep-") and detached:
+            if is_sweep_resource(g["name"]) and detached:
                 az("network", "nsg", "delete", "-g", RG, "-n", g["name"])
                 print(f"[teardown] deleting nsg {g['name']}")
 
@@ -722,7 +869,7 @@ def main() -> int:
                 [
                     g
                     for g in json.loads(az("network", "nsg", "list", "-g", RG, "-o", "json"))
-                    if g["name"].startswith("orca-sweep-")
+                    if is_sweep_resource(g["name"])
                 ]
             ),
         }
@@ -744,14 +891,14 @@ def main() -> int:
                 _, ip = fut.result()
             except Exception as exc:
                 print(f"[skip] {model}: prepare failed ({exc})", flush=True)
-                (SWEEP_DIR / model).mkdir(parents=True, exist_ok=True)
+                model_dir(model).mkdir(parents=True, exist_ok=True)
                 json.dump({"model": model, "state": "FAIL", "error": f"prepare: {exc}"},
-                          open(SWEEP_DIR / model / "status.json", "w"))
+                          open(model_dir(model) / "status.json", "w"))
                 continue
             ips[model] = ip
-            (SWEEP_DIR / model).mkdir(parents=True, exist_ok=True)
+            model_dir(model).mkdir(parents=True, exist_ok=True)
             json.dump({"ip": ip, "model": model, "state": "booting"},
-                      open(SWEEP_DIR / model / "status.json", "w"))
+                      open(model_dir(model) / "status.json", "w"))
 
     reused = {}
     for model, ip in ips.items():
@@ -795,7 +942,7 @@ def main() -> int:
                    "docs": result.get("count", -1), "rc": rc,
                    "execution_id": result.get("execution_id"),
                    "error": result.get("error")},
-                  open(SWEEP_DIR / model / "status.json", "w"), indent=2)
+                  open(model_dir(model) / "status.json", "w"), indent=2)
         print(f"[done] {model}: {state} docs={result.get('count', -1)}/{expected_docs}"
               + (f" ({result['error']})" if result.get("error") else ""), flush=True)
 

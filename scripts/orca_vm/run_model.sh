@@ -112,7 +112,9 @@ echo "ES data cleaned"
 # This is the exact path that passed 21/21 for Haiku. No manual scout, no
 # manual CCM, no --skip-server: a single command owns the whole lifecycle.
 echo "=== Running eval: $MODEL ==="
-node scripts/evals start --profile local --suite security-persona-matrix --model "$MODEL" 2>&1 | tail -40
+# Suite is injected by the sweeper (EVAL_SUITE); default keeps the historical
+# persona-matrix behaviour for any caller that predates the suite port.
+node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tail -40
 EVAL_EXIT=${PIPESTATUS[0]}
 echo "EVAL_EXIT=$EVAL_EXIT"
 
