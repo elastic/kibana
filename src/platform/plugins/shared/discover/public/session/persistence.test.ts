@@ -57,8 +57,8 @@ describe('Discover session persistence', () => {
   it('uses the legacy client when the local switch is disabled', async () => {
     const apiClient = createApiClient();
     const legacyClient = savedSearchPluginMock.createStartContract();
-    legacyClient.getDiscoverSession.mockResolvedValue(persistedSession);
-    legacyClient.saveDiscoverSession.mockResolvedValue(persistedSession);
+    jest.mocked(legacyClient.getDiscoverSession).mockResolvedValue(persistedSession);
+    jest.mocked(legacyClient.saveDiscoverSession).mockResolvedValue(persistedSession);
     const persistence = createDiscoverSessionPersistence({
       apiClient,
       legacyClient,
