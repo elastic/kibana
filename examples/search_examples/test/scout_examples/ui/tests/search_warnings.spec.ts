@@ -9,21 +9,12 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { ensureDownsampledSample, revertDownsampledSample } from '../fixtures/downsampled_sample';
 
 test.describe('Search example shard-failure warnings', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ apiServices, esArchiver, esClient, log }) => {
-    await ensureDownsampledSample({ apiServices, esArchiver, esClient, log });
-  });
-
-  test.afterAll(async ({ apiServices, esClient, log }) => {
-    await revertDownsampledSample({ apiServices, esClient, log });
-  });
-
-  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, downsampledSample, page, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.searchExamples.gotoSearch();
-    await pageObjects.searchExamples.configureWarningsDemo();
+    await pageObjects.searchExamples.configureWarningsDemo(downsampledSample.dataViewName);
     await page.components.toast().closeAll();
   });
 

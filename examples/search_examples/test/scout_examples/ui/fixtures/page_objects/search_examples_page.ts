@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { EuiComboBoxObject, Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import {
   APP_ID,
   DATA_VIEW,
@@ -18,11 +18,6 @@ import {
 
 /**
  * Page object for the search_examples demo apps.
- *
- * Combo selection uses a temporary replace-without-clear path: shared
- * `setSelectedOptions` clears pills via × first and times out on these
- * `singleSelection` demos. Keep until Apps DX adds that behavior to
- * `@elastic/eui-test-helpers`.
  */
 export class SearchExamplesPage {
   readonly searchSourceWithOther: Locator;
@@ -41,6 +36,9 @@ export class SearchExamplesPage {
   readonly warningsTab: Locator;
   readonly warningsCodeBlock: Locator;
   readonly viewWarningBtn: Locator;
+  readonly dataViewSelector: EuiComboBoxObject;
+  readonly searchBucketField: EuiComboBoxObject;
+  readonly searchMetricField: EuiComboBoxObject;
 
   constructor(
     private readonly page: ScoutPage,
@@ -64,6 +62,9 @@ export class SearchExamplesPage {
     this.warningsTab = this.page.testSubj.locator('warningsTab');
     this.warningsCodeBlock = this.page.testSubj.locator('warningsCodeBlock');
     this.viewWarningBtn = this.page.testSubj.locator('viewWarningBtn');
+    this.dataViewSelector = this.page.components.comboBox('dataViewSelector');
+    this.searchBucketField = this.page.components.comboBox('searchBucketField');
+    this.searchMetricField = this.page.components.comboBox('searchMetricField');
   }
 
   searchResults(count: number): Locator {
@@ -89,11 +90,11 @@ export class SearchExamplesPage {
    * Configures the Search demo: data view, bucket/metric fields, and time range.
    */
   async configureSearchDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
+    await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
     // Field options load after the data view resolves.
     await this.page.testSubj.locator('searchBucketField').waitFor({ state: 'visible' });
-    await this.selectSingleComboOption('searchBucketField', 'geo.src');
-    await this.selectSingleComboOption('searchMetricField', 'memory');
+    await this.searchBucketField.setSelectedOptions(['geo.src']);
+    await this.searchMetricField.setSelectedOptions(['memory']);
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
   }
 
@@ -101,13 +102,10 @@ export class SearchExamplesPage {
    * Configures the Search demo for shard-failure warnings: downsampled
    * data view, rollup metric field, and the range covering sample-01.
    */
-  async configureWarningsDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', SAMPLE_01_DATA_VIEW_NAME);
+  async configureWarningsDemo(dataViewName: string = SAMPLE_01_DATA_VIEW_NAME): Promise<void> {
+    await this.dataViewSelector.setSelectedOptions([dataViewName]);
     await this.page.testSubj.locator('searchMetricField').waitFor({ state: 'visible' });
-    await this.selectSingleComboOption(
-      'searchMetricField',
-      'kubernetes.container.memory.usage.bytes'
-    );
+    await this.searchMetricField.setSelectedOptions(['kubernetes.container.memory.usage.bytes']);
     await this.datePicker.setAbsoluteRange(SAMPLE_01_TIME_RANGE);
   }
 
@@ -117,8 +115,8 @@ export class SearchExamplesPage {
    * cannot clear the session after the spec starts it.
    */
   async configureSearchSessionDemo(): Promise<void> {
-    await this.selectSingleComboOption('dataViewSelector', DATA_VIEW);
-    await this.selectSingleComboOption('searchMetricField', 'bytes');
+    await this.dataViewSelector.setSelectedOptions([DATA_VIEW]);
+    await this.searchMetricField.setSelectedOptions(['bytes']);
     await this.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
     await this.page.testSubj
       .locator('dateRangePickerCustomRangePanel')
@@ -134,43 +132,5 @@ export class SearchExamplesPage {
   async saveBackgroundSearch(): Promise<void> {
     await this.page.testSubj.locator('queryCancelButton').waitFor({ state: 'visible' });
     await this.saveBackgroundSearchButton.click();
-  }
-
-  /**
-   * Temporary until Apps DX supports replace-without-clear on comboBox.
-   * Always types the label. EUI singleSelection hides the already-selected
-   * option, so after typing we wait for the matching list option or the
-   * selected pill, then click the option when it is in the list.
-   */
-  private async selectSingleComboOption(
-    testSubj: string,
-    label: string,
-    { timeout = 10_000 }: { timeout?: number } = {}
-  ): Promise<void> {
-    const normalizedLabel = label.trim();
-    const root = this.page.testSubj.locator(testSubj);
-    const comboInput = root.locator('[data-test-subj="comboBoxInput"]');
-    await comboInput.waitFor({ state: 'visible' });
-    await comboInput.click();
-
-    const exactLabel = new RegExp(`^${normalizedLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
-    const selectedPill = root.locator('[data-test-subj="euiComboBoxPill"]').filter({
-      hasText: exactLabel,
-    });
-    const searchInput = root.locator('[data-test-subj="comboBoxSearchInput"]');
-    const listbox = this.page.getByRole('listbox');
-    await listbox.waitFor({ state: 'visible', timeout });
-    const option = listbox.getByRole('option').filter({ hasText: exactLabel });
-
-    await searchInput.fill(label);
-    await option.or(selectedPill).waitFor({ state: 'visible', timeout });
-
-    if ((await option.count()) > 0) {
-      await option.click();
-      await listbox.waitFor({ state: 'hidden', timeout });
-      return;
-    }
-
-    await this.page.keyboard.press('Escape');
   }
 }
