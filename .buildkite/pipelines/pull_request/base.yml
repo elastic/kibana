@@ -6,6 +6,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-qa
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
       diskSizeGb: 50
