@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
+import { ENROLLMENT_API_KEY_MAPPINGS, FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
 import { isValidEnrollmentKeyExpiration } from '../../../common/services';
@@ -90,7 +90,7 @@ export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object(
     {
       name: schema.maybe(schema.string({ maxLength: 255 })),
-      policy_id: schema.string({ maxLength: 50 }),
+      policy_id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
       expiration: schema.maybe(
         schema.string({
           maxLength: 20,

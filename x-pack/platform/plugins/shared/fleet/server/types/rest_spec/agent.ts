@@ -575,61 +575,48 @@ export const PostAgentUnenrollRequestSchema = {
 };
 
 export const PostBulkAgentUnenrollRequestSchema = {
-  body: schema.object(
-    {
-      agents: schema.oneOf([
-        schema.arrayOf(
-          schema.string({
-            maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
-            meta: {
-              description: 'list of agent IDs',
-            },
-          }),
-          { maxSize: 10000 }
-        ),
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(
         schema.string({
-          maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+          maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
           meta: {
-            description: 'KQL query string, leave empty to action all agents',
+            description: 'list of agent IDs',
           },
         }),
-      ]),
-      force: schema.maybe(
-        schema.boolean({
-          meta: {
-            description: 'Unenrolls hosted agents too',
-          },
-        })
+        { maxSize: 10000 }
       ),
-      revoke: schema.maybe(
-        schema.boolean({
-          meta: {
-            description: 'Revokes API keys of agents',
-          },
-        })
-      ),
-      batchSize: schema.maybe(schema.number()),
-      includeInactive: schema.maybe(
-        schema.boolean({
-          meta: {
-            description: 'When passing agents by KQL query, unenrolls inactive agents too',
-          },
-        })
-      ),
-      dryRun: schema.maybe(schema.boolean()),
-    },
-    {
-      validate: (body: Record<string, unknown>) => {
-        if (Array.isArray(body.agents)) {
-          for (const id of body.agents as unknown[]) {
-            if (typeof id === 'string' && id.length > FLEET_SCHEMA_ID_MAX_LENGTH) {
-              return `Agent ID exceeds the maximum length of ${FLEET_SCHEMA_ID_MAX_LENGTH} characters`;
-            }
-          }
-        }
-      },
-    }
-  ),
+      schema.string({
+        maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+        meta: {
+          description: 'KQL query string, leave empty to action all agents',
+        },
+      }),
+    ]),
+    force: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Unenrolls hosted agents too',
+        },
+      })
+    ),
+    revoke: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Revokes API keys of agents',
+        },
+      })
+    ),
+    batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When passing agents by KQL query, unenrolls inactive agents too',
+        },
+      })
+    ),
+    dryRun: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const PostRemoveCollectorRequestSchema = {

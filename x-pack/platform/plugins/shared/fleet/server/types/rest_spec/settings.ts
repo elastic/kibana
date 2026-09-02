@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 import { isDiffPathProtocol } from '../../../common/services';
 
+import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
+
 const EnrollmentSettingsProxySchema = schema.object({
   id: schema.string({ maxLength: 50 }),
   name: schema.string({ maxLength: 255 }),
@@ -262,7 +264,7 @@ export const PutSpaceSettingsRequestSchema = {
 export const GetEnrollmentSettingsRequestSchema = {
   query: schema.maybe(
     schema.object({
-      agentPolicyId: schema.maybe(schema.string({ maxLength: 50 })),
+      agentPolicyId: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
     })
   ),
 };
