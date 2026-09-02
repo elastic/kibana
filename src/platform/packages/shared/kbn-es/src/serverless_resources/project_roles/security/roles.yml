@@ -306,7 +306,6 @@ t2_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -316,6 +315,7 @@ t2_analyst:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
+        - 'entities-latest-*'
       privileges:
         - read
         - view_index_metadata
@@ -366,6 +366,7 @@ t3_analyst:
         - .asset-criticality.asset-criticality-*
         - '.entities.v2.latest.*'
         - '.entities.v2.metadata.*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -401,7 +402,6 @@ t3_analyst:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - 'entities-latest-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
