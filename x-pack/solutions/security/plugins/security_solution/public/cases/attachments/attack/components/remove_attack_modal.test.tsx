@@ -46,11 +46,11 @@ describe('RemoveAttackModal', () => {
     expect(screen.getByText('Credential dumping on host-1')).toBeInTheDocument();
   });
 
-  it('offers an unchecked checkbox stating how many alerts would be removed', () => {
+  it('offers a checked checkbox stating how many alerts would be removed', () => {
     renderModal();
 
     const checkbox = screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
-    expect(checkbox).not.toBeChecked();
+    expect(checkbox).toBeChecked();
     expect(checkbox).toBeEnabled();
     expect(screen.getByLabelText('Also remove 3 related alerts')).toBe(checkbox);
   });
@@ -61,27 +61,26 @@ describe('RemoveAttackModal', () => {
     expect(screen.getByLabelText('Also remove 1 related alert')).toBeInTheDocument();
   });
 
-  it('confirms without the related alerts when the checkbox is left unchecked', async () => {
+  it('confirms with the related alerts when the checkbox is left as it is', async () => {
     renderModal();
 
-    await userEvent.click(screen.getByText('Remove'));
-
-    expect(onConfirm).toHaveBeenCalledWith({ removeRelatedAlerts: false });
-  });
-
-  it('confirms with the related alerts once the checkbox is checked', async () => {
-    renderModal();
-
-    await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
     await userEvent.click(screen.getByText('Remove'));
 
     expect(onConfirm).toHaveBeenCalledWith({ removeRelatedAlerts: true });
   });
 
-  it('removes nothing when cancelled', async () => {
+  it('confirms without the related alerts once the checkbox is unchecked', async () => {
     renderModal();
 
     await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
+    await userEvent.click(screen.getByText('Remove'));
+
+    expect(onConfirm).toHaveBeenCalledWith({ removeRelatedAlerts: false });
+  });
+
+  it('removes nothing when cancelled', async () => {
+    renderModal();
+
     await userEvent.click(screen.getByText('Cancel'));
 
     expect(onCancel).toHaveBeenCalled();
@@ -100,13 +99,16 @@ describe('RemoveAttackModal', () => {
     expect(checkbox).toHaveFocus();
 
     await userEvent.keyboard(' ');
-    expect(checkbox).toBeChecked();
+    expect(checkbox).not.toBeChecked();
   });
 
   it('disables the checkbox and explains why when the attack cannot be resolved', () => {
     renderModal({ isResolvable: false, alertCount: 0 });
 
-    expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID)).toBeDisabled();
+    const checkbox = screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
+    expect(checkbox).toBeDisabled();
+    // Nothing is removable, so the default tick is not shown as though something were.
+    expect(checkbox).not.toBeChecked();
     expect(screen.getByTestId(REMOVE_ATTACK_ALERTS_EXPLANATION_TEST_ID)).toHaveTextContent(
       'could not be determined'
     );
@@ -124,7 +126,6 @@ describe('RemoveAttackModal', () => {
   it('never confirms the related alerts when the resolution turned unresolvable after checking', async () => {
     const { rerender } = renderModal();
 
-    await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
     rerender(
       <TestProviders>
         <RemoveAttackModal {...defaultProps} isResolvable={false} alertCount={0} />

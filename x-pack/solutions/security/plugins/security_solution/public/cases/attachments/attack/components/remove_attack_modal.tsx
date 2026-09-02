@@ -73,9 +73,10 @@ export interface RemoveAttackModalProps {
  * Confirms the removal of a `security.attack` attachment, offering to remove the alerts the
  * attack brought in with it.
  *
- * The checkbox is unchecked by default: removing evidence from a case is opt-in. It is disabled,
- * with the reason spelled out beneath it, when there is nothing safe to remove — either the
- * attack's alert set could not be resolved, or none of its alerts are removable (see
+ * The checkbox is checked by default: an attack brings its alerts onto the case, so removing it
+ * takes them back off unless the analyst says otherwise. It is disabled, with the reason spelled
+ * out beneath it, when there is nothing safe to remove — either the attack's alert set could not
+ * be resolved, or none of its alerts are removable (see
  * {@link resolveRemovableAlertAttachments}).
  *
  * Purely presentational, so the resolution can be mounted — and paid for — only once the user
@@ -89,7 +90,7 @@ export const RemoveAttackModal = ({
   onCancel,
   onConfirm,
 }: RemoveAttackModalProps) => {
-  const [removeRelatedAlerts, setRemoveRelatedAlerts] = useState(false);
+  const [removeRelatedAlerts, setRemoveRelatedAlerts] = useState(true);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'removeAttackTitle' });
   const checkboxId = useGeneratedHtmlId({ prefix: 'removeAttackAlerts' });
 
@@ -137,7 +138,7 @@ export const RemoveAttackModal = ({
       ) : (
         <>
           <EuiCheckbox
-            checked={removeRelatedAlerts}
+            checked={hasRemovableAlerts && removeRelatedAlerts}
             data-test-subj={REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID}
             disabled={!hasRemovableAlerts}
             id={checkboxId}

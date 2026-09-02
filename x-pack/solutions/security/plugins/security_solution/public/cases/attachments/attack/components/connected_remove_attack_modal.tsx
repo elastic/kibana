@@ -6,20 +6,25 @@
  */
 
 import React, { useCallback } from 'react';
+import { useQuery } from '@kbn/react-query';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 import type { CaseAttachment } from '../utils';
+import { fetchCaseAttachments } from '../api';
 import { RemoveAttackModal } from './remove_attack_modal';
 
 /** What the confirmed removal should delete, beyond the attack attachments themselves. */
 export interface RemoveAttackConfirmation {
   /**
    * Saved object ids of the alert attachments to remove alongside the attacks. Empty unless the
-   * user opted in, so the caller can always pass these straight to a bulk delete.
+   * user opted out, so the caller can always pass these straight to a bulk delete.
    */
   alertAttachmentIds: string[];
 }
 
 export interface ConnectedRemoveAttackModalProps {
+  /** The case the attachments belong to. */
+  caseId: string;
   /**
    * Attack document ids of the attachments being removed: one for a row action, several for a
    * bulk selection.
@@ -27,28 +32,44 @@ export interface ConnectedRemoveAttackModalProps {
   attackIds: readonly string[];
   /** Names what is being removed in the prompt — an attack title, or a count of them. */
   attackTitle: string;
-  /** The case's attachments, used to resolve which alerts the attacks may take with them. */
-  comments: readonly CaseAttachment[];
   /** Closes the prompt without removing anything. */
   onCancel: () => void;
   /** Called once the user confirms. Nothing is removed until this runs. */
   onConfirm: (confirmation: RemoveAttackConfirmation) => void;
 }
 
+export const FETCH_CASE_ATTACHMENTS_QUERY_KEY = ['GET', 'attack-attachment-case-attachments'];
+
+const NO_ATTACHMENTS: CaseAttachment[] = [];
+
 /**
  * Resolves the removable alerts of the attacks being removed and feeds the confirmation prompt.
  *
- * Mount this only while the prompt is open: the resolution costs a request.
+ * The case's attachments are fetched here rather than taken as a prop, because the activity log
+ * hands a registered attachment's actions only the case id and title. Mount this only while the
+ * prompt is open: it costs the attachments request and the attack resolution behind it.
  */
 export const ConnectedRemoveAttackModal = ({
+  caseId,
   attackIds,
   attackTitle,
-  comments,
   onCancel,
   onConfirm,
 }: ConnectedRemoveAttackModalProps) => {
+  const { http } = useKibana().services;
+
+  const {
+    data: comments,
+    isLoading: isLoadingAttachments,
+    isError,
+  } = useQuery<CaseAttachment[]>(
+    [...FETCH_CASE_ATTACHMENTS_QUERY_KEY, caseId],
+    ({ signal }) => fetchCaseAttachments({ http, caseId, signal }),
+    { retry: false, refetchOnWindowFocus: false }
+  );
+
   const { attachmentIds, alertIds, isResolvable, isLoading } = useRemovableAlertAttachments({
-    comments,
+    comments: comments ?? NO_ATTACHMENTS,
     attackIds,
   });
 
@@ -65,8 +86,10 @@ export const ConnectedRemoveAttackModal = ({
       // The count names alert documents, not attachments: an alert attachment can carry several.
       alertCount={alertIds.length}
       attackTitle={attackTitle}
-      isLoading={isLoading}
-      isResolvable={isResolvable}
+      isLoading={isLoadingAttachments || isLoading}
+      // A failed attachments request leaves the case's other attacks invisible, which is exactly
+      // what the unresolvable explanation covers.
+      isResolvable={!isError && isResolvable}
       onCancel={onCancel}
       onConfirm={onModalConfirm}
     />

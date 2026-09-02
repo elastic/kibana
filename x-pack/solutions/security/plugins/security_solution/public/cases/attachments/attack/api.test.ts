@@ -6,10 +6,21 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
-import { bulkDeleteCaseAttachments } from './api';
+import {
+  MAX_BULK_DELETE_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
+import { bulkDeleteCaseAttachments, fetchCaseAttachments } from './api';
 
-const buildHttp = () => ({ post: jest.fn().mockResolvedValue(undefined) } as unknown as HttpSetup);
+const buildHttp = () =>
+  ({
+    post: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue({ comments: [], page: 1, per_page: 100, total: 0 }),
+  } as unknown as HttpSetup);
 
 describe('bulkDeleteCaseAttachments', () => {
   it('sends every attachment id in a single request', async () => {
@@ -72,5 +83,151 @@ describe('bulkDeleteCaseAttachments', () => {
     await expect(
       bulkDeleteCaseAttachments({ http, caseId: 'case-1', attachmentIds: ['so-attack-1'] })
     ).rejects.toThrow('boom');
+  });
+});
+
+const foundAttachment = (overrides: Record<string, unknown> = {}) => ({
+  id: 'so-attack-1',
+  version: 'WzEsMV0=',
+  type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+  owner: 'securitySolution',
+  attachmentId: 'attack-1',
+  metadata: { title: 'Credential dumping on host-1', alertCount: 2, index: '.alerts-attack' },
+  created_at: '2024-05-02T10:00:00.000Z',
+  created_by: { email: null, full_name: 'Ada Lovelace', username: 'ada', profile_uid: 'uid-1' },
+  pushed_at: null,
+  pushed_by: null,
+  updated_at: null,
+  updated_by: null,
+  ...overrides,
+});
+
+const findResponse = (comments: unknown[], total = comments.length) => ({
+  comments,
+  page: 1,
+  per_page: MAX_COMMENTS_PER_PAGE,
+  total,
+});
+
+describe('fetchCaseAttachments', () => {
+  it('reads the case attachments from the find endpoint', async () => {
+    const http = buildHttp();
+    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+
+    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledWith('/api/cases/case-1/comments/_find', {
+      query: { page: 1, perPage: MAX_COMMENTS_PER_PAGE },
+      signal: undefined,
+    });
+    expect(attachments).toHaveLength(1);
+  });
+
+  it('camel-cases the audit fields the case view would otherwise have converted', async () => {
+    const http = buildHttp();
+    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+
+    const [attachment] = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(attachment).toEqual({
+      id: 'so-attack-1',
+      version: 'WzEsMV0=',
+      type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'attack-1',
+      metadata: { title: 'Credential dumping on host-1', alertCount: 2, index: '.alerts-attack' },
+      createdAt: '2024-05-02T10:00:00.000Z',
+      createdBy: {
+        email: null,
+        fullName: 'Ada Lovelace',
+        username: 'ada',
+        profileUid: 'uid-1',
+      },
+      pushedAt: null,
+      pushedBy: null,
+      updatedAt: null,
+      updatedBy: null,
+    });
+  });
+
+  it('keeps the alert attachments, which is what the removal scope is resolved against', async () => {
+    const http = buildHttp();
+    (http.get as jest.Mock).mockResolvedValue(
+      findResponse([
+        foundAttachment(),
+        foundAttachment({
+          id: 'so-alert-1',
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: { index: '.alerts-detections' },
+        }),
+      ])
+    );
+
+    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(attachments.map(({ id }) => id)).toEqual(['so-attack-1', 'so-alert-1']);
+  });
+
+  it('drops value attachments, which reference nothing an attack could have brought in', async () => {
+    const http = buildHttp();
+    const { attachmentId, ...userComment } = foundAttachment({
+      id: 'so-comment-1',
+      type: 'comment',
+    });
+    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment(), userComment]));
+
+    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(attachments.map(({ id }) => id)).toEqual(['so-attack-1']);
+  });
+
+  it('walks the pages until the reported total is covered', async () => {
+    const http = buildHttp();
+    const firstPage = Array.from({ length: MAX_COMMENTS_PER_PAGE }, (_, index) =>
+      foundAttachment({ id: `so-${index}`, attachmentId: `attack-${index}` })
+    );
+    (http.get as jest.Mock)
+      .mockResolvedValueOnce(findResponse(firstPage, MAX_COMMENTS_PER_PAGE + 1))
+      .mockResolvedValueOnce(
+        findResponse([foundAttachment({ id: 'so-last' })], MAX_COMMENTS_PER_PAGE + 1)
+      );
+
+    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(http.get).toHaveBeenCalledTimes(2);
+    expect((http.get as jest.Mock).mock.calls[1][1].query).toEqual({
+      page: 2,
+      perPage: MAX_COMMENTS_PER_PAGE,
+    });
+    expect(attachments).toHaveLength(MAX_COMMENTS_PER_PAGE + 1);
+  });
+
+  it('stops rather than spinning when a page comes back empty below the reported total', async () => {
+    const http = buildHttp();
+    (http.get as jest.Mock).mockResolvedValue(findResponse([], 5));
+
+    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
+
+    expect(http.get).toHaveBeenCalledTimes(1);
+    expect(attachments).toEqual([]);
+  });
+
+  it('forwards the abort signal', async () => {
+    const http = buildHttp();
+    const signal = new AbortController().signal;
+    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+
+    await fetchCaseAttachments({ http, caseId: 'case-1', signal });
+
+    expect(http.get).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal }));
+  });
+
+  it('propagates a failed request', async () => {
+    const http = buildHttp();
+    (http.get as jest.Mock).mockRejectedValue(new Error('boom'));
+
+    await expect(fetchCaseAttachments({ http, caseId: 'case-1' })).rejects.toThrow('boom');
   });
 });
