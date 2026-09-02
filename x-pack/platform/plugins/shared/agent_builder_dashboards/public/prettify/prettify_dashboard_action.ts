@@ -104,7 +104,6 @@ export const createPrettifyDashboardAction = ({
         data: dashboardStateToAttachmentData(dashboardApi.getSerializedState().attributes),
       };
 
-      // The screenshot is best-effort context; prettify still works from the dashboard attachment.
       const hideScreenshotOverlay = showScreenshotOverlay(rendering);
       const screenshot = await captureDashboardScreenshot({ dashboardApi, files })
         .catch(() => {
