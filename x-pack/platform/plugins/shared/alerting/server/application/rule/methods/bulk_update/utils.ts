@@ -191,7 +191,8 @@ export const prepareUpdate = async <Params extends RuleParams>({
       data.tags,
       apiKeyAttributes.uiamApiKey,
       apiKeyAttributes.apiKeyCreatedByUser,
-      context.isServerless
+      context.isServerless,
+      context.shouldGrantUiam
     );
 
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);

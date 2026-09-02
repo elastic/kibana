@@ -106,6 +106,7 @@ export function apiKeyAsRuleDomainProperties(
  * Determines if the missing UIAM API key tag should be added to a rule.
  * The tag is added when:
  * - The environment is serverless
+ * - UIAM API key granting is enabled (shouldGrantUiam)
  * - uiamApiKey is not set (null/undefined)
  * - AND apiKeyCreatedByUser is false (system-created API key)
  *
@@ -114,9 +115,10 @@ export function apiKeyAsRuleDomainProperties(
 export function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
   apiKeyCreatedByUser: boolean | null | undefined,
-  isServerless: boolean
+  isServerless: boolean,
+  shouldGrantUiam: boolean | undefined
 ): boolean {
-  return isServerless && !uiamApiKey && apiKeyCreatedByUser === false;
+  return isServerless && shouldGrantUiam === true && !uiamApiKey && apiKeyCreatedByUser === false;
 }
 
 /**
@@ -127,9 +129,10 @@ export function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
   apiKeyCreatedByUser: boolean | null | undefined,
-  isServerless: boolean
+  isServerless: boolean,
+  shouldGrantUiam: boolean | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless)) {
+  if (shouldAddMissingUiamKeyTag(uiamApiKey, apiKeyCreatedByUser, isServerless, shouldGrantUiam)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

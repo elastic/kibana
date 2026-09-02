@@ -230,7 +230,8 @@ export async function createRule<Params extends RuleParams = never>(
     data.tags,
     apiKeyProps.uiamApiKey,
     apiKeyProps.apiKeyCreatedByUser,
-    context.isServerless
+    context.isServerless,
+    context.shouldGrantUiam
   );
 
   // Convert domain rule object to ES rule attributes

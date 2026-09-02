@@ -119,4 +119,4 @@ Task Manager provides generic infrastructure that alerting leverages:
 
 - **Invalidation framework:** Alerting imports `runInvalidate` from `@kbn/task-manager-plugin/server` and passes both `invalidateApiKeyFn` (ES) and `invalidateUiamApiKeyFn` (UIAM) to handle both key types.
 - **Task scheduling:** The `alerts_invalidate_api_keys` task is registered with and scheduled by Task Manager.
-- **Config schema:** Task Manager declares its own `api_key_type` enum (`'es'` | `'uiam'`) in its config, but this is **not used at runtime** in Task Manager's own execution pipeline. Rule-level UIAM key selection lives entirely in alerting's `rule_loader.ts`.
+- **Config schema:** Task Manager declares its own `api_key_type` enum (`'es'` | `'uiam'`) in its config. When `grant_uiam_api_keys` is enabled, this setting selects which credential `EsAndUiamApiKeyStrategy.getApiKeyForFakeRequest` uses for task fake requests (UIAM, with fallback to the ES key when no UIAM key is available). Rule-level UIAM key selection for rule execution lives separately in alerting's `rule_loader.ts`, governed by `xpack.alerting.rules.apiKeyType`.

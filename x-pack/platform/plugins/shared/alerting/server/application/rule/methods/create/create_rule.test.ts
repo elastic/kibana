@@ -4835,6 +4835,7 @@ This is the type of text _investigation guides_ will contain.`;
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
       });
@@ -4890,6 +4891,7 @@ This is the type of text _investigation guides_ will contain.`;
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
       });
 
       const data = getMockData();

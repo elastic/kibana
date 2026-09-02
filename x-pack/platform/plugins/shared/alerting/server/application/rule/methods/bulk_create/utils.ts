@@ -106,7 +106,8 @@ export const prepareRule = async <Params extends RuleParams>({
       data.tags,
       apiKeyProps.uiamApiKey,
       apiKeyProps.apiKeyCreatedByUser,
-      context.isServerless
+      context.isServerless,
+      context.shouldGrantUiam
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({
