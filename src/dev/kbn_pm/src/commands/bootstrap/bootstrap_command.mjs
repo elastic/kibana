@@ -35,7 +35,8 @@ export const command = {
   flagsHelp: `
     --force-install      Use this flag to force bootstrap to reinstall dependencies. By default pnpm only
                           touches node_modules when the lockfile or manifests change, so this is rarely
-                          needed, but it can help recover from a corrupted node_modules directory.
+                          needed, but it can help recover from a corrupted node_modules directory. This
+                          deletes node_modules before installing to guarantee a clean reinstall.
     --offline            Run the installation process without consulting online resources. This is useful and
                           sometimes necessary for using bootstrap on an airplane for instance. The local pnpm
                           store will be used exclusively.

@@ -11,6 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { isDirectory } from '../../lib/fs.mjs';
+import { cleanPaths } from '../../lib/clean.mjs';
 import { run } from '../../lib/spawn.mjs';
 
 export async function areNodeModulesPresent() {
@@ -22,15 +23,26 @@ export async function areNodeModulesPresent() {
  * there is no separate integrity gate: a no-op install is cheap and pnpm only
  * changes node_modules when the lockfile or manifests differ.
  *
+ * When `force` is set we delete node_modules first, because `pnpm install --force`
+ * only re-resolves/re-fetches and still reports "Already up to date" without
+ * rebuilding node_modules when the lockfile is already satisfied.
+ *
  * @param {import('src/platform/packages/private/kbn-some-dev-log').SomeDevLog} log
  * @param {{ offline: boolean, quiet: boolean, frozenLockfile: boolean, force: boolean }} options
  * @returns {Promise<void>}
  */
 export async function pnpmInstallDeps(log, { offline, quiet, frozenLockfile, force }) {
+  if (force) {
+    log.info('--force-install: removing node_modules to force a clean reinstall');
+    await cleanPaths(log, [
+      Path.resolve(REPO_ROOT, 'node_modules'),
+      Path.resolve(REPO_ROOT, 'x-pack/node_modules'),
+    ]);
+  }
+
   const args = ['install', '--config.confirmModulesPurge=false'];
   if (frozenLockfile) args.push('--frozen-lockfile');
   if (offline) args.push('--offline');
-  if (force) args.push('--force');
   if (quiet) args.push('--reporter=silent');
 
   log.info('installing dependencies with pnpm');
