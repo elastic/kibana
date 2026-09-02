@@ -62,21 +62,22 @@ export async function runWorkflow({
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
 }): Promise<RunWorkflowResult | void> {
+  apm.currentTransaction?.setLabel('execution_mode', 'async');
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {
-    setupResult = await setupDependencies(
+    setupResult = await setupDependencies({
       workflowRunId,
       spaceId,
       logger,
       config,
       dependencies,
+      fakeRequest,
+      workflowsExecutionEngine,
       workflowExecutionRepository,
       stepExecutionRepository,
-      fakeRequest,
-      workflowsExecutionEngine
-    );
+    });
   } catch (error) {
     // The graph could not be built — a permanent author error (the parallel
     // branch-body constraints, normally caught in the editor by validateGraphBuild
@@ -106,6 +107,10 @@ export async function runWorkflow({
     telemetryClient,
     workflowExecutionCursor,
   } = setupResult;
+
+  if (!workflowExecutionRepository) {
+    throw new Error('Persistent workflow execution repository is unavailable');
+  }
 
   const execution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(execution.status)) {
