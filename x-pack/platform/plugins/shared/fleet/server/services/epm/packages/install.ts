@@ -1383,16 +1383,10 @@ export async function createInstallation(options: {
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const created = await savedObjectsClient.create<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    savedObject,
-    { id: pkgName, overwrite: true }
-  );
-
-  return {
-    ...created,
-    attributes: brandInstallationSpaceId(created.attributes),
-  };
+  return savedObjectsClient.create<Installation>(PACKAGES_SAVED_OBJECT_TYPE, savedObject, {
+    id: pkgName,
+    overwrite: true,
+  });
 }
 
 export const kibanaAssetsToAssetsRef = (
