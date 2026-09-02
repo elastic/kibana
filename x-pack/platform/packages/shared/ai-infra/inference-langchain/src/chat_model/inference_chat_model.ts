@@ -36,6 +36,7 @@ import type {
   ChatCompletionReasoning,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
   ChatCompleteResponse,
 } from '@kbn/inference-common';
 import {
@@ -71,6 +72,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
   reasoning?: ChatCompletionReasoning;
+  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -107,6 +109,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   // @ts-ignore unused for now
   private readonly logger: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
+  private readonly anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -124,6 +127,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
     this.telemetryMetadata = args.telemetryMetadata;
+    this.anonymizationMetadata = args.anonymizationMetadata;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -222,7 +226,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
-      metadata: { connectorTelemetry: this.telemetryMetadata },
+      metadata: {
+        connectorTelemetry: this.telemetryMetadata,
+        ...(this.anonymizationMetadata ? { anonymization: this.anonymizationMetadata } : {}),
+      },
       timeout: options.timeout ?? this.timeout,
       maxContentLength: this.maxContentLength,
       cacheControl: options.cacheControl ?? this.cacheControl,
