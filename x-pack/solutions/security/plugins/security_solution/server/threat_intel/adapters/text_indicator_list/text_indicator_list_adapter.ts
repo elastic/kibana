@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
+import { GLOBAL_SPACE_ID, resolveCatalogSourceUrl } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
@@ -21,7 +21,7 @@ const SOURCE_DOC_REF_INDEX = 'maltrail:trail';
 const MAX_NESTED_PER_DOC = 5000;
 
 const readTrailUrl = (source: SourceHit): string | undefined => {
-  const url = source._source.config.url;
+  const url = resolveCatalogSourceUrl(source._id);
   return typeof url === 'string' && url.length > 0 ? url : undefined;
 };
 
@@ -94,7 +94,7 @@ export const textIndicatorListAdapter: FetchAdapter = {
     const log = context.logger.get('text-indicator-list-adapter');
     const url = readTrailUrl(source);
     if (!url) {
-      log.warn(`Source ${source._id} has no config.url — skipping`);
+      log.warn(`Source ${source._id} has no catalog URL — skipping`);
       return [];
     }
 

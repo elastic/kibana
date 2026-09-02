@@ -10,6 +10,7 @@ import { buildFingerprint } from '../fingerprint';
 import { severityScore } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
 import { normalizeProvenanceUrl } from '../../services/provenance_url';
+import { resolveCatalogSourceUrl } from '../../../../common/threat_intel';
 import type { FetchAdapter, NormalizedReport, SourceHit, AdapterRunContext } from '../types';
 
 /**
@@ -104,7 +105,7 @@ const parseKevVulnerability = (value: unknown): KevVulnerability | undefined => 
 };
 
 const readFeedUrl = (source: SourceHit): string => {
-  const url = source._source.config.url;
+  const url = resolveCatalogSourceUrl(source._id);
   return typeof url === 'string' && url.length > 0 ? url : KEV_FEED_URL;
 };
 

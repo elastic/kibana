@@ -68,12 +68,11 @@ const makeContext = (body: string, status = 200): AdapterRunContext => {
   };
 };
 
-const makeSource = (url = FEED_URL): SourceHit => ({
+const makeSource = (): SourceHit => ({
   _id: 'kev:cisa-known-exploited-vulnerabilities',
   _source: {
     adapter_type: 'kev',
     name: 'CISA Known Exploited Vulnerabilities',
-    config: { url },
     space_id: '*',
   },
 });
@@ -206,13 +205,10 @@ describe('kevAdapter', () => {
     expect(headers?.['User-Agent']).toMatch(/Mozilla/);
   });
 
-  it('removes credentials from stored feed provenance', async () => {
-    const [report] = await kevAdapter.run(
-      makeSource(`https://feed-user:feed-password@www.cisa.gov/kev.json`),
-      makeContext(makeEnvelope([VULN_1]))
-    );
+  it('stores a credential-free catalog feed URL in provenance', async () => {
+    const [report] = await kevAdapter.run(makeSource(), makeContext(makeEnvelope([VULN_1])));
 
-    expect(report.source.url).toBe('https://www.cisa.gov/kev.json');
+    expect(report.source.url).toBe(FEED_URL);
     expect(JSON.stringify(report)).not.toContain('feed-password');
   });
 

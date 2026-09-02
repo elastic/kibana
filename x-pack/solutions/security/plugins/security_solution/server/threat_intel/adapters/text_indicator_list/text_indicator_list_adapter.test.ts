@@ -45,12 +45,16 @@ const okResponse = () =>
     headers: { 'Content-Type': 'text/plain' },
   });
 
-const makeSource = (url: string, id = 'src-1', name = 'maltrail'): SourceHit => ({
+const SOURCE_ID = 'text_indicator_list:maltrail-cobaltstrike';
+
+const makeSource = (
+  id = SOURCE_ID,
+  name = 'Maltrail — CobaltStrike C2 indicators'
+): SourceHit => ({
   _id: id,
   _source: {
     adapter_type: 'text_indicator_list',
     name,
-    config: { url },
     enabled: true,
   },
 });
@@ -102,7 +106,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -115,7 +119,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -129,7 +133,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -143,7 +147,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -177,7 +181,7 @@ describe('textIndicatorListAdapter', () => {
     ]);
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(jest.fn().mockResolvedValue(okResponse()))
     );
     const iocs = reports.flatMap((report) => report.extracted?.iocs ?? []);
@@ -193,7 +197,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const [report] = await textIndicatorListAdapter.run(
-      makeSource(TRAIL_URL),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -207,7 +211,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/empty.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -226,7 +230,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/noiocs.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -240,16 +244,16 @@ describe('textIndicatorListAdapter', () => {
 
     await expect(
       textIndicatorListAdapter.run(
-        makeSource('https://example.com/trail/missing.txt'),
+        makeSource(),
         makeContext(fetchMock)
       )
     ).rejects.toThrow(/HTTP 404/);
   });
 
-  it('returns [] when config.url is missing', async () => {
+  it('returns [] when the source id has no catalog URL', async () => {
     const source: SourceHit = {
-      _id: 'src-no-url',
-      _source: { adapter_type: 'text_indicator_list', name: 'maltrail', config: {} },
+      _id: 'text_indicator_list:unknown',
+      _source: { adapter_type: 'text_indicator_list', name: 'maltrail' },
     };
     const fetchMock = jest.fn();
 
@@ -291,7 +295,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/big.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -323,7 +327,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/big.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -348,7 +352,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/huge.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -372,7 +376,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/mixed2.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -411,7 +415,7 @@ describe('textIndicatorListAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse());
 
     const reports = await textIndicatorListAdapter.run(
-      makeSource('https://example.com/trail/dedup.txt'),
+      makeSource(),
       makeContext(fetchMock)
     );
 
@@ -432,7 +436,7 @@ describe('textIndicatorListAdapter', () => {
         },
       ]);
       const reports = await textIndicatorListAdapter.run(
-        makeSource('https://example.com/trail/signal.txt'),
+        makeSource(),
         makeContext(jest.fn().mockResolvedValue(okResponse()))
       );
       return reports.map((r) => r.content_fingerprint);
@@ -474,9 +478,7 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
   // attributed every custom feed's reports, and every indicator promoted from
   // them, to maltrail.
   it('attributes reports to the configured source name', async () => {
-    const reports = await runWith(
-      makeSource('https://feeds.example/trails/custom.txt', 'src-9', 'Acme C2 list')
-    );
+    const reports = await runWith(makeSource(SOURCE_ID, 'Acme C2 list'));
 
     expect(reports.length).toBeGreaterThan(0);
     expect(reports[0].source.name).toBe('Acme C2 list');
@@ -484,16 +486,14 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
 
   // The credential reached the stored source.url, which the promote task copies
   // onto the indicator document, so this leaked well past the logs.
-  it('stores a credential-free source URL', async () => {
-    const reports = await runWith(
-      makeSource('https://feeduser:s3cret@feeds.example/trails/custom.txt')
-    );
+  it('stores a credential-free catalog source URL', async () => {
+    const reports = await runWith(makeSource());
 
-    expect(reports[0].source.url).toBe('https://feeds.example/trails/custom.txt');
+    expect(reports[0].source.url).toBe(TRAIL_URL);
     expect(JSON.stringify(reports[0])).not.toContain('s3cret');
   });
 
-  it('keeps the credential out of the fetch failure message', async () => {
+  it('keeps fetch failures readable without catalog secrets', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const failing = makeContext(
       jest
@@ -501,11 +501,8 @@ describe('textIndicatorListAdapter — attribution and credentials', () => {
         .mockResolvedValue(new Response('nope', { status: 503, statusText: 'Service Unavailable' }))
     );
 
-    await expect(
-      textIndicatorListAdapter.run(
-        makeSource('https://feeduser:s3cret@feeds.example/trails/custom.txt'),
-        failing
-      )
-    ).rejects.toThrow(/^(?!.*s3cret).*text_indicator_list fetch/s);
+    await expect(textIndicatorListAdapter.run(makeSource(), failing)).rejects.toThrow(
+      /HTTP 503/
+    );
   });
 });

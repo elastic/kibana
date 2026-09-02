@@ -23,7 +23,6 @@ describe('runAdapter', () => {
       _source: {
         adapter_type: 'manual',
         name: 'Analyst paste',
-        config: {},
       },
     } as unknown as SourceHit;
 
