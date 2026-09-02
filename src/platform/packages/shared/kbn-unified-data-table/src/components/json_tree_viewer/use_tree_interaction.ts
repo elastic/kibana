@@ -37,7 +37,7 @@ export interface TreeExpansionState {
   seedBudget?: number;
 }
 
-interface UseTreeExpansionArgs {
+export interface UseTreeExpansionArgs {
   initialState?: TreeExpansionState;
   onStateChange?: (state: TreeExpansionState) => void;
   expandedBySearchNodes: ReadonlySet<string>;
