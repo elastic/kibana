@@ -25,36 +25,40 @@ import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/p
 const TOOL_RESULT_LIMIT = 100;
 const TOOL_FETCH_LIMIT = TOOL_RESULT_LIMIT + 1;
 
-const getRuleEventsSchema = z.object({
-  start: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Start of an optional @timestamp window (inclusive), ISO 8601. Pass together with end to narrow the window.'
-    ),
-  end: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'End of an optional @timestamp window (inclusive), ISO 8601. Pass together with start to narrow the window.'
-    ),
-  status: alertEpisodeStatusSchema
-    .optional()
-    .describe(
-      'If set, only return events whose episode.status matches this lifecycle state (inactive, pending, active, recovering).'
-    ),
-});
+const getRuleEventsSchema = z
+  .object({
+    start: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Start of an optional @timestamp window (inclusive), ISO 8601. Pass together with end to narrow the window.'
+      ),
+    end: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'End of an optional @timestamp window (inclusive), ISO 8601. Pass together with start to narrow the window.'
+      ),
+    status: alertEpisodeStatusSchema
+      .optional()
+      .describe(
+        'If set, only return events whose episode.status matches this lifecycle state (inactive, pending, active, recovering).'
+      ),
+  })
+  .refine((value) => (value.start === undefined) === (value.end === undefined), {
+    message: 'start and end must both be provided',
+  });
 
 const parseEventData = (
   data: EpisodeEventRow['data']
-): Record<string, unknown> | string | null | undefined => {
+): Record<string, unknown> | object[] | string | null | undefined => {
   if (typeof data !== 'string') {
     return data;
   }
   try {
     const parsed: unknown = JSON.parse(data);
-    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Record<string, unknown>;
+    if (parsed !== null && typeof parsed === 'object') {
+      return parsed as Record<string, unknown> | object[];
     }
     return data;
   } catch {
@@ -99,45 +103,17 @@ export const getRuleEventsTool = ({
     }
 
     const { start, end, status } = args;
-    if ((start === undefined) !== (end === undefined)) {
+    if (start !== undefined && end !== undefined && Date.parse(start) > Date.parse(end)) {
       return {
         results: [
           {
             type: ToolResultType.error,
             data: {
-              message: 'start and end must both be provided',
+              message: 'start must be less than or equal to end',
             },
           },
         ],
       };
-    }
-    if (start !== undefined && end !== undefined) {
-      const startMs = Date.parse(start);
-      const endMs = Date.parse(end);
-      if (Number.isNaN(startMs) || Number.isNaN(endMs)) {
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: 'start and end must be valid ISO 8601 datetimes',
-              },
-            },
-          ],
-        };
-      }
-      if (startMs > endMs) {
-        return {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: 'start must be less than or equal to end',
-              },
-            },
-          ],
-        };
-      }
     }
 
     const client = getEpisodesClient({

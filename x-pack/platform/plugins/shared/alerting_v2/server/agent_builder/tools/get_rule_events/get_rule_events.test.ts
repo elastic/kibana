@@ -95,7 +95,8 @@ describe('getRuleEventsTool', () => {
       expect(tool.description).toContain('event data');
       expect(tool.schema.safeParse(validArgs).success).toBe(true);
       expect(tool.schema.safeParse({}).success).toBe(true);
-      expect(tool.schema.safeParse({ start: validArgs.start }).success).toBe(true);
+      expect(tool.schema.safeParse({ start: validArgs.start }).success).toBe(false);
+      expect(tool.schema.safeParse({ end: validArgs.end }).success).toBe(false);
     });
   });
 
@@ -162,6 +163,28 @@ describe('getRuleEventsTool', () => {
             type: ToolResultType.other,
             data: {
               events: [{ ...eventRow, data: { 'host.name': 'web-01', cpu: 72 } }],
+              count: 1,
+              truncated: false,
+            },
+          },
+        ],
+      });
+    });
+
+    it('parses JSON-array event data for the agent', async () => {
+      getEvents.mockResolvedValueOnce([{ ...eventRow, data: '["tag1","tag2"]' }]);
+
+      const result = await createTool().handler(
+        validArgs,
+        agentBuilderMocks.tools.createHandlerContext()
+      );
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              events: [{ ...eventRow, data: ['tag1', 'tag2'] }],
               count: 1,
               truncated: false,
             },
@@ -260,22 +283,12 @@ describe('getRuleEventsTool', () => {
       });
     });
 
-    it('returns an error when only start or only end is provided', async () => {
-      const result = await createTool().handler(
-        { start: validArgs.start },
-        agentBuilderMocks.tools.createHandlerContext()
-      );
-
-      expect(get).not.toHaveBeenCalled();
-      expect(getEvents).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: 'start and end must both be provided' },
-          },
-        ],
-      });
+    it('rejects a start without an end at the schema', () => {
+      const parsed = createTool().schema.safeParse({ start: validArgs.start });
+      expect(parsed.success).toBe(false);
+      if (!parsed.success) {
+        expect(parsed.error.issues[0]?.message).toBe('start and end must both be provided');
+      }
     });
 
     it('returns an error when start is after end', async () => {
@@ -291,24 +304,6 @@ describe('getRuleEventsTool', () => {
           {
             type: ToolResultType.error,
             data: { message: 'start must be less than or equal to end' },
-          },
-        ],
-      });
-    });
-
-    it('returns an error when start or end is not a valid datetime', async () => {
-      const result = await createTool().handler(
-        { start: 'not-a-date', end: validArgs.end },
-        agentBuilderMocks.tools.createHandlerContext()
-      );
-
-      expect(get).not.toHaveBeenCalled();
-      expect(getEvents).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        results: [
-          {
-            type: ToolResultType.error,
-            data: { message: 'start and end must be valid ISO 8601 datetimes' },
           },
         ],
       });
