@@ -290,6 +290,9 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+    // Rule changes that carry a `userActivity` block are also emitted to the Kibana user
+    // activity log by the change-history service clients this service creates in register().
+    this.changeTrackingService?.setTrackUserAction(core.userActivity.trackUserAction);
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 

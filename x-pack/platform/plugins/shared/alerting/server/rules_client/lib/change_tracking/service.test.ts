@@ -11,16 +11,18 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { ChangeHistoryClient } from '@kbn/change-history';
+import { ChangeHistoryServiceClient } from '@kbn/change-history-service';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleChange, RuleChangeHistorySnapshot } from './types';
 import { ChangeTrackingService } from './service';
 
-jest.mock('@kbn/change-history', () => ({
-  ChangeHistoryClient: jest.fn(),
+jest.mock('@kbn/change-history-service', () => ({
+  ChangeHistoryServiceClient: jest.fn(),
 }));
 
-const ChangeHistoryClientMock = ChangeHistoryClient as jest.MockedClass<typeof ChangeHistoryClient>;
+const ChangeHistoryClientMock = ChangeHistoryServiceClient as jest.MockedClass<
+  typeof ChangeHistoryServiceClient
+>;
 
 interface MockChangeHistoryClient {
   isInitialized: jest.Mock<boolean, []>;
@@ -60,14 +62,14 @@ describe('ChangeTrackingService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     ChangeHistoryClientMock.mockImplementation(
-      () => createMockClient() as unknown as ChangeHistoryClient
+      () => createMockClient() as unknown as ChangeHistoryServiceClient
     );
     logger = loggingSystemMock.createLogger();
     service = new ChangeTrackingService(logger, kibanaVersion);
   });
 
   describe('register', () => {
-    it('creates one ChangeHistoryClient per module', () => {
+    it('creates one ChangeHistoryServiceClient per module', () => {
       service.register('stack');
       service.register('stack');
       expect(ChangeHistoryClientMock).toHaveBeenCalledTimes(1);
@@ -85,6 +87,44 @@ describe('ChangeTrackingService', () => {
       service.register('stack');
       service.register('security');
       expect(ChangeHistoryClientMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('setTrackUserAction', () => {
+    const userActivity = {
+      message: 'User updated rule "a" (id: rule-1).',
+      event: {
+        action: 'alerting_rule_update' as const,
+        type: 'change' as const,
+        outcome: 'success' as const,
+      },
+      object: { id: 'rule-1', name: 'a', type: 'rule', tags: [] },
+    };
+
+    const getInjectedTracker = () => {
+      const ctorArgs = ChangeHistoryClientMock.mock.calls[0]![0] as {
+        trackUserAction?: (params: unknown) => void;
+      };
+      return ctorArgs.trackUserAction;
+    };
+
+    it('injects a lazy tracker into each client that forwards to the tracker set later', () => {
+      service.register('stack');
+      const injected = getInjectedTracker();
+      expect(injected).toEqual(expect.any(Function));
+
+      const trackUserAction = jest.fn();
+      service.setTrackUserAction(trackUserAction);
+      injected!(userActivity);
+
+      expect(trackUserAction).toHaveBeenCalledWith(userActivity);
+    });
+
+    it('is a no-op when the injected tracker is called before setTrackUserAction', () => {
+      service.register('stack');
+      const injected = getInjectedTracker();
+
+      expect(() => injected!(userActivity)).not.toThrow();
     });
   });
 
@@ -328,6 +368,49 @@ describe('ChangeTrackingService', () => {
             username: '',
             userProfileId: undefined,
           })
+        );
+      });
+
+      it('threads the per-change userActivity block through the regrouping', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        initializeService({ username: 'alice' });
+
+        const userActivity = {
+          message: 'User updated rule "a" (id: rule-1).',
+          event: {
+            action: 'alerting_rule_update' as const,
+            type: 'change' as const,
+            outcome: 'success' as const,
+          },
+          object: { id: 'rule-1', name: 'a', type: 'rule', tags: ['tag-1'] },
+        };
+        const changes: RuleChange[] = [
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-1',
+            snapshot: ruleSnapshot('a'),
+            userActivity,
+          },
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-2',
+            snapshot: ruleSnapshot('b'),
+          },
+        ];
+
+        await service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
+
+        expect(client.logBulk).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({ objectId: 'rule-1', userActivity }),
+            expect.objectContaining({ objectId: 'rule-2', userActivity: undefined }),
+          ],
+          expect.any(Object)
         );
       });
 
