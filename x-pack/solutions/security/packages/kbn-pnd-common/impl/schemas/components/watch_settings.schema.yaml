@@ -299,3 +299,7 @@ components:
           description: >-
             Logical workflow version for best-effort stale settings detection. Null when the
             per-space managed Worker has not been installed yet.
+        skills:
+          type: array
+          items:
+            $ref: './watch.schema.yaml#/components/schemas/WatchCallableRef'

@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Lifecycle, WatchRunAction } from './watch.gen';
+import { Lifecycle, WatchRunAction, WatchCallableRef } from './watch.gen';
 
 /**
  * Autonomy dial levels per programme decision D15 (2026-07-28). Manual is the MVP default. There is deliberately no mapping from the legacy 1–5 AutonomyLevel scale — see https://github.com/elastic/security-team/issues/18718.
@@ -86,10 +86,13 @@ export const WatchSkill = lazySchema(() =>
      */
     watchIds: z.array(z.string()),
     /**
+     * Summary of the skill's purpose
+     */
+    summary: z.string().optional(),
+    /**
      * ISO 8601 timestamp of last invocation, or null when never invoked
      */
     lastRun: z.string().nullable(),
-    summary: z.string().optional(),
     /**
      * Omitted for generally available skills; badge shown otherwise
      */
@@ -260,6 +263,7 @@ export const Worker = lazySchema(() =>
      * Logical workflow version for best-effort stale settings detection. Null when the per-space managed Worker has not been installed yet.
      */
     settingsRevision: z.number().int().min(0).nullable(),
+    skills: z.array(WatchCallableRef).optional(),
   })
 );
 export type Worker = z.infer<typeof Worker>;

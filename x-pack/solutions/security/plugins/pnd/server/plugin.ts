@@ -139,18 +139,14 @@ export class PndPlugin
 
     // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
     this.watchesService = new WatchesService();
-    this.workersService = new WorkersService(
-      management,
-      managedWorkflows,
-      this.logger /* , {
+    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
       ensureAgentForSpace: plugins.agentBuilder
         ? (spaceId) =>
             ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
         : undefined,
       agentBuilder: plugins.agentBuilder,
       agentTypes: [agentType],
-    }*/
-    );
+    });
 
     return {};
   }

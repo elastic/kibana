@@ -40,7 +40,10 @@ export const registerListWorkersRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const body: ListWorkersResponse = await getWorkersService().list(getSpaceId(request));
+          const body: ListWorkersResponse = await getWorkersService().list(
+            request,
+            getSpaceId(request)
+          );
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list workers: ${error}`);

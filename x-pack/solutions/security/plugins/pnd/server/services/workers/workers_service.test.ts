@@ -139,7 +139,7 @@ const createPersistentHarness = () => {
 
 describe('WorkersService', () => {
   it('lists every registered Worker with default settings before install', async () => {
-    const response = await createPersistentHarness().createService().list(SPACE);
+    const response = await createPersistentHarness().createService().list(request, SPACE);
 
     expect(response.workers.map(({ id }) => id)).toEqual([...SYSTEM_SECURITY_WORKER_IDS]);
     expect(
@@ -173,10 +173,10 @@ describe('WorkersService', () => {
       .createService()
       .update(TRIAGE, { autonomyLevel: 'assisted', settingsRevision: null }, 'space-b', request);
 
-    expect((await harness.createService().get(TRIAGE, 'space-a'))?.settings.autonomy).toBe(
+    expect((await harness.createService().get(TRIAGE, request, 'space-a'))?.settings.autonomy).toBe(
       'supervised'
     );
-    expect((await harness.createService().get(TRIAGE, 'space-b'))?.settings.autonomy).toBe(
+    expect((await harness.createService().get(TRIAGE, request, 'space-b'))?.settings.autonomy).toBe(
       'assisted'
     );
   });
@@ -274,7 +274,7 @@ describe('WorkersService', () => {
       new Error('storage down')
     );
 
-    const worker = await service.get(TRIAGE, SPACE);
+    const worker = await service.get(TRIAGE, request, SPACE);
 
     expect(worker?.state).toBe('unavailable');
     expect(worker?.stateReason).toBe('Worker settings could not be read from durable storage');
@@ -294,7 +294,7 @@ describe('WorkersService', () => {
       documentVersion: 2,
     });
 
-    const worker = await service.get(TRIAGE, SPACE);
+    const worker = await service.get(TRIAGE, request, SPACE);
 
     expect(worker?.state).toBe('unavailable');
     expect(worker?.stateReason).toBe('Worker settings could not be read from durable storage');
@@ -316,5 +316,41 @@ describe('WorkersService', () => {
     if (disabled.outcome !== 'updated') throw new Error('Expected disable to succeed');
     expect(disabled.response.worker.enabled).toBe(false);
     expect(harness.documents.has(`${TRIAGE}-space-a`)).toBe(true);
+  });
+
+  it('projects skills from the installed workflow definition when the worker is installed', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+    const mockDefinition = {
+      steps: [
+        {
+          name: 'invoke-agent',
+          type: 'ai.agent',
+          with: { configuration_overrides: { skill_ids: ['test.installed.skill'] } },
+        },
+      ],
+    };
+    (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({
+      id: `${TRIAGE}-${SPACE}`,
+      definition: mockDefinition,
+    });
+
+    const { workers } = await service.list(request, SPACE);
+    const triage = workers.find((w) => w.id === TRIAGE);
+
+    expect(harness.management.getWorkflow).toHaveBeenCalledWith(`${TRIAGE}-${SPACE}`, SPACE);
+    expect(triage?.skills?.some((s) => s.id === 'test.installed.skill')).toBe(true);
+  });
+
+  it('projects skills from the template definition when the worker is not installed', async () => {
+    const harness = createPersistentHarness();
+
+    const { workers } = await harness.createService().list(request, SPACE);
+    const triage = workers.find((w) => w.id === TRIAGE);
+
+    expect(harness.management.getWorkflow).not.toHaveBeenCalled();
+    expect(Array.isArray(triage?.skills)).toBe(true);
   });
 });

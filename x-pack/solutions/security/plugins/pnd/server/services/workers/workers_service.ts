@@ -9,12 +9,35 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/pnd-common';
 import { ListWorkersResponse, type UpdateWorkerRequestBody, type Worker } from '@kbn/pnd-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowSchema } from '@kbn/workflows';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import {
   installRegisteredWorker,
   workerRegistry,
   type WorkerRegistration,
 } from '../../managed_workflows/worker_registry';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
+import type { AgentLookup } from '../utils';
+import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
+
+const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
+  const managedDef: ManagedWorkflowDefinition | undefined = getManagedWorkflowDefinition(
+    registration.id
+  );
+  if (managedDef && 'yamlTemplate' in managedDef) {
+    const yaml = managedDef.yamlTemplate?.(registration.settings.createDefaultValues());
+    if (yaml) {
+      const result = parseWorkflowYamlToJSON(yaml, WorkflowSchema);
+      return result.success ? (result.data as unknown as WorkflowYaml) : null;
+    }
+  }
+  return null;
+};
 
 const templateValuesEqual = (
   left: Record<string, unknown> | null,
@@ -32,13 +55,24 @@ export type WorkerUpdateResult =
   | { outcome: 'failed' };
 
 export class WorkersService {
+  private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
+
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
     private readonly managedWorkflows:
       | Promise<PluginScopedManagedWorkflowsApi | undefined>
       | undefined,
-    private readonly logger: Logger
-  ) {}
+    private readonly logger: Logger,
+    private readonly agentOpts: {
+      /** Lazy ensure of the shared thin agent for the caller's space. */
+      ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      agentBuilder?: AgentBuilderPluginStart;
+      /** Code-registered agent types owned by this plugin, used for skill base resolution. */
+      agentTypes?: readonly AgentTypeDefinition[];
+    } = {}
+  ) {
+    this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
+  }
 
   private requireManagement(): WatchWorkflowsManagementClient {
     if (!this.management) {
@@ -58,19 +92,40 @@ export class WorkersService {
     return managedWorkflows;
   }
 
-  async list(spaceId: string): Promise<ListWorkersResponse> {
+  private async ensureAgent(spaceId: string): Promise<void> {
+    await this.agentOpts.ensureAgentForSpace?.(spaceId);
+  }
+
+  private async buildAgentLookup(request: KibanaRequest) {
+    if (!this.agentOpts.agentBuilder) return undefined;
+    return buildAgentLookup(this.agentOpts.agentBuilder, this.agentTypeMap, request, this.logger);
+  }
+
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
+    await this.ensureAgent(spaceId);
+
+    const agentLookup = await this.buildAgentLookup(request);
     const workers = await Promise.all(
-      workerRegistry.list().map((registration) => this.projectWorker(registration, spaceId))
+      workerRegistry
+        .list()
+        .map((registration) => this.projectWorker(registration, spaceId, agentLookup))
     );
     return ListWorkersResponse.parse({ workers });
   }
 
-  async get(workerId: string, spaceId: string): Promise<Worker | undefined> {
+  async get(
+    workerId: string,
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<Worker | undefined> {
+    await this.ensureAgent(spaceId);
     const registration = workerRegistry.get(workerId);
     if (!registration) {
       return undefined;
     }
-    return this.projectWorker(registration, spaceId);
+
+    const agentLookup = await this.buildAgentLookup(request);
+    return this.projectWorker(registration, spaceId, agentLookup);
   }
 
   async update(
@@ -171,7 +226,11 @@ export class WorkersService {
     return { outcome: 'updated', response: { worker } };
   }
 
-  private async projectWorker(registration: WorkerRegistration, spaceId: string): Promise<Worker> {
+  private async projectWorker(
+    registration: WorkerRegistration,
+    spaceId: string,
+    agentLookupCallback?: AgentLookup
+  ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
     const status = await managedWorkflows.getWorkflowStatus(registration.id, {
       spaceId,
@@ -183,6 +242,7 @@ export class WorkersService {
     let settingsRevision: number | null = null;
     let values = registration.settings.createDefaultValues();
     let settingsUnavailable = false;
+    let definition: WorkflowYaml | null = null;
 
     if (status.installed) {
       enabled = Boolean(status.enabled);
@@ -204,18 +264,25 @@ export class WorkersService {
       }
 
       try {
-        const executions = await this.requireManagement().getWorkflowExecutions(
-          { workflowId: status.workflowId, page: 1, size: 1 },
-          spaceId
-        );
+        const management = this.requireManagement();
+        const [detail, executions] = await Promise.all([
+          management.getWorkflow(status.workflowId, spaceId),
+          management.getWorkflowExecutions(
+            { workflowId: status.workflowId, page: 1, size: 1 },
+            spaceId
+          ),
+        ]);
+        definition = detail?.definition ?? null;
         lastRun = executions.results[0]?.startedAt ?? null;
       } catch (error) {
         this.logger.debug(
-          `Failed to load executions for worker ${registration.id}: ${
+          `Failed to load workflow detail or executions for worker ${registration.id}: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
       }
+    } else {
+      definition = getDefinitionFromTemplate(registration);
     }
 
     return {
@@ -230,6 +297,7 @@ export class WorkersService {
         : {}),
       settings: registration.settings.toSettings(values),
       settingsRevision,
+      skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }
 }
