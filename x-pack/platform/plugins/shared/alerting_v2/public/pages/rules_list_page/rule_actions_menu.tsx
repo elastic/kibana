@@ -225,9 +225,7 @@ export const RuleActionsMenu = ({
     .filter((group) => group.length > 0);
 
   const menuItems = groups.flatMap((group, index) =>
-    index === 0
-      ? group
-      : [<EuiHorizontalRule key={`separator-${index}`} margin="none" />, ...group]
+    index === 0 ? group : [<EuiHorizontalRule key={`separator-${index}`} margin="none" />, ...group]
   );
 
   if (menuItems.length === 0) {

@@ -178,9 +178,7 @@ export const RuleSummaryFlyout = ({
                   onToggleEnabled={onToggleEnabled}
                   onRun={onRun}
                   onUpdateApiKey={onUpdateApiKey}
-                  renderButton={({ toggle }) => (
-                    <TakeActionButton onClick={toggle} />
-                  )}
+                  renderButton={({ toggle }) => <TakeActionButton onClick={toggle} />}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
