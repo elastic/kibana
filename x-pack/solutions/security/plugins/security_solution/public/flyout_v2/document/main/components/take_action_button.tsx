@@ -273,25 +273,48 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const hasItems = getActionGroups({
-      addToCaseItems: addToCaseActionItems,
-      alertAssigneeItems: alertAssigneesItems,
-      alertTagItems: alertTagsItems,
-      documentWorkflowItems: documentWorkflowMenuItem,
-      endpointResponseItems: endpointResponseActionsConsoleItems,
-      exceptionItems: exceptionActionItems,
-      exploreItems: exploreActionItems,
-      hostIsolationItems: hostIsolationActionItems,
-      investigateInTimelineItems: investigateInTimelineActionItems,
-      isAlert,
-      isInSecurityApp,
-      isRemoteDocument,
-      noteItems,
-      osqueryAvailable: Boolean(osqueryAvailable),
-      osqueryItems: osqueryItemsArray,
-      runAlertWorkflowItems: runWorkflowMenuItem,
-      statusItems: statusActionItems,
-    }).some((group) => group.length > 0);
+    const osqueryAvailableFlag = Boolean(osqueryAvailable);
+    const hasItems = useMemo(
+      () =>
+        getActionGroups({
+          addToCaseItems: addToCaseActionItems,
+          alertAssigneeItems: alertAssigneesItems,
+          alertTagItems: alertTagsItems,
+          documentWorkflowItems: documentWorkflowMenuItem,
+          endpointResponseItems: endpointResponseActionsConsoleItems,
+          exceptionItems: exceptionActionItems,
+          exploreItems: exploreActionItems,
+          hostIsolationItems: hostIsolationActionItems,
+          investigateInTimelineItems: investigateInTimelineActionItems,
+          isAlert,
+          isInSecurityApp,
+          isRemoteDocument,
+          noteItems,
+          osqueryAvailable: osqueryAvailableFlag,
+          osqueryItems: osqueryItemsArray,
+          runAlertWorkflowItems: runWorkflowMenuItem,
+          statusItems: statusActionItems,
+        }).some((group) => group.length > 0),
+      [
+        addToCaseActionItems,
+        alertAssigneesItems,
+        alertTagsItems,
+        documentWorkflowMenuItem,
+        endpointResponseActionsConsoleItems,
+        exceptionActionItems,
+        exploreActionItems,
+        hostIsolationActionItems,
+        investigateInTimelineActionItems,
+        isAlert,
+        isInSecurityApp,
+        isRemoteDocument,
+        noteItems,
+        osqueryAvailableFlag,
+        osqueryItemsArray,
+        runWorkflowMenuItem,
+        statusActionItems,
+      ]
+    );
 
     const takeActionButton = (
       <EuiButton

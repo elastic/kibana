@@ -65,7 +65,8 @@ export const getDocumentActionGroups = ({
   statusItems,
 }: DocumentActionMenuGroupsProps): EuiContextMenuPanelItemDescriptor[][] => {
   if (isRemoteDocument) {
-    return [investigateInTimelineItems];
+    // Keep the same 5-tuple shape so callers can destructure unconditionally.
+    return [[], [], [], [], investigateInTimelineItems];
   }
   const alertManagementItems = [
     ...(showAlertActions ? alertAssigneeItems : []),
@@ -144,11 +145,6 @@ export const DocumentDetailsActionMenu = ({
       showEventFilter,
       statusItems,
     });
-
-    if (isRemoteDocument) {
-      // Remote: only timeline items, no decorators needed beyond icon gap-fill
-      return withActionIcons(rawGroups[0] ?? investigateInTimelineItems, ACTION_ICONS_BY_ID);
-    }
 
     const [statusRaw, alertMgmt, exceptions, response, timeline] = rawGroups;
     return withActionIcons(

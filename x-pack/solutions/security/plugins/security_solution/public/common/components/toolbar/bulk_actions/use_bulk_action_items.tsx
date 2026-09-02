@@ -31,9 +31,16 @@ import { useRunDocumentWorkflowPanel } from '../../../../detections/components/a
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
 
-/** Structured groups returned alongside the flat `items` array. */
+/**
+ * Structured groups returned alongside the flat `items` array.
+ * `casesItems` and `timelineItems` are sub-partitions of custom bulk actions
+ * whose producers set `groupId: 'cases'` or `groupId: 'timeline'` respectively.
+ * `customItems` holds any remaining custom actions with no recognised group.
+ */
 export interface BulkActionGroups {
   statusItems: BulkActionMenuItem[];
+  casesItems: BulkActionMenuItem[];
+  timelineItems: BulkActionMenuItem[];
   customItems: BulkActionMenuItem[];
   workflowItems: BulkActionMenuItem[];
 }
@@ -64,6 +71,14 @@ export interface BulkActionsProps {
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
 }
+
+/**
+ * Fall-through group assignment for custom actions whose producer does not set `groupId`.
+ * Keyed by the stable action `key`; values match the `BulkActionGroups` partition names.
+ */
+const CUSTOM_ACTION_GROUP_BY_KEY: Readonly<Record<string, 'casesItems' | 'timelineItems'>> = {
+  'attach-case': 'casesItems',
+};
 
 export const useBulkActionItems = ({
   eventIds,
@@ -258,25 +273,40 @@ export const useBulkActionItems = ({
     alertClosingReasonItem,
   ]);
 
-  const customItems = useMemo<BulkActionMenuItem[]>(() => {
-    if (!customBulkActions) return [];
-    return customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
-      const isDisabled = !!(query && action.disableOnQuery);
-      const onClick = () => {
-        closePopover?.();
-        action.onClick(eventIds);
-      };
-      acc.push({
-        key: action.key,
-        disabled: isDisabled,
-        'data-test-subj': action['data-test-subj'],
-        icon: action.icon,
-        toolTipContent: isDisabled ? action.disabledLabel : null,
-        onClick,
-        name: action.label,
-      });
-      return acc;
-    }, []);
+  const { casesItems, timelineItems, customItems } = useMemo(() => {
+    const cases: BulkActionMenuItem[] = [];
+    const timeline: BulkActionMenuItem[] = [];
+    const rest: BulkActionMenuItem[] = [];
+    if (customBulkActions) {
+      for (const action of customBulkActions) {
+        const isDisabled = !!(query && action.disableOnQuery);
+        const onClick = () => {
+          closePopover?.();
+          action.onClick(eventIds);
+        };
+        const menuItem: BulkActionMenuItem = {
+          key: action.key,
+          disabled: isDisabled,
+          'data-test-subj': action['data-test-subj'],
+          icon: action.icon,
+          toolTipContent: isDisabled ? action.disabledLabel : null,
+          onClick,
+          name: action.label,
+        };
+        const bucket =
+          action.groupId === 'cases'
+            ? cases
+            : action.groupId === 'timeline'
+            ? timeline
+            : CUSTOM_ACTION_GROUP_BY_KEY[action.key] === 'casesItems'
+            ? cases
+            : CUSTOM_ACTION_GROUP_BY_KEY[action.key] === 'timelineItems'
+            ? timeline
+            : rest;
+        bucket.push(menuItem);
+      }
+    }
+    return { casesItems: cases, timelineItems: timeline, customItems: rest };
   }, [customBulkActions, query, closePopover, eventIds]);
 
   const workflowItems = useMemo<BulkActionMenuItem[]>(
@@ -285,13 +315,13 @@ export const useBulkActionItems = ({
   );
 
   const items = useMemo<BulkActionMenuItem[]>(
-    () => [...statusItems, ...customItems, ...workflowItems],
-    [statusItems, customItems, workflowItems]
+    () => [...statusItems, ...casesItems, ...timelineItems, ...customItems, ...workflowItems],
+    [statusItems, casesItems, timelineItems, customItems, workflowItems]
   );
 
   const groups = useMemo<BulkActionGroups>(
-    () => ({ statusItems, customItems, workflowItems }),
-    [statusItems, customItems, workflowItems]
+    () => ({ statusItems, casesItems, timelineItems, customItems, workflowItems }),
+    [statusItems, casesItems, timelineItems, customItems, workflowItems]
   );
 
   const panels = useMemo(

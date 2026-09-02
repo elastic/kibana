@@ -22,18 +22,20 @@ interface EventsTableBulkActionMenuProps {
 }
 
 export const EventsTableBulkActionMenu = ({ panels, groups }: EventsTableBulkActionMenuProps) => {
-  const { statusItems, customItems, workflowItems } = groups;
+  const { statusItems, casesItems, timelineItems, customItems, workflowItems } = groups;
   const decoratedItems = useMemo(
     () =>
       withActionIcons(
         withGroupSeparators([
           withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS),
+          casesItems,
+          timelineItems,
           customItems,
           workflowItems,
         ]),
         ACTION_ICONS_BY_ID
       ),
-    [statusItems, customItems, workflowItems]
+    [statusItems, casesItems, timelineItems, customItems, workflowItems]
   );
 
   const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
