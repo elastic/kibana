@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import type { FlyoutBodyTabPanelProps } from '../../types';
+import { tabPanelPart } from './part';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-  const baseConfig = functionalConfig.getAll();
+/** Declarative `FlyoutTemplate.Body.TabPanel`. */
+export const TabPanel = tabPanelPart.createComponent<FlyoutBodyTabPanelProps>();
 
-  return {
-    ...baseConfig,
-    testFiles: [require.resolve('.')],
-  };
-}
+TabPanel.displayName = 'FlyoutTemplate.Body.TabPanel';
