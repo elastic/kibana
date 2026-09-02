@@ -63,15 +63,19 @@ apiTest.describe('vega - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.data.spec).toStrictEqual(VEGA_SPEC_JSON);
   });
 
-  apiTest('validation - returns 400 for json spec missing $schema', async ({ apiClient }) => {
-    const response = await apiClient.post(VEGA_API_PATH, {
-      headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
-      body: { title: 'My Vega Chart', spec: { format: 'json', value: {} } },
-      responseType: 'json',
-    });
+  apiTest(
+    'should create a vega library item with a json spec without $schema',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(VEGA_API_PATH, {
+        headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
+        body: { title: 'My Vega Chart', spec: { format: 'json', value: {} } },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(400);
-  });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.data.spec).toStrictEqual({ format: 'json', value: {} });
+    }
+  );
 
   apiTest('validation - returns 400 when title is missing', async ({ apiClient }) => {
     const response = await apiClient.post(VEGA_API_PATH, {

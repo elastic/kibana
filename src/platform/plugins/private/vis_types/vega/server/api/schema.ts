@@ -20,15 +20,14 @@ export const vegaSpecSchema = z
     }),
     z.object({
       format: z.literal('json'),
-      value: z.looseObject({ $schema: z.string().min(1) }).meta({
-        description:
-          'The Vega or Vega-Lite specification as a JSON object. Must include a `$schema` key.',
+      value: z.looseObject({}).meta({
+        description: 'The Vega or Vega-Lite specification as a JSON object.',
       }),
     }),
   ])
   .meta({
     description:
-      'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { "$schema": "..." } }` for a JSON object.',
+      'The Vega or Vega-Lite specification. Use `{ "format": "hjson", "value": "<hjson-string>" }` for HJSON (comments and unquoted keys are preserved) or `{ "format": "json", "value": { ... } }` for a JSON object.',
   });
 
 export const vegaLibraryItemSchema = z
