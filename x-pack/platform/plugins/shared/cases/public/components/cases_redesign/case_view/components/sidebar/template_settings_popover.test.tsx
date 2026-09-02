@@ -243,6 +243,7 @@ describe('TemplateSettingsPopover', () => {
             id: otherTemplate.templateId,
             version: otherTemplate.templateVersion,
             fields: otherParsedTemplate.definition.fields,
+            settings: otherParsedTemplate.definition.settings,
           },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
