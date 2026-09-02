@@ -269,7 +269,7 @@ describe('getEuidPainlessRuntimeMapping', () => {
 
 describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   // The `entity.id exists` arm is unique to postAggFilter. It is the post-LOOKUP-JOIN
-  // "already in the store" escape hatch and appears nowhere in documentsFilter or the
+  // "already in the store" arm, and it appears nowhere in documentsFilter or the
   // namespace clauses. `event.kind` does not work as a marker: the cloud-provider
   // namespace clause references it too.
   const postAggOnlyMarker = `doc.containsKey('entity.id')`;
@@ -292,5 +292,31 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
     // documentsFilter requires event.outcome != failure and at least one user identifier.
     expect(script).toContain(`doc.containsKey('event.outcome')`);
     expect(script).toContain(`doc.containsKey('user.name')`);
+  });
+
+  it('lets a detection alert satisfy the gate', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+
+    // The rule uuid is ORed in front of postAggFilter, so Painless short-circuits and skips the
+    // whole clause for alerts. An alert can satisfy no other arm: `entity.id` needs the
+    // extraction pipeline's LOOKUP JOIN, and `event.kind` is rewritten to `signal`.
+    expect(script).toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
+    const markerAt = script.indexOf(`doc.containsKey('kibana.alert.rule.uuid')`);
+    const postAggAt = script.indexOf(postAggOnlyMarker);
+    expect(markerAt).toBeGreaterThan(-1);
+    expect(markerAt).toBeLessThan(postAggAt);
+  });
+
+  it('omits the alert waiver when applyPostAggFilter is false', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+
+    expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
+  });
+
+  it('does not waive anything for a definition with no postAggFilter', () => {
+    // host has documentsFilter only, so there is nothing for an alert to escape.
+    const script = getEuidPainlessEvaluation(EntityType.enum.host);
+
+    expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
   });
 });

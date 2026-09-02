@@ -124,14 +124,13 @@ export interface EuidGateOptions {
   /**
    * Whether to gate the EUID on `postAggFilter` as well as `documentsFilter`.
    *
-   * `postAggFilter` decides whether a document may create or keep an entity. One of its arms
+   * `postAggFilter` decides whether a document may put an entity in the store. One of its arms
    * (`entity.id` exists) only becomes true after the extraction pipeline's LOOKUP JOIN has
-   * attached the stored entity.
+   * attached the stored entity, so a caller that runs no LOOKUP JOIN cannot satisfy it that way.
    *
-   * Pass `false` when resolving which existing entity a document refers to. Those callers have
-   * no LOOKUP JOIN, so that arm never fires and the gate rejects identifiers whose entities are
-   * already in the store. Alerts need this: the detection engine rewrites `event.kind` to
-   * `signal`, so `idpGate` cannot match and IdP-namespace users resolve to nothing.
+   * Detection alerts are handled by {@link waiveForAlerts}, so a caller that only ever sees alerts
+   * needs nothing here. Pass `false` for a caller that resolves raw source documents and must not
+   * be held to the admission rule, since such a document has no way to pass it.
    *
    * @default true
    */
@@ -139,9 +138,41 @@ export interface EuidGateOptions {
 }
 
 /**
- * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
- * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
- * logical field names; main extraction ESQL applies `recent.` only when building the post-join WHERE.
+ * Every detection alert carries the uuid of the rule that produced it. Mirrors `ALERT_RULE_UUID`
+ * from `@kbn/rule-data-utils`, spelled out here so this module keeps its two dependencies.
+ *
+ * Chosen over `kibana.alert.uuid` because it survives the ECS projection the document-details
+ * flyout passes around: `SignalEcsAAD` carries `kibana.alert.rule` but no top-level `uuid`.
+ */
+const ALERT_RULE_UUID_FIELD = 'kibana.alert.rule.uuid';
+
+/**
+ * A document produced by the detection engine, rather than raw source telemetry.
+ *
+ * `postAggFilter` decides whether a document may put an entity in the store, and an alert never
+ * does: extraction reads log indices, not `.alerts-*`. Alerts only arrive here to be matched
+ * against an entity that already exists, so satisfying the gate is the right answer for them.
+ * Without this, an alert has no way to pass: `entity.id` is attached by the extraction pipeline's
+ * LOOKUP JOIN, which none of these callers run, and the detection engine rewrites `event.kind` to
+ * `signal`, so an `event.kind`-based gate cannot match either.
+ */
+const DOCUMENT_IS_ALERT: Condition = { field: ALERT_RULE_UUID_FIELD, exists: true };
+
+/**
+ * Wraps `postAggFilter` so a detection alert satisfies it. Returns `undefined` unchanged when the
+ * definition has no `postAggFilter`, so nothing is added where there is nothing to waive.
+ */
+export function waiveForAlerts(postAggFilter?: Condition): Condition | undefined {
+  if (!postAggFilter) {
+    return undefined;
+  }
+  return { or: [DOCUMENT_IS_ALERT, postAggFilter] };
+}
+
+/**
+ * True when the document matches `documentsFilter`, and `postAggFilter` too unless the document is
+ * a detection alert. `postAggFilter` uses logical field names; main extraction ESQL applies
+ * `recent.` only when building the post-join WHERE.
  *
  * For single-field identity definitions, returns true (callers only use this on the
  * calculated-identity path after field evaluations).
@@ -160,7 +191,7 @@ export function documentPassesCalculatedIdentityPipelineGate(
     doc,
     mergeDocumentsFilterAndPostAgg(
       identityField.documentsFilter,
-      applyPostAggFilter ? postAggFilter : undefined
+      applyPostAggFilter ? waiveForAlerts(postAggFilter) : undefined
     )
   );
 }

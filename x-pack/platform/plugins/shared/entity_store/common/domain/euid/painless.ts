@@ -16,7 +16,7 @@ import type {
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import type { EuidGateOptions } from './commons';
-import { isEuidField } from './commons';
+import { isEuidField, waiveForAlerts } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -147,7 +147,7 @@ export function getEuidPainlessEvaluation(
   const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
   const filterChecks: string[] = [];
   const gateConditions = applyPostAggFilter
-    ? [identityField.documentsFilter, entityDefinition.postAggFilter]
+    ? [identityField.documentsFilter, waiveForAlerts(entityDefinition.postAggFilter)]
     : [identityField.documentsFilter];
   for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
     filterChecks.push(

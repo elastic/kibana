@@ -279,33 +279,43 @@ describe('getEuidFromObject', () => {
     });
   });
 
-  describe('applyPostAggFilter', () => {
-    // A detection alert raised on an okta user: the detection engine rewrites event.kind to
-    // 'signal', which no arm of postAggFilter accepts. Creation must reject it; resolution must
-    // not, or the alert can never be tied back to an entity that is already in the store.
-    const idpAlert = {
+  describe('detection alerts and postAggFilter', () => {
+    // An okta user with no host.id: not local, and the detection engine rewrites event.kind to
+    // 'signal', so no arm of postAggFilter accepts the document on its own merits.
+    const oktaUser = {
       user: { email: 'alice@example.com' },
       event: { kind: 'signal', module: 'okta' },
     };
+    // Every detection alert carries the uuid of the rule that produced it.
+    const asAlert = (doc: object) => ({ ...doc, 'kibana.alert.rule.uuid': 'rule-1' });
 
-    it('rejects an IdP-namespace alert by default', () => {
-      expect(getEuidFromObject('user', idpAlert)).toBeUndefined();
+    it('resolves an alert on an IdP-namespace user', () => {
+      expect(getEuidFromObject('user', asAlert(oktaUser))).toBe('user:alice@example.com@okta');
     });
 
-    it('resolves an IdP-namespace alert when applyPostAggFilter is false', () => {
-      expect(getEuidFromObject('user', idpAlert, { applyPostAggFilter: false })).toBe(
-        'user:alice@example.com@okta'
-      );
+    it('resolves an alert nested under kibana.alert.rule as well as flattened', () => {
+      expect(
+        getEuidFromObject('user', { ...oktaUser, kibana: { alert: { rule: { uuid: 'rule-1' } } } })
+      ).toBe('user:alice@example.com@okta');
     });
 
-    it('still enforces documentsFilter when applyPostAggFilter is false', () => {
+    it('still rejects the same document when it is not an alert', () => {
+      expect(getEuidFromObject('user', oktaUser)).toBeUndefined();
+    });
+
+    it('still enforces documentsFilter on an alert', () => {
       expect(
         getEuidFromObject(
           'user',
-          { ...idpAlert, event: { ...idpAlert.event, outcome: 'failure' } },
-          { applyPostAggFilter: false }
+          asAlert({ ...oktaUser, event: { ...oktaUser.event, outcome: 'failure' } })
         )
       ).toBeUndefined();
+    });
+
+    it('resolves without the gate when applyPostAggFilter is false', () => {
+      expect(getEuidFromObject('user', oktaUser, { applyPostAggFilter: false })).toBe(
+        'user:alice@example.com@okta'
+      );
     });
   });
 });

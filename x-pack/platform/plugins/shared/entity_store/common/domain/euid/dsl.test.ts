@@ -218,6 +218,20 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       ).toBeUndefined();
     });
 
+    it('builds a filter for the same doc when it is a detection alert', () => {
+      // The gate lives in documentPassesCalculatedIdentityPipelineGate, so the alert waiver
+      // reaches the DSL builder too. An alert is only ever matched against an existing entity.
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { id: 'user-id-42' },
+        event: { module: 'o365' },
+        'kibana.alert.rule.uuid': 'rule-1',
+      });
+
+      expect(result?.bool?.filter).toEqual(
+        expect.arrayContaining([{ term: { 'user.id': 'user-id-42' } }])
+      );
+    });
+
     it('returns undefined when no user id fields are present', () => {
       expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
     });
