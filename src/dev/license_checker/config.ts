@@ -86,7 +86,7 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   '@img/sharp-libvips-darwin-arm64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-x64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.3.1': ['LGPL-3.0-or-later'],
-  'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.4.14': ['(MPL-2.0 OR Apache-2.0)'],
   'node-liblzma@2.2.0': ['LGPL-3.0'],
 };
 // Globally overrides a license for a given package@version
@@ -101,6 +101,7 @@ export const LICENSE_OVERRIDES = {
   '@elastic/esql-ast': ['Elastic License 2.0'],
   '@elastic/esql-traversal': ['Elastic License 2.0'],
   '@elastic/esql-definitions': ['Elastic License 2.0'],
+  '@elastic/esql-parser': ['Elastic License 2.0'],
   '@elastic/pretty-printer': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   '@elastic/eui-theme-borealis': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
