@@ -47,7 +47,7 @@ cy.request('POST', '/api/security/some-endpoint', data);
 
 **Feature flags (Cypress only):** Cypress cannot reliably toggle flags on MKI. Do not treat `@skipInServerlessMKI` as the fix — migrate to Scout, which can set flags via Kibana Core APIs on MKI/cloud (see `cypress-to-scout-migration`). `@skipInServerlessMKI` is only a temporary Cypress hold when the spec is `@serverlessQA` and must keep running the QA gate without that MKI path.
 
-**Infrastructure not ready:** Elements disabled, "shards not active" or "index not found" errors. Check server logs; add readiness waits in the destination (Scout / API) or migrate. `@skipInServerlessMKI` is only a temporary Cypress hold when the spec is `@serverlessQA`.
+**Infrastructure not ready:** Elements disabled, "shards not active" or "index not found" errors. Check server logs. For a non-`@serverlessQA` test: add readiness waits in the destination (Scout / API), or migrate or delete — do not add `@skipInServerlessMKI`. That skip is only a temporary Cypress hold when the spec is already `@serverlessQA` and must keep running the QA gate without that MKI path.
 
 ## Environment Tag Combinations
 
