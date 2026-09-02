@@ -111,7 +111,6 @@ export function fetchEsql({
         let approximationApplied: boolean | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
-          console.log('response', response);
           if (response.type === 'error') {
             error = response.error.message;
           } else {
@@ -155,7 +154,6 @@ export function fetchEsql({
                 return true; // suppress the default behaviour
               });
             }
-            console.log('finalData', finalData);
             return {
               records: finalData || [],
               interceptedWarnings,
