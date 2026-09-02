@@ -7,13 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
+
 import { clientAuth } from '../../../common/types';
 
 // Flat oneOf with null as an explicit alternative — nested oneOf prevents null from
 // matching in @kbn/config-schema, so null must be a sibling alternative, not wrapped.
 const nullableSecretRefSchema = schema.oneOf([
   schema.literal(null),
-  schema.object({ id: schema.string({ maxLength: 50 }) }),
+  schema.object({ id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }) }),
   schema.string({ maxLength: 10000 }),
 ]);
 
@@ -25,7 +27,7 @@ export const FleetServerHostBaseSchema = schema.object({
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
   allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
-  proxy_id: schema.nullable(schema.string({ maxLength: 50 })),
+  proxy_id: schema.nullable(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(
@@ -69,13 +71,15 @@ export const FleetServerHostBaseSchema = schema.object({
 });
 
 export const FleetServerHostSchema = FleetServerHostBaseSchema.extends({
-  id: schema.string({ maxLength: 50 }),
+  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   name: schema.string({ maxLength: 255 }),
   host_urls: schema.arrayOf(schema.string({ maxLength: 2048 }), { minSize: 1, maxSize: 10 }),
   is_default: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),
-  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])),
+  proxy_id: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
+  ),
 });
 
 export const FleetServerHostResponseSchema = schema.object({
@@ -84,14 +88,14 @@ export const FleetServerHostResponseSchema = schema.object({
 
 export const PostFleetServerHostRequestSchema = {
   body: FleetServerHostSchema.extends({
-    id: schema.maybe(schema.string({ maxLength: 50 })),
+    id: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
   }),
 };
 
 export const GetOneFleetServerHostRequestSchema = {
   params: schema.object({
     itemId: schema.string({
-      maxLength: 50,
+      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
       meta: { description: 'The ID of the Fleet Server host' },
     }),
   }),
@@ -100,7 +104,7 @@ export const GetOneFleetServerHostRequestSchema = {
 export const PutFleetServerHostRequestSchema = {
   params: schema.object({
     itemId: schema.string({
-      maxLength: 50,
+      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
       meta: { description: 'The ID of the Fleet Server host' },
     }),
   }),

@@ -12,20 +12,22 @@ import { isDiffPathProtocol } from '../../../common/services';
 import { FLEET_SCHEMA_ID_MAX_LENGTH } from '../../constants';
 
 const EnrollmentSettingsProxySchema = schema.object({
-  id: schema.string({ maxLength: 50 }),
+  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   name: schema.string({ maxLength: 255 }),
   url: schema.string({ maxLength: 2048 }),
 });
 
 const EnrollmentSettingsFleetServerHostSchema = schema.object({
-  id: schema.string({ maxLength: 50 }),
+  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   name: schema.string({ maxLength: 255 }),
   host_urls: schema.arrayOf(schema.string({ maxLength: 2048 }), { minSize: 1, maxSize: 10 }),
   is_default: schema.boolean({ defaultValue: false }),
   is_preconfigured: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
-  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])),
+  proxy_id: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
+  ),
   ssl: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -49,7 +51,7 @@ const EnrollmentSettingsFleetServerHostSchema = schema.object({
 });
 
 const EnrollmentSettingsOutputSchema = schema.object({
-  id: schema.string({ maxLength: 50 }),
+  id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
   name: schema.string({ maxLength: 255 }),
   type: schema.literal('elasticsearch'),
   is_default: schema.boolean(),
@@ -70,7 +72,9 @@ const EnrollmentSettingsOutputSchema = schema.object({
     schema.oneOf([schema.literal(null), schema.string({ maxLength: 1000000 })])
   ),
   otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
-  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])),
+  proxy_id: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
+  ),
   allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
   preset: schema.maybe(
     schema.oneOf([
@@ -98,12 +102,14 @@ const EnrollmentSettingsOutputSchema = schema.object({
 
 const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
   schema.object({
-    id: schema.string({ maxLength: 50 }),
+    id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
     name: schema.string({ maxLength: 255 }),
     host: schema.uri({ scheme: ['http', 'https'] }),
     is_default: schema.boolean(),
     is_preconfigured: schema.maybe(schema.boolean()),
-    proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])),
+    proxy_id: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })])
+    ),
     ssl: schema.maybe(
       schema.object({
         certificate_authorities: schema.maybe(
@@ -273,7 +279,7 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
   fleet_server: schema.object({
     policies: schema.arrayOf(
       schema.object({
-        id: schema.string({ maxLength: 50 }),
+        id: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
         name: schema.string({ maxLength: 255 }),
         is_managed: schema.boolean(),
         is_default_fleet_server: schema.maybe(schema.boolean()),
