@@ -160,28 +160,30 @@ export function initializeLayoutManager(
   let lastSavedChildState = initialChildState;
 
   const resetLayout = async (state: DashboardState) => {
-    childrenStateLoading$.next(true);
+    try {
+      childrenStateLoading$.next(true);
 
-    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
-      state.panels,
-      state.pinned_panels
-    );
+      const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+        state.panels,
+        state.pinned_panels
+      );
 
-    if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
-      layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
-    }
-    currentChildState = cloneDeep(childStateToApply);
-
-    const setStatePromises: MaybePromise<void>[] = [];
-    for (const [uuid, child] of Object.entries(children$.value)) {
-      const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
-      if (nextChildState && apiHasSerializableState(child)) {
-        setStatePromises.push(child.applySerializedState(nextChildState));
+      if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
+        layout$.next({ ...layoutToApply }); // triggers removeOrphanedChildrenSubscription to purge orphaned children
       }
-    }
-    await Promise.all(setStatePromises);
+      currentChildState = cloneDeep(childStateToApply);
 
-    childrenStateLoading$.next(false);
+      const setStatePromises: MaybePromise<void>[] = [];
+      for (const [uuid, child] of Object.entries(children$.value)) {
+        const nextChildState = cloneDeep(childStateToApply[uuid]); // prevent shallow copies from being mutated unexpectedly
+        if (nextChildState && apiHasSerializableState(child)) {
+          setStatePromises.push(child.applySerializedState(nextChildState));
+        }
+      }
+      await Promise.all(setStatePromises);
+    } finally {
+      childrenStateLoading$.next(false);
+    }
   };
 
   /**
@@ -387,25 +389,27 @@ export function initializeLayoutManager(
   };
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
-    childrenStateLoading$.next(true);
-    const existingGridData = layout$.value.panels[idToRemove]?.grid;
-    const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
-    if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
+    try {
+      childrenStateLoading$.next(true);
+      const existingGridData = layout$.value.panels[idToRemove]?.grid;
+      const existingPinnedPanelData = layout$.value.pinnedPanels[idToRemove];
+      if (!existingGridData && !existingPinnedPanelData) throw new PanelNotFoundError();
 
-    removePanel(idToRemove);
-    if (existingGridData) {
-      const newPanel = await addNewPanel<DefaultEmbeddableApi>(
-        panelPackage,
-        { displaySuccessMessage: false },
-        existingGridData
-      );
+      removePanel(idToRemove);
+      if (existingGridData) {
+        const newPanel = await addNewPanel<DefaultEmbeddableApi>(
+          panelPackage,
+          { displaySuccessMessage: false },
+          existingGridData
+        );
+        return newPanel.uuid;
+      } else {
+        const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
+        const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
+        return newPanel.uuid;
+      }
+    } finally {
       childrenStateLoading$.next(false);
-      return newPanel.uuid;
-    } else {
-      const prevLayoutState = pick(existingPinnedPanelData, 'grow', 'width', 'order');
-      const newPanel = await addPinnedPanel(panelPackage, prevLayoutState);
-      childrenStateLoading$.next(false);
-      return newPanel.uuid;
     }
   };
 
