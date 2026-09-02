@@ -31,7 +31,10 @@ import { renderReliabilityHtml } from '../../matrix/render_reliability_html';
 import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
 import type { MatrixTraceData } from '../../matrix/trace_types';
 import { readLocalGitState } from '../../matrix/local_git_state';
-import { warnOnConfiguredNamesMissingFromData } from '../../matrix/config_data_preflight';
+import {
+  warnOnConfiguredNamesMissingFromData,
+  warnOnDataAboutToLeaveLookback,
+} from '../../matrix/config_data_preflight';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
 
@@ -294,6 +297,7 @@ export const matrixCmd: Command<void> = {
     }
 
     warnOnConfiguredNamesMissingFromData(config, aggregated, log);
+    warnOnDataAboutToLeaveLookback(config, aggregated, log);
 
     const matrix = buildMatrix(aggregated, config, log);
     const generateHtml = flagsReader.boolean('html');

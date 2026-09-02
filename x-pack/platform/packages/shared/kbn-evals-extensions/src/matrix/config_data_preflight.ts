@@ -71,3 +71,66 @@ export function warnOnConfiguredNamesMissingFromData(
     }
   }
 }
+
+/**
+ * Warn when a column's freshest data is inside the lookback window but close to
+ * falling out of it.
+ *
+ * A branch pin freezes a column on a run that never gets newer, so the window
+ * slides toward it. Nothing fails when it crosses: `pickLatestExperimentPerModel`
+ * simply stops selecting the experiment and the column goes blank, which reads
+ * as "the model was never evaluated" rather than "the data aged out". The
+ * migrations columns are pinned to a branch last written 2026-07-30, so on a
+ * 45-day window they blank on 2026-09-13 with no other signal.
+ *
+ * Warn only for data still IN the window: a column that already aged out is
+ * blank today, and a future-tense warning would misdescribe it.
+ */
+export function warnOnDataAboutToLeaveLookback(
+  config: MatrixConfig,
+  aggregated: AggregatedModelScores[],
+  log: ToolingLog,
+  { now = Date.now(), warnWithinDays = 14 }: { now?: number; warnWithinDays?: number } = {}
+): void {
+  const lookbackDays = config.lookbackDays;
+  if (!lookbackDays) {
+    return;
+  }
+
+  // Freshest run per suite: that is what decides how long the column survives.
+  const newestBySuite = new Map<string, number>();
+  for (const model of aggregated) {
+    for (const suite of model.suites) {
+      if (!suite.timestamp) {
+        continue;
+      }
+      const ts = Date.parse(suite.timestamp);
+      if (Number.isNaN(ts)) {
+        continue;
+      }
+      newestBySuite.set(suite.suiteId, Math.max(newestBySuite.get(suite.suiteId) ?? 0, ts));
+    }
+  }
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  for (const [suiteId, newest] of newestBySuite) {
+    const ageDays = (now - newest) / DAY_MS;
+    const daysLeft = Math.floor(lookbackDays - ageDays);
+    if (daysLeft < 0 || daysLeft > warnWithinDays) {
+      continue;
+    }
+
+    const columns = config.columns
+      .filter((column) => column.suites.includes(suiteId))
+      .map((column) => column.id);
+
+    log.warning(
+      `Suite \`${suiteId}\` has no run newer than ${new Date(newest)
+        .toISOString()
+        .slice(0, 10)}; it leaves the ${lookbackDays}-day lookback in ${daysLeft} day(s), after ` +
+        `which these columns go blank with no other signal: ${
+          columns.length ? columns.join(', ') : '(none)'
+        }. Re-run the suite or pin the column to a branch with fresher data.`
+    );
+  }
+}

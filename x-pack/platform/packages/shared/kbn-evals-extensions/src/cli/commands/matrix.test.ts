@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
@@ -161,5 +163,15 @@ describe('matrix command empty-result guard', () => {
 
     expect(matrix.proprietary).toHaveLength(0);
     expect(matrix.openSource).toHaveLength(0);
+  });
+
+  // Deleting either preflight call from the command is invisible to every
+  // other test -- the warnings simply stop appearing, and a silently unhooked
+  // warning is worse than no warning because the artifact looks checked.
+  it('wires both data preflights into the matrix command', () => {
+    const source = readFileSync(join(__dirname, 'matrix.ts'), 'utf8');
+
+    expect(source).toContain('warnOnConfiguredNamesMissingFromData(config, aggregated, log)');
+    expect(source).toContain('warnOnDataAboutToLeaveLookback(config, aggregated, log)');
   });
 });
