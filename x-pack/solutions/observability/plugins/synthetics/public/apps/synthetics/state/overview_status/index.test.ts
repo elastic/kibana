@@ -649,6 +649,92 @@ describe('overviewStatusReducer', () => {
 
       expect(state.allConfigs).toHaveLength(20);
     });
+
+    it('stores refreshThrough on a clamped silent refresh and clears it once covered', () => {
+      const page1 = [
+        makeMeta({ configId: 'mon1' }),
+        makeMeta({ configId: 'mon2' }),
+        makeMeta({ configId: 'mon3' }),
+        makeMeta({ configId: 'mon4' }),
+      ];
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(makePaginated(page1, { page: 1, perPage: 4, total: 4 }))
+      );
+      state = overviewStatusReducer(
+        state,
+        quietFetchOverviewStatusAction.get({
+          pageState: { page: 1, perPage: 2 } as any,
+          silent: true,
+          refreshThrough: 4,
+        })
+      );
+      expect(state.refreshThrough).toBe(4);
+
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            page: 1,
+            perPage: 2,
+            total: 4,
+          })
+        )
+      );
+      expect(state.refreshThrough).toBe(4);
+      expect(state.allConfigs).toHaveLength(4);
+
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({
+          pageState: { page: 2, perPage: 2 } as any,
+          silent: true,
+        })
+      );
+      expect(state.loading).toBe(false);
+
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated(
+            [
+              makeMeta({ configId: 'mon3', name: 'updated' }),
+              makeMeta({ configId: 'mon4' }),
+              makeMeta({ configId: 'mon5' }),
+            ],
+            { page: 2, perPage: 2, total: 4 }
+          )
+        )
+      );
+
+      expect(state.refreshThrough).toBeUndefined();
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual([
+        'mon1',
+        'mon2',
+        'mon3',
+        'mon4',
+      ]);
+      expect(state.allConfigs?.find((config) => config.configId === 'mon3')?.name).toBe('updated');
+    });
+
+    it('cancels a window remainder when the user appends the next infinite-scroll page', () => {
+      let state = overviewStatusReducer(
+        undefined,
+        quietFetchOverviewStatusAction.get({
+          pageState: { page: 1, perPage: 2 } as any,
+          silent: true,
+          refreshThrough: 4,
+        })
+      );
+      expect(state.refreshThrough).toBe(4);
+
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({ pageState: { page: 3, perPage: 20 } as any })
+      );
+      expect(state.refreshThrough).toBeUndefined();
+      expect(state.loading).toBe(true);
+    });
   });
 
   describe('multi-location promotion', () => {

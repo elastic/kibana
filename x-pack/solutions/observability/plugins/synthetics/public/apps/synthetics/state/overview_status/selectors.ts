@@ -14,6 +14,8 @@ import type {
 } from '../../../../../common/runtime_types';
 import type { SyntheticsAppState } from '../root_reducer';
 
+export const selectOverviewStatusReducer = (state: SyntheticsAppState) => state.overviewStatus;
+
 export const getStatusByConfig = (
   configId: string,
   status?: PaginatedOverviewStatus | null,

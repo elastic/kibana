@@ -91,7 +91,7 @@ const UnGroupedCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const pageState = useSelector(selectOverviewPageState);
   const perPage = pageState.perPage ?? 20;
-  const { total, allConfigs, loading, lastRequest } = useOverviewStatusState();
+  const { total, allConfigs, loading, lastRequest, refreshThrough } = useOverviewStatusState();
   const [rowCount, setRowCount] = useState(5);
   const [sliceToFetch, setSliceToFetch] = useState<{
     startIndex: number;
@@ -127,12 +127,28 @@ const UnGroupedCardView = ({
 
   // Read the latest values from a ref so the scroll callback below never closes
   // over a stale window and never over-fetches during a burst of scroll events.
-  const loadMoreRef = useRef({ hasMore, loading, loadedMonitors, perPage, pageState, lastRequest });
-  loadMoreRef.current = { hasMore, loading, loadedMonitors, perPage, pageState, lastRequest };
+  const loadMoreRef = useRef({
+    hasMore,
+    loading,
+    loadedMonitors,
+    perPage,
+    pageState,
+    lastRequest,
+    refreshThrough,
+  });
+  loadMoreRef.current = {
+    hasMore,
+    loading,
+    loadedMonitors,
+    perPage,
+    pageState,
+    lastRequest,
+    refreshThrough,
+  };
 
   const loadMoreMonitors = useCallback(() => {
     const s = loadMoreRef.current;
-    if (!s.hasMore || s.loading) {
+    if (!s.hasMore || s.loading || s.refreshThrough) {
       return;
     }
     // Only whole pages are appended, so a non-multiple means the last (partial)

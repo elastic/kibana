@@ -16,6 +16,7 @@ import {
   selectOverviewStatus,
   selectOverviewStatusSettled,
 } from '../../../state/overview_status';
+import { getCardWindowRefreshPayload } from '../../../state/overview_status/window_refresh';
 import { useGetUrlParams } from '../../../hooks';
 
 /**
@@ -24,7 +25,7 @@ import { useGetUrlParams } from '../../../hooks';
  * The fetch is triggered once by `useOverviewStatus` in the page-level component.
  */
 export function useOverviewStatusState() {
-  const { status, error, loaded, loading, allConfigs, total, lastRequest } =
+  const { status, error, loaded, loading, allConfigs, total, lastRequest, refreshThrough } =
     useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   return {
@@ -36,6 +37,7 @@ export function useOverviewStatusState() {
     allConfigs: allConfigs ?? [],
     total,
     lastRequest,
+    refreshThrough,
   };
 }
 
@@ -46,7 +48,8 @@ export function useOverviewStatusState() {
  */
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
-  const { status, error, loaded, loading, allConfigs, total } = useSelector(selectOverviewStatus);
+  const { status, error, loaded, loading, allConfigs, total, refreshThrough } =
+    useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   const isInitialMount = useRef(true);
 
@@ -67,6 +70,7 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     statusFilter,
     view,
     loadedCount: allConfigs?.length ?? 0,
+    refreshThrough,
   });
   paramsRef.current = {
     pageState,
@@ -76,6 +80,7 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     statusFilter,
     view,
     loadedCount: allConfigs?.length ?? 0,
+    refreshThrough,
   };
 
   // Tracks the last status filter the fetch effect reconciled, so it can detect
@@ -97,22 +102,29 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
         view: currentView,
         loadedCount,
         loading: isLoading,
+        refreshThrough: inFlightWindowRefresh,
       } = paramsRef.current;
-      // Don't start a replace-refresh while an append (or other fetch) is in
-      // flight — a page-1 refresh completing after the append would wipe it.
-      if (isLoading) {
+      // Don't start a replace-refresh while an append, remainder page, or other
+      // fetch is in flight — a page-1 refresh completing after the append would
+      // wipe it, and overlapping window refreshes would race.
+      if (isLoading || inFlightWindowRefresh) {
         return;
       }
-      // The card view accumulates pages via infinite scroll. Refresh the entire
-      // loaded window in one request (page 1, perPage = loaded) so a periodic
-      // refresh keeps every accumulated card without collapsing back to page 1.
+      // The card view accumulates pages via infinite scroll. Refresh from page 1
+      // with `perPage` clamped to the route max so a long session cannot 400.
+      // Remainder pages (when loadedCount exceeds the max) are requested by
+      // `refreshRemainingCardWindowEffect`.
       const refreshWholeWindow = currentView === 'cardView' && loadedCount > (ps.perPage ?? 0);
+      const windowRefresh = refreshWholeWindow
+        ? getCardWindowRefreshPayload(ps, loadedCount)
+        : { pageState: ps };
       dispatch(
         quietFetchOverviewStatusAction.get({
-          pageState: refreshWholeWindow ? { ...ps, page: 1, perPage: loadedCount } : ps,
+          pageState: windowRefresh.pageState,
           scopeStatusByLocation: scope,
           statusFilter: sf,
           silent: true,
+          refreshThrough: windowRefresh.refreshThrough,
         })
       );
     }

@@ -24,6 +24,7 @@ import {
   quietFetchOverviewStatusAction,
   initialLoadReported,
 } from './actions';
+import { getNextWindowRefreshPage, restrictOverviewPageToExistingKeys } from './window_refresh';
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
@@ -58,6 +59,9 @@ export interface OverviewStatusStateReducer {
   // must merge into the card view's accumulated window instead of shrinking it;
   // table paging is non-silent and must always replace.
   silentReplaceInFlight?: boolean;
+  // Target loaded-window size for a clamped card-view refresh. Set while
+  // remainder pages are still in flight so the timer and infinite scroll wait.
+  refreshThrough?: number;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -202,6 +206,21 @@ const mergePaginatedStatus = (
   };
 };
 
+const completeWindowRefreshIfCovered = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (state.refreshThrough == null) {
+    return;
+  }
+  if (incoming.total != null && incoming.total < state.refreshThrough) {
+    state.refreshThrough = incoming.total;
+  }
+  if (!getNextWindowRefreshPage(incoming.page, incoming.perPage, state.refreshThrough)) {
+    state.refreshThrough = undefined;
+  }
+};
+
 const applyMergedPaginated = (
   state: OverviewStatusStateReducer,
   incoming: PaginatedOverviewStatus
@@ -232,6 +251,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.status = null;
       state.loading = true;
       state.silentReplaceInFlight = false;
+      state.refreshThrough = undefined;
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -244,6 +264,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.loading = true;
       }
       state.silentReplaceInFlight = Boolean(action.payload.silent);
+      state.refreshThrough = action.payload.refreshThrough;
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -269,6 +290,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
 
       if (preserveAccumulatedWindow) {
         applyMergedPaginated(state, incoming);
+        completeWindowRefreshIfCovered(state, incoming);
         return;
       }
 
@@ -285,15 +307,21 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       // refresh (which just replaced `status`) doesn't flicker them back to
       // `pending` until the supplementary lookup re-resolves.
       applyStaleBeforeWindow(state);
+      completeWindowRefreshIfCovered(state, incoming);
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
       state.settled = true;
+      state.refreshThrough = undefined;
     })
     .addCase(appendOverviewStatusAction.get, (state, action) => {
-      // Keep the current page visible while the next one loads.
-      state.loading = true;
+      if (!action.payload.silent) {
+        // Keep the current page visible while the next one loads.
+        state.loading = true;
+        // User-driven infinite scroll cancels an in-flight window remainder.
+        state.refreshThrough = undefined;
+      }
       state.pendingAppendRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -307,13 +335,20 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       if (pending && !requestContextEquals(pending, state.lastRequest)) {
         return;
       }
-      applyMergedPaginated(state, action.payload);
+      const existingConfigs = state.status?.configs;
+      const incoming =
+        state.refreshThrough && existingConfigs && action.payload.configs
+          ? restrictOverviewPageToExistingKeys(existingConfigs, action.payload)
+          : action.payload;
+      applyMergedPaginated(state, incoming);
+      completeWindowRefreshIfCovered(state, action.payload);
     })
     .addCase(appendOverviewStatusAction.fail, (state, action) => {
       state.pendingAppendRequest = undefined;
       state.error = action.payload;
       state.loading = false;
       state.settled = true;
+      state.refreshThrough = undefined;
     })
     .addCase(fetchStaleStatusAction.success, (state, action) => {
       // Store the latest prior-run facts and promote the genuinely stale

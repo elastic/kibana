@@ -152,3 +152,7 @@ export const OVERVIEW_PAGINATION_DEFAULTS = {
   sortField: 'status',
   sortOrder: 'asc',
 } as const;
+
+// Route max for `perPage`. Card-view window refresh must clamp to this and
+// request later pages separately — sending `loadedCount` unbounded 400s.
+export const OVERVIEW_STATUS_MAX_PER_PAGE = 500;

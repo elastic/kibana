@@ -47,6 +47,7 @@ import {
   augmentStaleStatusEffect,
   fetchOverviewStatusEffect,
   fetchStaleStatusEffect,
+  refreshRemainingCardWindowEffect,
 } from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
@@ -67,6 +68,7 @@ export const rootEffect = function* root(): Generator {
     fork(appendOverviewStatusEffect),
     fork(fetchStaleStatusEffect),
     fork(augmentStaleStatusEffect),
+    fork(refreshRemainingCardWindowEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
     fork(fetchAgentStatsEffect),

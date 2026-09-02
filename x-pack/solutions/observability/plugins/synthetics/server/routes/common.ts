@@ -16,7 +16,10 @@ import {
   MonitorSortFieldSchema,
   OverviewStatusSortFieldSchema,
 } from '../../common/runtime_types/monitor_management/sort_field';
-import { MONITOR_STATUS_ENUM } from '../../common/constants/monitor_management';
+import {
+  MONITOR_STATUS_ENUM,
+  OVERVIEW_STATUS_MAX_PER_PAGE,
+} from '../../common/constants/monitor_management';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
@@ -90,7 +93,7 @@ export const OverviewStatusSchema = schema.object({
   // overview. Defaults to showing them; remote (CCS) monitors are unaffected.
   includeHeartbeatMonitors: schema.maybe(schema.boolean()),
   page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: 500 })),
+  perPage: schema.maybe(schema.number({ min: 1, max: OVERVIEW_STATUS_MAX_PER_PAGE })),
   sortField: OverviewStatusSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   statusFilter: schema.maybe(

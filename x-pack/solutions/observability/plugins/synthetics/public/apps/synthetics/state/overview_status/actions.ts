@@ -25,6 +25,10 @@ export const quietFetchOverviewStatusAction = createAsyncAction<
     statusFilter?: string;
     // Timer refreshes skip the loading flag so the table/progress bar does not flicker.
     silent?: boolean;
+    // Loaded card-window size when a silent refresh is clamped to the route
+    // `perPage` max. Remainder pages are requested until this many configs are
+    // covered. See `refreshRemainingCardWindowEffect`.
+    refreshThrough?: number;
   },
   PaginatedOverviewStatus
 >('quietFetchOverviewStatusAction');
@@ -36,7 +40,14 @@ export const quietFetchOverviewStatusAction = createAsyncAction<
  * (deduped by `configId`) so the already-rendered cards stay put.
  */
 export const appendOverviewStatusAction = createAsyncAction<
-  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  {
+    pageState: MonitorOverviewPageState;
+    scopeStatusByLocation?: boolean;
+    statusFilter?: string;
+    // Remainder pages of a clamped card-window refresh. Skips the loading
+    // flag and does not cancel that refresh (unlike user-driven infinite scroll).
+    silent?: boolean;
+  },
   PaginatedOverviewStatus
 >('appendOverviewStatusAction');
 

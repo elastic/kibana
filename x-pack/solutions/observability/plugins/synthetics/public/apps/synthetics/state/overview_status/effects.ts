@@ -18,6 +18,8 @@ import {
   quietFetchOverviewStatusAction,
 } from './actions';
 import { fetchOverviewStatus, fetchStaleStatus } from './api';
+import { selectOverviewStatusReducer } from './selectors';
+import { getNextWindowRefreshPage } from './window_refresh';
 
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
@@ -91,4 +93,43 @@ export function* augmentStaleStatusWorker(
  */
 export function* augmentStaleStatusEffect() {
   yield takeLatest(fetchOverviewStatusAction.success, augmentStaleStatusWorker);
+}
+
+/**
+ * After a clamped card-window refresh, fetch the remaining loaded pages one at
+ * a time (the route `perPage` max cannot cover a long infinite-scroll session).
+ */
+export function* refreshRemainingCardWindowWorker(
+  action:
+    | ReturnType<typeof fetchOverviewStatusAction.success>
+    | ReturnType<typeof appendOverviewStatusAction.success>
+) {
+  const overviewStatus: ReturnType<typeof selectOverviewStatusReducer> = yield select(
+    selectOverviewStatusReducer
+  );
+  const refreshThrough = overviewStatus.refreshThrough;
+  if (refreshThrough == null) {
+    return;
+  }
+  const incoming = action.payload;
+  const next = getNextWindowRefreshPage(incoming.page, incoming.perPage, refreshThrough);
+  if (!next) {
+    return;
+  }
+  const pageState: MonitorOverviewPageState = yield select(selectOverviewPageState);
+  yield put(
+    appendOverviewStatusAction.get({
+      pageState: { ...pageState, page: next.page, perPage: next.perPage },
+      scopeStatusByLocation: overviewStatus.lastRequest?.scopeStatusByLocation,
+      statusFilter: overviewStatus.lastRequest?.statusFilter,
+      silent: true,
+    })
+  );
+}
+
+export function* refreshRemainingCardWindowEffect() {
+  yield takeLatest(
+    [fetchOverviewStatusAction.success, appendOverviewStatusAction.success],
+    refreshRemainingCardWindowWorker
+  );
 }
