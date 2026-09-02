@@ -38,6 +38,10 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -57,6 +61,7 @@ export interface SignificantEventsPluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   streams: StreamsPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface SignificantEventsPluginStartDependencies {
@@ -75,6 +80,7 @@ export interface SignificantEventsPluginStartDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export type SignificantEventsServer = StreamsServer & {

@@ -19,6 +19,20 @@ triggers:
       every: "__REVIEW_INTERVAL_MINUTES__m"
   - type: manual
 steps:
+  - name: report_run_quota_heartbeat
+    type: kibana.request
+    if: '${{ execution.triggeredBy == "scheduled" }}'
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_heartbeat?group=detection'
+      body:
+        executionId: '${{ execution.id }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
   - name: run_review_until_drained
     type: while
     # Re-run while discovery found work this pass. A child error is deliberately
@@ -43,3 +57,5 @@ steps:
             flakyRuleDetectionThreshold: __FLAKY_RULE_DETECTION_THRESHOLD__
             flakyRuleProbeAfterMinutes: __FLAKY_RULE_PROBE_AFTER_MINUTES__
             flakyRuleExemptSeverityScore: __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__
+            rootTriggeredBy: '${{ execution.triggeredBy }}'
+            quotaSlot: '${{ while.iteration }}'

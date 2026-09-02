@@ -19,7 +19,8 @@
       "licensing",
       "security",
       "streams",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "taskManager"
     ],
     "optionalPlugins": [
       "agentBuilder",

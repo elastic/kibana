@@ -22,6 +22,13 @@ import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
+  ensureRunQuotaHousekeepingScheduled,
+  getRunQuotaSavedObjectTypes,
+  registerRunQuotaHousekeepingTask,
+} from './lib/run_quotas';
+import { getCostTrackingAuditSavedObjectType } from './lib/cost/tracking_audit';
+import { SignificantEventsCostService } from './lib/cost/service';
+import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
 } from './lib/maintenance/maintenance_service';
@@ -123,6 +130,14 @@ export class SignificantEventsPlugin
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    getRunQuotaSavedObjectTypes().forEach((type) => core.savedObjects.registerType(type));
+    core.savedObjects.registerType(getCostTrackingAuditSavedObjectType());
+    registerRunQuotaHousekeepingTask({
+      taskManager: plugins.taskManager,
+      core,
+      getServer: () => this.server,
+      logger: this.logger.get('run-quota-housekeeping'),
+    });
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -132,6 +147,10 @@ export class SignificantEventsPlugin
     );
 
     const significantEventsServices = createSignificantEventsServices();
+    const costService = new SignificantEventsCostService({
+      logger: this.logger.get('cost'),
+      cloudBaseUrl: plugins.cloud?.baseUrl,
+    });
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const { streams: streamsSetup } = plugins;
 
@@ -298,6 +317,10 @@ export class SignificantEventsPlugin
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
         streamsKIsOnboardingClient,
+        getScheduledTask: async (taskId) => {
+          const [, startPlugins] = await core.getStartServices();
+          return startPlugins.taskManager.get(taskId);
+        },
       });
     }
 
@@ -353,6 +376,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        costService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -381,6 +405,13 @@ export class SignificantEventsPlugin
 
       this.server.relayClient = plugins.actions.getRelayClient();
     }
+    void ensureRunQuotaHousekeepingScheduled(plugins.taskManager).catch((error: unknown) => {
+      this.logger.error(
+        `Failed to schedule run quota housekeeping: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
     // resources it cannot run. Only the flag and the license change at runtime, so only those feed

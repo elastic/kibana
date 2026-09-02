@@ -8,6 +8,7 @@
 import { internalAvailabilityRoutes } from './internal/availability/route';
 import { internalSlackAppRoutes } from './internal/apps/slack/route';
 import { internalDetectionsRoutes } from './internal/detections/route';
+import { internalCostRoutes } from './internal/cost/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
 import { internalEventsRoutes } from './internal/events/route';
@@ -23,6 +24,7 @@ import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_
 import { internalMaintenanceRoutes } from './internal/maintenance/route';
 import { internalMemoryRoutes } from '../memory_and_investigation/routes/route';
 import { internalPromptsRoutes } from './internal/prompts/route';
+import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
 import { syncRoutes } from './internal/knowledge_indicators/sync_route';
 import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
@@ -33,6 +35,7 @@ export const significantEventsRouteRepository = {
   // internal APIs
   ...internalAvailabilityRoutes,
   ...internalSlackAppRoutes,
+  ...internalCostRoutes,
   ...internalDetectionsRoutes,
   ...internalDetectionsWorkflowRoutes,
   ...internalDiscoveryRoutes,
@@ -49,6 +52,7 @@ export const significantEventsRouteRepository = {
   ...internalMaintenanceRoutes,
   ...internalMemoryRoutes,
   ...internalPromptsRoutes,
+  ...internalRunQuotaRoutes,
   ...reconcileRoutes,
   ...syncRoutes,
   ...internalScheduledDiscoveryRoutes,

@@ -19,6 +19,9 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '@kbn/management-settings-ids';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import { createInMemoryRunQuotaRepository } from '../../../lib/run_quotas/in_memory_repository.test_utils';
+import { getRunQuotaHeartbeatId } from '../../../lib/run_quotas';
+import { RUN_QUOTA_HEARTBEAT_SO_TYPE } from '../../../lib/run_quotas/saved_objects';
 import { internalScheduledDiscoveryRoutes } from './route';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 
@@ -76,6 +79,7 @@ const createHandlerParams = ({
     getState: jest.fn().mockResolvedValue(maintenanceState),
   };
   const agentBuilder = { agents: { ensure: jest.fn() } };
+  const runQuotaRepository = createInMemoryRunQuotaRepository();
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
@@ -84,7 +88,14 @@ const createHandlerParams = ({
       licensing: {},
       uiSettingsClient,
     }),
-    server: { agentBuilder },
+    server: {
+      agentBuilder,
+      core: {
+        savedObjects: {
+          createInternalRepository: jest.fn().mockReturnValue(runQuotaRepository.client),
+        },
+      },
+    },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     maintenanceService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
@@ -102,6 +113,7 @@ const createHandlerParams = ({
     scheduledWorkflowService,
     maintenanceService,
     agentBuilder,
+    runQuotaRepository,
   };
 };
 
@@ -111,17 +123,22 @@ describe('scheduled significant events discovery settings route', () => {
   });
 
   it('persists scheduled discovery settings and reconciles per-space workflows on enable', async () => {
-    const { handlerParams, uiSettingsClient, scheduledWorkflowService, agentBuilder } =
-      createHandlerParams({
-        scheduledDiscovery: {
-          enabled: true,
-          detectionIntervalMinutes: 45,
-          targetCoverageMinutes: 60,
-          reviewIntervalMinutes: 15,
-          discoveryBatchSize: 6,
-          maxReviewPasses: 4,
-        },
-      });
+    const {
+      handlerParams,
+      uiSettingsClient,
+      scheduledWorkflowService,
+      agentBuilder,
+      runQuotaRepository,
+    } = createHandlerParams({
+      scheduledDiscovery: {
+        enabled: true,
+        detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 60,
+        reviewIntervalMinutes: 15,
+        discoveryBatchSize: 6,
+        maxReviewPasses: 4,
+      },
+    });
 
     await route.handler(handlerParams);
 
@@ -157,6 +174,12 @@ describe('scheduled significant events discovery settings route', () => {
         flakyRuleExemptSeverityScore: 80,
       },
     });
+    expect(
+      runQuotaRepository.getAttributes(
+        RUN_QUOTA_HEARTBEAT_SO_TYPE,
+        getRunQuotaHeartbeatId('detection', 'space-a')
+      )
+    ).toEqual(expect.objectContaining({ scheduleGeneration: 1 }));
   });
 
   it('reconciles a teardown when scheduled discovery is disabled', async () => {
