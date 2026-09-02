@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
@@ -206,6 +207,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     });
 
+    const projectRouting = datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
+
     const esSearchRequest: estypes.SearchRequest = {
       index,
       query: {
@@ -225,9 +228,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       ...(isRuntimeMappings(datafeedConfig?.runtime_mappings)
         ? { runtime_mappings: datafeedConfig?.runtime_mappings }
         : {}),
-      ...(datafeedConfig?.project_routing
-        ? { project_routing: datafeedConfig.project_routing }
-        : {}),
+      ...(projectRouting !== null ? { project_routing: projectRouting } : {}),
       size: 0,
       _source: false,
     };

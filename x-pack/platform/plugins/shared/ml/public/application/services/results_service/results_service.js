@@ -8,6 +8,7 @@
 import { each, get } from 'lodash';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getProjectRoutingFromDatafeed } from '@kbn/ml-cps-common';
 
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 
@@ -231,8 +232,10 @@ export function resultsServiceProvider(mlApi, isMlCpsEnabled) {
       intervalMs,
       runtimeMappings,
       indicesOptions,
-      projectRouting
+      projectRoutingIn
     ) {
+      const projectRouting = getProjectRoutingFromDatafeed(projectRoutingIn);
+
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
