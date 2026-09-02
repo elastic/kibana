@@ -37,11 +37,10 @@ export const buildSpaceFilterTerms = (
 });
 
 /**
- * Whether the current space may update or delete a source document.
- * Space-owned sources are mutable only in their owning space. Global (`*`)
- * catalog rows (seed defaults and sources created from the default space)
- * are mutable only from the default space so other spaces cannot disable
- * shared feeds.
+ * Whether the current space may toggle a source document.
+ * Space-owned legacy rows are mutable only in their owning space. Global (`*`)
+ * catalog rows are mutable only from the default space so other spaces cannot
+ * disable shared feeds.
  */
 export const canMutateSourceInSpace = (
   sourceSpaceId: string | undefined,

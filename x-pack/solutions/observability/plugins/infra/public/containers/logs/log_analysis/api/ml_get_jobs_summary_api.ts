@@ -99,6 +99,9 @@ export const jobSummaryRT = rt.intersection([
     awaitingNodeAssignment: rt.boolean,
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
+    // CPS project scope of the job's datafeed, only returned when CPS is enabled
+    projectRouting: rt.union([rt.string, rt.null]),
+    isUiamEnabled: rt.boolean,
     fullJob: rt.partial({
       analysis_config: jobAnalysisConfigRT,
       create_time: rt.number,
