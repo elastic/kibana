@@ -7,9 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../../common/ui/fixtures';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import { spaceTest, testData, type DiscoverScoutSpace } from '../../../common/ui/fixtures';
+
+const createClassicSession = async (
+  apiServices: ApiServicesFixture,
+  discoverScoutSpace: DiscoverScoutSpace,
+  title: string,
+  tab: Pick<DiscoverSessionApiDataInput['tabs'][number], 'hide_chart' | 'chart_interval'> = {}
+) => {
+  await apiServices.discover.create(
+    {
+      title,
+      tabs: [
+        {
+          id: 'main',
+          label: 'Untitled',
+          data_source: {
+            type: 'data_view_reference',
+            ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+          },
+          ...tab,
+        },
+      ],
+    } satisfies DiscoverSessionApiDataInput,
+    discoverScoutSpace.id
+  );
+};
 
 spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -147,13 +173,15 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest(
     'does not keep a hidden histogram after visiting Dashboard',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects, scoutSpace }) => {
       const { dashboard, discover } = pageObjects;
       const hiddenSession = `hidden histogram then dashboard ${scoutSpace.id}`;
 
-      await discover.hideChart();
+      await createClassicSession(apiServices, discoverScoutSpace, hiddenSession, {
+        hide_chart: true,
+      });
+      await discover.loadSavedSearch(hiddenSession);
       await expect(discover.getHistogramChart()).toBeHidden();
-      await discover.saveSearch(hiddenSession);
       await discover.showChart();
       await expect(discover.getHistogramChart()).toBeVisible();
 
@@ -169,14 +197,12 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest(
     'reverts breakdown, interval, and visibility on a saved session',
-    async ({ pageObjects, scoutSpace }) => {
-      const { datePicker, discover } = pageObjects;
+    async ({ apiServices, discoverScoutSpace, pageObjects, scoutSpace }) => {
+      const { discover } = pageObjects;
       const stateSession = `histogram state ${scoutSpace.id}`;
 
-      await discover.showChart();
-      await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-      await discover.waitUntilSearchingHasFinished();
-      await discover.saveSearch(stateSession);
+      await createClassicSession(apiServices, discoverScoutSpace, stateSession);
+      await discover.loadSavedSearch(stateSession);
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
       await expect(discover.getHistogramChart()).toHaveAttribute(
@@ -225,21 +251,25 @@ spaceTest.describe('histogram', { tag: tags.deploymentAgnostic }, () => {
     }
   );
 
-  spaceTest('clears the chart interval on a saved session', async ({ pageObjects, scoutSpace }) => {
-    const { datePicker, discover } = pageObjects;
-    const clearedIntervalSession = `with chart interval then cleared ${scoutSpace.id}`;
+  spaceTest(
+    'clears the chart interval on a saved session',
+    async ({ apiServices, discoverScoutSpace, pageObjects, scoutSpace }) => {
+      const { discover } = pageObjects;
+      const clearedIntervalSession = `with chart interval then cleared ${scoutSpace.id}`;
 
-    await discover.showChart();
-    await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-    await discover.waitUntilSearchingHasFinished();
-    await discover.setChartInterval('Minute');
-    await discover.saveSearch(clearedIntervalSession);
-    await discover.setChartInterval('Auto');
-    await discover.saveSearch(clearedIntervalSession);
-    await discover.clickNewSearch();
-    await discover.loadSavedSearch(clearedIntervalSession);
-    expect(await discover.getChartInterval()).toBe('auto');
-  });
+      await createClassicSession(apiServices, discoverScoutSpace, clearedIntervalSession, {
+        chart_interval: 'm',
+      });
+
+      await discover.loadSavedSearch(clearedIntervalSession);
+      expect(await discover.getChartInterval()).toBe('m');
+      await discover.setChartInterval('Auto');
+      await discover.saveSearch(clearedIntervalSession);
+      await discover.clickNewSearch();
+      await discover.loadSavedSearch(clearedIntervalSession);
+      expect(await discover.getChartInterval()).toBe('auto');
+    }
+  );
 
   spaceTest('persists histogram hide/show in the URL', async ({ page, pageObjects }) => {
     const { datePicker, discover } = pageObjects;
