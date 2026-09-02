@@ -91,9 +91,9 @@ describe('GridSettingsFlyout', () => {
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
     expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
-      metricType: 'counter',
-      previousAggregation: 'sum',
-      newAggregation: 'max',
+      metric_type: 'counter',
+      previous_aggregation: 'sum',
+      new_aggregation: 'max',
     });
     expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
     expect(onClose).toHaveBeenCalled();
@@ -114,14 +114,14 @@ describe('GridSettingsFlyout', () => {
 
     expect(mockTrackAggregationConfigChanged).toHaveBeenCalledTimes(2);
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(1, {
-      metricType: 'gauge',
-      previousAggregation: 'avg',
-      newAggregation: 'min',
+      metric_type: 'gauge',
+      previous_aggregation: 'avg',
+      new_aggregation: 'min',
     });
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
-      metricType: 'histogram',
-      previousAggregation: 'p95',
-      newAggregation: 'p99',
+      metric_type: 'histogram',
+      previous_aggregation: 'p95',
+      new_aggregation: 'p99',
     });
   });
 

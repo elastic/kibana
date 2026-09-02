@@ -26,27 +26,27 @@ describe('getAggregationConfigChanges', () => {
       })
     ).toEqual([
       {
-        metricType: 'counter',
-        previousAggregation: 'sum',
-        newAggregation: 'max',
+        metric_type: 'counter',
+        previous_aggregation: 'sum',
+        new_aggregation: 'max',
       },
       {
-        metricType: 'gauge',
-        previousAggregation: 'avg',
-        newAggregation: 'min',
+        metric_type: 'gauge',
+        previous_aggregation: 'avg',
+        new_aggregation: 'min',
       },
       {
-        metricType: 'histogram',
-        previousAggregation: 'p95',
-        newAggregation: 'p99',
+        metric_type: 'histogram',
+        previous_aggregation: 'p95',
+        new_aggregation: 'p99',
       },
     ]);
   });
 
-  it('ignores missing and unchanged settings', () => {
+  it('ignores missing settings', () => {
     expect(
       getAggregationConfigChanges(gridSettings, {
-        counterAggregation: 'sum',
+        counterAggregation: undefined,
       })
     ).toEqual([]);
   });

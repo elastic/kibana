@@ -21,19 +21,19 @@ describe('registerMetricsEbtEvents', () => {
     expect(analytics.registerEventType).toHaveBeenCalledWith({
       eventType: 'discover_metrics_aggregation_config_changed',
       schema: {
-        metricType: {
+        metric_type: {
           type: 'keyword',
           _meta: {
             description: 'Metric type whose aggregation configuration changed',
           },
         },
-        previousAggregation: {
+        previous_aggregation: {
           type: 'keyword',
           _meta: {
             description: 'Aggregation configuration before the change',
           },
         },
-        newAggregation: {
+        new_aggregation: {
           type: 'keyword',
           _meta: {
             description: 'Aggregation configuration after the change',

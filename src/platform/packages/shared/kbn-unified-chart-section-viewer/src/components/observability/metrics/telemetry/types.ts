@@ -12,7 +12,7 @@ import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils
 export type MetricAggregationConfigMetricType = 'counter' | 'gauge' | 'histogram';
 
 export interface MetricAggregationConfigChangedEvent {
-  metricType: MetricAggregationConfigMetricType;
-  previousAggregation: SimpleAggregation | HistogramPercentile;
-  newAggregation: SimpleAggregation | HistogramPercentile;
+  metric_type: MetricAggregationConfigMetricType;
+  previous_aggregation: SimpleAggregation | HistogramPercentile;
+  new_aggregation: SimpleAggregation | HistogramPercentile;
 }

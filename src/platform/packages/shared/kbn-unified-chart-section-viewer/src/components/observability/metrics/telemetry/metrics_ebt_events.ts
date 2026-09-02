@@ -88,19 +88,19 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
     eventType: METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
     schema: {
-      metricType: {
+      metric_type: {
         type: 'keyword',
         _meta: {
           description: 'Metric type whose aggregation configuration changed',
         },
       },
-      previousAggregation: {
+      previous_aggregation: {
         type: 'keyword',
         _meta: {
           description: 'Aggregation configuration before the change',
         },
       },
-      newAggregation: {
+      new_aggregation: {
         type: 'keyword',
         _meta: {
           description: 'Aggregation configuration after the change',

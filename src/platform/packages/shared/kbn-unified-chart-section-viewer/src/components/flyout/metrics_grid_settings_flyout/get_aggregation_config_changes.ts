@@ -28,15 +28,15 @@ export const getAggregationConfigChanges = (
   (Object.keys(update) as AggregationSetting[]).flatMap((setting) => {
     const newAggregation = update[setting];
 
-    if (newAggregation === undefined || newAggregation === gridSettings[setting]) {
+    if (newAggregation === undefined) {
       return [];
     }
 
     return [
       {
-        metricType: METRIC_TYPE_BY_SETTING[setting],
-        previousAggregation: gridSettings[setting],
-        newAggregation,
+        metric_type: METRIC_TYPE_BY_SETTING[setting],
+        previous_aggregation: gridSettings[setting],
+        new_aggregation: newAggregation,
       },
     ];
   });

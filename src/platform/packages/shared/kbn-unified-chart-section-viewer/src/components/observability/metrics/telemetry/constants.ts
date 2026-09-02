@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DISCOVER_METRICS_EVENT_TYPE_PREFIX = 'discover_metrics_';
-
-export const METRICS_INFO_EVENT_TYPE = `${DISCOVER_METRICS_EVENT_TYPE_PREFIX}info`;
-export const MAX_DIMENSIONS_REACHED_EVENT_TYPE = `${DISCOVER_METRICS_EVENT_TYPE_PREFIX}max_dimensions_reached`;
-export const METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE = `${DISCOVER_METRICS_EVENT_TYPE_PREFIX}aggregation_config_changed`;
+export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';
+export const MAX_DIMENSIONS_REACHED_EVENT_TYPE = 'discover_metrics_max_dimensions_reached';
+export const METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE =
+  'discover_metrics_aggregation_config_changed';

@@ -18,17 +18,17 @@ describe('createUnifiedChartSectionViewerTelemetry', () => {
     const telemetry = createUnifiedChartSectionViewerTelemetry(analytics);
 
     telemetry.trackAggregationConfigChanged({
-      metricType: 'counter',
-      previousAggregation: 'sum',
-      newAggregation: 'max',
+      metric_type: 'counter',
+      previous_aggregation: 'sum',
+      new_aggregation: 'max',
     });
 
     expect(analytics.reportEvent).toHaveBeenCalledWith(
       'discover_metrics_aggregation_config_changed',
       {
-        metricType: 'counter',
-        previousAggregation: 'sum',
-        newAggregation: 'max',
+        metric_type: 'counter',
+        previous_aggregation: 'sum',
+        new_aggregation: 'max',
       }
     );
   });
