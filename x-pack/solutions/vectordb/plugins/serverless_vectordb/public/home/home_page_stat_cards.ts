@@ -19,7 +19,7 @@ interface StatCardDeps {
 }
 
 const showsVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
-  application.capabilities.serverlessVectordb?.canMonitorAllIndices === true;
+  application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
 
 export const getDataCard = ({
   application,

@@ -81,7 +81,7 @@ describe('HomePage', () => {
         cloud,
         application: {
           navigateToApp,
-          capabilities: { serverlessVectordb: { canMonitorAllIndices } },
+          capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
         },
         docLinks: { links: { enterpriseSearch: { vectorDatabaseGetStarted: DOCS_URL } } },
       },
