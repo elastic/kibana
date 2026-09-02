@@ -50,6 +50,12 @@ apiTest.describe(
       return ruleId;
     };
 
+    // Every test waits for at least one rule execution, which does not fit in the default 60s
+    // budget on a loaded stack.
+    apiTest.beforeEach(() => {
+      apiTest.setTimeout(180_000);
+    });
+
     apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       await Promise.allSettled(

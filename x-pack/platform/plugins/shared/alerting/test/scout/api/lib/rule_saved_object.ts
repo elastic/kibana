@@ -62,7 +62,9 @@ export const waitForQuietRuleSavedObject = async (esClient: Client, ruleId: stri
         return settled;
       },
       {
-        timeout: 60_000,
+        // The write being waited out lands within a second or two of the execution finishing, so
+        // a modest budget is enough and leaves the rest of the test's time to the rotation.
+        timeout: 30_000,
         intervals: [1_000],
         message: `Rule ${ruleId} kept being written to`,
       }

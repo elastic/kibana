@@ -35,6 +35,12 @@ apiTest.describe(
   () => {
     const ruleIds: string[] = [];
 
+    // Waiting for a rule execution and then for the rule to stop being written to does not fit
+    // in the default 60s budget on a loaded stack.
+    apiTest.beforeEach(() => {
+      apiTest.setTimeout(180_000);
+    });
+
     apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       await Promise.allSettled(
