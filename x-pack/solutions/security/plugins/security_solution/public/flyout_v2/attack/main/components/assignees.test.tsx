@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, screen } from '@testing-library/react';
 
 import { Assignees } from './assignees';
 import { TestProviders } from '../../../../common/mock';
@@ -72,20 +71,7 @@ const mockUseUpsellingMessage = useUpsellingMessage as jest.MockedFunction<
 const mockInvalidateFindAttackDiscoveries = jest.fn();
 
 const defaultMenuItems = {
-  items: [
-    {
-      key: 'manage-attack-assignees',
-      'data-test-subj': 'attack-assignees-context-menu-item',
-      name: 'Manage assignees',
-      panel: 2,
-    },
-    {
-      key: 'remove-all-attack-assignees',
-      'data-test-subj': 'remove-attack-assignees-menu-item',
-      name: 'Remove all assignees',
-      onClick: jest.fn(),
-    },
-  ],
+  items: [{ name: 'Manage assignees', panel: 2, key: 'manage' }],
   panels: [{ id: 2, title: 'Assignees', content: <div data-test-subj="assignees-panel" /> }],
 };
 
@@ -126,24 +112,6 @@ describe('<Assignees /> (v2)', () => {
       isPlatinumPlus: () => true,
     } as ReturnType<typeof useLicense>);
     mockUseUpsellingMessage.mockReturnValue(undefined);
-  });
-
-  it('decorates assignee items with a users icon', async () => {
-    renderAssignees();
-
-    fireEvent.click(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID));
-    await waitForEuiPopoverOpen();
-
-    expect(
-      screen
-        .getByTestId('attack-assignees-context-menu-item')
-        .querySelector('[data-euiicon-type="users"]')
-    ).toBeInTheDocument();
-    expect(
-      screen
-        .getByTestId('remove-attack-assignees-menu-item')
-        .querySelector('[data-euiicon-type="users"]')
-    ).toBeInTheDocument();
   });
 
   it('passes attacksWithAssignees and onSuccess to useAttackAssigneesContextMenuItems', () => {

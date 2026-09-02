@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { EuiIconProps } from '@elastic/eui';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
@@ -20,26 +19,6 @@ import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detect
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
-
-export const ATTACK_STATUS_ACTION_IDS = {
-  markAsOpen: 'open-attack-status',
-  markAsAcknowledged: 'acknowledge-attack-status',
-  markAsClosed: 'closed-attack-status',
-} as const;
-
-/**
- * Status-dot colour map keyed on action item `key`.
- * `useBulkClosingReasonItems` replaces the close item's key with `'close-alert-with-reason'`
- * when closing-reason support is enabled (which it always is when `isEnabled` is true here).
- * The fallback key `ATTACK_STATUS_ACTION_IDS.markAsClosed` is also mapped to `subdued` for
- * the rare case where `isEnabled` is false and the item is pushed with the fallback key.
- */
-export const ATTACK_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
-  [ATTACK_STATUS_ACTION_IDS.markAsOpen]: 'danger',
-  [ATTACK_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
-  [ATTACK_STATUS_ACTION_IDS.markAsClosed]: 'subdued',
-  'close-alert-with-reason': 'subdued',
-};
 
 export interface UseBulkAttackWorkflowStatusItemsProps {
   /** Callback when workflow status is updated */
@@ -132,7 +111,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_OPEN) {
       items.push({
         label: i18n.BULK_ACTION_OPEN_SELECTED,
-        key: ATTACK_STATUS_ACTION_IDS.markAsOpen,
+        key: 'open-attack-status',
         'data-test-subj': 'open-attack-status',
         onClick: handleStatusUpdate(FILTER_OPEN as AlertWorkflowStatus),
         disableOnQuery: true,
@@ -143,7 +122,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_ACKNOWLEDGED) {
       items.push({
         label: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-        key: ATTACK_STATUS_ACTION_IDS.markAsAcknowledged,
+        key: 'acknowledge-attack-status',
         'data-test-subj': 'acknowledged-attack-status',
         onClick: handleStatusUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus),
         disableOnQuery: true,
@@ -154,7 +133,7 @@ export const useBulkAttackWorkflowStatusItems = ({
     if (currentStatus !== FILTER_CLOSED) {
       items.push({
         label: alertClosingReasonItem?.label ?? i18n.BULK_ACTION_CLOSE_SELECTED,
-        key: alertClosingReasonItem?.key ?? ATTACK_STATUS_ACTION_IDS.markAsClosed,
+        key: alertClosingReasonItem?.key ?? 'closed-attack-status',
         'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
         panel: alertClosingReasonItem?.panel,
         disableOnQuery: true,

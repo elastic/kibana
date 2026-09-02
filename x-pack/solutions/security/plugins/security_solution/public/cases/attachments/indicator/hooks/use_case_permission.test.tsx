@@ -50,43 +50,24 @@ describe('useCasePermission', () => {
 
   it('calls canUseCases scoped to the securitySolution owner', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, read: true })
+      getMockedServices({ createComment: true, update: true })
     );
     renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
     expect(mockCanUseCases).toHaveBeenCalledWith([APP_ID]);
   });
 
-  it('should return false if user has createComment and read permissions and indicator has a name', () => {
+  it('should return false if user has correct permissions and indicator has a name', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, read: true })
+      getMockedServices({ createComment: true, update: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
     expect(hookResult.result.current).toEqual(false);
   });
 
-  // create/update live inside the base `all` privilege — the gate only requires createComment + read.
-  it('should return false even when create and update are absent (sub-privilege role)', () => {
+  it(`should return true if user doesn't have correct permissions`, () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, read: true, create: false, update: false })
-    );
-
-    hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
-    expect(hookResult.result.current).toEqual(false);
-  });
-
-  it(`should return true if createComment is missing`, () => {
-    const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: false, read: true })
-    );
-
-    hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
-    expect(hookResult.result.current).toEqual(true);
-  });
-
-  it(`should return true if read is missing`, () => {
-    const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, read: false })
+      getMockedServices({ createComment: false, update: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
@@ -95,7 +76,7 @@ describe('useCasePermission', () => {
 
   it('should return true if indicator name is missing or empty', () => {
     const ProviderComponent = getProviderComponent(
-      getMockedServices({ createComment: true, read: true })
+      getMockedServices({ createComment: true, update: true })
     );
 
     hookResult = renderHook(() => useCaseDisabled(EMPTY_VALUE), { wrapper: ProviderComponent });
