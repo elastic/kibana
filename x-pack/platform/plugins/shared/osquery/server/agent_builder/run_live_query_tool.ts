@@ -78,20 +78,6 @@ export const runLiveQueryTool = (
       return unauthorizedToolResult('writeLiveQueries');
     }
 
-    // `writeLiveQueries` and `readLiveQueries` are independently grantable
-    // (mutually-exclusive sub-feature privilege group in
-    // `register_features.ts`). The GET results route
-    // (`get_live_query_results_route.ts`) guards result rows behind
-    // `readLiveQueries` alone — dispatching a query must not become a
-    // second path to the same rows for a caller who cannot read them via
-    // that route. Callers without `readLiveQueries` still get the
-    // action_id (dispatch succeeded) but never inline rows.
-    const canReadResults = await hasOsqueryToolPrivilege(
-      osqueryContext,
-      request,
-      'readLiveQueries'
-    );
-
     const packageService = osqueryContext.service.getPackageService();
     const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
       osqueryContext,
@@ -188,31 +174,6 @@ export const runLiveQueryTool = (
       }
 
       const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
-
-      // Caller can dispatch (`writeLiveQueries`) but cannot read results
-      // (`readLiveQueries`) — same parity gap `get_live_query_results`
-      // guards. Return the dispatch confirmation only; do not poll or
-      // expose rows this caller could not obtain via the GET route.
-      if (!canReadResults) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.other,
-              data: {
-                action_id: queryActionId,
-                parent_action_id: parentActionId,
-                agent_count: agentCount,
-                status: 'dispatched' as const,
-                query,
-                timeout_seconds: timeout ?? 60,
-                guidance:
-                  'Query dispatched. This caller lacks the readLiveQueries privilege, so results are not returned inline; a caller with readLiveQueries must retrieve them via osquery.get_live_query_results.',
-              },
-            },
-          ],
-        };
-      }
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const pollResult = await pollActionResponses(esClient, queryActionId, {

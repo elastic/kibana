@@ -10,6 +10,8 @@ import { isToolHandlerStandardReturn, type ToolHandlerReturn } from '@kbn/agent-
 import type { ToolResult } from '@kbn/agent-builder-common';
 import type { SchemaService } from '../lib/schema_service';
 import { runLiveQueryTool } from './run_live_query_tool';
+import { registerFeatures } from '../utils/register_features';
+import { PLUGIN_ID } from '../../common';
 
 jest.mock('../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
@@ -141,27 +143,38 @@ describe('runLiveQueryTool', () => {
     expect(pollActionResponses).toHaveBeenCalled();
   });
 
-  // Regression: writeLiveQueries and readLiveQueries are independently
-  // grantable (mutually-exclusive sub-feature privilege group). Dispatching
-  // must not become a second path to result rows that the GET results route
-  // (guarded by readLiveQueries alone) would deny this caller.
-  it('dispatches but withholds inline rows when the caller lacks readLiveQueries', async () => {
-    const { context } = buildContext(['osquery-writeLiveQueries']);
-    const tool = runLiveQueryTool(context, loggerMock.create(), schemaService());
+  // `writeLiveQueries` is grantable ONLY via the `live_queries_all` sub-feature
+  // privilege, which co-grants `readLiveQueries` (see `register_features.ts`:
+  // api: [osquery-writeLiveQueries, osquery-readLiveQueries]). The group is
+  // `mutually_exclusive`, so a role resolves to All or Read and never to
+  // write-without-read. `run_live_query` therefore returns rows inline under
+  // `writeLiveQueries` alone without widening past the GET results route.
+  //
+  // This test pins that co-grant. If a future privilege change lets
+  // `writeLiveQueries` be held without `readLiveQueries`, dispatching would
+  // become a second path to rows the GET route denies, and this assertion
+  // fails to force that decision back into review.
+  it('grants readLiveQueries alongside writeLiveQueries in the feature registration', () => {
+    const registerKibanaFeature = jest.fn();
+    registerFeatures({ registerKibanaFeature } as never);
 
-    const result = await tool.handler(
-      { query: 'SELECT pid FROM processes', agent_ids: ['agent-1'] },
-      { request: {}, spaceId: 'default' } as any
-    );
+    expect(registerKibanaFeature).toHaveBeenCalledTimes(1);
+    const feature = registerKibanaFeature.mock.calls[0][0];
 
-    const data = getResultData(result);
-    expect(data.action_id).toBe('query-action-1');
-    expect(data.status).toBe('dispatched');
-    expect(data.rows).toBeUndefined();
-    expect(data.row_count).toBeUndefined();
-    expect(data.guidance).toMatch(/readLiveQueries/);
-    // No point polling for rows this caller can never see inline.
-    expect(pollActionResponses).not.toHaveBeenCalled();
+    const privilegesGrantingWrite = feature.subFeatures
+      .flatMap((subFeature: { privilegeGroups: unknown[] }) => subFeature.privilegeGroups)
+      .flatMap((group: { groupType: string; privileges: Array<{ api?: string[] }> }) =>
+        group.privileges.map((privilege) => ({ groupType: group.groupType, privilege }))
+      )
+      .filter(({ privilege }: { privilege: { api?: string[] } }) =>
+        privilege.api?.includes(`${PLUGIN_ID}-writeLiveQueries`)
+      );
+
+    // Exactly one privilege grants write, and it co-grants read.
+    expect(privilegesGrantingWrite).toHaveLength(1);
+    expect(privilegesGrantingWrite[0].privilege.api).toContain(`${PLUGIN_ID}-readLiveQueries`);
+    // Mutually-exclusive: a role resolves to All or Read, never write-without-read.
+    expect(privilegesGrantingWrite[0].groupType).toBe('mutually_exclusive');
   });
 
   it('still denies the whole call when the caller lacks writeLiveQueries', async () => {
