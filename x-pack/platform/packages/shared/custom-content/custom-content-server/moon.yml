@@ -16,7 +16,13 @@ project:
   channel: ''
   owner: '@elastic/kibana-visualizations'
   sourceRoot: x-pack/platform/packages/shared/custom-content/custom-content-server
-dependsOn: []
+dependsOn:
+  - '@kbn/custom-content-common'
+  - '@kbn/agent-builder-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/logging'
+  - '@kbn/inference-common'
+  - '@kbn/esql-utils'
 tags:
   - shared-server
   - package
