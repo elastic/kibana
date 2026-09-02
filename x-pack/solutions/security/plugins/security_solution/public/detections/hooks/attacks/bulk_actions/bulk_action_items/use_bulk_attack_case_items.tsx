@@ -10,8 +10,8 @@ import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 
 import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
 import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
-import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useCanAttachToCase } from '../../../../../cases/attachments/hooks/use_can_attach_to_case';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
@@ -40,14 +40,10 @@ export const useBulkAttackCaseItems = ({
   telemetrySource,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
-    services: { cases, telemetry },
+    services: { telemetry },
   } = useKibana();
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
-  const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
-  const canUserCreateAndReadCases = useCallback(
-    () => canCreateAndReadCases,
-    [canCreateAndReadCases]
-  );
+  const canAttach = useCanAttachToCase();
+  const canUserCreateAndReadCases = useCallback(() => canAttach, [canAttach]);
 
   const { onAddToNewCase, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     canUserCreateAndReadCases,
@@ -118,7 +114,7 @@ export const useBulkAttackCaseItems = ({
 
   const items = useMemo<BulkActionsConfig[]>(
     () =>
-      canCreateAndReadCases
+      canAttach
         ? [
             {
               name: ADD_TO_EXISTING_CASE,
@@ -141,7 +137,7 @@ export const useBulkAttackCaseItems = ({
           ]
         : [],
     [
-      canCreateAndReadCases,
+      canAttach,
       isAddToExistingCaseDisabled,
       isAddToNewCaseDisabled,
       onAddToExistingCaseClick,

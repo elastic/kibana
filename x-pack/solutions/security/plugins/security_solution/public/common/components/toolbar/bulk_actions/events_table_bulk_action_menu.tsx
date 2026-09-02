@@ -8,41 +8,50 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { BULK_ADD_TO_CASE_ACTION_ID } from '../../../../cases/attachments/event/hooks/use_bulk_event_actions';
-import { BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
-import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import {
-  isActionMenuItem,
   withActionIcons,
+  withGroupSeparators,
   withStatusDotIcons,
 } from '../../../utils/action_menu_items';
-import { ALERT_STATUS_ICON_COLORS, type BulkActionMenuItem } from './use_bulk_action_items';
+import { ACTION_ICONS_BY_ID } from '../../../utils/action_icons';
+import {
+  ALERT_STATUS_ICON_COLORS,
+  type BulkActionGroups,
+  type BulkActionMenuItem,
+} from './use_bulk_action_items';
 
 interface EventsTableBulkActionMenuProps {
+  /** Flat item list — used only when `groups` is not provided. */
   items: BulkActionMenuItem[];
   panels: EuiContextMenuPanelDescriptor[];
+  /**
+   * Structured groups from `useBulkActionItems`. When present, the menu inserts
+   * group-separator items between non-empty groups instead of relying on key
+   * inspection to guess which items are status items.
+   */
+  groups?: BulkActionGroups;
 }
 
-const ACTION_ICONS_BY_ID = {
-  [BULK_ADD_TO_CASE_ACTION_ID]: 'briefcase',
-  [BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
-  [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
-} as const;
-
-const isStatusItem = (item: BulkActionMenuItem) =>
-  isActionMenuItem(item) &&
-  typeof item.key === 'string' &&
-  Object.prototype.hasOwnProperty.call(ALERT_STATUS_ICON_COLORS, item.key);
-
-export const EventsTableBulkActionMenu = ({ items, panels }: EventsTableBulkActionMenuProps) => {
+export const EventsTableBulkActionMenu = ({
+  items,
+  panels,
+  groups,
+}: EventsTableBulkActionMenuProps) => {
   const decoratedItems = useMemo(() => {
-    const statusItems = items.filter(isStatusItem);
-    const actionItems = items.filter((item) => !isStatusItem(item));
-    return withActionIcons(
-      [...withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS), ...actionItems],
-      ACTION_ICONS_BY_ID
-    );
-  }, [items]);
+    if (groups) {
+      const { statusItems, customItems, workflowItems } = groups;
+      return withActionIcons(
+        withGroupSeparators([
+          withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS),
+          customItems,
+          workflowItems,
+        ]),
+        ACTION_ICONS_BY_ID
+      );
+    }
+    // Fallback for callers that pass a flat `items` list without groups.
+    return withActionIcons(items, ACTION_ICONS_BY_ID);
+  }, [groups, items]);
 
   const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [{ id: 0, items: decoratedItems }, ...panels],

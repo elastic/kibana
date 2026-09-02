@@ -11,7 +11,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityToAttach } from '..';
 import { AddToCase } from '../components/add_to_case';
 import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
-import { useEntityCasePermissions } from './use_case_permission';
+import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
 
 /**
  * Builds the "add to case" menu items for an entity's flyout "Take action" popover.
@@ -30,7 +30,7 @@ export const useEntityCaseTakeActionItems = (
   const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
   const { cases } = useKibana().services;
   const attachmentsEnabled = cases.config.attachmentsEnabled;
-  const { canAddToCase } = useEntityCasePermissions();
+  const canAddToCase = useCanAttachToCase();
 
   return useCallback(
     (closePopover: () => void) => {

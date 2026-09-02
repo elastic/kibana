@@ -24,10 +24,11 @@ import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 
 // Same status items as the footer's take-action menu (both come from `useAlertsActions`).
-const STATUS_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
-  'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
-  'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
+// Keyed on item.key (the stable action id from ALERT_STATUS_ACTION_IDS / ALERT_CLOSE_WITH_REASON_ACTION_ID).
+const STATUS_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
+  open: FLYOUT_ACTION.STATUS_OPEN,
+  acknowledge: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  'close-alert-with-reason': FLYOUT_ACTION.STATUS_CLOSED,
 };
 
 export interface StatusPopoverButtonFieldInfo {
@@ -108,7 +109,7 @@ export const StatusPopoverButton = memo(
       () =>
         wrapActionTelemetry(
           withStatusDotIcons(rawActionItems, ALERT_STATUS_ICON_COLORS),
-          STATUS_ACTION_TEST_SUBJ,
+          STATUS_ACTIONS_BY_ID,
           reportActionClicked
         ),
       [rawActionItems, reportActionClicked]

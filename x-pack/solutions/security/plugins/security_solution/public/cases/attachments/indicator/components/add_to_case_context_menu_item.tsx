@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import type { IndicatorAttachmentMetadata } from '..';
@@ -20,10 +20,6 @@ interface IndicatorAddToCaseContextMenuItemProps {
   onClick: () => void;
   ['data-test-subj']?: string;
 }
-
-const ADD_TO_CASE = i18n.translate('xpack.securitySolution.threatIntelligence.addToCase', {
-  defaultMessage: 'Add to case',
-});
 
 export const IndicatorAddToCaseContextMenuItem = ({
   indicator,

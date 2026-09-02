@@ -11,30 +11,19 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import {
-  getActionMenuGroupSeparator,
   withActionIcons,
+  withGroupSeparators,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
+import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
 import { ALERT_STATUS_ICON_COLORS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
-import { ADD_TO_CASE_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-import { EVENT_FILTER_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
-import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
-import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
-import { INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { OSQUERY_ACTION_ID } from '../../../../detections/components/osquery/osquery_action_item';
-import { ALERT_TAG_ACTION_ID } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
-import { ISOLATE_HOST_ACTION_ID } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { RESPOND_ACTION_ID } from '../../../../common/components/endpoint/responder/from_alerts/use_responder_action_item';
 
-interface DocumentDetailsActionMenuProps {
+/** Subset of DocumentDetailsActionMenuProps needed to derive the visible groups. */
+export interface DocumentActionMenuGroupsProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
-  alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
-  alertTagPanels: EuiContextMenuPanelDescriptor[];
   documentWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   endpointResponseItems: EuiContextMenuPanelItemDescriptor[];
   eventFilterItems: EuiContextMenuPanelItemDescriptor[];
@@ -46,29 +35,70 @@ interface DocumentDetailsActionMenuProps {
   osqueryAvailable: boolean;
   osqueryItems: EuiContextMenuPanelItemDescriptor[];
   runAlertWorkflowItems: EuiContextMenuPanelItemDescriptor[];
-  runAlertWorkflowPanels: EuiContextMenuPanelDescriptor[];
-  runDocumentWorkflowPanels: EuiContextMenuPanelDescriptor[];
   showAlertActions: boolean;
   showEventFilter: boolean;
   statusItems: EuiContextMenuPanelItemDescriptor[];
-  statusPanels: EuiContextMenuPanelDescriptor[];
 }
 
-const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
-  [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
-  [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
-  [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
-  [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: 'filter',
-  [ALERT_TAG_ACTION_ID]: 'tag',
-  [EVENT_FILTER_ACTION_ID]: 'filter',
-  [INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
-  [ISOLATE_HOST_ACTION_ID]: 'lock',
-  [OSQUERY_ACTION_ID]: 'commandLine',
-  [RESPOND_ACTION_ID]: 'bolt',
-  [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
-  [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
-} as const;
+/**
+ * Returns the raw action groups for the document details flyout Take Action menu.
+ * Used by the menu component and the parent to guarantee `hasItems` and the rendered
+ * groups always agree.
+ */
+export const getDocumentActionGroups = ({
+  addToCaseItems,
+  alertAssigneeItems,
+  alertTagItems,
+  documentWorkflowItems,
+  endpointResponseItems,
+  eventFilterItems,
+  exceptionItems,
+  hostIsolationItems,
+  investigateInTimelineItems,
+  isAlert,
+  isRemoteDocument,
+  osqueryAvailable,
+  osqueryItems,
+  runAlertWorkflowItems,
+  showAlertActions,
+  showEventFilter,
+  statusItems,
+}: DocumentActionMenuGroupsProps): EuiContextMenuPanelItemDescriptor[][] => {
+  if (isRemoteDocument) {
+    return [investigateInTimelineItems];
+  }
+  const alertManagementItems = [
+    ...(showAlertActions ? alertAssigneeItems : []),
+    ...addToCaseItems,
+    ...(showAlertActions ? alertTagItems : []),
+  ];
+  const exceptionActionItems = showAlertActions
+    ? exceptionItems
+    : showEventFilter
+    ? eventFilterItems
+    : [];
+  const responseActionItems = [
+    ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
+    ...hostIsolationItems,
+    ...endpointResponseItems,
+    ...(osqueryAvailable ? osqueryItems : []),
+  ];
+  return [
+    showAlertActions ? statusItems : [],
+    alertManagementItems,
+    exceptionActionItems,
+    responseActionItems,
+    investigateInTimelineItems,
+  ];
+};
+
+interface DocumentDetailsActionMenuProps extends DocumentActionMenuGroupsProps {
+  alertAssigneePanels: EuiContextMenuPanelDescriptor[];
+  alertTagPanels: EuiContextMenuPanelDescriptor[];
+  runAlertWorkflowPanels: EuiContextMenuPanelDescriptor[];
+  runDocumentWorkflowPanels: EuiContextMenuPanelDescriptor[];
+  statusPanels: EuiContextMenuPanelDescriptor[];
+}
 
 export const DocumentDetailsActionMenu = ({
   addToCaseItems,
@@ -95,42 +125,42 @@ export const DocumentDetailsActionMenu = ({
   statusPanels,
 }: DocumentDetailsActionMenuProps) => {
   const items = useMemo(() => {
+    const rawGroups = getDocumentActionGroups({
+      addToCaseItems,
+      alertAssigneeItems,
+      alertTagItems,
+      documentWorkflowItems,
+      endpointResponseItems,
+      eventFilterItems,
+      exceptionItems,
+      hostIsolationItems,
+      investigateInTimelineItems,
+      isAlert,
+      isRemoteDocument,
+      osqueryAvailable,
+      osqueryItems,
+      runAlertWorkflowItems,
+      showAlertActions,
+      showEventFilter,
+      statusItems,
+    });
+
     if (isRemoteDocument) {
-      return withActionIcons(investigateInTimelineItems, ACTION_ICONS_BY_ID);
+      // Remote: only timeline items, no decorators needed beyond icon gap-fill
+      return withActionIcons(rawGroups[0] ?? investigateInTimelineItems, ACTION_ICONS_BY_ID);
     }
 
-    const alertManagementItems = [
-      ...(showAlertActions ? alertAssigneeItems : []),
-      ...addToCaseItems,
-      ...(showAlertActions ? alertTagItems : []),
-    ];
-    const exceptionActionItems = showAlertActions
-      ? exceptionItems
-      : showEventFilter
-      ? eventFilterItems
-      : [];
-    const responseActionItems = [
-      ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
-      ...hostIsolationItems,
-      ...endpointResponseItems,
-      ...(osqueryAvailable ? osqueryItems : []),
-    ];
-    const actionGroups = [
-      showAlertActions ? withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS) : [],
-      alertManagementItems,
-      exceptionActionItems,
-      responseActionItems,
-      investigateInTimelineItems,
-    ].filter((group) => group.length > 0);
-
-    const orderedItems = actionGroups.flatMap((group, index) => [
-      ...group,
-      ...(index < actionGroups.length - 1
-        ? [getActionMenuGroupSeparator(`separator-${index}`)]
-        : []),
-    ]);
-
-    return withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
+    const [statusRaw, alertMgmt, exceptions, response, timeline] = rawGroups;
+    return withActionIcons(
+      withGroupSeparators([
+        withStatusDotIcons(statusRaw, ALERT_STATUS_ICON_COLORS),
+        alertMgmt,
+        exceptions,
+        response,
+        timeline,
+      ]),
+      ACTION_ICONS_BY_ID
+    );
   }, [
     addToCaseItems,
     alertAssigneeItems,
@@ -169,11 +199,12 @@ export const DocumentDetailsActionMenu = ({
     ]
   );
 
+  const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [{ id: 0, items }, ...panels],
+    [items, panels]
+  );
+
   return (
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={[{ id: 0, items }, ...panels]}
-      data-test-subj="takeActionPanelMenu"
-    />
+    <EuiContextMenu initialPanelId={0} panels={menuPanels} data-test-subj="takeActionPanelMenu" />
   );
 };

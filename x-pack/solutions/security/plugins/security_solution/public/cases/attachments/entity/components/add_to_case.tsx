@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import type { EntityToAttach } from '..';
 import { generateEntityAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -19,14 +19,7 @@ export interface AddToCaseProps {
   ['data-test-subj']?: string;
 }
 
-export const ADD_TO_CASE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.cases.addToCase',
-  {
-    defaultMessage: 'Add to case',
-  }
-);
-
-export const useAddToCase = ({ entity, onClick }: AddToCaseProps) => {
+const useAddToCase = ({ entity, onClick }: AddToCaseProps) => {
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 

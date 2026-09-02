@@ -31,6 +31,13 @@ import { useRunDocumentWorkflowPanel } from '../../../../detections/components/a
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
 
+/** Structured groups returned alongside the flat `items` array. */
+export interface BulkActionGroups {
+  statusItems: BulkActionMenuItem[];
+  customItems: BulkActionMenuItem[];
+  workflowItems: BulkActionMenuItem[];
+}
+
 export const ALERT_STATUS_ACTION_IDS = {
   markAsAcknowledged: 'acknowledge',
   markAsOpen: 'open',
@@ -208,79 +215,84 @@ export const useBulkActionItems = ({
     closePopover: closePopover ?? noop,
   });
 
-  const items = useMemo<BulkActionMenuItem[]>(() => {
-    const actionItems: BulkActionMenuItem[] = [];
-    if (showAlertStatusActions && hasAlertsUpdate) {
-      if (currentStatus !== FILTER_OPEN) {
-        actionItems.push({
-          key: ALERT_STATUS_ACTION_IDS.markAsOpen,
-          'data-test-subj': 'open-alert-status',
-          onClick: () => {
-            closePopover?.();
-            onClickUpdate(FILTER_OPEN as AlertWorkflowStatus);
-          },
-          name: i18n.BULK_ACTION_OPEN_SELECTED,
-        });
-      }
-      if (currentStatus !== FILTER_ACKNOWLEDGED) {
-        actionItems.push({
-          key: ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
-          'data-test-subj': 'acknowledged-alert-status',
-          onClick: () => {
-            closePopover?.();
-            onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus);
-          },
-          name: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
-        });
-      }
-      if (currentStatus !== FILTER_CLOSED) {
-        actionItems.push({
-          key: alertClosingReasonItem?.key,
-          'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
-          name: alertClosingReasonItem?.label,
-          panel: alertClosingReasonItem?.panel,
-        });
-      }
+  const statusItems = useMemo<BulkActionMenuItem[]>(() => {
+    const result: BulkActionMenuItem[] = [];
+    if (!showAlertStatusActions || !hasAlertsUpdate) return result;
+    if (currentStatus !== FILTER_OPEN) {
+      result.push({
+        key: ALERT_STATUS_ACTION_IDS.markAsOpen,
+        'data-test-subj': 'open-alert-status',
+        onClick: () => {
+          closePopover?.();
+          onClickUpdate(FILTER_OPEN as AlertWorkflowStatus);
+        },
+        name: i18n.BULK_ACTION_OPEN_SELECTED,
+      });
     }
-
-    const additionalItems = customBulkActions
-      ? customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
-          const isDisabled = !!(query && action.disableOnQuery);
-          const onClick = () => {
-            closePopover?.();
-            action.onClick(eventIds);
-          };
-          acc.push({
-            key: action.key,
-            disabled: isDisabled,
-            'data-test-subj': action['data-test-subj'],
-            icon: action.icon,
-            toolTipContent: isDisabled ? action.disabledLabel : null,
-            onClick,
-            name: action.label,
-          });
-          return acc;
-        }, [])
-      : [];
-
-    return [
-      ...actionItems,
-      ...additionalItems,
-      ...(showRunWorkflowActions ? runWorkflowMenuItem : []),
-    ];
+    if (currentStatus !== FILTER_ACKNOWLEDGED) {
+      result.push({
+        key: ALERT_STATUS_ACTION_IDS.markAsAcknowledged,
+        'data-test-subj': 'acknowledged-alert-status',
+        onClick: () => {
+          closePopover?.();
+          onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus);
+        },
+        name: i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED,
+      });
+    }
+    if (currentStatus !== FILTER_CLOSED) {
+      result.push({
+        key: alertClosingReasonItem?.key,
+        'data-test-subj': alertClosingReasonItem?.['data-test-subj'],
+        name: alertClosingReasonItem?.label,
+        panel: alertClosingReasonItem?.panel,
+      });
+    }
+    return result;
   }, [
     showAlertStatusActions,
     hasAlertsUpdate,
-    customBulkActions,
-    runWorkflowMenuItem,
-    showRunWorkflowActions,
     currentStatus,
     closePopover,
     onClickUpdate,
     alertClosingReasonItem,
-    query,
-    eventIds,
   ]);
+
+  const customItems = useMemo<BulkActionMenuItem[]>(() => {
+    if (!customBulkActions) return [];
+    return customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
+      const isDisabled = !!(query && action.disableOnQuery);
+      const onClick = () => {
+        closePopover?.();
+        action.onClick(eventIds);
+      };
+      acc.push({
+        key: action.key,
+        disabled: isDisabled,
+        'data-test-subj': action['data-test-subj'],
+        icon: action.icon,
+        toolTipContent: isDisabled ? action.disabledLabel : null,
+        onClick,
+        name: action.label,
+      });
+      return acc;
+    }, []);
+  }, [customBulkActions, query, closePopover, eventIds]);
+
+  const workflowItems = useMemo<BulkActionMenuItem[]>(
+    () => (showRunWorkflowActions ? runWorkflowMenuItem : []),
+    [showRunWorkflowActions, runWorkflowMenuItem]
+  );
+
+  const items = useMemo<BulkActionMenuItem[]>(
+    () => [...statusItems, ...customItems, ...workflowItems],
+    [statusItems, customItems, workflowItems]
+  );
+
+  const groups = useMemo<BulkActionGroups>(
+    () => ({ statusItems, customItems, workflowItems }),
+    [statusItems, customItems, workflowItems]
+  );
 
   const panels = useMemo(
     () =>
@@ -300,5 +312,5 @@ export const useBulkActionItems = ({
     [alertClosingReasonPanels, runDocumentWorkflowPanel, showRunWorkflowActions]
   );
 
-  return useMemo(() => ({ items, panels }), [items, panels]);
+  return useMemo(() => ({ items, panels, groups }), [items, panels, groups]);
 };

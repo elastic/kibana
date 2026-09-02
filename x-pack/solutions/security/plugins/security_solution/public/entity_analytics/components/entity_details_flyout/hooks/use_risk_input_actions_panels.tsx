@@ -8,12 +8,13 @@
 import { EuiTextTruncate } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { i18n } from '@kbn/i18n';
-import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { useCanAttachToCase } from '../../../../cases/attachments/hooks/use_can_attach_to_case';
+import { withGroupSeparators } from '../../../../common/utils/action_menu_items';
 import { useRiskInputActions } from './use_risk_input_actions';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -29,18 +30,14 @@ export const RISK_INPUT_ACTION_IDS = {
 } as const;
 
 export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: () => void) => {
-  const { cases: casesService, telemetry } = useKibana().services;
+  const { telemetry } = useKibana().services;
   const { addToCase } = useRiskInputActions(inputs, closePopover);
   const { from, to } = useGlobalTime();
   const {
     timelinePrivileges: { read: canReadTimelines },
   } = useUserPrivileges();
   const isInSecurityApp = useIsInSecurityApp();
-  const userCasesPermissions = casesService?.helpers.canUseCases([SECURITY_SOLUTION_OWNER]);
-  const hasCasesPermissions =
-    userCasesPermissions?.read &&
-    userCasesPermissions.createComment &&
-    (userCasesPermissions.create || userCasesPermissions.update);
+  const hasCasesPermissions = useCanAttachToCase();
 
   const { sendBulkEventsToTimelineHandler } = useSendBulkToTimeline({
     to,
@@ -126,18 +123,9 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
           />
         ),
         id: 0,
-        items: [
-          ...timelineActions,
-          ...(timelineActions.length > 0 && hasCasesPermissions
-            ? [
-                {
-                  key: 'separator-before-cases',
-                  isSeparator: true as const,
-                  'data-test-subj': 'securityActionMenuGroupSeparator',
-                },
-              ]
-            : []),
-          ...(hasCasesPermissions
+        items: withGroupSeparators([
+          timelineActions,
+          hasCasesPermissions
             ? [
                 {
                   key: RISK_INPUT_ACTION_IDS.addToCase,
@@ -147,8 +135,8 @@ export const useRiskInputActionsPanels = (inputs: InputAlert[], closePopover: ()
                   onClick: addToCase,
                 },
               ]
-            : []),
-        ],
+            : [],
+        ]),
       },
     ];
   }, [addToCase, inputs, hasCasesPermissions, timelineActions]);

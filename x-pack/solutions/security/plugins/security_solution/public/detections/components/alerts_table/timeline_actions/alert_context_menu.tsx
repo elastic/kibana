@@ -54,7 +54,7 @@ import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
-import { AlertRowActionMenu } from './action_menu/alert_row_action_menu';
+import { AlertRowActionMenu, getAlertRowActionGroups } from './action_menu/alert_row_action_menu';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -264,25 +264,21 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   });
 
   const isAlertActionMenu = !isEvent && Boolean(ruleId);
-  const hasItems = (
-    isAlertActionMenu
-      ? [
-          addToCaseActionItems,
-          statusActionItems,
-          runWorkflowMenuItem,
-          alertTagsItems,
-          alertAssigneesItems,
-          exceptionActionItems,
-          agentId ? osqueryActionItems : [],
-          addToChatActionItems,
-        ]
-      : [
-          addToCaseActionItems,
-          runDocumentWorkflowMenuItem,
-          canCreateEndpointEventFilters ? eventFilterActionItems : [],
-          agentId ? osqueryActionItems : [],
-        ]
-  ).some((actionItems) => actionItems.length > 0);
+  const hasItems = getAlertRowActionGroups({
+    addToCaseItems: addToCaseActionItems,
+    addToChatItems: addToChatActionItems,
+    alertAssigneeItems: alertAssigneesItems,
+    alertTagItems: alertTagsItems,
+    canCreateEndpointEventFilters,
+    eventFilterItems: eventFilterActionItems,
+    exceptionItems: exceptionActionItems,
+    hasAgent: Boolean(agentId),
+    isAlert: isAlertActionMenu,
+    osqueryItems: osqueryActionItems,
+    runAlertWorkflowItems: runWorkflowMenuItem,
+    runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
+    statusItems: statusActionItems,
+  }).some((group) => group.length > 0);
 
   const panels = useMemo(
     () => [

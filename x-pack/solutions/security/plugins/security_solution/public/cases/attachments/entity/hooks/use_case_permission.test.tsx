@@ -5,56 +5,11 @@
  * 2.0.
  */
 
-import type { CasesPermissions } from '@kbn/cases-plugin/common';
-import { renderHook } from '@testing-library/react';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-import { noCasesPermissions } from '../../../../cases_test_utils';
-import { APP_ID } from '../../../../../common/constants';
-import { useEntityCasePermissions } from './use_case_permission';
-
-jest.mock('../../../../common/lib/kibana');
-
-describe('useEntityCasePermissions', () => {
-  const mockedUseKibana = mockUseKibana();
-  const mockCanUseCases = jest.fn();
-
-  beforeEach(() => {
-    mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;
-  });
-
-  const renderWithPermissions = (permissions: Partial<CasesPermissions>) => {
-    mockCanUseCases.mockReturnValue({ ...noCasesPermissions(), ...permissions });
-    return renderHook(() => useEntityCasePermissions()).result;
-  };
-
-  it('calls canUseCases scoped to the securitySolution owner', () => {
-    renderWithPermissions({});
-    expect(mockCanUseCases).toHaveBeenCalledWith([APP_ID]);
-  });
-
-  it('allows adding to a case when the user can update existing cases', () => {
-    const { current } = renderWithPermissions({ update: true, createComment: true });
-    expect(current.canAddToCase).toEqual(true);
-  });
-
-  it('allows adding to a case when the user can create cases', () => {
-    const { current } = renderWithPermissions({ create: true, createComment: true });
-    expect(current.canAddToCase).toEqual(true);
-  });
-
-  it('does not allow adding to a case without createComment', () => {
-    const { current } = renderWithPermissions({
-      create: true,
-      createComment: false,
-      update: true,
-    });
-    expect(current.canAddToCase).toEqual(false);
-  });
-
-  it('does not allow adding to a case without create or update', () => {
-    const { current } = renderWithPermissions({});
-    expect(current).toEqual({
-      canAddToCase: false,
-    });
-  });
+/**
+ * The entity use_case_permission module is now a thin re-export of the shared
+ * `useCanAttachToCase` hook. Tests live with the implementation:
+ * x-pack/solutions/security/plugins/security_solution/public/cases/attachments/hooks/use_can_attach_to_case.test.ts
+ */
+it('see use_can_attach_to_case.test.ts for coverage', () => {
+  expect(true).toBe(true);
 });

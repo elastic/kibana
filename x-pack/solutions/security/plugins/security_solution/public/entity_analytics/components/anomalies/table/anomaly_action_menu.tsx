@@ -6,6 +6,7 @@
  */
 
 import { EuiContextMenu } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { AnomalyTableRowAction } from '../../../api/hooks/use_anomaly_table_row_actions';
 import { ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX } from '../test_ids';
@@ -27,5 +28,7 @@ export const AnomalyActionMenu = ({ actions }: AnomalyActionMenuProps) => {
     [actions]
   );
 
-  return <EuiContextMenu initialPanelId={0} panels={[{ id: 0, items }]} />;
+  const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => [{ id: 0, items }], [items]);
+
+  return <EuiContextMenu initialPanelId={0} panels={menuPanels} />;
 };

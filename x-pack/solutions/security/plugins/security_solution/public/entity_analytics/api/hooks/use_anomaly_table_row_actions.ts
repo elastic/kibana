@@ -23,7 +23,7 @@ import {
   ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_SMV,
 } from '../../components/anomalies/translations';
 
-export const ANOMALY_ACTION_IDS = {
+const ANOMALY_ACTION_IDS = {
   addToTimeline: 'add-to-timeline',
   viewInDiscover: 'view-in-discover',
   viewInSingleMetricViewer: 'view-in-single-metric-viewer',
