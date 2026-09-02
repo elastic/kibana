@@ -1481,6 +1481,20 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
+  it.each<InvestigationStatus>(['completed', 'failed', 'cancelled'])(
+    'throws InvestigationConflictError when the record is already %s',
+    async (status) => {
+      repository.get.mockResolvedValue(makeRecord({ status }, { id: EXECUTION_ID }));
+
+      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+        InvestigationConflictError
+      );
+      expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+    }
+  );
+
   it('transitions a pending record to running, stamping it from the execution document', async () => {
     repository.get.mockResolvedValue(
       makeRecord(

@@ -141,7 +141,6 @@ describe('SavedObjectInvestigationRepository', () => {
         sortOrder: 'asc',
         page: 2,
         perPage: 10,
-        fields: ['status', 'summary'],
       });
 
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
@@ -157,7 +156,6 @@ describe('SavedObjectInvestigationRepository', () => {
         sortOrder: 'asc',
         page: 2,
         perPage: 10,
-        fields: ['status', 'summary'],
       });
       expect(result).toEqual({
         results: [{ id: 'inv-1', version: 'WzEsMV0=', ...attributes }],
@@ -185,7 +183,7 @@ describe('SavedObjectInvestigationRepository', () => {
       );
     });
 
-    it('omits the filter and fields when none are given', async () => {
+    it('omits the filter when none are given', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.find.mockResolvedValue({
         saved_objects: [],
