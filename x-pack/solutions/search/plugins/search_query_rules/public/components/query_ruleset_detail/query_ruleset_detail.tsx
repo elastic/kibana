@@ -233,7 +233,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                 label: i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
                   defaultMessage: 'Test in Console',
                 }),
-                iconType: 'console' as const,
+                iconType: 'commandLine' as const,
                 run: runInConsole,
                 disableButton: createMode,
                 testId: 'queryRulesetDetailTestInConsoleButton',

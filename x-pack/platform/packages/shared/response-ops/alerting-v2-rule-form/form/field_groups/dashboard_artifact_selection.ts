@@ -7,8 +7,9 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { getDashboardId } from '../utils/artifact_data';
-import { resolveArtifactId, type RuleArtifactPayload } from '../utils/artifact_mappers';
+import type { RuleArtifactPayload } from '../utils/artifact_mappers';
 import type { MissingDashboard } from './search_related_dashboards';
 
 /**

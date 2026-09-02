@@ -17,7 +17,13 @@ export const strings = {
   },
   get projectPickerButtonAriaLabel() {
     return i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
-      defaultMessage: 'Cross-project search project picker',
+      defaultMessage: 'Cross-project search scope selector',
+    });
+  },
+  get projectPickerButtonDisabledAriaLabel() {
+    return i18n.translate('cpsUtils.projectPicker.projectPickerButtonDisabledLabel', {
+      defaultMessage:
+        'Cross-project search is not available here. Unless otherwise informed, your project scope will be limited to this project alone.',
     });
   },
   getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
@@ -41,14 +47,23 @@ export const strings = {
     i18n.translate('cpsUtils.projectPicker.thisProjectLabel', {
       defaultMessage: 'This project',
     }),
-  getProjectPickerTourTitle: () =>
+  getProjectPickerTourTitle: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('cpsUtils.projectPicker.tour.title', {
-      defaultMessage: 'Cross-project search (CPS) is now available',
+      defaultMessage:
+        "{isAllProjects, select, true {You're searching all projects} other {You're searching {numberOfProjects} of {totalProjects, plural, one {# project} other {# projects}}}}",
+      values: {
+        isAllProjects: String(numberOfProjects === totalProjects),
+        numberOfProjects,
+        totalProjects,
+      },
     }),
-  getProjectPickerTourContent: () =>
+  getProjectPickerTourContent: (linkedProjectsCount: number) =>
     i18n.translate('cpsUtils.projectPicker.tour.content', {
       defaultMessage:
-        'Your searches now include data from this project and all linked projects by default. Use this selector to toggle your search scope between all projects or just this one. You can change the default scope in your space settings.',
+        "Based on this space's defaults, your results include data from this project and {linkedProjectsCount, plural, one {# other} other {# others}}. Use this button to change which projects are included.",
+      values: {
+        linkedProjectsCount,
+      },
     }),
   getProjectPickerTourCloseButton: () =>
     i18n.translate('cpsUtils.projectPicker.tour.closeButton', {

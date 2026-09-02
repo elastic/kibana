@@ -26,11 +26,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import {
   getDashboardId,
   mapArtifacts,
   partitionArtifactsByDashboardType,
-  resolveArtifactId,
   resolveDashboardsByIds,
   searchRelatedDashboard,
   type Dashboard,
@@ -38,7 +38,7 @@ import {
 } from '@kbn/alerting-v2-rule-form';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-const SELECTABLE_LIST_MAX_HEIGHT = 320;
+export const SELECTABLE_LIST_MAX_HEIGHT = 320;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export interface ManageDashboardsPopoverProps {
@@ -312,7 +312,12 @@ export const ManageDashboardsPopover = ({
       isOpen={isOpen}
       closePopover={onClose}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      panelProps={{
+        css: css`
+          overflow: hidden;
+        `,
+      }}
+      anchorPosition="rightCenter"
       ownFocus
       initialFocus="[data-test-subj='ruleDashboardArtifactsSearch']"
       aria-labelledby={popoverTitleId}
@@ -373,14 +378,18 @@ export const ManageDashboardsPopover = ({
               paddingSize: 's',
               isVirtualized: false,
               rowHeight: 36,
-              style: { maxHeight: SELECTABLE_LIST_MAX_HEIGHT },
             }}
             data-test-subj="ruleDashboardArtifactsSelectable"
           >
             {(list, search) => (
               <>
                 <div css={searchPaddingStyles}>{search}</div>
-                {list}
+                <div
+                  style={{ maxHeight: SELECTABLE_LIST_MAX_HEIGHT, overflowY: 'auto' }}
+                  data-test-subj="ruleDashboardArtifactsSelectableList"
+                >
+                  {list}
+                </div>
               </>
             )}
           </EuiSelectable>

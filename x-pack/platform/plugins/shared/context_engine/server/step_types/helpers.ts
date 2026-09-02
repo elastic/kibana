@@ -6,12 +6,16 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { KiVerificationSummary } from '../ki_verification';
+import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
+import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
@@ -20,7 +24,112 @@ export interface KiStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
 }
+
+/** The AI index attributes KI steps need: the write target and whether the index is managed. */
+export interface ResolvedAiIndex {
+  dest: AiIndexDest;
+  managed: boolean;
+}
+
+const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
+  create: 'created in',
+  update: 'updated in',
+  delete: 'deleted from',
+};
+
+/**
+ * Runs a KI write step body, reporting the outcome (success, failure, or
+ * aborted) to EBT and the logs. The body receives a callback to record the
+ * AI index's managed state once resolved, and returns the step output whose
+ * `id` is the KI id.
+ */
+export const withKiWriteTelemetry = async <Output extends { id: string }>({
+  action,
+  aiIndexId,
+  analyticsService,
+  logger,
+  run,
+}: {
+  action: KiWriteAction;
+  aiIndexId: string;
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+  run: (setManaged: (managed: boolean) => void) => Promise<{ output: Output }>;
+}): Promise<{ output: Output }> => {
+  let managed: boolean | undefined;
+  try {
+    const result = await run((resolvedManaged) => {
+      managed = resolvedManaged;
+    });
+    analyticsService.reportKiWrite({ action, aiIndexId, managed, outcome: 'success' });
+    logger.debug(
+      `KI '${result.output.id}' ${KI_WRITE_SUCCESS_VERB[action]} AI index '${aiIndexId}'`
+    );
+    return result;
+  } catch (error) {
+    // A cancelled run is not a write failure; report it as aborted.
+    const aborted = isAbortError(error);
+    const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+    analyticsService.reportKiWrite({
+      action,
+      aiIndexId,
+      managed,
+      outcome: aborted ? 'aborted' : 'failure',
+      errorType,
+    });
+    logger.debug(
+      aborted
+        ? `KI ${action} aborted in AI index '${aiIndexId}'`
+        : `KI ${action} failed in AI index '${aiIndexId}': ${errorType}`
+    );
+    throw error;
+  }
+};
+
+/**
+ * Runs the verify step body, reporting the outcome (success, failure, or
+ * aborted) to EBT and the logs.
+ */
+export const withKiVerificationTelemetry = async ({
+  analyticsService,
+  logger,
+  run,
+}: {
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+  run: () => Promise<KiVerificationSummary>;
+}): Promise<KiVerificationSummary> => {
+  try {
+    const summary = await run();
+    const failures = summary.results.filter((result) => !result.passed);
+    analyticsService.reportKiVerification({
+      outcome: 'success',
+      passed: summary.passed,
+      verifiersRun: summary.results.length,
+      failedVerifierIds: failures.map(({ verifier }) => verifier),
+    });
+    if (summary.passed) {
+      logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);
+    } else {
+      logger.debug(
+        `KI verification failed: ${failures.map(({ verifier }) => verifier).join(', ')}`
+      );
+    }
+    return summary;
+  } catch (error) {
+    const aborted = isAbortError(error);
+    const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+    analyticsService.reportKiVerification({
+      outcome: aborted ? 'aborted' : 'failure',
+      errorType,
+    });
+    logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);
+    throw error;
+  }
+};
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */
 export const assertKiWritePrivilege = async (
@@ -49,19 +158,18 @@ export const assertContextEngineEnabled = async (
 };
 
 /** Resolves an AI index id to its backing store, failing the step when the id is unknown. */
-export const resolveAiIndexDest = async (
+export const resolveAiIndex = async (
   getAiIndexService: () => AiIndexService,
   aiIndexId: string
-): Promise<AiIndexDest> => {
+): Promise<ResolvedAiIndex> => {
   try {
-    const { dest } = await getAiIndexService().get(aiIndexId);
-    return dest;
+    const { dest, managed } = await getAiIndexService().get(aiIndexId);
+    return { dest, managed };
   } catch (error) {
     if (error instanceof AiIndexNotFoundError) {
       throw new ExecutionError({
         type: 'NotFoundError',
         message: `AI index '${aiIndexId}' not found`,
-        details: { aiIndexId },
       });
     }
     throw error;
@@ -73,15 +181,15 @@ export const resolveAiIndexDest = async (
  * when it does not exist yet with the index dest derived from the id (the UI
  * create flow's default).
  */
-export const resolveOrCreateAiIndexDest = async (
+export const resolveOrCreateAiIndex = async (
   getAiIndexService: () => AiIndexService,
   aiIndexId: string
-): Promise<AiIndexDest> => {
+): Promise<ResolvedAiIndex> => {
   const service = getAiIndexService();
 
   try {
-    const { dest } = await service.get(aiIndexId);
-    return dest;
+    const { dest, managed } = await service.get(aiIndexId);
+    return { dest, managed };
   } catch (error) {
     if (!(error instanceof AiIndexNotFoundError)) {
       throw error;
@@ -93,7 +201,6 @@ export const resolveOrCreateAiIndexDest = async (
     throw new ExecutionError({
       type: 'ValidationError',
       message: `Cannot create AI index '${aiIndexId}': ${idError}`,
-      details: { aiIndexId },
     });
   }
 
@@ -102,13 +209,13 @@ export const resolveOrCreateAiIndexDest = async (
   } catch (error) {
     if (error instanceof AiIndexAlreadyExistsError) {
       // Lost a concurrent creation race; the AI index exists now.
-      const { dest: existingDest } = await service.get(aiIndexId);
-      return existingDest;
+      const { dest: existingDest, managed } = await service.get(aiIndexId);
+      return { dest: existingDest, managed };
     }
     throw error;
   }
 
-  return dest;
+  return { dest, managed: false };
 };
 
 /** Fails the step when the dest is an index pattern, which cannot be a write target. */
@@ -116,8 +223,7 @@ export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void =
   if (isIndexPattern(dest.value)) {
     throw new ExecutionError({
       type: 'ValidationError',
-      message: `Cannot create a KI in AI index '${aiIndexId}': dest '${dest.value}' is an index pattern, not a single write target`,
-      details: { aiIndexId, destValue: dest.value },
+      message: `Cannot create a KI in AI index '${aiIndexId}': its dest is an index pattern, not a single write target`,
     });
   }
 };
@@ -127,7 +233,6 @@ export const kiNotFoundError = (aiIndexId: string, kiId: string): ExecutionError
   new ExecutionError({
     type: 'NotFoundError',
     message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
-    details: { aiIndexId, kiId },
   });
 
 /**
@@ -166,10 +271,8 @@ export const findKiBackingIndex = async ({
     const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
     throw new ExecutionError({
       type: 'ValidationError',
-      message: `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices (${indices.join(
-        ', '
-      )})`,
-      details: { aiIndexId, kiId, indices },
+      message: `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices`,
+      details: { indices },
     });
   }
 

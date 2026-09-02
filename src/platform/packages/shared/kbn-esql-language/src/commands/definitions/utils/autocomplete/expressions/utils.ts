@@ -10,12 +10,17 @@
 import {
   isBinaryExpression,
   isFunctionExpression,
+  isList,
   isLiteral,
   isUnaryExpression,
 } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
+import type { ESQLAstItem, ESQLFunction, ESQLList, ESQLSingleAstItem } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { ExpressionContext, FunctionParameterContext } from './types';
+import type {
+  ExpressionContext,
+  FunctionParameterContext,
+  ParenthesizedExpressionPosition,
+} from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../../functions';
 import { getBinaryExpressionOperand, resolveArgumentTypes } from '../../expressions';
@@ -31,6 +36,11 @@ import type { PreferredExpressionType } from './types';
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
+export const isTupleExpression = (
+  expression: ESQLSingleAstItem | undefined
+): expression is ESQLList =>
+  Boolean(expression && isList(expression) && expression.subtype === 'tuple');
+
 /** Checks whether the source text wraps an AST expression in closed parentheses. */
 export const isExpressionParenthesized = (
   innerText: string,
@@ -44,6 +54,19 @@ export const isExpressionParenthesized = (
   const afterExpression = innerText.slice(expressionRoot.location.max + 1).trimStart();
 
   return beforeExpression.endsWith('(') && afterExpression.startsWith(')');
+};
+
+/** Returns the cursor position relative to parentheses wrapping the expression. */
+export const getParenthesizedExpressionPosition = (
+  query: string,
+  innerText: string,
+  expressionRoot?: ESQLSingleAstItem
+): ParenthesizedExpressionPosition | undefined => {
+  if (!isExpressionParenthesized(query, expressionRoot)) {
+    return;
+  }
+
+  return isExpressionParenthesized(innerText, expressionRoot) ? 'after' : 'inside';
 };
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */

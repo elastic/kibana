@@ -31,8 +31,9 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAlertingAssets } from '../../../../../hooks';
 
-import { AssetsAccordion } from '../assets/assets_accordion';
 import { DeferredAssetsAccordion } from '../assets/deferred_assets_accordion';
+
+import { AlertingAssetsAccordion } from './alerting_assets_accordion';
 
 import { ALERTING_ASSET_TYPES } from '.';
 
@@ -194,7 +195,7 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
 
         return (
           <Fragment key={assetType}>
-            <AssetsAccordion savedObjects={sortedAssets} type={assetType} key={assetType} />
+            <AlertingAssetsAccordion savedObjects={sortedAssets} type={assetType} key={assetType} />
             <EuiSpacer size="l" />
           </Fragment>
         );

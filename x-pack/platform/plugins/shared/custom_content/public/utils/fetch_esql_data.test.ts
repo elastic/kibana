@@ -27,6 +27,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { fetchEsqlData } from './fetch_esql_data';
 
 const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
@@ -204,6 +205,39 @@ describe('fetchEsqlData', () => {
 
       expect(mockGetESQLResults).toHaveBeenCalledWith(
         expect.objectContaining({ filter: expect.objectContaining({ bool: expect.any(Object) }) })
+      );
+    });
+  });
+
+  describe('esqlVariables passthrough', () => {
+    it('omits variables from getESQLResults when not provided', async () => {
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
+
+      const call = mockGetESQLResults.mock.calls[0][0];
+      expect(call).not.toHaveProperty('variables');
+    });
+
+    it('omits variables from getESQLResults when an empty array is provided', async () => {
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        esqlVariables: [],
+      });
+
+      const call = mockGetESQLResults.mock.calls[0][0];
+      expect(call).not.toHaveProperty('variables');
+    });
+
+    it('forwards esqlVariables to getESQLResults as variables when provided', async () => {
+      const esqlVariables = [
+        { key: '?threshold', value: 100, type: ESQLVariableType.VALUES },
+        { key: '?env', value: 'production', type: ESQLVariableType.VALUES },
+      ];
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        esqlVariables,
+      });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ variables: esqlVariables })
       );
     });
   });

@@ -28,6 +28,7 @@ interface ProjectPickerListClickActionContext {
 interface ProjectPickerListContextMenuItemProps
   extends Pick<EuiContextMenuItemProps, 'icon' | 'external'> {
   label: string;
+  testSubj: string;
   onClick: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
   isDisabled: (props: ProjectPickerListClickActionContext) => boolean;
 }
@@ -46,6 +47,7 @@ export const getProjectPickerListContextMenuConfig = (
       label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
         defaultMessage: 'Include only this project',
       }),
+      testSubj: 'projectPickerIncludeOnlyThisProjectMenuItem',
       onClick: (props) => {
         actions.includeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
       },
@@ -65,6 +67,7 @@ export const getProjectPickerListContextMenuConfig = (
       label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
         defaultMessage: 'Exclude only this project',
       }),
+      testSubj: 'projectPickerExcludeOnlyThisProjectMenuItem',
       onClick: (props) => {
         actions.excludeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
       },
@@ -111,6 +114,7 @@ export function ProjectPickerListItemContextMenu({
         items={projectPickerListContextMenuConfig.map((item) => (
           <EuiContextMenuItem
             key={item.label}
+            data-test-subj={item.testSubj}
             onClick={item.onClick.bind(null, { activeProject })}
             disabled={item.isDisabled({
               activeProject,
