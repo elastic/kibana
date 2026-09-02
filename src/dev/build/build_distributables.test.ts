@@ -24,10 +24,6 @@ jest.mock('./lib/version_info', () => ({
 
 jest.mock('./tasks', () => {
   const actual = jest.requireActual('./tasks') as Record<string, unknown>;
-  const noopTaskRun = jest.fn().mockResolvedValue(undefined);
-  const mockRspackBundleTaskRun = jest.fn().mockResolvedValue(undefined);
-  const mockLegacyBundleTaskRun = jest.fn().mockResolvedValue(undefined);
-
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(actual)) {
@@ -38,13 +34,7 @@ jest.mock('./tasks', () => {
       'run' in value &&
       typeof (value as { run: unknown }).run === 'function'
     ) {
-      if (key === 'BuildRspackBundles') {
-        result[key] = { ...(value as object), run: mockRspackBundleTaskRun };
-      } else if (key === 'BuildKibanaPlatformPlugins') {
-        result[key] = { ...(value as object), run: mockLegacyBundleTaskRun };
-      } else {
-        result[key] = { ...(value as object), run: noopTaskRun };
-      }
+      result[key] = { ...(value as object), run: jest.fn().mockResolvedValue(undefined) };
     } else {
       result[key] = value;
     }
@@ -104,8 +94,7 @@ describe('buildDistributables KBN_USE_RSPACK gate', () => {
   });
 
   beforeEach(() => {
-    mockRspackBundleTaskRun.mockClear();
-    mockLegacyBundleTaskRun.mockClear();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -124,6 +113,32 @@ describe('buildDistributables KBN_USE_RSPACK gate', () => {
     expect(mockRspackBundleTaskRun).toHaveBeenCalledTimes(1);
     expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
     expect(Tasks.BuildRspackBundles.run).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds package webpack bundles while preparing Node', async () => {
+    const download = Promise.withResolvers<void>();
+    const webpackStarted = Promise.withResolvers<void>();
+    jest.mocked(Tasks.DownloadNodeBuilds.run).mockReturnValueOnce(download.promise);
+    jest.mocked(Tasks.BuildPackageWebpackBundles.run).mockImplementationOnce(async () => {
+      webpackStarted.resolve();
+    });
+
+    const buildPromise = buildDistributables(log, {
+      ...minimalGenericFoldersOptions,
+      initialize: true,
+      downloadFreshNode: true,
+    });
+    await webpackStarted.promise;
+
+    expect(Tasks.DownloadNodeBuilds.run).toHaveBeenCalledTimes(1);
+    expect(Tasks.ExtractNodeBuilds.run).not.toHaveBeenCalled();
+    expect(Tasks.BuildPackages.run).not.toHaveBeenCalled();
+
+    download.resolve();
+    await buildPromise;
+
+    expect(Tasks.ExtractNodeBuilds.run).toHaveBeenCalledTimes(1);
+    expect(Tasks.BuildPackages.run).toHaveBeenCalledTimes(1);
   });
 
   it('runs BuildRspackBundles by default when KBN_USE_RSPACK is not set', async () => {

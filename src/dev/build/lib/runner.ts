@@ -8,7 +8,8 @@
  */
 
 import chalk from 'chalk';
-import type { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { Message } from '@kbn/tooling-log';
 
 import { isErrorLogged, markErrorLogged } from './errors';
 import { Build } from './build';
@@ -18,6 +19,12 @@ interface Options {
   config: Config;
   log: ToolingLog;
   bufferLogs?: boolean;
+}
+
+interface ParallelTaskGroupsOptions {
+  config: Config;
+  log: ToolingLog;
+  taskGroups: ReadonlyArray<ReadonlyArray<Task | GlobalTask>>;
 }
 
 export interface GlobalTask {
@@ -99,4 +106,52 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
       }
     }
   };
+}
+
+function createBufferedLog(log: ToolingLog, messages: Message[]) {
+  const bufferedLog = new ToolingLog();
+  bufferedLog.setWriters([
+    {
+      write(message) {
+        messages.push(message);
+        return true;
+      },
+    },
+  ]);
+  bufferedLog.indent(log.getIndent());
+  return bufferedLog;
+}
+
+/** Runs task groups concurrently. Put the longest group first: its logs stream, the rest are flushed after. */
+export async function runTaskGroupsInParallel({
+  config,
+  log,
+  taskGroups,
+}: ParallelTaskGroupsOptions): Promise<void> {
+  const buffers = taskGroups.map((): Message[] => []);
+  const logs = taskGroups.map((_, i) => (i === 0 ? log : createBufferedLog(log, buffers[i])));
+  const results = await Promise.allSettled(
+    taskGroups.map(async (tasks, i) => {
+      const run = createRunner({ config, log: logs[i] });
+      for (const task of tasks) {
+        await run(task);
+      }
+    })
+  );
+
+  for (const message of buffers.flat()) {
+    for (const writer of log.getWriters()) {
+      writer.write(message);
+    }
+  }
+
+  const errors = results
+    .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+    .map(({ reason }) => reason);
+  if (errors.length === 1) {
+    throw errors[0];
+  }
+  if (errors.length > 1) {
+    throw markErrorLogged(new AggregateError(errors, `${errors.length} task groups failed`));
+  }
 }

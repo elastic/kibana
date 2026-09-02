@@ -19,9 +19,6 @@ import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { StdioOption } from 'execa';
-import execa from 'execa';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
@@ -112,13 +109,6 @@ export const BuildPackages: Task = {
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
-
-    log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles({
-      quiet: false,
-      dist: true,
-      noCache: true,
-    });
 
     await asyncForEachWithLimit(packages, cpus().length, async (pkg) => {
       const allPaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
@@ -337,7 +327,7 @@ export const BuildPackages: Task = {
           await fleetBuildTasks(pkgDistPath, log, config);
         }
 
-        log.info(`Copied`, pkg.manifest.id, 'into build');
+        log.debug('Copied', pkg.manifest.id, 'into build');
       } catch (error) {
         error.message = `Failed to copy ${pkg.manifest.id} into the build: ${error.message}`;
         throw error;
@@ -345,24 +335,3 @@ export const BuildPackages: Task = {
     });
   },
 };
-
-export async function buildWebpackBundles({
-  quiet,
-  dist,
-  noCache,
-}: {
-  quiet: boolean;
-  dist: boolean;
-  noCache?: boolean;
-}) {
-  const options = [
-    quiet ? ['--quiet'] : [],
-    dist ? ['--dist'] : [],
-    noCache ? ['--no-cache'] : [],
-  ].flat();
-  const stdio: StdioOption[] = quiet
-    ? ['ignore', 'pipe', 'pipe']
-    : ['inherit', 'inherit', 'inherit'];
-
-  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
-}
