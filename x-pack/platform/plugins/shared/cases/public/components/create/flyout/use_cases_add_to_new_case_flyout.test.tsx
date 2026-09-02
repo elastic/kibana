@@ -34,9 +34,8 @@ describe('use cases add to new case flyout hook', () => {
             basePath: '/jest',
             dispatch,
             features: {
-              alerts: { enabled: true, isExperimental: false, read: true, all: true },
+              alerts: { read: true, all: true },
               metrics: [],
-              events: { enabled: true },
             },
             releasePhase: 'ga',
           }}

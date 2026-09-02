@@ -87,13 +87,30 @@ export {
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
   TriggerSchema,
+  getCustomTriggerZodSchema,
   getTriggerSchema,
+  toCustomTriggerSchemaConfigs,
   TriggerTypes,
   WORKFLOW_EVENTS_VALUES_SET,
   WorkflowEventsSchema,
+  type CustomTrigger,
+  type CustomTriggerOn,
+  type CustomTriggerSchemaConfig,
+  type CustomTriggerSchemaInput,
   type TriggerType,
   type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+export {
+  isWorkflowValidationRuleId,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  WORKFLOW_VALIDATION_RULES,
+} from './validation/rules';
+export type {
+  WorkflowValidationRuleId,
+  WorkflowValidationRuleOwner,
+  WorkflowValidationRules,
+} from './validation/rules';

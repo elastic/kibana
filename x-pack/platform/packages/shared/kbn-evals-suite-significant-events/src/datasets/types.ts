@@ -41,6 +41,7 @@ export interface KIQueryGenerationScenario {
     expected_categories: string[];
     expected_ground_truth: string;
     expect_stats?: boolean;
+    expect_queries?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;

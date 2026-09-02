@@ -23,7 +23,7 @@ export type {
   ConversationTemplateUIDefinition,
   ConversationTemplateServiceStartContract,
 } from './templates';
-export { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export { TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
@@ -43,6 +43,7 @@ export type {
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
+  OpenConversationDetailsOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';

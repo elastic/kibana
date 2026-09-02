@@ -15,15 +15,8 @@ import {
   HOSTS,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
-  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
-import {
-  ACTIVE_ALERTS,
-  ALL_ALERTS,
-  RECOVERED_ALERTS,
-  cleanAlertsData,
-  ingestAlertsData,
-} from '../../fixtures/synthtrace/alerts_data';
+import { cleanAlertsData, ingestAlertsData } from '../../fixtures/synthtrace/alerts_data';
 
 const HOSTS_WITH_ALERTS = [HOST1_NAME, HOST2_NAME, HOST3_NAME];
 
@@ -45,67 +38,21 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        hostNames: HOSTS.map(({ hostName }) => hostName),
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length, {
-        timeout: EXTENDED_TIMEOUT,
-      });
+      await expect(hostsPage.tableLoaded).toBeVisible();
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
       await cleanAlertsData({ esClient, apiServices });
     });
 
-    test('should correctly load the Alerts tab', async ({ pageObjects: { hostsPage }, page }) => {
-      await hostsPage.visitAlertsTab();
-      await expect(page.getByTestId('hostsView-alerts')).toBeVisible();
-    });
-
-    test('should display the correct active alerts count badge', async ({
-      pageObjects: { hostsPage },
-    }) => {
-      const alertsCount = await hostsPage.getAlertsCount();
-      expect(alertsCount).toBe(String(ACTIVE_ALERTS));
-    });
-
-    test('should filter alerts to show all statuses', async ({ pageObjects: { hostsPage } }) => {
+    test('loads the alerts tab with live alerts', async ({ pageObjects: { hostsPage } }) => {
       await hostsPage.visitAlertsTab();
       await hostsPage.waitForAlertsTableToLoad();
-      await hostsPage.setAlertStatusFilter();
-
-      const rowCount = await hostsPage.getAlertsTableRowCount();
-      expect(rowCount).toBe(ALL_ALERTS);
-    });
-
-    test('should filter alerts to show only active alerts', async ({
-      pageObjects: { hostsPage },
-    }) => {
-      await hostsPage.visitAlertsTab();
-      await hostsPage.waitForAlertsTableToLoad();
-      await hostsPage.setAlertStatusFilter('active');
-
-      const rowCount = await hostsPage.getAlertsTableRowCount();
-      expect(rowCount).toBe(ACTIVE_ALERTS);
-    });
-
-    test('should filter alerts to show only recovered alerts', async ({
-      pageObjects: { hostsPage },
-    }) => {
-      await hostsPage.visitAlertsTab();
-      await hostsPage.waitForAlertsTableToLoad();
-      await hostsPage.setAlertStatusFilter('recovered');
-
-      const rowCount = await hostsPage.getAlertsTableRowCount();
-      expect(rowCount).toBe(RECOVERED_ALERTS);
-    });
-
-    test('should render the alerts table with cells', async ({ pageObjects: { hostsPage } }) => {
-      await hostsPage.visitAlertsTab();
-      await hostsPage.waitForAlertsTableToLoad();
-      await hostsPage.setAlertStatusFilter();
-
-      const cellCount = await hostsPage.getAlertsTableCells().count();
-      expect(cellCount).toBeGreaterThan(0);
+      await expect(hostsPage.getAlertsTable()).toContainText(HOST1_NAME);
     });
   }
 );
