@@ -40,6 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('logstash-*', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+      await PageObjects.discover.setQueryMode('classic', 'esql');
     });
 
     after(async () => {

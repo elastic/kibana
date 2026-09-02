@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esNode.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await discover.setQueryMode('classic', 'esql');
     });
 
     after(async () => {

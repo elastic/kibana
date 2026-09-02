@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
       await kibanaServer.uiSettings.update({ 'search:timeout': 3000 });
+      await discover.setQueryMode('classic', 'esql');
     });
 
     after(async () => {

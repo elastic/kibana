@@ -9,9 +9,10 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const { discover } = getPageObjects(['discover']);
 
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
@@ -30,6 +31,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
       });
+    });
+
+    beforeEach(async () => {
+      await discover.setQueryMode('classic', 'esql');
     });
 
     loadTestFile(require.resolve('./_framework'));

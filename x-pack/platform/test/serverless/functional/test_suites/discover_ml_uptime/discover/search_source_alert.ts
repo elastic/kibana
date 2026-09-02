@@ -402,6 +402,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.discover.setQueryMode('classic', 'esql');
 
       log.debug('create source indices');
       await createSourceIndex();

@@ -87,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esNode.load('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await discover.setQueryMode('classic', 'esql');
       log.debug('discover');
       await common.navigateToApp('discover');
     });

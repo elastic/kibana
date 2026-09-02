@@ -151,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
+        await discover.setQueryMode('classic', 'esql');
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
@@ -200,6 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
+        await discover.setQueryMode('classic', 'esql');
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');
@@ -388,6 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dateSubstractUnit: 'days',
         });
         await reportingAPI.initLogs();
+        await discover.setQueryMode('classic', 'esql');
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await discover.loadSavedSearch('Sparse Columns');
@@ -434,6 +437,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reportingAPI.initEcommerce();
+        await discover.setQueryMode('classic', 'esql');
         await common.navigateToApp('discover');
         await discover.waitUntilTabIsLoaded();
         await discover.selectIndexPattern('ecommerce');

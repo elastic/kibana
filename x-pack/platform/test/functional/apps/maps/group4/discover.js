@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
         'global_visualize_read',
       ]);
       await common.setTime({ from, to });
+      await discover.setQueryMode('classic', 'esql');
       await common.navigateToApp('discover');
     });
 

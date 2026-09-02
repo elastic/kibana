@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await kibanaServer.uiSettings.replace({});
+      await PageObjects.discover.setQueryMode('classic', 'esql');
       // Navigate once to capture the actual data view ID (importExport may assign a new UUID).
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
