@@ -70,7 +70,7 @@ const renderFooter = (
       cases: {
         config: { attachmentsEnabled },
         helpers: {
-          canUseCases: () => ({ create: true, update: true, createComment: true }),
+          canUseCases: () => ({ create: true, update: true, createComment: true, read: true }),
         },
       },
     },

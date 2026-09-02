@@ -14,32 +14,34 @@ import React, { useMemo } from 'react';
 import type { FlyoutActionType } from '../../../../common/lib/telemetry';
 import { FLYOUT_ACTION } from '../../../../common/lib/telemetry';
 import {
-  getActionMenuGroupSeparator,
   withActionIcon,
   withActionIcons,
+  withGroupSeparators,
   withStatusDotIcons,
 } from '../../../../common/utils/action_menu_items';
+import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
 import { ALERT_STATUS_ICON_COLORS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import type { ReportActionClickedParams } from '../../../shared/hooks/use_flyout_telemetry';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
-import { ALERT_EXCEPTION_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
-import { ADD_TO_CASE_ACTION_IDS } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
-import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
-import { INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { OSQUERY_ACTION_ID } from '../../../../detections/components/osquery/osquery_action_item';
-import { ALERT_TAG_ACTION_ID } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
-import { ISOLATE_HOST_ACTION_ID } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { RESPOND_ACTION_ID } from '../../../../common/components/endpoint/responder/from_alerts/use_responder_action_item';
-import { EXPLORE_ACTION_ID } from '../hooks/use_explore_actions';
+import {
+  ADD_TO_CASE_ACTION_IDS,
+  ALERT_ASSIGNEE_ACTION_IDS,
+  ALERT_EXCEPTION_ACTION_IDS,
+  ALERT_TAG_ACTION_ID,
+  EXPLORE_ACTION_ID,
+  INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  ISOLATE_HOST_ACTION_ID,
+  OSQUERY_ACTION_ID,
+  RESPOND_ACTION_ID,
+  RUN_ALERT_WORKFLOW_ACTION_ID,
+  RUN_DOCUMENT_WORKFLOW_ACTION_ID,
+} from '../../../../common/constants/action_ids';
 
-interface ActionMenuProps {
+/** Subset of ActionMenuProps used to derive the visible groups (no panels or callbacks). */
+export interface ActionMenuGroupsProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
-  alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
-  alertTagPanels: EuiContextMenuPanelDescriptor[];
   documentWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   endpointResponseItems: EuiContextMenuPanelItemDescriptor[];
   exceptionItems: EuiContextMenuPanelItemDescriptor[];
@@ -52,49 +54,90 @@ interface ActionMenuProps {
   noteItems: EuiContextMenuPanelItemDescriptor[];
   osqueryAvailable: boolean;
   osqueryItems: EuiContextMenuPanelItemDescriptor[];
-  reportActionClicked: (params: ReportActionClickedParams) => void;
   runAlertWorkflowItems: EuiContextMenuPanelItemDescriptor[];
+  statusItems: EuiContextMenuPanelItemDescriptor[];
+}
+
+/**
+ * Returns the raw action groups for the document flyout Take Action menu, in the order they
+ * are rendered. Each entry is an array of items for one group; empty arrays are included so
+ * the parent can replace its `hasItems` check with
+ * `getActionGroups(props).some(g => g.length > 0)` and guarantee it always agrees with what
+ * the menu actually renders.
+ */
+export const getActionGroups = ({
+  addToCaseItems,
+  alertAssigneeItems,
+  alertTagItems,
+  documentWorkflowItems,
+  endpointResponseItems,
+  exceptionItems,
+  exploreItems,
+  hostIsolationItems,
+  investigateInTimelineItems,
+  isAlert,
+  isInSecurityApp,
+  isRemoteDocument,
+  noteItems,
+  osqueryAvailable,
+  osqueryItems,
+  runAlertWorkflowItems,
+  statusItems,
+}: ActionMenuGroupsProps): EuiContextMenuPanelItemDescriptor[][] => {
+  const alertManagementItems = [
+    ...(!isRemoteDocument && isAlert ? alertAssigneeItems : []),
+    ...(!isRemoteDocument ? addToCaseItems : []),
+    ...(!isRemoteDocument && isAlert ? alertTagItems : []),
+  ];
+  const responseActionItems = !isRemoteDocument
+    ? [
+        ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
+        ...(isAlert ? hostIsolationItems : []),
+        ...endpointResponseItems,
+        ...(osqueryAvailable ? osqueryItems : []),
+      ]
+    : [];
+  return [
+    !isRemoteDocument && isAlert ? statusItems : [],
+    alertManagementItems,
+    !isRemoteDocument && isAlert ? exceptionItems : [],
+    responseActionItems,
+    !isRemoteDocument && !isAlert ? noteItems : [],
+    isInSecurityApp ? investigateInTimelineItems : [],
+    !isInSecurityApp ? exploreItems : [],
+  ];
+};
+
+interface ActionMenuProps extends ActionMenuGroupsProps {
+  alertAssigneePanels: EuiContextMenuPanelDescriptor[];
+  alertTagPanels: EuiContextMenuPanelDescriptor[];
+  reportActionClicked: (params: ReportActionClickedParams) => void;
   runAlertWorkflowPanels: EuiContextMenuPanelDescriptor[];
   runDocumentWorkflowPanels: EuiContextMenuPanelDescriptor[];
-  statusItems: EuiContextMenuPanelItemDescriptor[];
   statusPanels: EuiContextMenuPanelDescriptor[];
 }
 
-const FOOTER_ACTIONS_BY_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'add-to-case-action': FLYOUT_ACTION.ADD_TO_CASE,
-  'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
-  'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
-  'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
-  'alert-tags-context-menu-item': FLYOUT_ACTION.ADD_TAGS,
-  'alert-assignees-context-menu-item': FLYOUT_ACTION.ADD_ASSIGNEES,
-  'remove-alert-assignees-menu-item': FLYOUT_ACTION.REMOVE_ASSIGNEES,
-  'add-endpoint-exception-menu-item': FLYOUT_ACTION.ADD_ENDPOINT_EXCEPTION,
-  'add-exception-menu-item': FLYOUT_ACTION.ADD_RULE_EXCEPTION,
-  'isolate-host-action-item': FLYOUT_ACTION.ISOLATE_HOST,
-  'run-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
-  'run-document-workflow-action': FLYOUT_ACTION.RUN_WORKFLOW,
-  'endpointResponseActions-action-item': FLYOUT_ACTION.RESPOND,
-  'osquery-action-item': FLYOUT_ACTION.RUN_OSQUERY,
+// Keyed on item.key (the stable action id), not data-test-subj.
+const FOOTER_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
+  [ADD_TO_CASE_ACTION_IDS.addToCase]: FLYOUT_ACTION.ADD_TO_CASE,
+  // Status items use short keys defined in ALERT_STATUS_ACTION_IDS / ALERT_CLOSE_WITH_REASON_ACTION_ID
+  open: FLYOUT_ACTION.STATUS_OPEN,
+  acknowledge: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  'close-alert-with-reason': FLYOUT_ACTION.STATUS_CLOSED,
+  [ALERT_TAG_ACTION_ID]: FLYOUT_ACTION.ADD_TAGS,
+  [ALERT_ASSIGNEE_ACTION_IDS.assign]: FLYOUT_ACTION.ADD_ASSIGNEES,
+  [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: FLYOUT_ACTION.REMOVE_ASSIGNEES,
+  [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: FLYOUT_ACTION.ADD_ENDPOINT_EXCEPTION,
+  [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: FLYOUT_ACTION.ADD_RULE_EXCEPTION,
+  [ISOLATE_HOST_ACTION_ID]: FLYOUT_ACTION.ISOLATE_HOST,
+  [RUN_ALERT_WORKFLOW_ACTION_ID]: FLYOUT_ACTION.RUN_WORKFLOW,
+  [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: FLYOUT_ACTION.RUN_WORKFLOW,
+  [RESPOND_ACTION_ID]: FLYOUT_ACTION.RESPOND,
+  [OSQUERY_ACTION_ID]: FLYOUT_ACTION.RUN_OSQUERY,
   'add-note-action': FLYOUT_ACTION.ADD_NOTE,
-  'investigate-in-timeline-action-item': FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
-  'explore-in-alerts-or-timeline': FLYOUT_ACTION.EXPLORE,
+  [INVESTIGATE_IN_TIMELINE_ACTION_ID]: FLYOUT_ACTION.INVESTIGATE_IN_TIMELINE,
+  [EXPLORE_ACTION_ID]: FLYOUT_ACTION.EXPLORE,
 };
-
-const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
-  [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
-  [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
-  [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
-  [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: 'filter',
-  [ALERT_TAG_ACTION_ID]: 'tag',
-  [EXPLORE_ACTION_ID]: 'external',
-  [INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
-  [ISOLATE_HOST_ACTION_ID]: 'lock',
-  [OSQUERY_ACTION_ID]: 'commandLine',
-  [RESPOND_ACTION_ID]: 'bolt',
-  [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
-  [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
-} as const;
 
 export const ActionMenu = ({
   addToCaseItems,
@@ -122,39 +165,41 @@ export const ActionMenu = ({
   statusPanels,
 }: ActionMenuProps) => {
   const items = useMemo(() => {
-    const alertManagementItems = [
-      ...(!isRemoteDocument && isAlert ? alertAssigneeItems : []),
-      ...(!isRemoteDocument ? addToCaseItems : []),
-      ...(!isRemoteDocument && isAlert ? alertTagItems : []),
-    ];
-    const responseActionItems = !isRemoteDocument
-      ? [
-          ...(isAlert ? runAlertWorkflowItems : documentWorkflowItems),
-          ...(isAlert ? hostIsolationItems : []),
-          ...endpointResponseItems,
-          ...(osqueryAvailable ? osqueryItems : []),
-        ]
-      : [];
-    const actionGroups = [
-      !isRemoteDocument && isAlert ? withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS) : [],
-      alertManagementItems,
-      !isRemoteDocument && isAlert ? exceptionItems : [],
-      responseActionItems,
-      !isRemoteDocument && !isAlert ? withActionIcon(noteItems, 'pencil') : [],
-      isInSecurityApp ? investigateInTimelineItems : [],
-      !isInSecurityApp ? exploreItems : [],
-    ].filter((group) => group.length > 0);
+    const [statusRaw, alertMgmt, exceptions, response, notes, timeline, explore] = getActionGroups({
+      addToCaseItems,
+      alertAssigneeItems,
+      alertTagItems,
+      documentWorkflowItems,
+      endpointResponseItems,
+      exceptionItems,
+      exploreItems,
+      hostIsolationItems,
+      investigateInTimelineItems,
+      isAlert,
+      isInSecurityApp,
+      isRemoteDocument,
+      noteItems,
+      osqueryAvailable,
+      osqueryItems,
+      runAlertWorkflowItems,
+      statusItems,
+    });
 
-    const orderedItems = actionGroups.flatMap((group, index) => [
-      ...group,
-      ...(index < actionGroups.length - 1
-        ? [getActionMenuGroupSeparator(`separator-${index}`)]
-        : []),
+    const orderedItems = withGroupSeparators([
+      withStatusDotIcons(statusRaw, ALERT_STATUS_ICON_COLORS),
+      alertMgmt,
+      exceptions,
+      response,
+      withActionIcon(notes, 'pencil'),
+      timeline,
+      explore,
     ]);
 
-    const decoratedItems = withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
-
-    return wrapActionTelemetry(decoratedItems, FOOTER_ACTIONS_BY_TEST_SUBJ, reportActionClicked);
+    return wrapActionTelemetry(
+      withActionIcons(orderedItems, ACTION_ICONS_BY_ID),
+      FOOTER_ACTIONS_BY_ID,
+      reportActionClicked
+    );
   }, [
     addToCaseItems,
     alertAssigneeItems,
@@ -195,11 +240,12 @@ export const ActionMenu = ({
     ]
   );
 
+  const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [{ id: 0, items }, ...panels],
+    [items, panels]
+  );
+
   return (
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={[{ id: 0, items }, ...panels]}
-      data-test-subj="takeActionPanelMenu"
-    />
+    <EuiContextMenu initialPanelId={0} panels={menuPanels} data-test-subj="takeActionPanelMenu" />
   );
 };

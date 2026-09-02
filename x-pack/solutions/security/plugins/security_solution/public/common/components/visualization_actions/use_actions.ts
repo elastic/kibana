@@ -11,7 +11,7 @@ import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { LensProps } from '@kbn/cases-plugin/public/types';
-import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useSaveToLibrary } from './use_save_to_library';

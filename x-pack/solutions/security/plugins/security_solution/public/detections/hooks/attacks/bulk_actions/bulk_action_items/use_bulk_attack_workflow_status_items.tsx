@@ -28,14 +28,17 @@ export const ATTACK_STATUS_ACTION_IDS = {
 } as const;
 
 /**
- * Status-dot colour map keyed on action item `key`. The close item's key is overridden by
- * `useBulkClosingReasonItems` when present (`'close-alert-with-reason'`), so that key is left
- * unmapped and inherits `withStatusDotIcons`' `subdued` default; the fallback key
- * `ATTACK_STATUS_ACTION_IDS.markAsClosed` is also unmapped for the same reason.
+ * Status-dot colour map keyed on action item `key`.
+ * `useBulkClosingReasonItems` replaces the close item's key with `'close-alert-with-reason'`
+ * when closing-reason support is enabled (which it always is when `isEnabled` is true here).
+ * The fallback key `ATTACK_STATUS_ACTION_IDS.markAsClosed` is also mapped to `subdued` for
+ * the rare case where `isEnabled` is false and the item is pushed with the fallback key.
  */
 export const ATTACK_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
   [ATTACK_STATUS_ACTION_IDS.markAsOpen]: 'danger',
   [ATTACK_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  [ATTACK_STATUS_ACTION_IDS.markAsClosed]: 'subdued',
+  'close-alert-with-reason': 'subdued',
 };
 
 export interface UseBulkAttackWorkflowStatusItemsProps {

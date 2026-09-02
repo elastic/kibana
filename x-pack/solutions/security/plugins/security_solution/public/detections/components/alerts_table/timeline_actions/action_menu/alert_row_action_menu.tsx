@@ -11,23 +11,16 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { ALERT_EXCEPTION_ACTION_IDS } from '../use_add_exception_actions';
 import {
-  getActionMenuGroupSeparator,
   withActionIcons,
+  withGroupSeparators,
   withStatusDotIcons,
 } from '../../../../../common/utils/action_menu_items';
+import { ACTION_ICONS_BY_ID } from '../../../../../common/utils/action_icons';
 import { ALERT_STATUS_ICON_COLORS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
-import { ALERT_TAG_ACTION_ID } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { ALERT_ASSIGNEE_ACTION_IDS } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
-import { OSQUERY_ACTION_ID } from '../../../osquery/osquery_action_item';
-import { ADD_TO_CASE_ACTION_IDS } from '../use_add_to_case_actions';
-import { ADD_TO_CHAT_ACTION_ID } from '../use_add_to_chat_action';
-import { EVENT_FILTER_ACTION_ID } from '../use_event_filter_action';
-import { RUN_ALERT_WORKFLOW_ACTION_ID } from '../use_run_alert_workflow_panel';
-import { RUN_DOCUMENT_WORKFLOW_ACTION_ID } from '../use_run_document_workflow_panel';
 
-interface AlertRowActionMenuProps {
+/** Subset of AlertRowActionMenuProps needed to derive the visible groups. */
+export interface AlertRowActionGroupsProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
   addToChatItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
@@ -38,25 +31,44 @@ interface AlertRowActionMenuProps {
   hasAgent: boolean;
   isAlert: boolean;
   osqueryItems: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
   runAlertWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   runDocumentWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   statusItems: EuiContextMenuPanelItemDescriptor[];
 }
 
-const ACTION_ICONS_BY_ID = {
-  [ADD_TO_CASE_ACTION_IDS.addToCase]: 'briefcase',
-  [ADD_TO_CHAT_ACTION_ID]: 'comment',
-  [ALERT_ASSIGNEE_ACTION_IDS.assign]: 'users',
-  [ALERT_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
-  [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
-  [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: 'filter',
-  [ALERT_TAG_ACTION_ID]: 'tag',
-  [EVENT_FILTER_ACTION_ID]: 'filter',
-  [OSQUERY_ACTION_ID]: 'commandLine',
-  [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
-  [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
-} as const;
+/**
+ * Returns the raw action groups for the alert-row Take Action menu.
+ * Used by the menu component and the parent to guarantee `hasItems` and the rendered
+ * groups always agree.
+ */
+export const getAlertRowActionGroups = ({
+  addToCaseItems,
+  addToChatItems,
+  alertAssigneeItems,
+  alertTagItems,
+  canCreateEndpointEventFilters,
+  eventFilterItems,
+  exceptionItems,
+  hasAgent,
+  isAlert,
+  osqueryItems,
+  runAlertWorkflowItems,
+  runDocumentWorkflowItems,
+  statusItems,
+}: AlertRowActionGroupsProps): EuiContextMenuPanelItemDescriptor[][] => {
+  const alertManagementItems = [...alertAssigneeItems, ...addToCaseItems, ...alertTagItems];
+  const responseActionItems = [
+    ...(isAlert ? runAlertWorkflowItems : runDocumentWorkflowItems),
+    ...(hasAgent ? osqueryItems : []),
+  ];
+  return isAlert
+    ? [statusItems, alertManagementItems, exceptionItems, responseActionItems, addToChatItems]
+    : [addToCaseItems, canCreateEndpointEventFilters ? eventFilterItems : [], responseActionItems];
+};
+
+interface AlertRowActionMenuProps extends AlertRowActionGroupsProps {
+  panels: EuiContextMenuPanelDescriptor[];
+}
 
 export const AlertRowActionMenu = ({
   addToCaseItems,
@@ -75,34 +87,26 @@ export const AlertRowActionMenu = ({
   statusItems,
 }: AlertRowActionMenuProps) => {
   const items = useMemo(() => {
-    const alertManagementItems = [...alertAssigneeItems, ...addToCaseItems, ...alertTagItems];
-    const responseActionItems = [
-      ...(isAlert ? runAlertWorkflowItems : runDocumentWorkflowItems),
-      ...(hasAgent ? osqueryItems : []),
-    ];
-    const actionGroups = isAlert
-      ? [
-          withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS),
-          alertManagementItems,
-          exceptionItems,
-          responseActionItems,
-          addToChatItems,
-        ]
-      : [
-          addToCaseItems,
-          canCreateEndpointEventFilters ? eventFilterItems : [],
-          responseActionItems,
-        ];
-    const visibleActionGroups = actionGroups.filter((group) => group.length > 0);
+    const [statusRaw, ...restGroups] = getAlertRowActionGroups({
+      addToCaseItems,
+      addToChatItems,
+      alertAssigneeItems,
+      alertTagItems,
+      canCreateEndpointEventFilters,
+      eventFilterItems,
+      exceptionItems,
+      hasAgent,
+      isAlert,
+      osqueryItems,
+      runAlertWorkflowItems,
+      runDocumentWorkflowItems,
+      statusItems,
+    });
 
-    const orderedItems = visibleActionGroups.flatMap((group, index) => [
-      ...group,
-      ...(index < visibleActionGroups.length - 1
-        ? [getActionMenuGroupSeparator(`separator-${index}`)]
-        : []),
-    ]);
-
-    return withActionIcons(orderedItems, ACTION_ICONS_BY_ID);
+    return withActionIcons(
+      withGroupSeparators([withStatusDotIcons(statusRaw, ALERT_STATUS_ICON_COLORS), ...restGroups]),
+      ACTION_ICONS_BY_ID
+    );
   }, [
     addToCaseItems,
     addToChatItems,
@@ -119,11 +123,12 @@ export const AlertRowActionMenu = ({
     statusItems,
   ]);
 
+  const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
+    () => [{ id: 0, items }, ...panels],
+    [items, panels]
+  );
+
   return (
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={[{ id: 0, items }, ...panels]}
-      data-test-subj="actions-context-menu"
-    />
+    <EuiContextMenu initialPanelId={0} panels={menuPanels} data-test-subj="actions-context-menu" />
   );
 };

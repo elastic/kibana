@@ -34,7 +34,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
-import { DocumentDetailsActionMenu } from './document_details_action_menu';
+import { DocumentDetailsActionMenu, getDocumentActionGroups } from './document_details_action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyout.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -289,6 +289,7 @@ export const TakeActionDropdown = memo(
         }),
       [handleOnOsqueryClick]
     );
+    const osqueryItemsArray = useMemo(() => [osqueryActionItem], [osqueryActionItem]);
     const { osquery } = useKibana().services;
     const osqueryAvailable = osquery?.isOsqueryAvailable({
       agentId: osqueryAgentId,
@@ -336,19 +337,25 @@ export const TakeActionDropdown = memo(
     const showEventFilter = Boolean(
       !showAlertActions && isEndpointEvent && canCreateEndpointEventFilters
     );
-    const hasItems = [
-      isRemoteDocument ? [] : addToCaseActionItems,
-      isRemoteDocument || !showAlertActions ? [] : statusActionItems,
-      isRemoteDocument || !showAlertActions ? [] : alertTagsItems,
-      isRemoteDocument || !showAlertActions ? [] : alertAssigneesItems,
-      isRemoteDocument || !showAlertActions ? [] : exceptionActionItems,
-      isRemoteDocument || !showEventFilter ? [] : eventFilterActionItems,
-      isRemoteDocument ? [] : isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem,
-      isRemoteDocument ? [] : hostIsolationActionItems,
-      isRemoteDocument ? [] : endpointResponseActionsConsoleItems,
-      !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
-      investigateInTimelineActionItems,
-    ].some((actionItems) => actionItems.length > 0);
+    const hasItems = getDocumentActionGroups({
+      addToCaseItems: addToCaseActionItems,
+      alertAssigneeItems: alertAssigneesItems,
+      alertTagItems: alertTagsItems,
+      documentWorkflowItems: documentWorkflowMenuItem,
+      endpointResponseItems: endpointResponseActionsConsoleItems,
+      eventFilterItems: eventFilterActionItems,
+      exceptionItems: exceptionActionItems,
+      hostIsolationItems: hostIsolationActionItems,
+      investigateInTimelineItems: investigateInTimelineActionItems,
+      isAlert,
+      isRemoteDocument,
+      osqueryAvailable: Boolean(osqueryAvailable),
+      osqueryItems: osqueryItemsArray,
+      runAlertWorkflowItems: alertWorkflowMenuItem,
+      showAlertActions,
+      showEventFilter,
+      statusItems: statusActionItems,
+    }).some((group) => group.length > 0);
 
     const takeActionButton = useMemo(
       () => (
@@ -392,7 +399,7 @@ export const TakeActionDropdown = memo(
           isAlert={isAlert}
           isRemoteDocument={isRemoteDocument}
           osqueryAvailable={Boolean(osqueryAvailable)}
-          osqueryItems={[osqueryActionItem]}
+          osqueryItems={osqueryItemsArray}
           runAlertWorkflowItems={alertWorkflowMenuItem}
           runAlertWorkflowPanels={runAlertWorkflowPanel}
           runDocumentWorkflowPanels={runDocumentWorkflowPanel}

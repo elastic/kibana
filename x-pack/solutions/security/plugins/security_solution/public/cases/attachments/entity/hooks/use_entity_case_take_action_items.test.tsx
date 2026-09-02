@@ -9,15 +9,15 @@ import { renderHook } from '@testing-library/react';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useEntityCaseTakeActionItems } from './use_entity_case_take_action_items';
-import { useEntityCasePermissions } from './use_case_permission';
+import { useCanAttachToCase } from '../../hooks/use_can_attach_to_case';
 import type { EntityToAttach } from '..';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('./use_case_permission');
+jest.mock('../../hooks/use_can_attach_to_case');
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
-const mockUseEntityCasePermissions = useEntityCasePermissions as jest.Mock;
+const mockUseCanAttachToCase = useCanAttachToCase as jest.Mock;
 
 const ENTITY: EntityToAttach = {
   id: 'entity-store-id-abc',
@@ -36,9 +36,7 @@ describe('useEntityCaseTakeActionItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseEntityCasePermissions.mockReturnValue({
-      canAddToCase: true,
-    });
+    mockUseCanAttachToCase.mockReturnValue(true);
     mockUseKibana().services.cases.config = { attachmentsEnabled: true };
   });
 
@@ -47,9 +45,7 @@ describe('useEntityCaseTakeActionItems', () => {
   });
 
   it('returns no items when the user has no case permission', () => {
-    mockUseEntityCasePermissions.mockReturnValue({
-      canAddToCase: false,
-    });
+    mockUseCanAttachToCase.mockReturnValue(false);
 
     expect(renderItemKeys()).toEqual([]);
   });

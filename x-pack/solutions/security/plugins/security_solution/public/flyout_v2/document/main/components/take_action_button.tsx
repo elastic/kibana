@@ -38,7 +38,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
-import { ActionMenu } from './action_menu';
+import { ActionMenu, getActionGroups } from './action_menu';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
@@ -237,6 +237,7 @@ export const TakeActionButton = memo(
         }),
       [handleOnOsqueryClick]
     );
+    const osqueryItemsArray = useMemo(() => [osqueryActionItem], [osqueryActionItem]);
 
     const { osquery } = useKibana().services;
     const osqueryAvailable = osquery?.isOsqueryAvailable({
@@ -272,20 +273,25 @@ export const TakeActionButton = memo(
       onAddExceptionTypeClick: handleOpenAddRuleException,
     });
 
-    const hasItems = [
-      !isRemoteDocument ? addToCaseActionItems : [],
-      !isRemoteDocument && isAlert ? statusActionItems : [],
-      !isRemoteDocument && isAlert ? alertTagsItems : [],
-      !isRemoteDocument && isAlert ? alertAssigneesItems : [],
-      !isRemoteDocument && isAlert ? exceptionActionItems : [],
-      !isRemoteDocument && isAlert ? hostIsolationActionItems : [],
-      !isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : [],
-      !isRemoteDocument ? endpointResponseActionsConsoleItems : [],
-      !isRemoteDocument && osqueryAvailable ? [osqueryActionItem] : [],
-      !isRemoteDocument && !isAlert ? noteItems : [],
-      isInSecurityApp ? investigateInTimelineActionItems : [],
-      !isInSecurityApp ? exploreActionItems : [],
-    ].some((actionItems) => actionItems.length > 0);
+    const hasItems = getActionGroups({
+      addToCaseItems: addToCaseActionItems,
+      alertAssigneeItems: alertAssigneesItems,
+      alertTagItems: alertTagsItems,
+      documentWorkflowItems: documentWorkflowMenuItem,
+      endpointResponseItems: endpointResponseActionsConsoleItems,
+      exceptionItems: exceptionActionItems,
+      exploreItems: exploreActionItems,
+      hostIsolationItems: hostIsolationActionItems,
+      investigateInTimelineItems: investigateInTimelineActionItems,
+      isAlert,
+      isInSecurityApp,
+      isRemoteDocument,
+      noteItems,
+      osqueryAvailable: Boolean(osqueryAvailable),
+      osqueryItems: osqueryItemsArray,
+      runAlertWorkflowItems: runWorkflowMenuItem,
+      statusItems: statusActionItems,
+    }).some((group) => group.length > 0);
 
     const takeActionButton = (
       <EuiButton
@@ -345,7 +351,7 @@ export const TakeActionButton = memo(
             isRemoteDocument={isRemoteDocument}
             noteItems={noteItems}
             osqueryAvailable={Boolean(osqueryAvailable)}
-            osqueryItems={[osqueryActionItem]}
+            osqueryItems={osqueryItemsArray}
             reportActionClicked={reportActionClicked}
             runAlertWorkflowItems={runWorkflowMenuItem}
             runAlertWorkflowPanels={runAlertWorkflowPanel}
