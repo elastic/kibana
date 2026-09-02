@@ -112,7 +112,7 @@ const useGlobalHeaderStyles = () => {
       width: 1px;
       height: 24px;
       flex-shrink: 0;
-      background: ${euiTheme.colors.borderBaseSubdued};
+      background: ${euiTheme.colors.borderBasePlain};
     `;
 
     return {
@@ -147,14 +147,14 @@ export const GlobalHeaderRightGroup = React.memo<GlobalHeaderRightGroupProps>(
             {help}
           </div>
         )}
-        {actions && (
-          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
-            {actions}
-          </div>
-        )}
         {userMenu && (
           <div css={styles.userMenuSlot} data-test-subj="chromeNextGlobalHeaderUserMenu">
             {userMenu}
+          </div>
+        )}
+        {actions && (
+          <div css={styles.actionsSlot} data-test-subj="chromeNextGlobalHeaderActions">
+            {actions}
           </div>
         )}
       </div>

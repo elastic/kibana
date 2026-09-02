@@ -143,7 +143,6 @@ export const DEFAULT_GROUP_STATS_RENDERER: GetGroupStats<AlertsGroupingAggregati
     title: i18n.STATS_GROUP_ALERTS,
     badge: {
       value: bucket.doc_count,
-      width: 50,
       color: '#a83632',
     },
   },

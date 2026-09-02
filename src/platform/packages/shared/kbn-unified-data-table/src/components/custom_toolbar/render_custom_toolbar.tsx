@@ -201,7 +201,7 @@ export const styles = {
           '.euiDataGridToolbarControl': {
             blockSize: euiTheme.size.xl,
             border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseFormsControlDisabled}`,
-            borderRadius: euiTheme.border.radius.small,
+            borderRadius: euiTheme.border.radius.control,
 
             // making the icons larger than the default size
             '& svg': {
@@ -217,7 +217,7 @@ export const styles = {
       ? css({
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: euiTheme.border.radius.small,
+          borderRadius: euiTheme.border.radius.control,
           display: 'inline-flex',
           alignItems: 'stretch',
           flexDirection: 'row',

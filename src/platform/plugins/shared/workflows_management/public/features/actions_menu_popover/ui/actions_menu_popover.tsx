@@ -8,7 +8,8 @@
  */
 
 import type { EuiPopoverProps } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenu } from './actions_menu';
@@ -22,8 +23,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   jumpToStepEntries,
   onCommandSelected,
   onJumpToStep,
+  panelProps,
   ...props
 }: ActionsMenuPopoverProps) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -33,6 +37,13 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
       hasArrow={false}
       display="block"
       initialFocus="[name='actions-menu-search']"
+      panelProps={{
+        css: css({
+          borderRadius: euiTheme.border.radius.control,
+          overflow: 'hidden',
+        }),
+        ...panelProps,
+      }}
       {...props}
     >
       <ActionsMenu

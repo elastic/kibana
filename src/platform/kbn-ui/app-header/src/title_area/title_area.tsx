@@ -60,7 +60,7 @@ export const TitleArea = React.memo<TitleAreaProps>(({ title, back, size, placeh
   return (
     <div css={styles.wrapper}>
       {hasBack && <BackButton targets={backTargets} />}
-      {showTitle && title && <Title title={title} titleOffset={!hasBack} size={size} />}
+      {showTitle && title && <Title title={title} size={size} />}
       {showPlaceholder && (
         <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
       )}

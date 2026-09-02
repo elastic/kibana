@@ -175,6 +175,7 @@ export function DataViewsList({
               padding-bottom: 0;
             `}
             color="transparent"
+            hasBorder={false}
             paddingSize="s"
           >
             <EuiFlexGroup

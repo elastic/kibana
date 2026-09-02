@@ -76,7 +76,7 @@ export const getHighContrastSeparator = (
       width: ${width};
       margin: 0 auto;
       height: ${euiTheme.border.width.thin};
-      background-color: ${euiTheme.colors.borderBaseSubdued};
+      background-color: ${euiTheme.colors.borderBasePlain};
     }
   `;
 };

@@ -33,7 +33,7 @@ export function AlertsOverview() {
   const { esQuery } = useAlertsSearchBarContext();
 
   return (
-    <EuiPanel borderRadius="none" hasShadow={false}>
+    <EuiPanel hasShadow={false} borderRadius="m">
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           {esQuery && (

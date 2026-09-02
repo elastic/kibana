@@ -29,7 +29,7 @@ export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({
   const styles = css`
     word-break: break-word;
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${euiTheme.border.radius.small};
+    border-radius: ${euiTheme.border.radius.panel};
     background-color: ${backgroundColor};
   `;
   return (

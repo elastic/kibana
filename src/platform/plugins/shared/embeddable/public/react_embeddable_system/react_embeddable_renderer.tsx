@@ -131,7 +131,7 @@ export const EmbeddableRenderer = <
         showShadow={panelProps?.showShadow}
         showBorder={panelProps?.showBorder}
         css={css`
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.control};
         `}
         dataTestSubj="embeddablePanelLoadingIndicator"
       />

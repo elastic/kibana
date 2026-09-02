@@ -119,6 +119,8 @@ export const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> =
       <EuiPanel
         paddingSize="s"
         hasBorder
+        hasShadow={false}
+        borderRadius="m"
         data-test-subj="agentBuilderSkillReferencedContentFileRow"
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>

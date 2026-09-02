@@ -1,29 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0"; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiPanel } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
   children: React.ReactNode;
   /**
-   * Overrides for the inner `EuiPanel` that provides the recommended `16px` padding. Callers can
-   * e.g. pass `{ paddingSize: 'none' }` to render a more compact body.
+   * Overrides for the inner padding wrapper. Callers can e.g. pass `{ paddingSize: 'none' }`
+   * to render a more compact body.
    */
-  panelProps?: React.ComponentProps<typeof EuiPanel>;
+  panelProps?: Pick<EuiPanelProps, 'paddingSize' | 'css'>;
 }
 
 /**
- * Wrapper of `EuiFlyoutBody`, setting the recommended `16px` padding using a EuiPanel.
+ * Wrapper of `EuiFlyoutBody`, setting the recommended `16px` padding.
  */
 export const FlyoutBody: FC<FlyoutBodyProps> = memo(
   ({ children, panelProps, ...flyoutBodyProps }) => {
+    const { euiTheme } = useEuiTheme();
+    const paddingSize = panelProps?.paddingSize ?? 'm';
+
     return (
       <EuiFlyoutBody
         {...flyoutBodyProps}
@@ -35,9 +39,20 @@ export const FlyoutBody: FC<FlyoutBodyProps> = memo(
           }
         `}
       >
-        <EuiPanel hasShadow={false} color="transparent" {...panelProps}>
-          {children}
-        </EuiPanel>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+          css={[
+            paddingSize !== 'none' &&
+              css`
+                padding: ${euiTheme.size[paddingSize]};
+              `,
+            panelProps?.css,
+          ]}
+        >
+          <EuiFlexItem>{children}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     );
   }

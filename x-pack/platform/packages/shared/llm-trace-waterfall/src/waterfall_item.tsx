@@ -119,6 +119,7 @@ export const WaterfallItem: React.FC<WaterfallItemProps> = ({
     height: ${ROW_HEIGHT}px;
     cursor: pointer;
     border-left: 3px solid ${isSelected ? barColor : 'transparent'};
+    border-radius: ${euiTheme.border.radius.small};
     background-color: ${isSelected ? `${barColor}18` : 'transparent'};
     ${focusOutline}
     &:hover {

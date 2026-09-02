@@ -208,7 +208,6 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
         title: entitiesStatLabel,
         badge: {
           value: bucket.doc_count,
-          width: 50,
         },
       });
     }

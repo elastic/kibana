@@ -47,7 +47,7 @@ export function Card({
   const cardStyle = css`
     height: 100%;
     min-width: 300px;
-    border-radius: ${euiTheme.border.radius.medium};
+    border-radius: ${euiTheme.border.radius.panel};
     border: ${isSelected
       ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
       : 'none'};

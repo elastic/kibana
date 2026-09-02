@@ -65,7 +65,6 @@ export type ParsedGroupingAggregation<T> = ParsedRootAggregation<T> &
 export interface BadgeMetric {
   value: number;
   color?: string;
-  width?: number;
 }
 
 export interface GroupStatsItem {

@@ -40,16 +40,16 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
   if (theme === 'borealis') {
     return {
       light: {
-        pageBackground: '#F6F9FC', // colors.body
-        welcomeText: '#5A6D8C', // colors.subduedText
+        pageBackground: '#FFFFFF', // colors.backgroundBasePlain
+        welcomeText: '#516381', // colors.subduedText
         progress: '#ECF1F9', // colors.lightestShade
         progressBefore: '#0B64DD', // colors.primary
       },
       dark: {
-        pageBackground: '#07101F',
-        welcomeText: '#8E9FBC',
+        pageBackground: '#111C2C',
+        welcomeText: '#98A8C3',
         progress: '#172336',
-        progressBefore: '#599DFF',
+        progressBefore: '#61A2FF',
       },
     };
   }

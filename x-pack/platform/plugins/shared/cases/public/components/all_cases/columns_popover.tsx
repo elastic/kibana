@@ -190,6 +190,10 @@ export const ColumnsPopover: React.FC<Props> = ({
                         >
                           <EuiPanel
                             color="transparent"
+                            paddingSize="xs"
+                            css={css`
+                              border-radius: ${euiTheme.border.radius.control};
+                            `}
                             {...provided.dragHandleProps}
                             aria-label={i18n.DRAG_HANDLE}
                             grow={false}

@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 
 export interface LinkToAlertsRuleProps {
   onClick?: () => void;
   ['data-test-subj']: string;
-  buttonRef?: React.Ref<HTMLButtonElement>;
+  buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 export const CreateAlertRuleButton = ({
@@ -20,19 +20,11 @@ export const CreateAlertRuleButton = ({
   buttonRef,
 }: LinkToAlertsRuleProps) => {
   return (
-    <EuiButtonEmpty
-      buttonRef={buttonRef}
-      data-test-subj={dataTestSubj}
-      onClick={onClick}
-      size="xs"
-      iconSide="left"
-      flush="both"
-      iconType="bell"
-    >
+    <EuiLink ref={buttonRef} data-test-subj={dataTestSubj} onClick={onClick}>
       <FormattedMessage
         id="xpack.infra.infra.alerts.createAlertLink"
         defaultMessage="Create rule"
       />
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 };

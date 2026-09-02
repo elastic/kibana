@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { TakeAction } from '../shared/components/take_action';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
@@ -40,9 +42,9 @@ export const ServicePanelFooter = ({
    */
   flyoutFooterProps?: React.ComponentProps<typeof EuiFlyoutFooter>;
   /**
-   * Overrides for the inner `EuiPanel` (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
+   * Overrides for the inner padding wrapper (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
    */
-  panelProps?: React.ComponentProps<typeof EuiPanel>;
+  panelProps?: Pick<EuiPanelProps, 'paddingSize' | 'css'>;
 }) => {
   const identityServiceName = useMemo(
     () =>
@@ -74,27 +76,37 @@ export const ServicePanelFooter = ({
     [entityStoreId, identityServiceName, riskLevel, riskScore]
   );
   const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
+  const { euiTheme } = useEuiTheme();
+  const paddingSize = panelProps?.paddingSize ?? 'm';
 
   return (
     <EuiFlyoutFooter {...flyoutFooterProps}>
-      <EuiPanel color="transparent" {...panelProps}>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <AiAssistantButton
-              entityType={EntityType.service}
-              entityName={serviceName}
-              telemetryPathway="entity_flyout"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TakeAction
-              isDisabled={!identityServiceName}
-              kqlQuery={euidEntityFilter ?? `service.name: "${identityServiceName}"`}
-              additionalItems={additionalItems}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        alignItems="center"
+        css={[
+          paddingSize !== 'none' &&
+            css`
+              padding: ${euiTheme.size[paddingSize]};
+            `,
+          panelProps?.css,
+        ]}
+      >
+        <EuiFlexItem grow={false}>
+          <AiAssistantButton
+            entityType={EntityType.service}
+            entityName={serviceName}
+            telemetryPathway="entity_flyout"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TakeAction
+            isDisabled={!identityServiceName}
+            kqlQuery={euidEntityFilter ?? `service.name: "${identityServiceName}"`}
+            additionalItems={additionalItems}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 };

@@ -21,7 +21,8 @@ const editorStyleMap = {
       minInlineSize: '600px',
       maxInlineSize: '600px',
       maxBlockSize: '520px',
-      borderRadius: euiTheme.border.radius.medium,
+      borderRadius: euiTheme.border.radius.control,
+      overflow: 'hidden',
     }),
 
   container: ({ euiTheme }: UseEuiTheme) =>
@@ -192,7 +193,7 @@ const editorStyleMap = {
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseRecessed,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },

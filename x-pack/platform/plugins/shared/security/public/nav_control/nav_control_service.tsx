@@ -132,7 +132,7 @@ export class SecurityNavControlService {
           logoutUrl={this.logoutUrl}
           userMenuLinks$={this.userMenuLinks$}
           renderButton={(props) => <UserMenuComponent {...props} />}
-          avatarSize="m"
+          avatarSize="s"
         />
       </Providers>
     );
