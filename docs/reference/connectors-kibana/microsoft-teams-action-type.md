@@ -86,14 +86,14 @@ The Microsoft Teams connector has the following actions:
 :   Posts a new message to a channel. Requires the `ChannelMessage.Send` delegated permission or `ChannelMessage.ReadWrite.All` application permission.
     - `teamId` (required): The ID of the team containing the channel.
     - `channelId` (required): The ID of the channel to post to.
-    - `content` (required): The message body text (plain text or HTML, up to 2000 characters).
+    - `content` (required): The message body text (plain text or HTML, up to 10,000 characters).
     - `contentType` (optional): `"text"` (default) or `"html"`.
     - `subject` (optional): Optional subject line displayed as a message header.
 
 **Send chat message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Posts a new message to an existing chat (1:1 or group). Requires the `Chat.ReadWrite` delegated permission or `Chat.ReadWrite.All` application permission.
     - `chatId` (required): The ID of the chat to send the message to.
-    - `content` (required): The message body text (plain text or HTML, up to 2000 characters).
+    - `content` (required): The message body text (plain text or HTML, up to 10,000 characters).
     - `contentType` (optional): `"text"` (default) or `"html"`.
 
 **Update message** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
@@ -111,8 +111,8 @@ The Microsoft Teams connector has the following actions:
 
 **Create chat** {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
 :   Creates a new 1:1 or group chat and returns the resulting chat object including its `id`. Requires the `Chat.ReadWrite` delegated permission or `Chat.ReadWrite.All` application permission.
-    - `chatType` (required): `"oneOnOne"` for a 1:1 direct message (exactly one other member) or `"group"` for a group chat (two or more other members).
-    - `memberIds` (required): Array of user IDs (GUIDs or UPNs) to invite, not including yourself (1–20 members).
+    - `chatType` (required): `"oneOnOne"` for a 1:1 direct message (exactly two member IDs: yourself and the other person) or `"group"` for a group chat (yourself plus two or more others).
+    - `memberIds` (required): Array of user IDs (GUIDs or UPNs) of all chat members, including yourself (2–20 members).
     - `topic` (optional): Display topic or title for group chats. Ignored for `"oneOnOne"` chats.
 
 ## Connector networking configuration [microsoft-teams-connector-networking-configuration]
