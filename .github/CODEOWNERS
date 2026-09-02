@@ -1129,6 +1129,7 @@ x-pack/platform/packages/shared/ml/common-types @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/data-visualizer-server-schemas @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/error_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/ml-cps @elastic/search-ml-ux
+x-pack/platform/packages/shared/ml/ml-cps-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/response_stream @elastic/search-ml-ux
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/search-ml-ux
@@ -1884,7 +1885,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-signals-logs-team
-/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-signals-logs-team
@@ -2013,13 +2013,10 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
-/src/platform/test/functional/apps/discover/observability @elastic/obs-signals-logs-team
 
 # obs-exploration-team
 /x-pack/solutions/observability/plugins/apm/public/components/shared/links/discover_links @elastic/obs-signals-traces-team
-/x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
-/src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-signals-logs-team
 /src/platform/plugins/shared/discover/test/scout/metrics_experience/ @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/test/scout/traces_experience/ @elastic/obs-signals-traces-team
 /src/platform/plugins/shared/discover/test/scout/logs_experience/ @elastic/obs-signals-logs-team

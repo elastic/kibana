@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { type ConnectorContractUnion } from '../..';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../common/constants';
+import type { ConnectorContractUnion } from '../../types/v1';
 import { getDeprecatedStepMessage, getStepDeprecationInfo } from '../deprecated_step_metadata';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -35,7 +36,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { getTriggerSchema } from '../schema/triggers';
+import { type CustomTriggerSchemaInput, getTriggerSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -45,8 +46,8 @@ export function getStepId(stepName: string): string {
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
-  /** Registered custom trigger type ids for YAML schema validation (e.g. example.custom_trigger) */
-  triggers: string[] = [],
+  /** Registered custom triggers for YAML schema validation (id, optional requiresConnectorId) */
+  triggers: CustomTriggerSchemaInput[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
@@ -81,7 +82,9 @@ export function generateYamlSchemaFromConnectors(
  * Generates a schema for trusted workflow definitions that need the shared workflow envelope
  * validation without materializing the connector-expanded step union.
  */
-export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+export function generateLightweightYamlSchema(
+  triggers: CustomTriggerSchemaInput[] = []
+): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
   const triggerSchema = getTriggerSchema(triggers);
@@ -171,8 +174,9 @@ function generateStepSchemaForConnector(
   const connectorIdSchema: Record<string, z.ZodType> = {};
   // Add connector-id schema if hasConnectorId has a value
   if (connector.hasConnectorId) {
+    const connectorId = z.string().max(CONNECTOR_ID_MAX_LENGTH);
     connectorIdSchema['connector-id'] =
-      connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
+      connector.hasConnectorId === 'required' ? connectorId : connectorId.optional();
   }
 
   // If all params are optional (or there are none), `with` itself should be optional so users

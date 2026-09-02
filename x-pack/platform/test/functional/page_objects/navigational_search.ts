@@ -22,7 +22,9 @@ export class NavigationalSearchPageObject extends FtrService {
   private readonly browser = this.ctx.getService('browser');
 
   async ensureSearchOpen() {
-    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 })) {
+    // Poll the modal-open read so a transient re-render of the already-open modal isn't misread as
+    // closed, which would click SEARCH_BUTTON — a toggle hidden under the modal's own overlay mask.
+    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 2500 })) {
       return;
     }
     await this.testSubjects.click(SEARCH_BUTTON);
