@@ -8,14 +8,12 @@
  */
 
 export { GenAiTab } from './genai_tab';
-export { GenAiDetailsTable, type GenAiDetailsTableRow } from './genai_details_table';
 export { GenAiTechnicalPreviewBadge } from './technical_preview_badge';
 export {
   hasGenAiData,
   getGenAiFields,
   type GenAiFields,
   type GenAiMessage,
-  type GenAiToolDefinition,
 } from './get_genai_fields';
 export { getFieldFromSource, GEN_AI_LONG_MESSAGE_FIELDS } from './get_field_from_source';
 export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';

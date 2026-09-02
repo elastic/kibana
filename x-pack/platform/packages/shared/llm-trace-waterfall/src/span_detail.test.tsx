@@ -18,7 +18,7 @@ jest.mock('@kbn/apm-ui-shared', () => {
     GenAiTab: ({ genAi }: { genAi: GenAiFields }) => (
       <div data-test-subj="mockGenAiTab">
         GenAiTab:{genAi.operationName ?? genAi.toolName ?? 'unknown'}
-        {genAi.rawToolDefinitions != null && (
+        {genAi.toolDefinitions != null && (
           <span data-test-subj="mockRawToolDefinitions">Raw tool definitions</span>
         )}
       </div>

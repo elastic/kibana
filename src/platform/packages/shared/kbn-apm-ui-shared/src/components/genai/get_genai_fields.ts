@@ -39,13 +39,6 @@ export interface GenAiMessage {
   [key: string]: unknown;
 }
 
-export interface GenAiToolDefinition {
-  type: string;
-  name: string;
-  description?: string;
-  parameters?: unknown;
-}
-
 export interface GenAiFields {
   operationName?: string;
   requestModel?: string;
@@ -69,8 +62,7 @@ export interface GenAiFields {
   inputMessages: GenAiMessage[];
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
-  toolDefinitions?: GenAiToolDefinition[];
-  rawToolDefinitions?: unknown;
+  toolDefinitions?: unknown;
   toolName?: string;
   toolCallArguments?: unknown;
   toolCallResult?: unknown;
@@ -203,7 +195,7 @@ function stringifyFallback(raw: unknown): string | undefined {
 }
 
 /** Unwraps structured OTel system instructions into plain text. */
-export function parseSystemInstructions(raw: unknown): string | undefined {
+function parseSystemInstructions(raw: unknown): string | undefined {
   if (raw == null || raw === '') return undefined;
 
   const parsed = parseJsonValue(raw);
@@ -228,57 +220,16 @@ export function parseSystemInstructions(raw: unknown): string | undefined {
   return stringifyFallback(raw);
 }
 
-interface ParsedToolDefinitions {
-  definitions: GenAiToolDefinition[];
-  raw?: unknown;
-}
-
-function parseToolDefinitionsWithFallback(raw: unknown): ParsedToolDefinitions {
-  if (raw == null || raw === '') return { definitions: [] };
-
-  const parsed = parseJsonValue(raw);
-  if (!Array.isArray(parsed)) return { definitions: [], raw };
-
-  const definitions: GenAiToolDefinition[] = [];
-  for (const value of parsed) {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return { definitions: [], raw };
-    }
-    const { type, name, description, parameters } = value as Record<string, unknown>;
-    if (
-      typeof type !== 'string' ||
-      typeof name !== 'string' ||
-      (description != null && typeof description !== 'string')
-    ) {
-      return { definitions: [], raw };
-    }
-    definitions.push({
-      type,
-      name,
-      description: description ?? undefined,
-      parameters,
-    });
-  }
-
-  return { definitions };
-}
-
-/** Parses OTel tool definition arrays for display. */
-export function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] {
-  return parseToolDefinitionsWithFallback(raw).definitions;
-}
-
 export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
   const f = (key: string) => first(metadata, key);
-  const rawToolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
-  const nonNullToolDefinitions = Array.isArray(rawToolDefinitionsValue)
-    ? rawToolDefinitionsValue.filter((value) => value != null)
+  const toolDefinitionsValue = rawValue(metadata, ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS);
+  const nonNullToolDefinitions = Array.isArray(toolDefinitionsValue)
+    ? toolDefinitionsValue.filter((value) => value != null)
     : [];
-  const rawToolDefinitions =
+  const toolDefinitions =
     nonNullToolDefinitions.length === 1 && typeof nonNullToolDefinitions[0] === 'string'
       ? nonNullToolDefinitions[0]
-      : rawToolDefinitionsValue;
-  const parsedToolDefinitions = parseToolDefinitionsWithFallback(rawToolDefinitions);
+      : toolDefinitionsValue;
 
   return {
     operationName: f(ATTRIBUTE_GEN_AI_OPERATION_NAME) as string | undefined,
@@ -308,8 +259,7 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
     systemInstructions: parseSystemInstructions(f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS)),
-    toolDefinitions: parsedToolDefinitions.definitions,
-    rawToolDefinitions: parsedToolDefinitions.raw,
+    toolDefinitions,
     toolName: f(ATTRIBUTE_GEN_AI_TOOL_NAME) as string | undefined,
     toolCallArguments: f(ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS),
     toolCallResult: f(ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT),

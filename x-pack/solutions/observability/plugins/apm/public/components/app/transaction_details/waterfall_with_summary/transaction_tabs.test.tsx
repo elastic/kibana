@@ -71,7 +71,6 @@ const genAiFields: GenAiFields = {
   response: {},
   inputMessages: [],
   outputMessages: [],
-  toolDefinitions: [],
 };
 
 function mockGenAiData({ isGenAiSpan }: { isGenAiSpan: boolean }) {
