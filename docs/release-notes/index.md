@@ -52,7 +52,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix case metrics failing when a case already has alerts from a linked project [#286185]({{kib-pull}}286185).
 * Fix creating a case from a workflow, a case template, or {{ml}} so **Sync alerts** is not turned on unless that solution enables it [#286670]({{kib-pull}}286670).
 * Fix the **Additional fields** editor on the {{sn-itsm}}, {{sn-sir}}, and Jira connectors rejecting Mustache context variables as invalid JSON [#286578]({{kib-pull}}286578).
-* Fix cases accepting alert and event attachments from linked projects or remote clusters [#286972]({{kib-pull}}286972).
 * Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
 * Fix a template `$ref` global field ignoring its hide-on-value condition when the controlling field is in another section [#287308]({{kib-pull}}287308).
 * Fix global field column selections not syncing between the Cases list and table views [#287327]({{kib-pull}}287327).
