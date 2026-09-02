@@ -35,7 +35,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Developer tools**:
 * Raise the Dev Tools Console **Copy to curl** limit so a request-body string of up to `100000` characters copies successfully [#287526]({{kib-pull}}287526).
 
-
 ### Fixes [kibana-9.5.3-fixes]
 
 **Elastic Agent Builder**:
