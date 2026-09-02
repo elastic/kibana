@@ -204,7 +204,10 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    patchMetadata = jest.fn().mockResolvedValue({ id: 'conv-1', metadata: { severity: 'high' } });
+    patchMetadata = jest.fn().mockResolvedValue({
+      conversation: { id: 'conv-1', metadata: { severity: 'high' } },
+      changedFields: [],
+    });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {

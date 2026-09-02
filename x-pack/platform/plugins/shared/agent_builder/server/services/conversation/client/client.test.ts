@@ -212,7 +212,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list();
+      const { results: result } = await client.list();
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
@@ -242,7 +242,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list();
+      const { results: result } = await client.list();
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
@@ -318,7 +318,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list({ agentId: 'agent-2' });
+      const { results: result } = await client.list({ agentId: 'agent-2' });
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
@@ -352,7 +352,7 @@ describe('ConversationClient', () => {
     it('returns an empty list without querying conversations when the requested agent is inaccessible', async () => {
       agentRegistry.getIds.mockResolvedValue(['agent-1']);
 
-      await expect(client.list({ agentId: 'agent-2' })).resolves.toEqual([]);
+      await expect(client.list({ agentId: 'agent-2' })).resolves.toEqual({ results: [], total: 0 });
 
       expect(mockEsClient.search).not.toHaveBeenCalled();
     });
@@ -360,9 +360,139 @@ describe('ConversationClient', () => {
     it('returns an empty list when the user cannot access any underlying agents', async () => {
       agentRegistry.getIds.mockResolvedValue([]);
 
-      await expect(client.list()).resolves.toEqual([]);
+      await expect(client.list()).resolves.toEqual({ results: [], total: 0 });
 
       expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    // --- pagination ---
+
+    it('sends from=0, size=1000, descending sort, and track_total_hits=10000 by default', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.list();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: 0,
+          size: 1000,
+          sort: [{ updated_at: { order: 'desc' } }, { created_at: { order: 'desc' } }],
+          track_total_hits: 10_000,
+        })
+      );
+    });
+
+    it('computes from = (page - 1) * perPage', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.list({ page: 3, perPage: 10 });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ from: 20, size: 10 })
+      );
+    });
+
+    it('passes sortOrder: asc to both sort fields', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.list({ sortOrder: 'asc' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [{ updated_at: { order: 'asc' } }, { created_at: { order: 'asc' } }],
+        })
+      );
+    });
+
+    // --- total count ---
+
+    it('returns total when hits.total is a plain number', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: 7 } });
+
+      const result = await client.list();
+
+      expect(result.total).toBe(7);
+    });
+
+    it('returns total from hits.total.value when ES returns the object form', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 42, relation: 'eq' } },
+      });
+
+      const result = await client.list();
+
+      expect(result.total).toBe(42);
+    });
+
+    it('caps total at 10000 when ES reports more via track_total_hits', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 99_999, relation: 'gte' } },
+      });
+
+      const result = await client.list();
+
+      expect(result.total).toBe(10_000);
+    });
+
+    // --- pinned filter ---
+
+    it('omits the pinned filter when pinned is undefined', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list();
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
+      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+    });
+
+    it('adds { term: { pinned: true } } when pinned is true', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list({ pinned: true });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { pinned: true } }]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('adds a must_not negation for pinned: false to include pre-field documents', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list({ pinned: false });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ bool: { must_not: { term: { pinned: true } } } }]),
+            }),
+          }),
+        })
+      );
+      // A plain term: { pinned: false } would silently exclude documents created
+      // before the pinned field was added; must never be used.
+      expect(mockEsClient.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ term: { pinned: false } }]),
+            }),
+          }),
+        })
+      );
     });
   });
 
@@ -1597,7 +1727,9 @@ describe('ConversationClient', () => {
         },
       });
 
-      await expect(client.list()).resolves.toMatchObject([{ metadata: { enabled: true } }]);
+      await expect(client.list()).resolves.toMatchObject({
+        results: [{ metadata: { enabled: true } }],
+      });
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           _source: expect.arrayContaining(['template_id', 'template_version', 'metadata']),
@@ -1943,6 +2075,137 @@ describe('ConversationClient', () => {
         message: expect.stringContaining('conversation-1'),
       });
     });
+
+    describe('onMetadataPatched callback', () => {
+      const template = makeTemplate('tmpl-cb', {
+        status: {
+          input_type: 'SELECT',
+          description: 'Status',
+          options: ['open', 'closed'],
+        },
+        severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+      });
+
+      beforeEach(() => {
+        getTemplateMock.mockReturnValue(template);
+        mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      });
+
+      it('calls onMetadataPatched with changed fields after a successful write', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocumentWithTemplate({
+                templateId: template.id,
+                metadata: { status: 'open' },
+              }),
+            ],
+          },
+        });
+
+        await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
+
+        expect(onMetadataPatched).toHaveBeenCalledWith({
+          conversationId: 'conversation-1',
+          templateId: template.id,
+          parentId: undefined,
+          changedFields: ['severity'],
+        });
+      });
+
+      it('includes parentId when the conversation has a parent_conversation', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        const docWithParent = {
+          ...createConversationDocumentWithTemplate({
+            templateId: template.id,
+          }),
+        };
+        (docWithParent._source as unknown as Record<string, unknown>).parent_conversation = {
+          id: 'parent-conv-1',
+          relation: 'subagent',
+        };
+
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+
+        await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
+
+        expect(onMetadataPatched).toHaveBeenCalledWith(
+          expect.objectContaining({ parentId: 'parent-conv-1' })
+        );
+      });
+
+      it('does not call onMetadataPatched when all values are identical (no-op suppression)', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocumentWithTemplate({
+                templateId: template.id,
+                // status is already 'open' — writing the same value is a no-op
+                metadata: { status: 'open' },
+              }),
+            ],
+          },
+        });
+
+        await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
+
+        expect(onMetadataPatched).not.toHaveBeenCalled();
+      });
+
+      it('does not call onMetadataPatched when the write fails', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [createConversationDocumentWithTemplate({ templateId: template.id })],
+          },
+        });
+        mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+        await expect(
+          clientWithCb.patchMetadata('conversation-1', { severity: 'high' })
+        ).rejects.toThrow('disk full');
+
+        expect(onMetadataPatched).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('create with template', () => {
@@ -2115,7 +2378,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const results = await client.list();
+      const { results } = await client.list();
 
       expectNoReadByInList(results);
       expectNoRoundsInList(results);
