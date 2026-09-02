@@ -22,7 +22,7 @@ export const CREATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.createCase.documentation.details',
   {
     defaultMessage:
-      'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, sync settings, and custom fields. The step returns the complete created case object.',
+      'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, and sync settings. Custom fields are deprecated; set field values via `extended_fields` instead. The step returns the complete created case object.',
   }
 );
 
@@ -108,7 +108,7 @@ export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setCustomField.documentation.details',
   {
     defaultMessage:
-      'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value.',
+      'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value. Custom fields are deprecated; write field values via `extended_fields` on the update case API (`PATCH /api/cases`), and discover valid field keys with the get case fields API (`GET /api/cases/{case_id}/fields`).',
   }
 );
 

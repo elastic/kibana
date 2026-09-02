@@ -19,7 +19,10 @@ properties:
       - type
   customFields:
     type: array
-    description: Custom fields case configuration.
+    deprecated: true
+    description: >
+      Deprecated. Custom fields are superseded by the field library and the case `extended_fields`.
+      Custom fields case configuration.
     items:
       type: object
       required:

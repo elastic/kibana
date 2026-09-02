@@ -469,7 +469,8 @@
                       },
                       "customFields": {
                         "type": "array",
-                        "description": "Custom fields configuration details.",
+                        "deprecated": true,
+                        "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                         "items": {
                           "type": "object",
                           "properties": {
@@ -729,7 +730,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -993,7 +995,8 @@
                     },
                     "customFields": {
                       "type": "array",
-                      "description": "Custom fields configuration details.",
+                      "deprecated": true,
+                      "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.\n",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -3527,11 +3530,16 @@
         "title": "Case extended fields",
         "type": "object",
         "x-state": "Technical preview; added in 9.5.0",
-        "description": "Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).\n",
+        "description": "Case field values keyed by storage key. This replaces `customFields`. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields; any other key is rejected. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key. Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled, field-library fields and templates are unavailable. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).\n",
         "maxProperties": 500,
         "additionalProperties": {
           "type": "string",
           "maxLength": 30000
+        },
+        "example": {
+          "priority_as_keyword": "high",
+          "ticket_number_as_integer": "4287",
+          "escalated_as_boolean": "true"
         }
       },
       "create_case_request": {
@@ -3598,7 +3606,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -4073,6 +4082,16 @@
           }
         }
       },
+      "case_extended_fields_labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A read-only map from each `extended_fields` storage key to its human-readable label. Populated at response time from the field library and any applied template; it is not persisted and is ignored on write.\n",
+        "example": {
+          "priority_as_keyword": "Priority"
+        }
+      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -4301,7 +4320,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom field values for the case.",
+            "deprecated": true,
+            "description": "Deprecated. Use `extended_fields` instead. Custom field values for the case.",
             "items": {
               "type": "object",
               "properties": {
@@ -4333,6 +4353,9 @@
                 }
               }
             }
+          },
+          "extended_fields_labels": {
+            "$ref": "#/components/schemas/case_extended_fields_labels"
           },
           "description": {
             "type": "string",
@@ -4519,7 +4542,8 @@
                 },
                 "customFields": {
                   "type": "array",
-                  "description": "Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n",
+                  "deprecated": true,
+                  "description": "Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.\n",
                   "minItems": 0,
                   "maxItems": 10,
                   "items": {
@@ -4556,6 +4580,27 @@
                           }
                         ]
                       }
+                    }
+                  }
+                },
+                "template": {
+                  "type": "object",
+                  "nullable": true,
+                  "x-state": "Technical preview",
+                  "description": "The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.\n",
+                  "required": [
+                    "id",
+                    "version"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The template identifier. Retrieve template ids with `GET /api/cases/templates`."
+                    },
+                    "version": {
+                      "type": "integer",
+                      "description": "The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n",
+                      "minimum": 1
                     }
                   }
                 },
@@ -4730,7 +4775,9 @@
       },
       "templates": {
         "type": "array",
+        "deprecated": true,
         "x-state": "Technical preview",
+        "description": "Deprecated. These configuration-embedded templates are superseded by the case templates system. Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via the case `extended_fields`.\n",
         "items": {
           "type": "object",
           "properties": {
@@ -4879,7 +4926,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n",
             "minItems": 0,
             "maxItems": 10,
             "items": {
@@ -4980,7 +5028,8 @@
           },
           "customFields": {
             "type": "array",
-            "description": "Custom fields case configuration.",
+            "deprecated": true,
+            "description": "Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.\n",
             "items": {
               "type": "object",
               "required": [
@@ -5209,7 +5258,7 @@
       },
       "template_write_request": {
         "title": "Template write request",
-        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes.\n",
+        "description": "The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.\n\nResource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).\n",
         "type": "object",
         "required": [
           "owner",
@@ -5227,6 +5276,7 @@
           },
           "definition": {
             "type": "string",
+            "maxLength": 30000,
             "description": "The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.\n",
             "example": "name: Security incident\nseverity: high\ntags: [security]\nfields:\n  - name: priority\n    label: Priority\n    type: keyword\n    control: SELECT_BASIC\n    metadata:\n      options: [low, medium, high]\n      default: medium\n  - $ref: risk_score\n"
           },

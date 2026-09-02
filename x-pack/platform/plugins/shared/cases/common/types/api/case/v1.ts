@@ -110,6 +110,10 @@ const CustomFieldRt = rt.union([
   CaseCustomFieldNumberWithValidationRt,
 ]);
 
+/**
+ * @deprecated Use `extended_fields` (CASE_EXTENDED_FIELDS) instead. Values written here still work
+ * during the migration to the field-library / extended-fields system.
+ */
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
@@ -173,6 +177,9 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      */
     settings: CaseSettingsRt,
     template: rt.union([CaseTemplate, rt.null]),
+    // Field-library values keyed by storage key (`<name>_as_<type>`); the replacement for
+    // `customFields`. Only keys defined in the owner's field library (or an applied template) are
+    // accepted. Discover valid keys via `GET /api/cases/fields`.
     [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
     /**
      * The close reason to sync to attached alerts

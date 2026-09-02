@@ -298,7 +298,9 @@ paths:
                           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                     customFields:
                       type: array
-                      description: Custom fields configuration details.
+                      deprecated: true
+                      description: |
+                        Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
                       items:
                         type: object
                         properties:
@@ -483,7 +485,9 @@ paths:
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   customFields:
                     type: array
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
                     items:
                       type: object
                       properties:
@@ -670,7 +674,9 @@ paths:
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
                   customFields:
                     type: array
-                    description: Custom fields configuration details.
+                    deprecated: true
+                    description: |
+                      Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields configuration details.
                     items:
                       type: object
                       properties:
@@ -2377,11 +2383,15 @@ components:
       type: object
       x-state: Technical preview; added in 9.5.0
       description: |
-        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+        Case field values keyed by storage key. This replaces `customFields`. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields; any other key is rejected. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. Legacy custom fields are migrated into this map, so a migrated field's value is found under its `<key>_as_<storage_type>` key. Requires the `xpack.cases.templates.enabled` setting (enabled by default); when disabled, field-library fields and templates are unavailable. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`, or `GET /api/cases/{caseId}/fields` for an existing case).
       maxProperties: 500
       additionalProperties:
         type: string
         maxLength: 30000
+      example:
+        priority_as_keyword: high
+        ticket_number_as_integer: '4287'
+        escalated_as_boolean: 'true'
     create_case_request:
       title: Create case request
       description: The create case API request body varies depending on the type of connector.
@@ -2421,8 +2431,9 @@ components:
           $ref: '#/components/schemas/case_title'
         customFields:
           type: array
+          deprecated: true
           description: |
-            Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+            Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
           minItems: 0
           maxItems: 10
           items:
@@ -2780,6 +2791,14 @@ components:
         version:
           type: string
           example: WzIwNDMxLDFd
+    case_extended_fields_labels:
+      type: object
+      additionalProperties:
+        type: string
+      description: |
+        A read-only map from each `extended_fields` storage key to its human-readable label. Populated at response time from the field library and any applied template; it is not persisted and is ignored on write.
+      example:
+        priority_as_keyword: Priority
     external_service:
       type: object
       nullable: true
@@ -2947,7 +2966,8 @@ components:
           $ref: '#/components/schemas/case_response_created_by_properties'
         customFields:
           type: array
-          description: Custom field values for the case.
+          deprecated: true
+          description: Deprecated. Use `extended_fields` instead. Custom field values for the case.
           items:
             type: object
             properties:
@@ -2971,6 +2991,8 @@ components:
                     maxLength: 160
                     nullable: true
                   - type: boolean
+        extended_fields_labels:
+          $ref: '#/components/schemas/case_extended_fields_labels'
         description:
           type: string
           example: A case description.
@@ -3102,8 +3124,9 @@ components:
                   - $ref: '#/components/schemas/connector_properties_swimlane'
               customFields:
                 type: array
+                deprecated: true
                 description: |
-                  Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+                  Deprecated. Use `extended_fields` instead. Custom field values for a case. Any optional custom fields that are not specified in the request are set to null. Values written here continue to work during the migration to `extended_fields`.
                 minItems: 0
                 maxItems: 10
                 items:
@@ -3133,6 +3156,24 @@ components:
                           maxLength: 160
                           nullable: true
                         - type: boolean
+              template:
+                type: object
+                nullable: true
+                x-state: Technical preview
+                description: |
+                  The case template. Requires the `xpack.cases.templates.enabled` setting. Updating `template` is validation-only: switching the template validates the case's `extended_fields` against the new template's fields but does not inject template defaults (unlike create). Omit to leave the current template unchanged; set to `null` to clear it; set to `{ id, version }` to switch. Unlike create, switching a template on update is an explicit versioned action: both `id` and `version` are required — the server does not resolve a latest version here. After switching, use the get case fields API (`GET /api/cases/{case_id}/fields`) to see the fields the new template exposes.
+                required:
+                  - id
+                  - version
+                properties:
+                  id:
+                    type: string
+                    description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+                  version:
+                    type: integer
+                    description: |
+                      The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
+                    minimum: 1
               description:
                 $ref: '#/components/schemas/case_description'
               extended_fields:
@@ -3260,7 +3301,10 @@ components:
         maxLength: 256
     templates:
       type: array
+      deprecated: true
       x-state: Technical preview
+      description: |
+        Deprecated. These configuration-embedded templates are superseded by the case templates system. Manage templates through the templates API (`GET /api/cases/templates`) and apply their fields via the case `extended_fields`.
       items:
         type: object
         properties:
@@ -3368,7 +3412,9 @@ components:
             - type
         customFields:
           type: array
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
           minItems: 0
           maxItems: 10
           items:
@@ -3445,7 +3491,9 @@ components:
             - type
         customFields:
           type: array
-          description: Custom fields case configuration.
+          deprecated: true
+          description: |
+            Deprecated. Custom fields are superseded by the field library and the case `extended_fields`. Custom fields case configuration.
           items:
             type: object
             required:

@@ -1,0 +1,9 @@
+type: object
+additionalProperties:
+  type: string
+description: >
+  A read-only map from each `extended_fields` storage key to its human-readable label.
+  Populated at response time from the field library and any applied template; it is not
+  persisted and is ignored on write.
+example:
+  priority_as_keyword: Priority
