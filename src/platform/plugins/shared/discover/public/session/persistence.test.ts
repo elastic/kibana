@@ -7,19 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import {
+  VIEW_MODE,
+  type DiscoverSession,
+  type DiscoverSessionTab,
+} from '@kbn/saved-search-plugin/common';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import type { DiscoverSessionClient } from './api_client';
 import { createDiscoverSessionPersistence } from './persistence';
 
-const apiResponse: Awaited<ReturnType<DiscoverSessionClient['get']>> = {
+type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['get']>>;
+
+const runtimeTab: DiscoverSessionTab = {
+  id: 'logs-tab',
+  label: 'Logs',
+  sort: [],
+  columns: [],
+  grid: {},
+  hideChart: false,
+  hideTable: false,
+  isTextBasedQuery: false,
+  usesAdHocDataView: false,
+  serializedSearchSource: { index: 'logs-data-view' },
+};
+
+const apiData: ApiResponse['data'] = {
+  title: 'Session',
+  description: '',
+  tabs: [
+    {
+      id: 'logs-tab',
+      label: 'Logs',
+      sort: [],
+      column_order: [],
+      filters: [],
+      data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
+      view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+      hide_chart: false,
+      hide_table: false,
+    },
+  ],
+};
+
+const apiResponse: ApiResponse = {
   id: 'session-id',
-  data: {
-    title: 'Session',
-    description: '',
-    tabs: [],
-  },
+  data: apiData,
   meta: { managed: false },
 };
 
@@ -27,7 +60,7 @@ const session: SaveDiscoverSessionParams = {
   id: 'session-id',
   title: 'Session',
   description: '',
-  tabs: [],
+  tabs: [runtimeTab],
 };
 const persistedSession: DiscoverSession = {
   ...session,
@@ -45,13 +78,44 @@ describe('Discover session persistence', () => {
       useHttpApi: true,
     });
 
-    await persistence.get('session-id');
-    await persistence.save(session, { copyOnSave: false });
+    const loadedSession = await persistence.get('session-id');
+    const savedSession = await persistence.save(session, { copyOnSave: false });
 
     expect(apiClient.get).toHaveBeenCalledWith('session-id');
-    expect(apiClient.upsert).toHaveBeenCalledWith('session-id', apiResponse.data);
+    expect(apiClient.upsert).toHaveBeenCalledWith('session-id', apiData);
+    expect(apiClient.create).not.toHaveBeenCalled();
     expect(legacyClient.getDiscoverSession).not.toHaveBeenCalled();
     expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
+    expect(loadedSession).toEqual(savedSession);
+    expect(savedSession).toEqual(
+      expect.objectContaining({
+        id: 'session-id',
+        title: 'Session',
+        tabs: [expect.objectContaining({ id: 'logs-tab', label: 'Logs' })],
+      })
+    );
+  });
+
+  it('creates a session through the REST client when saving a copy', async () => {
+    const apiClient = createApiClient();
+    const legacyClient = savedSearchPluginMock.createStartContract();
+    const persistence = createDiscoverSessionPersistence({
+      apiClient,
+      legacyClient,
+      useHttpApi: true,
+    });
+
+    const savedSession = await persistence.save(session, { copyOnSave: true });
+
+    expect(apiClient.create).toHaveBeenCalledWith(apiData);
+    expect(apiClient.upsert).not.toHaveBeenCalled();
+    expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
+    expect(savedSession).toEqual(
+      expect.objectContaining({
+        id: 'session-id',
+        tabs: [expect.objectContaining({ id: 'logs-tab' })],
+      })
+    );
   });
 
   it('uses the legacy client when the local switch is disabled', async () => {
@@ -65,8 +129,8 @@ describe('Discover session persistence', () => {
       useHttpApi: false,
     });
 
-    await persistence.get('session-id');
-    await persistence.save(session, { copyOnSave: false });
+    const loadedSession = await persistence.get('session-id');
+    const savedSession = await persistence.save(session, { copyOnSave: false });
 
     expect(legacyClient.getDiscoverSession).toHaveBeenCalledWith('session-id');
     expect(legacyClient.saveDiscoverSession).toHaveBeenCalledWith(session, {
@@ -74,6 +138,8 @@ describe('Discover session persistence', () => {
     });
     expect(apiClient.get).not.toHaveBeenCalled();
     expect(apiClient.upsert).not.toHaveBeenCalled();
+    expect(loadedSession).toBe(persistedSession);
+    expect(savedSession).toBe(persistedSession);
   });
 });
 

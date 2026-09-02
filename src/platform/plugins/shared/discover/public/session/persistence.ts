@@ -21,6 +21,8 @@ type LegacyDiscoverSessionClient = Pick<
   'getDiscoverSession' | 'saveDiscoverSession'
 >;
 
+// This temporary contract matches the legacy client so Discover can switch persistence paths
+// without changing its save flow. Replace these legacy types when the legacy path is removed.
 export interface DiscoverSessionPersistence {
   get: (id: string) => Promise<DiscoverSession>;
   save: (

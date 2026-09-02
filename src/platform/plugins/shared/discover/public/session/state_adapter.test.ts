@@ -12,7 +12,8 @@ import {
   DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
 } from '@kbn/controls-constants';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { DataGridDensity, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { fromDiscoverSessionApiResponse, toDiscoverSessionApiData } from './state_adapter';
@@ -84,12 +85,25 @@ const response: ApiResponse = {
       {
         id: 'esql',
         label: 'ES|QL',
-        sort: [],
-        column_order: [],
+        sort: [{ name: '@timestamp', direction: 'asc' }],
+        column_order: ['@timestamp', 'message'],
+        column_settings: { message: { width: 320 } },
         data_source: { type: 'esql', query: 'FROM logs-*' },
         hide_chart: false,
         hide_table: false,
+        hide_aggregated_preview: true,
+        row_height: 2,
+        header_row_height: 'auto',
+        rows_per_page: 25,
+        sample_size: 500,
         breakdown_field: 'service.name',
+        chart_interval: 'h',
+        time_range: { from: 'now-24h', to: 'now' },
+        refresh_interval: { pause: false, value: 30_000 },
+        density: DataGridDensity.COMPACT,
+        documents_display_mode: 'json',
+        json_mode_settings: { hide_nulls: true, wrap_lines: false },
+        esql_approximation: true,
         vis_context: {
           suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
           attributes: {
@@ -224,6 +238,21 @@ describe('Discover session state adapter', () => {
     expect(filters[1].data_view_id).toBe('foreign-data-view-id');
   });
 
+  it('keeps pinned filters out of the API document', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    const pinnedFilter = {
+      meta: { index: 'logs-data-view' },
+      query: { match_all: {} },
+      $state: { store: FilterStateStore.GLOBAL_STATE },
+    };
+    session.tabs[0].serializedSearchSource.filter = [pinnedFilter];
+
+    const apiTab = toDiscoverSessionApiData(session).tabs[0];
+    const filters = 'filters' in apiTab ? apiTab.filters : undefined;
+
+    expect(filters).toEqual([]);
+  });
+
   it('reuses an inline runtime ID after runtime-only fields are removed during save', () => {
     const firstSession = fromDiscoverSessionApiResponse(response);
     const inlineDataView = firstSession.tabs[1].serializedSearchSource.index;
@@ -335,14 +364,38 @@ describe('Discover session state adapter', () => {
     });
   });
 
-  it('normalizes the legacy ES|QL control type before saving', () => {
+  it('normalizes the legacy ES|QL control type and camelCase config before saving', () => {
     const session = fromDiscoverSessionApiResponse(response);
     const controlGroup = JSON.parse(session.tabs[2].controlGroupJson ?? '{}');
-    controlGroup['service-control'].type = 'esqlControl';
+    controlGroup['service-control'] = {
+      order: 0,
+      type: 'esqlControl',
+      width: CONTROL_WIDTH_MEDIUM,
+      grow: DEFAULT_PINNED_CONTROL_STATE.grow,
+      controlType: 'STATIC_VALUES',
+      availableOptions: ['api', 'web'],
+      selectedOptions: ['api'],
+      singleSelect: true,
+      variableName: 'service',
+      variableType: 'values',
+      title: 'Service',
+    };
     session.tabs[2].controlGroupJson = JSON.stringify(controlGroup);
 
     const apiTab = toDiscoverSessionApiData(session).tabs[2];
-    expect(apiTab.control_panels?.[0].type).toBe(ESQL_CONTROL);
+    expect(apiTab.control_panels?.[0]).toEqual(
+      expect.objectContaining({
+        type: ESQL_CONTROL,
+        config: expect.objectContaining({
+          control_type: 'STATIC_VALUES',
+          available_options: ['api', 'web'],
+          selected_options: ['api'],
+          single_select: true,
+          variable_name: 'service',
+          variable_type: 'values',
+        }),
+      })
+    );
   });
 
   it('fails the save when control panel JSON is invalid', () => {

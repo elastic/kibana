@@ -10,14 +10,15 @@
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { DiscoverSessionClient } from './api_client';
 
 type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['get']>>;
 type ApiControlPanels = NonNullable<ApiResponse['data']['tabs'][number]['control_panels']>;
 type RuntimeControlPanel = ControlPanelsState<OptionsListESQLControlState>[string];
 
-// TODO: Share this mapping with the server control-panel transformer once it has a
-// browser-safe home. Keep both implementations aligned until then.
+// TODO: Move this mapping to a shared Discover module when the client and server use common
+// session types. Keep both implementations aligned until then.
 /** Converts API controls into the JSON shape used by Discover runtime state. */
 export const toControlGroupJson = (
   controlPanels: ApiControlPanels | undefined
@@ -50,6 +51,7 @@ export const toApiControlPanels = (
     .sort(([, panelA], [, panelB]) => panelA.order - panelB.order)
     .map(([id, panel]): ApiControlPanels[number] => {
       const { order: _order, type, id: _panelId, width, grow, ...config } = panel;
+      const snakeCasedConfig = convertCamelCasedKeysToSnakeCase(config);
 
       if (type !== 'esqlControl' && type !== ESQL_CONTROL) {
         throw new Error(`Unsupported Discover control panel type [${type}]`);
@@ -60,7 +62,7 @@ export const toApiControlPanels = (
         type: ESQL_CONTROL,
         width,
         grow,
-        config,
+        config: snakeCasedConfig,
       };
     });
 

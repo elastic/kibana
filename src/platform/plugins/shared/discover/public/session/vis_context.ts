@@ -26,8 +26,8 @@ interface EsqlVisContextFingerprint {
   timeField?: string;
 }
 
-// TODO: Share this mapping with the server vis-context transformer once it has a
-// browser-safe home. Keep both implementations aligned until then.
+// TODO: Move this mapping to a shared Discover module when the client and server use common
+// session types. Keep both implementations aligned until then.
 /** Restores a chart and keeps runtime-only values across an immediate save response. */
 export const toRuntimeVisContext = (
   apiTab: ApiTab,
