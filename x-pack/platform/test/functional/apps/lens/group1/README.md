@@ -19,7 +19,7 @@ Use the file that matches the main behavior under test:
 
 - `chart_creation.ts`: create, save, reopen, change data view, or edit saved visualization metadata.
 - `layers.ts`: create, duplicate, remove, switch, or validate Lens layers and layer-specific behavior (CCS-only; prefer Scout smokescreen for new coverage).
-- `dimension_editor.ts`: edit dimensions, operations, labels, formats, references, percentile values, or incomplete dimension state.
+- `dimension_editor.ts`: edit dimensions, operations, labels, formats, references, percentile values, or incomplete dimension state. Coverage also lives in Scout smokescreen (`dimension_editor.spec.ts`); prefer that for new tests.
 - `chart_style_settings.ts`: change chart appearance or chart interactions, such as axes, value labels, point visibility, visual options, or legend filtering.
 - `ad_hoc_data_view.ts`: flows specific to ad hoc data views.
 - `multiple_data_views.ts`: flows involving more than one data view.

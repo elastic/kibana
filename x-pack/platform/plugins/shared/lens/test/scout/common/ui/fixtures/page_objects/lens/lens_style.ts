@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { normalizeComputedColor, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -24,6 +24,8 @@ export class LensStyle {
   private readonly colorMappingPalettePicker;
   private readonly legacyPalettePicker;
   readonly referenceLineFillBelowButton;
+  private readonly curveStyleSelect;
+  readonly missingValuesSelect;
 
   constructor(private readonly page: ScoutPage) {
     this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
@@ -42,6 +44,8 @@ export class LensStyle {
     );
     this.legacyPalettePicker = this.page.testSubj.locator('lns-palettePicker');
     this.referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
+    this.curveStyleSelect = this.page.testSubj.locator('lnsCurveStyleSelect');
+    this.missingValuesSelect = this.page.testSubj.locator('lnsMissingValuesSelect');
   }
 
   /**
@@ -412,5 +416,29 @@ export class LensStyle {
     await this.page.components
       .comboBox(`lnsXY-annotation-tooltip-field-picker--${existingPickers}`)
       .setSelectedOptions([fieldName]);
+  }
+
+  /**
+   * Sets XY line interpolation from the open style flyout (`LINEAR`, `CURVE_MONOTONE_X`, …).
+   * EuiSuperSelect options use the type as DOM id (FTR `#${option}`).
+   */
+  async setCurvedLines(type: string) {
+    await this.selectSuperSelectOption(this.curveStyleSelect, type);
+  }
+
+  /**
+   * Sets XY missing-values fitting from the open style flyout (`None`, `Linear`, `Carry`, …).
+   * EuiSuperSelect options use the fitting id as DOM id.
+   */
+  async editMissingValues(type: string) {
+    await this.selectSuperSelectOption(this.missingValuesSelect, type);
+  }
+
+  private async selectSuperSelectOption(select: Locator, optionId: string) {
+    await select.click();
+    const option = this.page.locator(`#${optionId}`);
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    await option.waitFor({ state: 'hidden' });
   }
 }
