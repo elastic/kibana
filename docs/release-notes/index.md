@@ -45,19 +45,21 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Alerting and cases**:
 * Fix legacy custom fields and their v2 field-definition counterparts falling out of sync, by linking each legacy field to its definition and keeping both representations equal on every write [#282772]({{kib-pull}}282772).
-* Fix cases created from v2 templates by a system action not inheriting the template's external connector, sync and observables settings, and assignees [#284854]({{kib-pull}}284854).
+* Fix cases created from a case template by a rule action not inheriting the template's external connector, **Sync alerts** and **Extract observables** settings, and assignees [#284854]({{kib-pull}}284854).
 * Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
 * Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
 * Fix saved Lens visualizations missing from case attachments, and add helper text in the markdown editor for inline Timeline and Lens references [#286164]({{kib-pull}}286164).
 * Fix case metrics failing when a case already has alerts from a linked project [#286185]({{kib-pull}}286185).
-* Fix creating a case from a workflow, a v2 template, or a non-solution owner such as Machine Learning so **Sync alerts** is not turned on unless that owner enables it [#286670]({{kib-pull}}286670).
+* Fix creating a case from a workflow, a case template, or {{ml}} so **Sync alerts** is not turned on unless that solution enables it [#286670]({{kib-pull}}286670).
 * Fix the **Additional fields** editor on the {{sn-itsm}}, {{sn-sir}}, and Jira connectors rejecting Mustache context variables as invalid JSON [#286578]({{kib-pull}}286578).
 * Fix cases accepting alert and event attachments from linked projects or remote clusters [#286972]({{kib-pull}}286972).
 * Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
 * Fix a template `$ref` global field ignoring its hide-on-value condition when the controlling field is in another section [#287308]({{kib-pull}}287308).
 * Fix global field column selections not syncing between the Cases list and table views [#287327]({{kib-pull}}287327).
 * Fix the Cases list keeping the previous page after you change filters [#287945]({{kib-pull}}287945).
-* Fix `.rule-events` and `.alert-actions` data streams requesting a replica on single-node clusters, which left those shards unassigned [#287544]({{kib-pull}}287544).
+* Fix custom threshold **no data** alerts firing for groups that belong to a different custom threshold rule [#287151]({{kib-pull}}287151).
+* Fix custom threshold **Rate** aggregations not firing when a counter increases from 0 to a positive value [#283973]({{kib-pull}}283973).
+* Fix experimental alerting system `.rule-events` and `.alert-actions` data streams requesting a replica on single-node clusters, which left those shards unassigned [#287544]({{kib-pull}}287544).
 * Fix alerting resource installation using unbounded concurrency, which could exhaust {{kib}} heap when many contexts and namespaces install at once [#287643]({{kib-pull}}287643).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.3-8832a483 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
 % * Relabel the top-level **Alerting** privilege as **Alerting V2** in the Roles UI and mark it experimental [#288163]({{kib-pull}}288163).
