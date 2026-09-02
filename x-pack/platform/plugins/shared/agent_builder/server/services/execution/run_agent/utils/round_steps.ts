@@ -67,7 +67,7 @@ export const createBackgroundAgentStep = (
   };
 };
 
-export const buildRoundPrefixSteps = ({
+export const createPreExecutionSteps = ({
   compactionResult,
   relevantSkillsSelection,
 }: {

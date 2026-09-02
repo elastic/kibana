@@ -69,7 +69,7 @@ import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 import {
-  buildRoundPrefixSteps,
+  createPreExecutionSteps,
   createBackgroundAgentStep,
   createReasoningStep,
   createToolCallStep,
@@ -452,7 +452,7 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
-  const steps: ConversationRoundStep[] = buildRoundPrefixSteps({
+  const steps: ConversationRoundStep[] = createPreExecutionSteps({
     compactionResult,
     relevantSkillsSelection,
   });
