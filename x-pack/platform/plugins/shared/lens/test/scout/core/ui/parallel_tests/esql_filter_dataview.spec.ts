@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
+import { KibanaCodeEditorWrapper, type KbnClient, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+
 import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const INITIAL_ESQL_QUERY = `FROM ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}
@@ -16,25 +17,102 @@ const INITIAL_ESQL_QUERY = `FROM ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}
 const WILDCARD_ESQL_QUERY = `FROM ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}*
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
 
-async function setEsqlQueryAndRun(page: ScoutPage, query: string) {
+/**
+ * Creates a library Lens metric bound to the flights data view so the dashboard
+ * can add a second panel without navigating into the Lens editor (which unmounts
+ * the dashboard and races the debounced session-storage backup of the ES|QL panel).
+ */
+const createFlightsLibraryLens = async (
+  kbnClient: KbnClient,
+  spaceId: string,
+  dataViewId: string,
+  title: string
+): Promise<void> => {
+  await kbnClient.request({
+    method: 'POST',
+    path: `/s/${spaceId}/api/visualizations`,
+    headers: {
+      'kbn-xsrf': 'true',
+      'elastic-api-version': '2023-10-31',
+    },
+    body: {
+      type: 'metric',
+      title,
+      description: '',
+      ignore_global_filters: false,
+      sampling: 1,
+      data_source: { type: 'data_view_reference', ref_id: dataViewId },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'count',
+          label: 'Count of records',
+          empty_as_null: true,
+        },
+      ],
+      styling: {
+        primary: {
+          labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
+          value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
+        },
+      },
+    },
+  });
+};
+
+/**
+ * Waits for the new ES|QL panel's initial suggestion/column fetch to finish.
+ *
+ * That request uses `FROM <index> | limit 0` and can complete *after* a later
+ * STATS Run, overwriting a good chart suggestion with an empty Table.
+ */
+const waitForEsqlPanelInitialized = async (page: ScoutPage): Promise<void> => {
+  await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+  await expect(page.testSubj.locator('ESQLEditor-run-query-button')).toBeEnabled();
+  await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
+  // Initial ES|QL suggestion/column fetch (`FROM … | limit 0`) can exceed the
+  // default expect timeout under load; stats only appear once it settles.
+  await expect(page.getByText(/documents processed/i)).toBeVisible({ timeout: 30_000 });
+};
+
+const setEsqlQueryAndRun = async (page: ScoutPage, query: string): Promise<void> => {
   const codeEditor = new KibanaCodeEditorWrapper(page);
   await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+
+  const runButton = page.testSubj.locator('ESQLEditor-run-query-button');
+  await expect(runButton).toBeEnabled();
   await codeEditor.setCodeEditorValue(query);
-  await page.testSubj.click('ESQLEditor-run-query-button');
-  await page.locator('.echCanvasRenderer').waitFor({ state: 'visible', timeout: 30_000 });
-}
+  // Monaco setValue is sync; wait until the model reflects STATS before Run.
+  await expect.poll(async () => codeEditor.getCodeEditorValue()).toContain('STATS');
+  await runButton.click();
+  await page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+};
 
 spaceTest.describe(
   'Lens ES|QL filter data view selector',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-      await apiServices.dataViews.create({
+    let flightsLensTitle: string;
+
+    spaceTest.beforeAll(async ({ apiServices, kbnClient, scoutSpace }) => {
+      flightsLensTitle = `Flights ESQL filter ${scoutSpace.id}`;
+
+      // Space-scoped flights data view for the library Lens panel that supplies a
+      // second data view name in the filter editor (alongside the ES|QL ad-hoc view).
+      const { data: flightsDataView } = await apiServices.dataViews.create({
         title: testData.DATA_VIEW_ID.FLIGHTS,
         name: testData.DATA_VIEW_ID.FLIGHTS,
         timeFieldName: 'timestamp',
         spaceId: scoutSpace.id,
       });
+
+      await createFlightsLibraryLens(
+        kbnClient,
+        scoutSpace.id,
+        flightsDataView.id,
+        flightsLensTitle
+      );
+
       await scoutSpace.uiSettings.set({
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': JSON.stringify(testData.TSDB_IN_RANGE_DATES),
@@ -59,8 +137,7 @@ spaceTest.describe(
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-
-          await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+          await waitForEsqlPanelInitialized(page);
         });
 
         await spaceTest.step('set the ESQL query and apply', async () => {
@@ -75,20 +152,10 @@ spaceTest.describe(
           esqlEmbeddableId = panelElementId!.replace('panel-', '');
         });
 
-        await spaceTest.step('add a Lens chart panel using flights data view', async () => {
-          await dashboard.addNewLensPanel();
-          await expect(page.testSubj.locator('lnsApp')).toBeVisible();
-
-          await page.testSubj.click('lns-dataView-switch-link');
-          await page.testSubj.fill('indexPattern-switcher--input', testData.DATA_VIEW_ID.FLIGHTS);
-          await page.testSubj
-            .locator('indexPattern-switcher')
-            .locator(`[data-test-subj="dataView-${testData.DATA_VIEW_ID.FLIGHTS}"]`)
-            .click();
-
-          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 10_000 });
-          await page.testSubj.click('fieldToggle-AvgTicketPrice');
-          await pageObjects.lens.saveAndReturn();
+        await spaceTest.step('add a flights Lens panel from the library', async () => {
+          // Stay on the dashboard: opening the Lens editor unmounts it and can drop the
+          // debounced session-storage backup of the ES|QL panel's applied state.
+          await dashboard.addLens(flightsLensTitle);
           await dashboard.waitForRenderComplete();
           await dashboard.expectPanelCount(2);
         });
@@ -103,7 +170,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('wait for the filter badge to appear', async () => {
-          await expect(page.testSubj.locator('^filter-badge')).toBeVisible({ timeout: 10_000 });
+          await expect(page.testSubj.locator('^filter-badge')).toBeVisible();
         });
 
         await spaceTest.step('open the filter editor', async () => {
@@ -111,16 +178,16 @@ spaceTest.describe(
           await page.testSubj.click('editFilter');
         });
 
-        await spaceTest.step('verify data view selector has no duplicate names', async () => {
-          await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeVisible({
-            timeout: 5_000,
-          });
+        await spaceTest.step('verify data view selector has two unique names', async () => {
+          await expect(page.testSubj.locator('filterIndexPatternsSelect')).toBeVisible();
 
           const allOptionTexts = await page.components
             .comboBox('filterIndexPatternsSelect')
             .getAllVisibleOptions();
-          expect(allOptionTexts.length).toBeGreaterThan(0);
+          // ES|QL ad-hoc view + flights library panel — and no duplicated labels.
+          expect(allOptionTexts).toHaveLength(2);
           expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
+          expect(allOptionTexts).toContain(testData.DATA_VIEW_ID.FLIGHTS);
         });
       }
     );
@@ -133,7 +200,7 @@ spaceTest.describe(
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-          await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+          await waitForEsqlPanelInitialized(page);
         });
 
         await spaceTest.step('set the initial ESQL query and apply', async () => {
@@ -153,7 +220,7 @@ spaceTest.describe(
           const embeddableId = panelElementId!.replace('panel-', '');
 
           await dashboard.openInlineEditor(embeddableId);
-          await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+          await waitForEsqlPanelInitialized(page);
 
           await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
         });
