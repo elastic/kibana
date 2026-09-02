@@ -136,9 +136,15 @@ describe('pollEsNodesVersion', () => {
     internalClient = elasticsearchClientMock.createInternalClient();
   });
 
-  const nodeInfosSuccessOnce = (infos: NodesInfo) => {
+  const nodeInfosResponseOnce = (infos: NodesInfo) => {
     // @ts-expect-error not full interface
     internalClient.nodes.info.mockResponseOnce(infos);
+  };
+  const nodeInfosSuccessOnce = (infos: NodesInfo, timestamp = Date.now()) => {
+    nodeInfosResponseOnce(infos);
+    internalClient.nodes.stats.mockResponseOnce({
+      nodes: { 'node-0': { timestamp } },
+    });
   };
   const nodeInfosErrorOnce = (error: any) => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
@@ -306,7 +312,7 @@ describe('pollEsNodesVersion', () => {
   });
 
   it('returns compatibility results', (done) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
 
     nodeInfosSuccessOnce(nodes);
@@ -326,6 +332,123 @@ describe('pollEsNodesVersion', () => {
         },
         complete: () => {
           expect(internalClient.nodes.info).toHaveBeenCalledTimes(1);
+          expect(internalClient.nodes.info).toHaveBeenCalledWith(expect.any(Object), {
+            requestTimeout: expect.any(Number),
+            meta: true,
+          });
+          done();
+        },
+        error: done,
+      });
+  });
+
+  it('returns compatibility results when the node stats request fails', (done) => {
+    const nodes = createNodes('5.1.0');
+    nodeInfosResponseOnce(nodes);
+    internalClient.nodes.stats.mockRejectedValueOnce(new Error('mock stats request error'));
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual(mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false));
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('logs an error once when Elasticsearch and Kibana clocks differ by more than 60 seconds', (done) => {
+    expect.assertions(3);
+    const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
+    jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
+    const elasticsearchTime = kibanaTime - 61_000;
+
+    nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchTime);
+    nodeInfosSuccessOnce(createNodes('5.2.0'), elasticsearchTime);
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(2))
+      .subscribe({
+        complete: () => {
+          expect(mockLogger.error).toHaveBeenCalledTimes(1);
+          expect(mockLogger.error).toHaveBeenCalledWith(
+            'Kibana and Elasticsearch clocks are out of sync by at least 61000ms. Kibana time: 2026-08-21T12:00:00.000Z; Elasticsearch time: 2026-08-21T11:58:59.000Z.'
+          );
+          expect(internalClient.nodes.stats).toHaveBeenCalledWith(
+            {
+              node_id: '_all',
+              metric: 'os',
+              filter_path: ['nodes.*.timestamp'],
+            },
+            { requestTimeout: expect.any(Number) }
+          );
+          done();
+        },
+        error: done,
+      });
+  });
+
+  it('does not log an error when clock skew is 60 seconds', (done) => {
+    expect.assertions(1);
+    const kibanaTime = Date.parse('2026-08-21T12:00:00.000Z');
+    jest.spyOn(Date, 'now').mockReturnValue(kibanaTime);
+    nodeInfosSuccessOnce(createNodes('5.1.0'), kibanaTime - 60_000);
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(1))
+      .subscribe({
+        complete: () => {
+          expect(mockLogger.error).not.toHaveBeenCalled();
+          done();
+        },
+        error: done,
+      });
+  });
+
+  it('does not log an error when request latency explains the clock difference', (done) => {
+    const kibanaRequestTime = Date.parse('2026-08-21T12:00:00.000Z');
+    const elasticsearchTime = kibanaRequestTime + 500;
+    const kibanaResponseTime = kibanaRequestTime + 61_000;
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(kibanaRequestTime)
+      .mockReturnValueOnce(kibanaResponseTime);
+    nodeInfosSuccessOnce(createNodes('5.1.0'), elasticsearchTime);
+
+    pollEsNodesVersion({
+      internalClient,
+      healthCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+      healthCheckRetry: 1,
+    })
+      .pipe(take(1))
+      .subscribe({
+        complete: () => {
+          expect(mockLogger.error).not.toHaveBeenCalled();
           done();
         },
         error: done,
@@ -372,6 +495,10 @@ describe('pollEsNodesVersion', () => {
     const mockTestSchedulerInfoResponseOnce = (infos: NodesInfo) => {
       // @ts-expect-error we need to return an incompatible type to use the testScheduler here
       internalClient.nodes.info.mockReturnValueOnce([infos]);
+      // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+      internalClient.nodes.stats.mockReturnValueOnce([
+        { nodes: { 'node-0': { timestamp: Date.now() } } },
+      ]);
     };
 
     const mockTestSchedulerInfoErrorOnce = (error = 'mock error') => {
@@ -423,9 +550,17 @@ describe('pollEsNodesVersion', () => {
           // @ts-expect-error we need to return an incompatible type to use the testScheduler here
           of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
         );
+        internalClient.nodes.stats.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of({ nodes: { 'node-0': { timestamp: Date.now() } } })
+        );
         internalClient.nodes.info.mockReturnValueOnce(
           // @ts-expect-error we need to return an incompatible type to use the testScheduler here
           of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+        );
+        internalClient.nodes.stats.mockReturnValueOnce(
+          // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+          of({ nodes: { 'node-0': { timestamp: Date.now() } } })
         );
 
         const esNodesCompatibility$ = pollEsNodesVersion({

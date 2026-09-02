@@ -38,6 +38,8 @@ import {
 } from './es_kibana_version_compatability';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 
+const MAX_CLOCK_SKEW_MS = 60_000;
+
 /** @public */
 export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
@@ -194,6 +196,7 @@ export const pollEsNodesVersion = ({
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
   const isCheckFailing$ = new BehaviorSubject(false);
+  let clockSkewLogged = false;
 
   let currentInterval = 0;
   const checkInterval$ = combineLatest([isStartup$, isCheckFailing$]).pipe(
@@ -224,7 +227,7 @@ export const pollEsNodesVersion = ({
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
-          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
+          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT, meta: true }
         );
       }).pipe(
         retry({
@@ -241,8 +244,70 @@ export const pollEsNodesVersion = ({
         })
       );
     }),
-    map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) => {
-      return mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch);
+    switchMap((nodesInfoResponse) => {
+      if (clockSkewLogged || 'nodesInfoRequestError' in nodesInfoResponse) {
+        return of({
+          nodesInfoResponse,
+          elasticsearchTime: undefined,
+          kibanaTimeBoundary: undefined,
+        });
+      }
+
+      return defer(async () => {
+        const kibanaRequestTime = Date.now();
+        const nodesStatsResponse = await internalClient.nodes.stats(
+          {
+            node_id: '_all',
+            metric: 'os',
+            filter_path: ['nodes.*.timestamp'],
+          },
+          { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
+        );
+        return { nodesStatsResponse, kibanaRequestTime, kibanaResponseTime: Date.now() };
+      }).pipe(
+        map(({ nodesStatsResponse, kibanaRequestTime, kibanaResponseTime }) => {
+          const elasticsearchTime = Object.values(nodesStatsResponse.nodes).find(
+            ({ timestamp }) =>
+              timestamp !== undefined &&
+              (kibanaRequestTime - timestamp > MAX_CLOCK_SKEW_MS ||
+                timestamp - kibanaResponseTime > MAX_CLOCK_SKEW_MS)
+          )?.timestamp;
+          const kibanaTimeBoundary =
+            elasticsearchTime === undefined
+              ? undefined
+              : Math.min(kibanaResponseTime, Math.max(kibanaRequestTime, elasticsearchTime));
+
+          return { nodesInfoResponse, elasticsearchTime, kibanaTimeBoundary };
+        }),
+        catchError(() =>
+          of({
+            nodesInfoResponse,
+            elasticsearchTime: undefined,
+            kibanaTimeBoundary: undefined,
+          })
+        )
+      );
+    }),
+    tap(({ elasticsearchTime, kibanaTimeBoundary }) => {
+      if (elasticsearchTime === undefined || kibanaTimeBoundary === undefined) {
+        return;
+      }
+
+      const clockSkew = Math.abs(kibanaTimeBoundary - elasticsearchTime);
+
+      log.error(
+        `Kibana and Elasticsearch clocks are out of sync by at least ${clockSkew}ms. Kibana time: ${new Date(
+          kibanaTimeBoundary
+        ).toISOString()}; Elasticsearch time: ${new Date(elasticsearchTime).toISOString()}.`
+      );
+      clockSkewLogged = true;
+    }),
+    map(({ nodesInfoResponse }) => {
+      const nodesInfo =
+        'body' in nodesInfoResponse
+          ? nodesInfoResponse.body
+          : (nodesInfoResponse as NodesInfo & { nodesInfoRequestError?: Error });
+      return mapNodesVersionCompatibility(nodesInfo, kibanaVersion, ignoreVersionMismatch);
     }),
     // Only emit if there are new nodes or versions or if we return an error and that error changes
     distinctUntilChanged(compareNodes),
