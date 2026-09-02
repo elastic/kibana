@@ -278,6 +278,25 @@ export class ReportingPageObject extends FtrService {
   }
 
   async copyReportingPOSTURLValueToClipboard() {
+    // The export flyout renders the POST URL into the `exportAssetValue` code block and the copy
+    // button copies whatever that block currently shows. `selectExportItem` opens the flyout
+    // before the URL for the newly selected export renders, so a copy click that lands too early
+    // leaves the previous export's value on the clipboard. Wait for the URL to render, copy it
+    // once, then confirm the clipboard reflects the rendered value before returning.
+    let renderedUrl = '';
+    await this.retry.waitFor('export asset URL to render in the flyout', async () => {
+      renderedUrl = (
+        await this.browser.execute(
+          () => document.querySelector('[data-test-subj="exportAssetValue"]')?.textContent ?? ''
+        )
+      ).trim();
+      return renderedUrl.length > 0;
+    });
+
     await this.exports.copyExportAssetText();
+
+    await this.retry.waitFor('clipboard to hold the rendered export URL', async () => {
+      return (await this.browser.getClipboardValue()).trim() === renderedUrl;
+    });
   }
 }
