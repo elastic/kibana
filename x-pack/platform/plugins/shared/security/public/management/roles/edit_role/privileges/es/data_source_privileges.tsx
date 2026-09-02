@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
-import type { estypes } from '@elastic/elasticsearch';
 
 import { DataSourcePrivilegeForm } from './data_source_privilege_form';
 import type { Role } from '../../../../../../common';
@@ -59,104 +59,115 @@ const ensureGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege => {
   );
 };
 
-export class DataSourcePrivileges extends Component<Props> {
-  static defaultProps: Partial<Props> = {
-    editable: true,
-  };
+export const DataSourcePrivileges = ({
+  role,
+  indexPatterns,
+  onChange,
+  onAdd,
+  validator,
+  editable = true,
+}: Props) => {
+  const dataSources: RoleDataSourcePrivilege[] = useMemo(() => {
+    return getGlobalPrivilege(role)?.data_source ?? [];
+  }, [role]);
 
-  public render() {
-    const dataSources: RoleDataSourcePrivilege[] = getGlobalPrivilege(this.props.role)?.data_source ?? [];
-    const isRoleReadOnlyValue = !this.props.editable || isRoleReadOnly(this.props.role);
+  const isRoleReadOnlyValue = useMemo(() => {
+    return !editable || isRoleReadOnly(role);
+  }, [editable, role]);
 
-    return (
-      <Fragment>
-        {dataSources.map((dataSourcePrivilege: RoleDataSourcePrivilege, i: number) => (
-          <DataSourcePrivilegeForm
-            key={i}
-            formIndex={i}
-            validator={this.props.validator}
-            indexPatterns={this.props.indexPatterns}
-            dataSourcePrivilege={dataSourcePrivilege}
-            availableDataSourcePrivileges={AVAILABLE_DATA_SOURCE_PRIVILEGES}
-            onChange={this.onDataSourcePrivilegeChange(i)}
-            onDelete={this.onDataSourcePrivilegeDelete(i)}
-            isRoleReadOnly={isRoleReadOnlyValue}
-          />
-        ))}
+  const onDataSourcePrivilegeChange = useCallback(
+    (privilegeIndex: number) => {
+      return (updatedPrivilege: RoleDataSourcePrivilege) => {
+        const current = getGlobalPrivilege(role)?.data_source ?? [];
+        const next = [...current];
+        next[privilegeIndex] = updatedPrivilege;
 
-        {this.props.editable && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="plusCircle" onClick={this.props.onAdd}>
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.elasticSearchPrivileges.addDataSourcePrivilegesButtonLabel"
-                    defaultMessage="Add data source privilege"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </Fragment>
-    );
-  }
+        const global = ensureGlobalPrivilege(role);
+        const currentGlobal = role.elasticsearch.global;
+        const nextGlobal = Array.isArray(currentGlobal)
+          ? currentGlobal.map((entry, index) => {
+              if (index !== 0 && entry.data_source == null) {
+                return entry;
+              }
+              const shouldWrite = entry.data_source != null || index === 0;
+              return shouldWrite ? { ...entry, data_source: next } : entry;
+            })
+          : { ...global, data_source: next };
 
-  private onDataSourcePrivilegeChange = (privilegeIndex: number) => {
-    return (updatedPrivilege: RoleDataSourcePrivilege) => {
-      const current = getGlobalPrivilege(this.props.role)?.data_source ?? [];
-      const next = [...current];
-      next[privilegeIndex] = updatedPrivilege;
+        onChange({
+          ...role,
+          elasticsearch: {
+            ...role.elasticsearch,
+            global: nextGlobal,
+          },
+        });
+      };
+    },
+    [onChange, role]
+  );
 
-      const global = ensureGlobalPrivilege(this.props.role);
-      const currentGlobal = this.props.role.elasticsearch.global;
-      const nextGlobal = Array.isArray(currentGlobal)
-        ? currentGlobal.map((entry, index) => {
-            if (index !== 0 && entry.data_source == null) {
-              return entry;
-            }
-            const shouldWrite = entry.data_source != null || index === 0;
-            return shouldWrite ? { ...entry, data_source: next } : entry;
-          })
-        : { ...global, data_source: next };
+  const onDataSourcePrivilegeDelete = useCallback(
+    (privilegeIndex: number) => {
+      return () => {
+        const current = getGlobalPrivilege(role)?.data_source ?? [];
+        const next = [...current];
+        next.splice(privilegeIndex, 1);
 
-      this.props.onChange({
-        ...this.props.role,
-        elasticsearch: {
-          ...this.props.role.elasticsearch,
-          global: nextGlobal,
-        },
-      });
-    };
-  };
+        const global = ensureGlobalPrivilege(role);
+        const currentGlobal = role.elasticsearch.global;
+        const nextGlobal = Array.isArray(currentGlobal)
+          ? currentGlobal.map((entry, index) => {
+              if (index !== 0 && entry.data_source == null) {
+                return entry;
+              }
+              const shouldWrite = entry.data_source != null || index === 0;
+              return shouldWrite ? { ...entry, data_source: next } : entry;
+            })
+          : { ...global, data_source: next };
 
-  private onDataSourcePrivilegeDelete = (privilegeIndex: number) => {
-    return () => {
-      const current = getGlobalPrivilege(this.props.role)?.data_source ?? [];
-      const next = [...current];
-      next.splice(privilegeIndex, 1);
+        onChange({
+          ...role,
+          elasticsearch: {
+            ...role.elasticsearch,
+            global: nextGlobal,
+          },
+        });
+      };
+    },
+    [onChange, role]
+  );
 
-      const global = ensureGlobalPrivilege(this.props.role);
-      const currentGlobal = this.props.role.elasticsearch.global;
-      const nextGlobal = Array.isArray(currentGlobal)
-        ? currentGlobal.map((entry, index) => {
-            if (index !== 0 && entry.data_source == null) {
-              return entry;
-            }
-            const shouldWrite = entry.data_source != null || index === 0;
-            return shouldWrite ? { ...entry, data_source: next } : entry;
-          })
-        : { ...global, data_source: next };
+  return (
+    <Fragment>
+      {dataSources.map((dataSourcePrivilege: RoleDataSourcePrivilege, i: number) => (
+        <DataSourcePrivilegeForm
+          key={i}
+          formIndex={i}
+          validator={validator}
+          indexPatterns={indexPatterns}
+          dataSourcePrivilege={dataSourcePrivilege}
+          availableDataSourcePrivileges={AVAILABLE_DATA_SOURCE_PRIVILEGES}
+          onChange={onDataSourcePrivilegeChange(i)}
+          onDelete={onDataSourcePrivilegeDelete(i)}
+          isRoleReadOnly={isRoleReadOnlyValue}
+        />
+      ))}
 
-      this.props.onChange({
-        ...this.props.role,
-        elasticsearch: {
-          ...this.props.role.elasticsearch,
-          global: nextGlobal,
-        },
-      });
-    };
-  };
-}
-
+      {editable && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton iconType="plusCircle" onClick={onAdd}>
+                <FormattedMessage
+                  id="xpack.security.management.editRole.elasticSearchPrivileges.addDataSourcePrivilegesButtonLabel"
+                  defaultMessage="Add data source privilege"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </Fragment>
+  );
+};
