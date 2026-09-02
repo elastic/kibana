@@ -97,7 +97,7 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} />
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
 
           <EuiFlexItem>

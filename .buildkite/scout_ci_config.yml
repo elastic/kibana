@@ -84,6 +84,7 @@ plugins:
     - security_solution
     - security_solution_serverless
     - serverless_observability
+    - serverless_vectordb
     - share
     - significant_events
     - significant_events_app

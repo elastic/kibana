@@ -18,14 +18,12 @@ interface StatCardDeps {
   isLoading: boolean;
 }
 
-const showsVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
+
+const showVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
   application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
 
-export const getDataCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+export const getDataCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'database',
   title: i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
     defaultMessage: 'Data',
@@ -45,7 +43,7 @@ export const getDataCard = ({
       value: formatNumber(stats.documentsCount),
       isLoading,
     },
-    ...(showsVectorCount({ application })
+    ...(showVectorCount({ application })
       ? [
           {
             key: 'vectors',
@@ -78,11 +76,7 @@ export const getDataCard = ({
   ],
 });
 
-const getDashboardsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getDashboardsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'productDashboard',
   title: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.title', {
     defaultMessage: 'Dashboards',
@@ -127,11 +121,7 @@ const getDashboardsCard = ({
   ],
 });
 
-const getWorkflowsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getWorkflowsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'workflow',
   title: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.title', {
     defaultMessage: 'Workflows',
@@ -176,11 +166,7 @@ const getWorkflowsCard = ({
   ],
 });
 
-const getApiKeysCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getApiKeysCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'key',
   title: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.title', {
     defaultMessage: 'API Keys',
@@ -229,7 +215,7 @@ const getApiKeysCard = ({
 });
 
 /** Builds the cards rendered in a row under the data card, in display order. */
-export const getSecondaryCards = (deps: StatCardDeps): HomePageStatPanelProps[] => [
+export const getSecondaryCards = (deps: StatCardDeps): HomePageStats[] => [
   getDashboardsCard(deps),
   getWorkflowsCard(deps),
   getApiKeysCard(deps),

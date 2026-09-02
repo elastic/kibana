@@ -54,6 +54,10 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/features-plugin'
+  - '@kbn/scout'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/discover-plugin'
 tags:
   - plugin
   - prod
@@ -67,6 +71,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
