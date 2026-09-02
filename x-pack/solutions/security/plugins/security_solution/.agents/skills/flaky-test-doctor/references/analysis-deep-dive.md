@@ -53,7 +53,7 @@ Compare both tests and recommend keeping the better-written one.
 
 ### Duplicate in Scout tests
 
-Scout runs on MKI (stateful and serverless). Scout can replace Cypress for both ESS and MKI.
+Scout runs on stateful (ESS / classic Cloud) and on serverless, including MKI. Stateful is not MKI. Scout can replace Cypress `@ess` when it has `tags.stateful.*`, and Cypress `@serverless` when it has `tags.serverless.security.*` (MKI).
 
 **Read the `tag:` argument in the Scout spec** — do not grep for `@local-…` / `@cloud-…` strings. Those are runtime expansions of the `tags.*` helpers and almost never appear in source.
 
