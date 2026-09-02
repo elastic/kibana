@@ -32,7 +32,7 @@ interface OverviewConfig {
   configId: string;
   name: string;
   overallStatus: string;
-  origin?: string;
+  origin?: 'heartbeat';
   remote?: { remoteName: string };
   locations: OverviewLocation[];
 }
