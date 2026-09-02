@@ -18,18 +18,16 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodesFilterState, EpisodesSortState } from '../queries/episodes_query';
+import type { EpisodesFilterState, EpisodesSortState } from '../../queries/episodes_query';
 import {
   EPISODE_SEVERITY_CHART_VALUE,
   EPISODE_SEVERITIES,
   EPISODE_SEVERITY_FILTER_NONE,
   type EpisodeSeverity,
-} from '../components/severity/severity_utils';
-import { CLASSIC_ALERT_MUTED_FIELD, CLASSIC_ALERT_SNOOZED_FIELD } from './constants';
+} from '../../components/severity/severity_utils';
 import { V1_SEVERITY_MAP } from './map_alert';
 
 export interface ClassicAlertsTimeRange {
@@ -202,42 +200,3 @@ export const buildClassicAlertsSort = (sortState?: EpisodesSortState): estypes.S
   const field = (sortState && SORT_FIELD_MAP[sortState.sortField]) ?? TIMESTAMP;
   return [{ [field]: { order, unmapped_type: 'keyword' } }];
 };
-
-/**
- * Aggregations that compute the classic KPI counts with a v2 equivalent.
- *
- * Shaped to satisfy the `/internal/rac/alerts/find` route's aggregation schema,
- * whose `filter` aggregation only accepts a single `term` (no `bool`). Because of
- * that, "snoozed OR muted" is expressed as two separate `term` filter counts
- * (`snoozed` + `muted`) that the client sums — see `parseClassicAlertsKpis`. That
- * sum can slightly overcount alerts that are both muted and snoozed, which is rare
- * in practice.
- */
-export const buildClassicAlertsKpiAggs = (): Record<
-  string,
-  estypes.AggregationsAggregationContainer
-> => ({
-  firing_rules: {
-    filter: { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
-    aggs: {
-      rules: { cardinality: { field: ALERT_RULE_UUID } },
-    },
-  },
-  acknowledged: {
-    filter: { term: { [ALERT_WORKFLOW_STATUS]: 'acknowledged' } },
-  },
-  muted: {
-    filter: { term: { [CLASSIC_ALERT_MUTED_FIELD]: true } },
-  },
-  snoozed: {
-    filter: { term: { [CLASSIC_ALERT_SNOOZED_FIELD]: true } },
-  },
-});
-
-export const buildClassicAlertsTagsAggs = (
-  size: number
-): Record<string, estypes.AggregationsAggregationContainer> => ({
-  tags: {
-    terms: { field: ALERT_RULE_TAGS, size },
-  },
-});

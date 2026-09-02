@@ -6,15 +6,13 @@
  */
 
 import type { EpisodeDataSource } from '../types/episode_data_source';
-import {
-  fetchClassicAlertsAsEpisodes,
-  fetchClassicAlertsHistogram,
-  fetchClassicAlertsKpis,
-  fetchClassicAlertsTags,
-} from '../apis/classic_alerts_api';
+import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
+import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
+import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
+import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
+import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
-import { resolveClassicRules } from './resolve_classic_rules';
 
 export const CLASSIC_EPISODE_SOURCE_ID = 'classic-alerts';
 

@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
+import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
 import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api');
+jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
 const mockFetchClassicAlertById = jest.mocked(fetchClassicAlertById);
 

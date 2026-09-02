@@ -46,10 +46,8 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import {
-  fetchClassicAlertById,
-  type ClassicAlertFields,
-} from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
+import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
+import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
 import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../episode_sources';
 import * as i18n from '../translations';

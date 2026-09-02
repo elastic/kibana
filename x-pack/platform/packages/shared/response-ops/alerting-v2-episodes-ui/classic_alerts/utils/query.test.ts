@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildClassicAlertsQuery,
-  buildClassicAlertsSort,
-  buildClassicAlertsKpiAggs,
-} from './query';
+import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 
 /** Extracts `bool.filter` from a query container, throwing if the shape is unexpected. */
@@ -138,25 +134,5 @@ describe('buildClassicAlertsSort', () => {
   it('falls back to @timestamp for unknown fields', () => {
     const sort = buildClassicAlertsSort({ sortField: 'unknown_field', sortDirection: 'asc' });
     expect(sort).toEqual([{ '@timestamp': { order: 'asc', unmapped_type: 'keyword' } }]);
-  });
-});
-
-describe('buildClassicAlertsKpiAggs', () => {
-  it('returns aggregations for firing_rules, acknowledged, muted, and snoozed', () => {
-    const aggs = buildClassicAlertsKpiAggs();
-
-    expect(aggs).toHaveProperty('firing_rules');
-    expect(aggs).toHaveProperty('acknowledged');
-    expect(aggs).toHaveProperty('muted');
-    expect(aggs).toHaveProperty('snoozed');
-  });
-
-  it('firing_rules filters on active status with a cardinality sub-agg', () => {
-    const aggs = buildClassicAlertsKpiAggs();
-
-    expect(aggs.firing_rules).toEqual({
-      filter: { term: { 'kibana.alert.status': 'active' } },
-      aggs: { rules: { cardinality: { field: 'kibana.alert.rule.uuid' } } },
-    });
   });
 });

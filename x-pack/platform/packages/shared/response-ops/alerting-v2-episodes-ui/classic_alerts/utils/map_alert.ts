@@ -22,8 +22,8 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { AlertEpisode } from '../../queries/episodes_query';
+import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
 
 /**
  * Maps legacy v1 severity values that don't exist in the v2 `EpisodeSeverity`

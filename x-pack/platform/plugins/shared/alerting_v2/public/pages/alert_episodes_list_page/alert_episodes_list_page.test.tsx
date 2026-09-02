@@ -15,7 +15,7 @@ import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
-import { fetchClassicAlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
+import { fetchClassicAlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
@@ -65,7 +65,7 @@ jest.mock('@kbn/unified-data-table', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
-jest.mock('@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api');
+jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes');
 
 // useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
