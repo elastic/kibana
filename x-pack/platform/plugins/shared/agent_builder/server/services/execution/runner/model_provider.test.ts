@@ -140,7 +140,10 @@ describe('createModelProvider', () => {
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
           request: deps.request,
-          bindTo: { connectorId: 'default-connector' },
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
         })
       );
       expect(model.chatModel).toBe(chatModel);
@@ -211,7 +214,9 @@ describe('createModelProvider', () => {
         expect.objectContaining({ connectorId: 'specific-connector' })
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
-        expect.objectContaining({ bindTo: { connectorId: 'specific-connector' } })
+        expect.objectContaining({
+          bindTo: expect.objectContaining({ connectorId: 'specific-connector' }),
+        })
       );
     });
   });
@@ -321,7 +326,7 @@ describe('createModelProvider', () => {
   });
 
   describe('telemetryMetadata', () => {
-    it('defaults to the Agent Builder telemetry and binds no metadata when none is provided', async () => {
+    it('defaults to the Agent Builder telemetry and binds it on both the chat model and client', async () => {
       const deps = setupDeps();
       setupChatAndClient(deps.inference);
 
@@ -335,7 +340,10 @@ describe('createModelProvider', () => {
       );
       expect(deps.inference.getClient).toHaveBeenCalledWith(
         expect.objectContaining({
-          bindTo: { connectorId: 'default-connector' },
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          },
         })
       );
     });
@@ -443,6 +451,110 @@ describe('createModelProviderFactory', () => {
       expect.objectContaining({
         request: deps.request,
         connectorId: 'override-connector',
+      })
+    );
+  });
+});
+
+describe('anonymizationMetadata threading', () => {
+  beforeEach(() => {
+    resolveSelectedConnectorIdMock.mockResolvedValue('default-connector');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('forwards anonymizationMetadata to chatModelOptions', async () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+    const anonymizationMetadata = { sessionId: 'conv-1', agentId: 'agent-a' };
+
+    const provider = createModelProvider({ ...deps, anonymizationMetadata });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatModelOptions: expect.objectContaining({ anonymizationMetadata }),
+      })
+    );
+  });
+
+  it('forwards anonymizationMetadata to getClient bindTo.metadata', async () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+    const anonymizationMetadata = { sessionId: 'conv-1', agentId: 'agent-a' };
+
+    const provider = createModelProvider({ ...deps, anonymizationMetadata });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bindTo: expect.objectContaining({
+          metadata: expect.objectContaining({ anonymization: anonymizationMetadata }),
+        }),
+      })
+    );
+  });
+
+  it('always includes connectorTelemetry in getClient bindTo.metadata (default fallback)', async () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+
+    const provider = createModelProvider(deps);
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bindTo: expect.objectContaining({
+          metadata: expect.objectContaining({
+            connectorTelemetry: MODEL_TELEMETRY_METADATA,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('combines telemetryMetadata and anonymizationMetadata in getClient bindTo.metadata', async () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+    const anonymizationMetadata = { sessionId: 'conv-1', agentId: 'agent-a' };
+    const telemetryMetadata = { pluginId: 'my-plugin' };
+
+    const provider = createModelProvider({ ...deps, telemetryMetadata, anonymizationMetadata });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        bindTo: expect.objectContaining({
+          metadata: {
+            connectorTelemetry: telemetryMetadata,
+            anonymization: anonymizationMetadata,
+          },
+        }),
+      })
+    );
+  });
+
+  it('forwards anonymizationMetadata through the factory per-request opts', async () => {
+    const deps = setupDeps();
+    setupChatAndClient(deps.inference);
+    const anonymizationMetadata = { sessionId: 'conv-2', agentId: 'agent-b' };
+
+    const factory = createModelProviderFactory({
+      inference: deps.inference,
+      uiSettings: deps.uiSettings,
+      savedObjects: deps.savedObjects,
+      logger: deps.logger,
+      searchInferenceEndpoints: deps.searchInferenceEndpoints,
+    });
+
+    const provider = factory({ request: deps.request, anonymizationMetadata });
+    await provider.getDefaultModel();
+
+    expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatModelOptions: expect.objectContaining({ anonymizationMetadata }),
       })
     );
   });
