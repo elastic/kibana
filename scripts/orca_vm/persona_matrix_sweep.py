@@ -837,7 +837,11 @@ def main() -> int:
     # vCPU regional quota (~43 concurrent), so the ceiling here is Azure API
     # politeness and local ssh/scp load, not quota.
     ap.add_argument("--provision-workers", type=int, default=5,
-                    help="parallel VM provision+deploy workers")
+                    help="parallel VM provision+deploy workers. Raising this "
+                         "trades wall-clock for boot races: at 8 on 2026-09-02, "
+                         "5/15 VMs lost the CCM/.inference readiness race "
+                         "(fetch failed -> enable_eis_ccm exit 1). run_model.sh "
+                         "now retries that step 3x, but 5 is the tested default.")
     ap.add_argument("--suite", default="security-persona-matrix",
                     choices=sorted(SUITE_PROFILES),
                     help="eval suite to sweep; selects overlays, VM prefix and doc gate")

@@ -114,8 +114,35 @@ echo "ES data cleaned"
 echo "=== Running eval: $MODEL ==="
 # Suite is injected by the sweeper (EVAL_SUITE); default keeps the historical
 # persona-matrix behaviour for any caller that predates the suite port.
-node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tail -40
-EVAL_EXIT=${PIPESTATUS[0]}
+#
+# CCM boot race: `evals start` waits for the .inference index, then enables
+# Cloud Connected Mode against localhost:9220. Under concurrent provisioning
+# (8-way, 2026-09-02) ES was not yet accepting connections for 5/15 VMs and
+# the step died with "TypeError: fetch failed" ->
+# "enable_eis_ccm exited with code 1" -> EVAL_EXIT=1 and nothing to export.
+# The single-VM canary never hit it. It is a transient readiness fault, so
+# retry the whole step; a genuine failure (bad model, real eval failure)
+# fails identically on every attempt and still surfaces.
+run_eval() {
+  node scripts/evals start --profile local --suite "${EVAL_SUITE:-security-persona-matrix}" --model "$MODEL" 2>&1 | tail -40
+  return ${PIPESTATUS[0]}
+}
+
+EVAL_EXIT=1
+for attempt in 1 2 3; do
+  echo "--- eval attempt $attempt/3 ---"
+  run_eval
+  EVAL_EXIT=$?
+  [ "$EVAL_EXIT" -eq 0 ] && break
+  if [ "$attempt" -lt 3 ]; then
+    echo "eval attempt $attempt failed (exit $EVAL_EXIT); stopping stack and retrying"
+    node scripts/evals stop 2>/dev/null || true
+    pkill -f "scout.js" 2>/dev/null || true
+    pkill -f "org.elasticsearch.bootstrap.Elasticsearch" 2>/dev/null || true
+    sleep $((attempt * 30))
+    rm -rf ~/Projects/kibana/.es/cluster-scout/data 2>/dev/null
+  fi
+done
 echo "EVAL_EXIT=$EVAL_EXIT"
 
 # ─── Export scores to golden cluster ────────────────────────────────────────
