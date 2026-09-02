@@ -1,5 +1,8 @@
 {
-  "sha1": "65ec61ebc2a08258e91693a78442962a905ef6d2",
+  "sha1": "9502751567cc1d26a898e1d6209aa0d2b483b173",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "6a809f032317cab-9d625a74b69e51b",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/appearance.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 15,
+        "column": 23
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/appearance.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 24,
+        "column": 39
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links_unprivileged.spec.ts",
-        "line": 18,
-        "column": 7
+        "line": 13,
+        "column": 39
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 52,
-        "column": 7
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -81,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 92,
+        "line": 74,
         "column": 7
       }
     },
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 100,
-        "column": 7
+        "line": 78,
+        "column": 23
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 32,
+        "column": 57
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
-        "line": 47,
-        "column": 7
+        "line": 36,
+        "column": 22
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 80,
+        "column": 16
       }
     },
     {
@@ -151,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
-        "line": 128,
-        "column": 7
+        "line": 112,
+        "column": 69
       }
     },
     {
@@ -165,8 +168,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_onboarding.spec.ts",
-        "line": 166,
-        "column": 7
+        "line": 142,
+        "column": 9
+      }
+    },
+    {
+      "id": "ba9caf2bad05dd1-6bbe606e48badb6",
+      "title": "Spaces preferences modal persists remember last selected space preference when saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_preferences.spec.ts",
+        "line": 23,
+        "column": 8
+      }
+    },
+    {
+      "id": "ba9caf2bad05dd1-db13a3b8711401d",
+      "title": "Spaces preferences modal does not persist when discarding after toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/spaces_preferences.spec.ts",
+        "line": 31,
+        "column": 16
       }
     },
     {
@@ -179,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/trial_product_intercepts.spec.ts",
-        "line": 52,
-        "column": 7
+        "line": 37,
+        "column": 32
       }
     }
   ]

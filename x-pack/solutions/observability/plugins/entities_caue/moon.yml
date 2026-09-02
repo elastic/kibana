@@ -17,13 +17,15 @@ project:
   owner: '@elastic/obs-ux-infra_services-team'
   sourceRoot: x-pack/solutions/observability/plugins/entities_caue
 dependsOn:
+  - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/entity-store'
-  - '@kbn/es-types'
+  - '@kbn/observability-shared-plugin'
   - '@kbn/esql-utils'
   - '@kbn/i18n'
   - '@kbn/react-query'
+  - '@kbn/share-plugin'
 tags:
   - plugin
   - prod
@@ -34,6 +36,7 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

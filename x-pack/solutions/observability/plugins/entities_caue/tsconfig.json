@@ -10,7 +10,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/entity-store",
-    "@kbn/es-types",
     "@kbn/observability-shared-plugin",
     "@kbn/esql-utils",
     "@kbn/i18n",

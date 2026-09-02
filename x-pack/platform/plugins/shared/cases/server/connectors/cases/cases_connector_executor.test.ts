@@ -354,6 +354,9 @@ describe('CasesConnectorExecutor', () => {
                     },
                   ],
                 },
+                Object {
+                  "relaxRequiredFields": true,
+                },
               ],
             ]
           `);
@@ -371,14 +374,14 @@ describe('CasesConnectorExecutor', () => {
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(2);
 
-          expect(mockGetRecordId).nthCalledWith(1, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
             ruleId: rule.id,
             grouping: { 'host.name': 'A' },
             owner,
             spaceId: 'default',
           });
 
-          expect(mockGetRecordId).nthCalledWith(2, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(2, {
             ruleId: rule.id,
             grouping: { 'host.name': 'B' },
             owner,
@@ -392,7 +395,7 @@ describe('CasesConnectorExecutor', () => {
           expect(mockGetRecordId).toHaveBeenCalledTimes(3);
 
           for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-            expect(mockGetRecordId).nthCalledWith(index + 1, {
+            expect(mockGetRecordId).toHaveBeenNthCalledWith(index + 1, {
               ruleId: rule.id,
               grouping,
               owner,
@@ -500,7 +503,7 @@ describe('CasesConnectorExecutor', () => {
           expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
           for (const [index, { grouping }] of groupedAlertsWithOracleKey.entries()) {
-            expect(mockGetCaseId).nthCalledWith(index + 1, {
+            expect(mockGetCaseId).toHaveBeenNthCalledWith(index + 1, {
               ruleId: rule.id,
               grouping,
               owner,
@@ -517,13 +520,13 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutor.execute(params);
 
-          expect(mockGetCaseId).toBeCalledTimes(3);
+          expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
           /**
            * Oracle record index: 0
            * Should update the counter
            */
-          expect(mockGetCaseId).nthCalledWith(1, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
             counter: 2,
             grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'A' },
             owner: 'cases',
@@ -535,7 +538,7 @@ describe('CasesConnectorExecutor', () => {
            * Oracle record index: 1
            * Should not update the counter
            */
-          expect(mockGetCaseId).nthCalledWith(2, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.1', 'host.name': 'B' },
             owner: 'cases',
@@ -547,7 +550,7 @@ describe('CasesConnectorExecutor', () => {
            * Oracle record index: 3
            * Not found. Created.
            */
-          expect(mockGetCaseId).nthCalledWith(3, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
             counter: 1,
             grouping: { 'dest.ip': '0.0.0.3', 'host.name': 'B' },
             owner: 'cases',
@@ -1950,6 +1953,153 @@ metadata:
             expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
           });
 
+          describe('linked-field representation provenance', () => {
+            // A legacy required field linked (via legacyKey) to a global definition whose Field
+            // Library default legitimately diverged from the legacy configuration default.
+            const linkedLegacyField = {
+              key: 'req-text-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Required text',
+              required: true,
+              defaultValue: 'legacy',
+            };
+            const unlinkedLegacyField = {
+              key: 'unlinked-key',
+              type: CustomFieldTypes.TEXT,
+              label: 'Unlinked required text',
+              required: true,
+              defaultValue: 'unlinked-default',
+            };
+            const linkedGlobalDefinition = {
+              fieldDefinitionId: 'fd-priority',
+              name: 'priority',
+              owner: params.owner,
+              isGlobal: true,
+              legacyKey: 'req-text-key',
+              definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+metadata:
+  default: "field-library"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [linkedLegacyField, unlinkedLegacyField],
+                  templates: [],
+                },
+              ]);
+            });
+
+            it('sends only the v2 value for a linked field whose v1/v2 defaults diverge (no dual-input conflict)', async () => {
+              // REGRESSION (the bug this guards): the connector generated BOTH the required
+              // legacy default ("legacy") and the linked Field Library default ("field-library")
+              // as explicit values. Pairing rejected the whole bulk request as a dual-input
+              // conflict, so alert rules created no cases.
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // The linked legacy key is dropped from raw customFields (pairing derives v1 from
+              // the v2 value); the unlinked required field keeps its legacy fallback.
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+
+            it('keeps the required legacy fallback when the linked definition has no v2 value', async () => {
+              const linkedDefinitionWithoutDefault = {
+                ...linkedGlobalDefinition,
+                definition: `
+name: priority
+type: keyword
+control: INPUT_TEXT
+label: Priority
+`,
+              };
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedDefinitionWithoutDefault],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              // No v2 value was generated for the linked field — its required legacy fallback
+              // must remain (pairing then derives the v2 side from it).
+              expect(createdCase.customFields).toEqual([
+                { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'legacy' },
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+
+            it('applies the same filtering on the createNewCasesOutOfClosedCases path', async () => {
+              casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+                fieldDefinitions: [linkedGlobalDefinition],
+                total: 1,
+              });
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+                errors: [],
+              });
+              mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'tmpl-v2-id',
+                templateVersion: '1',
+                reopenClosedCases: false,
+              });
+
+              const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+              const createdCase = bulkCreateCall.cases[0];
+
+              expect(createdCase.customFields).toEqual([
+                { key: 'unlinked-key', type: CustomFieldTypes.TEXT, value: 'unlinked-default' },
+              ]);
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                priority_as_keyword: 'field-library',
+              });
+            });
+          });
+
           it('uses v2 template when creating cases from closed cases (createNewCasesOutOfClosedCases path)', async () => {
             casesClientMock.cases.bulkGet.mockResolvedValue({
               cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
@@ -2273,6 +2423,12 @@ fields: []
               { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
             ]);
 
+            // The connector is an automated caller: required-field enforcement must be relaxed
+            // on this create path too, not only on upsertCases.
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][1]).toEqual({
+              relaxRequiredFields: true,
+            });
+
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
               Object {
                 "cases": Array [
@@ -2363,18 +2519,20 @@ fields: []
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2397,18 +2555,20 @@ fields: []
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2469,41 +2629,41 @@ fields: []
           await connectorExecutor.execute({ ...params, internallyManagedAlerts: true });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
 
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
             caseId: 'mock-id-2',
             attachments: [
               {
-                alertId: ['alert-id-1'],
-                index: ['alert-index-1'],
+                attachmentId: ['alert-id-1'],
+                metadata: { index: ['alert-index-1'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
 
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
             caseId: 'mock-id-3',
             attachments: [
               {
-                alertId: ['alert-id-3'],
-                index: ['alert-index-3'],
+                attachmentId: ['alert-id-3'],
+                metadata: { index: ['alert-index-3'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2790,18 +2950,20 @@ fields: []
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: alerts.map((alert) => alert._id),
+                metadata: {
+                  index: alerts.map((alert) => alert._index),
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2833,7 +2995,7 @@ fields: []
           });
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(4);
-          expect(mockGetRecordId).nthCalledWith(4, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(4, {
             ruleId: rule.id,
             grouping: {
               'dest.ip': 'unknown',
@@ -2851,7 +3013,7 @@ fields: []
           ]);
 
           expect(mockGetCaseId).toHaveBeenCalledTimes(4);
-          expect(mockGetCaseId).nthCalledWith(3, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
             ruleId: rule.id,
             grouping: {
               'dest.ip': 'unknown',
@@ -2867,18 +3029,20 @@ fields: []
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(4);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
             caseId: 'mock-id-3',
             attachments: [
               {
-                type: 'alert',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-4', 'alert-id-5'],
+                metadata: {
+                  index: ['alert-index-4', 'alert-index-5'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                alertId: ['alert-id-4', 'alert-id-5'],
-                index: ['alert-index-4', 'alert-index-5'],
                 owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2935,7 +3099,7 @@ fields: []
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
 
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2956,7 +3120,7 @@ fields: []
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
 
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -2980,18 +3144,20 @@ fields: []
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: alerts.map((alert) => alert._id),
+              metadata: {
+                index: alerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3198,7 +3364,7 @@ fields: []
 
       expect(mockGetCaseId).toHaveBeenCalledTimes(2);
       // case ID is constructed with the new counter and the correct grouping
-      expect(mockGetCaseId).nthCalledWith(1, {
+      expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
         ruleId: rule.id,
         grouping: groupedAlertsWithOracleKey[0].grouping,
         owner,
@@ -3206,7 +3372,7 @@ fields: []
         counter: 2,
       });
 
-      expect(mockGetCaseId).nthCalledWith(2, {
+      expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
         ruleId: rule.id,
         grouping: groupedAlertsWithOracleKey[1].grouping,
         owner,
@@ -3217,34 +3383,38 @@ fields: []
       // called only once when the conflict occurs
       expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3329,34 +3499,38 @@ fields: []
       expect(casesClientMock.cases.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3410,34 +3584,38 @@ fields: []
       // called only once when the conflict occurs
       expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3486,34 +3664,38 @@ fields: []
       // called only once when the conflict occurs
       expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3540,98 +3722,110 @@ fields: []
       });
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(6);
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(4, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(4, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(5, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(5, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(6, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(6, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3675,7 +3869,7 @@ fields: []
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -3690,7 +3884,7 @@ fields: []
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -3706,15 +3900,17 @@ fields: []
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              type: 'alert',
-              alertId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
-              index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
-              rule: { id: 'rule-test-id', name: 'Test rule' },
+              attachmentId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
+              metadata: {
+                index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+              },
               owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3751,7 +3947,7 @@ fields: []
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
-        expect(mockGetRecordId).nthCalledWith(1, {
+        expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -3768,7 +3964,7 @@ fields: []
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
-        expect(mockGetCaseId).nthCalledWith(1, {
+        expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
           ruleId: rule.id,
           grouping: {},
           owner,
@@ -3786,18 +3982,20 @@ fields: []
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: allAlerts.map((alert) => alert._id),
-              index: allAlerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: allAlerts.map((alert) => alert._id),
+              metadata: {
+                index: allAlerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3873,41 +4071,38 @@ fields: []
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3973,41 +4168,38 @@ fields: []
 
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
 
-      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(3, {
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -4046,12 +4238,12 @@ fields: []
       await connectorExecutor.execute(missingDataParams);
       await connectorExecutor.execute(missingDataParams);
 
-      expect(mockBulkUpdateRecord).toBeCalledTimes(1);
+      expect(mockBulkUpdateRecord).toHaveBeenCalledTimes(1);
       expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
         { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
       ]);
 
-      expect(mockBulkCreateRecords).toBeCalledTimes(1);
+      expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
       expect(mockBulkCreateRecords).toHaveBeenCalledWith([
         {
           payload: {
@@ -4073,11 +4265,10 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -4259,6 +4450,9 @@ fields: []
                     },
                   ],
                 },
+                Object {
+                  "relaxRequiredFields": true,
+                },
               ],
             ]
           `);
@@ -4276,21 +4470,21 @@ fields: []
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(3);
 
-          expect(mockGetRecordId).nthCalledWith(1, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(1, {
             ruleId: rule.id,
             grouping: { field_name_1: 'field_value_1' },
             owner,
             spaceId: 'default',
           });
 
-          expect(mockGetRecordId).nthCalledWith(2, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(2, {
             ruleId: rule.id,
             grouping: { field_name_2: 'field_value_2' },
             owner,
             spaceId: 'default',
           });
 
-          expect(mockGetRecordId).nthCalledWith(3, {
+          expect(mockGetRecordId).toHaveBeenNthCalledWith(3, {
             ruleId: rule.id,
             grouping: { field_name_1: 'field_value_3' },
             owner,
@@ -4305,21 +4499,21 @@ fields: []
 
           expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
-          expect(mockGetCaseId).nthCalledWith(1, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(1, {
             ruleId: rule.id,
             grouping: { field_name_1: 'field_value_1' },
             owner,
             spaceId: 'default',
             counter: 1,
           });
-          expect(mockGetCaseId).nthCalledWith(2, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(2, {
             ruleId: rule.id,
             grouping: { field_name_2: 'field_value_2' },
             owner,
             spaceId: 'default',
             counter: 1,
           });
-          expect(mockGetCaseId).nthCalledWith(3, {
+          expect(mockGetCaseId).toHaveBeenNthCalledWith(3, {
             ruleId: rule.id,
             grouping: { field_name_1: 'field_value_3' },
             owner,
@@ -4431,13 +4625,12 @@ fields: []
             casesClient: casesClientMock,
             actionsClient,
             spaceId: 'default',
-            isCasesAttachmentsEnabled: true,
           });
 
           await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
               caseId: 'mock-id-1',
@@ -4471,20 +4664,22 @@ fields: []
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-1',
             attachments: [
               {
-                comment: 'comment-1',
+                data: { content: 'comment-1' },
                 owner: 'securitySolution',
-                type: 'user',
+                type: 'comment',
               },
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -4507,15 +4702,17 @@ fields: []
           });
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenNthCalledWith(1, {
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });

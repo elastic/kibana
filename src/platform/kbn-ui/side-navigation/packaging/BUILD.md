@@ -32,8 +32,8 @@ Artifacts in `src/platform/kbn-ui/side-navigation/target/`:
 1. **Type validation** — `tsc --noEmit` checks that the standalone types in
    `packaging/react/types.ts` stay compatible with the source types.
 2. **Webpack bundle** — compiles and bundles the component, replacing
-   `@kbn/i18n`, `@kbn/i18n-react`, `@kbn/core-chrome-layout-constants`, and
-   `@kbn/core-chrome-layout-utils` with local stubs via resolver aliases.
+   `@kbn/i18n`, `@kbn/i18n-react`, and `@kbn/ui-chrome-layout` with local stubs
+   or prebuilt targets via resolver aliases.
 3. **Declaration generation** — emits `index.d.ts` as a regular ES module
    (not an ambient `declare module` wrapper) so consumers can import types
    directly from `@kbn/ui-side-navigation`.

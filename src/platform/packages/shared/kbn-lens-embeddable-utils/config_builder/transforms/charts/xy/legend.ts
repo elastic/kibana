@@ -130,7 +130,7 @@ export function convertLegendToStateFormat(legend: XYConfig['legend']): {
         }
       : {}),
     ...extractAlignment(legend),
-    ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
+    ...(legend?.visibility === 'visible' ? { showSingleSeries: true } : {}),
     ...(legend?.placement === 'inside'
       ? {
           isInside: true,
@@ -259,7 +259,7 @@ function convertSeriesHeaderToAPIFormat(
 export function convertLegendToAPIFormat(
   legend: XYVisualizationState['legend']
 ): Pick<XYConfig, 'legend'> {
-  const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible';
+  const visibility = !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'visible' : 'auto';
   const statistics = legend.legendStats?.length
     ? legend.legendStats.map((stat) => legendStatisticCompat.toAPI(stat))
     : undefined;

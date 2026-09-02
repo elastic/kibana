@@ -28,6 +28,13 @@ const blastRadiusDependencySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this dependency entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   source: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -59,6 +66,13 @@ const blastRadiusInfrastructureSchema = z.object({
     .describe(
       'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
     ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   title: z
     .string()
     .max(MAX_TITLE_LENGTH)
@@ -83,6 +97,13 @@ const blastRadiusEntitySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+    ),
   name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
   stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
 });
@@ -95,12 +116,36 @@ export const blastRadiusEntrySchema = z.discriminatedUnion('type', [
 
 export type BlastRadiusEntry = z.infer<typeof blastRadiusEntrySchema>;
 
+/**
+ * A causal entity, carrying the classification of the Knowledge Indicator it references.
+ *
+ * `type` here is **not** the same field as `blast_radius[].type`. This one is the referenced
+ * indicator's own type, drawn from `INFERRED_FEATURE_TYPES` (`entity`, `infrastructure`,
+ * `technology`, `dependency`, `schema`). On a blast radius row, `type` is the discriminated-union
+ * tag that selects between the three row shapes (`entity`, `infrastructure`, `dependency`) and says
+ * nothing about the indicator. The two vocabularies overlap, so a value alone cannot tell you which
+ * field you are holding.
+ */
 export const causalFeatureSchema = z.object({
   feature_id: z
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
       'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+    ),
+  type: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
+    ),
+  subtype: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe(
+      "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
     ),
   name: z
     .string()
@@ -123,6 +168,15 @@ export const signalEvidenceSchema = z.object({
     .enum(['found', 'empty', 'error'])
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
+    ),
+  time_range: z
+    .object({
+      from: z.iso.datetime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+      to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+    })
+    .optional()
+    .describe(
+      'Absolute time window the query was executed against. Required to interpret an esql_query that uses ?_tstart/?_tend placeholders.'
     ),
 });
 
@@ -156,7 +210,7 @@ const signalBaseSchema = z.object({
   verdict: z
     .enum(SIGNAL_VERDICTS)
     .describe(
-      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation at a newly elevated rate; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion (empty or errored evidence, or matching rows whose pre/post rate shows no new elevation); not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -210,11 +264,12 @@ const detectionSignalSchema = signalBaseSchema
         message: 'A refuting verdict requires found or empty query evidence.',
       });
     }
-    if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {
+    if (signal.verdict === 'inconclusive' && result === undefined) {
       context.addIssue({
         code: 'custom',
         path: ['verdict'],
-        message: 'An inconclusive verdict requires empty or error query evidence.',
+        message:
+          'An inconclusive verdict requires query evidence (found rate-flat rows, empty, or error).',
       });
     }
     if (
@@ -253,6 +308,8 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     2. "60-high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "80-critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
     3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.
     4. "20-low" for recovery, noise, false alarm, or non-issue.
+
+    Known-ongoing exception: may cap an otherwise higher tier at "40-medium" only when current grounding confirms the exact mechanism documented as a known ongoing or transient background condition in memory, at its documented background rate. The cap does not apply to a different mechanism on the same component, nor when current rate evidence shows the documented mechanism newly elevated over that baseline — a clear rate step-up lifts the cap and the ordinary tier applies.
 
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
   `;
@@ -295,7 +352,7 @@ export const significantEventBaseSchema = z.object({
       Stable incident label. Format: "<Affected scope> — <observed condition>".
       Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
-      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, and current-cycle-only details.
+      Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
 
       Examples: "API gateway — upstream connection refused"; "Indexer — database pool exhausted"; "Platform tier — connection refused across worker, scheduler, and API services" (multi-service cascade grouped in one event).
     `

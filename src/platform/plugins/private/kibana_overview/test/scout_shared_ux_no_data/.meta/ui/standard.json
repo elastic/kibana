@@ -1,5 +1,8 @@
 {
   "sha1": "9db1ad4f1cd8e0a8ba6706f332646ab4ddeac9a8",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "775389bb0760dc1-51693a79d13259b",
@@ -10,8 +13,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/no_data.spec.ts",
-        "line": 14,
-        "column": 7
+        "line": 13,
+        "column": 88
       }
     },
     {
@@ -23,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/no_data.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 15,
+        "column": 11
       }
     },
     {
@@ -36,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/overview_a11y.spec.ts",
-        "line": 17,
+        "line": 16,
         "column": 9
       }
     }

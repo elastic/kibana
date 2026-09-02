@@ -119,7 +119,9 @@ describe('buildTopology', () => {
   it('falls back to namespace when replicaset is absent from result set', () => {
     // pod has a replicaset name but the replicaset entity is not in the list
     const { edges } = buildTopology([ns, pod]);
-    expect(edges.some((e) => e.source === 'k8s.namespace:mini-shop' && e.target === 'k8s.pod:uid-1')).toBe(true);
+    expect(
+      edges.some((e) => e.source === 'k8s.namespace:mini-shop' && e.target === 'k8s.pod:uid-1')
+    ).toBe(true);
   });
 
   it('connects daemonset-owned pod via daemonset', () => {
@@ -143,7 +145,11 @@ describe('buildTopology', () => {
       'k8s.daemonset.name': 'kindnet',
     });
     const { edges } = buildTopology([kns, ds, dsPod]);
-    expect(edges.some((e) => e.source === 'k8s.daemonset:kube-system/kindnet' && e.target === 'k8s.pod:uid-ds')).toBe(true);
+    expect(
+      edges.some(
+        (e) => e.source === 'k8s.daemonset:kube-system/kindnet' && e.target === 'k8s.pod:uid-ds'
+      )
+    ).toBe(true);
   });
 
   it('attaches k8s.node.name as nodeName on pod data, not as a graph node', () => {

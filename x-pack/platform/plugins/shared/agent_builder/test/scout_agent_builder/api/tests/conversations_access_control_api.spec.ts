@@ -572,19 +572,54 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step('Bob can mark a public conversation read', async () => {
-          const markReadResponse = await markConversationReadAs(
-            apiClient,
-            bob,
-            publicConversation.conversation_id,
-            true
-          );
-          expect(markReadResponse).toHaveStatusCode(200);
-          expect(markReadResponse.body).toMatchObject({
-            id: publicConversation.conversation_id,
-            read: true,
-          });
-        });
+        await apiTest.step(
+          'read status is tracked per user, not shared across readers',
+          async () => {
+            const getReadAs = async (user: { username: string; password: string }) => {
+              const response = await getConversationAs(
+                apiClient,
+                user,
+                publicConversation.conversation_id
+              );
+              expect(response).toHaveStatusCode(200);
+              return (response.body as Conversation).read;
+            };
+
+            const markReadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markReadResponse).toHaveStatusCode(200);
+            expect(markReadResponse.body).toMatchObject({
+              id: publicConversation.conversation_id,
+              read: true,
+            });
+
+            expect(await getReadAs(alice)).toBe(false);
+            expect(await getReadAs(bob)).toBe(true);
+
+            const markAliceReadResponse = await markConversationReadAs(
+              apiClient,
+              alice,
+              publicConversation.conversation_id,
+              true
+            );
+            expect(markAliceReadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(alice)).toBe(true);
+
+            const markBobUnreadResponse = await markConversationReadAs(
+              apiClient,
+              bob,
+              publicConversation.conversation_id,
+              false
+            );
+            expect(markBobUnreadResponse).toHaveStatusCode(200);
+            expect(await getReadAs(bob)).toBe(false);
+            expect(await getReadAs(alice)).toBe(true);
+          }
+        );
 
         await apiTest.step(
           'permissions reflect what rename and delete allow, on both GET routes',

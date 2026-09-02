@@ -50,7 +50,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import type { InputsOverride } from '../package_policy';
 import { _compilePackagePolicyInputs, updatePackageInputs } from '../package_policy';
 
-import { packageToPackagePolicyInputs } from '../../../common/services';
+import { inferVarGroupSelections, packageToPackagePolicyInputs } from '../../../common/services';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 import { appContextService } from '../app_context';
 import { storedPackagePolicyToAgentInputs } from '../agent_policies';
@@ -149,6 +149,19 @@ async function doUpgrade(
     packageInfo,
     packageToPackagePolicyInputs(packageInfo) as InputsOverride[]
   );
+
+  // Policies created before the package introduced var_groups have no stored
+  // var_group_selections; without them the UI falls back to the first visible option,
+  // which may not match the policy's actual configuration (e.g. a Direct Access Keys
+  // policy presented as Identity Federation). Infer and persist the selection from the
+  // pre-upgrade var values so the stored policy reflects reality.
+  if (!updatePackagePolicy.var_group_selections && packageInfo.var_groups?.length) {
+    updatePackagePolicy.var_group_selections = inferVarGroupSelections(
+      packageInfo.var_groups,
+      packagePolicy.vars
+    );
+  }
+
   const assetsMap = await getAgentTemplateAssetsMap({
     logger: appContextService.getLogger(),
     packageInfo,

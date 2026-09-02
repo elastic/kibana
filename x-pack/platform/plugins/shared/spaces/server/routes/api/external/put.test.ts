@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -123,7 +124,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should update an existing space with the provided ID', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: 'with a description',
       disabledFeatures: [],
@@ -154,7 +155,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should allow an empty description', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: '',
       disabledFeatures: ['foo'],
@@ -185,7 +186,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should not require disabledFeatures', async () => {
     const payload = {
-      id: 'a-space',
+      id: asSpaceId('a-space'),
       name: 'my updated space',
       description: '',
     };
@@ -218,7 +219,7 @@ describe('PUT /api/spaces/space', () => {
     const { routeHandler, savedObjectsRepositoryMock } = await setup({
       spacesSavedObjects: [
         {
-          id: 'mySpace',
+          id: brandSpaceId('mySpace'),
           attributes: {
             name: 'mySpace',
             solution: 'classic',
@@ -228,7 +229,7 @@ describe('PUT /api/spaces/space', () => {
       ],
     });
     const payload = {
-      id: 'mySpace',
+      id: brandSpaceId('mySpace'),
       name: 'mySpace',
       disabledFeatures: [],
       solution: 'oblt' as const,
@@ -257,7 +258,7 @@ describe('PUT /api/spaces/space', () => {
     const { routeHandler, savedObjectsRepositoryMock } = await setup({
       spacesSavedObjects: [
         {
-          id: 'mySpace',
+          id: brandSpaceId('mySpace'),
           attributes: {
             name: 'mySpace',
             solution: 'oblt',
@@ -267,7 +268,7 @@ describe('PUT /api/spaces/space', () => {
       ],
     });
     const payload = {
-      id: 'mySpace',
+      id: brandSpaceId('mySpace'),
       name: 'mySpace',
       disabledFeatures: [],
       solution: 'classic' as const,
@@ -293,7 +294,7 @@ describe('PUT /api/spaces/space', () => {
 
   it('should not allow a new space to be created', async () => {
     const payload = {
-      id: 'a-new-space',
+      id: asSpaceId('a-new-space'),
       name: 'my new space',
       description: 'with a description',
       disabledFeatures: [],
@@ -338,7 +339,7 @@ describe('PUT /api/spaces/space', () => {
   describe('Cross-project search', () => {
     it('updates the space with projectRouting when CPS is enabled and user has permission', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -374,7 +375,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('does not update NPRE when CPS is enabled and user does not have permission to update NPRE', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -407,7 +408,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('updates the space without projectRouting when CPS is enabled and user does not submit projectRouting', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],
@@ -439,7 +440,7 @@ describe('PUT /api/spaces/space', () => {
 
     it('updates the space without projectRouting when CPS is disabled', async () => {
       const payload = {
-        id: 'a-space',
+        id: asSpaceId('a-space'),
         name: 'my updated space',
         description: 'with a description',
         disabledFeatures: ['foo'],

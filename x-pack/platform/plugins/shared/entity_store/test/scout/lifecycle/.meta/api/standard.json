@@ -1,8 +1,7 @@
 {
-  "sha1": "f0a11855184e67c781dd421bf96dc3676eb52d2b",
+  "sha1": "36203c08032281beda0f7110f0741083aaeb8121",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -177,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 121,
-        "column": 13
+        "line": 127,
+        "column": 64
       }
     },
     {
@@ -193,8 +192,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 147,
-        "column": 42
+        "line": 155,
+        "column": 23
+      }
+    },
+    {
+      "id": "49ffef8e2339e90-9941b94d0d29d96",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 180,
+        "column": 38
       }
     },
     {
@@ -209,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 176,
-        "column": 24
+        "line": 208,
+        "column": 15
       }
     },
     {
@@ -225,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 193,
-        "column": 33
+        "line": 228,
+        "column": 5
       }
     },
     {
@@ -241,8 +256,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 219,
-        "column": 25
+        "line": 254,
+        "column": 5
+      }
+    },
+    {
+      "id": "49ffef8e2339e90-0403b3e66417e66",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 278,
+        "column": 9
       }
     },
     {
@@ -257,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 245,
-        "column": 4
+        "line": 305,
+        "column": 12
       }
     },
     {
@@ -273,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 265,
-        "column": 4
+        "line": 325,
+        "column": 14
       }
     },
     {
@@ -289,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 281,
-        "column": 46
+        "line": 342,
+        "column": 24
       }
     },
     {
@@ -305,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
-        "line": 300,
-        "column": 24
+        "line": 360,
+        "column": 13
       }
     },
     {
@@ -769,7 +800,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 70,
+        "line": 69,
         "column": 23
       }
     },
@@ -785,7 +816,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 75,
+        "line": 74,
         "column": 72
       }
     },
@@ -801,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 74
       }
     },
@@ -817,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 108,
+        "line": 107,
         "column": 67
       }
     },
@@ -833,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 122,
+        "line": 121,
         "column": 23
       }
     },
@@ -849,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 166,
+        "line": 158,
         "column": 24
       }
     }

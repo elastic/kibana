@@ -6,14 +6,28 @@
  */
 
 import React from 'react';
-import { EuiCallOut, type EuiCallOutProps, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
+
+const calloutComponents = {
+  primary: KbnInfoCallout,
+  success: KbnSuccessCallout,
+  warning: KbnWarningCallout,
+  danger: KbnDangerCallout,
+} as const;
+
+type ModelCalloutColor = keyof typeof calloutComponents;
 
 export interface ModelsCalloutProps {
   title: React.ReactNode;
   message: React.ReactNode;
   modelList: React.ReactNode[];
-  color?: EuiCallOutProps['color'];
-  iconType?: EuiCallOutProps['iconType'];
+  color?: ModelCalloutColor;
   'data-test-subj'?: string;
 }
 
@@ -22,25 +36,19 @@ export const ModelsCallout = ({
   message,
   modelList,
   color = 'warning',
-  iconType = 'warning',
   'data-test-subj': dts,
 }: ModelsCalloutProps) => {
+  const CalloutComponent =
+    calloutComponents[color as keyof typeof calloutComponents] ?? KbnWarningCallout;
   return (
     <>
-      <EuiCallOut
-        title={title}
-        color={color}
-        iconType={iconType}
-        data-test-subj={dts}
-        announceOnMount
-      >
-        <p>{message}</p>
+      <CalloutComponent title={title} text={message} data-test-subj={dts} announceOnMount>
         <ul>
           {modelList.map((model, i) => (
             <li key={`modelList.${i}`}>{model}</li>
           ))}
         </ul>
-      </EuiCallOut>
+      </CalloutComponent>
       <EuiSpacer size="l" />
     </>
   );

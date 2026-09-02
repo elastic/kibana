@@ -14,7 +14,7 @@ export const K8S_ENTITY_NODE_H = 60;
 /** Returns the first scalar value from a potentially multivalue field. */
 export const firstVal = (v: string | string[] | null | undefined): string | null => {
   if (v == null) return null;
-  return Array.isArray(v) ? (v[0] ?? null) : v;
+  return Array.isArray(v) ? v[0] ?? null : v;
 };
 
 /**

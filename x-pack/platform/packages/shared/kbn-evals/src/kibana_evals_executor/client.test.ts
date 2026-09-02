@@ -129,11 +129,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -197,6 +199,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -232,6 +235,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -244,6 +248,36 @@ describe('KibanaEvalsClient', () => {
     expect(firstRun.traceId).toBeNull();
     expect(exp.evaluationRuns[0].traceId).toBeNull();
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
+  });
+
+  it('copies evaluator.direction onto each EvaluationRun', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'Latency',
+        kind: 'CODE',
+        direction: 'minimize',
+        evaluate: async () => ({ score: 100 }),
+      },
+      {
+        name: 'Quality',
+        kind: 'CODE',
+        direction: 'maximize',
+        evaluate: async () => ({ score: 1 }),
+      },
+    ];
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
+    const byName = Object.fromEntries(exp.evaluationRuns.map((run) => [run.name, run]));
+
+    expect(byName.Latency.direction).toBe('minimize');
+    expect(byName.Quality.direction).toBe('maximize');
   });
 
   it('prefers a task-provided traceId over the client task-span id for the stored run and evaluator output', async () => {
@@ -262,6 +296,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -295,6 +330,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -325,6 +361,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -399,6 +436,7 @@ describe('KibanaEvalsClient', () => {
     const evaluator: Evaluator<EvaluationDataset['examples'][number], { ok: boolean }> = {
       name: 'AlwaysOne',
       kind: 'CODE',
+      direction: 'maximize',
       evaluate: async () => ({ score: 1 }),
     };
 
@@ -444,7 +482,14 @@ describe('KibanaEvalsClient', () => {
         datasets: [{ name: 'ds', description: 'desc', examples: [{ input: { q: 1 } }] }],
         task: async () => ({ ok: true }),
       },
-      [{ name: 'AlwaysOne', kind: 'CODE', evaluate: async () => ({ score: 1 }) }]
+      [
+        {
+          name: 'AlwaysOne',
+          kind: 'CODE',
+          direction: 'maximize',
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
     );
 
     expect(exp.datasetId).toBe('server-assigned-id');
@@ -511,11 +556,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
+        direction: 'maximize',
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -565,6 +612,97 @@ describe('KibanaEvalsClient', () => {
           result: { score: 1 },
         })
       );
+    });
+
+    it('reports each evaluator kind and judge model on the event', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      const judgeModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'Judge',
+            kind: 'LLM',
+            direction: 'maximize',
+            evaluate: async () => ({ score: 1 }),
+            getModel: () => judgeModel,
+          },
+          evaluators[0],
+        ]
+      );
+
+      expect(
+        onEvaluationComplete.mock.calls.map(([{ evaluationRun }]) => ({
+          name: evaluationRun.name,
+          kind: evaluationRun.kind,
+          model: evaluationRun.model,
+        }))
+      ).toEqual([
+        { name: 'Judge', kind: 'LLM', model: judgeModel },
+        { name: 'AlwaysOne', kind: 'CODE', model: undefined },
+      ]);
+    });
+
+    it('reads the judge model only after the evaluator resolves', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      // Mirrors EvaluatorApiClient, which only learns its model from the response.
+      let lateModel: { id: string } | undefined;
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'LateJudge',
+            kind: 'LLM',
+            direction: 'maximize',
+            evaluate: async () => {
+              lateModel = { id: 'resolved-late' };
+              return { score: 1 };
+            },
+            getModel: () => lateModel,
+          },
+        ]
+      );
+
+      expect(onEvaluationComplete.mock.calls[0][0].evaluationRun.model).toEqual({
+        id: 'resolved-late',
+      });
+    });
+
+    it('reads the evaluator version after the evaluator resolves', async () => {
+      const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+      const client = createClient({ repetitions: 1, onEvaluationComplete });
+      let resolvedVersion: string | undefined;
+
+      await client.runExperiment(
+        {
+          datasets: [{ ...dataset, examples: [dataset.examples[0]] }],
+          task: async () => ({ value: 1 }),
+        },
+        [
+          {
+            name: 'VersionedJudge',
+            kind: 'LLM',
+            direction: 'maximize',
+            evaluate: async () => {
+              resolvedVersion = '1.2.0';
+              return { score: 1 };
+            },
+            getVersion: () => resolvedVersion,
+          },
+        ]
+      );
+
+      expect(onEvaluationComplete.mock.calls[0][0].evaluationRun.version).toBe('1.2.0');
     });
 
     it('uses stringified exampleIndex when example has no id', async () => {

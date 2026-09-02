@@ -24,12 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sortBy } from 'lodash';
+import { consoleTranslations } from './translations';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
-import { getCommandNameWithArgs } from '../service/utils';
+import { buildCommandUsageList } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -227,7 +228,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           field: groupLabel,
           name: <div data-test-subj={getTestId('group')}>{groupLabel}</div>,
           render: (command: CommandDefinition) => {
-            const commandNameWithArgs = getCommandNameWithArgs(command);
+            const commandNameWithArgs = buildCommandUsageList(command, {
+              includeOptionalArgs: false,
+            }).shift();
             return (
               <StyledEuiFlexGroup
                 alignItems="center"
@@ -303,10 +306,10 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   if (display === 'table') {
     const calloutItems = [
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.escapeDoubleDashes"
-        defaultMessage="Escape values with double dashes (--) as \-\-, unless they are command arguments; otherwise the console interprets them as arguments."
-      />,
+      consoleTranslations.escapeDoubleDashesInfo,
+      consoleTranslations.keyTabInfo,
+      consoleTranslations.keyUpArrowInfo,
+      consoleTranslations.keyAltSpaceInfo,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
         defaultMessage="You can enter consecutive response actions — no need to wait for previous actions to complete."
@@ -392,7 +395,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             direction="column"
           >
             {filteredCommands.map((command) => {
-              const commandNameWithArgs = getCommandNameWithArgs(command);
+              const commandNameWithArgs = buildCommandUsageList(command, {
+                includeOptionalArgs: false,
+              }).shift();
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
