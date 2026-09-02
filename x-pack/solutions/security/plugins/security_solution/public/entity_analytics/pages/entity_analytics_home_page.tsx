@@ -37,7 +37,6 @@ import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
-import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
@@ -97,9 +96,6 @@ const riskPanelFlexItemStyle = css`
   min-width: 460px;
 `;
 
-const anomaliesPanelFlexItemStyle = css`
-  min-width: 500px;
-`;
 
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
@@ -439,14 +435,6 @@ const EntityAnalyticsHomePageContent = () => {
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem grow={false}>
-          <SignalCards
-            activeFilter={activeFilter}
-            cards={signalCards}
-            onFilterForCard={handleFilterForCard}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem>
           <EuiFlexGroup wrap gutterSize="m">
             <EuiFlexItem grow={3} css={riskPanelFlexItemStyle}>
@@ -457,9 +445,13 @@ const EntityAnalyticsHomePageContent = () => {
                 />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem grow={5} css={anomaliesPanelFlexItemStyle}>
-              <EuiPanel hasBorder>
-                <EntityAnalyticsRecentAnomalies watchlistId={selectedWatchlistId} />
+            <EuiFlexItem grow={5}>
+              <EuiPanel hasBorder paddingSize="none">
+                <SignalCards
+                  activeFilter={activeFilter}
+                  cards={signalCards}
+                  onFilterForCard={handleFilterForCard}
+                />
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
