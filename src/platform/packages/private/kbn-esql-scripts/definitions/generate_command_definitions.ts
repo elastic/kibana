@@ -12,6 +12,7 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ElasticsearchCommandDefinition } from '@kbn/esql-language';
 import { commandDefinitions } from '@elastic/esql-definitions/commands';
 
 const GENERATED_COMMANDS_BASE_PATH = join(
@@ -23,13 +24,15 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
   const outputCommandsDir = GENERATED_COMMANDS_BASE_PATH;
   await mkdir(outputCommandsDir, { recursive: true });
 
-  const commandsMetadata: Record<string, unknown> = {};
+  const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {};
 
   for (const command of commandDefinitions) {
     commandsMetadata[command.name] = {
       type: 'command',
       name: command.name,
-      ...(command.license && { license: command.license.toLowerCase() }),
+      ...(command.license && {
+        license: command.license.toLowerCase() as ElasticsearchCommandDefinition['license'],
+      }),
       ...(command.observabilityTier && { observability_tier: command.observabilityTier }),
       ...(command.output && { output: command.output }),
     };
@@ -45,7 +48,7 @@ ${commandDefinitions
   const tsContent = `
 // This file is auto-generated. Do not edit it manually.
 
-export const commandsMetadata: Record<string, unknown> = ${JSON.stringify(
+export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = ${JSON.stringify(
     commandsMetadata,
     null,
     2

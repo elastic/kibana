@@ -14,6 +14,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { settingDefinitions } from '@elastic/esql-definitions/settings';
+import { clearDocumentationDirectives } from '../lib/docs';
 
 // We exclude the time_zone setting as we decided that we won't support it in Kibana
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
@@ -21,10 +22,6 @@ const GENERATED_DEFINITIONS_PATH = join(
   REPO_ROOT,
   'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
 );
-
-// Clears MyST inline directives ({name}`content`) from documentation strings.
-const clearDocumentationDirectives = (docString: string): string =>
-  docString.replace(/\{([a-zA-Z_]+)\}`([^`]*)`/g, '');
 
 async function generateElasticsearchSettingsDefinitions(): Promise<void> {
   const outputSettingsDir = GENERATED_DEFINITIONS_PATH;
