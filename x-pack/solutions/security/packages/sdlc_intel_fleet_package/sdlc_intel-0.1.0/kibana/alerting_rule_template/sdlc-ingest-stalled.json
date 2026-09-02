@@ -2,27 +2,39 @@
   "id": "sdlc-ingest-stalled",
   "type": "alerting_rule_template",
   "attributes": {
-    "name": "SDLC ingest stalled (no documents written)",
-    "tags": ["SDLC Intelligence", "pipeline", "health", "sync", "freshness"],
+    "name": "SDLC ingest stalled (schedule-aware)",
+    "tags": [
+      "SDLC Intelligence",
+      "pipeline",
+      "health",
+      "sync",
+      "freshness"
+    ],
     "ruleTypeId": ".es-query",
-    "schedule": { "interval": "30m" },
+    "schedule": {
+      "interval": "30m"
+    },
     "params": {
       "searchType": "esqlQuery",
       "esqlQuery": {
-        "esql": "FROM vp-ingest-freshness | WHERE last_write < NOW() - 6 hours | KEEP source, last_write, doc_count_total | SORT last_write ASC"
+        "esql": "FROM vp-ingest-freshness\n| EVAL max_age_hours = CASE(\n    source IN (\"github-activity-issues\", \"github-activity-pull-requests\", \"github-catalog-sdh-issues\", \"github-catalog-sdh-labeled-issues\", \"github-enrich-issues-graph\", \"github-enrich-pull-requests-graph\", \"agent-pr-missing-related-issue\", \"salesforce-catalog-cases\", \"slack-channel-history\"), 3,\n    source IN (\"cross-link-feedback-loop\", \"cross-link-sdh-product\", \"github-cross-link-entities\", \"github-extract-drive-links\", \"slack-thread-replies\", \"github-enrich-epic-phases\", \"github-normalize-project-items\", \"github-project-epic-phases\"), 18,\n    30)\n| EVAL age_hours = DATE_DIFF(\"hours\", last_write, NOW())\n| WHERE age_hours > max_age_hours\n| KEEP source, doc_count_total, last_write, age_hours, max_age_hours\n| SORT age_hours DESC"
       },
       "timeField": "last_write",
-      "timeWindowSize": 24,
+      "timeWindowSize": 48,
       "timeWindowUnit": "h",
       "size": 0,
       "thresholdComparator": ">",
-      "threshold": [0],
+      "threshold": [
+        0
+      ],
       "excludeHitsFromPreviousRun": false,
       "aggType": "count",
       "groupBy": "all"
     },
-    "alertDelay": { "active": 1 },
-    "description": "Fires when a sync source has written no documents for over 6 hours. Complements sdlc-sync-health: that rule keys off workflow EXIT STATUS, so a workflow that reports completed while writing zero documents is invisible to it. Two real defects (org-members scope error, project-items bulk interpolation) failed exactly that way. This rule asserts document movement instead. Requires the ingest_freshness transform. NOTE: the 24h timeField window means a source stalled longer than 24h ages out of the window; treat prolonged silence plus rule recovery as suspicious."
+    "alertDelay": {
+      "active": 1
+    },
+    "description": "Fires when a sync source has not written documents for longer than its own schedule allows. Thresholds are per-source (3h for 30m/1h workflows, 18h for 2h/6h, 30h for 12h/1d) at roughly 2.5x the interval, so one missed run is tolerated and two consecutive misses alert. A flat threshold cannot work here: the catalog workflows run every: 1d, so a 6h rule reported them stalled for 18 hours of every day and buried genuine stalls in permanent noise."
   },
   "coreMigrationVersion": "8.8.0",
   "typeMigrationVersion": "10.1.0"
