@@ -48722,7 +48722,7 @@ paths:
                           minItems: 1
                           type: array
                         id:
-                          maxLength: 50
+                          maxLength: 512
                           type: string
                         is_default:
                           default: false
@@ -48736,7 +48736,7 @@ paths:
                           maxLength: 255
                           type: string
                         proxy_id:
-                          maxLength: 50
+                          maxLength: 512
                           nullable: true
                           type: string
                         secrets:
@@ -48753,7 +48753,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
-                                          maxLength: 50
+                                          maxLength: 512
                                           type: string
                                       required:
                                         - id
@@ -48766,7 +48766,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
-                                          maxLength: 50
+                                          maxLength: 512
                                           type: string
                                       required:
                                         - id
@@ -48779,7 +48779,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
-                                          maxLength: 50
+                                          maxLength: 512
                                           type: string
                                       required:
                                         - id
@@ -48933,7 +48933,7 @@ paths:
                   minItems: 1
                   type: array
                 id:
-                  maxLength: 50
+                  maxLength: 512
                   type: string
                 is_default:
                   default: false
@@ -48947,7 +48947,7 @@ paths:
                   maxLength: 255
                   type: string
                 proxy_id:
-                  maxLength: 50
+                  maxLength: 512
                   nullable: true
                   type: string
                 secrets:
@@ -48964,7 +48964,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -48977,7 +48977,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -48990,7 +48990,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -49084,7 +49084,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
-                        maxLength: 50
+                        maxLength: 512
                         type: string
                       is_default:
                         default: false
@@ -49098,7 +49098,7 @@ paths:
                         maxLength: 255
                         type: string
                       proxy_id:
-                        maxLength: 50
+                        maxLength: 512
                         nullable: true
                         type: string
                       secrets:
@@ -49115,7 +49115,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49128,7 +49128,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49141,7 +49141,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49261,7 +49261,7 @@ paths:
           name: itemId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -49343,7 +49343,7 @@ paths:
           name: itemId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -49382,7 +49382,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
-                        maxLength: 50
+                        maxLength: 512
                         type: string
                       is_default:
                         default: false
@@ -49396,7 +49396,7 @@ paths:
                         maxLength: 255
                         type: string
                       proxy_id:
-                        maxLength: 50
+                        maxLength: 512
                         nullable: true
                         type: string
                       secrets:
@@ -49413,7 +49413,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49426,7 +49426,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49439,7 +49439,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49569,7 +49569,7 @@ paths:
           name: itemId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -49608,7 +49608,7 @@ paths:
                   type: string
                 proxy_id:
                   default: null
-                  maxLength: 50
+                  maxLength: 512
                   nullable: true
                   type: string
                 secrets:
@@ -49625,7 +49625,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -49638,7 +49638,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -49651,7 +49651,7 @@ paths:
                               type: object
                               properties:
                                 id:
-                                  maxLength: 50
+                                  maxLength: 512
                                   type: string
                               required:
                                 - id
@@ -49742,7 +49742,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
-                        maxLength: 50
+                        maxLength: 512
                         type: string
                       is_default:
                         default: false
@@ -49756,7 +49756,7 @@ paths:
                         maxLength: 255
                         type: string
                       proxy_id:
-                        maxLength: 50
+                        maxLength: 512
                         nullable: true
                         type: string
                       secrets:
@@ -49773,7 +49773,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49786,7 +49786,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -49799,7 +49799,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
-                                        maxLength: 50
+                                        maxLength: 512
                                         type: string
                                     required:
                                       - id
@@ -52018,7 +52018,7 @@ paths:
           name: outputId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -52034,7 +52034,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    maxLength: 50
+                    maxLength: 512
                     type: string
                 required:
                   - id
@@ -52119,7 +52119,7 @@ paths:
           name: outputId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       responses:
         '200':
@@ -52228,7 +52228,7 @@ paths:
           name: outputId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       requestBody:
         content:
@@ -52348,7 +52348,7 @@ paths:
           name: outputId
           required: true
           schema:
-            maxLength: 50
+            maxLength: 512
             type: string
       responses:
         '200':
