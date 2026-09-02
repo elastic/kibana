@@ -164,6 +164,7 @@ export const AwsXRay: ConnectorSpec = {
   actions: {
     getInsightSummaries: {
       isTool: true,
+      scope: 'read',
       description:
         'List open and closed X-Ray insights for a group within a time range, optionally filtered by state. This is the primary entry point for reacting to a service anomaly: it returns each insight\u2019s ID, summary, root-cause service, and top anomalous services. Use the returned insightId with getInsight, getInsightImpactGraph, or getInsightEvents to dig deeper.',
       input: GetInsightSummariesInputSchema,
@@ -183,6 +184,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getInsight: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full summary of a single X-Ray insight by ID: its categories, root-cause service, client/root-cause impact statistics, top anomalous services, state, and time range. Use the insightId returned by getInsightSummaries.',
       input: GetInsightInputSchema,
@@ -196,6 +198,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getServiceGraph: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the service map for a time range (optionally scoped to a group): every service node with per-node error, fault, and latency statistics, and the edges (calls) between them. This is the core health snapshot used to see what an anomaly touched.',
       input: GetServiceGraphInputSchema,
@@ -213,6 +216,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getTraceSummaries: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for trace IDs and summaries in a time range using an optional X-Ray filter expression (e.g. by service, error, fault, or annotation). Use this to find the specific requests behind a spike or an insight, then pass the returned trace IDs to batchGetTraces for full detail or getTraceGraph for per-request topology.',
       input: GetTraceSummariesInputSchema,
@@ -237,6 +241,7 @@ export const AwsXRay: ConnectorSpec = {
 
     batchGetTraces: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the full segment detail (the complete trace document) for up to 5 trace IDs. This is the drill-down step after finding trace IDs with getTraceSummaries. Any IDs that could not be processed are returned in unprocessedTraceIds.',
       input: BatchGetTracesInputSchema,
@@ -251,6 +256,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getInsightImpactGraph: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the service graph scoped to a single insight, showing which downstream services the anomaly touched (structural information only \u2014 combine with getServiceGraph for full statistics). Use the insightId returned by getInsightSummaries. The gap between startTime and endTime cannot exceed six hours.',
       input: GetInsightImpactGraphInputSchema,
@@ -267,6 +273,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getInsightEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the ordered timeline of intermediate states X-Ray recorded while reevaluating an insight, so a workflow can see how the anomaly evolved (impact statistics and top anomalous services at each point) before deciding how to react. Use the insightId returned by getInsightSummaries.',
       input: GetInsightEventsInputSchema,
@@ -282,6 +289,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getTimeSeriesServiceStatistics: {
       isTool: true,
+      scope: 'read',
       description:
         'Get error, fault, and response-time statistics as a time series over a time range, aggregated by period, for a service or group. Use this to quantify an anomaly\u2019s blast radius or trend over time. If entitySelectorExpression is omitted, edge statistics are returned.',
       input: GetTimeSeriesServiceStatisticsInputSchema,
@@ -302,6 +310,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List all active X-Ray groups (name, ARN, filter expression, and insights configuration). Use this to resolve a group\u2019s ARN or name before calling getInsightSummaries, getServiceGraph, or getTimeSeriesServiceStatistics.',
       input: GetGroupsInputSchema,
@@ -315,6 +324,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getTraceGraph: {
       isTool: true,
+      scope: 'read',
       description:
         'Build a service graph scoped to a specific set of trace IDs (1-5), for per-request topology during an investigation. Use the trace IDs returned by getTraceSummaries.',
       input: GetTraceGraphInputSchema,
@@ -329,6 +339,7 @@ export const AwsXRay: ConnectorSpec = {
 
     startTraceRetrieval: {
       isTool: true,
+      scope: 'write',
       description:
         'Start an asynchronous retrieval job for traces in the Transaction Search CloudWatch log group over a time range (for deep historical pulls that would time out a blocking call). Returns a retrievalToken; pass it to getRetrievedTracesGraph once the job completes. Retrievals time out after 60 minutes, so segment long time ranges into multiple calls.',
       input: StartTraceRetrievalInputSchema,
@@ -344,6 +355,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getRetrievedTracesGraph: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the service graph produced by a completed startTraceRetrieval job, using its retrievalToken. The response is empty until retrievalStatus is COMPLETE \u2014 poll this action until the status changes from SCHEDULED/RUNNING to COMPLETE (or FAILED/CANCELLED/TIMEOUT).',
       input: GetRetrievedTracesGraphInputSchema,
@@ -358,6 +370,7 @@ export const AwsXRay: ConnectorSpec = {
 
     getSamplingRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List all X-Ray sampling rules (fixed rate, reservoir size, service/host/URL match conditions). Use this to audit how much trace data X-Ray is capturing for a service before relying on trace-based analysis.',
       input: GetSamplingRulesInputSchema,
