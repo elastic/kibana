@@ -52264,6 +52264,7 @@ paths:
                         is_preconfigured: false
                       has_seen_add_data_notice: true
                       id: fleet-default-settings
+                      otlp_output_requirements_met: true
                       output_secret_storage_requirements_met: true
                       prerelease_integrations_enabled: false
                       secret_storage_requirements_met: true
@@ -52318,6 +52319,8 @@ paths:
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
+                        type: boolean
+                      otlp_output_requirements_met:
                         type: boolean
                       output_secret_storage_requirements_met:
                         type: boolean
@@ -52477,6 +52480,7 @@ paths:
                         is_preconfigured: false
                       has_seen_add_data_notice: true
                       id: fleet-default-settings
+                      otlp_output_requirements_met: true
                       output_secret_storage_requirements_met: true
                       prerelease_integrations_enabled: true
                       secret_storage_requirements_met: true
@@ -52531,6 +52535,8 @@ paths:
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
+                        type: boolean
+                      otlp_output_requirements_met:
                         type: boolean
                       output_secret_storage_requirements_met:
                         type: boolean
@@ -104002,14 +104008,14 @@ components:
               properties:
                 placement:
                   default: before
-                  description: Label placement relative to the secondary metric value (before or after).
+                  description: Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.
                   enum:
                     - before
                     - after
                   type: string
                 visible:
-                  default: true
-                  description: When `true`, displays the label.
+                  default: false
+                  description: When `true`, displays the secondary metric name as its label.
                   type: boolean
             value:
               additionalProperties: false
