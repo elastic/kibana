@@ -56,7 +56,7 @@ interface UpdateDataStreamsMappingsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
   name: string;
-  mappings?: StreamsMappingProperties;
+  mappings: StreamsMappingProperties | undefined;
 }
 
 interface UpdateDefaultIngestPipelineOptions {
