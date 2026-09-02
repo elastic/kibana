@@ -160,8 +160,6 @@ describe('APIKeysGridPage', () => {
     expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
     expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
 
-    expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
-
     await findByText(/first-api-key/);
     expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
     expect(await findByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
@@ -192,6 +190,37 @@ describe('APIKeysGridPage', () => {
     const docLink = await findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
     expect(docLink).toHaveAttribute('href', coreStart.docLinks.links.management.apiKeys);
     expect(docLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('keeps the header and shows a loading body while API keys load', () => {
+    coreStart.http.post.mockReturnValue(new Promise(() => {}));
+    authc.getCurrentUser.mockReturnValue(new Promise(() => {}));
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: { save: true },
+    };
+
+    const { getByTestId } = renderApiKeysPage();
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(getByTestId('sectionLoading')).toBeInTheDocument();
+  });
+
+  it('opens the create flyout before the list has loaded', async () => {
+    coreStart.http.post.mockReturnValue(new Promise(() => {}));
+    coreStart.http.get.mockResolvedValue([]);
+    authc.getCurrentUser.mockReturnValue(new Promise(() => {}));
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      api_keys: { save: true },
+    };
+
+    const { findByTestId, getByTestId } = renderApiKeysPage(
+      createMemoryHistory({ initialEntries: ['/create'] })
+    );
+
+    expect(getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('API keys');
+    expect(await findByTestId('apiKeyFlyout')).toBeInTheDocument();
   });
 
   it('displays callout when API keys are disabled', async () => {

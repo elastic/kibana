@@ -309,7 +309,7 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
   let body: React.ReactNode;
   if (!loaded) {
     body = state.loading ? (
-      <SectionLoading>
+      <SectionLoading inline data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
           defaultMessage="Loading API keys…"
@@ -413,64 +413,60 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
 
   return (
     <>
-      {loaded && (
-        <>
-          <Route path="/create">
-            <Breadcrumb
-              text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
-                defaultMessage: 'Create',
-              })}
-              href="/create"
-            >
-              <ApiKeyFlyout
-                onSuccess={(createApiKeyResponse, type) => {
-                  history.push({ pathname: '/' });
-                  setCreatedApiKey(createApiKeyResponse);
-                  // Switch the table to the view matching the created key's type (and reset pagination)
-                  // so the newly created key is immediately visible, regardless of the active filter.
-                  const nextState = {
-                    ...tableState,
-                    filters: { ...tableState.filters, type: type as QueryFilters['type'] },
-                    searchAfter: undefined,
-                  };
-                  setTableState(nextState);
-                  setSearchAfterHistory([]);
-                  queryApiKeysAndAggregations(nextState);
-                }}
-                onCancel={() => history.push({ pathname: '/' })}
-                canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-                currentUser={loaded[1]}
-                isLoadingCurrentUser={state.loading}
-                readOnly={readOnly}
-              />
-            </Breadcrumb>
-          </Route>
+      <Route path="/create">
+        <Breadcrumb
+          text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
+            defaultMessage: 'Create',
+          })}
+          href="/create"
+        >
+          <ApiKeyFlyout
+            onSuccess={(createApiKeyResponse, type) => {
+              history.push({ pathname: '/' });
+              setCreatedApiKey(createApiKeyResponse);
+              // Switch the table to the view matching the created key's type (and reset pagination)
+              // so the newly created key is immediately visible, regardless of the active filter.
+              const nextState = {
+                ...tableState,
+                filters: { ...tableState.filters, type: type as QueryFilters['type'] },
+                searchAfter: undefined,
+              };
+              setTableState(nextState);
+              setSearchAfterHistory([]);
+              queryApiKeysAndAggregations(nextState);
+            }}
+            onCancel={() => history.push({ pathname: '/' })}
+            canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+            currentUser={loaded?.[1]}
+            isLoadingCurrentUser={!loaded || state.loading}
+            readOnly={readOnly}
+          />
+        </Breadcrumb>
+      </Route>
 
-          {openedApiKey && (
-            <ApiKeyFlyout
-              onSuccess={() => {
-                services.notifications.toasts.addSuccess({
-                  title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
-                    defaultMessage: "Updated API key ''{name}''",
-                    values: { name: openedApiKey.name },
-                  }),
-                  'data-test-subj': 'updateApiKeySuccessToast',
-                });
+      {openedApiKey && (
+        <ApiKeyFlyout
+          onSuccess={() => {
+            services.notifications.toasts.addSuccess({
+              title: i18n.translate('xpack.security.management.apiKeys.updateSuccessMessage', {
+                defaultMessage: "Updated API key ''{name}''",
+                values: { name: openedApiKey.name },
+              }),
+              'data-test-subj': 'updateApiKeySuccessToast',
+            });
 
-                setOpenedApiKey(undefined);
-                // Re-query using the current table state so the user's active filter (e.g.
-                // cross-cluster) is preserved after an update, instead of resetting to the default view.
-                queryApiKeysAndAggregations(tableState);
-              }}
-              onCancel={() => setOpenedApiKey(undefined)}
-              apiKey={openedApiKey}
-              readOnly={readOnly}
-              canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
-              currentUser={loaded[1]}
-              isLoadingCurrentUser={state.loading}
-            />
-          )}
-        </>
+            setOpenedApiKey(undefined);
+            // Re-query using the current table state so the user's active filter (e.g.
+            // cross-cluster) is preserved after an update, instead of resetting to the default view.
+            queryApiKeysAndAggregations(tableState);
+          }}
+          onCancel={() => setOpenedApiKey(undefined)}
+          apiKey={openedApiKey}
+          readOnly={readOnly}
+          canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
+          currentUser={loaded?.[1]}
+          isLoadingCurrentUser={!loaded || state.loading}
+        />
       )}
 
       <AppHeader
