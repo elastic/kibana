@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 
 import {
   EuiButtonEmpty,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -20,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
-import { RiskInputActionMenu } from './risk_input_action_menu';
+import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface Props {
   riskInputs: InputAlert[];
@@ -31,6 +32,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const panels = useRiskInputActionsPanels(riskInputs, closePopover);
 
   if (riskInputs.length === 0) {
     return null;
@@ -78,7 +80,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
               </EuiButtonEmpty>
             }
           >
-            <RiskInputActionMenu closePopover={closePopover} inputs={riskInputs} />
+            <EuiContextMenu initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

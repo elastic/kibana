@@ -14,44 +14,27 @@ import {
   withStatusDotIcons,
 } from '../../../utils/action_menu_items';
 import { ACTION_ICONS_BY_ID } from '../../../utils/action_icons';
-import {
-  ALERT_STATUS_ICON_COLORS,
-  type BulkActionGroups,
-  type BulkActionMenuItem,
-} from './use_bulk_action_items';
+import { ALERT_STATUS_ICON_COLORS, type BulkActionGroups } from './use_bulk_action_items';
 
 interface EventsTableBulkActionMenuProps {
-  /** Flat item list — used only when `groups` is not provided. */
-  items: BulkActionMenuItem[];
   panels: EuiContextMenuPanelDescriptor[];
-  /**
-   * Structured groups from `useBulkActionItems`. When present, the menu inserts
-   * group-separator items between non-empty groups instead of relying on key
-   * inspection to guess which items are status items.
-   */
-  groups?: BulkActionGroups;
+  groups: BulkActionGroups;
 }
 
-export const EventsTableBulkActionMenu = ({
-  items,
-  panels,
-  groups,
-}: EventsTableBulkActionMenuProps) => {
-  const decoratedItems = useMemo(() => {
-    if (groups) {
-      const { statusItems, customItems, workflowItems } = groups;
-      return withActionIcons(
+export const EventsTableBulkActionMenu = ({ panels, groups }: EventsTableBulkActionMenuProps) => {
+  const { statusItems, customItems, workflowItems } = groups;
+  const decoratedItems = useMemo(
+    () =>
+      withActionIcons(
         withGroupSeparators([
           withStatusDotIcons(statusItems, ALERT_STATUS_ICON_COLORS),
           customItems,
           workflowItems,
         ]),
         ACTION_ICONS_BY_ID
-      );
-    }
-    // Fallback for callers that pass a flat `items` list without groups.
-    return withActionIcons(items, ACTION_ICONS_BY_ID);
-  }, [groups, items]);
+      ),
+    [statusItems, customItems, workflowItems]
+  );
 
   const menuPanels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => [{ id: 0, items: decoratedItems }, ...panels],

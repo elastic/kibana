@@ -6,8 +6,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButton, EuiContextMenuItem, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
-import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -115,7 +120,7 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
       anchorPosition="downLeft"
       data-test-subj="take-action-button"
     >
-      <ExpandableContextMenuPanel items={actionsItems} />
+      <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
   );
 };

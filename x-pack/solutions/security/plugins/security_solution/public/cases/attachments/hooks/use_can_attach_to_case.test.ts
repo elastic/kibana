@@ -48,9 +48,15 @@ describe('useCanAttachToCase', () => {
   });
 
   // create/update live inside the base `all` privilege and cannot be held independently.
-  // The gate must NOT require them — a Cases-Read + createComment sub-privilege role must be allowed.
+  // The gate must NOT require them — a Cases-Read + createComment sub-privilege role
+  // must be allowed.
   it('allows attaching even when create and update are both false (sub-privilege role)', () => {
-    const result = renderWithPermissions({ createComment: true, read: true, create: false, update: false });
+    const result = renderWithPermissions({
+      createComment: true,
+      read: true,
+      create: false,
+      update: false,
+    });
     expect(result).toBe(true);
   });
 
