@@ -9,24 +9,28 @@
  * Builds an ES|QL query that counts entities that crossed into High or Critical
  * risk since yesterday, using the risk score time-series history index.
  *
- * Uses numeric level mapping (Critical=4, High=3, Medium=2, Low=1, Unknown=0) so
- * that MAX() aggregation sorts correctly — MAX on the raw keyword field sorts
- * lexicographically (Unknown > Medium > Low > High > Critical), which is wrong.
+ * The risk score index uses type-specific field names (host.risk.calculated_level,
+ * user.risk.calculated_level, service.risk.calculated_level). We COALESCE across
+ * all three types and map levels to numbers so MAX() sorts correctly — MAX on the
+ * raw keyword sorts lexicographically (Unknown > Medium > Low > High > Critical).
  *
  * An entity qualifies when:
  *   - today_level_num >= 3  (today is High or Critical)
- *   - yday_level_num < 3 OR yday_level_num IS NULL  (was not H/C yesterday,
- *     or has no yesterday bucket — e.g. a newly tracked entity)
+ *   - yday_level_num < 3 OR yday_level_num IS NULL  (was not H/C yesterday)
  */
 export const buildNewlyHighCriticalCountQuery = (spaceId: string): string => {
   const index = `risk-score.risk-score-${spaceId}`;
   return [
+    `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
     `| WHERE @timestamp >= NOW() - 48h`,
+    `| EVAL entity_name = COALESCE(host.name, user.name, service.name)`,
+    `| EVAL risk_level = COALESCE(host.risk.calculated_level, user.risk.calculated_level, service.risk.calculated_level)`,
+    `| WHERE entity_name IS NOT NULL`,
     `| EVAL bucket = CASE(@timestamp >= NOW() - 24h, "today", "yday")`,
-    `| EVAL level_num = CASE(entity.risk.calculated_level == "Critical", 4, entity.risk.calculated_level == "High", 3, entity.risk.calculated_level == "Medium", 2, entity.risk.calculated_level == "Low", 1, 0)`,
-    `| STATS today_level_num = MAX(CASE(bucket == "today", level_num, null)), yday_level_num = MAX(CASE(bucket == "yday", level_num, null)) BY entity.id, entity.type`,
+    `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Medium", 2, risk_level == "Low", 1, 0)`,
+    `| STATS today_level_num = MAX(CASE(bucket == "today", level_num, null)), yday_level_num = MAX(CASE(bucket == "yday", level_num, null)) BY entity_name`,
     `| WHERE today_level_num >= 3 AND (yday_level_num IS NULL OR yday_level_num < 3)`,
-    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
+    `| STATS value = COUNT(*), entity_names = VALUES(entity_name)`,
   ].join('\n');
 };

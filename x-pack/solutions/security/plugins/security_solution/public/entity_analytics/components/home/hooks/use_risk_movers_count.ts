@@ -36,7 +36,7 @@ export const useRiskMoversCount = ({
     isLoading,
     isRefetching,
     error,
-  } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
+  } = useQuery<{ count: number; entityNames: string[] }, SecurityAppError>(
     ['riskMoversCount', query],
     async ({ signal }) => {
       const raw = await lastValueFrom(
@@ -48,15 +48,15 @@ export const useRiskMoversCount = ({
       const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      const entityIdsIndex = response.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
+      const entityNamesIndex = response.columns?.findIndex((c) => c.name === 'entity_names') ?? -1;
       const count = typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
-      const rawIds = entityIdsIndex >= 0 ? row?.[entityIdsIndex] : undefined;
-      const entityIds: string[] = Array.isArray(rawIds)
+      const rawIds = entityNamesIndex >= 0 ? row?.[entityNamesIndex] : undefined;
+      const entityNames: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
         ? [rawIds]
         : [];
-      return { count, entityIds };
+      return { count, entityNames };
     },
     {
       enabled: isEnabled,
@@ -72,7 +72,7 @@ export const useRiskMoversCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? [],
+    entityNames: queryResult?.entityNames ?? [],
     isLoading: isStatusLoading || isLoading || isRefetching,
     error: filteredError,
   };

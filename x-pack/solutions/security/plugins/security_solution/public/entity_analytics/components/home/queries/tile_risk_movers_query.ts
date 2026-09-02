@@ -9,20 +9,26 @@
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
  * vs the previous 24h window, using the risk score time-series history index.
  *
- * The query splits 48h of history into "today" (last 24h) and "yday" (24–48h ago)
- * buckets, takes the max score per entity per bucket, and filters to movers.
+ * The risk score index uses type-specific field names (host.risk.calculated_score,
+ * user.risk.calculated_score, service.risk.calculated_score) rather than a shared
+ * entity.* namespace. We COALESCE across all three types so a single query covers
+ * all entity types. entity_name maps to entity.name on entity-latest.
  *
- * Unlike LOOKUP JOIN tiles, no euidApi is needed — entity.id is a native field
- * on the risk score index and matches entity-latest directly.
+ * SET unmapped_fields="nullify" prevents errors when only some entity types are
+ * present in the index (e.g. only host docs → user.name is not in the mapping).
  */
 export const buildRiskMoversCountQuery = (spaceId: string): string => {
   const index = `risk-score.risk-score-${spaceId}`;
   return [
+    `SET unmapped_fields="nullify";`,
     `FROM ${index}`,
     `| WHERE @timestamp >= NOW() - 48h`,
+    `| EVAL entity_name = COALESCE(host.name, user.name, service.name)`,
+    `| EVAL risk_score = COALESCE(host.risk.calculated_score, user.risk.calculated_score, service.risk.calculated_score)`,
+    `| WHERE entity_name IS NOT NULL`,
     `| EVAL bucket = CASE(@timestamp >= NOW() - 24h, "today", "yday")`,
-    `| STATS today_score = MAX(CASE(bucket == "today", entity.risk.calculated_score, null)), yday_score = MAX(CASE(bucket == "yday", entity.risk.calculated_score, null)) BY entity.id, entity.type`,
+    `| STATS today_score = MAX(CASE(bucket == "today", risk_score, null)), yday_score = MAX(CASE(bucket == "yday", risk_score, null)) BY entity_name`,
     `| WHERE today_score IS NOT NULL AND yday_score IS NOT NULL AND today_score - yday_score >= 10`,
-    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
+    `| STATS value = COUNT(*), entity_names = VALUES(entity_name)`,
   ].join('\n');
 };
