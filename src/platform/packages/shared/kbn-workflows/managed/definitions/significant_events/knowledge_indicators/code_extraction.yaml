@@ -158,6 +158,7 @@ steps:
                         steps:
                           - name: run_logging_wrappers_agent
                             type: ai.agent
+                            timeout: 120s
                             agent-id: 'significant-events.logging-wrappers'
                             connector-id-by-feature: 'significant_events_ki_extraction'
                             plugin-id: 'significant_events_code_intelligence'
