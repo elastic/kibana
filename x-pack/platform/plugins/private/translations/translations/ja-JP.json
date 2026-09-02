@@ -6912,8 +6912,6 @@
     "links.panelEditor.layoutSettingsTitle": "レイアウト",
     "links.panelEditor.linksTitle": "リンク",
     "links.panelEditor.saveButtonLabel": "保存",
-    "links.panelEditor.saveToLibrarySwitchLabel": "ライブラリに保存",
-    "links.panelEditor.saveToLibrarySwitchTooltip": "このリンクパネルをライブラリに保存すると、他のダッシュボードに簡単に追加できます。",
     "links.panelEditor.titleInputLabel": "タイトル",
     "links.visTypeAlias.title": "リンク",
     "lists.exceptions.doesNotExistOperatorLabel": "存在しない",

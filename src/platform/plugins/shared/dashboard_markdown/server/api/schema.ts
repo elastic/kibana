@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 
 import { markdownStateSchema } from '../embeddable/schemas';
 
@@ -19,5 +20,6 @@ export const markdownLibraryItemSchema = z
       .optional()
       .meta({ description: 'A short description of the markdown library item.' }),
     title: z.string().min(1).meta({ description: 'The markdown library item title.' }),
+    tags: getAsCodeTagsSchema().optional(),
   })
   .strict();

@@ -16,9 +16,10 @@ import {
   apiPublishesTitle,
   apiPublishesSavedObjectId,
   apiIsPresentationContainer,
+  apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { LinksParentApi } from '../types';
+import type { LinksDashboardParentApi, LinksParentApi } from '../types';
 import type { LinksEmbeddableState } from '../../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
@@ -26,11 +27,15 @@ import { coreServices } from '../services/kibana_services';
 import { getEditorFlyout } from '../editor/get_editor_flyout';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 
-export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
-  apiIsPresentationContainer(parentApi) &&
+export const isLinksParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiPublishesSavedObjectId(parentApi) &&
   apiPublishesTitle(parentApi) &&
-  apiPublishesDescription(parentApi);
+  apiPublishesDescription(parentApi) &&
+  apiPublishesUnifiedSearch(parentApi) &&
+  typeof (parentApi as LinksParentApi)?.getSerializedStateForChild === 'function';
+
+export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksDashboardParentApi =>
+  apiIsPresentationContainer(parentApi) && isLinksParentApiCompatible(parentApi);
 
 export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   id: ADD_LINKS_PANEL_ACTION_ID,

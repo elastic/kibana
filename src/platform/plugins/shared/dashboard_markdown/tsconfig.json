@@ -29,7 +29,11 @@
     "@kbn/react-kibana-context-render",
     "@kbn/as-code-utils",
     "@kbn/usage-collection-plugin",
-    "@kbn/as-code-shared-telemetry"
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/presentation-util-plugin",
+    "@kbn/presentation-util",
+    "@kbn/content-management-utils"
   ],
   "exclude": ["target/**/*"]
 }

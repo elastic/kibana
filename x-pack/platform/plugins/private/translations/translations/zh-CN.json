@@ -6915,8 +6915,6 @@
     "links.panelEditor.layoutSettingsTitle": "布局",
     "links.panelEditor.linksTitle": "链接",
     "links.panelEditor.saveButtonLabel": "保存",
-    "links.panelEditor.saveToLibrarySwitchLabel": "保存到库",
-    "links.panelEditor.saveToLibrarySwitchTooltip": "将此链接面板保存到库中，以便将其轻松添加到其他仪表板。",
     "links.panelEditor.titleInputLabel": "标题",
     "links.visTypeAlias.title": "链接",
     "lists.exceptions.doesNotExistOperatorLabel": "不存在",

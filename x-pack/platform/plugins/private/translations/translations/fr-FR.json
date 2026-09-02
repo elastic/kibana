@@ -6894,8 +6894,6 @@
     "links.panelEditor.layoutSettingsTitle": "Couche",
     "links.panelEditor.linksTitle": "Liens",
     "links.panelEditor.saveButtonLabel": "Enregistrer",
-    "links.panelEditor.saveToLibrarySwitchLabel": "Enregistrer dans la bibliothèque",
-    "links.panelEditor.saveToLibrarySwitchTooltip": "Enregistrer ce panneau de liens dans la bibliothèque afin de pouvoir l'ajouter facilement à d'autres tableaux de bord.",
     "links.panelEditor.titleInputLabel": "Titre",
     "links.visTypeAlias.title": "Liens",
     "lists.exceptions.doesNotExistOperatorLabel": "n'existe pas",
