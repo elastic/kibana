@@ -124,31 +124,24 @@ export interface EuidGateOptions {
   /**
    * Whether to gate the EUID on `postAggFilter` as well as `documentsFilter`.
    *
-   * `postAggFilter` is an admission rule: may this document create or keep an entity. It is not a
-   * rule about which entity a document belongs to, and two of its arms cannot be satisfied outside
-   * the extraction pipeline. `entity.id exists` only becomes true after the pipeline's LOOKUP JOIN
-   * has attached the stored entity, and `idpGate` reads `event.kind`, which the detection engine
-   * rewrites to `signal` on every alert.
+   * `postAggFilter` decides whether a document may create or keep an entity. One of its arms
+   * (`entity.id` exists) only becomes true after the extraction pipeline's LOOKUP JOIN has
+   * attached the stored entity.
    *
-   * Defaults to `false`, because the document-based evaluators in this folder are resolution
-   * helpers: they answer which existing entity a document refers to. Gating them drops
-   * IdP-namespace identities that are already in the store, silently and without an error.
+   * Pass `false` when resolving which existing entity a document refers to. Those callers have
+   * no LOOKUP JOIN, so that arm never fires and the gate rejects identifiers whose entities are
+   * already in the store. Alerts need this: the detection engine rewrites `event.kind` to
+   * `signal`, so `idpGate` cannot match and IdP-namespace users resolve to nothing.
    *
-   * Extraction does not read this option at all. It applies `postAggFilter` itself, as an ESQL
-   * `WHERE` after the LOOKUP JOIN (see `logs_extraction_query_builder`).
-   *
-   * Pass `true` only from a genuine create path, so that path is held to the same admission rule
-   * as extraction. `EntityStoreCRUDClient` is the one such caller.
-   *
-   * @default false
+   * @default true
    */
   applyPostAggFilter?: boolean;
 }
 
 /**
- * True when the document matches `documentsFilter`, and `postAggFilter` too when
- * `applyPostAggFilter` is set. `postAggFilter` uses logical field names; main extraction ESQL
- * applies `recent.` only when building the post-join WHERE.
+ * True when the document matches `documentsFilter` ∧ `postAggFilter` (same predicate as
+ * `getEuidDslDocumentsContainsIdFilter` / logs extraction WHERE). `postAggFilter` uses
+ * logical field names; main extraction ESQL applies `recent.` only when building the post-join WHERE.
  *
  * For single-field identity definitions, returns true (callers only use this on the
  * calculated-identity path after field evaluations).
@@ -159,7 +152,7 @@ export function documentPassesCalculatedIdentityPipelineGate(
   options?: EuidGateOptions
 ): boolean {
   const { identityField, postAggFilter } = entityDefinition;
-  const { applyPostAggFilter = false } = options ?? {};
+  const { applyPostAggFilter = true } = options ?? {};
   if (isSingleFieldIdentity(identityField)) {
     return true;
   }

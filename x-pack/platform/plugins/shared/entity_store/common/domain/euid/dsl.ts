@@ -88,11 +88,10 @@ export function getEuidDslDocumentsContainsIdFilter(
  *   semantics, used by extraction). Pass `false` when looking up a stored entity by partial
  *   identity (e.g. only `host.name`) — the stored entity carries the higher-ranked fields
  *   (e.g. `host.id`), so demanding their absence would always produce zero results.
- * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain
- *   enough identifying information, or if it would not pass the entity's `documentsFilter` after
- *   field evaluations and `whenConditionTrueSetFieldsPreAgg`. `postAggFilter` is not applied: this
- *   resolves which entity a document refers to, it does not admit one into the store. See
- *   {@link EuidGateOptions}.
+ * @returns An Elasticsearch DSL query container, or `undefined` if the document does not contain enough
+ *   identifying information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter`
+ *   (same gate as `getEuidDslDocumentsContainsIdFilter` / logs extraction) after field evaluations
+ *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,

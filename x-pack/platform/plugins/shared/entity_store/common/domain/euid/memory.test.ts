@@ -66,15 +66,13 @@ describe('getEntityIdentifiersFromDocument', () => {
     });
   });
 
-  it('returns identifiers for a user document that fails postAggFilter', () => {
-    // Identity seeds are used to look up an entity that already exists, so the creation gate does
-    // not apply. This document has no `entity.id`, is not local, and is not an asset event.
+  it('returns undefined when user document fails pipeline gate (e.g. wrong IDP module)', () => {
     expect(
       getEntityIdentifiersFromDocument('user', {
         user: { email: 'a@b.com' },
         event: { module: 'azure' },
       })
-    ).toStrictEqual({ 'user.email': 'a@b.com', 'entity.namespace': 'entra_id' });
+    ).toBeUndefined();
   });
 
   it('prefers host.id over host.name for host identifiers', () => {
@@ -158,13 +156,13 @@ describe('getEuidFromObject', () => {
       ).toBe('user:a@b.com@okta');
     });
 
-    it('resolves a document that fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
+    it('returns undefined when document fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
       expect(
         getEuidFromObject('user', {
           user: { email: 'a@b.com' },
           event: { module: 'azure' },
         })
-      ).toBe('user:a@b.com@entra_id');
+      ).toBeUndefined();
     });
 
     it('uses non-IDP path when user.name and host.id are present', () => {
@@ -283,38 +281,31 @@ describe('getEuidFromObject', () => {
 
   describe('applyPostAggFilter', () => {
     // A detection alert raised on an okta user: the detection engine rewrites event.kind to
-    // 'signal', which no arm of postAggFilter accepts. Resolution must still tie the alert back to
-    // the entity in the store; a create path must reject it.
+    // 'signal', which no arm of postAggFilter accepts. Creation must reject it; resolution must
+    // not, or the alert can never be tied back to an entity that is already in the store.
     const idpAlert = {
       user: { email: 'alice@example.com' },
       event: { kind: 'signal', module: 'okta' },
     };
 
-    it('resolves an IdP-namespace alert by default', () => {
-      expect(getEuidFromObject('user', idpAlert)).toBe('user:alice@example.com@okta');
+    it('rejects an IdP-namespace alert by default', () => {
+      expect(getEuidFromObject('user', idpAlert)).toBeUndefined();
     });
 
-    it('rejects an IdP-namespace alert when applyPostAggFilter is true', () => {
-      expect(getEuidFromObject('user', idpAlert, { applyPostAggFilter: true })).toBeUndefined();
+    it('resolves an IdP-namespace alert when applyPostAggFilter is false', () => {
+      expect(getEuidFromObject('user', idpAlert, { applyPostAggFilter: false })).toBe(
+        'user:alice@example.com@okta'
+      );
     });
 
-    it('still enforces documentsFilter by default', () => {
-      expect(
-        getEuidFromObject('user', {
-          ...idpAlert,
-          event: { ...idpAlert.event, outcome: 'failure' },
-        })
-      ).toBeUndefined();
-    });
-
-    it('admits an asset event on a create path', () => {
+    it('still enforces documentsFilter when applyPostAggFilter is false', () => {
       expect(
         getEuidFromObject(
           'user',
-          { user: { email: 'alice@example.com' }, event: { kind: 'asset', module: 'okta' } },
-          { applyPostAggFilter: true }
+          { ...idpAlert, event: { ...idpAlert.event, outcome: 'failure' } },
+          { applyPostAggFilter: false }
         )
-      ).toBe('user:alice@example.com@okta');
+      ).toBeUndefined();
     });
   });
 });

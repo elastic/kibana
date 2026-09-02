@@ -37,8 +37,8 @@ import { applyFieldEvaluations } from './field_evaluations';
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
- * @param options - See {@link EuidGateOptions}; pass `applyPostAggFilter: true` from a create path
- * to hold the document to the same admission rule as extraction.
+ * @param options - See {@link EuidGateOptions}; pass `applyPostAggFilter: false` to resolve which
+ * existing entity a document refers to rather than deciding whether one may be created.
  * @returns An entity id string, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidFromObject(entityType: EntityType, doc: any, options?: EuidGateOptions) {

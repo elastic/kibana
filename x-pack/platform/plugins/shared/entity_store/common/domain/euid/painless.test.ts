@@ -258,11 +258,11 @@ describe('getEuidPainlessRuntimeMapping', () => {
 
   it('threads applyPostAggFilter through to the evaluation', () => {
     const mapping = getEuidPainlessRuntimeMapping(EntityType.enum.user, {
-      applyPostAggFilter: true,
+      applyPostAggFilter: false,
     });
 
     expect(mapping.script.source).toContain(
-      getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: true })
+      getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false })
     );
   });
 });
@@ -274,20 +274,20 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
   // namespace clause references it too.
   const postAggOnlyMarker = `doc.containsKey('entity.id')`;
 
-  it('does not gate on postAggFilter by default', () => {
+  it('gates on postAggFilter by default', () => {
     const script = getEuidPainlessEvaluation(EntityType.enum.user);
-
-    expect(script).not.toContain(postAggOnlyMarker);
-  });
-
-  it('adds the postAggFilter gate when applyPostAggFilter is true', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: true });
 
     expect(script).toContain(postAggOnlyMarker);
   });
 
-  it('keeps the documentsFilter gate by default', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user);
+  it('omits the postAggFilter gate when applyPostAggFilter is false', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+
+    expect(script).not.toContain(postAggOnlyMarker);
+  });
+
+  it('keeps the documentsFilter gate when applyPostAggFilter is false', () => {
+    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
 
     // documentsFilter requires event.outcome != failure and at least one user identifier.
     expect(script).toContain(`doc.containsKey('event.outcome')`);

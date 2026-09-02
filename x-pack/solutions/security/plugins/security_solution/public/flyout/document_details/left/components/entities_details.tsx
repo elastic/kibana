@@ -67,9 +67,9 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
   ) as IdentityFields;
 
   /**
-   * EUID extraction can return nothing when the entity store EUID API is still loading (it is
-   * imported lazily) or when the document carries no user identity at all. Resolve the display
-   * name from the document and use it for store lookup in that case.
+   * User EUID extraction applies postAggFilter (e.g. non-IDP path needs host.id), so many ECS docs
+   * with user.name + host.name still get no identifiers while host extraction succeeds. Resolve the
+   * display name from the document and use it for store lookup when EUID returns nothing.
    */
   const resolvedUserName = resolveUserDisplayForEntities(userEntityIdentifiers, getFieldsData);
   const legacyUserIdentityForStore =

@@ -209,18 +209,13 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('builds a filter for a doc that fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
-      // `postAggFilter` would reject this document, but that gate decides whether a document may
-      // create an entity. This builder answers which entity a document refers to, so it does not
-      // apply it. Gating here would drop every IdP-namespace user already in the store.
-      const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { id: 'user-id-42' },
-        event: { module: 'o365' },
-      });
-
-      expect(result?.bool?.filter).toEqual(
-        expect.arrayContaining([{ term: { 'user.id': 'user-id-42' } }])
-      );
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset kind, no local namespace, no entity.id)', () => {
+      expect(
+        getEuidDslFilterBasedOnDocument('user', {
+          user: { id: 'user-id-42' },
+          event: { module: 'o365' },
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined when no user id fields are present', () => {
