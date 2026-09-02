@@ -1544,12 +1544,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -1564,7 +1563,6 @@ module.exports = {
         'no-useless-computed-key': 'error',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -1861,12 +1859,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': ['error', { props: true }],
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -1883,7 +1880,6 @@ module.exports = {
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
         'no-void': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -2387,7 +2383,6 @@ module.exports = {
             next: ['return'],
           },
         ],
-        'padded-blocks': ['error', 'always'],
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
@@ -2543,7 +2538,15 @@ module.exports = {
         'x-pack/platform/plugins/private/telemetry_collection_xpack/**',
       ],
       rules: {
-        '@typescript-eslint/prefer-ts-expect-error': 'error',
+        '@typescript-eslint/ban-ts-comment': [
+          'error',
+          {
+            'ts-check': false,
+            'ts-expect-error': false,
+            'ts-ignore': true,
+            'ts-nocheck': false,
+          },
+        ],
       },
     },
 
@@ -2588,12 +2591,11 @@ module.exports = {
         'no-lone-blocks': 'error',
         'no-multi-assign': 'error',
         'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
+        'no-new-native-nonconstructor': 'error',
         'no-obj-calls': 'error',
         'no-param-reassign': 'error',
         'no-process-exit': 'error',
         'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
         'no-self-compare': 'error',
         'no-shadow-restricted-names': 'error',
         'no-sparse-arrays': 'error',
@@ -2608,7 +2610,6 @@ module.exports = {
         'no-useless-computed-key': 'error',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
         'prefer-rest-params': 'error',
@@ -2763,17 +2764,6 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
-      },
-    },
-
-    /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
 
