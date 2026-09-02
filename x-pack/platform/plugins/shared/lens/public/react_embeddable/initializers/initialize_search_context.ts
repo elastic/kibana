@@ -41,6 +41,9 @@ export interface SearchContextConfig {
     PublishesSearchSession &
     PublishesProjectRoutingOverrides &
     PublishesEsqlUsage;
+  internalApi: {
+    setApproximationApplied: (value: boolean | undefined) => void;
+  };
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
@@ -124,6 +127,13 @@ export function initializeSearchContext(
       approximationApplied$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
+    },
+    internalApi: {
+      setApproximationApplied: (value: boolean | undefined) => {
+        if (approximationApplied$.getValue() !== value) {
+          approximationApplied$.next(value);
+        }
+      },
     },
     anyStateChange$: merge(timeRangeManager.anyStateChange$),
     cleanup: () => {
