@@ -19,11 +19,26 @@ interface ConversationWithMaybeMetadata {
   metadata?: unknown;
 }
 
-/** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; everything else → String(value). */
+/**
+ * Converts a domain metadata value to its ES `flattened` storage form.
+ *
+ * TEXT_ARRAY  → string[]  (each element coerced to a string)
+ * OBJECT      → stored as-is (raw JSON object, verbatim in `_source`)
+ * OBJECT_ARRAY → stored as-is (raw JSON array of objects, verbatim in `_source`)
+ * everything else → String(value)
+ *
+ * OBJECT / OBJECT_ARRAY values skip serialization entirely. The `flattened` mapping
+ * accepts nested JSON and preserves `_source` verbatim, so no coercion is needed or
+ * desirable — a nested boolean or number keeps its JSON type on read.
+ */
 export const serializeMetadataValue = (
   value: MetadataFieldValue,
   inputType: ConversationTemplateInputType
 ): SerializedMetadataValue => {
+  if (inputType === 'OBJECT' || inputType === 'OBJECT_ARRAY') {
+    // Stored as-is — no serialization for structured types.
+    return value as SerializedMetadataValue;
+  }
   if (inputType === 'TEXT_ARRAY') {
     const arr = Array.isArray(value) ? value : [String(value)];
     return arr.map(String);
@@ -33,18 +48,28 @@ export const serializeMetadataValue = (
 
 /**
  * Converts a stored metadata value back to its declared JS type.
- * TOGGLE → boolean, NUMBER → number (or raw string if NaN), TEXT_ARRAY → string[], others → unchanged.
+ *
+ * TOGGLE       → boolean
+ * NUMBER       → number (or raw string if NaN)
+ * TEXT_ARRAY   → string[]
+ * OBJECT       → returned as-is (raw JSON object — was stored verbatim)
+ * OBJECT_ARRAY → returned as-is (raw JSON array of objects — was stored verbatim)
+ * others       → unchanged
  */
 export const deserializeMetadataValue = (
   value: SerializedMetadataValue,
   inputType: ConversationTemplateInputType
 ): MetadataFieldValue => {
+  // OBJECT / OBJECT_ARRAY were stored as-is — return unchanged.
+  if (inputType === 'OBJECT' || inputType === 'OBJECT_ARRAY') {
+    return value as MetadataFieldValue;
+  }
   if (inputType === 'TOGGLE') {
     return value === 'true';
   }
   if (inputType === 'NUMBER') {
     const n = Number(value);
-    return Number.isNaN(n) ? value : n;
+    return Number.isNaN(n) ? (value as string) : n;
   }
   if (inputType === 'TEXT_ARRAY') {
     return Array.isArray(value) ? value : [value as string];

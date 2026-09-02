@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const phishingTemplate: ConversationTemplate = {
   id: 'phishing',
-  version: 1,
+  version: 2,
   name: 'Phishing Investigation',
   description: 'Use for investigating suspected phishing attempts.',
   fields: {
@@ -70,6 +70,36 @@ export const phishingTemplate: ConversationTemplate = {
       description: 'Optional CVSS score if a known vulnerability is involved.',
       min: 0,
       max: 10,
+    },
+    indicators: {
+      input_type: 'OBJECT_ARRAY',
+      description:
+        'Threat indicators extracted from the phishing email (IPs, domains, URLs, file hashes). ' +
+        'Each element describes one indicator with its type, value, and when it was observed.',
+      max_items: 50,
+      properties: {
+        type: {
+          input_type: 'SELECT',
+          description: 'Indicator category.',
+          required: true,
+          options: ['ip', 'domain', 'url', 'file_hash', 'email'],
+        },
+        value: {
+          input_type: 'TEXT',
+          description: 'Raw indicator value (e.g. "192.0.2.1", "evil.example.com").',
+          required: true,
+          max_length: 2048,
+        },
+        seen_at: {
+          input_type: 'DATE',
+          description: 'ISO 8601 date/time when this indicator was first observed.',
+        },
+        confidence: {
+          input_type: 'SELECT',
+          description: 'Confidence level in the indicator.',
+          options: ['low', 'medium', 'high'],
+        },
+      },
     },
   },
 };
