@@ -12,13 +12,16 @@ export const dockerContainerName = (kind: 'fleet-server' | 'agent', runId: strin
 
 const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
 const ERROR_TAIL_CHARS = 4000;
+const SECRET_ENV_RE = /(FLEET_SERVER_SERVICE_TOKEN|FLEET_ENROLLMENT_TOKEN)=[^\s]+/g;
+
+const redactSecrets = (text: string): string => text.replace(SECRET_ENV_RE, '$1=[redacted]');
 
 const formatDockerFailure = (args: string[], result: SpawnSyncReturns<string>): string => {
   const output = `${result.stderr || ''}\n${result.stdout || ''}`.trim();
   const tailed = output.length > ERROR_TAIL_CHARS ? output.slice(-ERROR_TAIL_CHARS) : output;
   const reason =
     result.error?.message ?? (result.signal ? `signal ${result.signal}` : `exit ${result.status}`);
-  return `docker ${args.join(' ')} failed (${reason}): ${tailed}`;
+  return redactSecrets(`docker ${args.join(' ')} failed (${reason}): ${tailed}`);
 };
 
 const runDocker = (args: string[]): string => {
@@ -48,7 +51,7 @@ export const publishedHostPort = (name: string, containerPort: number): number =
 
 export const containerLogs = (name: string, tail = 80): string => {
   const result = spawnSync('docker', ['logs', '--tail', String(tail), name], { encoding: 'utf8' });
-  return `${result.stdout || ''}${result.stderr || ''}`.trim();
+  return redactSecrets(`${result.stdout || ''}${result.stderr || ''}`.trim());
 };
 
 export const startDetachedContainer = (name: string, args: string[]): void => {
