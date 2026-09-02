@@ -139,7 +139,7 @@ const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) 
 
 /** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
 const MAX_VISIBLE_BADGES = 5;
-const MAX_BADGES_BEFORE_OVERFLOW = 4;
+const MAX_BADGES_BEFORE_OVERFLOW = MAX_VISIBLE_BADGES - 1;
 const MAX_BADGE_WIDTH = 200;
 
 /** Caps badge width so long labels ellipsize; `euiBadge__text` supplies the truncation. */
