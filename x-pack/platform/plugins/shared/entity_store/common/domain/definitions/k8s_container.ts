@@ -103,7 +103,6 @@ export const k8sContainerEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'kubernetes.container.status.phase' }),
     newestValue({ source: 'kubernetes.container.status.ready', mapping: { type: 'boolean' } }),
     newestValue({ source: 'kubernetes.container.status.reason' }),
-    newestValue({ source: 'kubernetes.container.status.restarts', mapping: { type: 'integer' } }),
     collect({ source: 'fields.cluster' }),
     collect({ source: 'service.name' }),
     ...getCommonFieldDescriptions('entity'),

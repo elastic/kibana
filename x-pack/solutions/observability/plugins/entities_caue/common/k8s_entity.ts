@@ -32,7 +32,6 @@ export interface K8sEntity {
   'kubernetes.container.status.phase': string | null;
   'kubernetes.container.status.ready': boolean | null;
   'kubernetes.container.status.reason': string | null;
-  'kubernetes.container.status.restarts': number | null;
   // --- lifecycle (newestValue / oldestValue, always scalar) ---
   'entity.lifecycle.first_seen': string | null;
   'entity.lifecycle.last_seen': string | null;

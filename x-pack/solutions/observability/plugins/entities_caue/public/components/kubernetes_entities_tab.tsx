@@ -89,17 +89,6 @@ const columns: Array<EuiBasicTableColumn<K8sEntity>> = [
     },
   },
   {
-    name: i18n.translate('xpack.entitiesCaue.k8s.columns.restarts', {
-      defaultMessage: 'Restarts',
-    }),
-    sortable: (item: K8sEntity) => item['kubernetes.container.status.restarts'] ?? -1,
-    width: '90px',
-    render: (item: K8sEntity) => {
-      const r = item['kubernetes.container.status.restarts'];
-      return r != null ? String(r) : '—';
-    },
-  },
-  {
     name: i18n.translate('xpack.entitiesCaue.k8s.columns.lastSeen', {
       defaultMessage: 'Last seen',
     }),
