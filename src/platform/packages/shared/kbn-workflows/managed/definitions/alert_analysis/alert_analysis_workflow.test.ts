@@ -752,4 +752,40 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW render-level tests', () => {
     expect(posSummaryAlpha).toBeLessThan(posAlertB);
     expect(posAlertB).toBeLessThan(posSummaryBeta);
   });
+
+  it('renders boolean false values for code_signature fields', () => {
+    // LiquidJS treats `false != blank` as false, so a `!= blank` guard silently drops
+    // boolean false. The template must use `!= nil` for boolean fields.
+    const template = getMessageTemplate();
+    const output = engine.parseAndRenderSync(
+      template,
+      makeRenderContext([
+        {
+          _id: 'alert-1',
+          process: {
+            code_signature: { exists: false, trusted: false, subject_name: 'Acme Corp' },
+            parent: { code_signature: { trusted: false } },
+          },
+          event: {},
+          user: {},
+          host: {},
+          file: {},
+          source: {},
+          destination: {},
+          network: {},
+          url: {},
+          dns: {},
+          cloud: {},
+          kibana: { alert: {} },
+          aws: {},
+          azure: {},
+          gcp: {},
+        },
+      ])
+    );
+
+    expect(output).toContain('process.code_signature.exists: false');
+    expect(output).toContain('process.code_signature.trusted: false');
+    expect(output).toContain('process.parent.code_signature.trusted: false');
+  });
 });

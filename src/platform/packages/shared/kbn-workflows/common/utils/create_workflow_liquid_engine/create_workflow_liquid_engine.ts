@@ -150,7 +150,8 @@ export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
       return value;
     }
     const groupSize = Math.floor(Number(size));
-    if (!Number.isFinite(groupSize) || groupSize < 1) {
+    const isUsableSize = Number.isInteger(groupSize) && groupSize >= 1;
+    if (!isUsableSize) {
       return value.length > 0 ? [value] : [];
     }
     const groups: unknown[][] = [];

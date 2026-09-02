@@ -907,10 +907,10 @@ steps:
                 {% if a.process.hash.sha256 != blank -%}
                 - process.hash.sha256: {{ a.process.hash.sha256 | escape }}
                 {% endif -%}
-                {% if a.process.code_signature.exists != blank -%}
+                {% if a.process.code_signature.exists != nil -%}
                 - process.code_signature.exists: {{ a.process.code_signature.exists | escape }}
                 {% endif -%}
-                {% if a.process.code_signature.trusted != blank -%}
+                {% if a.process.code_signature.trusted != nil -%}
                 - process.code_signature.trusted: {{ a.process.code_signature.trusted | escape }}
                 {% endif -%}
                 {% if a.process.code_signature.subject_name != blank -%}
@@ -925,7 +925,7 @@ steps:
                 {% if a.process.parent.executable != blank -%}
                 - process.parent.executable: {{ a.process.parent.executable | truncate: 1000 | escape }}
                 {% endif -%}
-                {% if a.process.parent.code_signature.trusted != blank -%}
+                {% if a.process.parent.code_signature.trusted != nil -%}
                 - process.parent.code_signature.trusted: {{ a.process.parent.code_signature.trusted | escape }}
                 {% endif -%}
                 {% if a.process.parent.code_signature.subject_name != blank -%}
@@ -993,6 +993,10 @@ steps:
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
             create-conversation: "${{ variables.create_conversation }}"
+            # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
+            # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
+            # this via the AWS SDK so the limit only affects OpenAI-family connectors.
+            max-step-size: '10mb'
             on-failure:
               retry:
                 max-attempts: 3
