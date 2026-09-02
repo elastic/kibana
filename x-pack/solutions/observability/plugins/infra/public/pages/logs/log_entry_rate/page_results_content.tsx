@@ -29,6 +29,7 @@ import {
   JobStoppedCallout,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
+import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { ManageJobsButton } from '../../../components/logging/log_analysis_setup/manage_jobs_button';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
@@ -76,6 +77,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     setupStatus: logEntryRateSetupStatus,
     jobStatus: logEntryRateJobStatus,
     jobIds: logEntryRateJobIds,
+    projectRouting: logEntryRateProjectRouting,
   } = useLogEntryRateModuleContext();
 
   const {
@@ -87,6 +89,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     setupStatus: logEntryCategoriesSetupStatus,
     jobStatus: logEntryCategoriesJobStatus,
     jobIds: logEntryCategoriesJobIds,
+    projectRouting: logEntryCategoriesProjectRouting,
   } = useLogEntryCategoriesModuleContext();
 
   const jobIds = useMemo(() => {
@@ -258,17 +261,33 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <DatasetsSelector
-                availableDatasets={datasets}
-                isLoading={isLoadingDatasets}
-                hasFailedLoading={hasFailedLoadingDatasets}
-                onRetry={getLogEntryAnomaliesDatasets}
-                selectedDatasets={selectedDatasets}
-                onChangeDatasetSelection={setSelectedDatasets}
-              />
-            </EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <JobProjectScopes
+                  jobs={[
+                    {
+                      name: logEntryCategoriesModuleDescriptor.moduleName,
+                      projectRouting: logEntryCategoriesProjectRouting,
+                    },
+                    {
+                      name: logEntryRateModuleDescriptor.moduleName,
+                      projectRouting: logEntryRateProjectRouting,
+                    },
+                  ]}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <DatasetsSelector
+                  availableDatasets={datasets}
+                  isLoading={isLoadingDatasets}
+                  hasFailedLoading={hasFailedLoadingDatasets}
+                  onRetry={getLogEntryAnomaliesDatasets}
+                  selectedDatasets={selectedDatasets}
+                  onChangeDatasetSelection={setSelectedDatasets}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
                 start={friendlyTimeRange.startTime}
