@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  TRANSACTION_DETAILS_BY_NAME_LOCATOR,
+  type TransactionDetailsByNameParams,
+} from '@kbn/deeplinks-observability';
 import { useCallback, useMemo } from 'react';
 import { getFlyoutDiscoverNavigation } from '../../service_flyout/utils/get_flyout_discover_navigation';
 import { useApmIndices } from '../../service_flyout/hooks/use_apm_indices';
@@ -20,6 +24,19 @@ export function useTransactionDetailFlyoutLinks() {
 
   const { indices, loading: indicesLoading } = useApmIndices({ http: core.http });
   const openInNewDiscoverTab = contextActions?.openInNewDiscoverTab;
+
+  const transactionDetailsHref = useMemo(() => {
+    const locator = share?.url?.locators?.get<TransactionDetailsByNameParams>(
+      TRANSACTION_DETAILS_BY_NAME_LOCATOR
+    );
+    return locator?.getRedirectUrl({
+      serviceName,
+      transactionName,
+      environment,
+      rangeFrom,
+      rangeTo,
+    });
+  }, [share, serviceName, transactionName, environment, rangeFrom, rangeTo]);
 
   const { href: discoverHref, esqlQuery: discoverEsqlQuery } = getFlyoutDiscoverNavigation({
     share,
@@ -53,12 +70,20 @@ export function useTransactionDetailFlyoutLinks() {
   return useMemo(
     () => ({
       loading: indicesLoading,
+      apm: { transactionDetailsHref },
       discover: {
         href: discoverHref,
         openInDiscoverTab:
           openInNewDiscoverTab && discoverEsqlQuery ? openInDiscoverTab : undefined,
       },
     }),
-    [indicesLoading, discoverHref, openInNewDiscoverTab, discoverEsqlQuery, openInDiscoverTab]
+    [
+      indicesLoading,
+      transactionDetailsHref,
+      discoverHref,
+      openInNewDiscoverTab,
+      discoverEsqlQuery,
+      openInDiscoverTab,
+    ]
   );
 }

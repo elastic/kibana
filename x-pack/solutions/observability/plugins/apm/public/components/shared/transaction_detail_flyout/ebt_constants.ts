@@ -6,5 +6,6 @@
  */
 
 export const TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS = {
+  TITLE: 'transactionDetailFlyoutTitle',
   ACTIONS_MENU: 'transactionDetailFlyoutActionsMenu',
 } as const;

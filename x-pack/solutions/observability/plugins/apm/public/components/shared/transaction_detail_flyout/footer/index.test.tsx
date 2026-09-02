@@ -22,6 +22,7 @@ function makeLinks({
 } = {}) {
   return {
     loading,
+    apm: { transactionDetailsHref: '/app/apm/services/checkout/transactions/view' },
     discover: { href: discoverHref, openInDiscoverTab },
   };
 }
@@ -34,10 +35,6 @@ function renderFooter() {
   );
 }
 
-function openActionsMenu() {
-  fireEvent.click(screen.getByTestId('transactionDetailFlyoutActionsButton'));
-}
-
 describe('TransactionDetailFlyoutFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,46 +45,46 @@ describe('TransactionDetailFlyoutFooter', () => {
     cleanup();
   });
 
-  it('renders the discover action when href resolves', () => {
+  it('renders a direct Discover button when href resolves', () => {
     renderFooter();
 
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).not.toBeDisabled();
-    openActionsMenu();
-
-    expect(
-      screen.getByTestId('transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
-    ).toHaveAttribute('href', '/app/discover/traces');
+    const button = screen.getByTestId('transactionDetailFlyoutOpenInDiscoverButton');
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('href', '/app/discover/traces');
+    expect(button).toHaveTextContent('Open traces in Discover');
   });
 
-  it('disables the actions button while links are loading', () => {
+  it('disables the Discover button while links are loading', () => {
     mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks({ loading: true }));
 
     renderFooter();
 
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).toBeDisabled();
+    expect(screen.getByTestId('transactionDetailFlyoutOpenInDiscoverButton')).toBeDisabled();
   });
 
-  it('disables the actions button when no actions are available', () => {
+  it('disables the Discover button when no discover action is available', () => {
     mockUseTransactionDetailFlyoutLinks.mockReturnValue({
       loading: false,
+      apm: { transactionDetailsHref: undefined },
       discover: { href: undefined, openInDiscoverTab: undefined },
     });
 
     renderFooter();
 
-    expect(screen.getByTestId('transactionDetailFlyoutActionsButton')).toBeDisabled();
+    expect(screen.getByTestId('transactionDetailFlyoutOpenInDiscoverButton')).toBeDisabled();
   });
 
-  it('uses the Discover tab action label when openInDiscoverTab is provided', () => {
-    mockUseTransactionDetailFlyoutLinks.mockReturnValue(
-      makeLinks({ openInDiscoverTab: jest.fn() })
-    );
+  it('uses the Discover tab label and onClick when openInDiscoverTab is provided', () => {
+    const openInDiscoverTab = jest.fn();
+    mockUseTransactionDetailFlyoutLinks.mockReturnValue(makeLinks({ openInDiscoverTab }));
 
     renderFooter();
-    openActionsMenu();
 
-    expect(
-      screen.getByTestId('transactionDetailFlyoutActionsMenuItem-openTracesInDiscover')
-    ).toHaveTextContent('Open traces in a Discover tab');
+    const button = screen.getByTestId('transactionDetailFlyoutOpenInDiscoverButton');
+    expect(button).toHaveTextContent('Open traces in a Discover tab');
+    expect(button).not.toHaveAttribute('href');
+
+    fireEvent.click(button);
+    expect(openInDiscoverTab).toHaveBeenCalledTimes(1);
   });
 });
