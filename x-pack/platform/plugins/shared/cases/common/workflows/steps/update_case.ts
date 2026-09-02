@@ -57,6 +57,17 @@ export const updateCaseStepCommonDefinition: CommonStepDefinition<
       status: "in-progress"
       severity: "high"
 \`\`\``,
+      `## Update case fields (extended_fields)
+Keys provided are merged into the stored map; unlisted keys are left untouched. Discover keys with \`GET /api/cases/fields\`.
+\`\`\`yaml
+- name: update_case_fields
+  type: ${UpdateCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    updates:
+      extended_fields:
+        priority_as_keyword: "low"
+\`\`\``,
     ],
   },
   inputSchema: InputSchema,

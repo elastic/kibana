@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n-react'
   - '@kbn/ui-callout'
+  - '@kbn/react-kibana-context-styled'
 tags:
   - plugin
   - prod

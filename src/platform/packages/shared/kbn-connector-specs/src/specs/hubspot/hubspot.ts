@@ -85,6 +85,7 @@ export const HubSpotConnector: ConnectorSpec = {
   actions: {
     searchCrmObjects: {
       isTool: true,
+      scope: 'read',
       description:
         'Search or list one HubSpot CRM object type: contacts, companies, deals, tickets, or engagements ' +
         '(calls, emails, meetings, notes, tasks). Omit query to list pages. For contacts with includeAssociatedDeals, ' +
@@ -141,6 +142,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     getCrmObject: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve one CRM record by object type and ID. For tickets, fetches linked notes (body text) when ' +
         'CRM scopes allow.',
@@ -218,6 +220,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     listOwners: {
       isTool: true,
+      scope: 'read',
       description:
         'List HubSpot owners (CRM users). Use to resolve names or emails to hubspot_owner_id for deal ' +
         'filters.',
@@ -237,6 +240,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     searchDeals: {
       isTool: true,
+      scope: 'read',
       description:
         'Search deals with optional keyword, owner, pipeline, and stage. Discover IDs via listPipelines ' +
         'and listOwners before filtering.',
@@ -278,6 +282,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     searchBroad: {
       isTool: true,
+      scope: 'read',
       description:
         'Run one keyword search across contacts, companies, deals, and tickets in parallel (per-type limit, ' +
         'default 5).',
@@ -300,6 +305,7 @@ export const HubSpotConnector: ConnectorSpec = {
 
     listPipelines: {
       isTool: true,
+      scope: 'read',
       description:
         'List HubSpot pipelines and stages for deals or tickets. Use returned pipeline and stage IDs with ' +
         'searchDeals.',
