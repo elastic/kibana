@@ -35,7 +35,10 @@ import { REVISION_SIZE_LIMIT } from '../../../../lib/knowledge_indicators/knowle
 import type { SignificantEventsCodeExtractionClient } from '../../../../lib/workflows/code_extraction_workflow_client';
 import {
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
+  FALLBACK_LOG_INDEX_PATTERN,
   FALLBACK_LOG_STREAM,
+  FALLBACK_METRIC_INDEX_PATTERN,
+  FALLBACK_TRACE_INDEX_PATTERN,
 } from '../../../../lib/knowledge_indicators/code_intelligence/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -913,13 +916,33 @@ const identifyOtelSignalsRoute = createServerRoute({
       esClient: streamDataEsClient,
       logger: routeLogger,
     });
+    const hasTypedStreamCoverage =
+      resolved.traceStreams.length > 0 ||
+      resolved.metricStreams.length > 0 ||
+      resolved.logStreams.length > 0;
+    const predictiveFallback =
+      !hasTypedStreamCoverage && authorizedStreamNames.has(FALLBACK_LOG_STREAM)
+        ? {
+            traceStreams: [FALLBACK_TRACE_INDEX_PATTERN],
+            metricStreams: [FALLBACK_METRIC_INDEX_PATTERN],
+            logStreams: [FALLBACK_LOG_INDEX_PATTERN],
+            traceStreamNames: [FALLBACK_LOG_STREAM],
+            metricStreamNames: [FALLBACK_LOG_STREAM],
+            logStreamNames: [FALLBACK_LOG_STREAM],
+          }
+        : resolved;
+    if (!hasTypedStreamCoverage && predictiveFallback !== resolved) {
+      routeLogger.info(
+        `No typed streams exist for OTel service "${name}"; generating predictive typed queries on root "${FALLBACK_LOG_STREAM}"`
+      );
+    }
     const generated = generateOtelQueries({
       serviceName: name,
       repository,
       gitSha,
       signals: extraction.signals,
       signalCounts,
-      ...resolved,
+      ...predictiveFallback,
     });
 
     // Template queries are valid only when no typed signal tier can target a

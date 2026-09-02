@@ -358,6 +358,82 @@ describe('Code Intelligence routes', () => {
     expect(mockDiscoverLoggingSites).not.toHaveBeenCalled();
   });
 
+  it('generates predictive typed OTel queries when no typed streams exist yet', async () => {
+    const typedCandidate = {
+      stream: 'logs',
+      query: { id: 'typed-query', esql: { query: 'FROM traces* | STATS c = COUNT(*)' } },
+    };
+    mockExtractOtelSignalsResult.mockResolvedValue({
+      signals: [{ kind: 'span_name', value: 'checkout', file: 'src/app.ts', line: 1 }],
+      failed: false,
+    });
+    mockResolveSignalStreams.mockResolvedValue({
+      traceStreams: [],
+      metricStreams: [],
+      logStreams: [],
+    });
+    mockGenerateOtelQueries.mockReturnValue({ gateBypassed: false, queries: [typedCandidate] });
+    mockClassifyOtelSignals.mockResolvedValue([typedCandidate]);
+    mockResolveConnectorForFeature.mockResolvedValue('connector');
+    const bulk = jest.fn().mockResolvedValue(undefined);
+    const getStreamToQueryLinksMap = jest.fn().mockResolvedValue({ logs: [] });
+
+    await expect(
+      identifyOtelSignalsRoute.handler({
+        params: {
+          body: {
+            repository: 'repository',
+            gitSha: 'sha',
+            serviceRoot: 'service',
+            name: 'service',
+            language: 'typescript',
+            hasOtel: true,
+            signalCounts: {
+              instrumentation_grpc: 0,
+              instrumentation_http: 0,
+              instrumentation_other: 0,
+              start_span: 1,
+              set_attribute: 0,
+              add_event: 0,
+              record_exception: 0,
+              set_status_error: 0,
+              create_metric: 0,
+            },
+          },
+        },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          inferenceClient: {},
+          streamDataEsClient: {},
+          streamsClient: { listStreams: jest.fn().mockResolvedValue([{ name: 'logs' }]) },
+          getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+            getStreamToQueryLinksMap,
+            bulk,
+          }),
+        }),
+        server: {},
+        logger: {
+          get: jest.fn().mockReturnValue({ info: jest.fn(), warn: jest.fn(), debug: jest.fn() }),
+        },
+        maintenanceService: createMaintenanceService(),
+      } as unknown as IdentifyOtelHandlerParams)
+    ).resolves.toEqual({ status: 'generated', queriesGenerated: 1, otelSignalsFound: 1 });
+
+    expect(mockGenerateOtelQueries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        traceStreams: ['traces*'],
+        metricStreams: ['metrics*'],
+        logStreams: ['logs*'],
+        traceStreamNames: ['logs'],
+        metricStreamNames: ['logs'],
+        logStreamNames: ['logs'],
+      })
+    );
+    expect(mockDiscoverLoggingSites).not.toHaveBeenCalled();
+    expect(bulk).toHaveBeenCalledWith('logs', expect.any(Array));
+  });
+
   it('uses the template fallback after typed source extraction fails', async () => {
     const sourceEsClient = { source: true };
     const streamDataEsClient = { streamData: true };
