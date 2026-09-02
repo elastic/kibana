@@ -19,6 +19,6 @@ import { useKibana } from '../../../common/lib/kibana';
  */
 export const useCanAttachToCase = (): boolean => {
   const { cases } = useKibana().services;
-  const permissions = cases.helpers.canUseCases([APP_ID]);
-  return permissions.createComment && permissions.read;
+  const permissions = cases?.helpers.canUseCases([APP_ID]);
+  return (permissions?.createComment ?? false) && (permissions?.read ?? false);
 };

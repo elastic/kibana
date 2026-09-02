@@ -21,12 +21,13 @@ import { useKibana } from '../../../../common/lib/kibana';
  */
 export const useCaseDisabled = (indicatorName: string): boolean => {
   const { cases } = useKibana().services;
-  const permissions: CasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const permissions: CasesPermissions = cases?.helpers.canUseCases([APP_ID]);
 
   // disable the item if there is no indicator name or if the user doesn't have the right permission
   // in the case's attachment, the indicator name is the link to open the flyout
   const invalidIndicatorName: boolean = indicatorName === EMPTY_VALUE;
-  const hasPermission: boolean = permissions.createComment && permissions.update;
+  const hasPermission: boolean =
+    (permissions?.createComment ?? false) && (permissions?.read ?? false);
 
   return invalidIndicatorName || !hasPermission;
 };
