@@ -15,7 +15,6 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import type { AttackAttachmentPayload } from '../../../../../common/cases/attachments/attack';
 import {
   ATTACK_CARD_DELETE_ACTION_TEST_ID,
@@ -43,7 +42,7 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: () => true,
 }));
 
-const FIND_ATTACHMENTS_URL = '/api/cases/case-1/comments/_find';
+const RESOLVE_CASE_URL = '/api/cases/case-1/resolve';
 const BULK_DELETE_URL = '/api/cases/case-1/comments/_bulk_delete';
 
 const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
@@ -136,12 +135,9 @@ describe('the attack activity card delete action', () => {
       cancelRequest: jest.fn(),
       refetch: jest.fn(),
     });
-    mockedUseKibana.services.http.get = jest.fn().mockResolvedValue({
-      comments: caseAttachments,
-      page: 1,
-      per_page: MAX_COMMENTS_PER_PAGE,
-      total: caseAttachments.length,
-    });
+    mockedUseKibana.services.http.get = jest
+      .fn()
+      .mockResolvedValue({ case: { comments: caseAttachments } });
     mockedUseKibana.services.http.post = jest.fn().mockResolvedValue(undefined);
   });
 
@@ -168,8 +164,8 @@ describe('the attack activity card delete action', () => {
 
     expect(await screen.findByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).toBeInTheDocument();
     await waitFor(() =>
-      expect(mockedUseKibana.services.http.get).toHaveBeenCalledWith(FIND_ATTACHMENTS_URL, {
-        query: { page: 1, perPage: MAX_COMMENTS_PER_PAGE },
+      expect(mockedUseKibana.services.http.get).toHaveBeenCalledWith(RESOLVE_CASE_URL, {
+        query: { includeComments: true, mode: 'unified' },
         signal: expect.anything(),
       })
     );

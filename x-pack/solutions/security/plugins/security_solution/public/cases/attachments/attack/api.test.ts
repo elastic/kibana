@@ -6,10 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import {
-  MAX_BULK_DELETE_ATTACHMENTS,
-  MAX_COMMENTS_PER_PAGE,
-} from '@kbn/cases-plugin/common/constants';
+import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
 import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -19,7 +16,7 @@ import { bulkDeleteCaseAttachments, fetchCaseAttachments } from './api';
 const buildHttp = () =>
   ({
     post: jest.fn().mockResolvedValue(undefined),
-    get: jest.fn().mockResolvedValue({ comments: [], page: 1, per_page: 100, total: 0 }),
+    get: jest.fn().mockResolvedValue({ case: { comments: [] } }),
   } as unknown as HttpSetup);
 
 describe('bulkDeleteCaseAttachments', () => {
@@ -102,23 +99,18 @@ const foundAttachment = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const findResponse = (comments: unknown[], total = comments.length) => ({
-  comments,
-  page: 1,
-  per_page: MAX_COMMENTS_PER_PAGE,
-  total,
-});
+const resolveResponse = (comments: unknown[]) => ({ case: { comments } });
 
 describe('fetchCaseAttachments', () => {
-  it('reads the case attachments from the find endpoint', async () => {
+  it('reads the case attachments in one request, as the case view does', async () => {
     const http = buildHttp();
-    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+    (http.get as jest.Mock).mockResolvedValue(resolveResponse([foundAttachment()]));
 
     const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
 
     expect(http.get).toHaveBeenCalledTimes(1);
-    expect(http.get).toHaveBeenCalledWith('/api/cases/case-1/comments/_find', {
-      query: { page: 1, perPage: MAX_COMMENTS_PER_PAGE },
+    expect(http.get).toHaveBeenCalledWith('/api/cases/case-1/resolve', {
+      query: { includeComments: true, mode: 'unified' },
       signal: undefined,
     });
     expect(attachments).toHaveLength(1);
@@ -126,7 +118,7 @@ describe('fetchCaseAttachments', () => {
 
   it('camel-cases the audit fields the case view would otherwise have converted', async () => {
     const http = buildHttp();
-    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+    (http.get as jest.Mock).mockResolvedValue(resolveResponse([foundAttachment()]));
 
     const [attachment] = await fetchCaseAttachments({ http, caseId: 'case-1' });
 
@@ -154,7 +146,7 @@ describe('fetchCaseAttachments', () => {
   it('keeps the alert attachments, which is what the removal scope is resolved against', async () => {
     const http = buildHttp();
     (http.get as jest.Mock).mockResolvedValue(
-      findResponse([
+      resolveResponse([
         foundAttachment(),
         foundAttachment({
           id: 'so-alert-1',
@@ -176,48 +168,24 @@ describe('fetchCaseAttachments', () => {
       id: 'so-comment-1',
       type: 'comment',
     });
-    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment(), userComment]));
+    (http.get as jest.Mock).mockResolvedValue(resolveResponse([foundAttachment(), userComment]));
 
     const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
 
     expect(attachments.map(({ id }) => id)).toEqual(['so-attack-1']);
   });
 
-  it('walks the pages until the reported total is covered', async () => {
+  it('reads a case that carries no attachments at all', async () => {
     const http = buildHttp();
-    const firstPage = Array.from({ length: MAX_COMMENTS_PER_PAGE }, (_, index) =>
-      foundAttachment({ id: `so-${index}`, attachmentId: `attack-${index}` })
-    );
-    (http.get as jest.Mock)
-      .mockResolvedValueOnce(findResponse(firstPage, MAX_COMMENTS_PER_PAGE + 1))
-      .mockResolvedValueOnce(
-        findResponse([foundAttachment({ id: 'so-last' })], MAX_COMMENTS_PER_PAGE + 1)
-      );
+    (http.get as jest.Mock).mockResolvedValue({ case: {} });
 
-    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
-
-    expect(http.get).toHaveBeenCalledTimes(2);
-    expect((http.get as jest.Mock).mock.calls[1][1].query).toEqual({
-      page: 2,
-      perPage: MAX_COMMENTS_PER_PAGE,
-    });
-    expect(attachments).toHaveLength(MAX_COMMENTS_PER_PAGE + 1);
-  });
-
-  it('stops rather than spinning when a page comes back empty below the reported total', async () => {
-    const http = buildHttp();
-    (http.get as jest.Mock).mockResolvedValue(findResponse([], 5));
-
-    const attachments = await fetchCaseAttachments({ http, caseId: 'case-1' });
-
-    expect(http.get).toHaveBeenCalledTimes(1);
-    expect(attachments).toEqual([]);
+    await expect(fetchCaseAttachments({ http, caseId: 'case-1' })).resolves.toEqual([]);
   });
 
   it('forwards the abort signal', async () => {
     const http = buildHttp();
     const signal = new AbortController().signal;
-    (http.get as jest.Mock).mockResolvedValue(findResponse([foundAttachment()]));
+    (http.get as jest.Mock).mockResolvedValue(resolveResponse([foundAttachment()]));
 
     await fetchCaseAttachments({ http, caseId: 'case-1', signal });
 

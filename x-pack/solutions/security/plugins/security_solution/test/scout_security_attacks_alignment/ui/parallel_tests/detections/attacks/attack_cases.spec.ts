@@ -18,12 +18,15 @@
  *    formatted markdown, and none of the Attacks page's calls to action.
  *  - The Attacks section renders as a data grid that reads as a sibling of the Alerts section
  *    above it: the default column set, the toolbar's column and sort selectors, the column
- *    picker and its persistence, and the two row actions.
+ *    picker and its persistence, and the three row actions — expand, investigate in timeline and
+ *    an overflow carrying the attack take-action menu.
  *  - The "Show attack details" affordance opens the attack flyout, both from the Activity log
  *    card and from the grid's row actions.
- *  - Removing the attack from the Attacks section, with the prompt's "also remove related
- *    alerts" checkbox ticked, takes the attack and the alerts it brought in off the case, both
- *    one row at a time and for a whole selection through the bulk action bar.
+ *  - Selecting rows raises a bulk action bar carrying those same take-action verbs across the
+ *    selection. Nothing in the grid removes an attachment.
+ *  - Removing the attack from its own entry in the Activity log, with the prompt's "also remove
+ *    related alerts" checkbox left ticked, takes the attack and the alerts no other attached
+ *    attack still claims off the case.
  *
  * The `security.attack` type is registered only when `attackAttachmentsEnabled` is on; the
  * attacks-alignment Scout config boots with it (see
@@ -36,8 +39,16 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
+import type { EsClient, KbnClient } from '@kbn/scout-security';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
 import { spaceTest, tags } from '../../../fixtures';
-import { ATTACK_GRID_COLUMN_ID } from '../../../fixtures/page_objects/attack_cases_page';
+import {
+  ATTACK_GRID_COLUMN_ID,
+  ATTACK_TAKE_ACTION_ITEM_TEST_ID,
+} from '../../../fixtures/page_objects/attack_cases_page';
 
 const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment';
@@ -55,15 +66,111 @@ const SEEDED_ENTITY_SUMMARY = 'Seeded entity summary';
 // Every seeded attack carries two constituent alerts.
 const SEEDED_ALERT_COUNT = '2';
 
+/**
+ * The seeded attacks and the synthetic alerts they comprise, from
+ * `apiServices.attackDiscovery.seedAttackData`. The manual attack is the one whose title carries
+ * the suffix, and it is the one the shared-alert test re-points at {@link SHARED_ALERT_ID} so the
+ * two attacks overlap — the seed leaves their alert sets disjoint, which cannot exercise the rule
+ * that an alert claimed by another attached attack is never removed.
+ */
+const MANUAL_TITLE_SUFFIX = '(Manual)';
+const SCHEDULED_ONLY_ALERT_ID = 'seed-alert-1';
+const SHARED_ALERT_ID = 'seed-alert-2';
+const MANUAL_ONLY_ALERT_ID = 'seed-alert-3';
+/** The attack document field the alert set is read from, live, at removal time. */
+const ALERT_IDS_FIELD = 'kibana.alert.attack_discovery.alert_ids';
+
+/** One seeded attack, as the attack discovery find API returns it. */
+interface FoundAttack {
+  id: string;
+  index: string;
+  title: string;
+  alertIds: string[];
+}
+
+/** One case attachment, as the Cases find-attachments endpoint returns it. */
+interface FoundCaseAttachment {
+  id: string;
+  type: string;
+  attachmentId?: string | string[];
+  metadata?: { title?: string } | null;
+}
+
 // The shared placeholder a column renders when it has no value, from
 // `public/common/components/empty_value` (`getEmptyValue`). Inlined rather than imported to keep
 // the Kibana public bundle out of the Playwright process.
 const EMPTY_VALUE = '—';
 
+const buildSpacePath = (spaceId: string, path: string): string =>
+  spaceId === 'default' ? path : `/s/${spaceId}${path}`;
+
+/** The seeded attacks, read back live so the shared-alert setup can address their documents. */
+const findSeededAttacks = async (kbnClient: KbnClient, spaceId: string): Promise<FoundAttack[]> => {
+  const response = await kbnClient.request({
+    method: 'GET',
+    path: buildSpacePath(spaceId, '/api/attack_discovery/_find'),
+    query: { per_page: 10, search: SEEDED_TITLE, scheduled: true, shared: true },
+  });
+
+  return (response.data as { data: FoundAttack[] }).data;
+};
+
+/** Re-points one attack's constituent alerts, so two attached attacks can overlap on one alert. */
+const setAttackAlertIds = async (
+  esClient: EsClient,
+  { attack, alertIds }: { attack: FoundAttack; alertIds: string[] }
+): Promise<void> => {
+  await esClient.update({
+    index: attack.index,
+    id: attack.id,
+    refresh: true,
+    doc: { [ALERT_IDS_FIELD]: alertIds },
+  });
+};
+
+/**
+ * The case's attachments, in the unified shape, read from the same endpoint the case view reads
+ * them from. Read directly rather than through the UI because the seeded alerts are synthetic ids
+ * with no documents behind them, so the Alerts section can only show how many are attached, never
+ * which. The public find-attachments endpoint is no use here: it returns user comments alone.
+ */
+const findCaseAttachments = async (
+  kbnClient: KbnClient,
+  spaceId: string,
+  caseId: string
+): Promise<FoundCaseAttachment[]> => {
+  const response = await kbnClient.request({
+    method: 'GET',
+    path: buildSpacePath(spaceId, `/api/cases/${caseId}/resolve`),
+    query: { includeComments: true, mode: 'unified' },
+  });
+
+  return (response.data as { case: { comments: FoundCaseAttachment[] } }).case.comments;
+};
+
+/** The de-anonymised alert ids the case's `security.alert` attachments reference, sorted. */
+const getAttachedAlertIds = (attachments: readonly FoundCaseAttachment[]): string[] =>
+  attachments
+    .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+    .flatMap(({ attachmentId }) =>
+      typeof attachmentId === 'string' ? [attachmentId] : attachmentId ?? []
+    )
+    .sort();
+
+/** The case's `security.attack` attachments, keyed by the attack title each snapshotted. */
+const getAttackAttachments = (attachments: readonly FoundCaseAttachment[]): FoundCaseAttachment[] =>
+  attachments.filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE);
+
 spaceTest.describe(
   'Attack case attachments',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
+    /**
+     * The seeded attack whose alert set a test re-pointed, and the set to put back. Held across
+     * hooks so the seeded data is restored even when the test that changed it fails.
+     */
+    let seededAttackToRestore: { attack: FoundAttack; alertIds: string[] } | undefined;
+
     spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
       await scoutSpace.savedObjects.cleanStandardList();
       await apiServices.attackDiscovery.seedAttackData();
@@ -86,7 +193,14 @@ spaceTest.describe(
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
+    spaceTest.afterEach(async ({ apiServices, esClient, scoutSpace }) => {
+      const seededAttack = seededAttackToRestore;
+      seededAttackToRestore = undefined;
+
+      if (seededAttack != null) {
+        await setAttackAlertIds(esClient, seededAttack);
+      }
+
       await apiServices.cases.cleanup.deleteAllCases(scoutSpace.id);
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
       await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
@@ -198,10 +312,51 @@ spaceTest.describe(
           // The cell renders de-anonymised plain text, so neither markdown syntax nor the
           // `{{ field value }}` token syntax may reach it.
           await expect(attackCases.attackGridSummaryCells).not.toContainText('{{');
+        });
 
-          // Both row actions live in the single leading actions cell.
-          await expect(attackCases.attackGridRowActions).toHaveCount(1);
-          await expect(attackCases.attackGridShowButtons).toHaveCount(1);
+        await spaceTest.step(
+          'the row offers expand, investigate in timeline and more actions',
+          async () => {
+            // All three live in the single leading actions cell, matching the alerts row above.
+            await expect(attackCases.attackGridRowActions).toHaveCount(1);
+            await expect(attackCases.attackGridShowButtons).toHaveCount(1);
+            await expect(attackCases.attackGridInvestigateInTimelineButtons).toHaveCount(1);
+            await expect(attackCases.attackGridMoreActionsButtons).toHaveCount(1);
+            expect(await attackCases.getRowActionCount()).toBe(3);
+          }
+        );
+
+        await spaceTest.step('the row overflow opens the attack take-action menu', async () => {
+          await attackCases.openRowMoreActionsMenu();
+
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToExistingCase)
+          ).toBeVisible();
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToNewCase)
+          ).toBeVisible();
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.markAcknowledged)
+          ).toBeVisible();
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.manageTags)
+          ).toBeVisible();
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.manageAssignees)
+          ).toBeVisible();
+
+          // The row's own timeline icon button already offers this, so the menu does not repeat
+          // it — and the assistant item is suppressed here as it is in the flyout footer.
+          await expect(
+            attackCases.rowMoreActionsMenuItem(
+              ATTACK_TAKE_ACTION_ITEM_TEST_ID.investigateInTimeline
+            )
+          ).toHaveCount(0);
+          await expect(
+            attackCases.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.viewInAiAssistant)
+          ).toHaveCount(0);
+
+          await attackCases.closeRowMoreActionsMenu();
         });
 
         await spaceTest.step(
@@ -227,61 +382,34 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'removes the attack and the alerts it brought in from the grid row action',
-      async ({ pageObjects }) => {
+      'removes an attack from its activity card, keeping the alerts another attack claims',
+      async ({ esClient, kbnClient, pageObjects, scoutSpace }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – removal';
-
-        await spaceTest.step('attach the first attack to a new case', async () => {
-          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
-          await detectionsAttackDiscoveryPage.collapseKpisSection();
-          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
-
-          await attackCases.openFirstAttackTakeActionMenu();
-          await attackCases.clickAddToNewCase();
-          await attackCases.createCase(caseName, CASE_DESCRIPTION);
-          await attackCases.clickCaseToastLink();
-        });
-
-        await spaceTest.step(
-          'the Attachments tab shows the attack and its constituent alerts',
-          async () => {
-            await attackCases.openAttachmentsTab();
-            await expect(attackCases.attackAccordion).toBeVisible();
-            await expect(attackCases.attackAccordionBadge).toHaveText('1');
-            await expect(attackCases.attackGridRowTitles).toHaveCount(1);
-            // The seeded attack carries two constituent alerts, attached alongside it.
-            await expect(attackCases.alertAccordionBadge).toHaveText(SEEDED_ALERT_COUNT);
-          }
-        );
-
-        await spaceTest.step('remove the attack, taking its related alerts', async () => {
-          await attackCases.selectAllAttacks();
-          await attackCases.openBulkRemoveAttacksPrompt();
-          await attackCases.confirmRemoveAttack({ withRelatedAlerts: true });
-        });
-
-        await spaceTest.step(
-          'the case view drops both sections without a manual refresh',
-          async () => {
-            // An accordion only renders while the case still has an attachment of that type, so
-            // both disappearing is the end state for an attack removed with all of its alerts.
-            await expect(attackCases.attackAccordion).toBeHidden();
-            await expect(attackCases.alertAccordion).toBeHidden();
-            await expect(attackCases.activityAttackTitle).toBeHidden();
-          }
-        );
-      }
-    );
-
-    spaceTest(
-      'removes several attacks at once from the bulk action bar',
-      async ({ pageObjects }) => {
-        const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
-        const caseName = 'Scout attack attachment case – bulk removal';
         let caseId = '';
+        let manualAttachmentId = '';
 
-        await spaceTest.step('attach the first attack to a new case', async () => {
+        await spaceTest.step('make the two seeded attacks share an alert', async () => {
+          // The seed leaves the two attacks' alert sets disjoint, which cannot exercise the rule
+          // that an alert claimed by another attached attack is never removed. Re-point the manual
+          // attack's alert set so it overlaps the scheduled one on a single alert; the afterEach
+          // puts it back, so the other specs sharing this space see the seeded attacks unchanged.
+          const attacks = await findSeededAttacks(kbnClient, scoutSpace.id);
+          const manualAttack = attacks.find(({ title }) => title.endsWith(MANUAL_TITLE_SUFFIX));
+
+          if (manualAttack == null) {
+            throw new Error('The seeded manual attack was not found');
+          }
+
+          seededAttackToRestore = { attack: manualAttack, alertIds: manualAttack.alertIds };
+
+          await setAttackAlertIds(esClient, {
+            attack: manualAttack,
+            alertIds: [SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID],
+          });
+        });
+
+        await spaceTest.step('attach both attacks to one case', async () => {
           await detectionsAttackDiscoveryPage.navigateToAttacksPage();
           await detectionsAttackDiscoveryPage.collapseKpisSection();
           await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
@@ -292,9 +420,7 @@ spaceTest.describe(
           await attackCases.clickCaseToastLink();
 
           caseId = await attackCases.getOpenCaseId();
-        });
 
-        await spaceTest.step('attach the second attack to the same case', async () => {
           // The space is seeded with two attacks, one group per attack, and the case created
           // above is the only one in it — so "Add to existing case" has a single candidate.
           await detectionsAttackDiscoveryPage.navigateToAttacksPage();
@@ -305,31 +431,109 @@ spaceTest.describe(
           await attackCases.addToOnlyExistingCase();
         });
 
-        await spaceTest.step('the grid lists both attacks', async () => {
-          await attackCases.navigateToCase(caseId);
-          await attackCases.openAttachmentsTab();
-          await expect(attackCases.attackAccordionBadge).toHaveText('2');
-          await expect(attackCases.attackGridRowTitles).toHaveCount(2);
-        });
+        await spaceTest.step(
+          'the case holds both attacks and the three alerts they comprise',
+          async () => {
+            const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
+            const attackAttachments = getAttackAttachments(attachments);
 
-        await spaceTest.step('selecting every row reveals the bulk action bar', async () => {
-          await expect(attackCases.attackGridBulkActions).toHaveCount(0);
+            expect(attackAttachments).toHaveLength(2);
+            // The alert both attacks claim is attached once, by whichever was attached first —
+            // which is what makes it a single attachment two attacks claim.
+            expect(getAttachedAlertIds(attachments)).toStrictEqual(
+              [SCHEDULED_ONLY_ALERT_ID, SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
+            );
 
-          await attackCases.selectAllAttacks();
+            const manualAttachment = attackAttachments.find(({ metadata }) =>
+              metadata?.title?.endsWith(MANUAL_TITLE_SUFFIX)
+            );
 
-          await expect(attackCases.attackGridRowSelectCheckboxes).toHaveCount(2);
-          await expect(attackCases.attackGridBulkActions).toBeVisible();
-          await expect(attackCases.attackGridBulkRemoveButton).toBeVisible();
-        });
+            if (manualAttachment == null) {
+              throw new Error('The manual attack was not attached to the case');
+            }
+
+            manualAttachmentId = manualAttachment.id;
+
+            await attackCases.navigateToCase(caseId);
+            await attackCases.openAttachmentsTab();
+            await expect(attackCases.attackAccordionBadge).toHaveText('2');
+            await expect(attackCases.alertAccordionBadge).toHaveText('3');
+            await expect(attackCases.attackGridRowTitles).toHaveCount(2);
+          }
+        );
 
         await spaceTest.step(
-          'removing the selection takes both attacks and their alerts off the case',
+          'selecting every row raises a bulk bar of the take-action verbs',
           async () => {
-            await attackCases.openBulkRemoveAttacksPrompt();
-            await attackCases.confirmRemoveAttack({ withRelatedAlerts: true });
+            await expect(attackCases.attackGridBulkActions).toHaveCount(0);
 
-            await expect(attackCases.attackAccordion).toBeHidden();
-            await expect(attackCases.alertAccordion).toBeHidden();
+            await attackCases.selectAllAttacks();
+
+            await expect(attackCases.attackGridRowSelectCheckboxes).toHaveCount(2);
+            await expect(attackCases.attackGridBulkActions).toBeVisible();
+
+            await attackCases.openBulkTakeActionMenu();
+
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToExistingCase)
+            ).toBeVisible();
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.addToNewCase)
+            ).toBeVisible();
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.markAcknowledged)
+            ).toBeVisible();
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.manageTags)
+            ).toBeVisible();
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.manageAssignees)
+            ).toBeVisible();
+            // Unlike the row's overflow, the bar carries the timeline item: a selection has no
+            // icon button of its own for it to duplicate.
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.investigateInTimeline)
+            ).toBeVisible();
+
+            await attackCases.closeBulkTakeActionMenu();
+          }
+        );
+
+        await spaceTest.step(
+          'the activity card removes the attack and only the alerts it alone brought in',
+          async () => {
+            await attackCases.openActivityTab();
+            // Each attack's own entry carries the removal action registered in place of the Cases
+            // framework's default trash.
+            await expect(attackCases.activityAttackDeleteButtons).toHaveCount(2);
+
+            await attackCases.removeAttackFromActivityCard({
+              savedObjectId: manualAttachmentId,
+              withRelatedAlerts: true,
+            });
+
+            // The case view refreshes itself once the removal lands, so the remaining card is the
+            // signal that the delete has been written — no manual refresh, and no polling.
+            await expect(attackCases.activityAttackDeleteButtons).toHaveCount(1);
+
+            const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
+
+            expect(getAttackAttachments(attachments)).toHaveLength(1);
+            // The manual attack's own alert goes with it; the alert the scheduled attack also
+            // claims stays, as does the scheduled attack's own.
+            expect(getAttachedAlertIds(attachments)).toStrictEqual(
+              [SCHEDULED_ONLY_ALERT_ID, SHARED_ALERT_ID].sort()
+            );
+          }
+        );
+
+        await spaceTest.step(
+          'the Attachments tab drops the removed attack and its alert',
+          async () => {
+            await attackCases.openAttachmentsTab();
+            await expect(attackCases.attackAccordionBadge).toHaveText('1');
+            await expect(attackCases.alertAccordionBadge).toHaveText('2');
+            await expect(attackCases.attackGridRowTitles).toHaveCount(1);
           }
         );
       }

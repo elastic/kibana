@@ -7,14 +7,8 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { JsonValue } from '@kbn/utility-types';
-import {
-  getCaseBulkDeleteAttachmentsUrl,
-  getCaseFindAttachmentsUrl,
-} from '@kbn/cases-plugin/common/api';
-import {
-  MAX_BULK_DELETE_ATTACHMENTS,
-  MAX_COMMENTS_PER_PAGE,
-} from '@kbn/cases-plugin/common/constants';
+import { getCaseBulkDeleteAttachmentsUrl, getCaseDetailsUrl } from '@kbn/cases-plugin/common/api';
+import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
 import type { CaseAttachment } from './utils';
 
 export interface BulkDeleteCaseAttachmentsParams {
@@ -87,11 +81,9 @@ interface FoundAttachment {
   updated_by: FoundAttachmentUser | null;
 }
 
-interface FindCaseAttachmentsResponse {
-  comments: FoundAttachment[];
-  page: number;
-  per_page: number;
-  total: number;
+/** The case, with its attachments, as the resolve endpoint returns it. */
+interface ResolveCaseResponse {
+  case: { comments?: FoundAttachment[] };
 }
 
 const toCaseUser = ({
@@ -144,44 +136,22 @@ export interface FetchCaseAttachmentsParams {
 }
 
 /**
- * Reads a case's reference attachments via the Cases find endpoint.
+ * Reads a case's reference attachments, in the same request the case view itself reads them with.
  *
  * The activity log hands a registered attachment's actions only the case id and title, so the
  * attack card's removal has no other way to see the attack and alert attachments the removal
- * scope is resolved against. The endpoint caps a page at
- * {@link MAX_COMMENTS_PER_PAGE} attachments and a case can hold far more — one attack alone may
- * bring in a thousand alerts — so the pages are walked until the reported total is covered.
+ * scope is resolved against. The public find-attachments endpoint is no use for it: that one
+ * returns the case's user comments alone, never the reference attachments an attack brought in.
  */
 export const fetchCaseAttachments = async ({
   http,
   caseId,
   signal,
 }: FetchCaseAttachmentsParams): Promise<CaseAttachment[]> => {
-  const url = getCaseFindAttachmentsUrl(caseId);
-  const attachments: CaseAttachment[] = [];
+  const response = await http.get<ResolveCaseResponse>(`${getCaseDetailsUrl(caseId)}/resolve`, {
+    query: { includeComments: true, mode: 'unified' },
+    signal,
+  });
 
-  let page = 1;
-  let fetched = 0;
-  let total = 0;
-
-  do {
-    const response = await http.get<FindCaseAttachmentsResponse>(url, {
-      query: { page, perPage: MAX_COMMENTS_PER_PAGE },
-      signal,
-    });
-
-    total = response.total;
-    fetched += response.comments.length;
-    page += 1;
-
-    // A short page cannot be followed by a fuller one, and treating it as one would spin forever
-    // if the reported total ever disagreed with what the endpoint actually returns.
-    if (response.comments.length === 0) {
-      break;
-    }
-
-    attachments.push(...response.comments.flatMap(toCaseAttachments));
-  } while (fetched < total);
-
-  return attachments;
+  return (response.case.comments ?? []).flatMap(toCaseAttachments);
 };
