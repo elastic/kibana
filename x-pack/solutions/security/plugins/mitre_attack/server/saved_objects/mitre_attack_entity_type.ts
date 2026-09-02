@@ -25,9 +25,9 @@ const mitreAttackEntityAttributesSchemaV1 = schema.object({
     schema.literal('technique'),
     schema.literal('subtechnique'),
   ]),
-  superseded_by_id: schema.maybe(schema.arrayOf(schema.string())),
+  superseded_by_id: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
   position: schema.maybe(schema.number()),
-  tactic_ids: schema.maybe(schema.arrayOf(schema.string())),
+  tactic_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
   technique_id: schema.maybe(schema.string()),
 });
 
