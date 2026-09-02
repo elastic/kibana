@@ -7,20 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
+import {
+  Container,
+  ContainerModule,
+  LazyServiceIdentifier,
+  type ServiceIdentifier,
+} from 'inversify';
+import { type KibanaContainerModuleLoadOptions, OnSetup, OnStart } from '@kbn/core-di';
 import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
-import { KibanaContainerModule } from './module';
-import { OnSetup, OnStart } from './services/plugin';
+import { toKibanaContainerModuleLoadOptions } from './module';
 
-describe('KibanaContainerModule', () => {
+describe('toKibanaContainerModuleLoadOptions', () => {
   const token = Symbol.for('something');
   const dependencyToken = Symbol.for('dependency') as ServiceIdentifier<string>;
   const asyncDependencyToken = Symbol.for('async');
 
   let container: Container;
+  let options: KibanaContainerModuleLoadOptions;
 
   beforeEach(() => {
     container = injectionServiceMock.createSetupContract().getContainer();
+    container.load(
+      new ContainerModule((base) => {
+        options = toKibanaContainerModuleLoadOptions(base);
+      })
+    );
+    container.snapshot();
   });
 
   describe.each([
@@ -28,16 +40,11 @@ describe('KibanaContainerModule', () => {
     { name: 'onStart' as const, hook: OnStart, trigger: start },
   ])('$name', ({ hook, name, trigger }) => {
     let handler: jest.Mock;
-    let module: KibanaContainerModule;
 
     beforeEach(() => {
       handler = jest.fn();
-      module = new KibanaContainerModule(({ [name]: onHook }) => {
-        onHook(token, handler);
-      });
-
+      options[name](token, handler);
       container.bind(dependencyToken).toConstantValue('something');
-      container.load(module);
     });
 
     it('should bind to a lifecycle hook', () => {
@@ -94,12 +101,8 @@ describe('KibanaContainerModule', () => {
     });
 
     it('should provide a dependency in the current context', () => {
-      container.unload(module);
-      container.load(
-        new KibanaContainerModule(({ [name]: onHook }) => {
-          onHook(token, dependencyToken, handler);
-        })
-      );
+      container.restore();
+      options[name](token, dependencyToken, handler);
       container.bind(dependencyToken).toConstantValue('something');
 
       const child = new Container({ parent: container });
@@ -144,13 +147,10 @@ describe('KibanaContainerModule', () => {
         kind: 'an optional service identifier',
       },
     ])('should provide a dependency when injected as $kind', ({ dependency, expected }) => {
-      container.unload(module);
-      container.load(
-        new KibanaContainerModule(({ [name]: onHook }) => {
-          onHook(token, dependency, handler);
-        })
-      );
+      container.restore();
+      options[name](token, dependency, handler);
       container.bind(token).toConstantValue('value');
+      container.bind(dependencyToken).toConstantValue('something');
 
       expect(() => trigger(container)).not.toThrow();
       expect(handler).toHaveBeenCalledTimes(1);
@@ -166,14 +166,10 @@ describe('KibanaContainerModule', () => {
     it('should not resolve dependencies until Kibana is started', async () => {
       const factory = jest.fn(() => 'something');
 
-      container.load(
-        new KibanaContainerModule(({ bind, inject }) => {
-          bind(dependencyToken).toResolvedValue(factory);
-          bind(token).toDynamicValue(
-            inject(dependencyToken, (dependency) => `value:${dependency}`)
-          );
-        })
-      );
+      options.bind(dependencyToken).toResolvedValue(factory);
+      options
+        .bind(token)
+        .toDynamicValue(options.inject(dependencyToken, (dependency) => `value:${dependency}`));
 
       const promise = container.getAsync(token);
       await new Promise(process.nextTick);
@@ -187,13 +183,9 @@ describe('KibanaContainerModule', () => {
     });
 
     it('should resolve dependencies in the current context', async () => {
-      container.load(
-        new KibanaContainerModule(({ bind, inject }) => {
-          bind(token).toDynamicValue(
-            inject(dependencyToken, (dependency) => `value:${dependency}`)
-          );
-        })
-      );
+      options
+        .bind(token)
+        .toDynamicValue(options.inject(dependencyToken, (dependency) => `value:${dependency}`));
 
       const child = new Container({ parent: container });
       child.bind(dependencyToken).toConstantValue('something');
@@ -236,13 +228,9 @@ describe('KibanaContainerModule', () => {
         kind: 'an asynchronous ',
       },
     ])('should inject when dependency is $kind', async ({ dependency, expected }) => {
-      container.load(
-        new KibanaContainerModule(({ bind, inject }) => {
-          bind(dependencyToken).toConstantValue('something');
-          bind(asyncDependencyToken).toConstantValue(Promise.resolve('async'));
-          bind(token).toDynamicValue(inject(dependency, (value) => value));
-        })
-      );
+      options.bind(dependencyToken).toConstantValue('something');
+      options.bind(asyncDependencyToken).toConstantValue(Promise.resolve('async'));
+      options.bind(token).toDynamicValue(options.inject(dependency, (value) => value));
 
       expect(() => start(container)).not.toThrow();
       await expect(container.getAsync(token)).resolves.toEqual(expected);
@@ -259,14 +247,10 @@ describe('KibanaContainerModule', () => {
       it('should inject in the `onSetup` context', async () => {
         let resolved: string | undefined;
 
-        container.load(
-          new KibanaContainerModule(({ onSetup }) => {
-            onSetup(token, ({ inject }) =>
-              inject(dependencyToken, (value) => {
-                resolved = value as string;
-              })()
-            );
-          })
+        options.onSetup(token, ({ inject }) =>
+          inject(dependencyToken, (value) => {
+            resolved = value as string;
+          })()
         );
         child.bind(token).toConstantValue('value');
 
@@ -277,12 +261,8 @@ describe('KibanaContainerModule', () => {
       });
 
       it('should inject in the `onActivation` context', async () => {
-        container.load(
-          new KibanaContainerModule(({ bind, onActivation }) => {
-            bind(token).toConstantValue('value');
-            onActivation(token, ({ inject }) => inject(dependencyToken, (value) => value)());
-          })
-        );
+        options.bind(token).toConstantValue('value');
+        options.onActivation(token, ({ inject }) => inject(dependencyToken, (value) => value)());
 
         expect(() => setup(child)).not.toThrow();
         expect(() => start(child)).not.toThrow();
@@ -291,11 +271,9 @@ describe('KibanaContainerModule', () => {
       });
 
       it('should inject in the `toDynamicValue` context', async () => {
-        container.load(
-          new KibanaContainerModule(({ bind }) => {
-            bind(token).toDynamicValue(({ inject }) => inject(dependencyToken, (value) => value)());
-          })
-        );
+        options
+          .bind(token)
+          .toDynamicValue(({ inject }) => inject(dependencyToken, (value) => value)());
 
         expect(() => setup(child)).not.toThrow();
         expect(() => start(child)).not.toThrow();
@@ -304,13 +282,9 @@ describe('KibanaContainerModule', () => {
       });
 
       it('should inject in the `toFactory` context', async () => {
-        container.load(
-          new KibanaContainerModule(({ bind }) => {
-            bind(token as ServiceIdentifier<() => string>).toFactory(({ inject }) =>
-              inject(dependencyToken, (value) => jest.fn(() => value))()
-            );
-          })
-        );
+        options
+          .bind(token as ServiceIdentifier<() => string>)
+          .toFactory(({ inject }) => inject(dependencyToken, (value) => jest.fn(() => value))());
 
         expect(() => setup(child)).not.toThrow();
         expect(() => start(child)).not.toThrow();
