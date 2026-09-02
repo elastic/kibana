@@ -21,6 +21,19 @@ type HttpHandlerArgs =
  * Creates a function that matches the HttpHandler interface from Core's
  * API, using the KbnClient from @kbn/kbn-client
  */
+/**
+ * Combine an optional caller signal with an optional timeout signal so an abort from
+ * either one takes effect. Picking one (`a || b`) silently disables the other.
+ */
+function combineSignals(
+  callerSignal: AbortSignal | null | undefined,
+  timeoutSignal: AbortSignal | undefined
+): AbortSignal | undefined {
+  if (!callerSignal) return timeoutSignal;
+  if (!timeoutSignal) return callerSignal;
+  return AbortSignal.any([callerSignal, timeoutSignal]);
+}
+
 export function httpHandlerFromKbnClient({
   kbnClient,
   log,
@@ -110,7 +123,17 @@ export function httpHandlerFromKbnClient({
     // Bound each attempt so a dead endpoint becomes a retryable failure. Set it
     // ABOVE the slowest legitimate call: golden shows a real glm-5-2 example at
     // 1198s, so too tight a bound aborts healthy work and the retry aborts again.
-    const requestTimeoutMs = Number(process.env.KBN_EVALS_HTTP_TIMEOUT_MS ?? '0') || 0;
+    //
+    // Default to a bound rather than 0. With no bound no AbortController is created,
+    // so nothing can ever abort and attempt 4 parks forever: measured 2026-09-02 at
+    // concurrency 1, 2 and 5 alike (Kibana 0.0% CPU, zero established sockets),
+    // which is what ruled concurrency out as the cause.
+    const DEFAULT_REQUEST_TIMEOUT_MS = 1_500_000;
+    const rawTimeout = process.env.KBN_EVALS_HTTP_TIMEOUT_MS;
+    const requestTimeoutMs =
+      rawTimeout === undefined || rawTimeout === ''
+        ? DEFAULT_REQUEST_TIMEOUT_MS
+        : Number(rawTimeout) || 0;
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -126,7 +149,10 @@ export function httpHandlerFromKbnClient({
           query,
           responseType: rawResponse ? 'stream' : undefined,
           headers: finalHeaders,
-          signal: signal || timeoutController?.signal,
+          // Compose rather than choose: `signal || timeoutController?.signal` silently
+          // drops the timeout the moment a caller supplies its own signal, leaving the
+          // abort timer firing into nothing and restoring the unbounded hang.
+          signal: combineSignals(signal, timeoutController?.signal),
           // We implement retries here so we can retry only on specific status codes.
           retries: 0,
         });

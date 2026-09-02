@@ -132,4 +132,54 @@ describe('httpHandlerFromKbnClient transport retries', () => {
     expect(result).toEqual({ ok: true });
     expect(calls).toBe(2);
   });
+
+  it('bounds a hung request even when KBN_EVALS_HTTP_TIMEOUT_MS is unset', async () => {
+    // The wedge shape: with the old `?? '0'` default no AbortController was built, so
+    // nothing could abort and the attempt parked forever. Assert a controller reaches
+    // the request rather than waiting out the real 1,500,000ms default.
+    delete process.env.KBN_EVALS_HTTP_TIMEOUT_MS;
+    const request = jest.fn().mockResolvedValue({ data: { ok: true } });
+
+    const handler = httpHandlerFromKbnClient({ kbnClient: kbnClient(request), log });
+    await handler({ path: '/api/agent_builder/converse', method: 'POST' } as any);
+
+    const { signal } = request.mock.calls[0][0];
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(signal.aborted).toBe(false);
+  });
+
+  it('keeps the timeout active when the caller supplies its own signal', async () => {
+    // `signal || timeoutController?.signal` returned the caller's signal and discarded
+    // the timeout, so the abort timer fired into nothing and the hang came back.
+    process.env.KBN_EVALS_HTTP_RETRIES = '1';
+    process.env.KBN_EVALS_HTTP_TIMEOUT_MS = '150';
+    const callerController = new AbortController();
+    let calls = 0;
+
+    const request = jest.fn().mockImplementation(async ({ signal }: { signal?: AbortSignal }) => {
+      calls += 1;
+      if (calls === 1) {
+        return new Promise((_resolve, reject) => {
+          signal?.addEventListener('abort', () => {
+            const err: any = new Error('The operation was aborted');
+            err.name = 'AbortError';
+            reject(err);
+          });
+        });
+      }
+      return { data: { ok: true } };
+    });
+
+    const handler = httpHandlerFromKbnClient({ kbnClient: kbnClient(request), log });
+    const result = await handler({
+      path: '/api/agent_builder/converse',
+      method: 'POST',
+      signal: callerController.signal,
+    } as any);
+
+    // The caller never aborted; only the timeout did, and it still took effect.
+    expect(callerController.signal.aborted).toBe(false);
+    expect(result).toEqual({ ok: true });
+    expect(calls).toBe(2);
+  });
 });
