@@ -132,6 +132,7 @@ const InvestigateInTimeline = ({
   return (
     <EuiContextMenuItem
       key="investigateInTimeline"
+      icon="timeline"
       onClick={async () => {
         closePopover();
         setIsLoading(true);
