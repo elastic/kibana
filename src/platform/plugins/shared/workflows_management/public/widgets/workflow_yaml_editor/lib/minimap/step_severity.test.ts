@@ -38,6 +38,7 @@ const makeError = (
   ({
     id: `err-${startLineNumber}`,
     owner: 'yaml',
+    ruleId: 'yamlSyntaxError',
     severity,
     startLineNumber,
     startColumn: 1,
