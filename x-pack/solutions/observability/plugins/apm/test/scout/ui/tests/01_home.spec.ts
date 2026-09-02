@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
-import { EXTENDED_TIMEOUT } from '../fixtures/constants';
+import { ENVIRONMENT_ALL, EXTENDED_TIMEOUT } from '../fixtures/constants';
 
 test.describe('APM home page', { tag: tags.stateful.classic }, () => {
   // `observability:enableComparisonByDefault` controls whether the APM root
@@ -70,6 +70,7 @@ test.describe('APM home page', { tag: tags.stateful.classic }, () => {
     await serviceInventoryPage.gotoServiceInventory({
       rangeFrom: testData.START_DATE,
       rangeTo: testData.END_DATE,
+      environment: ENVIRONMENT_ALL,
     });
 
     await serviceInventoryPage.clickServiceLink(testData.SERVICE_OPBEANS_RUM);
