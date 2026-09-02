@@ -29,7 +29,7 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   },
   getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
     return i18n.translate('embeddableApi.badge.approximationApplied.displayNameTooltip', {
-      defaultMessage: 'Panel displays apporximate results.',
+      defaultMessage: 'This panel shows approximate results',
     });
   },
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
