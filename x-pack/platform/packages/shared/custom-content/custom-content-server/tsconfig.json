@@ -10,5 +10,11 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/custom-content-common",
+    "@kbn/agent-builder-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/inference-common",
+    "@kbn/esql-utils",
   ]
 }
