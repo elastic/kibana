@@ -31,7 +31,8 @@ import { FOREACH_ITEM_SCHEMA_DESC } from '../../workflow_context/lib/get_foreach
 
 describe('validateVariables for-loop integration', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
-  const yamlDocument = parseDocument(FOR_LOOP_VALIDATION_YAML);
+  const lineCounter = new LineCounter();
+  const yamlDocument = parseDocument(FOR_LOOP_VALIDATION_YAML, { lineCounter });
   const model = createFakeMonacoModel(FOR_LOOP_VALIDATION_YAML);
 
   function variableItemForKey(key: string) {
@@ -82,6 +83,7 @@ describe('validateVariables for-loop integration', () => {
     const collectionResults = validateLiquidForLoopCollections(
       FOR_LOOP_VALIDATION_YAML,
       yamlDocument,
+      lineCounter,
       workflowGraph,
       forLoopValidationWorkflowDefinition
     );

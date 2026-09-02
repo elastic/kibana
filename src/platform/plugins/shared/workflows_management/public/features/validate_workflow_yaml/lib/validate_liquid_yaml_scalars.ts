@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { Document, Node, Pair, Scalar } from 'yaml';
+import type { Document, LineCounter, Node, Pair, Scalar } from 'yaml';
 import { visit } from 'yaml';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -47,6 +47,7 @@ interface CollectionDiagnostic {
 
 interface ForLoopValidationContext {
   readonly yamlString: string;
+  readonly lineCounter: LineCounter;
   readonly workflowGraph: WorkflowGraph;
   readonly workflowDefinition: WorkflowYaml;
   readonly yamlDocument: Document;
@@ -61,6 +62,7 @@ interface ForLoopValidationContext {
 export function validateLiquidYamlScalars(
   yamlString: string,
   yamlDocument: Document,
+  lineCounter: LineCounter,
   workflowGraph?: WorkflowGraph,
   workflowDefinition?: WorkflowYaml
 ): YamlValidationResult[] {
@@ -69,6 +71,7 @@ export function validateLiquidYamlScalars(
     workflowGraph != null && workflowDefinition != null
       ? {
           yamlString,
+          lineCounter,
           workflowGraph,
           workflowDefinition,
           yamlDocument,
@@ -104,18 +107,18 @@ export function validateLiquidYamlScalars(
           errorMessage,
           relativePosition
         );
-        const startPos = offsetToLineColumn(yamlString, absPosition.start);
-        const endPos = offsetToLineColumn(yamlString, absPosition.end);
+        const startPos = lineCounter.linePos(absPosition.start);
+        const endPos = lineCounter.linePos(absPosition.end);
 
         results.push({
-          id: `liquid-template-${startPos.line}-${startPos.column}-${endPos.line}-${endPos.column}`,
+          id: `liquid-template-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
           owner: 'liquid-template-validation',
           ruleId: 'liquidSyntaxError',
           message: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
           startLineNumber: startPos.line,
-          startColumn: startPos.column,
+          startColumn: startPos.col,
           endLineNumber: endPos.line,
-          endColumn: endPos.column,
+          endColumn: endPos.col,
           severity: 'error',
           hoverMessage: errorMessage.replace(/, line:\d+, col:\d+/g, ''),
         });
@@ -168,18 +171,6 @@ function mapLiquidSyntaxErrorToAbsoluteRange(
       };
     }
   }
-}
-
-function offsetToLineColumn(text: string, offset: number): { line: number; column: number } {
-  let line = 1;
-  let lastNewline = -1;
-  for (let i = 0; i < offset; i++) {
-    if (text.charCodeAt(i) === 10) {
-      line++;
-      lastNewline = i;
-    }
-  }
-  return { line, column: offset - lastNewline };
 }
 
 function collectForLoopCollectionResults(
@@ -242,8 +233,8 @@ function collectForLoopCollectionResults(
     const diagnostic = validateCollectionPath(resolvedCollectionPath, schemaAtCollection);
 
     if (diagnostic && absRange) {
-      const startPos = offsetToLineColumn(ctx.yamlString, absRange.start);
-      const endPos = offsetToLineColumn(ctx.yamlString, absRange.end);
+      const startPos = ctx.lineCounter.linePos(absRange.start);
+      const endPos = ctx.lineCounter.linePos(absRange.end);
 
       results.push({
         id: `for-collection-${nearestStep.name}-${scope.collectionPath}-${absRange.start}`,
@@ -252,9 +243,9 @@ function collectForLoopCollectionResults(
         message: diagnostic.message,
         severity: diagnostic.severity,
         startLineNumber: startPos.line,
-        startColumn: startPos.column,
+        startColumn: startPos.col,
         endLineNumber: endPos.line,
-        endColumn: endPos.column,
+        endColumn: endPos.col,
         hoverMessage: null,
       });
     }

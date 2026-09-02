@@ -146,7 +146,7 @@ function runPerStepBenchmarks(yamlContent: string, config: BenchmarkConfig) {
   }, iterations);
 
   timings.validateLiquidTemplate = benchmarkSync(() => {
-    validateLiquidTemplate(yamlContent, yamlDocument);
+    validateLiquidTemplate(yamlContent, yamlDocument, lineCounter);
   }, iterations);
 
   timings.collectAllConnectorIds = benchmarkSync(() => {
@@ -250,7 +250,7 @@ async function runE2EBenchmark(yamlContent: string, config: BenchmarkConfig) {
     record('validateStepNameUniqueness', performance.now() - start);
 
     start = performance.now();
-    validateLiquidTemplate(yamlContent, yamlDocument);
+    validateLiquidTemplate(yamlContent, yamlDocument, lc);
     record('validateLiquidTemplate', performance.now() - start);
 
     start = performance.now();
