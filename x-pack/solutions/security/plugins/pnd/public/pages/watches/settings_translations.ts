@@ -90,7 +90,7 @@ export const SKILLS_SECTION_TITLE = i18n.translate(
 
 export const SKILLS_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.skills.sectionSubtitle',
-  { defaultMessage: "what this Watch's Workers can use" }
+  { defaultMessage: 'what this Worker can use' }
 );
 
 export const SKILLS_VIEW_ALL = i18n.translate('xpack.pnd.watches.settings.skills.viewAll', {

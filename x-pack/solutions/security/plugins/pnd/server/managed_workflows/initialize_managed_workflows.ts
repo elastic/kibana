@@ -55,5 +55,37 @@ export const initializeManagedWorkflows = async ({
     logger.warn('PND managed workflow reconciliation skipped because initialization degraded');
   }
 
+  if (ensureAgentForSpace) {
+    try {
+      const states = await client.listInstalledWorkflowStates();
+      const workerSpaces = [
+        ...new Set(
+          states
+            .map((s) => s.spaceId)
+            .filter((id): id is string => !!id && id !== GLOBAL_WORKFLOW_SPACE_ID)
+        ),
+      ];
+      const agentResults = await Promise.allSettled(
+        workerSpaces.map((spaceId) => ensureAgentForSpace(spaceId))
+      );
+
+      for (const [index, result] of agentResults.entries()) {
+        if (result.status === 'rejected') {
+          logger.warn(
+            `Failed to ensure agent for space "${workerSpaces[index]}": ${
+              result.reason instanceof Error ? result.reason.message : String(result.reason)
+            }`
+          );
+        }
+      }
+    } catch (error) {
+      logger.warn(
+        `Failed to ensure agents for existing worker spaces: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
   return client;
 };

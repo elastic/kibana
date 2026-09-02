@@ -25,6 +25,7 @@ import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 import { AutonomySlider } from './components/autonomy_slider';
 import { SettingsSection } from './components/settings_section';
+import { WorkerSkillsTable } from './components/worker_skills_table';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import * as i18n from './translations';
 import * as settingsI18n from './settings_translations';
@@ -61,6 +62,8 @@ const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
           updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
         }
       />
+      <EuiSpacer size="m" />
+      <WorkerSkillsTable skills={worker.skills} />
     </SettingsSection>
   );
 };
