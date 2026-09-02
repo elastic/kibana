@@ -77,7 +77,7 @@ Establish which environment(s) the test fails in. Check test tags:
 
 A test can be flaky in one environment but stable in another.
 
-**Self-investigate first** — check tags, git history, GitHub issue. Only ask the user for information you cannot find (which specific environment failed, error messages from CI, screenshots, failure frequency).
+**Self-investigate first** — check tags, git history, GitHub issue, and any CI links in the issue. If a CI URL needs login, open it in the browser and ask the user to sign in or grant permissions. Only ask them to paste logs/screenshots if the browser session cannot reach CI.
 
 ### Step 2: Duplicate coverage check
 
@@ -179,21 +179,27 @@ If the root cause is an app bug, fix the app before writing Scout. If it is a Cy
 | Test tags/environments | Read the test file |
 | Test file structure/imports | Read the file and related tasks/screens |
 
-**Ask the user** (can't self-determine):
+**Try the browser before asking** (CI is reachable if the user logs in or grants permissions):
+
+| Information | How |
+|-------------|-----|
+| Which environment failed? | Open the CI / Buildkite link from the GitHub issue |
+| Error message, screenshots, videos | Same CI job artifacts |
+| Failure frequency | CI history / failed-test issue comments |
+| Server logs | Job artifacts once the browser session is authenticated |
+
+**Ask the user** only if the browser cannot open CI (no link, login failed, no permission):
 
 | Information | Why |
 |-------------|-----|
-| Which environment failed? | CI links are private |
-| Error message | From CI logs, not in code |
-| Screenshots/videos | Visual info not in code |
-| Consistent or intermittent? | Requires multiple runs |
-| Additional CI context | Private infrastructure |
+| CI URL or pasted logs/screenshots | Browser session could not reach the job |
+| What they saw locally | Not in CI |
 
 **Guidelines:**
-1. Self-investigate first — exhaust what you can learn from code and git before asking
-2. Ask efficiently — combine related questions into one message, don't ask one at a time
-3. Don't ask the obvious — if it's in the code or searchable, find it yourself
-4. CI links are private — never assume you can access CI dashboards, build logs, or screenshots
+1. Self-investigate first — code, git, GitHub issue, then CI in the browser
+2. If CI asks for login or permissions, prompt the user there — do not treat the link as unreachable
+3. Ask efficiently — combine leftover questions into one message
+4. Don't ask for logs you can open yourself
 5. Frame questions clearly — when you do ask, be specific about what you need and why
 
 ## Response format

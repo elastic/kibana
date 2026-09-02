@@ -199,7 +199,7 @@ Before proposing ANY fix, verify:
 | Check | Status | Action if Not Done |
 |-------|--------|-------------------|
 | **Step 0: Functionality Valid?** | [ ] | Go back and verify the feature still exists and works |
-| **Step 1: Environment Context?** | [ ] | Ask user which environment(s) are failing |
+| **Step 1: Environment Context?** | [ ] | Read tags and open CI in the browser (user can log in). Ask only if CI is unreachable |
 | **Step 2: Duplicate Coverage?** | [ ] | Search for API/unit tests covering same functionality |
 | **Step 3: Destination layer?** | [ ] | Scout UI / API / unit / delete — Cypress fix only if `@serverlessQA` |
 
