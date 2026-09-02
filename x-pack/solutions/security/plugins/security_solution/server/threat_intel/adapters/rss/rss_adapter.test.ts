@@ -6,11 +6,13 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { CATALOG_SOURCE_URLS } from '../../../../common/threat_intel';
 import { extractIocs } from '../../services/extract_iocs';
 import { rssAdapter } from './rss_adapter';
 import type { AdapterRunContext, SourceHit } from '../types';
 
-const FEED_URL = 'https://acme.example/feed.xml';
+const SOURCE_ID = 'vendor_api:elastic-security-labs';
+const FEED_URL = CATALOG_SOURCE_URLS[SOURCE_ID];
 const FEED_BODY = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
   <title>Acme</title>
@@ -31,11 +33,10 @@ const FEED_BODY = `<?xml version="1.0" encoding="UTF-8"?>
 </channel></rss>`;
 
 const buildSource = (overrides: Partial<SourceHit['_source']> = {}): SourceHit => ({
-  _id: 'rss:acme',
+  _id: SOURCE_ID,
   _source: {
     adapter_type: 'rss',
-    name: 'Acme',
-    config: { url: FEED_URL },
+    name: 'Elastic Security Labs',
     ...overrides,
   },
 });
@@ -73,9 +74,9 @@ describe('rssAdapter', () => {
       space_id: '*',
       source: {
         type: 'rss',
-        name: 'Acme',
+        name: 'Elastic Security Labs',
         url: 'https://acme.example/1',
-        adapter_id: 'rss:rss:acme',
+        adapter_id: 'rss:vendor_api:elastic-security-labs',
       },
       content: {
         title: 'Item one',
@@ -225,10 +226,10 @@ describe('rssAdapter', () => {
     expect(reports[0].space_id).toBe('team-a');
   });
 
-  it('returns [] when the source has no config.url', async () => {
+  it('returns [] when the source id has no catalog URL', async () => {
     const fetchMock = jest.fn();
     const reports = await rssAdapter.run(
-      buildSource({ config: {} as Record<string, unknown> }),
+      { _id: 'rss:unknown', _source: { adapter_type: 'rss', name: 'Unknown' } },
       buildContext(fetchMock)
     );
     expect(reports).toEqual([]);
@@ -249,19 +250,5 @@ describe('rssAdapter', () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse(empty));
     const reports = await rssAdapter.run(buildSource(), buildContext(fetchMock));
     expect(reports).toEqual([]);
-  });
-
-  it('ingests percent-encoded data: fixture URLs without calling fetch', async () => {
-    const dataUrl = `data:application/rss+xml;charset=utf-8,${encodeURIComponent(FEED_BODY)}`;
-    const fetchMock = jest.fn();
-    const reports = await rssAdapter.run(
-      buildSource({ config: { url: dataUrl } }),
-      buildContext(fetchMock)
-    );
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(reports).toHaveLength(2);
-    expect(reports[0].content.title).toBe('Item one');
-    expect(reports[0].lineage.extraction_method).toBe('pending');
   });
 });

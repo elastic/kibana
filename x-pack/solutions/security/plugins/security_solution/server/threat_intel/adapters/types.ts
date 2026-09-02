@@ -26,7 +26,6 @@ export interface SourceHit {
     adapter_type: FetchAdapterType;
     name: string;
     enabled?: boolean;
-    config: Record<string, unknown>;
     tags?: string[];
     space_id?: string;
   };

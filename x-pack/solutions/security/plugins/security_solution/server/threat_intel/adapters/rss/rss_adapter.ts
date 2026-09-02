@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
+import { GLOBAL_SPACE_ID, resolveCatalogSourceUrl } from '../../../../common/threat_intel';
 import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
@@ -21,7 +21,7 @@ const BODY_TEXT_MAX_LENGTH = 32_000;
 const SOURCE_DOC_REF_INDEX = 'rss:feed';
 
 const readFeedUrl = (source: SourceHit): string | undefined => {
-  const url = source._source.config.url;
+  const url = resolveCatalogSourceUrl(source._id);
   return typeof url === 'string' && url.length > 0 ? url : undefined;
 };
 
@@ -58,7 +58,7 @@ export const rssAdapter: FetchAdapter = {
     const log = context.logger.get('rss-adapter');
     const feedUrl = readFeedUrl(source);
     if (!feedUrl) {
-      log.warn(`Source ${source._id} has no config.url — skipping`);
+      log.warn(`Source ${source._id} has no catalog URL — skipping`);
       return [];
     }
 
