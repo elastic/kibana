@@ -10,13 +10,13 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useInfiniteQuery } from '@kbn/react-query';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { i18n } from '@kbn/i18n';
+import { MAX_CONVERSATION_SEARCH_PER_PAGE } from '../../../common/constants';
 import { queryKeys } from '../query_keys';
 import { dedupeById, getNextConversationPageParam } from '../utils/conversation_pagination';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useKibana } from './use_kibana';
 
 const SEARCH_DEBOUNCE_MS = 250;
-const SEARCH_PAGE_SIZE = 25;
 
 const conversationSearchErrorToastTitle = i18n.translate(
   'xpack.agentBuilder.conversationSearch.errorTitle',
@@ -37,13 +37,12 @@ export const useConversationSearch = ({ query, agentId }: { query: string; agent
   const { data, isLoading, isError, error, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: queryKeys.conversations.search(trimmedQuery, { agentId }),
-      // React Query v4: first call receives `pageParam: undefined`; default inside queryFn.
       queryFn: ({ pageParam }: { pageParam?: number }) =>
         conversationsService.search({
           query: trimmedQuery,
           agentId,
           page: pageParam ?? 1,
-          perPage: SEARCH_PAGE_SIZE,
+          perPage: MAX_CONVERSATION_SEARCH_PER_PAGE,
         }),
       getNextPageParam: getNextConversationPageParam,
       enabled: trimmedQuery.length > 0,
