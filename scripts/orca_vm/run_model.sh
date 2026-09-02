@@ -121,7 +121,7 @@ echo "EVAL_EXIT=$EVAL_EXIT"
 # ─── Export scores to golden cluster ────────────────────────────────────────
 echo "=== Exporting scores to golden ==="
 source /tmp/golden-cluster-env.sh 2>/dev/null
-python3 /tmp/export_scores.py "$MODEL" 2>&1
+EVAL_SUITE="${EVAL_SUITE:-security-persona-matrix}" python3 /tmp/export_scores.py "$MODEL" 2>&1
 EXPORT_EXIT=$?
 
 # export_scores.py exits 2 when SOME documents landed and some did not. That is

@@ -73,9 +73,12 @@ SUITE_PROFILES = {
         "cli_suite": "attack-discovery-agent-builder",
         "gate_suite_id": "attack-discovery-agent-builder",
         "vm_prefix": "orca-ad",
-        # 5 examples in src/dataset.ts (one per fixture slice), counted from
-        # source -- NOT guessed. Golden runs land 8-13 score docs per experiment.
-        "n_examples": 5,
+        # 9 datasets x 1 example each, MEASURED from a completed canary run
+        # (orca-ad-openai-gpt-5-4, 2026-09-02, "9 passed"): 117 score docs over
+        # 9 datasets x 13 evaluators. Source-counting src/dataset.ts gives 5 and
+        # misses the scenario-registry + clean-profile specs entirely -- two
+        # separate wrong answers before the live run settled it.
+        "n_examples": 9,
     },
     "security-automatic-migrations": {
         "cli_suite": "security-automatic-migrations",
@@ -544,7 +547,7 @@ def self_test() -> int:
 
         # Doc-count gate: expected docs are per-suite, counted from the datasets.
         check("persona n_examples", SUITE_PROFILES["security-persona-matrix"]["n_examples"], 21)
-        check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 5)
+        check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 9)
         check("migrations n_examples",
               SUITE_PROFILES["security-automatic-migrations"]["n_examples"], 22)
 
@@ -794,6 +797,11 @@ def _model_state(model: str) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", default="all")
+    # Provision/deploy fan-out. Each VM is 8 vCPUs against a 350 low-priority
+    # vCPU regional quota (~43 concurrent), so the ceiling here is Azure API
+    # politeness and local ssh/scp load, not quota.
+    ap.add_argument("--provision-workers", type=int, default=5,
+                    help="parallel VM provision+deploy workers")
     ap.add_argument("--suite", default="security-persona-matrix",
                     choices=sorted(SUITE_PROFILES),
                     help="eval suite to sweep; selects overlays, VM prefix and doc gate")
@@ -881,7 +889,7 @@ def main() -> int:
 
     # Provision + deploy in parallel (independent per VM); launches stay serial.
     ips: dict[str, str] = {}
-    with ThreadPoolExecutor(max_workers=5) as pool:
+    with ThreadPoolExecutor(max_workers=args.provision_workers) as pool:
         # as_completed + try/except so one dead VM (eviction, sshd race)
         # loses its cell instead of killing the whole sweep before launch.
         futures = {pool.submit(prepare, model): model for model in models}

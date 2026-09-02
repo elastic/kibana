@@ -14,7 +14,13 @@ GOLDEN_KEY = os.environ.get("GOLDEN_ES_API_KEY", "")
 LOCAL_ES = "http://localhost:9220"
 LOCAL_AUTH = "Basic ZWxhc3RpYzpjaGFuZ2VtZQ=="  # elastic:changeme
 
-DATASET = "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"  # persona-matrix
+# Suite to export, injected by the sweeper (EVAL_SUITE). A single hardcoded
+# dataset UUID only ever worked for persona-matrix, which has one dataset;
+# attack-discovery spans 9 datasets and automatic-migrations several more, so
+# filter on the suite instead. Observed 2026-09-02: a clean AD canary run
+# passed 9/9 and exported NOTHING, because the persona-matrix dataset id
+# matched no local doc and the exporter treated that as "nothing to do".
+SUITE_ID = os.environ.get("EVAL_SUITE", "security-persona-matrix")
 INDEX = ".evaluation-scores"
 # Bulk in chunks so one bad batch cannot discard the whole export.
 BULK_BATCH_SIZE = 500
@@ -33,18 +39,18 @@ def es_local(path, body=None):
 
 def export_model(model_id: str):
     # Every sweep VM starts from a clean ES data directory and runs exactly one
-    # model. Export the complete persona-matrix dataset instead of guessing the
+    # model. Export the complete suite instead of guessing the
     # stored model ID from the connector ID: connector IDs use hyphens
     # (google-gemini-3-1-pro), while score docs use dots
     # (google-gemini-3.1-pro). The dataset filter is the stable identity.
     body = {
         "size": 10000,
-        "query": {"term": {"example.dataset.id": DATASET}},
+        "query": {"term": {"metadata.suite_id": SUITE_ID}},
     }
     resp = es_local(f"/{INDEX}/_search", body)
     hits = resp.get("hits", {}).get("hits", [])
     if not hits:
-        sys.stderr.write(f"no local persona-matrix docs for {model_id}\n")
+        sys.stderr.write(f"no local {SUITE_ID} docs for {model_id}\n")
         return 0, 0
 
     stored_models = {
