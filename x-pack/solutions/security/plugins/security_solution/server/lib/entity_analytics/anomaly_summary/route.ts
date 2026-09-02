@@ -129,11 +129,13 @@ export const registerAnomalySummaryRoutes = ({
           }
 
           const core = await context.core;
+          const esClient = core.elasticsearch.client.asCurrentUser;
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
           const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
+            esClient,
             entityId,
             entityType,
           });
@@ -252,6 +254,7 @@ export const registerAnomalySummaryRoutes = ({
 
           const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
+            esClient,
             entityId,
             entityType,
           });

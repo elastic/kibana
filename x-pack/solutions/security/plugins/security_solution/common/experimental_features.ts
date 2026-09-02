@@ -46,9 +46,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
-   * Release: 9.6
+   * Release: 9.6, backported to 9.5.x
    */
-  responseActionsEndpointMemoryDumpRaw: false,
+  responseActionsEndpointMemoryDumpRaw: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -346,6 +346,14 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Threat-intel supply pipeline (indices, ingest adapters, create
+   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
+   * off. Enable with:
+   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
+   */
+  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

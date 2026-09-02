@@ -33,7 +33,8 @@ interface GetCurrentProfileAttributes extends BasicAttributes {
 }
 
 interface OAuthTokenExchangeAttributes extends BasicAttributes {
-  errorType?: string;
+  oauthErrorType?: string;
+  oauthErrorCode?: string;
 }
 
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
@@ -169,7 +170,8 @@ class SecurityTelemetry {
       profileActivationRequired,
       apiKeyRetrievalRequired,
       fakeRequestProfileResolution,
-      errorType,
+      oauthErrorType,
+      oauthErrorCode,
       ...rest
     } = attributes;
 
@@ -187,7 +189,8 @@ class SecurityTelemetry {
       ...(fakeRequestProfileResolution
         ? { 'profile.get_current.fake_request_profile_resolution': fakeRequestProfileResolution }
         : {}),
-      ...(errorType ? { 'oauth.error.type': errorType } : {}),
+      ...(oauthErrorType ? { 'oauth.error.type': oauthErrorType } : {}),
+      ...(oauthErrorCode ? { 'oauth.error.code': oauthErrorCode } : {}),
       ...rest,
     };
 

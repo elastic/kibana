@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_log_ml_job_id_formats_shim';
 import type { IdFormat, JobType } from '../../../../common/http_api/latest';
@@ -66,7 +67,8 @@ export const useLogAnalysisModule = <T extends JobType>({
         selectedIndices: string[],
         start: number | undefined,
         end: number | undefined,
-        datasetFilter: DatasetFilter
+        datasetFilter: DatasetFilter,
+        projectRouting?: ProjectRouting
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
         const setupResult = await moduleDescriptor.setUpModule(
@@ -80,7 +82,8 @@ export const useLogAnalysisModule = <T extends JobType>({
             timestampField,
             runtimeMappings,
           },
-          services.http.fetch
+          services.http.fetch,
+          projectRouting
         );
         const jobSummaries = await moduleDescriptor.getJobSummary(
           spaceId,
@@ -159,12 +162,13 @@ export const useLogAnalysisModule = <T extends JobType>({
       selectedIndices: string[],
       start: number | undefined,
       end: number | undefined,
-      datasetFilter: DatasetFilter
+      datasetFilter: DatasetFilter,
+      projectRouting?: ProjectRouting
     ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end, datasetFilter);
+          setUpModule(selectedIndices, start, end, datasetFilter, projectRouting);
         })
         .catch((e) => {
           dispatchModuleStatus({ type: 'failedSetup', reason: e.toString() });

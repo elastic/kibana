@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import {
-  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { HeaderPage } from '../../../common/components/header_page';
+import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 
@@ -32,11 +31,6 @@ export const SKELETON_TEST_ID = 'alerts-page-skeleton';
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertsPage.dataViewError', {
   defaultMessage: 'Unable to retrieve the data view',
 });
-
-const DATAVIEW_DEGRADED_TITLE = i18n.translate(
-  'xpack.securitySolution.alertsPage.dataViewDegraded.title',
-  { defaultMessage: 'Some alert data view fields are unavailable' }
-);
 
 interface WrapperProps {
   /** the alerts data view, retrieved once by the parent via useDataView(PageScope.alerts) */
@@ -78,18 +72,15 @@ export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
       <>
         {isDataViewDegraded && (
           <>
-            <KbnWarningCallout
+            <DataViewDegradedCallout
+              dataView={dataView}
               data-test-subj={DATA_VIEW_DEGRADED_TEST_ID}
-              title={DATAVIEW_DEGRADED_TITLE}
             >
               <FormattedMessage
-                id="xpack.securitySolution.alertsPage.dataViewDegraded.body"
-                defaultMessage="Index pattern {indexPattern} matched no indices. Alerts are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
-                values={{
-                  indexPattern: <EuiCode>{dataView.getIndexPattern()}</EuiCode>,
-                }}
+                id="xpack.securitySolution.alertsPage.dataViewDegradedDetailsDescription"
+                defaultMessage="Alerts are still listed below, but field-dependent features such as search suggestions, the fields browser and grouping options may be limited."
               />
-            </KbnWarningCallout>
+            </DataViewDegradedCallout>
             <EuiSpacer size="m" />
           </>
         )}

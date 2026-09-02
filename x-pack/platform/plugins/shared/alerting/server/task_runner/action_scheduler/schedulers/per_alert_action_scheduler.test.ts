@@ -270,7 +270,7 @@ describe('Per-Alert Action Scheduler', () => {
       // 2 per-alert actions * 2 alerts = 4 actions to schedule
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
@@ -1448,8 +1448,8 @@ describe('Per-Alert Action Scheduler', () => {
         activeAlerts: { '1': alert },
       });
       expect(spy).toHaveBeenCalledTimes(2); // 2 actions
-      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
-      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
+      expect(spy).toHaveBeenNthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).toHaveBeenNthCalledWith(2, ['111-111', '222-222']);
     });
 
     test('should skip creating actions to schedule when alert is delayed', async () => {

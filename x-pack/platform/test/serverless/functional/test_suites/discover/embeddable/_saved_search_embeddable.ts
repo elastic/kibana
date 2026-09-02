@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIXED. Subset of the stateful suite
+ * (src/platform/test/functional/apps/discover/embeddable/_saved_search_embeddable.ts).
+ * See individual tests. Merge into one Scout spec with deployment tags rather than keeping a serverless mirror.
+ */
+
 // Original test (remove during Scout migration): src/platform/test/functional/apps/discover/embeddable/_saved_search_embeddable.ts
 
 import expect from '@kbn/expect';
@@ -106,6 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
     };
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Fine persistence/integration test. Serverless
+     * needs a non-logs saved search because pagination is disabled for log sources.
+     */
     it('can save a search embeddable with a defined rows per page number', async function () {
       const dashboardName = 'Dashboard with a Paginated Saved Search';
       await addSearchEmbeddableToDashboard(nonLogsSavedSearchName);
@@ -129,6 +139,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
 
+    /**
+     * Migration recommendation: DELETE. Column reorder/remove is covered in
+     * src/platform/packages/shared/kbn-unified-data-table/src/components/actions/columns.test.ts
+     * and data_table.test.tsx.
+     */
     it('should control columns correctly', async () => {
       await addSearchEmbeddableToDashboard();
       await dashboard.switchToEditMode();
@@ -146,6 +161,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Merge with the stateful duplicate-panel smoke.
+     */
     it('should render duplicate saved search embeddables', async () => {
       await addSearchEmbeddableToDashboard();
       await addSearchEmbeddableToDashboard();
@@ -156,6 +174,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(firstGridCellContent).to.be.equal(secondGridCellContent);
     });
 
+    /**
+     * Migration recommendation: MIXED. Drop the exact document count. Keep a short Scout smoke
+     * that invalid KQL surfaces embeddableError.
+     */
     it('should display an error', async () => {
       await addSearchEmbeddableToDashboard();
       await queryBar.setQuery('bytes > 5000');
@@ -171,11 +193,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(errorText).to.match(/Expected[\S\s]+but "n" found/);
     });
 
+    /**
+     * Migration recommendation: DELETE. DiscoverGridEmbeddable hardcodes showFullScreenButton={false};
+     * the prop is covered in src/platform/packages/shared/kbn-unified-data-table/src/components/data_table.test.tsx.
+     */
     it('should not show the full screen button', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.missingOrFail('dataGridFullScreenButton');
     });
 
+    /**
+     * Migration recommendation: DELETE. The embeddable always passes renderCustomToolbar; toolbar
+     * presence is covered in Discover Scout data_grid.spec.ts and discover_documents.test.tsx.
+     */
     it('should show the the grid toolbar', async () => {
       await addSearchEmbeddableToDashboard();
       await testSubjects.existOrFail('unifiedDataTableToolbar');

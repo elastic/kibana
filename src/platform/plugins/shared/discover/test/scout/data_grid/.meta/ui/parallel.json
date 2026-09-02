@@ -1,21 +1,9 @@
 {
   "sha1": "de9e9cd56ce314840caf46ed8433654b10c09b0f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "dd8d3bea8591859-efeb975c1fb574f",
-      "title": "Teardown data grid tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "d3bfac238753802-05460b2aab98f7c",
       "title": "Setup data grid tests data",
@@ -1010,6 +998,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_pinning.spec.ts",
         "line": 77,
         "column": 20
+      }
+    },
+    {
+      "id": "dd8d3bea8591859-efeb975c1fb574f",
+      "title": "Teardown data grid tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]
