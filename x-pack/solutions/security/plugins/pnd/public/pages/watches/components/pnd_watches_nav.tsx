@@ -12,8 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiSkeletonText,
   EuiTitle,
   useEuiTheme,
