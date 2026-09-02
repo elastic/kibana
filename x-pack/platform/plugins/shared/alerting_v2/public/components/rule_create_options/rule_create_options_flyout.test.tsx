@@ -52,6 +52,24 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('uses overlay session stacking when a historyKey is provided', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
     renderFlyout();
 

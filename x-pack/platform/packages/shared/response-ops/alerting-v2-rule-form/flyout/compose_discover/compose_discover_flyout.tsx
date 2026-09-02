@@ -21,6 +21,7 @@ import {
   euiFullHeight,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -224,6 +225,11 @@ export interface ComposeDiscoverFlyoutProps {
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
+  /**
+   * Called when EUI navigates Back in a stacked session. Must unmount this flyout
+   * without dismissing the parent picker, so the same create path can be opened again.
+   */
+  onHistoryBack?: () => void;
   services: RuleFormServices;
   /**
    * Called with the create payload when the user submits in create mode. When the user
@@ -314,6 +320,7 @@ export function ComposeDiscoverFlyout({
   rule,
   ruleId,
   onClose,
+  onHistoryBack,
   services,
   onCreateRule,
   onUpdateRule,
@@ -499,16 +506,30 @@ export function ComposeDiscoverFlyout({
     { query: string | undefined; esqlVariables: ESQLControlVariable[] | undefined } | undefined
   >();
 
-  const handleRequestClose = useCallback(() => {
-    const yamlDirty =
-      yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
-    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
-    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
-      setIsConfirmCloseVisible(true);
-    } else {
-      onClose();
-    }
-  }, [onClose, uiState.recoveryType]);
+  const handleRequestClose: EuiFlyoutProps['onClose'] = useCallback(
+    (_event, meta) => {
+      // Back returns to the picker with no confirm. Unmount this flyout (without
+      // dismissing the picker) so choosing the same path can push a new session.
+      if (meta?.reason === 'navigation-back') {
+        onHistoryBack?.();
+        return;
+      }
+      // Parent session closed (picker dismissed). Tear down without confirm.
+      if (meta?.reason === 'navigation-cascade') {
+        onClose();
+        return;
+      }
+      const yamlDirty =
+        yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
+      const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
+      if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
+        setIsConfirmCloseVisible(true);
+      } else {
+        onClose();
+      }
+    },
+    [onClose, onHistoryBack, uiState.recoveryType]
+  );
 
   const handleConfirmDiscard = useCallback(() => {
     setIsConfirmCloseVisible(false);
@@ -1250,6 +1271,7 @@ export function ComposeDiscoverFlyout({
             type="overlay"
             session="start"
             historyKey={historyKey}
+            flyoutMenuProps={{ title }}
             onClose={handleRequestClose}
             aria-labelledby={FLYOUT_TITLE_ID}
             size={540}

@@ -27,6 +27,21 @@ import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
+type CapturedFlyoutOnClose = (event: unknown, meta?: { reason?: string }) => void;
+
+let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
+
+jest.mock('@elastic/eui', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+  return {
+    ...actual,
+    EuiFlyout: ReactActual.forwardRef((props: Record<string, unknown>, ref) => {
+      latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
+      return ReactActual.createElement(actual.EuiFlyout, { ...props, ref });
+    }),
+  };
+});
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <div data-test-subj="codeEditorMock" />,
@@ -606,6 +621,34 @@ describe('ComposeDiscoverFlyout', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not confirm when EUI navigates back, and calls onHistoryBack', () => {
+      const onClose = jest.fn();
+      const onHistoryBack = jest.fn();
+      renderFlyout({ onClose, onHistoryBack });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-back' });
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onHistoryBack).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('closes without confirm when the parent session cascade-closes', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      act(() => {
+        latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
     it('shows confirmation in YAML mode when text differs from baseline', () => {
