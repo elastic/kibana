@@ -14,7 +14,6 @@ import { createSystemIndicesEsClient } from '../../fixtures/system_indices_es_cl
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
 const EXECUTIONS_INDEX = '.workflows-executions';
-const STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 const EVENTS_DATA_STREAM = '.significant_events-events';
 const SPACE_ID = 'default';
 const DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
@@ -36,7 +35,6 @@ apiTest.describe(
     let seedEsClient: EsClient;
     let originalState: RunQuotaState;
     const executionIds = new Set<string>();
-    const stepExecutionIds = new Set<string>();
     const eventIds = new Set<string>();
 
     apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
@@ -87,9 +85,6 @@ apiTest.describe(
       await Promise.all([
         ...[...executionIds].map((id) =>
           seedEsClient.delete({ index: EXECUTIONS_INDEX, id }, { ignore: [404] })
-        ),
-        ...[...stepExecutionIds].map((id) =>
-          seedEsClient.delete({ index: STEP_EXECUTIONS_INDEX, id }, { ignore: [404] })
         ),
       ]);
       if (eventIds.size > 0) {
@@ -283,7 +278,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'reserves an eligible investigation through a managed execution chain',
+      'reserves an open high-severity event through a managed execution chain',
       async ({ apiClient }) => {
         const before = await readGroup(apiClient, 'investigation');
         const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
@@ -308,39 +303,6 @@ apiTest.describe(
         };
         eventIds.add(event.eventId);
 
-        const stepId = `${prefix}-store-step`;
-        stepExecutionIds.add(stepId);
-        await seedEsClient.index({
-          index: STEP_EXECUTIONS_INDEX,
-          id: stepId,
-          refresh: true,
-          document: {
-            id: stepId,
-            stepId: 'store_significant_events',
-            stepExecutionIndex: 0,
-            output: {
-              significant_events: [
-                {
-                  event_id: event.eventId,
-                  event_uuid: event.eventUuid,
-                  status: 'open',
-                  written: true,
-                },
-              ],
-            },
-          },
-        });
-        await indexExecution({
-          id: chain.childId,
-          workflowId: DISCOVERY_WORKFLOW_ID,
-          spaceId: SPACE_ID,
-          status: 'running',
-          stepExecutionIds: [stepId],
-          context: {
-            parentWorkflowExecutionId: chain.parentId,
-            inputs: { quotaSlot: 5 },
-          },
-        });
         await seedEsClient.create({
           index: EVENTS_DATA_STREAM,
           id: event.eventUuid,

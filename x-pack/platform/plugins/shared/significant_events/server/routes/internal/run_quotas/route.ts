@@ -296,7 +296,7 @@ const reserveInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/run_quotas/investigation/_reserve',
   options: {
     access: 'internal',
-    summary: 'Reserve one verified automated investigation grant',
+    summary: 'Reserve one automated investigation grant',
   },
   security: {
     authz: {
