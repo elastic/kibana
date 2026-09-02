@@ -130,6 +130,7 @@ describe('Inbound events HTTP API', () => {
       .set('kbn-xsrf', 'kibana')
       .expect(200);
     expect((getRes.body as ConnectorHttpBody).secrets?.ingest_token).toBeUndefined();
+    expect((getRes.body as ConnectorHttpBody).config?.ingestTokenHash).toBeUndefined();
 
     const rotateRes = await getSupertest(
       kibanaServer.root,

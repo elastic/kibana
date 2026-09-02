@@ -13,7 +13,7 @@ Restart Kibana. With the flag off, `.inboundWebhook` is not registered (create /
 
 ## Create, then mint the token
 
-Public create/update never return a plaintext token (and never mint one). After create, call rotate once to mint the first live token.
+Public create/update never return a plaintext token (and never mint one). Public GET/create/update omit `config.ingestTokenHash`; the hub still verifies against the stored hash. After create, call rotate once to mint the first live token.
 
 ```bash
 curl -u elastic:changeme -X POST "$KIBANA_URL/api/actions/connector" \
