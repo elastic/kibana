@@ -10,16 +10,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
 export interface TakeActionButtonProps {
-  isOpen: boolean;
   onClick: () => void;
 }
 
-/** Footer "Take action" trigger. The arrow points toward where the menu opens: up when closed
- * (the menu opens upward), down when open (clicking again collapses it). */
-export const TakeActionButton = ({ isOpen, onClick }: TakeActionButtonProps) => (
+export const TakeActionButton = ({ onClick }: TakeActionButtonProps) => (
   <EuiButton
     fill
-    iconType={isOpen ? 'arrowDown' : 'arrowUp'}
+    iconType="chevronSingleDown"
     iconSide="right"
     onClick={onClick}
     data-test-subj="ruleSummaryFlyoutTakeActionButton"
