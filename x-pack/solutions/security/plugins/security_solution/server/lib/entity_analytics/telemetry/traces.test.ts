@@ -28,7 +28,7 @@ describe('entity analytics traces', () => {
 
   it('wrapTaskRun invokes the run callback and returns its result', async () => {
     const result = await wrapTaskRun({
-      spanName: ENTITY_ANALYTICS_SPAN_NAMES.privilegeMonitoringTaskRun,
+      spanName: ENTITY_ANALYTICS_SPAN_NAMES.watchlistTaskRun,
       namespace: 'default',
       run: async () => 'ok',
     });
