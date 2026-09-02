@@ -2718,7 +2718,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         if (willDeployAsync) {
           logger.warn(
-            `[deleteSecretsIfNotReferenced] Agent policy revision was deployed asynchronously — skipping secret deletion for [${secretsToDelete.join(', ')}] to avoid removing a secret still referenced by an in-flight compiled policy.`
+            `[deleteSecretsIfNotReferenced] Agent policy revision was deployed asynchronously — skipping secret deletion for [${secretsToDelete.join(
+              ', '
+            )}] to avoid removing a secret still referenced by an in-flight compiled policy.`
           );
         } else {
           // The package policies being deleted are removed from the agent policies above,
