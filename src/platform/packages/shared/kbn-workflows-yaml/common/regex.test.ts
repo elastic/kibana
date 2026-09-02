@@ -11,68 +11,82 @@ import {
   ALLOWED_KEY_REGEX,
   isLiquidTagValue,
   LIQUID_FILTER_REGEX,
+  matchAllVariables,
+  matchLastUnfinishedVariable,
+  matchVariable,
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
 } from './regex';
 
 describe('regex patterns', () => {
-  describe('VARIABLE_REGEX_GLOBAL', () => {
+  describe('matchAllVariables', () => {
     it('should match complete mustache expressions', () => {
-      const text = 'Hello {{ user.name }} and {{ item.price }}!';
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+      const matches = matchAllVariables('Hello {{ user.name }} and {{ item.price }}!');
 
       expect(matches).toHaveLength(2);
-      expect(matches[0].groups?.key).toBe('user.name');
-      expect(matches[1].groups?.key).toBe('item.price');
+      expect(matches[0].groups.key).toBe('user.name');
+      expect(matches[1].groups.key).toBe('item.price');
     });
 
-    it('should match mustache with whitespace', () => {
-      const text = 'Value: {{  steps.getData.output  }}';
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+    it('should trim padding the key class absorbed', () => {
+      const matches = matchAllVariables('Value: {{  steps.getData.output  }}');
 
       expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('steps.getData.output');
+      expect(matches[0].groups.key).toBe('steps.getData.output');
+      expect(matches[0][0]).toBe('{{  steps.getData.output  }}');
+    });
+
+    it('should report an empty key for an empty expression', () => {
+      expect(matchVariable('{{}}')?.groups.key).toBe('');
+      expect(matchVariable('{{ }}')?.groups.key).toBe('');
     });
 
     it('should not match incomplete mustache', () => {
-      const text = 'Incomplete: {{ user.name';
-      const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
+      expect(matchAllVariables('Incomplete: {{ user.name')).toHaveLength(0);
+    });
 
-      expect(matches).toHaveLength(0);
+    it('should keep the match offset so callers can map it back to the document', () => {
+      const [match] = matchAllVariables('ab {{ x }}');
+
+      expect(match.index).toBe(3);
     });
   });
 
-  describe('UNFINISHED_VARIABLE_REGEX_GLOBAL', () => {
+  describe('matchLastUnfinishedVariable', () => {
     it('should match unfinished mustache at end of line', () => {
-      const text = 'Message: {{ user.name';
-      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('user.name');
+      expect(matchLastUnfinishedVariable('Message: {{ user.name')?.groups.key).toBe('user.name');
     });
 
     it('should match unfinished mustache with partial key', () => {
-      const text = 'Value: {{ steps.getData.out';
-      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('steps.getData.out');
+      expect(matchLastUnfinishedVariable('Value: {{ steps.getData.out')?.groups.key).toBe(
+        'steps.getData.out'
+      );
     });
 
     it('should match mustache with just opening braces', () => {
-      const text = 'Start: {{ ';
-      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-
-      expect(matches).toHaveLength(1);
-      expect(matches[0].groups?.key).toBe('');
+      expect(matchLastUnfinishedVariable('Start: {{ ')?.groups.key).toBe('');
     });
 
     it('should not match complete mustache', () => {
-      const text = 'Complete: {{ user.name }} more';
-      const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
+      expect(matchLastUnfinishedVariable('Complete: {{ user.name }} more')).toBeNull();
+    });
+  });
 
-      expect(matches).toHaveLength(0);
+  describe('mustache pattern complexity', () => {
+    // An earlier form padded a lazy key with `\s*` on both sides. Because the key class
+    // also matches whitespace, an unclosed `{{` followed by a whitespace run forced the
+    // engine through every split of that run: 8k tabs took ~88s (CodeQL js/polynomial-redos).
+    const REDOS_INPUT = `{{${'\t'.repeat(1_000_000)}`;
+
+    it('scans a long unclosed run in linear time', () => {
+      const start = Date.now();
+
+      expect(matchAllVariables(REDOS_INPUT)).toHaveLength(0);
+      expect([...REDOS_INPUT.matchAll(VARIABLE_REGEX_GLOBAL)]).toHaveLength(0);
+      expect([...REDOS_INPUT.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)]).toHaveLength(1);
+
+      expect(Date.now() - start).toBeLessThan(1_000);
     });
   });
 

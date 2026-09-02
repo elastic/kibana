@@ -21,7 +21,7 @@ describe('toAuthzError', () => {
 
 describe('throwAuthzError', () => {
   it('does nothing if validation is valid', () => {
-    expect(() => throwAuthzError({ valid: true, message: undefined })).not.toThrowError();
+    expect(() => throwAuthzError({ valid: true, message: undefined })).not.toThrow();
   });
 
   it('throws an error if validation is invalid', () => {

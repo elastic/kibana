@@ -23,6 +23,7 @@ import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
 import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 import { updateNoteStepDefinition } from './update_note_step/update_note_step';
+import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -32,7 +33,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(16);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(17);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -78,6 +79,9 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(getNotesStepDefinition);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       updateNoteStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createRuleStepDefinition
     );
   });
 });

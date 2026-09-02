@@ -16,7 +16,7 @@ export interface IacProvisionerConfig {
     tls?: {
       certificate?: string;
       key?: string;
-      ca?: string | string[];
+      ca?: string;
     };
   };
 }

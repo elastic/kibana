@@ -22,6 +22,7 @@ export const createAttackDiscoveryRubricEvaluator = ({
   return {
     name: 'AttackDiscoveryRubric',
     kind: 'LLM',
+    direction: 'maximize',
     evaluate: async ({ output, expected }) => {
       const errors = (output as AttackDiscoveryTaskOutput | undefined)?.errors;
       if (errors && errors.length > 0) {

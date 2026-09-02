@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
@@ -18,12 +19,14 @@ export type PndPluginStart = Record<string, never>;
 export interface PndSetupDependencies {
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
 }
 
 export interface PndStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 export type PndRouter = IRouter;

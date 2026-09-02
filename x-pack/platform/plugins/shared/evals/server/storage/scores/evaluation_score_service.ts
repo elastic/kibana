@@ -93,6 +93,7 @@ const toEvaluationScoreDocuments = (
         explanation: score.evaluator.explanation,
         metadata: score.evaluator.metadata,
         trace_id: score.evaluator.trace_id,
+        direction: score.evaluator.direction,
         ...(score.evaluator.kind != null && { kind: score.evaluator.kind }),
         ...(evaluatorModel != null && { model: evaluatorModel }),
       },

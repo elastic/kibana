@@ -26,7 +26,6 @@ interface NavigationState {
  *
  * @param isCollapsed - whether the side nav is collapsed.
  * @param items - the navigation structure including primary, secondary, and footer items.
- * @param logoId - the logo ID, used for highlighting the logo.
  * @param activeItemId - the active item ID, used for highlighting the active item.
  * @returns the navigation state including:
  * - `actualActiveItemId` - the actual active item ID. There can only be one `aria-current=page` link on the page.
@@ -39,16 +38,15 @@ interface NavigationState {
 export const useNavigation = (
   isCollapsed: boolean,
   items: NavigationStructure,
-  logoId: string | undefined,
   activeItemId?: string
 ) => {
-  const { primaryItem, secondaryItem, isLogoActive } = useMemo(
-    () => getActiveItems(items, activeItemId, logoId),
-    [items, activeItemId, logoId]
+  const { primaryItem, secondaryItem } = useMemo(
+    () => getActiveItems(items, activeItemId),
+    [items, activeItemId]
   );
 
   const actualActiveItemId = activeItemId;
-  const visuallyActivePageId = isLogoActive ? logoId : primaryItem?.id;
+  const visuallyActivePageId = primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
   const openerNode = primaryItem;
   const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
