@@ -167,7 +167,8 @@ export class EsqlQueryParser {
       if (requestObject) {
         const esqlResponse = data.rawResponse as unknown as ESQLSearchResponse;
         if (esqlResponse.approximation_applied !== undefined) {
-          this.approximationApplied = this.approximationApplied || esqlResponse.approximation_applied;
+          this.approximationApplied =
+            this.approximationApplied || esqlResponse.approximation_applied;
         }
         const rowData = this._transformEsqlRowsToVegaRows(esqlResponse);
 
