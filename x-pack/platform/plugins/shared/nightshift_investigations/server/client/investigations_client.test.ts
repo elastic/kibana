@@ -1018,4 +1018,146 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
   });
+
+  describe('subject recovery from execution inputs', () => {
+    // recoverSubjectFromInput / recoverTriggerTypeFromInput are called here (and only here) on the
+    // create path. These cases were previously on get() which used the same functions; after the
+    // read path moved to the SO store the functions stayed live but lost their only coverage.
+
+    it('recovers significant_event subject via event_id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('event-42');
+    });
+
+    it('recovers significant_event subject via significant_event_id when event_id is absent', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: 'se-99' } },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('se-99');
+    });
+
+    it('prefers event_id over significant_event_id when both are present', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'checkout-latency-breach',
+                significant_event_id: 'event-uuid-1',
+              },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_id).toBe('checkout-latency-breach');
+    });
+
+    it('falls through an empty event_id to significant_event_id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: '',
+                significant_event_id: 'se-fallback',
+              },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_id).toBe('se-fallback');
+    });
+
+    it('throws InvestigationSubjectMissingError when all significant_event id fields are empty', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
+          },
+        })
+      );
+      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+        InvestigationSubjectMissingError
+      );
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('throws InvestigationSubjectMissingError when the source is unrecognized', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'chat', some_id: 'x' } } },
+        })
+      );
+      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+        InvestigationSubjectMissingError
+      );
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('stores subject_summary from ctx.summary for a significant_event subject', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: { source: 'significant_event', event_id: 'event-42', summary: long },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('event-42');
+      expect(attrs.subject_summary).toBe(long);
+    });
+
+    it('stores subject_summary for an alert subject', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('alert');
+      expect(attrs.subject_id).toBe('alert-99');
+      expect(attrs.subject_summary).toBe('CPU saturation');
+    });
+
+    it('falls back to manual trigger_type when context carries none', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'alert', alert_id: 'a-1' } } },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.trigger_type).toBe('manual');
+    });
+  });
 });

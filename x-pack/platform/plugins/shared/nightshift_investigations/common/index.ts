@@ -126,8 +126,7 @@ export interface UpdateInvestigationRequest extends InvestigationStructuredOutpu
 
 export interface GetInvestigationResponse extends InvestigationStructuredOutput {
   investigation_id: string;
-  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
-  subject?: InvestigationSubject;
+  subject: InvestigationSubject;
   trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
   created_at: string;
