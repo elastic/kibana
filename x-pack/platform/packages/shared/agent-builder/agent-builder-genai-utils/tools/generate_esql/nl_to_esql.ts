@@ -17,6 +17,7 @@ import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph, requestDocumentationSchema } from './graph';
+import type { RequestDocumentationAction } from './actions';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
@@ -171,31 +172,30 @@ export const generateEsql = async ({
           : nlQuery.trim();
 
         let selectedTarget = index;
-
-        // Doc selection needs only the NL query, so it starts immediately —
-        // concurrently with index discovery when needed, or alone when index is known.
-        const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
-          sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
-        };
-        const requestDocModel = model.chatModel
-          .withStructuredOutput(requestDocumentationSchema, {
-            name: 'request_documentation',
-          })
-          .withConfig(requestDocCallConfig);
-        const docPromise = requestDocModel
-          .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
-          .then(({ commands = [], functions = [] }) => {
-            const requestedKeywords = [...commands, ...functions];
-            return {
-              type: 'request_documentation' as const,
-              requestedKeywords,
-              fetchedDoc: docBase.getDocumentation(requestedKeywords),
-            };
-          });
-
-        let precomputedDocAction;
+        let precomputedDocAction: RequestDocumentationAction | undefined;
 
         if (!selectedTarget) {
+          // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
+          // The resource-less prompt is an accepted quality tradeoff for the latency win.
+          const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
+            sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
+          };
+          const requestDocModel = model.chatModel
+            .withStructuredOutput(requestDocumentationSchema, {
+              name: 'request_documentation',
+            })
+            .withConfig(requestDocCallConfig);
+          const docPromise = requestDocModel
+            .invoke(createRequestDocumentationPromptNoResource({ nlQuery, documentation }))
+            .then(({ commands = [], functions = [] }) => {
+              const requestedKeywords = [...commands, ...functions];
+              return {
+                type: 'request_documentation' as const,
+                requestedKeywords,
+                fetchedDoc: docBase.getDocumentation(requestedKeywords),
+              };
+            });
+
           const [
             {
               resources: [selectedResource],
@@ -220,8 +220,6 @@ export const generateEsql = async ({
           selectedTarget = selectedResource.name;
           logger?.debug(`Discovered target index: ${selectedTarget}`);
           precomputedDocAction = docAction;
-        } else {
-          precomputedDocAction = await docPromise;
         }
 
         const outState = await graph.invoke(
@@ -235,7 +233,8 @@ export const generateEsql = async ({
             rowLimit,
             disableNamedParams,
             timeRange,
-            actions: [precomputedDocAction],
+            // Empty when index is known — graph runs request_documentation in-graph with resource context.
+            actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
           {
             recursionLimit: 25,
