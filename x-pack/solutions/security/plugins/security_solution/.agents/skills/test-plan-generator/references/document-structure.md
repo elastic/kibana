@@ -8,6 +8,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 - [Template](#template)
 - [Notes](#notes)
+- [Verbosity levels](#verbosity-levels)
 - [Pending work pattern](#pending-work-pattern)
 - [Test Coverage Summary — filling in the table](#test-coverage-summary--filling-in-the-table)
 - [Issue Clarity Assessment section](#issue-clarity-assessment-section)
@@ -145,6 +146,19 @@ This file defines the required sections of a test plan, their order, and the con
 - **RBAC / Permission Testing Matrix** — only include if the issue explicitly mentions roles, permissions, or access control. Do not add speculatively.
 - **Scope** must reflect the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) triggers (upgrade / CRUD per persisted object / dependency data lifecycle). Every *Out of scope* bullet carries a one-clause reason on the same line — bullets with no reason are indistinguishable from oversights.
 - If a section cannot be filled in due to missing information, apply the Core rule: stop and ask the user rather than leaving placeholder text in the draft.
+
+## Verbosity levels
+
+The template above shows the `standard` (default) rendering. Three levels — `lean`, `standard`, `detailed` — control **prose density only** for `Overview`, `Feature Background`, `Assumptions`, and per-scenario metadata. Non-negotiable invariants (scenario count, priorities, ⚠️ entries in *Known Limitations*, *Out of scope* reasons) are identical across all levels.
+
+The **canonical per-level render rules, invocation grammar, and non-negotiable constraint** live in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels). Do not duplicate them here — read that section when writing sections whose length changes with the level.
+
+Level-specific reminders for the template above:
+
+- **`Overview`** — under `lean`, replace the paragraph with one sentence covering the feature name and validation scope. Under `standard`/`detailed`, keep the paragraph.
+- **`Feature Background`** — under `lean`, one sentence stating the problem. Under `standard`/`detailed`, keep the 2–4 sentence motivation.
+- **`Assumptions`** — under `lean`, render only bullets whose value was confirmed from a concrete Step 1 source, on a single line, `; `-separated (`Enterprise license; at least one active alert.`). Emit `See _Known Limitations_ for open assumptions.` when nothing was confirmed. Never invent defaults — that violates the Core rule at the top of [`SKILL.md`](../SKILL.md#core-rule--never-assume-always-ask). Under `standard`, the four labelled bullets each flag missing values with ⚠️ inline; under `detailed`, confirmed values carry a provenance suffix. ⚠️ entries in *Known Limitations* are identical across all three levels.
+- **Scenario metadata** — the `**Automation coverage**:` line and the `detailed`-only `**Source:**` line follow the rules in [`output-formats.md`](output-formats.md#scenario-format).
 
 ## Pending work pattern
 

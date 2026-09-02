@@ -31,6 +31,7 @@ The content below is exactly what would be saved to `.agents/tmp/test-plan-#1234
 ```markdown
 <!-- test-plan-generated -->
 <!-- generated-by: claude-sonnet-4-6 -->
+<!-- verbosity: standard -->
 
 # Test Plan: Alert Notes
 

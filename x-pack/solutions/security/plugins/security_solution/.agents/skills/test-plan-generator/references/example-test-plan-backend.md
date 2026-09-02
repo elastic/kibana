@@ -27,6 +27,7 @@ The content below is exactly what would be saved to `.agents/tmp/test-plan-#9020
 ```markdown
 <!-- test-plan-generated -->
 <!-- generated-by: claude-sonnet-4-6 -->
+<!-- verbosity: standard -->
 
 # Test Plan: Parser support for FooBar helper variants
 
