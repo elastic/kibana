@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
-import { InvalidInvestigationContextError } from '../client/errors';
+import { InvestigationUnavailableError, InvalidInvestigationContextError } from '../client/errors';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -76,6 +76,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       // found something the route schema let through. A 500 would be the wrong answer.
       if (err instanceof InvalidInvestigationContextError) {
         throw badRequest(err.message);
+      }
+      if (err instanceof InvestigationUnavailableError) {
+        throw serverUnavailable(err.message);
       }
       throw err;
     }
