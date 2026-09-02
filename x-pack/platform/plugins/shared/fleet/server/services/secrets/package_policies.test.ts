@@ -2135,6 +2135,29 @@ describe('Package policy secrets', () => {
       expect(esClientMock.transport.request).not.toHaveBeenCalled();
     });
 
+    it('logs only the candidate ids skipped by the compiled-policy check, not every ref in the compiled docs', async () => {
+      // The compiled doc references both 'candidate' and 'bystander', but only 'candidate'
+      // was passed as a deletion candidate. The log should mention 'candidate' and be silent
+      // about 'bystander' — logging non-candidates was the bug caught during manual testing.
+      mockedFindFleetPolicies.mockResolvedValue({
+        referencedIds: new Set(['candidate', 'bystander']),
+        checkFailed: false,
+      });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['candidate'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      const debugCalls: string[] = (mockContract.logger.debug as jest.Mock).mock.calls.map(
+        (args: unknown[]) => String(args[0])
+      );
+      expect(debugCalls.some((msg) => msg.includes('candidate'))).toBe(true);
+      expect(debugCalls.some((msg) => msg.includes('bystander'))).toBe(false);
+    });
+
     it('skips all deletions when checkFailed is true', async () => {
       mockedFindFleetPolicies.mockResolvedValue({ referencedIds: new Set(), checkFailed: true });
 

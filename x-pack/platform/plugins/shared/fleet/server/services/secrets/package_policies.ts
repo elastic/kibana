@@ -249,12 +249,11 @@ export async function deleteSecretsIfNotReferenced(opts: {
     return;
   }
 
-  if (compiledPolicyReferencedIds.size > 0) {
-    for (const id of compiledPolicyReferencedIds) {
-      logger.debug(
-        `Not deleting secret with id ${id} — still referenced by a compiled .fleet-policies document.`
-      );
-    }
+  const skippedByCompiledPolicy = ids.filter((id) => compiledPolicyReferencedIds.has(id));
+  for (const id of skippedByCompiledPolicy) {
+    logger.debug(
+      `Not deleting secret with id ${id} — still referenced by a compiled .fleet-policies document.`
+    );
   }
 
   const secretsToDelete = ids.filter((id) => {
