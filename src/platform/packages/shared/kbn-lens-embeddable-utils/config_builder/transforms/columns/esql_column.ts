@@ -9,17 +9,8 @@
 
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { VariableNamePrefix } from '@kbn/esql-types';
 import type { LensApiESQLColumnWithFormat } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
-
-const getESQLControlVariable = (column: string | undefined): string | undefined => {
-  if (!column?.startsWith(VariableNamePrefix.IDENTIFIER)) {
-    return undefined;
-  }
-  const variable = column.slice(VariableNamePrefix.IDENTIFIER.length);
-  return variable.length > 0 ? variable : undefined;
-};
 
 export const getValueColumn = (
   id: string,
@@ -28,7 +19,6 @@ export const getValueColumn = (
   inMetricDimension?: boolean
 ): TextBasedLayerColumn => {
   const format = fromFormatAPIToLensState(column?.format);
-  const variable = getESQLControlVariable(column?.column);
 
   return {
     columnId: id,
@@ -37,7 +27,6 @@ export const getValueColumn = (
     ...(format ? { params: { format } } : {}),
     ...(fieldType ? { meta: { type: fieldType } } : {}),
     ...(inMetricDimension != null ? { inMetricDimension } : {}),
-    ...(variable ? { variable } : {}),
   };
 };
 

@@ -22,6 +22,7 @@ export {
   mapVariableToColumn,
   getValuesFromQueryField,
   getESQLQueryVariables,
+  getESQLIdentifierVariables,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getSparklineColumns,

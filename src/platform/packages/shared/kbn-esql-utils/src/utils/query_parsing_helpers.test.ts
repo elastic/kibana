@@ -20,6 +20,7 @@ import {
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  getESQLIdentifierVariables,
   mapVariableToColumn,
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
@@ -1314,6 +1315,28 @@ describe('esql query helpers', () => {
 
     it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
       expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
+    });
+  });
+
+  describe('getESQLIdentifierVariables', () => {
+    it('returns Identifier (??) variable names without the prefix', () => {
+      expect(getESQLIdentifierVariables('FROM a | STATS COUNT(*) BY ??field')).toEqual(['field']);
+      expect(getESQLIdentifierVariables('FROM a | KEEP ??field, ??field2')).toEqual([
+        'field',
+        'field2',
+      ]);
+    });
+
+    it('excludes Value (?) variables', () => {
+      expect(getESQLIdentifierVariables('FROM a | WHERE os == ?os')).toEqual([]);
+      expect(
+        getESQLIdentifierVariables('FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os')
+      ).toEqual(['field']);
+    });
+
+    it('does not treat a backtick-quoted column named `??x` as a variable', () => {
+      expect(getESQLIdentifierVariables('FROM a | EVAL `??x` = 1')).toEqual([]);
+      expect(getESQLIdentifierVariables('FROM a | STATS COUNT(`??x`)')).toEqual([]);
     });
   });
 });

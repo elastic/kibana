@@ -10,15 +10,16 @@
 import { getValueColumn } from './esql_column';
 
 describe('getValueColumn', () => {
-  it('reconstructs the ES|QL Control Variable from an Identifier Control column', () => {
-    expect(getValueColumn('id', { column: '??field' }).variable).toBe('field');
-    expect(getValueColumn('id', { column: '??field1' }).variable).toBe('field1');
-    expect(getValueColumn('id', { column: '??function' }).variable).toBe('function');
+  it('sets fieldName from the API column, falling back to the id', () => {
+    expect(getValueColumn('id', { column: '??field' }).fieldName).toBe('??field');
+    expect(getValueColumn('id').fieldName).toBe('id');
   });
 
-  it('does not set variable for Value Controls or ordinary columns', () => {
+  // The `??` prefix alone is ambiguous (a real column can be named `??x` via backtick quoting),
+  // so the query-unaware helper never sets `variable`. That is stamped in `buildESQLLayer`.
+  it('never reconstructs `variable` (that is query-aware, done in buildESQLLayer)', () => {
+    expect(getValueColumn('id', { column: '??field' }).variable).toBeUndefined();
     expect(getValueColumn('id', { column: '?os' }).variable).toBeUndefined();
     expect(getValueColumn('id', { column: 'COUNT(*)' }).variable).toBeUndefined();
-    expect(getValueColumn('id', { column: '??' }).variable).toBeUndefined();
   });
 });

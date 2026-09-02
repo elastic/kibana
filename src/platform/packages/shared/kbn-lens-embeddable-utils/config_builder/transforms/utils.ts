@@ -21,7 +21,12 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
+  getESQLIdentifierVariables,
+} from '@kbn/esql-utils';
+import { VariableNamePrefix } from '@kbn/esql-types';
 import { Sha256 } from '@kbn/crypto-browser';
 import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -439,6 +444,26 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
   }
 }
 
+// Stamps each column's ES|QL Control Variable using the layer's query as the source of truth.
+// A genuine Identifier Control (`??field`) appears as a query parameter
+// This mirrors the render-time mapping in `mapVariableToColumn` (`@kbn/esql-utils`).
+function reconstructESQLControlVariables(
+  columns: TextBasedLayerColumn[],
+  esql: string
+): TextBasedLayerColumn[] {
+  const identifierVariables = new Set(getESQLIdentifierVariables(esql));
+  if (identifierVariables.size === 0) {
+    return columns;
+  }
+  return columns.map((column) => {
+    if (!column.fieldName.startsWith(VariableNamePrefix.IDENTIFIER)) {
+      return column;
+    }
+    const variable = column.fieldName.slice(VariableNamePrefix.IDENTIFIER.length);
+    return identifierVariables.has(variable) ? { ...column, variable } : column;
+  });
+}
+
 // internal function used to build datasource states layer
 function buildDatasourceStatesLayer(
   layer: unknown,
@@ -470,7 +495,7 @@ function buildDatasourceStatesLayer(
       index: generateAdHocDataViewId({ ...dataSourceIndex, dataSourceType: 'esql' }),
       query: { esql: ds.query },
       timeField: dataSourceIndex.timeFieldName || undefined,
-      columns,
+      columns: reconstructESQLControlVariables(columns, ds.query),
       ignoreGlobalFilters: layerWithSettings.ignore_global_filters,
     };
   }
