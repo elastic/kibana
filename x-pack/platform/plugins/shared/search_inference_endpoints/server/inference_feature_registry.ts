@@ -71,4 +71,35 @@ export class InferenceFeatureRegistry {
   get(featureId: string): InferenceFeatureConfig | undefined {
     return this.features.get(featureId);
   }
+
+  /**
+   * Replaces the recommended endpoints for an already-registered feature.
+   *
+   * @param featureId - The ID of the feature to update.
+   * @param endpoints - Non-empty list of endpoint IDs to set as recommended.
+   * @returns `{ ok: true }` on success, or `{ ok: false, error }` if the feature is not found or the list is invalid.
+   */
+  updateRecommendedEndpoints(featureId: string, endpoints: string[]): RegisterResult {
+    const feature = this.features.get(featureId);
+    if (!feature) {
+      const error = `Feature "${featureId}" not found.`;
+      this.logger.error(`Failed to update recommended endpoints: ${error}`);
+      return { ok: false, error };
+    }
+    if (endpoints.length === 0) {
+      const error = 'endpoints must not be empty.';
+      this.logger.error(`Failed to update recommended endpoints: ${error}`);
+      return { ok: false, error };
+    }
+    if (endpoints.some((ep) => !ep.trim())) {
+      const error = 'endpoints must not contain empty strings.';
+      this.logger.error(`Failed to update recommended endpoints: ${error}`);
+      return { ok: false, error };
+    }
+    this.features.set(featureId, { ...feature, recommendedEndpoints: endpoints });
+    this.logger.debug(
+      `Updated recommended endpoints for "${featureId}": [${endpoints.join(', ')}]`
+    );
+    return { ok: true };
+  }
 }

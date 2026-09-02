@@ -46,6 +46,7 @@ import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_swi
 import { registerInferenceFeatures } from './inference_features';
 import { AGENTBUILDER_FEATURE_ID } from '../common/features';
 import { runToolIdBackfill } from './backfills/tool_id_backfill';
+import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 
 export class AgentBuilderPlugin
   implements
@@ -65,6 +66,8 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private pollerStartTimer?: ReturnType<typeof setTimeout>;
+  private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -321,6 +324,16 @@ export class AgentBuilderPlugin
       logger: this.logger.get('model-provider'),
     });
 
+    this.recommendedEndpointsPoller = new RecommendedEndpointsPoller({
+      logger: this.logger.get('recommended-endpoints-poller'),
+      esClient: elasticsearch.client.asInternalUser,
+      features: searchInferenceEndpoints.features,
+    });
+    this.pollerStartTimer = setTimeout(() => {
+      this.pollerStartTimer = undefined;
+      this.recommendedEndpointsPoller?.start();
+    }, 5_000);
+
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
@@ -358,6 +371,11 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    if (this.pollerStartTimer !== undefined) {
+      clearTimeout(this.pollerStartTimer);
+      this.pollerStartTimer = undefined;
+    }
+    this.recommendedEndpointsPoller?.stop();
     await this.teardownTracing?.();
   }
 

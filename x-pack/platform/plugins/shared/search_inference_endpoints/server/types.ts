@@ -41,6 +41,7 @@ export interface InferenceFeatureRegistryContract {
 export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
+  updateRecommendedEndpoints: (featureId: string, endpoints: string[]) => RegisterResult;
 }
 
 export interface SearchInferenceEndpointsPluginSetup {
