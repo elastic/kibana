@@ -31,8 +31,8 @@ describe('dataset_wizard_flow_variant', () => {
       '/create?flow=flow_3_9_6'
     );
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_4)).toBe('/create?flow=flow_4');
-    expect(buildCloneDatasetWizardPath('my-dataset')).toBe('/clone/my-dataset?flow=flow_3');
-    expect(buildEditDatasetWizardPath('my-dataset')).toBe('/edit/my-dataset?flow=flow_3');
+    expect(buildCloneDatasetWizardPath('my-dataset')).toBe('/clone/my-dataset?flow=flow_3_9_6');
+    expect(buildEditDatasetWizardPath('my-dataset')).toBe('/edit/my-dataset?flow=flow_3_9_6');
   });
 
   it('parses valid flow variants from search params', () => {

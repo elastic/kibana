@@ -221,7 +221,7 @@ describe('DatasetsTabContent', () => {
 
     fireEvent.click(document.querySelector('[data-test-subj="mockEditFirst"]') as Element);
 
-    expect(mockHistoryPush).toHaveBeenCalledWith('/edit/set1?flow=flow_3');
+    expect(mockHistoryPush).toHaveBeenCalledWith('/edit/set1?flow=flow_3_9_6');
   });
 
   it('navigates to clone wizard when clone is clicked', async () => {
@@ -234,7 +234,7 @@ describe('DatasetsTabContent', () => {
 
     fireEvent.click(document.querySelector('[data-test-subj="mockCloneFirst"]') as Element);
 
-    expect(mockHistoryPush).toHaveBeenCalledWith('/clone/set1?flow=flow_3');
+    expect(mockHistoryPush).toHaveBeenCalledWith('/clone/set1?flow=flow_3_9_6');
   });
 
   it('navigates to Discover when open in Discover is clicked', async () => {

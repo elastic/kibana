@@ -81,7 +81,7 @@ export const resolveWizardFlowVariant = (
 
 const buildNamedDatasetWizardPath = (action: 'edit' | 'clone', datasetName: string): string => {
   const params = new URLSearchParams();
-  params.set(DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM, DATASET_WIZARD_FLOW_VARIANT_3);
+  params.set(DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM, DATASET_WIZARD_FLOW_VARIANT_3_9_6);
 
   return `/${action}/${encodeURIComponent(datasetName)}?${params.toString()}`;
 };

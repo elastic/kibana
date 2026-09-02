@@ -35,7 +35,7 @@ import {
 } from './dataset_wizard_form_persistence';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
-  DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
   isDatasetWizardFlow3,
   resolveWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -104,7 +104,7 @@ export const DatasetWizardPage: FunctionComponent = () => {
       resolveWizardFlowVariant(
         location.search,
         isEditMode || isCloneMode
-          ? DATASET_WIZARD_FLOW_VARIANT_3
+          ? DATASET_WIZARD_FLOW_VARIANT_3_9_6
           : DATASET_WIZARD_FLOW_VARIANT_1
       ),
     [isCloneMode, isEditMode, location.search]
@@ -165,7 +165,7 @@ export const DatasetWizardPage: FunctionComponent = () => {
         return rawMessage;
       }
     },
-    [datasetsClient, history, isEditMode, reloadDataSets, toasts]
+    [datasetsClient, history, reloadDataSets, toasts]
   );
 
   const requiresSourceDataSet = isEditMode || isCloneMode;
