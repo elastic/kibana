@@ -62,10 +62,6 @@ export const STATUS_LABEL = i18n.translate('llmTraceWaterfall.statusLabel', {
   defaultMessage: 'Status:',
 });
 
-export const HTTP_ATTRIBUTES_HEADING = i18n.translate('llmTraceWaterfall.httpAttributesHeading', {
-  defaultMessage: 'HTTP attributes',
-});
-
 export const NO_ATTRIBUTES = i18n.translate('llmTraceWaterfall.noAttributes', {
   defaultMessage: 'No attributes available for this span.',
 });
@@ -86,24 +82,6 @@ export const getTotalDuration = (duration: string) =>
   i18n.translate('llmTraceWaterfall.totalDuration', {
     defaultMessage: '{duration}ms total',
     values: { duration },
-  });
-
-export const getOtherAttributesHeading = (count: number) =>
-  i18n.translate('llmTraceWaterfall.otherAttributesHeading', {
-    defaultMessage: 'Other attributes ({count})',
-    values: { count },
-  });
-
-export const getResourceAttributesHeading = (count: number) =>
-  i18n.translate('llmTraceWaterfall.resourceAttributesHeading', {
-    defaultMessage: 'Resource attributes ({count})',
-    values: { count },
-  });
-
-export const getCopyAttributeAriaLabel = (key: string) =>
-  i18n.translate('llmTraceWaterfall.copyAttributeAriaLabel', {
-    defaultMessage: 'Copy {key}',
-    values: { key },
   });
 
 export const GENAI_TAB_LABEL = i18n.translate('llmTraceWaterfall.genAiTabLabel', {

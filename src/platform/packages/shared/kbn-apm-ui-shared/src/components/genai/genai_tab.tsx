@@ -146,10 +146,10 @@ function ToolDefinitionsSection({ toolDefinitions }: Pick<GenAiFields, 'toolDefi
         initialIsOpen={false}
       >
         {parsedToolDefinitions ? (
-          parsedToolDefinitions.map((tool) => (
-            <React.Fragment key={tool.name}>
+          parsedToolDefinitions.map((tool, index) => (
+            <React.Fragment key={`${tool.name}-${index}`}>
               <EuiAccordion
-                id={`genAiToolDef-${tool.name}`}
+                id={`genAiToolDef-${tool.name}-${index}`}
                 data-test-subj={`genAiToolDef-${tool.name}`}
                 buttonContent={<GenAiFieldLabel>{tool.name}</GenAiFieldLabel>}
                 paddingSize="s"
