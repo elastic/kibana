@@ -10,7 +10,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiCodeBlock,
   EuiCopy,
   EuiFieldText,
   EuiFlexGroup,
@@ -25,6 +25,8 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -97,6 +99,76 @@ function mockDestinations(seed: number): string[] {
   return Array.from(new Set(names));
 }
 
+interface SenderTab {
+  id: string;
+  name: string;
+  language: string;
+  snippet: string;
+}
+
+// The client integrations shown under "Sends data using", each with a copyable
+// snippet. Prototype-only mock content.
+const SENDER_TABS: SenderTab[] = [
+  {
+    id: 'pushgateway',
+    name: 'Pushgateway',
+    language: 'yaml',
+    snippet: `exporters:
+  otlp/elastic:
+    endpoint: "\${MOTLP_ENDPOINT}"
+    headers:
+      Authorization: "ApiKey <key>"
+    sending_queue:
+      enabled: true`,
+  },
+  {
+    id: 'java',
+    name: 'Java',
+    language: 'java',
+    snippet: `OpenTelemetrySdk.builder()
+    .setMeterProvider(SdkMeterProvider.builder()
+        .registerMetricReader(PeriodicMetricReader.builder(
+            OtlpHttpMetricExporter.builder()
+                .setEndpoint("\${MOTLP_ENDPOINT}")
+                .addHeader("Authorization", "ApiKey <key>")
+                .build())
+            .build())
+        .build())
+    .build();`,
+  },
+  {
+    id: 'go',
+    name: 'Go',
+    language: 'go',
+    snippet: `exp, err := otlpmetrichttp.New(ctx,
+    otlpmetrichttp.WithEndpoint("\${MOTLP_ENDPOINT}"),
+    otlpmetrichttp.WithHeaders(map[string]string{
+        "Authorization": "ApiKey <key>",
+    }),
+)`,
+  },
+  {
+    id: 'python',
+    name: 'Python',
+    language: 'python',
+    snippet: `from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+
+exporter = OTLPMetricExporter(
+    endpoint="\${MOTLP_ENDPOINT}",
+    headers={"Authorization": "ApiKey <key>"},
+)`,
+  },
+  {
+    id: 'ruby',
+    name: 'Ruby',
+    language: 'ruby',
+    snippet: `OpenTelemetry::Exporter::OTLP::MetricsExporter.new(
+  endpoint: "\${MOTLP_ENDPOINT}",
+  headers: { "Authorization" => "ApiKey <key>" },
+)`,
+  },
+];
+
 const SOURCE_PROTOCOLS: Array<{ label: string; iconType: string }> = [
   { label: 'Prometheus', iconType: 'logoPrometheus' },
   { label: 'Kafka', iconType: 'logoKafka' },
@@ -144,6 +216,9 @@ function ConfiguredSourceBody({
   const destinations = useMemo(() => mockDestinations(seed), [seed]);
   const protocol = useMemo(() => mockProtocol(seed), [seed]);
   const [apiKeys, setApiKeys] = useState<MockApiKeyEntry[]>(() => mockApiKeys(seed));
+  const [selectedTab, setSelectedTab] = useState(SENDER_TABS[0].id);
+
+  const activeTab = SENDER_TABS.find((tab) => tab.id === selectedTab) ?? SENDER_TABS[0];
 
   const generateKey = () =>
     setApiKeys((keys) => [
@@ -155,24 +230,30 @@ function ConfiguredSourceBody({
 
   return (
     <>
-      <EuiCallOut
-        color="warning"
-        size="s"
-        title={i18n.translate('xpack.streams.sourceFlyout.statsCalloutTitle', {
-          defaultMessage: 'Placeholder note',
-        })}
-        data-test-subj="sourceFlyoutStatsCallout"
-        className={css`
-          color: ${euiTheme.colors.textWarning};
-        `}
+      <EuiPanel
+        color="accent"
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="m"
+        data-test-subj="sourceFlyoutStatsPanel"
       >
-        <p>
-          {i18n.translate('xpack.streams.sourceFlyout.statsCalloutBody', {
-            defaultMessage:
-              'Source stats and metric data will live here in a future milestone. Users will read the data here, then choose to edit the source if they need to. For V1, everything stays in this one view.',
-          })}
-        </p>
-      </EuiCallOut>
+        <EuiText size="s" color="accent">
+          <strong>
+            {i18n.translate('xpack.streams.sourceFlyout.statsPanelTitle', {
+              defaultMessage: 'V1 Milestone Note',
+            })}
+          </strong>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="accent">
+          <p>
+            {i18n.translate('xpack.streams.sourceFlyout.statsPanelBody', {
+              defaultMessage:
+                'Detailed source stats and metric data will live here in a future milestone. Users will read the data here, then choose to edit the source if they need to. But for V1, everything stays in this one view.',
+            })}
+          </p>
+        </EuiText>
+      </EuiPanel>
 
       <EuiSpacer size="l" />
 
@@ -212,6 +293,30 @@ function ConfiguredSourceBody({
           {protocol.label}
         </EuiBadge>
       </div>
+      <EuiSpacer size="m" />
+      <EuiTabs size="s">
+        {SENDER_TABS.map((tab) => (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.id === selectedTab}
+            onClick={() => setSelectedTab(tab.id)}
+            data-test-subj={`sourceFlyoutSenderTab-${tab.id}`}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock
+        language={activeTab.language}
+        fontSize="s"
+        paddingSize="m"
+        isCopyable
+        overflowHeight={104}
+        data-test-subj="sourceFlyoutSenderSnippet"
+      >
+        {activeTab.snippet}
+      </EuiCodeBlock>
       <EuiSpacer size="l" />
 
       <EuiFormRow
