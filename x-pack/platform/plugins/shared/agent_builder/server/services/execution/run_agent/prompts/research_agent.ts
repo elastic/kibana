@@ -21,7 +21,6 @@ import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
 import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
@@ -116,7 +115,6 @@ const getAgentSystemMessage = async ({
   spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
-  capabilities,
   renderers,
   processedConversation,
   conversationTemplates,
@@ -125,7 +123,6 @@ const getAgentSystemMessage = async ({
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>
     | undefined;
-  const visEnabled = capabilities.visualizations;
 
   const conversationMetadataSection = await getConversationMetadataSection(
     conversationTemplateId,
@@ -227,8 +224,6 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING
-
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 

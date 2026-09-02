@@ -89,6 +89,7 @@ export class Plugin implements PluginType {
       share: plugins.share,
       alerting: plugins.alerting,
       syntheticsIndicesCache: new SyntheticsIndicesCache(),
+      isCpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);

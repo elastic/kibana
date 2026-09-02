@@ -1,0 +1,184 @@
+{
+  "sha1": "57ad4d03d1c4a1995d93c72a118bc8aa55db0464",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5429c7862b7908f-204ba02a91e54e6",
+      "title": "GET /internal/nightshift/investigations/{id} returns 404 for a non-existent investigation id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "5429c7862b7908f-2b2e5757f4e17da",
+      "title": "GET /internal/nightshift/investigations/{id} returns 403 for a user without agentBuilder:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
+        "line": 24,
+        "column": 56
+      }
+    },
+    {
+      "id": "66985a39c31728f-3a718426c726756",
+      "title": "GET /internal/nightshift/investigations returns 200 with a paginated result shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
+      "id": "66985a39c31728f-7ae8c85f53ffb6b",
+      "title": "GET /internal/nightshift/investigations returns 403 for a user without agentBuilder:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "line": 30,
+        "column": 19
+      }
+    },
+    {
+      "id": "66985a39c31728f-cf95e219beaac9f",
+      "title": "GET /internal/nightshift/investigations returns 400 when page exceeds the maximum of 100",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "line": 37,
+        "column": 47
+      }
+    },
+    {
+      "id": "66985a39c31728f-04b5ffc5b345613",
+      "title": "GET /internal/nightshift/investigations returns 400 for an unrecognised status value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "line": 45,
+        "column": 83
+      }
+    },
+    {
+      "id": "66985a39c31728f-ff030e7c235250d",
+      "title": "GET /internal/nightshift/investigations returns 400 for an invalid sort_field value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/list_investigations.spec.ts",
+        "line": 49,
+        "column": 23
+      }
+    },
+    {
+      "id": "12c7e027c9e78de-191f1096e16fe19",
+      "title": "POST /internal/nightshift/investigations returns 400 when the request body is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 25,
+        "column": 47
+      }
+    },
+    {
+      "id": "12c7e027c9e78de-7b20b65a8e37982",
+      "title": "POST /internal/nightshift/investigations returns 400 for an invalid subject type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 34,
+        "column": 74
+      }
+    },
+    {
+      "id": "12c7e027c9e78de-19f05d1b7f407a6",
+      "title": "POST /internal/nightshift/investigations returns 400 when subject.id exceeds 500 characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 39,
+        "column": 23
+      }
+    },
+    {
+      "id": "12c7e027c9e78de-18ba0269d41c907",
+      "title": "POST /internal/nightshift/investigations returns 403 for a user without agentBuilder:write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 50,
+        "column": 28
+      }
+    }
+  ]
+}

@@ -9,8 +9,10 @@
     "id": "nightshiftInvestigations",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "nightshift_investigations"],
     "requiredPlugins": [],
     "optionalPlugins": [
+      "agentBuilder",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement"

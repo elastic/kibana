@@ -21,7 +21,10 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
-import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
+import {
+  DeployPrivateLocationMonitors,
+  formatFailedCreates,
+} from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
@@ -109,21 +112,41 @@ export class SyncPrivateLocationMonitorsTask {
       ]);
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
 
-      if (taskInstance.state.privateLocationId) {
-        // if privateLocationId exists on state, we just perform sync and exit
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations,
-          encryptedSavedObjects,
-          privateLocationId: taskInstance.state.privateLocationId,
-          soClient: savedObjects.createInternalRepository(),
-        });
+      const { privateLocationId } = taskInstance.state;
+      if (privateLocationId) {
+        // This instance is one-shot, so never return a schedule: task manager
+        // would turn a failed run into a recurring task. A failed recreate is
+        // re-attempted by the next cleanup run, bounded by maxCleanUpRetries.
+        const state = {
+          ...taskInstance.state,
+          privateLocationId: undefined,
+        } as SyncTaskState;
 
-        return {
-          state: {
-            ...taskInstance.state,
-            privateLocationId: undefined,
-          } as SyncTaskState,
-        };
+        try {
+          const { failedCreatesBySpace } = await this.deployPackagePolicies.syncAllPackagePolicies({
+            allPrivateLocations,
+            encryptedSavedObjects,
+            privateLocationId,
+            soClient: savedObjects.createInternalRepository(),
+          });
+
+          if (failedCreatesBySpace.length > 0) {
+            // surface it as a task failure so the next cleanup run re-attempts
+            // the recreate instead of treating it as already done
+            const error = new Error(formatFailedCreates(failedCreatesBySpace));
+            logger.error(
+              `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+            );
+            return { error, state };
+          }
+        } catch (error) {
+          logger.error(
+            `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+          );
+          return { error, state };
+        }
+
+        return { state };
       }
 
       const defaultState = {
@@ -138,6 +161,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
+        taskState.hasAlreadyDoneCleanup = true;
         return { state: taskState, schedule: { interval } };
       }
       if (performCleanupSync) {
@@ -146,21 +170,13 @@ export class SyncPrivateLocationMonitorsTask {
             `locations count: ${allPrivateLocations.length}`
         );
 
-        if (allPrivateLocations.length > 1) {
-          for (const location of allPrivateLocations) {
-            await runTaskPerPrivateLocation({
-              server: this.serverSetup,
-              privateLocationId: location.id,
-            });
-          }
-        } else {
-          await this.deployPackagePolicies.syncAllPackagePolicies({
-            allPrivateLocations,
-            soClient,
-            encryptedSavedObjects,
+        for (const location of allPrivateLocations) {
+          await runTaskPerPrivateLocation({
+            server: this.serverSetup,
+            privateLocationId: location.id,
           });
         }
-        this.debugLog(`Completed post-cleanup sync`);
+        this.debugLog(`Scheduled post-cleanup sync per private location`);
         return defaultState;
       }
 
@@ -222,7 +238,9 @@ export class SyncPrivateLocationMonitorsTask {
     return {
       lastStartedAt: startedAt.toISOString(),
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
+      // `??`, not `||`: a persisted 0 means the budget is spent, and `||` would
+      // silently hand back a fresh 3 and re-run cleanup on every interval forever
+      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries ?? 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }

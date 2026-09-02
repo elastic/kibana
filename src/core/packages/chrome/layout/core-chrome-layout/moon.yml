@@ -26,8 +26,6 @@ dependsOn:
   - '@kbn/ui-chrome-layout'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/core-chrome-browser-hooks'
-  - '@kbn/core-chrome-feature-flags'
-  - '@kbn/core-feature-flags-browser'
 tags:
   - shared-browser
   - package

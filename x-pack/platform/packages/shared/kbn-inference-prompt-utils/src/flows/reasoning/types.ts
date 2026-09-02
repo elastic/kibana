@@ -18,6 +18,12 @@ import type {
 
 export type ReasoningPower = 'low' | 'medium' | 'high';
 
+/** Additive reasoning-loop diagnostics surfaced to consumers of the shared agent. */
+export interface ReasoningPromptDiagnostics {
+  /** Turns where external text and pending task tools were correctly continued. */
+  externalContentToolContinuations: number;
+}
+
 export interface ReasoningPromptOptions {
   inferenceClient: BoundInferenceClient;
   /**
@@ -56,6 +62,10 @@ export type ReasoningPromptResponseOf<
       }
     >
   >;
+  diagnostics: ReasoningPromptDiagnostics;
 };
 
-export type ReasoningPromptResponse = PromptResponse & { input: Message[] };
+export type ReasoningPromptResponse = PromptResponse & {
+  input: Message[];
+  diagnostics: ReasoningPromptDiagnostics;
+};

@@ -13,7 +13,6 @@ import type {
   ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
-  AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
@@ -91,7 +90,6 @@ export interface ExecuteSubAgentParams {
   parentExecutionId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -106,7 +104,6 @@ export interface CreateSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -117,7 +114,6 @@ export interface SendToSubAgentParams {
   conversationId: string;
   prompt: string;
   connectorId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
 }
 
@@ -355,10 +351,6 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
-  /**
-   * Agent capabilities to enable.
-   */
-  capabilities?: AgentCapabilities;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

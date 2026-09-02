@@ -414,6 +414,11 @@ const resolveAuthorizedUniverse = async ({
  * This is passed to the ES|QL `_query` API's `filter` parameter rather than expressed as a WHERE
  * clause, because ES|QL's index resolution excludes `nested` fields — they cannot be referenced as
  * columns at all. A Query DSL filter is pushed down to Lucene and does support them.
+ *
+ * `minimum_should_match: 1` is stated explicitly and MUST NOT be dropped. When ES|QL
+ * pushes this filter into a `FORK` plan (every non-empty search query builds one)
+ * the outer `bool` lands in the filter context, where a `should`-only bool
+ * defaults to `minimum_should_match: 0` and therefore matches every document.
  */
 const buildVisibilityFilter = ({
   spaceId,
@@ -423,6 +428,7 @@ const buildVisibilityFilter = ({
   authz?: AuthorizedUniverse;
 }): Record<string, unknown> => ({
   bool: {
+    minimum_should_match: 1,
     should: [
       {
         bool: {

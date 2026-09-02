@@ -23,6 +23,7 @@ export type {
   ICPSManager,
   ProjectsData,
   CPSAppAccessResolver,
+  CPSConfigurationLinks,
 } from './types';
 export type { ProjectRoutingValue } from '@kbn/cps-common';
 export { ProjectPicker, DisabledProjectPicker } from './components/project_picker';

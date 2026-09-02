@@ -40,12 +40,6 @@ export const PND_INVESTIGATION_URL_TEMPLATE = `${PND_INVESTIGATIONS_URL}/{id}` a
 export const buildInvestigationUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
-export const PND_INVESTIGATION_PROPOSALS_URL_TEMPLATE =
-  `${PND_INVESTIGATIONS_URL}/{id}/proposals` as const;
-
-export const buildInvestigationProposalsUrl = (id: string) =>
-  `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}/proposals`;
-
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
 export const SYSTEM_SECURITY_WATCH_OFFICER_ID = 'system-security-watch-officer' as const;
@@ -73,13 +67,13 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
 /**
  * Presentation metadata for the managed watch catalog.
  *
- * The managed five are compile-time constants installed at start-up, so consumers that must not wait
- * for an HTTP round trip — the app's deep links and the solution navigation tree — build their
+ * The managed five are compile-time constants, so consumers that must not wait for an HTTP round
+ * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. `WATCHES_SEED` derives its
- * name, colour and lifecycle from here so the two cannot drift.
+ * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
+ * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -127,7 +121,6 @@ export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_DARK_TAG = 'watch-dark' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
-export const WATCH_CUSTOM_TAG = 'watch-custom' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
@@ -141,12 +134,6 @@ export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;
 
-export const TEMPLATE_IDS = [
-  TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_ID_PROPOSAL,
-  TEMPLATE_ID_INCIDENT,
-] as const;
-
 export const API_VERSIONS = {
   internal: {
     v1: '1',
@@ -154,16 +141,6 @@ export const API_VERSIONS = {
 } as const;
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
-
-export const RECOMMENDED_ACTIONS = ['contain', 'escalate', 'investigate', 'tune'] as const;
-
-export const PROPOSAL_STATUSES = [
-  'pending',
-  'approved',
-  'modified',
-  'dismissed',
-  'executed',
-] as const;
 
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,

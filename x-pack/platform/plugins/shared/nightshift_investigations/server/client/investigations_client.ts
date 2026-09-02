@@ -11,6 +11,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   GetInvestigationResponse,
   InvestigationStatus,
@@ -23,7 +25,8 @@ import type {
 } from '../../common';
 
 import { InvestigationNotFoundError } from './errors';
-export { InvestigationNotFoundError };
+import { InvestigationUnavailableError } from './investigation_unavailable_error';
+export { InvestigationNotFoundError, InvestigationUnavailableError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -108,16 +111,35 @@ function recoverSubjectFromInput(
   return undefined;
 }
 
+export interface NightshiftInvestigationsClientDeps {
+  request: KibanaRequest;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
+  logger: Logger;
+  /**
+   * Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+   * definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+   */
+  spaceIdOverride?: string;
+  agentBuilder?: AgentBuilderPluginStart;
+}
+
 export class NightshiftInvestigationsClient {
-  constructor(
-    private readonly request: KibanaRequest,
-    private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined,
-    private readonly spaces: SpacesPluginStart | undefined,
-    private readonly logger: Logger,
-    // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
-    // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined;
+  private readonly spaces: SpacesPluginStart | undefined;
+  private readonly logger: Logger;
+  private readonly spaceIdOverride?: string;
+  private readonly agentBuilder?: AgentBuilderPluginStart;
+
+  constructor(deps: NightshiftInvestigationsClientDeps) {
+    this.request = deps.request;
+    this.workflowsManagement = deps.workflowsManagement;
+    this.spaces = deps.spaces;
+    this.logger = deps.logger;
+    this.spaceIdOverride = deps.spaceIdOverride;
+    this.agentBuilder = deps.agentBuilder;
+  }
 
   private getSpaceId(): string {
     return (
@@ -129,14 +151,23 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    message,
+    stream_names,
     concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    if (!this.agentBuilder) {
+      throw new InvestigationUnavailableError('agentBuilder is not available');
     }
 
     const spaceId = this.getSpaceId();
+
+    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
     const workflow = await this.workflowsManagement.management.getWorkflow(
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       spaceId
@@ -146,11 +177,12 @@ export class NightshiftInvestigationsClient {
       this.logger.error(
         `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
       );
-      throw new Error('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError('Investigations are not configured in this space');
     }
 
     const inputs = {
-      message: `Investigation requested for ${subject.type} ${subject.id}`,
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...context,

@@ -17,6 +17,7 @@ import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import type { GroupByState } from '../../../../../state/overview';
 import { selectOverviewGroupBy, setOverviewGroupByAction } from '../../../../../state/overview';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { getRemoteOriginFieldLabel } from '../../../../../utils/remote/remote_origin_copy';
 
 const DEFAULT_GROUP_BY: GroupByState = { field: 'none', order: 'asc' };
 const LOCAL_STORAGE_KEY = 'synthetics.overviewGroupBy';
@@ -145,7 +146,7 @@ export const GroupFields = () => {
     ...(hasRemoteMonitors
       ? [
           {
-            label: REMOTE_CLUSTER_LABEL,
+            label: getRemoteOriginFieldLabel(),
             value: 'remoteName',
             checked: groupField === 'remoteName',
             defaultSortOrder: 'asc',
@@ -247,7 +248,7 @@ const getOrderContent = (groupField: string) => {
       return {
         asc: SORT_ALPHABETICAL_ASC,
         desc: SORT_ALPHABETICAL_DESC,
-        label: REMOTE_CLUSTER_LABEL,
+        label: getRemoteOriginFieldLabel(),
       };
 
     default:
@@ -312,10 +313,3 @@ const TAG_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.tag.lab
 const PROJECT_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.project.label', {
   defaultMessage: 'Project',
 });
-
-const REMOTE_CLUSTER_LABEL = i18n.translate(
-  'xpack.synthetics.overview.groupPopover.remoteCluster.label',
-  {
-    defaultMessage: 'Remote cluster',
-  }
-);

@@ -36,9 +36,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           type: eventType,
         });
 
-        logger.debug({
-          message: `[${step.name}] Created alert events builder for rule ${state.input.ruleId}`,
-        });
+        logger.debug({ message: 'Created alert events builder' });
       }
 
       const alertEventsBatch = buildBatch([...state.esqlRowBatch]);

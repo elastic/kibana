@@ -73,6 +73,7 @@ const expectedVisibilityFilter = ({
   spaceId?: string;
 }) => ({
   bool: {
+    minimum_should_match: 1,
     should: [
       {
         bool: {
@@ -1995,6 +1996,7 @@ describe('SmlService', () => {
                 { terms: { id: ['id-1', 'id-2'] } },
                 {
                   bool: {
+                    minimum_should_match: 1,
                     should: [
                       {
                         bool: {

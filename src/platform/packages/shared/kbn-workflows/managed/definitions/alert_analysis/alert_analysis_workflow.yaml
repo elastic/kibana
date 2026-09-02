@@ -1121,7 +1121,7 @@ steps:
                     delay: 5s
                 with:
                   method: PATCH
-                  path: /api/note
+                  path: "/s/{{ workflow.spaceId }}/api/note"
                   body:
                     note:
                       eventId: '{{ foreach.item._id }}'
@@ -1147,7 +1147,7 @@ steps:
                     delay: 5s
                 with:
                   method: PATCH
-                  path: /api/note
+                  path: "/s/{{ workflow.spaceId }}/api/note"
                   body:
                     note:
                       eventId: '{{ foreach.item._id }}'

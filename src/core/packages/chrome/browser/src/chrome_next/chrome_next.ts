@@ -56,20 +56,19 @@ export type ChromeAppHeaderConfig = DistributiveOmit<AppHeaderConfig, 'back'> & 
 };
 
 /**
- * Chrome Next rollout APIs.
+ * Chrome Next project-shell APIs.
  *
  * @remarks
- * This namespace starts with the rollout state and will host additional Chrome Next APIs as
- * follow-up feature slices land behind the same flag.
+ * Chrome Next is the project chrome shell (global header, project navigation, app header
+ * surfaces). APIs under this namespace integrate apps and plugins with that shell.
  *
  * @public
  */
 export interface ChromeNext {
   /**
-   * Whether the Chrome Next feature flag is enabled.
-   *
-   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
-   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   * Always `true`. Kept so existing `chrome.next.isEnabled` / `useIsNextChrome()` call sites
+   * do not need to change. Require `chrome.getChromeStyle() === 'project'` to know whether the
+   * project shell is rendering.
    */
   readonly isEnabled: boolean;
   aiButton: {

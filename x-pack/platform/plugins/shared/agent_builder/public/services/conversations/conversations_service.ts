@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   ListConversationsResponseItem,
   GetConversationResponse,
@@ -73,6 +74,25 @@ export class ConversationsService {
     return await this.http.post<MarkReadConversationResponse>(
       `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
+    );
+  }
+
+  async submitRoundFeedback({
+    conversationId,
+    roundId,
+    vote,
+    chips,
+    comment,
+  }: {
+    conversationId: string;
+    roundId: string;
+    vote: 'up' | 'down' | null;
+    chips?: FeedbackChipId[];
+    comment?: string;
+  }): Promise<void> {
+    await this.http.post(
+      `${internalApiPath}/conversations/${conversationId}/rounds/${roundId}/_feedback`,
+      { body: JSON.stringify({ vote, chips, comment }) }
     );
   }
 

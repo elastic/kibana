@@ -10,14 +10,13 @@ import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const createDashboardManagementSkill = (getCustomContentEnabled: () => Promise<boolean>) =>
-  defineSkillType({
-    id: 'dashboard-management',
-    name: 'dashboard-management',
-    basePath: 'skills/platform/dashboard',
-    description:
-      'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
-    content: `## When to Use This Skill
+export const dashboardManagementSkill = defineSkillType({
+  id: 'dashboard-management',
+  name: 'dashboard-management',
+  basePath: 'skills/platform/dashboard',
+  description:
+    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+  content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
@@ -33,12 +32,9 @@ ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
 `,
-    referencedContent: [
-      ...(dashboardGeneration.referencedContent ?? []),
-      ...(kibanaRendering.referencedContent ?? []),
-    ],
-    getInlineTools: async () => {
-      const customContentEnabled = await getCustomContentEnabled();
-      return [generateDashboardTool({ customContentEnabled })];
-    },
-  });
+  referencedContent: [
+    ...(dashboardGeneration.referencedContent ?? []),
+    ...(kibanaRendering.referencedContent ?? []),
+  ],
+  getInlineTools: () => [generateDashboardTool()],
+});

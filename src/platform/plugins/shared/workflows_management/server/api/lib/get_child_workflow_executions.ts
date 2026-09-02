@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type {
   ChildWorkflowExecutionItem,
@@ -15,11 +14,16 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
+import type {
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
+
 interface GetChildWorkflowExecutionsParams {
-  esClient: ElasticsearchClient;
-  workflowExecutionIndex: string;
-  stepsExecutionIndex: string;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   parentExecutionId: string;
   spaceId: string;
 }
@@ -29,15 +33,16 @@ interface ChildRef {
   childExecutionId: string;
 }
 
-const STEP_SOURCE_EXCLUDES = ['input', 'output'];
-const PARENT_SOURCE_INCLUDES = ['spaceId', 'stepExecutionIds'];
+const STEP_SOURCE_EXCLUDES: (keyof EsWorkflowStepExecution)[] = ['input', 'output'];
+const PARENT_SOURCE_INCLUDES: (keyof EsWorkflowExecution)[] = ['spaceId', 'stepExecutionIds'];
 const CHILD_SOURCE_INCLUDES = [
+  'id',
   'spaceId',
   'workflowId',
   'workflowDefinition.name',
   'status',
   'stepExecutionIds',
-];
+] as GetWorkflowExecutionsByIdsOptions['sourceIncludes'];
 
 const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
   steps
@@ -53,23 +58,18 @@ const extractChildRefs = (steps: EsWorkflowStepExecution[]): ChildRef[] =>
     }));
 
 const fetchChildDocs = async (
-  esClient: ElasticsearchClient,
-  workflowExecutionIndex: string,
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient,
   childIds: string[],
   spaceId: string
 ): Promise<Map<string, EsWorkflowExecution>> => {
-  const mgetResponse = await esClient.mget<EsWorkflowExecution>({
-    docs: childIds.map((id) => ({ _index: workflowExecutionIndex, _id: id })),
-    _source_includes: CHILD_SOURCE_INCLUDES,
+  const { items } = await workflowExecutionsDataClient.getByIds(childIds, {
+    sourceIncludes: CHILD_SOURCE_INCLUDES,
   });
 
   const result = new Map<string, EsWorkflowExecution>();
-  for (const d of mgetResponse.docs) {
-    if ('found' in d && d.found) {
-      const doc = d._source as EsWorkflowExecution;
-      if (doc.spaceId === spaceId) {
-        result.set(d._id, doc);
-      }
+  for (const { document: doc } of items) {
+    if (doc.spaceId === spaceId) {
+      result.set(doc.id, doc);
     }
   }
   return result;
@@ -89,26 +89,30 @@ const groupStepsByWorkflowRunId = (
 };
 
 export const getChildWorkflowExecutions = async ({
-  esClient,
-  workflowExecutionIndex,
-  stepsExecutionIndex,
+  workflowExecutionsDataClient,
+  stepExecutionsDataClient,
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const response = await esClient.get<EsWorkflowExecution>({
-    index: workflowExecutionIndex,
-    id: parentExecutionId,
-    _source_includes: PARENT_SOURCE_INCLUDES,
-  });
-  const parentDoc = response._source ?? undefined;
+  const { items: parentItems, missing: parentMissing } =
+    await workflowExecutionsDataClient.getByIds([parentExecutionId], {
+      sourceIncludes: [...PARENT_SOURCE_INCLUDES],
+    });
+
+  // Throw so callers can distinguish "parent doesn't exist" from "parent has no
+  // child executions" — both cases would otherwise silently return [].
+  if (parentMissing.includes(parentExecutionId)) {
+    throw new Error(`Workflow execution not found: ${parentExecutionId}`);
+  }
+
+  const parentDoc = parentItems[0]?.document;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
     return [];
   }
 
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
-    esClient,
-    stepsExecutionIndex,
+    stepExecutionsDataClient,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -120,8 +124,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const childDocMap = await fetchChildDocs(
-    esClient,
-    workflowExecutionIndex,
+    workflowExecutionsDataClient,
     childRefs.map((ref) => ref.childExecutionId),
     spaceId
   );
@@ -133,8 +136,7 @@ export const getChildWorkflowExecutions = async ({
   const childStepExecutions =
     allChildStepExecutionIds.length > 0
       ? await getStepExecutionsByWorkflowExecution({
-          esClient,
-          stepsExecutionIndex,
+          stepExecutionsDataClient,
           workflowExecutionId: '',
           stepExecutionIds: allChildStepExecutionIds,
           sourceExcludes: STEP_SOURCE_EXCLUDES,

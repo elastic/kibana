@@ -9,8 +9,6 @@ export const CUSTOM_CONTENT_EMBEDDABLE_TYPE = 'custom_content';
 
 export const CUSTOM_CONTENT_SCRIPT_PATTERN = /<script[\s>/]/i;
 
-export const CUSTOM_CONTENT_ENABLED_FLAG_KEY = 'dashboard.customContent.enabled';
-
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
 export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
 /** Maximum UTF-8 byte size of a rendered template. Enforced server-side on both the generation and agent paths. */

@@ -13,6 +13,7 @@ import type {
   HasTypeDisplayName,
   HasEditCapabilities,
   PublishesDataViews,
+  PublishesDataLoading,
   PublishesEsqlUsage,
 } from '@kbn/presentation-publishing';
 import {
@@ -42,17 +43,19 @@ import {
   switchMap,
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  toEsqlQueryState,
+} from '@kbn/custom-content-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
-import {
-  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-  type CustomContentContextAttachmentData,
-} from '../common/panel_context_attachment';
+import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../common/constants';
+import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
+import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
 
@@ -60,6 +63,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasTypeDisplayName &
   HasEditCapabilities &
   PublishesDataViews &
+  PublishesDataLoading &
   PublishesEsqlUsage;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -70,21 +74,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     let isRetained = false;
-    let storedPrompt = initialState.prompt ?? '';
-    const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
+    const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
+    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    // Starts true so the panel is not reported as render-complete before its first fetch resolves;
+    // screenshotting would otherwise capture an empty panel.
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
-      prompt: storedPrompt || undefined,
-      esqlQuery: esqlQuery$.getValue(),
+      esql_query: toEsqlQueryState(esqlQuery$.getValue()),
       template: template$.getValue(),
     });
 
@@ -110,14 +115,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
-        prompt: 'skip',
-        esqlQuery: 'referenceEquality',
+        esql_query: 'deepEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
-        storedPrompt = lastSaved?.prompt ?? '';
-        esqlQuery$.next(lastSaved?.esqlQuery);
+        esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
         template$.next(lastSaved?.template);
       },
     });
@@ -128,6 +131,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       usesEsql$,
       dataViews$,
+      dataLoading$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
@@ -166,6 +170,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               hasSaved = true;
               closeFlyout();
               agentBuilder.openChat({
+                newConversation: true,
                 attachments: [
                   buildCustomContentContextAttachment(
                     draftTemplate,
@@ -174,7 +179,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     titleManager.api.title$.getValue() ?? undefined
                   ),
                 ],
-                sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
               });
             };
 
@@ -321,6 +325,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        useEffect(
+          () =>
+            registerPanelPreviewHandler(uuid, (data) => {
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+            }),
+          []
+        );
+
         useEffect(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
@@ -334,30 +347,37 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             .subscribe((event) => {
               if (!isRoundCompleteEvent(event)) return;
 
-              const updatedRef = event.data.round.input.attachment_refs?.find(
+              // A round can touch several attachments — the dashboard's, and one per custom content
+              // panel. Scan every agent-authored ref instead of only the first, or an unrelated
+              // attachment leading the list would make this panel skip its own update.
+              const agentRefs = event.data.round.input.attachment_refs?.filter(
                 (ref) =>
                   ref.actor === ATTACHMENT_REF_ACTOR.agent &&
                   (ref.operation === 'updated' || ref.operation === 'created')
               );
-              if (!updatedRef) return;
+              if (!agentRefs?.length) return;
 
-              const updatedAttachment = event.data.attachments?.find(
-                (a) =>
-                  a.id === updatedRef.attachment_id &&
-                  a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
-              );
-              if (!updatedAttachment) return;
+              for (const ref of agentRefs) {
+                const updatedAttachment = event.data.attachments?.find(
+                  (a) =>
+                    a.id === ref.attachment_id && a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
+                );
+                if (!updatedAttachment) continue;
 
-              const data = getLatestVersion(updatedAttachment)?.data as
-                | CustomContentContextAttachmentData
-                | undefined;
-              if (!data || data.embeddable_id !== uuid) return;
+                const data = readPanelContextData(updatedAttachment);
+                if (!data || data.embeddable_id !== uuid) continue;
 
-              template$.next(data.panel_template);
-              esqlQuery$.next(data.esql_query);
+                template$.next(data.panel_template);
+                esqlQuery$.next(data.esql_query);
+                break;
+              }
             });
 
           return () => sub.unsubscribe();
+        }, []);
+
+        const handleLoadingChange = useCallback((isLoading: boolean) => {
+          dataLoading$.next(isLoading);
         }, []);
 
         const handleGenerateWithChat = useCallback(() => {
@@ -366,10 +386,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
+            newConversation: true,
             attachments: [
               buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
             ],
-            sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
           });
         }, [panelTitle]);
 
@@ -385,6 +405,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             query={query}
             filters={filters}
             previewHtml={previewHtml}
+            onLoadingChange={handleLoadingChange}
             onGenerateWithChat={handleGenerateWithChat}
           />
         );

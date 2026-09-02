@@ -96,7 +96,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         }
 
         lastState.logger.withLabels({ step: stepName }).debug({
-          message: `[${stepName}] Emitting ${finalBatch.length} absence-based event(s) for rule ${lastState.input.ruleId}`,
+          message: 'Emitting absence-based alert events',
         });
 
         return {

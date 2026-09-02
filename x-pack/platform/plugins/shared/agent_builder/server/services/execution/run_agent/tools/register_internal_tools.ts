@@ -9,7 +9,6 @@ import {
   AgentExecutionMode,
   agentBuilderDefaultAgentId,
   ToolOrigin,
-  type AgentCapabilities,
   type ConversationTemplate,
   type SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
@@ -38,7 +37,6 @@ export interface RegisterInternalToolsParams {
   context: AgentHandlerContext;
   agentId?: string;
   executionId?: string;
-  capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
   /** Callback to merge key/value updates into the active conversation's metadata. */
@@ -70,7 +68,6 @@ export const registerInternalTools = async ({
   context,
   agentId,
   executionId,
-  capabilities,
   abortSignal,
   backgroundExecutionService,
   updateConversationMetadata,
@@ -133,7 +130,6 @@ export const registerInternalTools = async ({
         agentId: agentId ?? agentBuilderDefaultAgentId,
         executionId: executionId ?? '',
         connectorId: defaultConnectorId,
-        capabilities,
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,
@@ -146,7 +142,6 @@ export const registerInternalTools = async ({
       createSendMessageTool({
         agentId: agentId ?? agentBuilderDefaultAgentId,
         executionId: executionId ?? '',
-        capabilities,
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,

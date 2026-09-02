@@ -13,8 +13,11 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
+import { readEsqlQuery } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import type { openLazyFlyout } from '@kbn/presentation-util';
+import type { EditCustomContentFlyoutProps } from './components/edit_custom_content_flyout';
 
 jest.mock('@kbn/presentation-publishing', () => {
   const actual = jest.requireActual('@kbn/presentation-publishing');
@@ -25,13 +28,16 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
   typeof apiIsPresentationContainer
 >;
 
-let capturedComponentProps: { onGenerateWithChat?: () => void } | undefined;
+let capturedComponentProps:
+  | { onGenerateWithChat?: () => void; onLoadingChange?: (isLoading: boolean) => void }
+  | undefined;
 
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
+    onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
     capturedComponentProps = props;
@@ -55,7 +61,7 @@ let capturedFlyoutProps:
   | undefined;
 
 jest.mock('./components/edit_custom_content_flyout', () => ({
-  EditCustomContentFlyout: (props: any) => {
+  EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
     capturedFlyoutProps = props;
     return <div data-test-subj="mockEditCustomContentFlyout" />;
   },
@@ -73,7 +79,7 @@ let mockFlyoutClose: () => void = () => {};
 let mockFlyoutOnClose: Promise<void> = Promise.resolve();
 
 jest.mock('@kbn/presentation-util', () => ({
-  openLazyFlyout: (args: any) => {
+  openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
     capturedOpenLazyFlyoutArgs = args;
     let resolve: () => void;
     mockFlyoutOnClose = new Promise<void>((r) => {
@@ -82,8 +88,10 @@ jest.mock('@kbn/presentation-util', () => ({
     mockFlyoutClose = () => resolve();
     return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
   },
-  tracksOverlays: (api: any) =>
-    !!api && typeof api.clearOverlays === 'function' && typeof api.openOverlay === 'function',
+  tracksOverlays: (api: unknown) =>
+    !!api &&
+    typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
+    typeof (api as Record<string, unknown>).openOverlay === 'function',
 }));
 
 let mockAgentBuilder: unknown;
@@ -93,8 +101,7 @@ jest.mock('./services', () => ({
 }));
 
 const baseState: CustomContentEmbeddableState = {
-  prompt: 'Show KPI cards',
-  esqlQuery: 'FROM logs | STATS count = COUNT(*)',
+  esql_query: ['FROM logs | STATS count = COUNT(*)'],
   template: '<div>static html</div>',
 };
 
@@ -140,7 +147,7 @@ describe('customContentEmbeddableFactory', () => {
   };
 
   describe('serializeState', () => {
-    it('round-trips prompt and template from initial state', async () => {
+    it('round-trips esqlQuery and template from initial state', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       expect(embeddable.api.serializeState()).toEqual(baseState);
     });
@@ -148,7 +155,6 @@ describe('customContentEmbeddableFactory', () => {
     it('reflects updates applied via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       const nextState: CustomContentEmbeddableState = {
-        prompt: 'Show a status board',
         template: '<div>new</div>',
       };
 
@@ -160,7 +166,7 @@ describe('customContentEmbeddableFactory', () => {
     });
 
     it('serializes template as undefined when not provided', async () => {
-      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
+      const { embeddable } = await buildEmbeddable({ template: undefined });
       expect(embeddable.api.serializeState().template).toBeUndefined();
     });
 
@@ -169,12 +175,32 @@ describe('customContentEmbeddableFactory', () => {
       act(() => {
         embeddable.api.applySerializedState({
           ...baseState,
-          esqlQuery: 'FROM metrics | STATS avg = AVG(value)',
+          esql_query: ['FROM metrics | STATS avg = AVG(value)'],
         });
       });
-      expect(embeddable.api.serializeState().esqlQuery).toBe(
+      expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
+    });
+  });
+
+  // Screenshotting marks a panel render-complete as soon as `dataLoading$` is falsy, so reporting
+  // would capture an empty panel if this defaulted to false.
+  describe('dataLoading$', () => {
+    it('starts loading before the first fetch resolves', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+    });
+
+    it('follows the rendered content loading state', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
     });
   });
 
@@ -194,7 +220,7 @@ describe('customContentEmbeddableFactory', () => {
       act(() => {
         embeddable.api.applySerializedState({
           ...baseState,
-          esqlQuery: 'FROM metrics | LIMIT 10',
+          esql_query: ['FROM metrics | LIMIT 10'],
         });
       });
 
@@ -220,7 +246,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
+      expect(el).toHaveAttribute('data-esql-query', readEsqlQuery(baseState));
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
   });
@@ -251,7 +277,7 @@ describe('customContentEmbeddableFactory', () => {
       );
 
       const state = embeddable.api.serializeState();
-      expect(state.esqlQuery).toBe('FROM metrics | LIMIT 10');
+      expect(readEsqlQuery(state)).toBe('FROM metrics | LIMIT 10');
       expect(state.template).toBe('<div>new</div>');
     });
 
@@ -358,7 +384,7 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
 
-      expect(openChat).toHaveBeenCalled();
+      expect(openChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
     });
 
     it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
@@ -388,7 +414,7 @@ describe('customContentEmbeddableFactory', () => {
 
   describe('agent event subscription', () => {
     it('applies template update from RoundCompleteEvent attachment', async () => {
-      const chatEvents$ = new Subject<any>();
+      const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
 
       mockAgentBuilder = {
@@ -440,8 +466,89 @@ describe('customContentEmbeddableFactory', () => {
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
     });
 
+    it('applies its own update when other attachments were updated in the same round', async () => {
+      const chatEvents$ = new Subject<unknown>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      // The dashboard attachment leads the ref list, and another custom content panel follows.
+      // Neither may stop this panel from picking up its own update.
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'dashboard-att',
+                  version: 3,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+                {
+                  attachment_id: 'other-panel-att',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'dashboard-att',
+              type: 'dashboard',
+              current_version: 3,
+              versions: [{ version: 3, data: { title: 'A dashboard' } }],
+            },
+            {
+              id: 'other-panel-att',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: { panel_template: '<p>not mine</p>', embeddable_id: 'other-uuid' },
+                },
+              ],
+            },
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: { panel_template: '<p>mine</p>', embeddable_id: 'test-uuid' },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+
+      expect(embeddable.api.serializeState().template).toBe('<p>mine</p>');
+    });
+
     it('ignores events for a different embeddable_id', async () => {
-      const chatEvents$ = new Subject<any>();
+      const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
 
       mockAgentBuilder = {
@@ -551,7 +658,9 @@ describe('customContentEmbeddableFactory', () => {
               data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
             }),
           ]),
-          sessionTag: expect.stringContaining('test-uuid'),
+          // Which stored conversation gets restored depends on the entry point the user last used,
+          // so refining always starts fresh; the attachments carry the state the agent needs.
+          newConversation: true,
         })
       );
     });

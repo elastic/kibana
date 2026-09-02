@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { parseDurationToMs } from '../../duration';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
@@ -47,13 +48,11 @@ export class ApplyThrottlingStep implements DispatcherStep {
       groups,
       policies,
       lastNotifiedMap,
-      input.startedAt
+      input.startedAt,
+      logger
     );
 
-    logger.debug({
-      message: () =>
-        `Applied throttling to ${throttled.length} groups and dispatched ${dispatch.length} groups`,
-    });
+    logger.debug({ message: 'Applied throttling' });
 
     return { type: 'continue', data: { dispatch, throttled } };
   }
@@ -85,14 +84,22 @@ export function applyThrottling(
   groups: readonly ActionGroup[],
   policies: ReadonlyMap<string, ActionPolicy>,
   lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
-  now: Date
+  now: Date,
+  logger?: LoggerServiceContract
 ): { dispatch: ActionGroup[]; throttled: ActionGroup[] } {
   const dispatch: ActionGroup[] = [];
   const throttled: ActionGroup[] = [];
+  const reportInvalidInterval = createInvalidIntervalReporter(logger);
 
   for (const group of groups) {
     const policy = policies.get(group.policyId)!;
-    const bucket = shouldDispatch(group, policy, lastNotifiedMap.get(group.id), now)
+    const bucket = shouldDispatch(
+      group,
+      policy,
+      lastNotifiedMap.get(group.id),
+      now,
+      reportInvalidInterval
+    )
       ? dispatch
       : throttled;
     bucket.push(group);
@@ -101,11 +108,36 @@ export function applyThrottling(
   return { dispatch, throttled };
 }
 
+/**
+ * A single misconfigured interval would otherwise warn once per group, and one
+ * policy can cover thousands of groups in a tick.
+ */
+function createInvalidIntervalReporter(
+  logger?: LoggerServiceContract
+): (policyId: string, error: unknown) => void {
+  const reported = new Set<string>();
+
+  return (policyId, error) => {
+    if (!logger || reported.has(policyId)) {
+      return;
+    }
+
+    reported.add(policyId);
+    logger.warn({
+      message: 'Action policy throttle interval is invalid',
+      error,
+      code: ALERTING_LOG_CODES.DISPATCH_THROTTLE_INTERVAL_INVALID,
+      labels: { policy_id: policyId },
+    });
+  };
+}
+
 function shouldDispatch(
   group: ActionGroup,
   policy: ActionPolicy,
   lastRecord: LastNotifiedInfo | undefined,
-  now: Date
+  now: Date,
+  reportInvalidInterval: (policyId: string, error: unknown) => void
 ): boolean {
   if (!lastRecord) return true;
 
@@ -120,7 +152,13 @@ function shouldDispatch(
   if (groupingMode !== 'per_episode') {
     return (
       !policy.throttle?.interval ||
-      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+      !isWithinInterval(
+        lastRecord.lastNotified,
+        policy.throttle.interval,
+        now,
+        policy.id,
+        reportInvalidInterval
+      )
     );
   }
 
@@ -132,7 +170,13 @@ function shouldDispatch(
   if (strategy === 'per_status_interval') {
     return (
       !!policy.throttle?.interval &&
-      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+      !isWithinInterval(
+        lastRecord.lastNotified,
+        policy.throttle.interval,
+        now,
+        policy.id,
+        reportInvalidInterval
+      )
     );
   }
 
@@ -140,11 +184,18 @@ function shouldDispatch(
   return false;
 }
 
-function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
+function isWithinInterval(
+  lastNotifiedAt: Date,
+  interval: string,
+  now: Date,
+  policyId: string,
+  reportInvalidInterval: (policyId: string, error: unknown) => void
+): boolean {
   try {
     const intervalMillis = parseDurationToMs(interval);
     return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
-  } catch {
+  } catch (error) {
+    reportInvalidInterval(policyId, error);
     return false;
   }
 }
