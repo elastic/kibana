@@ -40,49 +40,22 @@ describe('AttachmentGroupPill', () => {
     expect(screen.getByTestId('agentBuilderAttachmentGroupPill-my-group')).toBeInTheDocument();
   });
 
-  it('does not render the remove button when not hovered', () => {
-    renderWithProviders(<AttachmentGroupPill group={makeGroup()} onRemove={jest.fn()} />);
+  it('does not render the remove button when onRemove is not provided', () => {
+    renderWithProviders(<AttachmentGroupPill group={makeGroup()} />);
 
     expect(
       screen.queryByRole('button', { name: 'Remove attachment group' })
     ).not.toBeInTheDocument();
   });
 
-  it('renders the remove button after hovering and calls onRemove when clicked', () => {
+  it('renders the remove button when onRemove is provided and calls it when clicked', () => {
     const onRemove = jest.fn();
     renderWithProviders(<AttachmentGroupPill group={makeGroup()} onRemove={onRemove} />);
-
-    const panel = screen.getByTestId('agentBuilderAttachmentGroupPill-test-group-1');
-    fireEvent.mouseEnter(panel);
 
     const removeButton = screen.getByRole('button', { name: 'Remove attachment group' });
     expect(removeButton).toBeInTheDocument();
 
     fireEvent.click(removeButton);
     expect(onRemove).toHaveBeenCalledTimes(1);
-  });
-
-  it('hides the remove button again after the mouse leaves', () => {
-    renderWithProviders(<AttachmentGroupPill group={makeGroup()} onRemove={jest.fn()} />);
-
-    const panel = screen.getByTestId('agentBuilderAttachmentGroupPill-test-group-1');
-    fireEvent.mouseEnter(panel);
-    expect(screen.getByRole('button', { name: 'Remove attachment group' })).toBeInTheDocument();
-
-    fireEvent.mouseLeave(panel);
-    expect(
-      screen.queryByRole('button', { name: 'Remove attachment group' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('does not render the remove button even when hovered if onRemove is not provided', () => {
-    renderWithProviders(<AttachmentGroupPill group={makeGroup()} />);
-
-    const panel = screen.getByTestId('agentBuilderAttachmentGroupPill-test-group-1');
-    fireEvent.mouseEnter(panel);
-
-    expect(
-      screen.queryByRole('button', { name: 'Remove attachment group' })
-    ).not.toBeInTheDocument();
   });
 });
