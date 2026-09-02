@@ -139,6 +139,9 @@ describe('config validation', () => {
           "markdownPlugins": Object {
             "lens": true,
           },
+          "runWorkflows": Object {
+            "enabled": false,
+          },
           "stack": Object {
             "enabled": true,
           },
@@ -197,6 +200,16 @@ describe('config validation', () => {
     it('allows templates.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ templates: { enabled: false } });
       expect(config.templates.enabled).toBe(false);
+    });
+
+    it('sets runWorkflows.enabled default to false', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.runWorkflows.enabled).toBe(false);
+    });
+
+    it('allows runWorkflows.enabled to be set to true explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
+      expect(config.runWorkflows.enabled).toBe(true);
     });
   });
 });

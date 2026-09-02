@@ -24,7 +24,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
+import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
+import { DataFormatSelect } from './data_format_select';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -50,18 +53,38 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
   } = useServicesStep({ onContinue });
+
+  const { detectAndReviewStep } = useOnboardingFlow();
+  const isFormatDisabled =
+    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
+    Object.values(detectAndReviewStep.serviceStatuses).some(
+      (s) => s !== 'error' && s !== 'timeout'
+    );
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestHub.servicesStep.title"
-            defaultMessage="Which AWS services do you want to monitor?"
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.title"
+                defaultMessage="Which AWS services do you want to monitor?"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DataFormatSelect
+            dataFormat={dataFormat}
+            onChange={setDataFormat}
+            disabled={isFormatDisabled}
           />
-        </h2>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
@@ -106,7 +129,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>{cat}</strong>
+                      <strong>{getCategoryTitle(cat)}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
                       {preview}
@@ -150,7 +173,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>{activeCategory}</h3>
+                        <h3>{getCategoryTitle(activeCategory)}</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -190,7 +213,9 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                           onToggle={handleToggle}
                           displayName={
                             duplicateNamesInCategory.has(service.name)
-                              ? `${service.name} ${SIGNAL_TYPE_LABELS[service.signalType]}`
+                              ? `${service.name} ${service.signalTypes
+                                  .map((t) => SIGNAL_TYPE_LABELS[t])
+                                  .join(' & ')}`
                               : undefined
                           }
                         />

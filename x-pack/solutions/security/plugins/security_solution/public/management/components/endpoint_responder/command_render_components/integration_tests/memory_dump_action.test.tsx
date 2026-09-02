@@ -162,8 +162,8 @@ describe('Memory dump response action', () => {
       await render();
       await enterConsoleCommand(renderResult, user, `memory-dump --process`);
 
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        '"pid" or "entityId argument is required for "process" memory dumps'
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --process requires (only) one of the following arguments: --entityId, --pid'
       );
     });
 

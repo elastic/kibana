@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -242,12 +243,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('moreActionsButton');
+    if (!(await this.testSubjects.exists('deleteIndexPatternButton'))) {
+      await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+    }
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
-    return await this.testSubjects.getVisibleText('indexPatternTitle');
+    return await this.testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title);
   }
 
   async getManagedTag() {
@@ -781,6 +784,9 @@ export class SettingsPageObject extends FtrService {
     await this.retry.try(async () => {
       this.log.debug('getAlertText');
       alertText = await this.testSubjects.getVisibleText('deleteDataViewFlyoutHeader');
+      // getVisibleText returns '' while the flyout is still animating in, and the retry accepts
+      // that empty read; wait for the static title to actually paint before returning it.
+      if (!alertText) throw new Error('delete data view flyout title has not rendered yet');
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');

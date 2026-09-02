@@ -35,6 +35,11 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content).not.toContain('ai-index-ds-*');
   });
 
+  it('requires the prompt-provided space filter on every AI-index query', () => {
+    expect(kiRetrievalSkill.content).toContain('pass its exact `filter`');
+    expect(kiRetrievalSkill.content).toContain('on every AI-index query');
+  });
+
   it('has no referencedContent', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });

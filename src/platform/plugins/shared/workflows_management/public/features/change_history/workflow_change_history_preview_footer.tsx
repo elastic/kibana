@@ -25,6 +25,7 @@ export interface WorkflowChangeHistoryPreviewFooterProps {
   validationResults: YamlValidationResult[];
   isEditorMounted: boolean;
   isValidationLoading: boolean;
+  validationError: Error | null;
   highlightValidationErrors: boolean;
   onValidationErrorClick?: (error: YamlValidationResult) => void;
 }
@@ -33,6 +34,7 @@ export const WorkflowChangeHistoryPreviewFooter = ({
   validationResults,
   isEditorMounted,
   isValidationLoading,
+  validationError,
   highlightValidationErrors,
   onValidationErrorClick,
 }: WorkflowChangeHistoryPreviewFooterProps): JSX.Element => {
@@ -55,7 +57,7 @@ export const WorkflowChangeHistoryPreviewFooter = ({
           <WorkflowYamlValidationAccordion
             isMounted={isEditorMounted}
             isLoading={showValidationLoading}
-            error={null}
+            error={validationError}
             validationErrors={showValidationLoading ? null : validationResults}
             onErrorClick={onValidationErrorClick}
           />

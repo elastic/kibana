@@ -54,6 +54,7 @@
     "@kbn/core-spaces-common",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
+    "@kbn/es-errors",
     "@kbn/as-code-shared-transforms",
     "@kbn/utility-types",
     "@kbn/securitysolution-list-utils",
@@ -119,6 +120,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/apm-utils",
+    "@kbn/tracing-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/es-types",
     "@kbn/utils",
@@ -290,8 +292,6 @@
     "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows",
-    "@kbn/deeplinks-workflows",
-    "@kbn/core-rendering-browser",
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
@@ -311,5 +311,6 @@
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
+    "@kbn/shared-ux-utility",
   ]
 }

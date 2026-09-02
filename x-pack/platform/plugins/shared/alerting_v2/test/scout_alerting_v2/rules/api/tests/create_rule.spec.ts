@@ -459,6 +459,30 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'create: persists a conditionless composed rule without a breach block',
+    async ({ apiClient, apiServices }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'conditionless-composed-rule' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        },
+      });
+
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.query).toStrictEqual(body.query);
+
+      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+      expect(persisted.query).toStrictEqual(body.query);
+    }
+  );
+
+  apiTest(
     'create: returns 201 with composed format including a recovery segment',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({

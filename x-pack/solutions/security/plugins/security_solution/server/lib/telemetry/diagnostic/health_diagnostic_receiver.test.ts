@@ -8,10 +8,7 @@
 import { lastValueFrom, toArray } from 'rxjs';
 import { interpolatePath, CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
 import { QueryType, PermissionError, NotAllowedError } from './health_diagnostic_service.types';
-import type {
-  ApiExecutableQuery,
-  HealthDiagnosticQueryV3,
-} from './health_diagnostic_service.types';
+import type { ApiExecutableQuery, ApiQuery } from './health_diagnostic_service.types';
 import { ValidationError } from './health_diagnostic_circuit_breakers.types';
 import { telemetryConfiguration } from '../configuration';
 import {
@@ -25,8 +22,7 @@ import {
   createMockApiQueryV3,
   setupPointInTime,
   executeObservableTest,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV2,
+  type IndexQuery,
 } from './__mocks__';
 
 describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryExecutor', () => {
@@ -34,14 +30,14 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   let mockEsClient: ReturnType<typeof createMockEsClient>;
   let mockLogger: ReturnType<typeof createMockLogger>;
 
-  const mkExecV1 = (type: QueryType, overrides: Partial<HealthDiagnosticQueryV1> = {}) => ({
+  const mkExecV1 = (type: QueryType, overrides: Partial<IndexQuery> = {}) => ({
     kind: 'executable' as const,
     query: createMockQueryV1(type, overrides),
   });
 
   const mkExecV2 = (
     type: QueryType,
-    overrides: Partial<HealthDiagnosticQueryV2> = {},
+    overrides: Partial<IndexQuery> = {},
     indices = ['logs-endpoint.events.process-default']
   ) => ({
     kind: 'executable' as const,
@@ -335,50 +331,46 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('should not inject FROM prefix when v1 query starts with lowercase from', (done) => {
+    test('ESQL query with lowercase FROM clause is blocked', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, {
         query: 'from logs-* | stats count() by user.name',
       });
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      const mockRecords = [{ 'user.name': 'test', 'count()': 1 }];
-      const mockToRecords = jest.fn().mockResolvedValue({ records: mockRecords });
-      mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
-
-      executeObservableTest(
-        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-        () => {
-          expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-            { query: 'from logs-* | stats count() by user.name' },
-            { signal: expect.any(AbortSignal) }
-          );
-          done();
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
         },
-        done
-      );
+        complete: () => done(new Error('Should not complete successfully')),
+      });
     });
 
-    test('should handle ES|QL query with FROM clause already present', (done) => {
+    test('ESQL query with uppercase FROM clause is blocked', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, {
         query: 'FROM logs-* | stats count() by user.name',
       });
       const circuitBreaker = createMockCircuitBreaker(true);
 
-      const mockRecords = [{ 'user.name': 'test', 'count()': 1 }];
-      const mockToRecords = jest.fn().mockResolvedValue({ records: mockRecords });
-      mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
-
-      executeObservableTest(
-        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-        () => {
-          expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-            { query: 'FROM logs-* | stats count() by user.name' },
-            { signal: expect.any(AbortSignal) }
-          );
-          done();
+      queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => done(new Error('Should not emit')),
+        error: (error) => {
+          try {
+            expect(error.message).toContain('FROM clause');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
         },
-        done
-      );
+        complete: () => done(new Error('Should not complete successfully')),
+      });
     });
   });
 
@@ -802,9 +794,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   });
 
   describe('CircuitBreakingQueryExecutorImpl.searchApi', () => {
-    const buildExecutableApiQuery = (
-      overrides: Partial<HealthDiagnosticQueryV3> = {}
-    ): ApiExecutableQuery => ({
+    const buildExecutableApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
       kind: 'executable_api',
       query: createMockApiQueryV3(overrides),
     });

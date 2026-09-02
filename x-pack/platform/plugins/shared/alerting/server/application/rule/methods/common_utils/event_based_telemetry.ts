@@ -36,7 +36,7 @@ export const RULE_CREATED_EVENT: EventTypeOpts<RuleCreatedEventData> = {
       type: 'keyword',
       _meta: {
         description:
-          'The id of the rule template the rule was created from, when known (for example, from the rule gallery).',
+          'The id of the rule template the rule was created from, when known (for example, from the rule gallery or a Fleet-installed package).',
         optional: true,
       },
     },

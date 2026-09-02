@@ -127,9 +127,9 @@ export const ManualInstructions = ({
   const debOrRpmWithInstallServers = showInstallServers ? `ELASTIC_AGENT_FLAVOR=servers ` : '';
 
   const linuxAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-arm64.tar.gz ${curlDownloadSourceProxyArgs}
-  tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
-  cd elastic-agent-${agentVersion}-linux-arm64
-  sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
+tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
+cd elastic-agent-${agentVersion}-linux-arm64
+sudo ./elastic-agent install ${getEnrollArgsByPlatForm('linux_aarch64')}`;
 
   const linuxX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-x86_64.tar.gz ${curlDownloadSourceProxyArgs}
 tar xzvf elastic-agent-${agentVersion}-linux-x86_64.tar.gz
@@ -151,6 +151,12 @@ Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${ag
 Expand-Archive .\\elastic-agent-${agentVersion}-windows-x86_64.zip -DestinationPath .
 cd elastic-agent-${agentVersion}-windows-x86_64
 .\\elastic-agent.exe install ${getEnrollArgsByPlatForm('windows')}`;
+
+  const windowsArm64Command = `$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-arm64.zip -OutFile elastic-agent-${agentVersion}-windows-arm64.zip ${windowsDownloadSourceProxyArgs}
+Expand-Archive .\\elastic-agent-${agentVersion}-windows-arm64.zip -DestinationPath .
+cd elastic-agent-${agentVersion}-windows-arm64
+.\\elastic-agent.exe install ${getEnrollArgsByPlatForm('windows_arm64')}`;
 
   const windowsMSICommand = `$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.msi -OutFile elastic-agent-${agentVersion}-windows-x86_64.msi ${windowsDownloadSourceProxyArgs}
@@ -201,6 +207,7 @@ sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo 
     mac_aarch64: macAarch64Command,
     mac_x86_64: macX8664Command,
     windows: windowsCommand,
+    windows_arm64: windowsArm64Command,
     windows_msi: windowsMSICommand,
     deb_aarch64: linuxDebAarch64Command,
     deb_x86_64: linuxDebX8664Command,
