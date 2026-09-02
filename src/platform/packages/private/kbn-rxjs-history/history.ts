@@ -11,7 +11,7 @@ import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, map, pairwise, withLatestFrom } from 'rxjs';
+import { BehaviorSubject, filter, pairwise } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
@@ -32,8 +32,6 @@ export function startTrackingHistory<T extends object = {}>({
   let latestState: T | undefined;
   const stateSubscription = onStateChange$
     .pipe(
-      withLatestFrom(pause$),
-      map(([state, paused]) => (paused ? undefined : state)),
       filter((state): state is T => Boolean(state)),
       pairwise()
     )
