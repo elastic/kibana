@@ -9,6 +9,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   rawUiamApiKeysProvisioningStatusSchemaV1,
   rawUiamApiKeysProvisioningStatusSchemaV2,
+  rawUiamApiKeysProvisioningStatusSchemaV3,
 } from '../schemas/raw_uiam_api_keys_provisioning_status';
 
 export const uiamApiKeysProvisioningStatusModelVersions: SavedObjectsModelVersionMap = {
@@ -39,6 +40,25 @@ export const uiamApiKeysProvisioningStatusModelVersions: SavedObjectsModelVersio
         { unknowns: 'ignore' }
       ),
       create: rawUiamApiKeysProvisioningStatusSchemaV2,
+    },
+  },
+  '3': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          apiKeyId: {
+            type: 'keyword',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawUiamApiKeysProvisioningStatusSchemaV3.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: rawUiamApiKeysProvisioningStatusSchemaV3,
     },
   },
 };

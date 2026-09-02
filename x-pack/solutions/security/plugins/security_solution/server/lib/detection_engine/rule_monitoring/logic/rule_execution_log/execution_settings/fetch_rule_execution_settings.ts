@@ -6,7 +6,7 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isMissingUiamApiKeyMessage } from '@kbn/alerting-plugin/server';
+import { isUnusableUiamApiKeyMessage } from '@kbn/alerting-plugin/server';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { ConfigType } from '../../../../../../config';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
@@ -51,7 +51,7 @@ export const fetchRuleExecutionSettings = async (
     // healer that consumes it.
     // Every other failure keeps the long-standing behavior of silently falling back to defaults.
     const reason = e instanceof Error ? e.message : String(e);
-    if (isMissingUiamApiKeyMessage(reason)) {
+    if (isUnusableUiamApiKeyMessage(reason)) {
       ruleResultService?.addLastRunError(`${logMessage}: ${reason}`);
     }
 

@@ -31,6 +31,7 @@ export interface ProvisioningStatusDocs {
     status: string;
     message?: string;
     errorCode?: string;
+    apiKeyId?: string;
   };
 }
 

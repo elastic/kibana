@@ -92,6 +92,25 @@ The `UiamApiKeyProvisioningTask` runs on serverless deployments when the `alerti
 
 Rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`).
 
+#### Self-Healing (Repair During a Rule Run)
+
+When a rule run fails because its UIAM key is unusable, `repairUiamApiKey` (`task_runner/lib/repair_uiam_api_key.ts`) re-grants the key so the next run authenticates with a working credential instead of failing indefinitely. Two rejections qualify:
+
+| Rejection | Wire shape |
+| --- | --- |
+| UIAM does not know the key (`APIKEY_MISSING`) | HTTP 401 with `authentication_error_code: 0x28D520` |
+| UIAM knows the key and will not authorize it | HTTP 403 `security_exception: failed to authorize cloud API key` |
+
+Both are matched structurally and by message, because rule types that record a failed run rather than throwing (Security Solution's detection rules) flatten the Elasticsearch error to text. `isUnusableUiamApiKeyMessage` is exported from the plugin so those call sites can flag a rejection they would otherwise swallow.
+
+Each attempt that reaches a verdict is recorded on the rule's `uiam_api_keys_provisioning_status` saved object — the same document the provisioning task writes, keyed on the rule id — so the healer and the provisioning task cannot independently retry the same doomed conversion. A recorded attempt stops the next one, which matters because a rule can run every minute:
+
+- A permanent UIAM verdict (`PERMANENT_UIAM_CONVERSION_ERROR_CODES`) is about the identity that created the key, so it is never retried.
+- Any other recorded attempt is scoped to `apiKeyId`, the Elasticsearch key it was made for. Re-saving a rule re-mints that key under a new id, which resets the record.
+- Failures that say nothing about the credential — `uiamConvert` unreachable, a version conflict, a deleted rule — are not recorded and are retried on the next run.
+
+When UIAM refuses the conversion it also states why, and that reason is the only explanation Kibana ever gets. It is recorded on the rule's last run as well as the status document, so the rule reports (for example) `API key creator is not an organization member` rather than a bare refusal.
+
 #### Invalidation
 
 API key invalidation is handled by the `alerts_invalidate_api_keys` task, which:

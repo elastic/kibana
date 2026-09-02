@@ -74,6 +74,21 @@ const missingUiamApiKeyError = () =>
     },
   });
 
+/**
+ * The 403 Elasticsearch returns when UIAM authenticates the API key a rule run presented and then
+ * declines to resolve its privileges. No status 401, no code — only the `security_exception` reason.
+ */
+const unauthorizedUiamApiKeyError = () =>
+  Object.assign(new Error('security_exception'), {
+    statusCode: 403,
+    body: {
+      error: {
+        type: 'security_exception',
+        reason: 'failed to authorize cloud API key for project [b5fa1e0e]',
+      },
+    },
+  });
+
 let fakeTimer: sinon.SinonFakeTimers;
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
@@ -224,6 +239,24 @@ describe('Task Runner UIAM API key repair', () => {
     expect(alertingEventLogger.done).toHaveBeenCalledWith(
       expect.objectContaining({ status: expect.objectContaining({ status: 'error' }) })
     );
+  });
+
+  test('re-grants the UIAM API key when a run is refused authorization with it', async () => {
+    // The failure class the healer used to be blind to: rule `4de3f252` on `b5fa1e0e` produced this
+    // 34,899 times over seven days without a single repair attempt.
+    ruleType.executor.mockRejectedValue(unauthorizedUiamApiKeyError());
+
+    const runResult = await createTaskRunner().run();
+
+    expect(uiamConvert).toHaveBeenCalledWith([uiamRuleSO.attributes.apiKey]);
+    expect(unsafeSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({ uiamApiKey: FRESH_UIAM_API_KEY }),
+      expect.objectContaining({ mergeAttributes: false, version: uiamRuleSO.version })
+    );
+    expect(runResult.schedule).toEqual({ interval: '10s' });
+    expect(runResult.taskRunError).toBeDefined();
   });
 
   test('leaves the key alone when the run failed for an unrelated reason', async () => {

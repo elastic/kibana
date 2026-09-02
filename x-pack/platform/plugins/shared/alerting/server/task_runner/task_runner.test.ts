@@ -3579,6 +3579,32 @@ describe('Task Runner', () => {
     );
   });
 
+  test('re-grants the UIAM API key when the rule type throws an authorization refusal', async () => {
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    ruleType.executor.mockImplementation(async () => {
+      throw Object.assign(new Error('security_exception'), {
+        statusCode: 403,
+        body: {
+          error: {
+            type: 'security_exception',
+            reason: 'failed to authorize cloud API key for project [b5fa1e0e]',
+          },
+        },
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+
+    await taskRunner.run();
+
+    expect(mockRepairUiamApiKey).toHaveBeenCalledTimes(1);
+    expect(mockRepairUiamApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({ ruleId: '1', spaceId: 'default' })
+    );
+  });
+
   test('re-grants the UIAM API key when a rule reports a missing key without throwing', async () => {
     // Security Solution's detection rules record a failed run rather than throwing, so the error
     // never reaches the catch in run() and only survives as the recorded message.
