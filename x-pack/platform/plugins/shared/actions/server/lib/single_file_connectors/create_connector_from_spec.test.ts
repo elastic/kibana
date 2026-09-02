@@ -41,6 +41,7 @@ describe('createConnectorTypeFromSpec', () => {
       },
       actions: overrides.actions || {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
@@ -61,6 +62,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       actions: {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
@@ -129,6 +131,7 @@ describe('createConnectorTypeFromSpec', () => {
       },
       actions: {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
@@ -231,14 +234,17 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           action1: {
+            scope: 'read',
             input: z4.object({ field1: z4.string() }),
             handler: jest.fn(),
           },
           action2: {
+            scope: 'read',
             input: z4.object({ field2: z4.number() }),
             handler: jest.fn(),
           },
           action3: {
+            scope: 'read',
             input: z4.object({ field3: z4.boolean() }),
             handler: jest.fn(),
           },
@@ -269,6 +275,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -285,6 +292,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -301,6 +309,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -320,6 +329,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -340,6 +350,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           complexAction: {
+            scope: 'read',
             input: z4.object({
               nested: z4.object({
                 field1: z4.string(),
@@ -499,6 +510,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           [TEST_CONNECTOR_SUB_ACTION]: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -514,6 +526,7 @@ describe('createConnectorTypeFromSpec', () => {
     it('does not mutate spec.actions when augmenting with test handler', () => {
       const actions = {
         testAction: {
+          scope: 'read' as const,
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
