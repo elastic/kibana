@@ -68,6 +68,7 @@ SUITE_PROFILES = {
         "vm_prefix": "orca-sweep",
         # 21 prompts x 7 categories x 3 variants
         "n_examples": 21,
+        "gate": "exact",
     },
     "attack-discovery-agent-builder": {
         "cli_suite": "attack-discovery-agent-builder",
@@ -79,14 +80,21 @@ SUITE_PROFILES = {
         # misses the scenario-registry + clean-profile specs entirely -- two
         # separate wrong answers before the live run settled it.
         "n_examples": 9,
+        # Uniform grid (every dataset runs all 13 evaluators), so the
+        # examples x evaluators product is exact.
+        "gate": "exact",
     },
     "security-automatic-migrations": {
         "cli_suite": "security-automatic-migrations",
         "gate_suite_id": "security-automatic-migrations",
         "vm_prefix": "orca-mig",
-        # 22 = 10 standard_dashboards + 6 splunk + 6 qradar, counted from the
-        # dataset sources. Golden runs land 32-48 score docs per experiment.
-        "n_examples": 22,
+        # Each dataset carries a DIFFERENT evaluator count (measured on the
+        # 2026-09-02 canary: standard-dashboards 7, qradar 9, splunk-spl 8),
+        # so examples x evaluators is structurally wrong for this suite.
+        # Gate on a floor measured from that canary run (86 docs) instead.
+        "n_examples": None,
+        "gate": "floor",
+        "min_docs": 80,
     },
 }
 
@@ -548,8 +556,16 @@ def self_test() -> int:
         # Doc-count gate: expected docs are per-suite, counted from the datasets.
         check("persona n_examples", SUITE_PROFILES["security-persona-matrix"]["n_examples"], 21)
         check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 9)
-        check("migrations n_examples",
-              SUITE_PROFILES["security-automatic-migrations"]["n_examples"], 22)
+        # Migrations has no uniform grid -- per-dataset evaluator counts are
+        # 7 (standard-dashboards) / 9 (qradar) / 8 (splunk-spl), measured on the
+        # 2026-09-02 canary -- so examples x evaluators is structurally wrong.
+        # It gates on a floor measured from that run (86 docs) instead.
+        check("migrations gate is floor",
+              SUITE_PROFILES["security-automatic-migrations"]["gate"], "floor")
+        check("migrations floor set",
+              SUITE_PROFILES["security-automatic-migrations"]["min_docs"] > 0, True)
+        check("ad gate is exact",
+              SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
         # Unknown suite must fail loudly rather than silently sweeping persona.
         try:
@@ -559,6 +575,17 @@ def self_test() -> int:
             pass
     finally:
         SUITE = saved
+
+    # No persona-matrix identity may survive anywhere in the file: the gate
+    # resolved "latest execution" by a hardcoded persona-matrix dataset UUID,
+    # so on an AD/migrations run it counted the model's OLD persona-matrix
+    # execution (294 docs) and compared it to the new suite's expectation.
+    # The sweep read as FAIL while the real run was fine -- and would have
+    # read as PASS if the numbers had happened to line up.
+    src = Path(__file__).read_text()
+    check("no hardcoded dataset uuid", ("f2db90e6-cb7f" + "-58f2-b862-1b69e47f6a77") in src, False)
+    for suite_id in SUITE_PROFILES:
+        check(f"gate scopes to {suite_id}", suite_profile(suite_id)["gate_suite_id"], suite_id)
 
     print(f"self-test: {len(failures)} failure(s)")
     for f in failures:
@@ -706,7 +733,7 @@ def check_golden(model: str, ip: str) -> dict:
         "sort": [{"@timestamp": {"order": "desc"}}],
         "query": {"bool": {"must": [
             {"term": {"task.model.id": stored_id}},
-            {"term": {"example.dataset.id": "f2db90e6-cb7f-58f2-b862-1b69e47f6a77"}},
+            {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
         ]}},
     })
     # NOTE: cmd is passed to ssh as a single argv (no local shell), so the
@@ -754,7 +781,16 @@ def check_golden(model: str, ip: str) -> dict:
         except Exception:
             return {"count": -1, "error": out[:200]}
     reps = int(os.environ.get("EVAL_REPETITIONS", "1") or "1")
-    result["expected"] = suite_profile()["n_examples"] * n_evaluators * reps
+    prof = suite_profile()
+    if prof.get("gate") == "floor":
+        # Suites whose datasets carry different evaluator counts (migrations:
+        # 7 / 9 / 8) have no examples x evaluators product. Gate on a floor
+        # measured from a canary run, and report it as such.
+        result["expected"] = prof["min_docs"]
+        result["gate"] = "floor"
+    else:
+        result["expected"] = prof["n_examples"] * n_evaluators * reps
+        result["gate"] = "exact"
     result["execution_id"] = exec_id
     return result
 
@@ -937,13 +973,17 @@ def main() -> int:
         # otherwise PASS a run that produced nothing (observed when the spec
         # overlay missed tool_registration_check.ts and every run died at
         # require time).
+        gate_kind = result.get("gate", "exact")
+        meets = (
+            count >= expected_docs if gate_kind == "floor" else count == expected_docs
+        )
         state = (
             "PASS"
             if rc == 0
             and not result.get("error")
             and isinstance(count, int)
             and count > 0
-            and count == expected_docs
+            and meets
             else "FAIL"
         )
         json.dump({"ip": ip, "model": model, "state": state,
