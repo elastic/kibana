@@ -57,8 +57,14 @@ export const EventDetail = memo(function EventDetail({
     selectors.isCurrentRelatedEventLoading(state.analyzer[id])
   );
   const isTreeLoading = useSelector((state: State) => selectors.isTreeLoading(state.analyzer[id]));
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStatus = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)

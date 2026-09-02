@@ -268,6 +268,16 @@ const ariaFlowtoCandidateSelector = composeSelectors(
 );
 
 /**
+ * The origin node's collapsed lifecycle `@timestamp`, which is the process start time from the tree query that sorts
+ * `@timestamp` ascending. This approximates the analyzed-event time for ancestor labels, but it is not the alert
+ * document timestamp.
+ */
+export const originTimestamp: (state: ResolverState) => number | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originTimestamp
+);
+
+/**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
