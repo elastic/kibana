@@ -31,9 +31,12 @@ export interface TagCloudVisDependencies {
 }
 
 /** @internal */
-export class TagCloudPlugin
-  implements Plugin<void, void, TagCloudPluginSetupDependencies, TagCloudPluginStartDependencies>
-{
+export class TagCloudPlugin implements Plugin<
+  void,
+  void,
+  TagCloudPluginSetupDependencies,
+  TagCloudPluginStartDependencies
+> {
   initializerContext: PluginInitializerContext<TagcloudPublicConfig>;
 
   constructor(initializerContext: PluginInitializerContext<TagcloudPublicConfig>) {

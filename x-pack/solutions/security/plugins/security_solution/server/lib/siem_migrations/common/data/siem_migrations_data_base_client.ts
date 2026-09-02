@@ -84,7 +84,7 @@ export class SiemMigrationsDataBaseClient {
   protected getTotalHits(response: SearchResponse) {
     return typeof response.hits.total === 'number'
       ? response.hits.total
-      : response.hits.total?.value ?? 0;
+      : (response.hits.total?.value ?? 0);
   }
 
   /** Returns functions to iterate over all the search results in batches */

@@ -10,9 +10,12 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getRuntimeFieldEditorLoader } from './load_editor';
 
-export class RuntimeFieldsPlugin
-  implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>
-{
+export class RuntimeFieldsPlugin implements Plugin<
+  PluginSetup,
+  PluginStart,
+  SetupPlugins,
+  StartPlugins
+> {
   public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): PluginSetup {
     return {
       loadEditor: getRuntimeFieldEditorLoader(core),

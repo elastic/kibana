@@ -95,7 +95,7 @@ export interface IAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   initializeExecution(opts: InitializeExecutionOpts): Promise<void>;
   hasReachedAlertLimit(): boolean;
@@ -173,7 +173,7 @@ export interface InitializeExecutionOpts {
 
 export interface TrackedAlerts<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
 > {
   active: Record<string, LegacyAlert<State, Context>>;
   recovered: Record<string, LegacyAlert<State, Context>>;
@@ -183,7 +183,7 @@ export interface PublicAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   report(
     alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
@@ -199,7 +199,7 @@ export interface ReportedAlert<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   id: string; // alert instance id
   actionGroup: ActionGroupIds;
@@ -212,7 +212,7 @@ export interface RecoveredAlertData<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > {
   alert: LegacyAlert<State, Context, ActionGroupIds>;
   hit?: AlertData;
@@ -228,7 +228,7 @@ export type UpdateableAlert<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
-  ActionGroupIds extends string
+  ActionGroupIds extends string,
 > = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;
 
 export interface SearchResult<AlertData, Aggregation = unknown> {
@@ -270,8 +270,7 @@ export interface GetLifecycleAlertsQueryByExecutionUuidParams {
   alertsFilter?: AlertsFilter | null;
 }
 
-export interface GetQueryByExecutionUuidParams
-  extends GetLifecycleAlertsQueryByExecutionUuidParams {
+export interface GetQueryByExecutionUuidParams extends GetLifecycleAlertsQueryByExecutionUuidParams {
   action?: string;
 }
 
@@ -300,8 +299,9 @@ export interface GetLifecycleAlertsQueryByTimeRangeParams {
   alertsFilter?: AlertsFilter | null;
 }
 
-export interface GetQueryByTimeRangeParams<AlertTypes>
-  extends GetLifecycleAlertsQueryByTimeRangeParams {
+export interface GetQueryByTimeRangeParams<
+  AlertTypes,
+> extends GetLifecycleAlertsQueryByTimeRangeParams {
   type?: AlertTypes;
 }
 

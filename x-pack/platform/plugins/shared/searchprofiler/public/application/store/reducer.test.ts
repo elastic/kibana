@@ -45,9 +45,7 @@ describe('Searchprofiler store reducer', () => {
     expect(nextState).toEqual({
       ...state,
       highlightDetails: {
-        operation: {
-          /* .children no longer defined */
-        },
+        operation: {/* .children no longer defined */},
         shardName: '[a][c]',
         indexName: 'test',
       },

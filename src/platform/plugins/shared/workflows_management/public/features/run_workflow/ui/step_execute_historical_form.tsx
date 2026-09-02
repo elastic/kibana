@@ -81,9 +81,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(
       initialWorkflowRunId ?? null
     );
-    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] = useState(
-      !!initialStepExecutionId
-    );
+    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] =
+      useState(!!initialStepExecutionId);
     const [startedAfter, setStartedAfter] = useState('now-1w');
     const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
@@ -181,10 +180,13 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       const results = stepExecutionsList?.results ?? [];
       if (!results.length) return [];
       // Count the number of step executions for each workflow run to identify loop executions
-      const workflowRunIdsStepCount = results.reduce((acc, stepExecution) => {
-        acc[stepExecution.workflowRunId] = (acc[stepExecution.workflowRunId] ?? 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const workflowRunIdsStepCount = results.reduce(
+        (acc, stepExecution) => {
+          acc[stepExecution.workflowRunId] = (acc[stepExecution.workflowRunId] ?? 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       const loopStepRunIdsIndex = new Map<string, number>(
         Object.entries(workflowRunIdsStepCount)

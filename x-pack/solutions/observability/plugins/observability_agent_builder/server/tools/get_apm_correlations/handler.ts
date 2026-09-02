@@ -229,7 +229,7 @@ export async function getToolHandler({
   const overallTotalHits =
     typeof overallCountResp.hits.total === 'number'
       ? overallCountResp.hits.total
-      : overallCountResp.hits.total?.value ?? 0;
+      : (overallCountResp.hits.total?.value ?? 0);
 
   if (overallTotalHits === 0) {
     const emptyBase = {
@@ -457,7 +457,7 @@ export async function getToolHandler({
   const subsetTotalHits =
     typeof subsetCountResp.hits.total === 'number'
       ? subsetCountResp.hits.total
-      : subsetCountResp.hits.total?.value ?? 0;
+      : (subsetCountResp.hits.total?.value ?? 0);
 
   const defaultCandidates =
     metric === 'infra_metrics'

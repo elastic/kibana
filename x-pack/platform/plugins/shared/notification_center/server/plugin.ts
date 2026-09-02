@@ -28,15 +28,12 @@ import type {
   NotificationCenterStartDependencies,
 } from './types';
 
-export class NotificationCenterPlugin
-  implements
-    Plugin<
-      NotificationCenterPluginSetup,
-      NotificationCenterPluginStart,
-      NotificationCenterSetupDependencies,
-      NotificationCenterStartDependencies
-    >
-{
+export class NotificationCenterPlugin implements Plugin<
+  NotificationCenterPluginSetup,
+  NotificationCenterPluginStart,
+  NotificationCenterSetupDependencies,
+  NotificationCenterStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext<NotificationCenterConfig>) {

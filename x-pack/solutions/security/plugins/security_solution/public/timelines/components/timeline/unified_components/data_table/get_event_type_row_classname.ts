@@ -16,8 +16,8 @@ export const getEventTypeRowClassName = (ecsData: TimelineItem['ecs']) => {
         ? 'eqlSequence'
         : 'eqlNonSequence'
       : eventType === 'raw'
-      ? 'rawEvent'
-      : 'nonRawEvent';
+        ? 'rawEvent'
+        : 'nonRawEvent';
 
   const buildingBlockTypeClassName = isEventBuildingBlockType(ecsData) ? 'buildingBlockType' : '';
 

@@ -531,7 +531,7 @@ export async function getPackageInfo({
   const resolvedPkgVersion =
     pkgVersion !== ''
       ? pkgVersion
-      : savedObject?.attributes.install_version ?? latestPackage!.version;
+      : (savedObject?.attributes.install_version ?? latestPackage!.version);
 
   // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
   // otherwise build it from the archive

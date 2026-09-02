@@ -74,9 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
         predicate: (record) =>
           Boolean(
             record.log?.logger === 'elasticsearch.query.data' &&
-              record.trace?.id === responseTraceId &&
-              // esClient.ping() request
-              record.message?.includes('HEAD /')
+            record.trace?.id === responseTraceId &&
+            // esClient.ping() request
+            record.message?.includes('HEAD /')
           ),
         logs,
       });

@@ -18,9 +18,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
 
-  const saml1IdPMetadataPath = require.resolve(
-    '@kbn/security-api-integration-helpers/saml/idp_metadata.xml'
-  );
+  const saml1IdPMetadataPath =
+    require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),

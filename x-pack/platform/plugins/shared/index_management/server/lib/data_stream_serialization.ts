@@ -133,8 +133,8 @@ export function deserializeDataStream(
         Array.isArray(enabledSetting) && enabledSetting.every((p) => typeof p === 'string')
           ? enabledSetting
           : typeof enabledSetting === 'string'
-          ? [enabledSetting]
-          : [];
+            ? [enabledSetting]
+            : [];
 
       matchesFailureStoreClusterPattern = patterns.some((pattern) =>
         wildcardToRegExp(pattern).test(name)
@@ -158,8 +158,8 @@ export function deserializeDataStream(
     indexMode === LOGSDB_INDEX_MODE || indexMode === STANDARD_INDEX_MODE
       ? indexMode
       : isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
-      ? LOGSDB_INDEX_MODE
-      : STANDARD_INDEX_MODE;
+        ? LOGSDB_INDEX_MODE
+        : STANDARD_INDEX_MODE;
 
   const resolvedFailureStoreDefaultRetentionPeriod =
     failureStoreLifecycle?.retention_determined_by === 'default_failures_retention' &&

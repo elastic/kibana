@@ -165,7 +165,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           background: ${backgroundBaseSuccess};
         }
         .embPanel__hoverActionsAnchor {
-          --internalBorderStyle: 1px solid ${success}!important;
+          --internalBorderStyle: 1px solid ${success} !important;
         }
       `}
     >

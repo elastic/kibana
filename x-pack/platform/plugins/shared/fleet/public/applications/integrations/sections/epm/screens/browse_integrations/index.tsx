@@ -70,7 +70,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     automaticImportCapabilities?.view ?? Boolean(automaticImport);
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? (automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations)
     : useEmptyAllIntegrations;
   const {
     integrations,

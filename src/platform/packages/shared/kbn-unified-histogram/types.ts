@@ -158,8 +158,8 @@ export interface LensRequestData {
 }
 
 export enum LensVisServiceStatus {
-  'initial' = 'initial',
-  'completed' = 'completed',
+  initial = 'initial',
+  completed = 'completed',
 }
 
 export interface LensVisServiceState {

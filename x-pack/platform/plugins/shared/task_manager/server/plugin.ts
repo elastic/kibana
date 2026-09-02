@@ -137,15 +137,12 @@ export interface TaskManagerPluginsSetup {
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
 
-export class TaskManagerPlugin
-  implements
-    Plugin<
-      TaskManagerSetupContract,
-      TaskManagerStartContract,
-      TaskManagerPluginsSetup,
-      TaskManagerPluginsStart
-    >
-{
+export class TaskManagerPlugin implements Plugin<
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+  TaskManagerPluginsSetup,
+  TaskManagerPluginsStart
+> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
   private usageCounter?: UsageCounter;

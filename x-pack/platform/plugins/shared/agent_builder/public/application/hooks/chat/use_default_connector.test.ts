@@ -21,7 +21,7 @@ const createConnector = (id: string, isPreconfigured = false): AIConnector =>
     isSystemAction: false,
     config: {},
     isConnectorTypeDeprecated: false,
-  } as AIConnector);
+  }) as AIConnector;
 
 describe('useDefaultConnector', () => {
   it('returns GenAI default when set and available', () => {

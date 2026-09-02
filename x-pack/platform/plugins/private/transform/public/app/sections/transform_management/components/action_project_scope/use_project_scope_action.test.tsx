@@ -44,7 +44,7 @@ const createTransformItem = (id: string) =>
       source: { index: ['source-index'], project_routing: PROJECT_ROUTING.ORIGIN },
       dest: { index: 'dest-index' },
     },
-  } as unknown as TransformListRow);
+  }) as unknown as TransformListRow;
 
 const transformItem = createTransformItem('transform-1');
 const secondTransformItem = createTransformItem('transform-2');

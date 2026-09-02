@@ -25,15 +25,15 @@ type CombinedAPIRequest<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
   TEndpoint extends APIEndpoint
     ? APIReturnType<TEndpoint>
     : TEndpoint extends SourcesAPIEndpoint
-    ? SourcesAPIReturnType<TEndpoint>
-    : never;
+      ? SourcesAPIReturnType<TEndpoint>
+      : never;
 
 type CombinedOptions<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
   TEndpoint extends APIEndpoint
     ? Options<TEndpoint>
     : TEndpoint extends SourcesAPIEndpoint
-    ? SourceOptions<TEndpoint>
-    : never;
+      ? SourceOptions<TEndpoint>
+      : never;
 
 type Options<TEndpoint extends APIEndpoint> = {
   type?: 'form-data';
@@ -61,7 +61,7 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
 
   async function makeApiRequest<
     TEndpoint extends APIEndpoint | SourcesAPIEndpoint,
-    TOpts extends CombinedOptions<TEndpoint>
+    TOpts extends CombinedOptions<TEndpoint>,
   >({
     options,
     headers,

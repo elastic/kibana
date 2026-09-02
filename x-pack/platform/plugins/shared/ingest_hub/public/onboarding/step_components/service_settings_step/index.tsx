@@ -80,17 +80,17 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
 
   const activeFlyoutInstance = activeFlyoutInstanceId
-    ? instances.find((i) => i.instanceId === activeFlyoutInstanceId) ?? null
+    ? (instances.find((i) => i.instanceId === activeFlyoutInstanceId) ?? null)
     : null;
   const activeFlyoutService = activeFlyoutInstance
-    ? awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null
+    ? (awsServicesMap?.get(activeFlyoutInstance.serviceId) ?? null)
     : null;
 
   const duplicateSourceInstance = duplicateSourceInstanceId
-    ? instances.find((i) => i.instanceId === duplicateSourceInstanceId) ?? null
+    ? (instances.find((i) => i.instanceId === duplicateSourceInstanceId) ?? null)
     : null;
   const duplicateSourceService = duplicateSourceInstance
-    ? awsServicesMap?.get(duplicateSourceInstance.serviceId) ?? null
+    ? (awsServicesMap?.get(duplicateSourceInstance.serviceId) ?? null)
     : null;
 
   const handleFlyoutApply =

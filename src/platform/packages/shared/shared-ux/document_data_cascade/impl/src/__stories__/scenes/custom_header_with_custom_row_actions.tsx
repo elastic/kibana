@@ -52,19 +52,22 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
-        return groupByFields.reduce<Record<string, string>>((acc, field) => {
-          return {
-            ...acc,
-            [field]:
-              nodePathMap && nodePath?.indexOf(field) !== -1
-                ? nodePathMap[field]
-                : /clientip/.test(field)
-                ? faker.internet.ipv4()
-                : /url\.keyword/.test(field)
-                ? faker.internet.url({ protocol: 'https' })
-                : faker.person.fullName(),
-          };
-        }, {} as Record<string, string>);
+        return groupByFields.reduce<Record<string, string>>(
+          (acc, field) => {
+            return {
+              ...acc,
+              [field]:
+                nodePathMap && nodePath?.indexOf(field) !== -1
+                  ? nodePathMap[field]
+                  : /clientip/.test(field)
+                    ? faker.internet.ipv4()
+                    : /url\.keyword/.test(field)
+                      ? faker.internet.url({ protocol: 'https' })
+                      : faker.person.fullName(),
+            };
+          },
+          {} as Record<string, string>
+        );
       },
       [groupByFields]
     );
@@ -236,8 +239,7 @@ export const CascadeCustomHeaderWithCustomRowActionsImplementation: StoryObj<
     ) {
       customerEmailPopoverRef.current = e.currentTarget as HTMLElement;
       setAlertsCandidates([this]);
-    },
-    []);
+    }, []);
 
     const rowHeaderActions = useCallback<
       NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderActions']>

@@ -73,10 +73,13 @@ export class ProductDocInstallClient {
       type: typeName,
       perPage: 100,
     };
-    const installStatus = Object.values(DocumentationProduct).reduce((memo, product) => {
-      memo[product] = { status: 'uninstalled' };
-      return memo;
-    }, {} as Record<ProductName, ProductInstallState>);
+    const installStatus = Object.values(DocumentationProduct).reduce(
+      (memo, product) => {
+        memo[product] = { status: 'uninstalled' };
+        return memo;
+      },
+      {} as Record<ProductName, ProductInstallState>
+    );
     try {
       const response = await this.soClient.find<TypeAttributes>(query);
       const savedObjects = isImpliedDefaultElserInferenceId(inferenceId)

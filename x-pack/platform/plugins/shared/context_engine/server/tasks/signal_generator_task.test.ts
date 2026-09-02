@@ -484,7 +484,7 @@ describe('scheduling', () => {
     ({
       ensureScheduled: jest.fn(async () => ({})),
       removeIfExists: jest.fn(async () => ({})),
-    } as unknown as TaskManagerStartContract);
+    }) as unknown as TaskManagerStartContract;
 
   it('schedules the task with the fixed id/type/interval', async () => {
     const taskManager = createTaskManagerStart();

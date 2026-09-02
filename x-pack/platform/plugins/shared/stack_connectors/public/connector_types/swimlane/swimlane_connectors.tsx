@@ -82,8 +82,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         status: (currentStep === 1
           ? 'selected'
           : currentStep === 2
-          ? 'complete'
-          : 'incomplete') as EuiStepStatus,
+            ? 'complete'
+            : 'incomplete') as EuiStepStatus,
         onClick: () => updateCurrentStep(1),
       },
       {
@@ -93,8 +93,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         status: (!isValid
           ? 'danger'
           : currentStep === 2
-          ? 'selected'
-          : 'incomplete') as EuiStepStatus,
+            ? 'selected'
+            : 'incomplete') as EuiStepStatus,
       },
     ],
     [

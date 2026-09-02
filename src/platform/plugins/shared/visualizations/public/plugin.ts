@@ -266,15 +266,12 @@ const styles = {
  *
  * @internal
  */
-export class VisualizationsPlugin
-  implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsSetupDeps,
-      VisualizationsStartDeps
-    >
-{
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsSetup,
+  VisualizationsStart,
+  VisualizationsSetupDeps,
+  VisualizationsStartDeps
+> {
   private readonly types: TypesService = new TypesService();
   private appStateSubscription?: Subscription;
   private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));

@@ -145,7 +145,7 @@ export type SuccessfulRunResult = {
   shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
-  {
+    {
       /**
        * Specifies the next run date / time for this task. If unspecified, this is
        * treated as a single-run task, and will not be rescheduled after

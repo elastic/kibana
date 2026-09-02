@@ -122,8 +122,8 @@ export const createPartitionQualityLlmEvaluator = (
          exp.max_overlap_threshold
        )} overlap)
        - Current overlap score: ${(1 - metrics.overlapScore).toFixed(2)} (${formatPercent(
-        metrics.overlapScore
-      )} overlap)
+         metrics.overlapScore
+       )} overlap)
        - Each partition should capture a cohesive group of documents`,
 
       `NAMING: Partition names should be descriptive and follow naming conventions.

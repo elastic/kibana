@@ -77,7 +77,7 @@ export const useDocumentFlyoutTitle = ({
   );
 
   const label = useMemo(
-    () => (isAttack ? attackTitle ?? ATTACK_TITLE : getDocumentTitle(hit)),
+    () => (isAttack ? (attackTitle ?? ATTACK_TITLE) : getDocumentTitle(hit)),
     [attackTitle, hit, isAttack]
   );
   const sessionTitle = useMemo(

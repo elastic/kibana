@@ -98,7 +98,7 @@ export const getSignalsByTag = async (
   const total =
     typeof response.hits.total === 'number'
       ? response.hits.total
-      : response.hits.total?.value ?? signals.length;
+      : (response.hits.total?.value ?? signals.length);
 
   return { signals, total };
 };

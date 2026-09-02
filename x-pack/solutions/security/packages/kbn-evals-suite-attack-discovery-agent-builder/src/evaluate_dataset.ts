@@ -146,7 +146,7 @@ const inspectWorkflow = async ({
     passedAlertCount,
     validatedDiscoveryCount: Array.isArray(pipeline.validated_discoveries)
       ? pipeline.validated_discoveries.length
-      : adToolResult?.discoveryCount ?? null,
+      : (adToolResult?.discoveryCount ?? null),
   };
 };
 

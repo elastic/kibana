@@ -280,7 +280,7 @@ export interface InventoryModel<
   TEntityType extends InventoryItemType,
   TAggregations extends AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
-  TCharts extends ChartsConfigMap | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined,
 > {
   id: TEntityType;
   displayName: string;

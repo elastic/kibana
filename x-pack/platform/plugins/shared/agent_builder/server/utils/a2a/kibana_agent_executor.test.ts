@@ -22,7 +22,7 @@ describe('KibanaAgentExecutor', () => {
       off: jest.fn(),
       once: jest.fn(),
       removeAllListeners: jest.fn(),
-    } as unknown as jest.Mocked<ExecutionEventBus>);
+    }) as unknown as jest.Mocked<ExecutionEventBus>;
 
   const createUserMessage = (): Message => ({
     kind: 'message',
@@ -50,7 +50,7 @@ describe('KibanaAgentExecutor', () => {
   ) => {
     const logger = { debug: jest.fn(), error: jest.fn() } as any;
     const kibanaRequest = { headers: {} } as unknown as KibanaRequest;
-    const getInternalServices = () => ({ execution } as any);
+    const getInternalServices = () => ({ execution }) as any;
     return new KibanaAgentExecutor({
       logger,
       getInternalServices,

@@ -37,7 +37,10 @@ export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 export class AnomalyExplorerChartsService {
   private _customTimeRange: TimeRange | undefined;
 
-  constructor(private timeFilter: TimefilterContract, private mlApi: MlApi) {
+  constructor(
+    private timeFilter: TimefilterContract,
+    private mlApi: MlApi
+  ) {
     this.timeFilter.enableTimeRangeSelector();
   }
 
@@ -59,7 +62,7 @@ export class AnomalyExplorerChartsService {
     return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
-      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
+      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed }) as CombinedJob);
   }
 
   public getAnomalyData$(

@@ -43,7 +43,7 @@ const createDataSetRow = ({
     data_source: dataSource,
     resource: 'bucket/*',
     description: '',
-  } as DataSetWithName);
+  }) as DataSetWithName;
 
 describe('DatasetsTable', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {

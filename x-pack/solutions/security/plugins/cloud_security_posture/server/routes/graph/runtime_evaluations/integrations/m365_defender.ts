@@ -7,14 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { IntegrationEvaluations } from "../types";
+import type { IntegrationEvaluations } from '../types';
 
 export const m365_defenderEvaluations = {
-  integration: "m365_defender",
+  integration: 'm365_defender',
   evaluations: [
     {
-      id: "detection_flags",
-      section: "Detection flags (mandatory \u2014 run first)",
+      id: 'detection_flags',
+      section: 'Detection flags (mandatory \u2014 run first)',
       esql: `| EVAL
   actor_exists = user.id IS NOT NULL OR user.name IS NOT NULL OR user.email IS NOT NULL OR user.domain IS NOT NULL
     OR process.name IS NOT NULL OR process.user.name IS NOT NULL OR process.user.id IS NOT NULL
@@ -28,8 +28,8 @@ export const m365_defenderEvaluations = {
   action_exists = event.action IS NOT NULL`,
     },
     {
-      id: "optional_classification",
-      section: "Optional classification helpers (when needed)",
+      id: 'optional_classification',
+      section: 'Optional classification helpers (when needed)',
       esql: `| EVAL
   entity.target.type = CASE(
     entity.target.type IS NOT NULL, entity.target.type,
@@ -42,8 +42,8 @@ export const m365_defenderEvaluations = {
   )`,
     },
     {
-      id: "actor",
-      section: "Combined ES|QL \u2014 actor fields",
+      id: 'actor',
+      section: 'Combined ES|QL \u2014 actor fields',
       esql: `| EVAL
   user.id = CASE(
     user.id IS NOT NULL, user.id,
@@ -65,8 +65,8 @@ export const m365_defenderEvaluations = {
   )`,
     },
     {
-      id: "event_action",
-      section: "Combined ES|QL \u2014 event action",
+      id: 'event_action',
+      section: 'Combined ES|QL \u2014 event action',
       esql: `| EVAL
   event.action = CASE(
     event.action IS NOT NULL, event.action,
@@ -75,8 +75,8 @@ export const m365_defenderEvaluations = {
   )`,
     },
     {
-      id: "target",
-      section: "Combined ES|QL \u2014 target fields",
+      id: 'target',
+      section: 'Combined ES|QL \u2014 target fields',
       esql: `| EVAL
   host.target.id = CASE(
     host.target.id IS NOT NULL, host.target.id,

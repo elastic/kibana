@@ -70,8 +70,8 @@ export const isDeferredMigration = (
 ): boolean =>
   Boolean(
     valid(migrationVersion) &&
-      valid(minDeferredKibanaVersion) &&
-      gte(migrationVersion, minDeferredKibanaVersion)
+    valid(minDeferredKibanaVersion) &&
+    gte(migrationVersion, minDeferredKibanaVersion)
   );
 
 export const isUserCommentSO = (

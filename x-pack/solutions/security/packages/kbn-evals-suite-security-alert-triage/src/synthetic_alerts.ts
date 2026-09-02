@@ -306,8 +306,8 @@ const ENTITY_CORRELATION_ALERTS: SyntheticAlert[] = ENTITY_CORRELATION_IDS.map((
       webServerAttackIndex % 5 === 0
         ? 'critical'
         : webServerAttackIndex % 3 === 0
-        ? 'high'
-        : 'high';
+          ? 'high'
+          : 'high';
     return {
       id,
       doc: {

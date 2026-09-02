@@ -31,7 +31,7 @@ const makeExecution = (
     duration: 300000,
     concurrencyGroupKey: `streams-ki-onboarding-${streamName}`,
     ...overrides,
-  } as WorkflowExecutionListItemDto);
+  }) as WorkflowExecutionListItemDto;
 
 const makeStream = (name: string, opts?: { query: boolean }): Streams.all.Definition =>
   opts?.query

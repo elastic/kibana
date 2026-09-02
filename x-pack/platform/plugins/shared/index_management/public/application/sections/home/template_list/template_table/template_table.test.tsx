@@ -181,7 +181,7 @@ const createTemplate = (overrides: Partial<TemplateListItem> = {}): TemplateList
 };
 
 const createHistory = (): ScopedHistory =>
-  ({ push: jest.fn(), location: {} } as unknown as ScopedHistory);
+  ({ push: jest.fn(), location: {} }) as unknown as ScopedHistory;
 
 describe('TemplateTable', () => {
   const mockTrackMetric = jest.fn();

@@ -36,9 +36,12 @@ import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
-export class PndPlugin
-  implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
-{
+export class PndPlugin implements Plugin<
+  PndPluginSetup,
+  PndPluginStart,
+  PndSetupDependencies,
+  PndStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: PndConfig;
   private spaces?: PndStartDependencies['spaces'];

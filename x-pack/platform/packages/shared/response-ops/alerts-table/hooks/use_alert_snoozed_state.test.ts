@@ -32,7 +32,7 @@ const makeAlert = (ruleId: string, instanceId: string): Alert =>
   ({
     [ALERT_RULE_UUID]: [ruleId],
     [ALERT_INSTANCE_ID]: [instanceId],
-  } as unknown as Alert);
+  }) as unknown as Alert;
 
 describe('useAlertSnoozedState', () => {
   beforeEach(() => {

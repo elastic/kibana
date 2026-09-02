@@ -125,7 +125,7 @@ describe('registerAssetInventoryUsageCollector', () => {
   const mockCoreServicesTuple: [
     CoreStart,
     SecuritySolutionPluginStartDependencies,
-    SecuritySolutionPluginStart
+    SecuritySolutionPluginStart,
   ] = [
     {} as CoreStart,
     {} as SecuritySolutionPluginStartDependencies,

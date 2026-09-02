@@ -18,7 +18,7 @@ export const getTaskManagerMetricEvent = (value: TaskManagerMetrics) => {
 const mockDefinitions = (overrides: Record<string, { taskTypeGroup?: string }> = {}) =>
   ({
     get: (type: string) => overrides[type],
-  } as unknown as TaskTypeDictionary);
+  }) as unknown as TaskTypeDictionary;
 
 describe('TaskOverdueMetricsAggregator', () => {
   let taskOverdueMetricsAggregator: TaskOverdueMetricsAggregator;

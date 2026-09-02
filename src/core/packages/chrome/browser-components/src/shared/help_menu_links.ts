@@ -88,7 +88,7 @@ export const toContextMenuItem = (
         closeMenu();
       }
     },
-  } as EuiContextMenuPanelItemDescriptor);
+  }) as EuiContextMenuPanelItemDescriptor;
 
 const HELP_MENU_WHATS_NEW_TEST_SUBJ = 'helpMenuWhatsNewButton';
 

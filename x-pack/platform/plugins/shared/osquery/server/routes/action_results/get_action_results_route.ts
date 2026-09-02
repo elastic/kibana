@@ -96,7 +96,7 @@ export const getActionResultsRoute = (
           }
 
           const spaceId = osqueryContext?.service?.getActiveSpace
-            ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+            ? ((await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID)
             : DEFAULT_SPACE_ID;
 
           const search = await getScopedSearch(

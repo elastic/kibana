@@ -42,15 +42,12 @@ import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/maintainers/automated_resolution';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 
-export class EntityStorePlugin
-  implements
-    Plugin<
-      EntityStoreSetupContract,
-      EntityStoreStartContract,
-      EntityStoreSetupPlugins,
-      EntityStoreStartPlugins
-    >
-{
+export class EntityStorePlugin implements Plugin<
+  EntityStoreSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 

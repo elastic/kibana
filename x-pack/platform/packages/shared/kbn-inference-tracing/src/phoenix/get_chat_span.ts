@@ -110,9 +110,9 @@ export function getChatSpan(span: tracing.ReadableSpan) {
   const parsedTools: Record<string, ToolDefinition> = span.attributes[
     GenAISemanticConventions.GenAIToolDefinitions
   ]
-    ? parseJsonAttr<Record<string, ToolDefinition>>(
+    ? (parseJsonAttr<Record<string, ToolDefinition>>(
         span.attributes[GenAISemanticConventions.GenAIToolDefinitions]
-      ) ?? {}
+      ) ?? {})
     : {};
 
   span.attributes[LLM_TOOLS] = JSON.stringify(

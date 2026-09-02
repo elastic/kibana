@@ -55,7 +55,7 @@ const createMockWorkflowApi = (
         version: '1',
       },
     }),
-  } as unknown as jest.Mocked<WorkflowApi>);
+  }) as unknown as jest.Mocked<WorkflowApi>;
 
 describe('export_workflows', () => {
   beforeEach(() => {

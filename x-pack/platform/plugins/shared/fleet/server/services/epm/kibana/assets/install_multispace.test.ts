@@ -69,7 +69,7 @@ const makeInstalledPkg = (
         additionalSpaces.map((s) => [s, [{ id: `${s}-dash`, type: 'dashboard' }]])
       ),
     } as unknown as Installation,
-  } as SavedObject<Installation>);
+  }) as SavedObject<Installation>;
 
 const makePackageInstallContext = () => ({
   packageInfo: { name: 'nginx', title: 'Nginx', version: '2.3.2' } as never,

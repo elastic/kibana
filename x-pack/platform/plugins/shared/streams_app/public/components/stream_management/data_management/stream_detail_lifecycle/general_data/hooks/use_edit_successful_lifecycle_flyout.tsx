@@ -141,7 +141,7 @@ export const useEditSuccessfulLifecycleFlyout = ({
 
   const inheritedEffectiveLifecycleOrNull = isLoadingInheritedEffectiveLifecycle
     ? null
-    : inheritedEffectiveLifecycle ?? null;
+    : (inheritedEffectiveLifecycle ?? null);
 
   const isLoadingInherited =
     inheritLifecycle && inheritedFetchEnabled && inheritedEffectiveLifecycleOrNull === null;

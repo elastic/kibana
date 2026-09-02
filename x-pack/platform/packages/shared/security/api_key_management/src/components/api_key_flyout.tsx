@@ -1225,7 +1225,7 @@ function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
   const customPrivileges =
     apiKey.type !== 'cross_cluster' ? Object.keys(apiKey.role_descriptors).length > 0 : false;
   const certificateIdentity =
-    apiKey.type === 'cross_cluster' ? apiKey.certificate_identity ?? '' : '';
+    apiKey.type === 'cross_cluster' ? (apiKey.certificate_identity ?? '') : '';
 
   return {
     name: apiKey.name,

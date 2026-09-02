@@ -176,8 +176,8 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
   isOfAggregateQueryType(searchSource.query)
     ? searchSource.query.esql
     : isObject(searchSource.index)
-    ? searchSource.index.id
-    : searchSource.index;
+      ? searchSource.index.id
+      : searchSource.index;
 
 export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,

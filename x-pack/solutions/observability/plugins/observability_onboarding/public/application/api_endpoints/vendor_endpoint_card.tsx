@@ -42,7 +42,7 @@ export const VendorEndpointCard = ({
   onCreateApiKey,
 }: Props) => {
   const { colorMode } = useEuiTheme();
-  const logo = colorMode === 'DARK' ? vendor.darkLogo ?? vendor.logo : vendor.logo;
+  const logo = colorMode === 'DARK' ? (vendor.darkLogo ?? vendor.logo) : vendor.logo;
 
   return (
     <EuiPanel

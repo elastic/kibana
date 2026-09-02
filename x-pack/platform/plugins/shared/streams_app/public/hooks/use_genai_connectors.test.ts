@@ -50,7 +50,7 @@ const createLoadConnectorsResult = (
     refetch: jest.fn(),
     soEntryFound: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useLoadConnectors>);
+  }) as unknown as ReturnType<typeof useLoadConnectors>;
 
 describe('useGenAIConnectors', () => {
   const mockHttp = {} as HttpSetup;

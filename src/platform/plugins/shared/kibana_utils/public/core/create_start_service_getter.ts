@@ -18,7 +18,7 @@ interface StartServices<Plugins = unknown, OwnContract = unknown, Core = CoreSta
 export type StartServicesGetter<
   Plugins = unknown,
   OwnContract = unknown,
-  Core = CoreStart
+  Core = CoreStart,
 > = () => StartServices<Plugins, OwnContract>;
 
 /**

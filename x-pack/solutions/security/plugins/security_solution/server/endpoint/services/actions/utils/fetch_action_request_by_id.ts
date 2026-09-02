@@ -32,7 +32,7 @@ import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 export const fetchActionRequestById = async <
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TMeta extends {} = {}
+  TMeta extends {} = {},
 >(
   endpointService: EndpointAppContextService,
   spaceId: string,
@@ -79,8 +79,8 @@ export const fetchActionRequestById = async <
     const actionTags = Array.isArray(actionRequest.tags)
       ? actionRequest.tags
       : actionRequest.tags
-      ? [actionRequest.tags]
-      : [];
+        ? [actionRequest.tags]
+        : [];
     const isOrphanAction = actionTags.includes(
       ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted
     );

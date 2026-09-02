@@ -153,9 +153,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           parentApi,
           returnFocus,
           loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { EditCustomContentFlyout } = await import(
-              './components/edit_custom_content_flyout'
-            );
+            const { EditCustomContentFlyout } =
+              await import('./components/edit_custom_content_flyout');
 
             const handleSave = (
               newEsqlQuery: string | undefined,
@@ -194,7 +193,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             function FlyoutWithReactiveState() {
               const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
                 apiPublishesTimeRange(parentApi)
-                  ? parentApi.timeRange$.getValue() ?? undefined
+                  ? (parentApi.timeRange$.getValue() ?? undefined)
                   : undefined
               );
               const [isApproximate, setIsApproximate] = useState(isApproximate$.getValue());
@@ -327,7 +326,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
           apiPublishesTimeRange(parentApi)
-            ? parentApi.timeRange$.getValue() ?? undefined
+            ? (parentApi.timeRange$.getValue() ?? undefined)
             : undefined
         );
 

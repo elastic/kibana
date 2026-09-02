@@ -47,8 +47,8 @@ export function toListItem(
     ...(document.object.sequence !== undefined
       ? { metadata: { version: document.object.sequence } }
       : document.metadata
-      ? { metadata: document.metadata }
-      : {}),
+        ? { metadata: document.metadata }
+        : {}),
   };
 
   return item;

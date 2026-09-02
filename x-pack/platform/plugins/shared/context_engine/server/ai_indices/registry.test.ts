@@ -27,7 +27,7 @@ const makeServiceMock = (overrides: Partial<AiIndexService> = {}): jest.Mocked<A
     list: jest.fn(),
     delete: jest.fn(),
     ...overrides,
-  } as unknown as jest.Mocked<AiIndexService>);
+  }) as unknown as jest.Mocked<AiIndexService>;
 
 describe('AiIndexRegistry', () => {
   let registry: AiIndexRegistry;

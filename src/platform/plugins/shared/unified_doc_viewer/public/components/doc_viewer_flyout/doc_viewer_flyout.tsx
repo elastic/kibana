@@ -41,8 +41,10 @@ import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
-export interface UnifiedDocViewerFlyoutProps
-  extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
+export interface UnifiedDocViewerFlyoutProps extends Pick<
+  DocViewerProps,
+  'initialTabId' | 'onUpdateSelectedTabId'
+> {
   docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;

@@ -738,7 +738,7 @@ export function ComposeDiscoverFlyout({
           if (isBuilderMode) {
             const formQuery = methods.getValues('query');
             const builderRecover =
-              formQuery.format === 'composed' ? formQuery.recovery?.segment ?? '' : '';
+              formQuery.format === 'composed' ? (formQuery.recovery?.segment ?? '') : '';
             if (builderRecover.trim()) {
               return { ...q, recovery: { segment: builderRecover } };
             }
@@ -1278,12 +1278,10 @@ export function ComposeDiscoverFlyout({
                 ) : (
                   <EuiFlexItem grow>
                     <HorizontalMinimalStepper
-                      steps={steps.map(
-                        (s, i): MinimalStep => ({
-                          title: s.title,
-                          status: getStepStatus(uiState.step, i),
-                        })
-                      )}
+                      steps={steps.map((s, i): MinimalStep => ({
+                        title: s.title,
+                        status: getStepStatus(uiState.step, i),
+                      }))}
                     />
                   </EuiFlexItem>
                 )}

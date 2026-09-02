@@ -242,8 +242,7 @@ export class LensAttributes {
     const isFormulaColumn =
       Boolean(
         metricOptions &&
-          (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)
-            ?.formula
+        (metricOptions.find((option) => option.id === selectedMetricField) as MetricOption)?.formula
       ) || yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     let orderBy: TermColumnParamsOrderBy = {

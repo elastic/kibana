@@ -146,7 +146,7 @@ export const createChildVirtualizerController = ({
     if (!root) return 0;
     const scrollEl = root.scrollElement;
     const offset = root.scrollOffset ?? 0;
-    const height = scrollEl ? (scrollEl as HTMLElement).clientHeight ?? 0 : 0;
+    const height = scrollEl ? ((scrollEl as HTMLElement).clientHeight ?? 0) : 0;
     return offset + height / 2;
   };
 

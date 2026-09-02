@@ -29,7 +29,7 @@ const buildItem = (overrides: Partial<CellItem> = {}): CellItem =>
       indexPatternId: undefined,
     },
     ...overrides,
-  } as CellItem);
+  }) as CellItem;
 
 const renderCell = (item: CellItem, dataViewNameMap: Record<string, string> = {}) =>
   render(

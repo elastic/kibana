@@ -43,8 +43,8 @@ export class HistogramFormat extends FieldFormat {
         subFormatId === 'bytes'
           ? BytesFormat
           : subFormatId === 'percent'
-          ? PercentFormat
-          : NumberFormat;
+            ? PercentFormat
+            : NumberFormat;
       const converter = new SubFormat(this.param('params'), this.getConfig);
       return converter.convertToText(val, options);
     } else {

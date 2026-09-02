@@ -104,7 +104,7 @@ describe('comment_to_esql/utils', () => {
     const buildEditor = () =>
       ({
         executeEdits: jest.fn(),
-      } as unknown as monaco.editor.IStandaloneCodeEditor);
+      }) as unknown as monaco.editor.IStandaloneCodeEditor;
 
     it('inserts on the next line and returns the matching range when not on the last line', () => {
       const editor = buildEditor();

@@ -27,7 +27,7 @@ const buildPackageInfo = (ilmPolicy?: string) =>
     installationInfo: {
       namespace_customization_settings: ilmPolicy ? { production: { ilm_policy: ilmPolicy } } : {},
     },
-  } as any);
+  }) as any;
 
 describe('applyIlmPolicyChange', () => {
   beforeEach(() => {

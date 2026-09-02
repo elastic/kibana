@@ -94,10 +94,10 @@ export const noDataExample = ({
             'Composed format has no `query.no_data` block — the `base` query is the data-presence query.',
           ]
         : needsStandalonePresenceQuery(strategy)
-        ? [
-            'Standalone format includes a `query.no_data` ES|QL block that counts documents per host.name, distinct from the breach query.',
-          ]
-        : []),
+          ? [
+              'Standalone format includes a `query.no_data` ES|QL block that counts documents per host.name, distinct from the breach query.',
+            ]
+          : []),
       'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],

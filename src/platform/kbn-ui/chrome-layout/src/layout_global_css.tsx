@@ -103,14 +103,16 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
     ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
-    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${applicationTop +
-    applicationTopBarHeight}px);
+    ${layoutVarName('application.topBar.bottom')}: calc(
+      100vh - ${applicationTop + applicationTopBarHeight}px
+    );
   `;
 
   const applicationBottomBar = css`
     ${layoutVarName('application.bottomBar.height')}: ${applicationBottomBarHeight}px;
-    ${layoutVarName('application.bottomBar.top')}: calc(100vh - ${footerHeight +
-    applicationBottomBarHeight}px);
+    ${layoutVarName('application.bottomBar.top')}: calc(
+      100vh - ${footerHeight + applicationBottomBarHeight}px
+    );
     ${layoutVarName('application.bottomBar.left')}: ${navigationWidth}px;
     ${layoutVarName('application.bottomBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.bottomBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);

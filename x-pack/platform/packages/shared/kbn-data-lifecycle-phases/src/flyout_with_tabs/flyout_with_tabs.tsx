@@ -32,7 +32,7 @@ export interface FlyoutHeaderTab<TId extends string> {
 /** At least one tab so the flyout always has a valid selected tab id. */
 export type NonEmptyFlyoutTabs<TId extends string> = readonly [
   FlyoutHeaderTab<TId>,
-  ...FlyoutHeaderTab<TId>[]
+  ...FlyoutHeaderTab<TId>[],
 ];
 
 export interface FlyoutWithTabsProps<TId extends string> {

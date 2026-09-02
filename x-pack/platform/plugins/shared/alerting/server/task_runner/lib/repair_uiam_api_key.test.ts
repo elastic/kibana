@@ -38,7 +38,7 @@ const getRawRule = (overrides: Partial<RawRule> = {}): RawRule =>
     uiamApiKey: Buffer.from('stale-id:essu_stale').toString('base64'),
     apiKeyCreatedByUser: false,
     ...overrides,
-  } as RawRule);
+  }) as RawRule;
 
 const setup = ({
   uiamConvert,

@@ -87,9 +87,8 @@ describe('Alerting Plugin', () => {
         beforeEach(() => jest.clearAllMocks());
 
         it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
-          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-            generateAlertingConfig()
-          );
+          const context =
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
           plugin = new AlertingPlugin(context);
 
           plugin.setup(setupMocks, mockPlugins);
@@ -103,9 +102,8 @@ describe('Alerting Plugin', () => {
         });
 
         it('should create usage counter if usageCollection plugin is defined', async () => {
-          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-            generateAlertingConfig()
-          );
+          const context =
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
           plugin = new AlertingPlugin(context);
 
           const usageCollectionSetup = createUsageCollectionSetupMock();
@@ -152,9 +150,8 @@ describe('Alerting Plugin', () => {
         });
 
         it(`exposes configured minimumScheduleInterval()`, async () => {
-          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-            generateAlertingConfig()
-          );
+          const context =
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
           plugin = new AlertingPlugin(context);
 
           const setupContract = plugin.setup(setupMocks, mockPlugins);
@@ -174,9 +171,8 @@ describe('Alerting Plugin', () => {
         describe('registerType()', () => {
           let setup: AlertingServerSetup;
           beforeEach(async () => {
-            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-              generateAlertingConfig()
-            );
+            const context =
+              coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
             plugin = new AlertingPlugin(context);
             setup = plugin.setup(setupMocks, mockPlugins);
             await waitForSetupComplete(setupMocks);
@@ -368,9 +364,8 @@ describe('Alerting Plugin', () => {
           });
 
           it('should register type if enabled config is not set', async () => {
-            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-              generateAlertingConfig()
-            );
+            const context =
+              coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
             plugin = new AlertingPlugin(context);
             const setup = plugin.setup(setupMocks, {
               ...mockPlugins,
@@ -392,9 +387,8 @@ describe('Alerting Plugin', () => {
           let setup: AlertingServerSetup;
 
           beforeEach(async () => {
-            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-              generateAlertingConfig()
-            );
+            const context =
+              coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
 
             plugin = new AlertingPlugin(context);
             setup = await plugin.setup(setupMocks, mockPlugins);
@@ -418,9 +412,8 @@ describe('Alerting Plugin', () => {
       describe('start()', () => {
         describe('getRulesClientWithRequest()', () => {
           it('throws error when encryptedSavedObjects plugin is missing encryption key', async () => {
-            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-              generateAlertingConfig()
-            );
+            const context =
+              coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
             const plugin = new AlertingPlugin(context);
 
             const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -468,9 +461,8 @@ describe('Alerting Plugin', () => {
           });
 
           it(`doesn't throw error when encryptedSavedObjects plugin has encryption key`, async () => {
-            const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-              generateAlertingConfig()
-            );
+            const context =
+              coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
             const plugin = new AlertingPlugin(context);
 
             const encryptedSavedObjectsSetup = {
@@ -533,9 +525,8 @@ describe('Alerting Plugin', () => {
         });
 
         test(`exposes getAlertingAuthorizationWithRequest()`, async () => {
-          const context = coreMock.createPluginInitializerContext<AlertingConfig>(
-            generateAlertingConfig()
-          );
+          const context =
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig());
           const plugin = new AlertingPlugin(context);
 
           const encryptedSavedObjectsSetup = {

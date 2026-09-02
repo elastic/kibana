@@ -11,7 +11,7 @@ import { EVALS_EXPERIMENT_WORKFLOW_TAG, isEvalsOwnedWorkflow } from './run_exper
 const asWorkflow = (tags?: string[]): Pick<WorkflowDetailDto, 'definition'> =>
   ({
     definition: tags === undefined ? null : { tags },
-  } as unknown as Pick<WorkflowDetailDto, 'definition'>);
+  }) as unknown as Pick<WorkflowDetailDto, 'definition'>;
 
 describe('isEvalsOwnedWorkflow', () => {
   it('accepts a workflow whose definition carries the evals experiment tag', () => {

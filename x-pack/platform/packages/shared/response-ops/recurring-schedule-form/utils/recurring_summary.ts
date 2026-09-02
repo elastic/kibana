@@ -93,18 +93,18 @@ export const recurringSummary = ({
   const onSummary = dailyWithWeekdays
     ? dailyWeekdaySummary
     : frequency === Frequency.WEEKLY
-    ? weeklySummary
-    : frequency === Frequency.MONTHLY
-    ? monthlySummary
-    : frequency === Frequency.YEARLY
-    ? yearlyByMonthSummary
-    : null;
+      ? weeklySummary
+      : frequency === Frequency.MONTHLY
+        ? monthlySummary
+        : frequency === Frequency.YEARLY
+          ? yearlyByMonthSummary
+          : null;
 
   const untilSummary = schedule.until
     ? RECURRING_SCHEDULE_FORM_UNTIL_DATE_SUMMARY(moment(schedule.until).format('LL'))
     : schedule.count
-    ? RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY(schedule.count)
-    : null;
+      ? RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY(schedule.count)
+      : null;
 
   let time: string | null = null;
   if (showTime) {

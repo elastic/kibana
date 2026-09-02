@@ -32,7 +32,7 @@ export const createTextModel = ({
     getDecorationsInRange,
     isDisposed: () => false,
     uri,
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 export const createDisposedTextModel = () =>
   ({
@@ -41,13 +41,13 @@ export const createDisposedTextModel = () =>
     getValueLength: jest.fn(),
     getLineCount: jest.fn(),
     isDisposed: () => true,
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 export const createIndexSource = (name: string) =>
-  ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
+  ({ name, hidden: false, type: SOURCES_TYPES.INDEX }) as ESQLSourceResult;
 
 export const createWiredStreamSource = (name: string) =>
-  ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
+  ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM }) as ESQLSourceResult;
 
 export const createField = (
   name: string,

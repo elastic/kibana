@@ -10,9 +10,10 @@
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
-export class CoreAppLeavePlugin
-  implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart>
-{
+export class CoreAppLeavePlugin implements Plugin<
+  CoreAppLeavePluginSetup,
+  CoreAppLeavePluginStart
+> {
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'appleave1',

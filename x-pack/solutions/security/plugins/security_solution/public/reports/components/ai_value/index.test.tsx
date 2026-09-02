@@ -112,7 +112,7 @@ describe('AIValueReport', () => {
         },
         ...overrides,
       },
-    } as Partial<StartServices>);
+    }) as Partial<StartServices>;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -20,7 +20,7 @@ const makeInputTextField = (overrides: Partial<FieldSchemaType> = {}): FieldSche
     type: 'keyword',
     control: FieldType.INPUT_TEXT,
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeInputNumberField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -29,7 +29,7 @@ const makeInputNumberField = (overrides: Partial<FieldSchemaType> = {}): FieldSc
     type: 'long',
     control: FieldType.INPUT_NUMBER,
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeSelectField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -39,7 +39,7 @@ const makeSelectField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaT
     control: FieldType.SELECT_BASIC,
     metadata: { options: ['low', 'medium', 'high'] },
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeTextareaField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -48,7 +48,7 @@ const makeTextareaField = (overrides: Partial<FieldSchemaType> = {}): FieldSchem
     type: 'keyword',
     control: FieldType.TEXTAREA,
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeCheckboxGroupField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -58,7 +58,7 @@ const makeCheckboxGroupField = (overrides: Partial<FieldSchemaType> = {}): Field
     control: FieldType.CHECKBOX_GROUP,
     metadata: { options: ['api', 'database', 'cache'] },
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeUserPickerField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -67,7 +67,7 @@ const makeUserPickerField = (overrides: Partial<FieldSchemaType> = {}): FieldSch
     type: 'keyword',
     control: FieldType.USER_PICKER,
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -76,7 +76,7 @@ const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaT
     type: 'boolean',
     control: FieldType.TOGGLE,
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 const makeMarkdownField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaType =>
   ({
@@ -86,7 +86,7 @@ const makeMarkdownField = (overrides: Partial<FieldSchemaType> = {}): FieldSchem
     control: FieldType.MARKDOWN,
     metadata: { content: 'Follow these steps.' },
     ...overrides,
-  } as FieldSchemaType);
+  }) as FieldSchemaType;
 
 describe('validateExtendedFields', () => {
   describe('value size backstop', () => {

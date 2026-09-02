@@ -10,7 +10,6 @@
 import type { ObservabilityRootProfileProvider } from '../types';
 
 export const getDefaultEsqlQuery: ObservabilityRootProfileProvider['profile']['getDefaultEsqlQuery'] =
-
     (prev, { context }) =>
     () => {
       if (!context.allLogsIndexPattern) {

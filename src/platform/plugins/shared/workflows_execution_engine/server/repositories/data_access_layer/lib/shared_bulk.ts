@@ -21,8 +21,9 @@ export interface SharedBulkItem<TExecution extends { id: string }> extends BulkI
   retryOnConflict?: number;
 }
 
-export interface SharedBulkRequestOptions<TExecution extends { id: string }>
-  extends BulkRequestOptions<TExecution> {
+export interface SharedBulkRequestOptions<
+  TExecution extends { id: string },
+> extends BulkRequestOptions<TExecution> {
   items: SharedBulkItem<TExecution>[];
 }
 

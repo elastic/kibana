@@ -38,7 +38,7 @@ export const createMockWorkflowDataClient = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  } as jest.Mocked<WorkflowExecutionsDataClient>);
+  }) as jest.Mocked<WorkflowExecutionsDataClient>;
 
 export const createMockStepDataClient = (
   overrides: Partial<jest.Mocked<StepExecutionsDataClient>> = {}
@@ -51,4 +51,4 @@ export const createMockStepDataClient = (
     scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
-  } as jest.Mocked<StepExecutionsDataClient>);
+  }) as jest.Mocked<StepExecutionsDataClient>;

@@ -25,15 +25,12 @@ import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_
 import { createNavigationTree } from './navigation_tree';
 import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
-export class ServerlessSearchPlugin
-  implements
-    Plugin<
-      ServerlessSearchPluginSetup,
-      ServerlessSearchPluginStart,
-      ServerlessSearchPluginSetupDependencies,
-      ServerlessSearchPluginStartDependencies
-    >
-{
+export class ServerlessSearchPlugin implements Plugin<
+  ServerlessSearchPluginSetup,
+  ServerlessSearchPluginStart,
+  ServerlessSearchPluginSetupDependencies,
+  ServerlessSearchPluginStartDependencies
+> {
   private managementCardsSubscription?: Subscription;
 
   public setup(

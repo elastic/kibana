@@ -28,7 +28,7 @@ const makeLog = (): ToolingLog =>
     debug: jest.fn(),
     warning: jest.fn(),
     error: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 const makeEsClient = (overrides?: Partial<FakeEsClient['indices']>): FakeEsClient => ({
   indices: {

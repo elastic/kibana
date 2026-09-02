@@ -90,8 +90,8 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       params.body.pkgName === 'kubernetes'
         ? createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding', true)
         : isManagedOtlpServiceAvailable
-        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
-        : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
+          ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+          : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,

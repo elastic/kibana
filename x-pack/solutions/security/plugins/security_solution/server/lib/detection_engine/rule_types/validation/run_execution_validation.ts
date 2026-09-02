@@ -80,9 +80,8 @@ export const runExecutionValidation = async (
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   try {
-    const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
-      inputIndex
-    );
+    const { matchedIndexPatterns, matchedIndices } =
+      await indexPatterns.getIndexPatternMatches(inputIndex);
 
     // Collect rule execution metrics
     ruleExecutionLogger.logMetric('matched_indices_count', matchedIndices?.length);

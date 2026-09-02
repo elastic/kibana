@@ -94,7 +94,7 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
       routePath,
       requestPath,
     } = routingContext;
-    const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
+    const httpStatus = error ? getErrorStatus(error) : (event.statusCode ?? 200);
 
     const metricAttributes: Record<string, string | number | boolean> = {
       'kibana.cps.enabled': cpsEnabled,

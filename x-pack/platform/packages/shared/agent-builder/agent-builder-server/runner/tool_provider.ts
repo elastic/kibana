@@ -36,7 +36,7 @@ export interface ToolProvider {
  */
 export interface ExecutableTool<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > extends ToolDefinition<ToolType, TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.

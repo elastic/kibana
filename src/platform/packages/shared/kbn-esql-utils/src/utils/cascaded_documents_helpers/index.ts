@@ -64,8 +64,8 @@ const hasUnsupportedGroupingFunction = (definition: ESQLProperNode): boolean => 
   const funcExpr = isFunctionExpression(definition)
     ? definition
     : isInlineCast(definition) && isFunctionExpression(definition.value)
-    ? definition.value
-    : null;
+      ? definition.value
+      : null;
 
   if (!funcExpr) {
     return false;
@@ -490,19 +490,19 @@ function handleStatsByColumnLeafOperation(
             Builder.identifier({ name: operationColumnName }),
           ])
         : shouldUseMatchPhrase
-        ? Builder.expression.func.call('match_phrase', [
-            Builder.identifier({ name: operationColumnName }),
-            Builder.expression.literal.string(operationValue as string),
-          ])
-        : Builder.expression.func.binary('==', [
-            Builder.expression.column({
-              args: [Builder.identifier({ name: operationColumnName })],
-            }),
-            Number.isNaN(Number(operationValue)) ||
-            dataViewFields.getByName(operationColumnName)?.type === 'string'
-              ? Builder.expression.literal.string(operationValue as string)
-              : Builder.expression.literal.integer(Number(operationValue)),
-          ]),
+          ? Builder.expression.func.call('match_phrase', [
+              Builder.identifier({ name: operationColumnName }),
+              Builder.expression.literal.string(operationValue as string),
+            ])
+          : Builder.expression.func.binary('==', [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: operationColumnName })],
+              }),
+              Number.isNaN(Number(operationValue)) ||
+              dataViewFields.getByName(operationColumnName)?.type === 'string'
+                ? Builder.expression.literal.string(operationValue as string)
+                : Builder.expression.literal.integer(Number(operationValue)),
+            ]),
     ],
   });
 
@@ -615,7 +615,7 @@ function handleStatsByCategorizeLeafOperation(
  * for ES|QL query containing a stats command in the cascade layout experience
  */
 export const appendFilteringWhereClauseForCascadeLayout = <
-  T extends SupportedFieldTypes | string = SupportedFieldTypes | string
+  T extends SupportedFieldTypes | string = SupportedFieldTypes | string,
 >(
   query: string,
   esqlVariables: ESQLControlVariable[] | undefined,
@@ -793,8 +793,8 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       expressionType === 'postfix-unary'
         ? Builder.expression.func.postfix(operator, [matchPhraseExpression])
         : operator === '!='
-        ? Builder.expression.func.unary('not', [matchPhraseExpression])
-        : matchPhraseExpression;
+          ? Builder.expression.func.unary('not', [matchPhraseExpression])
+          : matchPhraseExpression;
   } else {
     computedFilteringExpression =
       expressionType === 'postfix-unary'
@@ -807,12 +807,12 @@ export const appendFilteringWhereClauseForCascadeLayout = <
               ? fieldType === 'boolean'
                 ? Builder.expression.literal.boolean(value as boolean)
                 : fieldType === 'string'
-                ? Builder.expression.literal.string(value as string)
-                : Builder.expression.literal[fieldType](value as number)
+                  ? Builder.expression.literal.string(value as string)
+                  : Builder.expression.literal[fieldType](value as number)
               : // when fieldType is not provided or supported, we default to string
-              Number.isNaN(Number(value))
-              ? Builder.expression.literal.string(value as string)
-              : Builder.expression.literal.integer(value as number),
+                Number.isNaN(Number(value))
+                ? Builder.expression.literal.string(value as string)
+                : Builder.expression.literal.integer(value as number),
           ]);
   }
 

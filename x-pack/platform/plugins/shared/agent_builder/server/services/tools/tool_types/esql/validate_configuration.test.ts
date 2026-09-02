@@ -38,7 +38,7 @@ describe('validateConfig', () => {
 
     mockValidateQuery.mockResolvedValue({ errors: [], warnings: [] });
     mockGetESQLQueryVariables.mockReturnValue([]);
-    mockCreateBadRequestError.mockImplementation((message: string) => ({ message } as any));
+    mockCreateBadRequestError.mockImplementation((message: string) => ({ message }) as any);
   });
 
   describe('successful validation', () => {

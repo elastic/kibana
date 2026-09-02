@@ -84,10 +84,10 @@ export function summarizeCopyResult(
     const overwrite = conflict
       ? false
       : missingReference
-      ? missingReference.obj.overwrite === true
-      : copyResult?.successfulImports.some(
-          (obj) => obj.type === type && obj.id === id && obj.overwrite
-        ) === true;
+        ? missingReference.obj.overwrite === true
+        : copyResult?.successfulImports.some(
+            (obj) => obj.type === type && obj.id === id && obj.overwrite
+          ) === true;
 
     return { conflict, hasMissingReferences, hasUnresolvableErrors, overwrite };
   };

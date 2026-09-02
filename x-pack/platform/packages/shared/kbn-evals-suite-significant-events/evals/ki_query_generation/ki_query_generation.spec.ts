@@ -366,9 +366,8 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   lastReplayedSnapshot = source.snapshotName;
                 }
 
-                const { stream: logsStream } = await apiServices.streams.getStreamDefinition(
-                  MANAGED_STREAM_NAME
-                );
+                const { stream: logsStream } =
+                  await apiServices.streams.getStreamDefinition(MANAGED_STREAM_NAME);
 
                 const stream = {
                   ...logsStream,

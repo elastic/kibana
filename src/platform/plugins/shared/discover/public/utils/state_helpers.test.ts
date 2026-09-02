@@ -15,7 +15,7 @@ import { handleSourceColumnState } from './state_helpers';
 const createUiSettings = (defaultColumns: string[] = []) =>
   ({
     get: (key: string) => (key === DEFAULT_COLUMNS_SETTING ? defaultColumns : undefined),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 describe('handleSourceColumnState', () => {
   it('keeps mixed field and Summary columns unchanged', () => {

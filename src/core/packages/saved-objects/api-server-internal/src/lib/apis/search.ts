@@ -31,7 +31,7 @@ export interface PerformSearchParams {
 
 function createEmptySearchResponse<
   T extends SavedObjectsRawDocSource,
-  A = unknown
+  A = unknown,
 >(): SavedObjectsSearchResponse<T, A> {
   return {
     hits: { hits: [] },

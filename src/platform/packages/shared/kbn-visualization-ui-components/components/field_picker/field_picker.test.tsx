@@ -55,7 +55,7 @@ const generateProps = (customField = generateFieldWithLabelOfLength(20)) =>
     ],
     onChoose: jest.fn(),
     fieldIsInvalid: false,
-  } as unknown as FieldPickerProps<FieldOptionValue>);
+  }) as unknown as FieldPickerProps<FieldOptionValue>;
 
 describe('field picker', () => {
   const renderAndOpenFieldPicker = async (customField = generateFieldWithLabelOfLength(20)) => {

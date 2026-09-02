@@ -81,7 +81,7 @@ describe('shouldFailOnWorkflowRunRetry', () => {
       spaceId: 'default',
       workflowId: 'w1',
       status,
-    } as EsWorkflowExecution);
+    }) as EsWorkflowExecution;
 
   it('returns false when terminal', () => {
     expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.FAILED))).toBe(false);

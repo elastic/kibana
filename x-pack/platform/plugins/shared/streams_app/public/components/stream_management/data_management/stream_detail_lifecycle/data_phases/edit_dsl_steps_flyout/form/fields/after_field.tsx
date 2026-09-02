@@ -240,12 +240,12 @@ export const AfterField = ({
             phase: 'frozen' as const,
           }
         : dataRetentionMs !== undefined && dataRetentionEsFormat
-        ? {
-            boundaryMs: dataRetentionMs,
-            boundaryEsFormat: dataRetentionEsFormat,
-            phase: 'delete' as const,
-          }
-        : undefined;
+          ? {
+              boundaryMs: dataRetentionMs,
+              boundaryEsFormat: dataRetentionEsFormat,
+              phase: 'delete' as const,
+            }
+          : undefined;
 
     return [
       { validator: requiredAfterValue },

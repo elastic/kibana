@@ -37,7 +37,7 @@ export const AssigneesBadge = ({ assignees }: { assignees: string[] }) => {
   );
   const renderAssigneeItem = useCallback((user: AssigneeItem, index: number) => {
     const displayName = user
-      ? user.user.full_name ?? user.user.email ?? user.user.username
+      ? (user.user.full_name ?? user.user.email ?? user.user.username)
       : UNKNOWN_USER_PROFILE_NAME;
     return (
       <EuiFlexGroup

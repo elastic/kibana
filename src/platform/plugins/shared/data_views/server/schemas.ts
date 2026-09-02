@@ -44,7 +44,7 @@ export const serializedFieldFormatSchema = schema.object(
 
 export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
   PRIMITIVE_RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>
+    Type<RuntimeType>,
   ]
 );
 

@@ -130,8 +130,8 @@ export const KubernetesPanel: React.FC = () => {
       status: (dataReceived || hasPreExistingDataEarly
         ? 'complete'
         : isMonitoringStepActive
-        ? 'current'
-        : 'incomplete') as EuiStepStatus,
+          ? 'current'
+          : 'incomplete') as EuiStepStatus,
       children: (
         <KubernetesElasticAgentVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}

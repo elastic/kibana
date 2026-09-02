@@ -28,7 +28,10 @@ export type SkillLoadErrorCode =
   | 'invalid_definition';
 
 export class SkillLoadError extends Error {
-  constructor(public readonly code: SkillLoadErrorCode, message: string) {
+  constructor(
+    public readonly code: SkillLoadErrorCode,
+    message: string
+  ) {
     super(message);
     this.name = 'SkillLoadError';
   }

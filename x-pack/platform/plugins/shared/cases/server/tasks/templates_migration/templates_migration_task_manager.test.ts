@@ -110,8 +110,8 @@ const buildFieldDefinitionSOForKey = (key: string, v1Type: string = CustomFieldT
     v1Type === CustomFieldTypes.NUMBER
       ? 'INPUT_NUMBER'
       : v1Type === CustomFieldTypes.TOGGLE
-      ? 'TOGGLE'
-      : 'INPUT_TEXT';
+        ? 'TOGGLE'
+        : 'INPUT_TEXT';
   return {
     id: `def-${key}`,
     type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
@@ -2392,8 +2392,8 @@ describe('TemplatesMigrationTaskManager', () => {
         opts.type === CASE_CONFIGURE_SAVED_OBJECT
           ? Promise.resolve({ saved_objects: [configSO], total: 1 })
           : opts.type === CASE_SAVED_OBJECT
-          ? Promise.resolve(fullPage)
-          : Promise.resolve({ saved_objects: [], total: 0 })
+            ? Promise.resolve(fullPage)
+            : Promise.resolve({ saved_objects: [], total: 0 })
       );
       const hook = jest.fn().mockResolvedValue(undefined);
 

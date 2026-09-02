@@ -59,8 +59,8 @@ describe('refreshEpisodeTool', () => {
       attachmentId: 'attach-1',
       episodeId: 'ep-1',
       logger: loggerService,
-      getEpisodesClient: () => ({ get } as unknown as EpisodesClient),
-      getRulesClient: () => ({ getRule } as unknown as RulesClient),
+      getEpisodesClient: () => ({ get }) as unknown as EpisodesClient,
+      getRulesClient: () => ({ getRule }) as unknown as RulesClient,
       getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 

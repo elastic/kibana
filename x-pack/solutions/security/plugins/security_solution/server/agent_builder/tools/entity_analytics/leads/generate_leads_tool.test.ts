@@ -89,7 +89,7 @@ describe('generateLeadsTool', () => {
     mockUpsertLeadGenerationConfig.mockResolvedValue(undefined);
     mockRunLeadGenerationPipeline.mockResolvedValue({ total: 3 });
     mockResolveChatModel.mockResolvedValue({});
-    MockRiskScoreDataClient.mockImplementation(() => ({} as RiskScoreDataClient));
+    MockRiskScoreDataClient.mockImplementation(() => ({}) as RiskScoreDataClient);
     mockGetUserLeadPrivileges.mockResolvedValue({
       has_read_permissions: true,
       has_write_permissions: true,

@@ -75,7 +75,7 @@ const createMockHit = (
     raw: rawIndex ? { _index: rawIndex } : {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockHit = createMockHit({
   'event.kind': 'signal',

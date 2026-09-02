@@ -181,8 +181,8 @@ export function getLegendTruncateAfterLines(
     'shouldTruncate' in legend
       ? legend
       : 'truncateLegend' in legend
-      ? { shouldTruncate: legend.truncateLegend, maxLines: legend.legendMaxLines }
-      : {};
+        ? { shouldTruncate: legend.truncateLegend, maxLines: legend.legendMaxLines }
+        : {};
 
   return shouldTruncate && maxLines > 0 ? maxLines : undefined;
 }
@@ -196,7 +196,7 @@ type ExtendsNumber<N, Yes, No> = N extends number ? Yes : No;
  */
 export function getReversibleMappings<
   API extends string | number | undefined,
-  State extends string | number | undefined
+  State extends string | number | undefined,
 >(entries: readonly [API, State][]) {
   const mappings = new Map(entries);
   const reverseMappings = new Map(entries.map(([key, value]) => [value, key]));

@@ -49,9 +49,12 @@ export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
  */
 export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 
-export class SpacesPlugin
-  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart>
-{
+export class SpacesPlugin implements Plugin<
+  SpacesPluginSetup,
+  SpacesPluginStart,
+  PluginsSetup,
+  PluginsStart
+> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
   private eventTracker!: EventTracker;

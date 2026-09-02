@@ -48,9 +48,11 @@ export function Card({
     height: 100%;
     min-width: 300px;
     border-radius: ${euiTheme.border.radius.medium};
-    border: ${isSelected
-      ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
-      : 'none'};
+    border: ${
+      isSelected
+        ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
+        : 'none'
+    };
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
     cursor: ${isClickable ? 'pointer' : 'default'};
   `;

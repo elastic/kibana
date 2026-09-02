@@ -20,8 +20,10 @@ interface LicenseInfo {
   expirationDate: string | null;
 }
 
-interface LicensePageHeaderProps
-  extends Omit<ComponentProps<typeof EuiPageHeader>, 'pageTitle' | 'description'> {
+interface LicensePageHeaderProps extends Omit<
+  ComponentProps<typeof EuiPageHeader>,
+  'pageTitle' | 'description'
+> {
   license: LicenseInfo;
 }
 

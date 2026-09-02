@@ -11,7 +11,7 @@ import type { ParsedDataSearchRequestDescriptor } from './types';
 
 export const flattenDataSearchResponseDescriptor = <
   Request extends IKibanaSearchRequest,
-  Response
+  Response,
 >({
   abortController,
   options,

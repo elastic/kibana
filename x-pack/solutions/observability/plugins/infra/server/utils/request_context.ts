@@ -24,7 +24,7 @@ export class NoMlPluginError extends Error {
 }
 
 export function assertHasInfraPlugins<
-  Context extends { infra?: Promise<InfraRequestHandlerContext> }
+  Context extends { infra?: Promise<InfraRequestHandlerContext> },
 >(context: Context): asserts context is Context & { infra: Context['infra'] } {
   if (context.infra == null) {
     throw new MissingContextValuesError('Failed to access "infra" context values.');
@@ -32,7 +32,7 @@ export function assertHasInfraPlugins<
 }
 
 export async function assertHasInfraMlPlugins<
-  Context extends { infra?: Promise<InfraRequestHandlerContext> }
+  Context extends { infra?: Promise<InfraRequestHandlerContext> },
 >(
   context: Context
 ): Promise<

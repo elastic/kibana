@@ -31,7 +31,7 @@ const createHit = (
     raw: { _id: id, _index: index },
     flattened: { _id: id, _index: index, ...flattened },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('useExploreActions', () => {
   const mockClosePopover = jest.fn();

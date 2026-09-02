@@ -26,7 +26,7 @@ export const renderActionButton = (button: ActionButton) => {
       />
     </EuiToolTip>
   );
-  const tooltipContent = button.disabled ? button.disabledReason ?? button.label : button.label;
+  const tooltipContent = button.disabled ? (button.disabledReason ?? button.label) : button.label;
 
   return (
     <EuiToolTip key={button.label} content={tooltipContent} disableScreenReaderOutput>

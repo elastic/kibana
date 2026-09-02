@@ -30,7 +30,7 @@ describe('ensureMetadataDataStreamMappings', () => {
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
     esClient.indices.getDataStream.mockImplementation(
-      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] }) as never
     );
   });
 
@@ -135,7 +135,7 @@ describe('ensureMetadataDataStreamMappingsOnce', () => {
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
     esClient.indices.getDataStream.mockImplementation(
-      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] }) as never
     );
   });
 

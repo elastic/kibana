@@ -31,7 +31,7 @@ export function useSloFormValues(sloId?: string): UseSloFormValuesResponse {
 
   const initialValues = isEditMode
     ? sloFormValuesFromSloResponse
-    : sloFormValuesFromUrlState ?? sloFormValuesFromTemplateId;
+    : (sloFormValuesFromUrlState ?? sloFormValuesFromTemplateId);
 
   return {
     initialValues,

@@ -219,7 +219,7 @@ export const getData = async (
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
         const flattenGrouping: Record<string, string> = {};
-        const groups: string[] = typeof groupBy === 'string' ? [groupBy] : groupBy ?? [];
+        const groups: string[] = typeof groupBy === 'string' ? [groupBy] : (groupBy ?? []);
         groups.map((group: string, groupIndex) => {
           flattenGrouping[group] = bucket.key[`groupBy${groupIndex}`];
         });

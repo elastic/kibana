@@ -28,7 +28,7 @@ const makeEndpoint = (modelId: string, regions: CspRegion[]): EisInferenceEndpoi
     service: 'elastic',
     service_settings: { model_id: modelId },
     metadata: { regions },
-  } as unknown as EisInferenceEndpoint);
+  }) as unknown as EisInferenceEndpoint;
 
 const makeMetadata = (
   overrides: NonNullable<EisInferenceEndpointMetadata['heuristics']>

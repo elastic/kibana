@@ -13,15 +13,12 @@ import type {
   CustomBrandingPublicStartDependencies,
 } from './types';
 
-export class CustomBrandingPlugin
-  implements
-    Plugin<
-      CustomBrandingPublicSetup,
-      CustomBrandingPublicStart,
-      CustomBrandingPublicSetupDependencies,
-      CustomBrandingPublicStartDependencies
-    >
-{
+export class CustomBrandingPlugin implements Plugin<
+  CustomBrandingPublicSetup,
+  CustomBrandingPublicStart,
+  CustomBrandingPublicSetupDependencies,
+  CustomBrandingPublicStartDependencies
+> {
   public setup(): CustomBrandingPublicSetup {
     return {};
   }

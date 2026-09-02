@@ -187,10 +187,10 @@ export const HostPanel = memo(function HostPanel({
 
   useQueryInspector({
     deleteQuery,
-    inspect: hasEntityStoreRecord ? entityFromStoreResult?.inspect ?? null : inspect,
-    loading: hasEntityStoreRecord ? entityFromStoreResult?.isLoading ?? false : loading,
+    inspect: hasEntityStoreRecord ? (entityFromStoreResult?.inspect ?? null) : inspect,
+    loading: hasEntityStoreRecord ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: hasEntityStoreRecord ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    refetch: hasEntityStoreRecord ? (entityFromStoreResult?.refetch ?? (() => {})) : refetch,
     setQuery,
   });
 

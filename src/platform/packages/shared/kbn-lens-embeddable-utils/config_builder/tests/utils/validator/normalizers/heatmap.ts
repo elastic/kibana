@@ -33,7 +33,7 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
     attributes.state.visualization.gridConfig.isXAxisTitleVisible = isXAxisTitleVisible ?? false;
     // from_api uses layer.axis?.y?.title?.visible ?? false; when there is no Y bucket there is no axis.y
     attributes.state.visualization.gridConfig.isYAxisTitleVisible = hasYAxis
-      ? isYAxisTitleVisible ?? false
+      ? (isYAxisTitleVisible ?? false)
       : false;
 
     // Align deprecated naming conventions

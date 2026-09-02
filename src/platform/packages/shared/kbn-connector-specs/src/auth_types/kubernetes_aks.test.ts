@@ -21,7 +21,7 @@ const createMockAxiosInstance = () =>
   ({
     defaults: { headers: { common: {} } },
     interceptors: { request: { clear: jest.fn(), use: jest.fn() } },
-  } as unknown as AxiosInstance);
+  }) as unknown as AxiosInstance;
 
 const createMockContext = (getToken: jest.Mock) =>
   ({
@@ -29,7 +29,7 @@ const createMockContext = (getToken: jest.Mock) =>
     getCustomHostSettings: jest.fn(),
     logger: { debug: jest.fn(), warn: jest.fn() },
     sslSettings: {},
-  } as unknown as AuthContext);
+  }) as unknown as AuthContext;
 
 describe('KubernetesAksAuth', () => {
   it('has the expected id and schema fields', () => {

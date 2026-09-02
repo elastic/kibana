@@ -25,8 +25,7 @@ export interface ServerlessVectordbAppStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
 }
 
-export interface ServerlessVectordbStartDependencies
-  extends ServerlessVectordbAppStartDependencies {
+export interface ServerlessVectordbStartDependencies extends ServerlessVectordbAppStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 

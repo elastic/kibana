@@ -690,7 +690,7 @@ const ReputationLinkComponent: React.FC<{
                 url={urlTemplate}
                 key={`reputationLink-${id}`}
               >
-                <>{showDomain ? domain : name ?? domain}</>
+                <>{showDomain ? domain : (name ?? domain)}</>
               </ExternalLink>
             ))}
         </EuiFlexItem>

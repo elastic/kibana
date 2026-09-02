@@ -18,7 +18,7 @@ interface GetInstallPkgRouteOptionsParams {
 
 export type InstallPkgRouteOptions = [
   string,
-  { path: string; state: CreatePackagePolicyRouteState }
+  { path: string; state: CreatePackagePolicyRouteState },
 ];
 
 /*

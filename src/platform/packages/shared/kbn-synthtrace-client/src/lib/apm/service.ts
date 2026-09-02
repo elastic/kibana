@@ -45,7 +45,7 @@ export function service(
           environment: string;
           agentName: string | OpenTelemetryAgentName;
           agentVersion?: string;
-        }
+        },
       ]
     | [string, string, string]
 ) {

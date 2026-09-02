@@ -14,15 +14,12 @@ import type {
   ContextEngineAgentBuilderPublicStartDependencies,
 } from './types';
 
-export class ContextEngineAgentBuilderPlugin
-  implements
-    Plugin<
-      ContextEngineAgentBuilderPublicSetup,
-      ContextEngineAgentBuilderPublicStart,
-      ContextEngineAgentBuilderPublicSetupDependencies,
-      ContextEngineAgentBuilderPublicStartDependencies
-    >
-{
+export class ContextEngineAgentBuilderPlugin implements Plugin<
+  ContextEngineAgentBuilderPublicSetup,
+  ContextEngineAgentBuilderPublicStart,
+  ContextEngineAgentBuilderPublicSetupDependencies,
+  ContextEngineAgentBuilderPublicStartDependencies
+> {
   constructor(_context: PluginInitializerContext) {}
 
   setup(

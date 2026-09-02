@@ -15,15 +15,12 @@ interface SetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StartDependencies {}
 
-export class ReindexServerPublicPlugin
-  implements
-    Plugin<
-      ReindexServicePublicSetup,
-      ReindexServicePublicStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ReindexServerPublicPlugin implements Plugin<
+  ReindexServicePublicSetup,
+  ReindexServicePublicStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private reindexService?: ReindexService;
 
   setup({ http }: CoreSetup<SetupDependencies>) {

@@ -17,7 +17,6 @@ import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
 
 export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
-
     (prev, { context, toolkit }) =>
     (params) => {
       const additionalControls = prev(params) || [];

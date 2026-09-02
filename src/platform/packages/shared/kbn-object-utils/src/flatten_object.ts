@@ -9,9 +9,8 @@
 
 import { isPlainObject } from 'lodash';
 
-type GetValuesTypes<T> = T extends Record<PropertyKey, any>
-  ? { [K in keyof T]: GetValuesTypes<T[K]> }[keyof T]
-  : T;
+type GetValuesTypes<T> =
+  T extends Record<PropertyKey, any> ? { [K in keyof T]: GetValuesTypes<T[K]> }[keyof T] : T;
 
 /**
  * Returns a flattened version of the input object also accounting for nested properties.

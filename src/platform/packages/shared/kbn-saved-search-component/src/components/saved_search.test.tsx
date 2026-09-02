@@ -40,7 +40,7 @@ const createDependencies = () =>
         serialize: () => ({ searchSourceJSON: '{}', references: [] }),
       }),
     },
-  } as unknown as SavedSearchComponentProps['dependencies']);
+  }) as unknown as SavedSearchComponentProps['dependencies'];
 
 const renderSavedSearchComponent = (projectRouting?: ProjectRouting) =>
   render(

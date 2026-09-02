@@ -35,7 +35,7 @@ const makeAction = (
     from: 'foo',
     to: 'bar',
     where: ALWAYS_CONDITION,
-  } as StreamlangStepWithUIAttributes);
+  }) as StreamlangStepWithUIAttributes;
 
 const makeCondition = (
   id: string,
@@ -45,7 +45,7 @@ const makeCondition = (
     customIdentifier: id,
     parentId,
     where: { ...ALWAYS_CONDITION },
-  } as StreamlangStepWithUIAttributes);
+  }) as StreamlangStepWithUIAttributes;
 
 const steps: StreamlangStepWithUIAttributes[] = [
   makeAction('p1'),

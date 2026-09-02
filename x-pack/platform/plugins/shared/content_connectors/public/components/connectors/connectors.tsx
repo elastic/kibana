@@ -144,117 +144,120 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
         rightSideItems: isLoading
           ? []
           : !isCrawler
-          ? [
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiButton
-                    data-test-subj="entSearchContent-connectors-newConnectorButton"
-                    data-telemetry-id="entSearchContent-connectors-newConnectorButton"
-                    key="newConnector"
-                    color="primary"
-                    iconType="plusCircle"
-                    fill
-                    onClick={() => {
-                      const url = application?.getUrlForApp('management', {
-                        path: `/data/content_connectors`,
-                      });
-                      application?.navigateToUrl(`${url}${NEW_INDEX_SELECT_CONNECTOR_PATH}`);
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.contentConnectors.connectors.newConnectorButtonLabel"
-                      defaultMessage="New Connector"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiPopover
-                    aria-label={i18n.translate(
-                      'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
-                      { defaultMessage: 'More connector options' }
-                    )}
-                    isOpen={showMoreOptionsPopover}
-                    closePopover={() => setShowMoreOptionsPopover(false)}
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.enterpriseSearch.connectors.more.ariaLabel',
-                          { defaultMessage: 'More options' }
-                        )}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
-                          data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
-                          color="primary"
-                          display="fill"
-                          size="m"
-                          iconType="boxesVertical"
-                          aria-label={i18n.translate(
+            ? [
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="entSearchContent-connectors-newConnectorButton"
+                      data-telemetry-id="entSearchContent-connectors-newConnectorButton"
+                      key="newConnector"
+                      color="primary"
+                      iconType="plusCircle"
+                      fill
+                      onClick={() => {
+                        const url = application?.getUrlForApp('management', {
+                          path: `/data/content_connectors`,
+                        });
+                        application?.navigateToUrl(`${url}${NEW_INDEX_SELECT_CONNECTOR_PATH}`);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.contentConnectors.connectors.newConnectorButtonLabel"
+                        defaultMessage="New Connector"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiPopover
+                      aria-label={i18n.translate(
+                        'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
+                        { defaultMessage: 'More connector options' }
+                      )}
+                      isOpen={showMoreOptionsPopover}
+                      closePopover={() => setShowMoreOptionsPopover(false)}
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.enterpriseSearch.connectors.more.ariaLabel',
                             { defaultMessage: 'More options' }
                           )}
-                          onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
-                        />
-                      </EuiToolTip>
-                    }
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj="entSearchContent-connectors-newConnector-moreOptionsButton"
+                            data-telemetry-id="entSearchContent-connectors-newConnector-moreOptionsButton"
+                            color="primary"
+                            display="fill"
+                            size="m"
+                            iconType="boxesVertical"
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.connectors.more.ariaLabel',
+                              { defaultMessage: 'More options' }
+                            )}
+                            onClick={() => setShowMoreOptionsPopover(!showMoreOptionsPopover)}
+                          />
+                        </EuiToolTip>
+                      }
+                    >
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            key="newConnectorNative"
+                            onClick={() => {
+                              const url = application?.getUrlForApp('management', {
+                                path: `/data/content_connectors`,
+                              });
+                              application?.navigateToUrl(
+                                `${url}${NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH}`
+                              );
+                            }}
+                            icon="plusCircle"
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
+                              {
+                                defaultMessage: 'New Elastic managed Connector',
+                              }
+                            )}
+                          </EuiContextMenuItem>,
+                          <EuiContextMenuItem
+                            key="newConnectorClient"
+                            icon="plusCircle"
+                            onClick={() => {
+                              const url = application?.getUrlForApp('management', {
+                                path: `/data/content_connectors`,
+                              });
+                              application?.navigateToUrl(
+                                `${url}${NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH}`
+                              );
+                            }}
+                          >
+                            {i18n.translate(
+                              'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
+                              { defaultMessage: 'New Self-managed Connector' }
+                            )}
+                          </EuiContextMenuItem>,
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+                ...[
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                    onClick={() => setShowDefaultSettingsFlyout(true)}
                   >
-                    <EuiContextMenuPanel
-                      items={[
-                        <EuiContextMenuItem
-                          key="newConnectorNative"
-                          onClick={() => {
-                            const url = application?.getUrlForApp('management', {
-                              path: `/data/content_connectors`,
-                            });
-                            application?.navigateToUrl(
-                              `${url}${NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH}`
-                            );
-                          }}
-                          icon="plusCircle"
-                        >
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
-                            {
-                              defaultMessage: 'New Elastic managed Connector',
-                            }
-                          )}
-                        </EuiContextMenuItem>,
-                        <EuiContextMenuItem
-                          key="newConnectorClient"
-                          icon="plusCircle"
-                          onClick={() => {
-                            const url = application?.getUrlForApp('management', {
-                              path: `/data/content_connectors`,
-                            });
-                            application?.navigateToUrl(
-                              `${url}${NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH}`
-                            );
-                          }}
-                        >
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                            { defaultMessage: 'New Self-managed Connector' }
-                          )}
-                        </EuiContextMenuItem>,
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-              ...[
-                <EuiButton
-                  color="primary"
-                  data-test-subj="entSearchContent-searchIndices-defaultSettings"
-                  onClick={() => setShowDefaultSettingsFlyout(true)}
-                >
-                  {i18n.translate('xpack.contentConnectors.content.searchIndices.defaultSettings', {
-                    defaultMessage: 'Default settings',
-                  })}
-                </EuiButton>,
-              ],
-            ]
-          : undefined,
+                    {i18n.translate(
+                      'xpack.contentConnectors.content.searchIndices.defaultSettings',
+                      {
+                        defaultMessage: 'Default settings',
+                      }
+                    )}
+                  </EuiButton>,
+                ],
+              ]
+            : undefined,
       }}
     >
       <DeleteConnectorModal isCrawler={isCrawler} />

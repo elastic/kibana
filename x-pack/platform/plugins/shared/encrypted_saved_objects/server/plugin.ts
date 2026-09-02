@@ -62,10 +62,11 @@ export interface EncryptedSavedObjectsPluginStart {
 /**
  * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
  */
-export class EncryptedSavedObjectsPlugin
-  implements
-    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup>
-{
+export class EncryptedSavedObjectsPlugin implements Plugin<
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+  PluginsSetup
+> {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
   #service?: Readonly<EncryptedSavedObjectsService>;

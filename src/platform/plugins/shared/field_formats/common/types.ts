@@ -167,7 +167,7 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SerializedFieldFormat<
   P = {},
-  TParams extends FieldFormatParams<P> = FieldFormatParams<P>
+  TParams extends FieldFormatParams<P> = FieldFormatParams<P>,
 > = {
   id?: string;
   params?: TParams;

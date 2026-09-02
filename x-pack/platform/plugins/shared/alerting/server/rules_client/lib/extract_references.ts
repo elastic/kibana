@@ -16,7 +16,7 @@ import { denormalizeArtifacts } from './denormalize_artifacts';
 
 export async function extractReferences<
   Params extends RuleTypeParams,
-  ExtractedParams extends RuleTypeParams
+  ExtractedParams extends RuleTypeParams,
 >(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,

@@ -41,9 +41,9 @@ export const RetentionCard = ({
 
   const savedRetentionPeriod = retentionDisabled
     ? undefined
-    : customRetentionPeriod ?? defaultRetentionPeriod;
+    : (customRetentionPeriod ?? defaultRetentionPeriod);
 
-  const retentionPeriod = isPreviewActive ? previewRetentionPeriod : savedRetentionPeriod ?? null;
+  const retentionPeriod = isPreviewActive ? previewRetentionPeriod : (savedRetentionPeriod ?? null);
 
   const failureRetentionPeriod =
     (!isPreviewActive && retentionDisabled) || !retentionPeriod

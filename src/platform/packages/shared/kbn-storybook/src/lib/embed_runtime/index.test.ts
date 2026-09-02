@@ -55,7 +55,7 @@ const storyModuleFor = (story: ReturnType<typeof composeStory>) => () =>
 // jsdom is unavailable under the Node jest preset, so stand in a minimal EventTarget-backed element.
 class FakeContainer extends EventTarget {
   public style: Record<string, string> = {};
-  public getBoundingClientRect = () => ({ height: 40 } as DOMRect);
+  public getBoundingClientRect = () => ({ height: 40 }) as DOMRect;
 }
 
 const makeContainer = () => new FakeContainer() as unknown as HTMLElement;
@@ -142,7 +142,7 @@ describe('createDocsRegistry', () => {
     const previousDocument = (global as { document?: unknown }).document;
     const renderNode = {
       tagName: 'DIV',
-      getBoundingClientRect: () => ({ height: 12 } as DOMRect),
+      getBoundingClientRect: () => ({ height: 12 }) as DOMRect,
     } as unknown as HTMLElement;
     (global as { document?: unknown }).document = { createElement: () => renderNode };
 

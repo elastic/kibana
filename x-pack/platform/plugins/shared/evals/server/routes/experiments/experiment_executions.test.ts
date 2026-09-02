@@ -16,7 +16,7 @@ const asStep = (step: Partial<StepProgressInput>): StepProgressInput => step as 
 const asExecution = (tags?: string[]): Pick<WorkflowExecutionDto, 'workflowDefinition'> =>
   ({
     workflowDefinition: tags === undefined ? undefined : { tags },
-  } as unknown as Pick<WorkflowExecutionDto, 'workflowDefinition'>);
+  }) as unknown as Pick<WorkflowExecutionDto, 'workflowDefinition'>;
 
 describe('extractProgress', () => {
   it('reads the authoritative counters from a completed step output', () => {

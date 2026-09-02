@@ -569,16 +569,18 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 data-test-subj="workflowExecuteModalBodyContent"
                 grow={isFillHeightTriggerBody}
                 css={css`
-                  ${isFillHeightTriggerBody
-                    ? css`
-                        flex: 1;
-                        min-height: 0;
-                        overflow: hidden;
-                      `
-                    : css`
-                        flex: 0 1 auto;
-                        overflow: visible;
-                      `}
+                  ${
+                    isFillHeightTriggerBody
+                      ? css`
+                          flex: 1;
+                          min-height: 0;
+                          overflow: hidden;
+                        `
+                      : css`
+                          flex: 0 1 auto;
+                          overflow: visible;
+                        `
+                  }
                   display: flex;
                   flex-direction: column;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};

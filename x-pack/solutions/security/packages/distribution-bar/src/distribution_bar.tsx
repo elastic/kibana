@@ -168,199 +168,199 @@ const shouldShowTooltip = ({
  * Security Solution DistributionBar component.
  * Shows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result.
  */
-export const DistributionBar: React.FC<DistributionBarProps> = React.memo(function DistributionBar(
-  props
-) {
-  const styles = useStyles();
-  const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
+export const DistributionBar: React.FC<DistributionBarProps> = React.memo(
+  function DistributionBar(props) {
+    const styles = useStyles();
+    const { stats, 'data-test-subj': dataTestSubj, hideLastTooltip } = props;
 
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const [shouldFlipTooltip, setShouldFlipTooltip] = useState<Record<string, boolean>>({});
-  const barContainerRef = useRef<HTMLDivElement>(null);
-  const partRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const tooltipContentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const hasCurrentFilter = useMemo(() => stats.some((item) => item.isCurrentFilter), [stats]);
+    const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+    const [shouldFlipTooltip, setShouldFlipTooltip] = useState<Record<string, boolean>>({});
+    const barContainerRef = useRef<HTMLDivElement>(null);
+    const partRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const tooltipContentRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const hasCurrentFilter = useMemo(() => stats.some((item) => item.isCurrentFilter), [stats]);
 
-  // Calculate which tooltips need to be flipped to prevent left overflow
-  useLayoutEffect(() => {
-    if (!barContainerRef.current) return;
-
-    const recalculate = () => {
+    // Calculate which tooltips need to be flipped to prevent left overflow
+    useLayoutEffect(() => {
       if (!barContainerRef.current) return;
 
-      try {
-        const containerRect = barContainerRef.current.getBoundingClientRect();
-        const flippedMap: Record<string, boolean> = {};
+      const recalculate = () => {
+        if (!barContainerRef.current) return;
 
-        stats.forEach((stat) => {
-          const partElement = partRefs.current[stat.key];
-          const tooltipContentElement = tooltipContentRefs.current[stat.key];
-          if (!partElement || !tooltipContentElement) return;
+        try {
+          const containerRect = barContainerRef.current.getBoundingClientRect();
+          const flippedMap: Record<string, boolean> = {};
 
-          const partRect = partElement.getBoundingClientRect();
-          const tooltipContentRect = tooltipContentElement.getBoundingClientRect();
+          stats.forEach((stat) => {
+            const partElement = partRefs.current[stat.key];
+            const tooltipContentElement = tooltipContentRefs.current[stat.key];
+            if (!partElement || !tooltipContentElement) return;
 
-          // Flip to left-aligned when right-aligned would overflow the left edge AND the right
-          // side of the segment has at least as much room as the left side. This prevents the
-          // flipped tooltip from causing a worse right overflow than the original left overflow.
-          const tooltipLeftEdge = partRect.right - tooltipContentRect.width;
-          if (tooltipLeftEdge < containerRect.left) {
-            const spaceOnRight = containerRect.right - partRect.left;
-            const spaceOnLeft = partRect.right - containerRect.left;
-            if (spaceOnRight >= spaceOnLeft) {
-              flippedMap[stat.key] = true;
+            const partRect = partElement.getBoundingClientRect();
+            const tooltipContentRect = tooltipContentElement.getBoundingClientRect();
+
+            // Flip to left-aligned when right-aligned would overflow the left edge AND the right
+            // side of the segment has at least as much room as the left side. This prevents the
+            // flipped tooltip from causing a worse right overflow than the original left overflow.
+            const tooltipLeftEdge = partRect.right - tooltipContentRect.width;
+            if (tooltipLeftEdge < containerRect.left) {
+              const spaceOnRight = containerRect.right - partRect.left;
+              const spaceOnLeft = partRect.right - containerRect.left;
+              if (spaceOnRight >= spaceOnLeft) {
+                flippedMap[stat.key] = true;
+              }
             }
-          }
-        });
+          });
 
-        // Use functional update to bail out when nothing changed
-        setShouldFlipTooltip((prev) => {
-          const hasChanged = stats.some(
-            (stat) => (prev[stat.key] ?? false) !== (flippedMap[stat.key] ?? false)
-          );
-          return hasChanged ? flippedMap : prev;
-        });
-      } catch (e) {
-        // non-critical layout calculation — swallow errors to avoid crashing the component
+          // Use functional update to bail out when nothing changed
+          setShouldFlipTooltip((prev) => {
+            const hasChanged = stats.some(
+              (stat) => (prev[stat.key] ?? false) !== (flippedMap[stat.key] ?? false)
+            );
+            return hasChanged ? flippedMap : prev;
+          });
+        } catch (e) {
+          // non-critical layout calculation — swallow errors to avoid crashing the component
+        }
+      };
+
+      recalculate();
+
+      let debounceTimer: ReturnType<typeof setTimeout>;
+      const observer = new ResizeObserver(() => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(recalculate, 50);
+      });
+      observer.observe(barContainerRef.current);
+
+      return () => {
+        clearTimeout(debounceTimer);
+        observer.disconnect();
+      };
+    }, [stats]);
+
+    const parts = stats.map((stat, index) => {
+      const isLast = index === stats.length - 1;
+      const isHovered = hoveredKey === stat.key;
+      const shouldFlip = shouldFlipTooltip[stat.key] ?? false;
+
+      // Only show tooltip for segments thats hovered OR Set as Filter OR Last
+      const isCurrentFilter = stat.isCurrentFilter ?? false;
+      const showTooltip = shouldShowTooltip({
+        isHovered,
+        isCurrentFilter,
+        isLast,
+        hasFilterActive: hasCurrentFilter,
+        hideLastTooltip,
+        isHoveringAnyStatsBar: Boolean(hoveredKey),
+      });
+
+      const partStyle = [
+        styles.part.base,
+        styles.part.tick,
+        styles.part.hover,
+        css`
+          background-color: ${stat.color};
+          flex: ${stat.count};
+        `,
+      ];
+
+      if (showTooltip) {
+        partStyle.push(styles.part.visibleTooltip);
       }
-    };
 
-    recalculate();
+      const prettyNumber = numeral(stat.count).format('0,0a');
 
-    let debounceTimer: ReturnType<typeof setTimeout>;
-    const observer = new ResizeObserver(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(recalculate, 50);
-    });
-    observer.observe(barContainerRef.current);
-
-    return () => {
-      clearTimeout(debounceTimer);
-      observer.disconnect();
-    };
-  }, [stats]);
-
-  const parts = stats.map((stat, index) => {
-    const isLast = index === stats.length - 1;
-    const isHovered = hoveredKey === stat.key;
-    const shouldFlip = shouldFlipTooltip[stat.key] ?? false;
-
-    // Only show tooltip for segments thats hovered OR Set as Filter OR Last
-    const isCurrentFilter = stat.isCurrentFilter ?? false;
-    const showTooltip = shouldShowTooltip({
-      isHovered,
-      isCurrentFilter,
-      isLast,
-      hasFilterActive: hasCurrentFilter,
-      hideLastTooltip,
-      isHoveringAnyStatsBar: Boolean(hoveredKey),
-    });
-
-    const partStyle = [
-      styles.part.base,
-      styles.part.tick,
-      styles.part.hover,
-      css`
-        background-color: ${stat.color};
-        flex: ${stat.count};
-      `,
-    ];
-
-    if (showTooltip) {
-      partStyle.push(styles.part.visibleTooltip);
-    }
-
-    const prettyNumber = numeral(stat.count).format('0,0a');
-
-    return (
-      <div
-        key={stat.key}
-        ref={(el) => {
-          partRefs.current[stat.key] = el;
-        }}
-        css={partStyle}
-        data-test-subj={`${dataTestSubj}__part`}
-        data-tooltip-flipped={shouldFlip ? 'true' : 'false'}
-        onClick={stat.filter}
-        onMouseEnter={() => setHoveredKey(stat.key)}
-        onMouseLeave={() => setHoveredKey(null)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            stat.filter?.();
-          }
-        }}
-        tabIndex={0}
-        role="button"
-      >
+      return (
         <div
-          css={[
-            styles.tooltip,
-            showTooltip && styles.part.visibleTooltip,
-            shouldFlip && styles.tooltipFlipped,
-            isCurrentFilter && styles.tooltipActiveFilter,
-          ]}
+          key={stat.key}
+          ref={(el) => {
+            partRefs.current[stat.key] = el;
+          }}
+          css={partStyle}
+          data-test-subj={`${dataTestSubj}__part`}
+          data-tooltip-flipped={shouldFlip ? 'true' : 'false'}
+          onClick={stat.filter}
+          onMouseEnter={() => setHoveredKey(stat.key)}
+          onMouseLeave={() => setHoveredKey(null)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              stat.filter?.();
+            }
+          }}
+          tabIndex={0}
+          role="button"
         >
           <div
-            ref={(el) => {
-              tooltipContentRefs.current[stat.key] = el;
-            }}
-            css={styles.tooltipContent}
+            css={[
+              styles.tooltip,
+              showTooltip && styles.part.visibleTooltip,
+              shouldFlip && styles.tooltipFlipped,
+              isCurrentFilter && styles.tooltipActiveFilter,
+            ]}
           >
-            <EuiFlexGroup
-              gutterSize="none"
-              justifyContent={shouldFlip ? 'flexStart' : 'flexEnd'}
-              wrap={false}
-              responsive={false}
+            <div
+              ref={(el) => {
+                tooltipContentRefs.current[stat.key] = el;
+              }}
+              css={styles.tooltipContent}
             >
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" css={styles.tooltipBadgeLeft}>
-                  {prettyNumber}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="dot" size="s" color={stat.color} aria-hidden={true} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
-                    {stat.isCurrentFilter && stat.reset && (
+              <EuiFlexGroup
+                gutterSize="none"
+                justifyContent={shouldFlip ? 'flexStart' : 'flexEnd'}
+                wrap={false}
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" css={styles.tooltipBadgeLeft}>
+                    {prettyNumber}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          type="cross"
-                          size="m"
-                          aria-label={i18n.translate(
-                            'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
-                            { defaultMessage: 'Remove filter' }
-                          )}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setHoveredKey(null);
-                            stat.reset?.(e);
-                          }}
-                        />
+                        <EuiIcon type="dot" size="s" color={stat.color} aria-hidden={true} />
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                      <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
+                      {stat.isCurrentFilter && stat.reset && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            type="cross"
+                            size="m"
+                            aria-label={i18n.translate(
+                              'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
+                              { defaultMessage: 'Remove filter' }
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setHoveredKey(null);
+                              stat.reset?.(e);
+                            }}
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
           </div>
         </div>
+      );
+    });
+
+    return (
+      <div ref={barContainerRef}>
+        <EuiFlexGroup
+          alignItems="center"
+          css={styles.bar}
+          data-test-subj={dataTestSubj}
+          responsive={false}
+        >
+          {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
+        </EuiFlexGroup>
       </div>
     );
-  });
-
-  return (
-    <div ref={barContainerRef}>
-      <EuiFlexGroup
-        alignItems="center"
-        css={styles.bar}
-        data-test-subj={dataTestSubj}
-        responsive={false}
-      >
-        {parts.length ? parts : <EmptyBar data-test-subj={`${dataTestSubj}__emptyBar`} />}
-      </EuiFlexGroup>
-    </div>
-  );
-});
+  }
+);

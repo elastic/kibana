@@ -44,7 +44,7 @@ export function useSecondaryFiltersWidthStyle({
         const textArea = container.querySelector<HTMLTextAreaElement>(
           '[data-apm-unified-search-root] textarea'
         );
-        setQueryTextAreaElement((prev) => (prev === textArea ? prev : textArea ?? null));
+        setQueryTextAreaElement((prev) => (prev === textArea ? prev : (textArea ?? null)));
       };
 
       updateTextAreaRef();

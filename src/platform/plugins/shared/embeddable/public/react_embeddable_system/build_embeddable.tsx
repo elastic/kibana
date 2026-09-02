@@ -26,7 +26,7 @@ import { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 
 export async function buildEmbeddable<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 >({
   factory,
   maybeId,

@@ -31,15 +31,12 @@ import type { SearchConnectorsConfig } from './config';
 import { AgentlessConnectorDeploymentsSyncService } from './task';
 import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
-export class SearchConnectorsPlugin
-  implements
-    Plugin<
-      SearchConnectorsPluginSetup,
-      SearchConnectorsPluginStart,
-      SearchConnectorsPluginSetupDependencies,
-      SearchConnectorsPluginStartDependencies
-    >
-{
+export class SearchConnectorsPlugin implements Plugin<
+  SearchConnectorsPluginSetup,
+  SearchConnectorsPluginStart,
+  SearchConnectorsPluginSetupDependencies,
+  SearchConnectorsPluginStartDependencies
+> {
   private connectors: ConnectorServerSideDefinition[];
   private readonly logger: LoggerFactory;
   private readonly config: SearchConnectorsConfig;

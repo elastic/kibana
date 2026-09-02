@@ -82,7 +82,7 @@ export interface ActionsPlugin {
 export interface ActionTypeExecutorOptions<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
-  Params
+  Params,
 > {
   actionId: string;
   services: Services | UnsecuredServices;
@@ -107,7 +107,7 @@ export type ActionResult = Connector;
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > extends ActionResult {
   secrets: Secrets;
   config: Config;
@@ -122,7 +122,7 @@ export type ExecutorType<
   Config extends Record<string, unknown>,
   Secrets extends Record<string, unknown>,
   Params,
-  ResultData
+  ResultData,
 > = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult<ResultData>>;
@@ -152,7 +152,7 @@ export type RenderParameterTemplates<Params extends ActionTypeParams> = (
 
 export interface PreSaveConnectorHookParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > {
   connectorId: string;
   config: Config;
@@ -165,7 +165,7 @@ export interface PreSaveConnectorHookParams<
 
 export interface PostSaveConnectorHookParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > {
   connectorId: string;
   config: Config;
@@ -179,7 +179,7 @@ export interface PostSaveConnectorHookParams<
 
 export interface PostDeleteConnectorHookParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
 > {
   connectorId: string;
   config: Config;
@@ -217,7 +217,7 @@ export type ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 > =
   | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
   | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
@@ -225,7 +225,7 @@ export type ActionType<
 export interface ActionTypeCoreFields<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
+  Params extends ActionTypeParams = ActionTypeParams,
 > {
   id: string;
   name: string;
@@ -283,7 +283,7 @@ export type WorkflowActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   validate: {
@@ -298,7 +298,7 @@ export type ClassicActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
-  ExecutorResultData = void
+  ExecutorResultData = void,
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   validate: {

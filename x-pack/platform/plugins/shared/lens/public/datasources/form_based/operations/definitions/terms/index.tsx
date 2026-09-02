@@ -226,8 +226,8 @@ export const termsOperation: OperationDefinition<
 
     return Boolean(
       allFields.length &&
-        invalidFields.length === 0 &&
-        (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
+      invalidFields.length === 0 &&
+      (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
   buildColumn({ layer, field, indexPattern }, columnParams) {

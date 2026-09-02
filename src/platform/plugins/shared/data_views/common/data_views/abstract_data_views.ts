@@ -141,30 +141,33 @@ export abstract class AbstractDataView {
 
     // it's importing field attributes when a data view is imported from a spec and those attributes aren't provided in the fieldAttrs
     const extractedFieldAttrs = spec?.fields
-      ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
-          const attrs: FieldAttrSet = {};
-          let hasAttrs = false;
+      ? Object.entries(spec.fields).reduce(
+          (acc, [key, value]) => {
+            const attrs: FieldAttrSet = {};
+            let hasAttrs = false;
 
-          if (value.count) {
-            attrs.count = value.count;
-            hasAttrs = true;
-          }
+            if (value.count) {
+              attrs.count = value.count;
+              hasAttrs = true;
+            }
 
-          if (value.customLabel) {
-            attrs.customLabel = value.customLabel;
-            hasAttrs = true;
-          }
+            if (value.customLabel) {
+              attrs.customLabel = value.customLabel;
+              hasAttrs = true;
+            }
 
-          if (value.customDescription) {
-            attrs.customDescription = value.customDescription;
-            hasAttrs = true;
-          }
+            if (value.customDescription) {
+              attrs.customDescription = value.customDescription;
+              hasAttrs = true;
+            }
 
-          if (hasAttrs) {
-            acc[key] = attrs;
-          }
-          return acc;
-        }, {} as Record<string, FieldAttrSet>)
+            if (hasAttrs) {
+              acc[key] = attrs;
+            }
+            return acc;
+          },
+          {} as Record<string, FieldAttrSet>
+        )
       : {};
 
     this.allowNoIndex = spec?.allowNoIndex || false;

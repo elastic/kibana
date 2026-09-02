@@ -90,8 +90,8 @@ export const useChangeAppliedTemplate = () => {
   return useMutation(
     ({ caseData, newTemplate, extendedFields }: ChangeAppliedTemplateArgs) => {
       const newExtendedFields = newTemplate
-        ? extendedFields ??
-          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {})
+        ? (extendedFields ??
+          computeNewExtendedFields(newTemplate.fields, caseData.extendedFields ?? {}))
         : {};
       return patchCase({
         caseId: caseData.id,

@@ -43,7 +43,7 @@ export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup
       transformOut: <
         StoredStateType extends Partial<
           LegacyStoredRangeSliderExplicitInput & RangeSliderControlState
-        >
+        >,
       >(
         state: StoredStateType,
         panelReferences: Reference[] | undefined,

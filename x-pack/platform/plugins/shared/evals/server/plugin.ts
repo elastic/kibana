@@ -41,10 +41,12 @@ import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
 
-export class EvalsPlugin
-  implements
-    Plugin<EvalsPluginSetup, EvalsPluginStart, EvalsSetupDependencies, EvalsStartDependencies>
-{
+export class EvalsPlugin implements Plugin<
+  EvalsPluginSetup,
+  EvalsPluginStart,
+  EvalsSetupDependencies,
+  EvalsStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
   private readonly isServerless: boolean;

@@ -49,9 +49,8 @@ export function createTelemetryDiagnosticsTaskConfig() {
           taskExecutionPeriod.last,
           taskExecutionPeriod.current
         )) {
-          const processedAlerts = alerts.map(
-            (event: TelemetryEvent): TelemetryEvent =>
-              copyAllowlistedFields(filterList.endpointAlerts, event)
+          const processedAlerts = alerts.map((event: TelemetryEvent): TelemetryEvent =>
+            copyAllowlistedFields(filterList.endpointAlerts, event)
           );
 
           if (alerts.length === 0) {

@@ -128,12 +128,12 @@ function normalizeESQLAdHocDataViews(
       // Use the same logic as the transform: derive timeField from the ES|QL query
       const timeFieldName = esqlQuery
         ? parseTimeFieldFromESQLQuery(esqlQuery)
-        : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
+        : (adHocDataView.timeFieldName ?? layer.timeField ?? undefined);
       // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
       // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
       const indexPattern = esqlQuery
         ? getIndexPatternFromESQLQuery(esqlQuery)
-        : adHocDataView.name ?? '';
+        : (adHocDataView.name ?? '');
       const newId = generateAdHocDataViewId({
         index: indexPattern,
         dataSourceType: 'esql',
@@ -1269,13 +1269,16 @@ export const getCommonNormalizer = <T extends LensAttributes>(
         getFormBasedDatasourceState(attributes.state.datasourceStates),
         (ds) => {
           for (const layer of Object.values(ds.layers)) {
-            layer.columns = columnRemapping.reduce((columns, [oldColumn, newColumn]) => {
-              if (oldColumn && layer.columns[oldColumn]) {
-                columns[newColumn] = layer.columns[oldColumn];
-              }
+            layer.columns = columnRemapping.reduce(
+              (columns, [oldColumn, newColumn]) => {
+                if (oldColumn && layer.columns[oldColumn]) {
+                  columns[newColumn] = layer.columns[oldColumn];
+                }
 
-              return columns;
-            }, {} as typeof layer.columns);
+                return columns;
+              },
+              {} as typeof layer.columns
+            );
 
             layer.columnOrder = layer.columnOrder
               .filter((colId: string) => columnIdMap.has(colId))

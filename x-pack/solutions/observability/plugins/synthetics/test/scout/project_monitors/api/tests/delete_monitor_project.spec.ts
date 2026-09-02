@@ -203,9 +203,8 @@ apiTest.describe(
         const project = `test-brower-suite-${uuidv4()}`;
         const spaceId = `test-space-${uuidv4()}`;
         await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
-        const spaceLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-          spaceId
-        );
+        const spaceLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(spaceId);
 
         const monitors = [makeMonitor()];
         const monitorIds = monitors.map((m) => m.id);

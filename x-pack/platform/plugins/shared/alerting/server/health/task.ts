@@ -74,9 +74,7 @@ export function healthCheckTaskRunner(
       async run() {
         try {
           const result = await getAlertingHealthStatus(
-            (
-              await coreStartServices
-            )[0].savedObjects,
+            (await coreStartServices)[0].savedObjects,
             state.runs
           );
           const updatedState: LatestTaskStateSchema = result.state;

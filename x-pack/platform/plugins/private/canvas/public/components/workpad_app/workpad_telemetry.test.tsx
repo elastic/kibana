@@ -50,7 +50,7 @@ const getResolveArgWithState = (state: 'pending' | 'ready' | 'error') =>
   ({
     expressionRenderable: { value: { as: state, type: 'render' }, state, error: null },
     expressionContext: {} as ExpressionContext,
-  } as ResolvedArgType);
+  }) as ResolvedArgType;
 
 const arrayToObject = (array: ResolvedArgType[]) =>
   array.reduce<Record<number, ResolvedArgType>>((acc, el, index) => {

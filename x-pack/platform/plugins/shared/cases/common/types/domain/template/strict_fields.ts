@@ -198,7 +198,7 @@ export const buildStrictFieldsArraySchema = (grandfatheredNames?: ReadonlySet<st
   z.array(buildStrictFieldSchema(grandfatheredNames)).refine(
     (fields) => {
       const fieldNames = new Set(
-        fields.map((field) => (isRefField(field) ? field.name ?? field.$ref : field.name))
+        fields.map((field) => (isRefField(field) ? (field.name ?? field.$ref) : field.name))
       );
       return fieldNames.size === fields.length;
     },

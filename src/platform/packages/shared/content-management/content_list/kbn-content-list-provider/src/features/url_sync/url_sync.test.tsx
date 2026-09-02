@@ -21,12 +21,10 @@ import type { FindItemsParams, FindItemsResult } from '../../datasource';
 import { parseSearch } from './url_codec';
 
 describe('ContentListUrlSync', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper = ({
     history,

@@ -37,7 +37,7 @@ const makeAgent = (overrides?: Partial<Agent>): Agent =>
     },
     capabilities: ['logs', 'metrics', 'traces'],
     ...overrides,
-  } as Agent);
+  }) as Agent;
 
 const config: OTelCollectorConfig = {
   service: {

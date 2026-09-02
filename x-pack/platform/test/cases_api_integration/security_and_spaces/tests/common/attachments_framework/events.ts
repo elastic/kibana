@@ -40,7 +40,7 @@ const legacyEventPayload = (overrides: Record<string, unknown> = {}): Attachment
     index: LEGACY_EVENTS_INDEX,
     owner: 'securitySolutionFixture',
     ...overrides,
-  } as AttachmentRequest);
+  }) as AttachmentRequest;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

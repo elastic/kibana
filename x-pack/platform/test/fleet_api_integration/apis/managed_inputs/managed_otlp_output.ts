@@ -369,9 +369,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('allows assigning the OTLP output to a pure-OTel agent policy', async () => {
-        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
-          'allowed'
-        );
+        const { otlpOutputId, policyId, policyName } =
+          await createOtlpOutputAndOtelPolicy('allowed');
 
         // Assigning OTLP output to a pure-OTel policy must succeed
         await supertest
@@ -382,9 +381,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('rejects assigning the OTLP output to a mixed OTel+beats agent policy', async () => {
-        const { otlpOutputId, policyId, policyName } = await createOtlpOutputAndOtelPolicy(
-          'rejected'
-        );
+        const { otlpOutputId, policyId, policyName } =
+          await createOtlpOutputAndOtelPolicy('rejected');
 
         // Also add a non-OTel (beats) package policy to make the policy mixed
         await supertest

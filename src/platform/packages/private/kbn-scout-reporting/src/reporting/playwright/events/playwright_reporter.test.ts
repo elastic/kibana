@@ -25,10 +25,10 @@ jest.mock('@kbn/code-owners', () => ({
 }));
 
 const createMockConfig = (): FullConfig =>
-  ({ configFile: undefined, fullyParallel: false } as unknown as FullConfig);
+  ({ configFile: undefined, fullyParallel: false }) as unknown as FullConfig;
 
 const createMockSuite = (tests: TestCase[] = []): Suite =>
-  ({ allTests: () => tests } as unknown as Suite);
+  ({ allTests: () => tests }) as unknown as Suite;
 
 const createMockTest = (): TestCase =>
   ({
@@ -43,7 +43,7 @@ const createMockTest = (): TestCase =>
       type: 'describe',
       titlePath: () => ['', 'local', 'path/to/file.spec.ts', 'My Suite'],
     },
-  } as unknown as TestCase);
+  }) as unknown as TestCase;
 
 /** A `TestCase` with a fixed `outcome()` and one `TestResult` per given status. */
 const createMockTestCase = (overrides: {
@@ -72,7 +72,7 @@ const createMockTestCase = (overrides: {
 };
 
 const createMockFullResult = (status: FullResult['status'] = 'passed'): FullResult =>
-  ({ status, duration: 1000 } as FullResult);
+  ({ status, duration: 1000 }) as FullResult;
 
 const createMockResult = (
   overrides: { attachments?: TestResult['attachments']; retry?: number } = {}
@@ -86,7 +86,7 @@ const createMockResult = (
     error: undefined,
     stdout: [],
     stderr: [],
-  } as unknown as TestResult);
+  }) as unknown as TestResult;
 
 describe('ScoutPlaywrightReporter', () => {
   let reporter: ScoutPlaywrightReporter;

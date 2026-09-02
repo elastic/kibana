@@ -61,7 +61,7 @@ const buildCache = (...pages: ListConversationsResponse[]): ConversationListCach
 const buildConversationsService = (response?: ListConversationsResponse) =>
   ({
     list: jest.fn().mockResolvedValue(response ?? buildPage([])),
-  } as unknown as ConversationsService);
+  }) as unknown as ConversationsService;
 
 // ---------------------------------------------------------------------------
 // Tests

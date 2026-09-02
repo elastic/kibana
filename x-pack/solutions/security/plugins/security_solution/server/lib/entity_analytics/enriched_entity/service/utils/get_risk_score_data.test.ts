@@ -44,7 +44,7 @@ const makeSearchResponse = (riskScore: EntityRiskScoreRecord | undefined, entity
     hits: {
       hits: riskScore ? [{ _source: { [entityType]: { risk: riskScore } } }] : [],
     },
-  } as unknown as SearchResponse<Record<string, { risk: EntityRiskScoreRecord }>>);
+  }) as unknown as SearchResponse<Record<string, { risk: EntityRiskScoreRecord }>>;
 
 const makeFoundDoc = (
   _id: string,
@@ -60,7 +60,7 @@ const makeFoundDoc = (
 const makeMissingDoc = (_id: string) => ({ _id, found: false });
 
 const makeEntity = (id: string, type: string): Entity =>
-  ({ entity: { id, EngineMetadata: { Type: type } } } as unknown as Entity);
+  ({ entity: { id, EngineMetadata: { Type: type } } }) as unknown as Entity;
 
 const baseOptions = {
   logger,

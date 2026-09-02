@@ -48,16 +48,18 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
     });
 
     await test.step('origin_marker field is available', async () => {
-      const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
-        originMarkerField
-      );
+      const option =
+        await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
+          originMarkerField
+        );
       await expect(option).toBeVisible({ timeout: 15_000 });
     });
 
     await test.step('linked_marker field is NOT available', async () => {
-      const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
-        linkedMarkerField
-      );
+      const option =
+        await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
+          linkedMarkerField
+        );
       await expect(option).toHaveCount(0, { timeout: 5_000 });
     });
   });
@@ -84,16 +86,18 @@ test.describe('CPS field dropdown scoping - threat match mapping fields', { tag:
     });
 
     await test.step('origin_marker field is available', async () => {
-      const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
-        originMarkerField
-      );
+      const option =
+        await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
+          originMarkerField
+        );
       await expect(option).toBeVisible({ timeout: 15_000 });
     });
 
     await test.step('linked_marker field is also available', async () => {
-      const option = await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
-        linkedMarkerField
-      );
+      const option =
+        await pageObjects.threatMatchRuleCreatePage.openThreatFieldDropdownOption(
+          linkedMarkerField
+        );
       await expect(option).toBeVisible({ timeout: 15_000 });
     });
   });

@@ -98,7 +98,7 @@ const createMockChatModel = () =>
         unanswered_questions: [],
       }),
     }),
-  } as any);
+  }) as any;
 
 describe('extractProgrammaticSummary', () => {
   it('should extract tool calls from round steps', () => {

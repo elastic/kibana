@@ -199,8 +199,8 @@ export const ExperimentsListPage: React.FC = () => {
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
-            ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
-            : item.experiment_name ?? item.experiment_id.slice(0, 12);
+            ? (item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12))
+            : (item.experiment_name ?? item.experiment_id.slice(0, 12));
           const tooltipId = item.execution_id ?? item.experiment_id;
           const detailHref = history.createHref({
             pathname: `/experiments/${encodeURIComponent(item.experiment_id)}`,

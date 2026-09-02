@@ -449,8 +449,8 @@ const scoreMemoryUsage = (
       typeof params.id === 'string'
         ? params.id
         : typeof params.name === 'string'
-        ? params.name
-        : '';
+          ? params.name
+          : '';
     if (page && patchedPages.has(page)) {
       return {
         score: 0,
@@ -636,10 +636,10 @@ export const scoreToolUsage = ({
         ? allRecordedNoise && hasNoiseConfirmation
           ? 'Correctly confirmed already-recorded-noise and skipped events_write'
           : persistenceCalls.retriedPartialFailure
-          ? 'Correctly called all tools and retried only failed event items'
-          : persistenceCalls.retriedSchemaFailure
-          ? 'Correctly called all tools and retried after a schema or tool error'
-          : 'Correctly called all tools'
+            ? 'Correctly called all tools and retried only failed event items'
+            : persistenceCalls.retriedSchemaFailure
+              ? 'Correctly called all tools and retried after a schema or tool error'
+              : 'Correctly called all tools'
         : `Missing tools: ${missing.join(', ')}`,
   };
 };

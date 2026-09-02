@@ -50,8 +50,9 @@ type AutoSizerChildren = (size: { height: number; width: number }) => React.Reac
 jest.mock(
   'react-virtualized/dist/commonjs/AutoSizer',
   () =>
-    ({ children }: { children: AutoSizerChildren }) =>
+    ({ children }: { children: AutoSizerChildren }) => (
       <div>{children({ height: 500, width: 500 })}</div>
+    )
 );
 
 export const renderProcessorEditor = (httpSetup: HttpSetup, props: Props) => {

@@ -45,7 +45,7 @@ const buildService = (templates: Template[]) => {
         listTemplates: jest.fn().mockResolvedValue(templates),
         getTemplate: jest.fn(),
         getHealth: jest.fn(),
-      } as unknown as LibraryFetcher)
+      }) as unknown as LibraryFetcher
   );
 
   return new LibraryService({

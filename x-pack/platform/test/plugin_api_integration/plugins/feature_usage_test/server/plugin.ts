@@ -21,15 +21,12 @@ export interface FeatureUsageTestStartDependencies {
   licensing: LicensingPluginStart;
 }
 
-export class FeatureUsageTestPlugin
-  implements
-    Plugin<
-      FeatureUsageTestPluginSetup,
-      FeatureUsageTestPluginStart,
-      FeatureUsageTestSetupDependencies,
-      FeatureUsageTestStartDependencies
-    >
-{
+export class FeatureUsageTestPlugin implements Plugin<
+  FeatureUsageTestPluginSetup,
+  FeatureUsageTestPluginStart,
+  FeatureUsageTestSetupDependencies,
+  FeatureUsageTestStartDependencies
+> {
   public setup(
     {
       http,

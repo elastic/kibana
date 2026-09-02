@@ -205,12 +205,12 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 defaultMessage: 'Checking status…',
               })
             : paused
-            ? i18n.translate('xpack.significantEventsApp.settings.maintenance.resumeButton', {
-                defaultMessage: 'Resume Significant Events activity',
-              })
-            : i18n.translate('xpack.significantEventsApp.settings.maintenance.pauseButton', {
-                defaultMessage: 'Pause Significant Events activity',
-              })}
+              ? i18n.translate('xpack.significantEventsApp.settings.maintenance.resumeButton', {
+                  defaultMessage: 'Resume Significant Events activity',
+                })
+              : i18n.translate('xpack.significantEventsApp.settings.maintenance.pauseButton', {
+                  defaultMessage: 'Pause Significant Events activity',
+                })}
         </EuiButton>
       </EuiPanel>
 

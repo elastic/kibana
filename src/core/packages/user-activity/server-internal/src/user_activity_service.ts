@@ -35,9 +35,10 @@ interface UserActivitySetupDeps {
  *
  * @internal
  */
-export class UserActivityService
-  implements CoreService<InternalUserActivityServiceSetup, InternalUserActivityServiceStart>
-{
+export class UserActivityService implements CoreService<
+  InternalUserActivityServiceSetup,
+  InternalUserActivityServiceStart
+> {
   private readonly logger: Logger;
   private enabled = false;
   private filters: UserActivityFiltersType = [];

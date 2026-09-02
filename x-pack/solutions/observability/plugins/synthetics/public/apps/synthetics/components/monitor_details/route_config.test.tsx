@@ -35,7 +35,7 @@ jest.mock('./monitor_errors/errors_icon', () => ({
 const makeHistory = () =>
   ({
     location: { search: '' },
-  } as any);
+  }) as any;
 
 describe('getMonitorDetailsRoute - Alerts tab', () => {
   beforeEach(() => {

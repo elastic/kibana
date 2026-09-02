@@ -515,9 +515,9 @@ export const isTimeChart = (
 ) =>
   Boolean(
     dataLayers.length &&
-      dataLayers.every(
-        (dataLayer) =>
-          dataLayer.xAccessor &&
-          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
-      )
+    dataLayers.every(
+      (dataLayer) =>
+        dataLayer.xAccessor &&
+        checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+    )
   );

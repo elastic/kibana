@@ -10,7 +10,10 @@
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class BulkOperationError extends Error {
-  constructor(message: string, public response: BulkResponse) {
+  constructor(
+    message: string,
+    public response: BulkResponse
+  ) {
     super(message);
     this.name = 'BulkOperationError';
   }

@@ -1597,7 +1597,7 @@ describe('getEntityTool', () => {
           ],
           score_type: 'base',
           ...override,
-        } as unknown as EntityRiskScoreRecord);
+        }) as unknown as EntityRiskScoreRecord;
 
       const buildRiskSearchResponse = (records: EntityRiskScoreRecord[]) => ({
         took: 1,

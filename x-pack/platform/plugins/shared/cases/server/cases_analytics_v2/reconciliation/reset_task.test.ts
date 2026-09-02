@@ -42,7 +42,7 @@ const successResult = (): RunFullResetResult =>
     casesError: null,
     activityError: null,
     attachmentsError: null,
-  } as unknown as RunFullResetResult);
+  }) as unknown as RunFullResetResult;
 
 /**
  * Registers the reset task, extracts the `run()` closure Task Manager

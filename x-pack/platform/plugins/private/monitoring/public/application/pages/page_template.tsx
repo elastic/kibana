@@ -76,7 +76,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   };
   const hasCloudConnectPermission = Boolean(
     services.application.capabilities.cloudConnect?.show ||
-      services.application.capabilities.cloudConnect?.configure
+    services.application.capabilities.cloudConnect?.configure
   );
 
   const getPageDataResponseHandler = useCallback(

@@ -12,7 +12,7 @@ describe('deepObjectEntries', () => {
     [
       objectValue: object,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expected: Array<[path: Array<keyof any>, fieldValue: unknown]>
+      expected: Array<[path: Array<keyof any>, fieldValue: unknown]>,
     ]
   > = [
     [{}, []], // No 'field' values found

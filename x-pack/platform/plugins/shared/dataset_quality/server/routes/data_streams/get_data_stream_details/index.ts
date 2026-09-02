@@ -252,10 +252,13 @@ function getTermsFromAgg(
     return {};
   }
 
-  return Object.entries(termAgg).reduce((acc, [key, _value]) => {
-    const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
-    return { ...acc, [key]: values };
-  }, {} as Record<string, string[]>);
+  return Object.entries(termAgg).reduce(
+    (acc, [key, _value]) => {
+      const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
+      return { ...acc, [key]: values };
+    },
+    {} as Record<string, string[]>
+  );
 }
 
 function throwIfInvalidDataStreamParams(dataStream?: string) {

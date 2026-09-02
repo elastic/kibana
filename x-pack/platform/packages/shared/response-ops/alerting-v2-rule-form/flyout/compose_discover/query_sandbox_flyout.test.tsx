@@ -89,7 +89,7 @@ jest.mock('./compose_discover_tabs', () => ({
 }));
 
 const mockField = (name: string, type: string) =>
-  ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);
+  ({ name, type, searchable: true, aggregatable: true }) as DataViewFieldMap[string];
 
 const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
   format: 'standalone',

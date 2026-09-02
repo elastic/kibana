@@ -78,7 +78,7 @@ export type AssistantMessage<TToolCalls extends ToolCall[] | undefined = ToolCal
 export type ToolMessage<
   TName extends string = string,
   TToolResponse extends ToolResponse = ToolResponse,
-  TToolData extends ToolData | undefined = ToolData | undefined
+  TToolData extends ToolData | undefined = ToolData | undefined,
 > = MessageBase<MessageRole.Tool> & {
   /**
    * The name of the tool called. Used for refining the type of the response.
@@ -122,7 +122,7 @@ export type ToolResponses = Record<string, ToolResponse>;
  */
 export type ToolMessageOf<
   TToolOptions extends ToolOptions,
-  TToolResponses extends ToolResponses = ToolResponses
+  TToolResponses extends ToolResponses = ToolResponses,
 > = ValuesType<{
   [key in ToolNamesOf<TToolOptions>]: ToolMessage<key, TToolResponses[key], any>;
 }>;
@@ -135,5 +135,5 @@ export type MessageOf<
   TToolResponses extends Record<ToolNamesOf<TToolOptions>, any> = Record<
     ToolNamesOf<TToolOptions>,
     unknown
-  >
+  >,
 > = UserMessage | AssistantMessageOf<TToolOptions> | ToolMessageOf<TToolOptions, TToolResponses>;

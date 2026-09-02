@@ -157,7 +157,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
     updatedBy: 'elastic',
     updatedAt: '2026-01-02T03:04:05.000Z',
     ...overrides,
-  } as RuleApiResponse);
+  }) as RuleApiResponse;
 
 const mockRules: RuleApiResponse[] = [
   createRule(),

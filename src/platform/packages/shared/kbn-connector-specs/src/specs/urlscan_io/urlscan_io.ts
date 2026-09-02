@@ -194,7 +194,7 @@ const rateLimitOf = (headers: unknown) => {
  */
 const brandNames = (brands: Array<ScanBrand | string> | undefined): string[] =>
   (brands ?? [])
-    .map((brand) => (typeof brand === 'string' ? brand : brand.name ?? brand.key))
+    .map((brand) => (typeof brand === 'string' ? brand : (brand.name ?? brand.key)))
     .filter((name): name is string => name !== undefined);
 
 const trimVerdictSource = (source: ScanVerdictSource | undefined) => {
@@ -643,8 +643,8 @@ Gotchas that matter:
                 status === 410
                   ? 'The scan has been deleted (HTTP 410). Deleted scans cannot be retrieved; submit a new scan if you still need the verdict.'
                   : noSuchScan
-                  ? 'No such scan (HTTP 404). urlscan has no submission with this uuid, so retrying will not help. Check the uuid, or submit a new scan.'
-                  : 'No result yet (HTTP 404). The scan is still processing. Wait a few seconds and retry, or use scanUrlAndWait to have the connector poll for you.',
+                    ? 'No such scan (HTTP 404). urlscan has no submission with this uuid, so retrying will not help. Check the uuid, or submit a new scan.'
+                    : 'No result yet (HTTP 404). The scan is still processing. Wait a few seconds and retry, or use scanUrlAndWait to have the connector poll for you.',
             };
           }
           return throwWithApiError(error);

@@ -27,7 +27,7 @@ import type { ConfigType } from '../config';
 const allowAuditLogging = { allowAuditLogging: true } as SecurityLicenseFeatures;
 
 const auditConfig = (appender: ConfigType['audit']['appender']): ConfigType['audit'] =>
-  ({ enabled: true, include_saved_object_names: false, appender } as ConfigType['audit']);
+  ({ enabled: true, include_saved_object_names: false, appender }) as ConfigType['audit'];
 
 const rollingFileAppender = (fileName: string) =>
   ({
@@ -36,7 +36,7 @@ const rollingFileAppender = (fileName: string) =>
     layout: { type: 'json' },
     policy: { type: 'time-interval' },
     strategy: { type: 'numeric', max: 10 },
-  } as ConfigType['audit']['appender']);
+  }) as ConfigType['audit']['appender'];
 
 describe('createLoggingConfig', () => {
   const config = auditConfig(rollingFileAppender('/var/log/kibana/audit.log'));

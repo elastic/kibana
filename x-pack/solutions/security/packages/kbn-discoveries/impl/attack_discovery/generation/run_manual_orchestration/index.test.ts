@@ -594,7 +594,7 @@ describe('runManualOrchestration', () => {
 
   describe('step failure telemetry', () => {
     const createAnalytics = (): AnalyticsServiceSetup =>
-      ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+      ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceSetup;
 
     it('reports the resolved default validation workflow id when validation_workflow_id is the empty-string sentinel', async () => {
       const analytics = createAnalytics();

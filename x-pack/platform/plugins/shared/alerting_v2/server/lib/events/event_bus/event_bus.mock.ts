@@ -24,7 +24,7 @@ import type { DomainEvent, EventBus } from './types';
  */
 export function createEventBusMock<
   TEvent extends DomainEvent = DomainEvent,
-  TContext = void
+  TContext = void,
 >(): jest.Mocked<EventBus<TEvent, TContext>> {
   return {
     publish: jest.fn(),

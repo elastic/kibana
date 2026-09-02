@@ -35,15 +35,12 @@ import type {
 } from './types';
 import { aiAssistantCapabilities } from '../common/capabilities';
 
-export class ObservabilityAIAssistantPlugin
-  implements
-    Plugin<
-      ObservabilityAIAssistantPublicSetup,
-      ObservabilityAIAssistantPublicStart,
-      ObservabilityAIAssistantPluginSetupDependencies,
-      ObservabilityAIAssistantPluginStartDependencies
-    >
-{
+export class ObservabilityAIAssistantPlugin implements Plugin<
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies
+> {
   logger: Logger;
   service?: ObservabilityAIAssistantService;
   scopeFromConfig?: AssistantScope;

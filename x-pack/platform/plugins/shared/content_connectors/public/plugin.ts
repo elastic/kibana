@@ -20,15 +20,12 @@ import type {
 import { PLUGIN_ID } from '../common/constants';
 import { PLUGIN_NAME } from './translations';
 
-export class SearchConnectorsPlugin
-  implements
-    Plugin<
-      SearchConnectorsPluginSetup,
-      SearchConnectorsPluginStart,
-      SearchConnectorsPluginSetupDependencies,
-      SearchConnectorsPluginStartDependencies
-    >
-{
+export class SearchConnectorsPlugin implements Plugin<
+  SearchConnectorsPluginSetup,
+  SearchConnectorsPluginStart,
+  SearchConnectorsPluginSetupDependencies,
+  SearchConnectorsPluginStartDependencies
+> {
   private readonly kibanaVersion: string;
   private readonly config: ClientConfigType;
   private contentConnectorsApp?: ManagementApp;

@@ -12,7 +12,7 @@ const createRuleSourceImporterMock = (): jest.Mocked<RuleSourceImporter> =>
     setup: jest.fn(),
     calculateRuleSource: jest.fn(),
     isPrebuiltRule: jest.fn(),
-  } as unknown as jest.Mocked<RuleSourceImporter>);
+  }) as unknown as jest.Mocked<RuleSourceImporter>;
 
 export const ruleSourceImporterMock = {
   create: createRuleSourceImporterMock,

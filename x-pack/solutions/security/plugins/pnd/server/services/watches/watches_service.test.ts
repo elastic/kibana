@@ -112,7 +112,7 @@ const createPersistentHarness = () => {
       triggers: [{ type: 'manual' }],
       consts: { watch_policy: { mandate: 'Frontline triage' } },
       steps: [],
-    } as never);
+    }) as never;
   const getWorkflow = jest.fn(async (id: string) => {
     const document = documents.get(id);
     if (!document) return null;

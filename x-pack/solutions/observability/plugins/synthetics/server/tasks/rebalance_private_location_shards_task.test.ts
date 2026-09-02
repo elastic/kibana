@@ -67,9 +67,9 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
     agentPolicyId: 'ap-1',
     isAgentSharding: true,
     ...over,
-  } as unknown as Awaited<
+  }) as unknown as Awaited<
     ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>
-  >[number]);
+  >[number];
 
 const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentInfo => ({
   lastCheckin,
@@ -80,7 +80,7 @@ const taskInstance = (
   state: Record<string, unknown> = {},
   over: Partial<ConcreteTaskInstance> = {}
 ): ConcreteTaskInstance =>
-  ({ id: REBALANCE_SHARDS_TASK_ID, state, params: {}, ...over } as unknown as ConcreteTaskInstance);
+  ({ id: REBALANCE_SHARDS_TASK_ID, state, params: {}, ...over }) as unknown as ConcreteTaskInstance;
 
 const makeTask = () =>
   new RebalancePrivateLocationShardsTask(mockServerSetup, mockSyntheticsMonitorClient);

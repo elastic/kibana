@@ -23,9 +23,7 @@ export interface LicenseManagementLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;
 }
 
-export class LicenseManagementLocatorDefinition
-  implements LocatorDefinition<LicenseManagementLocatorParams>
-{
+export class LicenseManagementLocatorDefinition implements LocatorDefinition<LicenseManagementLocatorParams> {
   constructor(protected readonly deps: LicenseManagementLocatorDefinitionDependencies) {}
 
   public readonly id = LICENSE_MANAGEMENT_LOCATOR_ID;

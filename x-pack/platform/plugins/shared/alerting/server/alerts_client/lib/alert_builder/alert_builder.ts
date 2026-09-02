@@ -38,7 +38,7 @@ interface AlertBuilderOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   rule: AlertRule;
   reportedAlerts: Record<string, DeepPartial<AlertData>>;
@@ -61,7 +61,7 @@ export class AlertBuilder<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private readonly rule: AlertRule;
   private readonly alertRuleData: AlertRuleData;

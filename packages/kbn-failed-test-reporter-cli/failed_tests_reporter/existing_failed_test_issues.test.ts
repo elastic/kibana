@@ -47,18 +47,16 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
     return jsonResponse({
       existingIssues: body.failures
         .filter((t) => t.classname.includes('foo'))
-        .map(
-          (t, i): FailedTestIssue => ({
-            classname: t.classname,
-            name: t.name,
-            github: {
-              htmlUrl: `htmlurl(${t.classname}/${t.name})`,
-              nodeId: `nodeid(${t.classname}/${t.name})`,
-              number: (i + 1) * (t.classname.length + t.name.length),
-              body: `FAILURE: ${t.classname}/${t.name}`,
-            },
-          })
-        ),
+        .map((t, i): FailedTestIssue => ({
+          classname: t.classname,
+          name: t.name,
+          github: {
+            htmlUrl: `htmlurl(${t.classname}/${t.name})`,
+            nodeId: `nodeid(${t.classname}/${t.name})`,
+            number: (i + 1) * (t.classname.length + t.name.length),
+            body: `FAILURE: ${t.classname}/${t.name}`,
+          },
+        })),
     });
   });
 
@@ -172,18 +170,16 @@ describe('Scout failures', () => {
       return jsonResponse({
         existingIssues: body.failures
           .filter((t) => t.name === 'scout test name')
-          .map(
-            (t): FailedTestIssue => ({
-              classname: t.classname || 'scout suite',
-              name: t.name,
-              github: {
-                htmlUrl: 'htmlurl(scout test name)',
-                nodeId: 'nodeid(scout test name)',
-                number: 123,
-                body: 'FAILURE: scout test name',
-              },
-            })
-          ),
+          .map((t): FailedTestIssue => ({
+            classname: t.classname || 'scout suite',
+            name: t.name,
+            github: {
+              htmlUrl: 'htmlurl(scout test name)',
+              nodeId: 'nodeid(scout test name)',
+              number: 123,
+              body: 'FAILURE: scout test name',
+            },
+          })),
       });
     });
 
@@ -265,18 +261,16 @@ describe('Scout failures', () => {
         failures: Array<{ classname: string; name: string }>;
       };
       return jsonResponse({
-        existingIssues: body.failures.map(
-          (t, i): FailedTestIssue => ({
-            classname: t.classname,
-            name: t.name,
-            github: {
-              htmlUrl: `htmlurl(${t.classname}/${t.name})`,
-              nodeId: `nodeid(${t.classname}/${t.name})`,
-              number: i + 1,
-              body: `FAILURE: ${t.classname}/${t.name}`,
-            },
-          })
-        ),
+        existingIssues: body.failures.map((t, i): FailedTestIssue => ({
+          classname: t.classname,
+          name: t.name,
+          github: {
+            htmlUrl: `htmlurl(${t.classname}/${t.name})`,
+            nodeId: `nodeid(${t.classname}/${t.name})`,
+            number: i + 1,
+            body: `FAILURE: ${t.classname}/${t.name}`,
+          },
+        })),
       });
     });
 

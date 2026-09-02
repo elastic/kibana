@@ -27,7 +27,7 @@ const buildServer = ({
     isElasticsearchServerless,
     syntheticsIndicesCache: { get: cacheGet, invalidate: jest.fn() },
     logger: { warn, error: jest.fn(), debug: jest.fn(), info: jest.fn() },
-  } as unknown as SyntheticsServerSetup);
+  }) as unknown as SyntheticsServerSetup;
 
 describe('resolveHeartbeatIndices', () => {
   const esClient = {} as ElasticsearchClient;

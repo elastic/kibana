@@ -25,9 +25,9 @@ export type CamelToSnakeCase<S extends string> = S extends `${infer C}${infer R}
  * A type that recursively converts all keys in an object from camel case to snake case.
  */
 export type SnakeCasedKeys<StateType extends object = object> = {
-  [KeyType in keyof StateType as `${CamelToSnakeCase<
-    string & KeyType
-  >}`]: StateType[KeyType] extends object
+  [
+    KeyType in keyof StateType as `${CamelToSnakeCase<string & KeyType>}`
+  ]: StateType[KeyType] extends object
     ? StateType[KeyType] extends Array<any>
       ? StateType[KeyType]
       : SnakeCasedKeys<StateType[KeyType]> // recurse on nested object and snake case the keys

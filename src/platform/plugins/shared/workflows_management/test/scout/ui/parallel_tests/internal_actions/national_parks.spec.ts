@@ -61,13 +61,11 @@ test.describe('InternalActions/Elasticsearch', { tag: [...tags.stateful.classic]
     });
 
     // verify output of bulk_index_park_data
-    const bulkIndexParkDataStep = await pageObjects.workflowExecution.getStep(
-      'bulk_index_park_data'
-    );
+    const bulkIndexParkDataStep =
+      await pageObjects.workflowExecution.getStep('bulk_index_park_data');
     await bulkIndexParkDataStep.click();
-    const bulkIndexOutput = await pageObjects.workflowExecution.getStepResultJson<
-      Record<string, unknown>
-    >('output');
+    const bulkIndexOutput =
+      await pageObjects.workflowExecution.getStepResultJson<Record<string, unknown>>('output');
     expect(bulkIndexOutput.errors).toBe(false);
     expect(bulkIndexOutput.items).toHaveLength(5);
 

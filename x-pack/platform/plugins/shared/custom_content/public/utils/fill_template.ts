@@ -51,8 +51,8 @@ export async function fillTemplate(
         max === undefined
           ? undefined
           : max !== 0 && isFiniteNumber(value)
-          ? Math.min(100, Math.max(0, Math.round((value / max) * 100)))
-          : 0;
+            ? Math.min(100, Math.max(0, Math.round((value / max) * 100)))
+            : 0;
       obj[col.name] = { value, pct };
     });
     return obj;

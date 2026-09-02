@@ -239,12 +239,12 @@ export const createCustomThresholdExecutor = ({
         isNoDataFound && isAlertOnNoDataEnabled
           ? AlertStates.NO_DATA
           : isIndeterminateState
-          ? AlertStates.ALERT
-          : shouldAlertFire
-          ? AlertStates.ALERT
-          : shouldAlertWarn
-          ? AlertStates.WARNING
-          : AlertStates.OK;
+            ? AlertStates.ALERT
+            : shouldAlertFire
+              ? AlertStates.ALERT
+              : shouldAlertWarn
+                ? AlertStates.WARNING
+                : AlertStates.OK;
 
       let reason;
       if (
@@ -301,14 +301,14 @@ export const createCustomThresholdExecutor = ({
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-            ? NO_DATA_ACTIONS_ID
-            : nextState === AlertStates.WARNING
-            ? WARNING_ACTIONS_ID
-            : FIRED_ACTIONS_ID;
+              ? NO_DATA_ACTIONS_ID
+              : nextState === AlertStates.WARNING
+                ? WARNING_ACTIONS_ID
+                : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
-            ? alertResults[0][group].context ?? {}
+            ? (alertResults[0][group].context ?? {})
             : {}
           : {};
 

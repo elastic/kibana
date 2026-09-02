@@ -77,7 +77,7 @@ export const ContentListEmptyState = ({
       {secondaryAction}
     </>
   ) : (
-    secondaryAction ?? undefined
+    (secondaryAction ?? undefined)
   );
 
   const isPrimitive = (node: ReactNode): node is string | number =>

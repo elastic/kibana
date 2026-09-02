@@ -31,7 +31,7 @@ const createMockUser = (overrides: Partial<AuthenticatedUser> = {}): Authenticat
       name: MOCK_IDP_REALM_NAME,
     },
     ...overrides,
-  } as AuthenticatedUser);
+  }) as AuthenticatedUser;
 
 const resolvePath = (pathOrOptions: unknown): string => {
   if (typeof pathOrOptions === 'string') {

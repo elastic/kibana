@@ -33,9 +33,7 @@ export interface GlobalUrlState extends SerializableRecord {
 
 export type SearchSessionsExamplesAppLocatorParams = AppUrlState & GlobalUrlState;
 
-export class SearchSessionsExamplesAppLocatorDefinition
-  implements LocatorDefinition<SearchSessionsExamplesAppLocatorParams>
-{
+export class SearchSessionsExamplesAppLocatorDefinition implements LocatorDefinition<SearchSessionsExamplesAppLocatorParams> {
   public readonly id = SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR;
 
   constructor(protected readonly getAppBasePath: () => Promise<string>) {}

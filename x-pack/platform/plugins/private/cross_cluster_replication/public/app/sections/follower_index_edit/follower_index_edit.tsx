@@ -163,7 +163,7 @@ export class FollowerIndexEdit extends PureComponent<
               values: { name },
             }
           )
-        : body?.message ?? error.message;
+        : (body?.message ?? error.message);
 
     const listNav = reactRouterNavigate(this.props.history, `/follower_indices`);
 

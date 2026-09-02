@@ -19,7 +19,7 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 const createStandaloneExecution = (): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -27,7 +27,7 @@ const createStandaloneExecution = (): AgentExecution =>
     agentParams: {
       nextInput: { message: 'hello' },
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 
 const failurePayload: ChatCallbackFailureResponse = {
   execution_id: 'execution-1',

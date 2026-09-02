@@ -41,7 +41,10 @@ export class LensDimensions {
   readonly dimensionFilterLanguageButton;
   readonly luceneLanguageMenuItem;
 
-  constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensDimensionsDeps
+  ) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
     this.timeShift = this.page.testSubj.locator(TIME_SHIFT_TEST_SUBJ);
     this.timeShiftComboInput = this.timeShift.locator('[data-test-subj="comboBoxInput"]');

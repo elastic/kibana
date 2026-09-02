@@ -189,7 +189,7 @@ const createReasoningResponse = (
     toolCalls: [],
     tokens,
     diagnostics: { externalContentToolContinuations: 0 },
-  } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
+  }) as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>;
 
 interface HarnessOptions {
   requireQueryIntent?: boolean;

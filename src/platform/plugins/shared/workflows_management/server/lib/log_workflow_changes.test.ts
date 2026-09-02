@@ -48,7 +48,7 @@ const makeDocument = (overrides: Partial<WorkflowProperties> = {}): WorkflowProp
     updated_at: '2024-01-01T00:00:00.000Z',
     version: 3,
     ...overrides,
-  } as WorkflowProperties);
+  }) as WorkflowProperties;
 
 describe('logWorkflowChanges', () => {
   let scopedChangeHistory: jest.Mocked<IScopedWorkflowChangeHistoryService>;

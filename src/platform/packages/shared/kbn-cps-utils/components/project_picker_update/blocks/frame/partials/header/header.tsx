@@ -29,8 +29,10 @@ import { useProjectPickerActions, useProjectPickerState } from '../../../../stat
 interface HeaderContextMenuClickActionContext {
   state: ProjectPickerState;
 }
-export interface HeaderContextMenuItemProps
-  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'href' | 'external' | 'disabled'> {
+export interface HeaderContextMenuItemProps extends Pick<
+  EuiContextMenuItemProps,
+  'icon' | 'onClick' | 'href' | 'external' | 'disabled'
+> {
   label: string;
   testSubj: string;
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;

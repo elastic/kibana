@@ -30,7 +30,7 @@ const createMockRun = (insights: DefendInsights): Run =>
     },
     session_id: 'test-session',
     extra: {},
-  } as Run);
+  }) as Run;
 
 const createMockExample = (insights: DefendInsights): Example =>
   ({
@@ -43,7 +43,7 @@ const createMockExample = (insights: DefendInsights): Example =>
       insights,
     },
     extra: {},
-  } as Example);
+  }) as Example;
 
 describe('customPolicyResponseFailureEvaluator', () => {
   const mockDefendInsight: DefendInsight = {

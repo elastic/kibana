@@ -368,10 +368,10 @@ export class SavedMap {
   public hasSaveAndReturnConfig(): boolean {
     return Boolean(
       this._originatingApp &&
-        this._originatingPath &&
-        // TODO remove this check in editors (lens does this too)
-        // instead, embeddable state transform should provide hasSaveAndReturnConfig
-        !this._originatingPath.includes('/list/')
+      this._originatingPath &&
+      // TODO remove this check in editors (lens does this too)
+      // instead, embeddable state transform should provide hasSaveAndReturnConfig
+      !this._originatingPath.includes('/list/')
     );
   }
 
@@ -393,7 +393,7 @@ export class SavedMap {
   public getAutoFitToBounds(): boolean {
     return this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined
       ? this._mapEmbeddableState.mapSettings.autoFitToDataBounds
-      : this._attributes?.settings?.autoFitToDataBounds ?? false;
+      : (this._attributes?.settings?.autoFitToDataBounds ?? false);
   }
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {

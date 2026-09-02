@@ -15,15 +15,12 @@ export interface IndexPatternsTestStartDeps {
   data: DataPluginStart;
 }
 
-export class IndexPatternsTestPlugin
-  implements
-    Plugin<
-      IndexPatternsTestPluginSetup,
-      IndexPatternsTestPluginStart,
-      {},
-      IndexPatternsTestStartDeps
-    >
-{
+export class IndexPatternsTestPlugin implements Plugin<
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart,
+  {},
+  IndexPatternsTestStartDeps
+> {
   public setup(core: CoreSetup<IndexPatternsTestStartDeps>) {
     const router = core.http.createRouter();
 

@@ -359,8 +359,8 @@ function resolveLabelPosition(
     node.type === 'selector'
       ? (node as PromQLSelector)
       : parent?.type === 'selector'
-      ? (parent as PromQLSelector)
-      : undefined;
+        ? (parent as PromQLSelector)
+        : undefined;
 
   if (
     selectorNode?.labelMap &&

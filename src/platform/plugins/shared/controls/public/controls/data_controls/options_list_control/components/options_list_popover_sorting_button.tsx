@@ -70,7 +70,7 @@ export const OptionsListPopoverSortingButton = ({
   const conditionalApiSubjects: [
     DSLOptionsListComponentApi['sort$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
-    PublishingSubject<ControlValuesSource | undefined>
+    PublishingSubject<ControlValuesSource | undefined>,
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [

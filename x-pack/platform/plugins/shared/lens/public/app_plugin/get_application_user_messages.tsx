@@ -309,7 +309,7 @@ export const useApplicationUserMessages = ({
           })
         : []),
       ...(visualizationState?.activeId && visualizationState.state
-        ? visualization?.getUserMessages?.(visualizationState.state, {
+        ? (visualization?.getUserMessages?.(visualizationState.state, {
             frame: framePublicAPI,
             setState: (newStateOrUpdater) => {
               dispatch(
@@ -322,7 +322,7 @@ export const useApplicationUserMessages = ({
                 })
               );
             },
-          }) ?? []
+          }) ?? [])
         : []),
       ...getApplicationUserMessages({
         visualizationType,

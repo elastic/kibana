@@ -18,7 +18,7 @@ const createConfig = (overrides: Partial<PndClientConfig> = {}): PndClientConfig
 const createContext = (config: PndClientConfig) =>
   ({
     config: { get: () => config },
-  } as unknown as ConstructorParameters<typeof PndPublicPlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof PndPublicPlugin>[0];
 
 describe('PndPublicPlugin feature-flag gating', () => {
   it('does not register the browser app when disabled', () => {

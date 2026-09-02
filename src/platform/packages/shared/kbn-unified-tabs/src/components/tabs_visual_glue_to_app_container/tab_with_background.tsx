@@ -42,9 +42,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           position: relative;
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
-          background: ${isSelected || isDragging
-            ? euiTheme.colors.backgroundBasePlain
-            : 'transparent'};
+          background: ${
+            isSelected || isDragging ? euiTheme.colors.backgroundBasePlain : 'transparent'
+          };
           transition: background ${euiTheme.animation.fast};
           margin: ${euiTheme.size.xs};
           // overlap the container's bottom border so the active tab connects to the content below
@@ -55,8 +55,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           border-left: ${euiTheme.border.width.thin} solid transparent;
           border-right: ${euiTheme.border.width.thin} solid transparent;
 
-          ${isSelected
-            ? `
+          ${
+            isSelected
+              ? `
               border-top-color: ${
                 isLoading ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.primary
               };
@@ -65,23 +66,24 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
             `
-            : ''}
+              : ''
+          }
 
-          ${isDragging
-            ? `
+          ${
+            isDragging
+              ? `
               ${euiSlightShadowHover(euiThemeContext)};
               border-radius: ${euiTheme.border.radius.small};
           `
-            : ''}
+              : ''
+          }
 
           // right vertical separator
           &::before {
             content: '';
             position: absolute;
             right: -${euiTheme.size.xs};
-            top: calc(
-              50% - ${euiTheme.size.xs} / 2
-            ); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
+            top: calc(50% - ${euiTheme.size.xs} / 2); // 50% is the tab height midpoint, we want it centered in the middle of the whole tab bar
             transform: translateY(-50%);
             width: 1px;
             height: ${euiTheme.size.base};
@@ -94,15 +96,17 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       >
         <div
           css={css`
-            ${!isSelected
-              ? `
+            ${
+              !isSelected
+                ? `
               &:hover {
                 background-color: ${euiTheme.colors.backgroundLightPrimary};
                 color: ${euiTheme.colors.primary};
                 border-radius: ${euiTheme.border.radius.small};
               }
             `
-              : ''}
+                : ''
+            }
           `}
         >
           {children}

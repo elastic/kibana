@@ -311,10 +311,10 @@ function buildGroups(alerts: TriageAlert[], enrichment: EntityEnrichmentMap): Tr
         ? enrichment.get(entityKey(entityType, entityName))
         : undefined;
     const entityRiskBoost = entityEnrichment?.riskLevel
-      ? ENTITY_RISK_BOOST[entityEnrichment.riskLevel] ?? 0
+      ? (ENTITY_RISK_BOOST[entityEnrichment.riskLevel] ?? 0)
       : 0;
     const assetCriticalityBoost = entityEnrichment?.criticality
-      ? ASSET_CRITICALITY_BOOST[entityEnrichment.criticality] ?? 0
+      ? (ASSET_CRITICALITY_BOOST[entityEnrichment.criticality] ?? 0)
       : 0;
     const finalScore = groupScore + entityRiskBoost + assetCriticalityBoost;
 

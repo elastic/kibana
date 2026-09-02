@@ -259,15 +259,15 @@ export class SearchSource {
     const queryString = Array.isArray(query)
       ? query.map((q) => q.query)
       : isOfQueryType(query)
-      ? query?.query
-      : undefined;
+        ? query?.query
+        : undefined;
 
     const indexPatternFromQuery =
       typeof queryString === 'string'
         ? this.parseActiveIndexPatternFromQueryString(queryString)
-        : queryString?.reduce((acc: string[], currStr: string) => {
+        : (queryString?.reduce((acc: string[], currStr: string) => {
             return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
-          }, []) ?? [];
+          }, []) ?? []);
 
     const activeIndexPattern = filters?.reduce((acc, f) => {
       const isPhraseFilterType = isPhraseFilter(f);
@@ -645,7 +645,7 @@ export class SearchSource {
       case 'filter':
         return addToRoot(
           'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
+          (typeof data.filters === 'function' ? data.filters() : (data.filters ?? [])).concat(val)
         );
       case 'nonHighlightingFilters':
         return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));

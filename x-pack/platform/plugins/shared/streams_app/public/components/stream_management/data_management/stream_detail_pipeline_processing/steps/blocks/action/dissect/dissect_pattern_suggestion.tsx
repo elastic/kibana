@@ -54,9 +54,9 @@ export const DissectPatternAISuggestions = ({
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
-        previewDocuments.some(
-          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
-        )
+      previewDocuments.some(
+        (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
+      )
     );
   }, [previewDocuments, fieldValue]);
 

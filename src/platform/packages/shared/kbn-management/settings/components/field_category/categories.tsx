@@ -23,7 +23,8 @@ import { FieldCategory, type FieldCategoryProps } from './category';
  * Props for the {@link FieldCategories} component.
  */
 export interface FieldCategoriesProps
-  extends Pick<FieldCategoryProps, 'onClearQuery'>,
+  extends
+    Pick<FieldCategoryProps, 'onClearQuery'>,
     Pick<FieldRowProps, 'onFieldChange' | 'isSavingEnabled'> {
   /** Categorized fields for display. */
   categorizedFields: CategorizedFields;

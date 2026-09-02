@@ -11,7 +11,6 @@ import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { ClassicNavRootProfileProvider } from '../types';
 
 export const getDefaultAdHocDataViews: ClassicNavRootProfileProvider['profile']['getDefaultAdHocDataViews'] =
-
     (prev, { context }) =>
     () => {
       const prevDataViews = prev();

@@ -139,7 +139,7 @@ export class RelationshipsClient {
       .map((hit) => hit._source)
       .filter((src): src is RelationshipMetadataDoc => src !== undefined);
     const total =
-      typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+      typeof resp.hits.total === 'number' ? resp.hits.total : (resp.hits.total?.value ?? 0);
 
     return { records, total, page, perPage };
   }

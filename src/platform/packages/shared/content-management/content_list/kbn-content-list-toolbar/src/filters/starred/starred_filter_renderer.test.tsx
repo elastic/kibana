@@ -18,12 +18,10 @@ import {
 } from '@kbn/content-list-provider';
 import { StarredFilterRenderer } from './starred_filter_renderer';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockFavoritesService: FavoritesClientPublic = {
   getFavorites: async () => ({ favoriteIds: [], favoriteMetadata: {} as Record<string, never> }),

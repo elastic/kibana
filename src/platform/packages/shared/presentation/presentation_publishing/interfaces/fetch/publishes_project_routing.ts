@@ -38,6 +38,6 @@ export const apiPublishesProjectRoutingOverrides = (
 ): unknownApi is PublishesProjectRoutingOverrides => {
   return Boolean(
     unknownApi &&
-      (unknownApi as PublishesProjectRoutingOverrides)?.projectRoutingOverrides$ !== undefined
+    (unknownApi as PublishesProjectRoutingOverrides)?.projectRoutingOverrides$ !== undefined
   );
 };

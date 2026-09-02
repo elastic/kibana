@@ -19,9 +19,7 @@ export interface ManagementAppLocatorParams extends SerializableRecord {
 
 export type ManagementAppLocator = LocatorPublic<ManagementAppLocatorParams>;
 
-export class ManagementAppLocatorDefinition
-  implements LocatorDefinition<ManagementAppLocatorParams>
-{
+export class ManagementAppLocatorDefinition implements LocatorDefinition<ManagementAppLocatorParams> {
   public readonly id = MANAGEMENT_APP_LOCATOR;
 
   public readonly getLocation = async (params: ManagementAppLocatorParams) => {

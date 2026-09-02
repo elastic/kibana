@@ -184,12 +184,12 @@ function hasUncorroboratedUploadAssets(
 
   return Boolean(
     existingIndexTemplate &&
-      !isAssetCorroboratedByUpload(
-        installation,
-        existingIndexTemplate._meta?.package?.name,
-        dataStreamType,
-        datasetName
-      )
+    !isAssetCorroboratedByUpload(
+      installation,
+      existingIndexTemplate._meta?.package?.name,
+      dataStreamType,
+      datasetName
+    )
   );
 }
 

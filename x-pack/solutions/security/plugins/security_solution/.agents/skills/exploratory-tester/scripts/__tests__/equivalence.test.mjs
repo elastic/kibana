@@ -34,9 +34,9 @@ const FIXTURES_DIR = resolve(__dirname, 'fixtures');
 
 // ── Load detector scripts ──────────────────────────────────────────────────
 
-const domScript     = readFileSync(join(SCRIPTS_DIR, 'check-dom-anomalies.js'), 'utf8').trim();
-const consoleScript = readFileSync(join(SCRIPTS_DIR, 'classify-console.js'),   'utf8').trim();
-const networkScript = readFileSync(join(SCRIPTS_DIR, 'dedup-network.js'),       'utf8').trim();
+const domScript = readFileSync(join(SCRIPTS_DIR, 'check-dom-anomalies.js'), 'utf8').trim();
+const consoleScript = readFileSync(join(SCRIPTS_DIR, 'classify-console.js'), 'utf8').trim();
+const networkScript = readFileSync(join(SCRIPTS_DIR, 'dedup-network.js'), 'utf8').trim();
 
 // ── Assertion helpers ──────────────────────────────────────────────────────
 
@@ -102,8 +102,12 @@ function networkInject(requests) {
 
 // ── Helper to load fixtures ────────────────────────────────────────────────
 
-function html(name) { return readFileSync(join(FIXTURES_DIR, `${name}.html`), 'utf8'); }
-function json(name) { return JSON.parse(readFileSync(join(FIXTURES_DIR, `${name}.json`), 'utf8')); }
+function html(name) {
+  return readFileSync(join(FIXTURES_DIR, `${name}.html`), 'utf8');
+}
+function json(name) {
+  return JSON.parse(readFileSync(join(FIXTURES_DIR, `${name}.json`), 'utf8'));
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // DOM DETECTOR TESTS
@@ -113,68 +117,93 @@ console.log('\n── DOM detector: correctness ──────────�
 
 {
   const r = domPaste(html('dom-clean'));
-  assert(r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
-    'dom-clean → all arrays empty');
+  assert(
+    r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+    'dom-clean → all arrays empty'
+  );
 }
 
 {
   const r = domPaste(html('dom-level1-error-toast'));
   assert(r.level1.length >= 1, 'dom-level1-error-toast → at least 1 level1 finding');
-  assert(r.level1.some(i => i.type === 'error_toast'),
-    'dom-level1-error-toast → type is error_toast');
-  assert(r.level1[0].text.includes('Could not save'),
-    'dom-level1-error-toast → text contains error message');
+  assert(
+    r.level1.some((i) => i.type === 'error_toast'),
+    'dom-level1-error-toast → type is error_toast'
+  );
+  assert(
+    r.level1[0].text.includes('Could not save'),
+    'dom-level1-error-toast → text contains error message'
+  );
 }
 
 {
   const r = domPaste(html('dom-level1-error-page'));
-  assert(r.level1.some(i => i.type === 'error_page'),
-    'dom-level1-error-page → type is error_page');
+  assert(
+    r.level1.some((i) => i.type === 'error_page'),
+    'dom-level1-error-page → type is error_page'
+  );
   // title starts with "Error" triggers the title check
-  assert(r.level1[0].text.length > 0,
-    'dom-level1-error-page → text is non-empty');
+  assert(r.level1[0].text.length > 0, 'dom-level1-error-page → text is non-empty');
 }
 
 {
   const r = domPaste(html('dom-level1-error-banner'));
-  assert(r.level1.some(i => i.type === 'error_banner'),
-    'dom-level1-error-banner → type is error_banner');
-  assert(r.level1.some(i => i.text.includes('License expired')),
-    'dom-level1-error-banner → text contains banner message');
+  assert(
+    r.level1.some((i) => i.type === 'error_banner'),
+    'dom-level1-error-banner → type is error_banner'
+  );
+  assert(
+    r.level1.some((i) => i.text.includes('License expired')),
+    'dom-level1-error-banner → text contains banner message'
+  );
 }
 
 {
   const r = domPaste(html('dom-level2-embeddable-error'));
-  assert(r.level2.some(i => i.type === 'embeddable_error'),
-    'dom-level2-embeddable-error → type is embeddable_error');
-  assert(r.level2.find(i => i.type === 'embeddable_error').count === 2,
-    'dom-level2-embeddable-error → count is 2 (both panels)');
+  assert(
+    r.level2.some((i) => i.type === 'embeddable_error'),
+    'dom-level2-embeddable-error → type is embeddable_error'
+  );
+  assert(
+    r.level2.find((i) => i.type === 'embeddable_error').count === 2,
+    'dom-level2-embeddable-error → count is 2 (both panels)'
+  );
 }
 
 {
   const r = domPaste(html('dom-level2-warning-badge'));
-  assert(r.level2.some(i => i.type === 'search_response_warning_badge'),
-    'dom-level2-warning-badge → type is search_response_warning_badge');
-  assert(r.level2.some(i => i.text.includes('click it to read the full message')),
-    'dom-level2-warning-badge → text includes click-to-read instruction');
+  assert(
+    r.level2.some((i) => i.type === 'search_response_warning_badge'),
+    'dom-level2-warning-badge → type is search_response_warning_badge'
+  );
+  assert(
+    r.level2.some((i) => i.text.includes('click it to read the full message')),
+    'dom-level2-warning-badge → text includes click-to-read instruction'
+  );
 }
 
 {
   const r = domPaste(html('dom-level2-callout-danger'));
-  assert(r.level2.some(i => i.type === 'error_callout'),
-    'dom-level2-callout-danger → type is error_callout');
+  assert(
+    r.level2.some((i) => i.type === 'error_callout'),
+    'dom-level2-callout-danger → type is error_callout'
+  );
 }
 
 {
   const r = domPaste(html('dom-level2-panels-not-rendered'));
-  assert(r.level2.some(i => i.type === 'panels_not_rendered'),
-    'dom-level2-panels-not-rendered → type is panels_not_rendered');
+  assert(
+    r.level2.some((i) => i.type === 'panels_not_rendered'),
+    'dom-level2-panels-not-rendered → type is panels_not_rendered'
+  );
 }
 
 {
   const r = domPaste(html('dom-level3-spinner'));
-  assert(r.level3.some(i => i.type === 'spinner_present'),
-    'dom-level3-spinner → type is spinner_present');
+  assert(
+    r.level3.some((i) => i.type === 'spinner_present'),
+    'dom-level3-spinner → type is spinner_present'
+  );
 }
 
 console.log('\n── DOM detector: paste ≡ inject (equivalence gate) ──────────────────────');
@@ -191,11 +220,15 @@ for (const name of [
   'dom-level3-spinner',
 ]) {
   const fixture = html(name);
-  const paste   = domPaste(fixture);
-  const inject  = domInject(fixture);
-  assert(deepEqual(paste, inject),
+  const paste = domPaste(fixture);
+  const inject = domInject(fixture);
+  assert(
+    deepEqual(paste, inject),
     `${name}: paste output === inject output`,
-    deepEqual(paste, inject) ? '' : `paste=${JSON.stringify(paste)}\n         inject=${JSON.stringify(inject)}`);
+    deepEqual(paste, inject)
+      ? ''
+      : `paste=${JSON.stringify(paste)}\n         inject=${JSON.stringify(inject)}`
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -206,40 +239,54 @@ console.log('\n── Console detector: correctness ─────────�
 
 {
   const r = consolePaste(json('console-clean'));
-  assert(r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0 && r.suppressed.length === 0,
-    'console-clean → all arrays empty');
+  assert(
+    r.level1.length === 0 &&
+      r.level2.length === 0 &&
+      r.level3.length === 0 &&
+      r.suppressed.length === 0,
+    'console-clean → all arrays empty'
+  );
 }
 
 {
   const r = consolePaste(json('console-level1-server-error'));
-  assert(r.level1.some(i => i.type === 'server_error'),
-    'console-level1-server-error → type is server_error');
+  assert(
+    r.level1.some((i) => i.type === 'server_error'),
+    'console-level1-server-error → type is server_error'
+  );
 }
 
 {
   const r = consolePaste(json('console-level1-infinite-rerender'));
-  assert(r.level1.some(i => i.type === 'infinite_rerender'),
-    'console-level1-infinite-rerender → type is infinite_rerender');
+  assert(
+    r.level1.some((i) => i.type === 'infinite_rerender'),
+    'console-level1-infinite-rerender → type is infinite_rerender'
+  );
 }
 
 {
   const r = consolePaste(json('console-level2-react-warning'));
-  assert(r.level2.some(i => i.type === 'react_warning'),
-    'console-level2-react-warning → type is react_warning');
+  assert(
+    r.level2.some((i) => i.type === 'react_warning'),
+    'console-level2-react-warning → type is react_warning'
+  );
 }
 
 {
   const r = consolePaste(json('console-level3-other-error'));
-  assert(r.level3.some(i => i.type === 'console_error'),
-    'console-level3-other-error → type is console_error');
+  assert(
+    r.level3.some((i) => i.type === 'console_error'),
+    'console-level3-other-error → type is console_error'
+  );
 }
 
 {
   const r = consolePaste(json('console-suppressed-noise'));
-  assert(r.suppressed.length >= 1,
-    'console-suppressed-noise → at least 1 item in suppressed[]');
-  assert(r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
-    'console-suppressed-noise → nothing in level1/2/3');
+  assert(r.suppressed.length >= 1, 'console-suppressed-noise → at least 1 item in suppressed[]');
+  assert(
+    r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+    'console-suppressed-noise → nothing in level1/2/3'
+  );
 }
 
 console.log('\n── Console detector: paste ≡ inject ────────────────────────────────────');
@@ -253,10 +300,9 @@ for (const name of [
   'console-suppressed-noise',
 ]) {
   const messages = json(name);
-  const paste    = consolePaste(messages);
-  const inject   = consoleInject(messages);
-  assert(deepEqual(paste, inject),
-    `${name}: paste output === inject output`);
+  const paste = consolePaste(messages);
+  const inject = consoleInject(messages);
+  assert(deepEqual(paste, inject), `${name}: paste output === inject output`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -267,39 +313,35 @@ console.log('\n── Network detector: correctness ─────────�
 
 {
   const r = networkPaste(json('network-clean'));
-  assert(r.findings.length === 0,
-    'network-clean → no duplicate findings');
+  assert(r.findings.length === 0, 'network-clean → no duplicate findings');
 }
 
 {
   const r = networkPaste(json('network-level2-duplicate'));
-  assert(r.findings.length >= 2,
-    'network-level2-duplicate → at least 2 duplicate findings');
-  assert(r.findings.every(f => f.type === 'duplicate_api_call'),
-    'network-level2-duplicate → all findings have type duplicate_api_call');
-  const postDup = r.findings.find(f => f.key.startsWith('POST'));
-  assert(postDup?.count === 2,
-    'network-level2-duplicate → POST endpoint count is 2');
+  assert(r.findings.length >= 2, 'network-level2-duplicate → at least 2 duplicate findings');
+  assert(
+    r.findings.every((f) => f.type === 'duplicate_api_call'),
+    'network-level2-duplicate → all findings have type duplicate_api_call'
+  );
+  const postDup = r.findings.find((f) => f.key.startsWith('POST'));
+  assert(postDup?.count === 2, 'network-level2-duplicate → POST endpoint count is 2');
 }
 
 {
   const r = networkPaste(json('network-polling-ok'));
-  assert(r.findings.length === 0,
-    'network-polling-ok → polling endpoints (/status, /fleet-setup, /me) are suppressed');
+  assert(
+    r.findings.length === 0,
+    'network-polling-ok → polling endpoints (/status, /fleet-setup, /me) are suppressed'
+  );
 }
 
 console.log('\n── Network detector: paste ≡ inject ────────────────────────────────────');
 
-for (const name of [
-  'network-clean',
-  'network-level2-duplicate',
-  'network-polling-ok',
-]) {
+for (const name of ['network-clean', 'network-level2-duplicate', 'network-polling-ok']) {
   const requests = json(name);
-  const paste    = networkPaste(requests);
-  const inject   = networkInject(requests);
-  assert(deepEqual(paste, inject),
-    `${name}: paste output === inject output`);
+  const paste = networkPaste(requests);
+  const inject = networkInject(requests);
+  assert(deepEqual(paste, inject), `${name}: paste output === inject output`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -361,10 +403,9 @@ for (const name of [
   'dom-level3-spinner',
 ]) {
   const fixture = html(name);
-  const paste   = domPaste(fixture);
-  const inject  = injectorDom(fixture);
-  assert(deepEqual(paste, inject),
-    `${name}: paste output === injector output`);
+  const paste = domPaste(fixture);
+  const inject = injectorDom(fixture);
+  assert(deepEqual(paste, inject), `${name}: paste output === injector output`);
 }
 
 // Console: injector output === paste output
@@ -378,24 +419,18 @@ for (const name of [
   'console-suppressed-noise',
 ]) {
   const messages = json(name);
-  const paste    = consolePaste(messages);
-  const inject   = injectorConsole(messages);
-  assert(deepEqual(paste, inject),
-    `${name}: paste output === injector output`);
+  const paste = consolePaste(messages);
+  const inject = injectorConsole(messages);
+  assert(deepEqual(paste, inject), `${name}: paste output === injector output`);
 }
 
 // Network: injector output === paste output
 console.log('\n── Injector network: paste ≡ injector ───────────────────────────────────');
-for (const name of [
-  'network-clean',
-  'network-level2-duplicate',
-  'network-polling-ok',
-]) {
+for (const name of ['network-clean', 'network-level2-duplicate', 'network-polling-ok']) {
   const requests = json(name);
-  const paste    = networkPaste(requests);
-  const inject   = injectorNetwork(requests);
-  assert(deepEqual(paste, inject),
-    `${name}: paste output === injector output`);
+  const paste = networkPaste(requests);
+  const inject = injectorNetwork(requests);
+  assert(deepEqual(paste, inject), `${name}: paste output === injector output`);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -409,11 +444,13 @@ console.log('\n── Drift gate: inject-detectors.js matches build-injector.mjs
 
 {
   const expected = buildInjectorSource({ domScript, consoleScript, networkScript });
-  assert(injectorScript === expected,
+  assert(
+    injectorScript === expected,
     'committed inject-detectors.js is byte-identical to a fresh build-injector.mjs run',
     injectorScript === expected
       ? ''
-      : 'Run: node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/__tests__/build-injector.mjs');
+      : 'Run: node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/__tests__/build-injector.mjs'
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -432,12 +469,16 @@ console.log('\n── Lifecycle: missing-bridge detection (fallback trigger) ─
   // exact check phases/2-flow-core.md uses to decide whether to fall back to
   // pasting the full detector script for that call.
   const dom = new JSDOM(html('dom-clean'), { runScripts: 'dangerously' });
-  assert(dom.window.eval('typeof window.__et') === 'undefined',
-    'before injection: typeof window.__et === "undefined" (fallback condition true)');
+  assert(
+    dom.window.eval('typeof window.__et') === 'undefined',
+    'before injection: typeof window.__et === "undefined" (fallback condition true)'
+  );
 
   dom.window.eval(injectorScript);
-  assert(dom.window.eval('typeof window.__et') === 'object',
-    'after injection: typeof window.__et === "object" (fallback condition false)');
+  assert(
+    dom.window.eval('typeof window.__et') === 'object',
+    'after injection: typeof window.__et === "object" (fallback condition false)'
+  );
 }
 
 console.log('\n── Lifecycle: navigation reinjection (fresh window per navigation) ─────');
@@ -451,17 +492,25 @@ console.log('\n── Lifecycle: navigation reinjection (fresh window per naviga
   const beforeNav = JSON.parse(JSON.stringify(preNavWindow.window.eval('window.__et.dom()')));
 
   const postNavWindow = new JSDOM(html('dom-level1-error-toast'), { runScripts: 'dangerously' });
-  assert(postNavWindow.window.eval('typeof window.__et') === 'undefined',
-    'post-navigation window starts with no window.__et (navigation cleared the bridge)');
+  assert(
+    postNavWindow.window.eval('typeof window.__et') === 'undefined',
+    'post-navigation window starts with no window.__et (navigation cleared the bridge)'
+  );
 
   postNavWindow.window.eval(injectorScript);
   const afterReinject = JSON.parse(JSON.stringify(postNavWindow.window.eval('window.__et.dom()')));
 
-  assert(deepEqual(beforeNav, afterReinject),
+  assert(
+    deepEqual(beforeNav, afterReinject),
     'reinjecting after a simulated navigation reproduces byte-identical detector output',
-    deepEqual(beforeNav, afterReinject) ? '' : `before=${JSON.stringify(beforeNav)}\n         after=${JSON.stringify(afterReinject)}`);
-  assert(deepEqual(afterReinject, domPaste(html('dom-level1-error-toast'))),
-    'reinjected output still matches canonical paste-mode output');
+    deepEqual(beforeNav, afterReinject)
+      ? ''
+      : `before=${JSON.stringify(beforeNav)}\n         after=${JSON.stringify(afterReinject)}`
+  );
+  assert(
+    deepEqual(afterReinject, domPaste(html('dom-level1-error-toast'))),
+    'reinjected output still matches canonical paste-mode output'
+  );
 }
 
 console.log('\n── Lifecycle: redundant reinjection is idempotent (double inject, no navigation) ─');
@@ -475,12 +524,16 @@ console.log('\n── Lifecycle: redundant reinjection is idempotent (double inj
   const firstInject = JSON.parse(JSON.stringify(dom.window.eval('window.__et.dom()')));
 
   dom.window.eval(injectorScript); // redundant re-injection, same window
-  assert(dom.window.eval('typeof window.__et') === 'object',
-    'window.__et remains a valid object after a redundant reinjection');
+  assert(
+    dom.window.eval('typeof window.__et') === 'object',
+    'window.__et remains a valid object after a redundant reinjection'
+  );
   const secondInject = JSON.parse(JSON.stringify(dom.window.eval('window.__et.dom()')));
 
-  assert(deepEqual(firstInject, secondInject),
-    'redundant reinjection produces byte-identical output to the first injection');
+  assert(
+    deepEqual(firstInject, secondInject),
+    'redundant reinjection produces byte-identical output to the first injection'
+  );
 }
 
 console.log('\n── Lifecycle: console/network detectors survive reinjection too ────────');
@@ -489,24 +542,32 @@ console.log('\n── Lifecycle: console/network detectors survive reinjection t
   const dom = new JSDOM('<!DOCTYPE html>', { runScripts: 'dangerously' });
   dom.window.eval(injectorScript);
   const messages = json('console-level2-react-warning');
-  const before = JSON.parse(JSON.stringify(
-    dom.window.eval(`window.__et.console(${JSON.stringify(messages)})`)));
+  const before = JSON.parse(
+    JSON.stringify(dom.window.eval(`window.__et.console(${JSON.stringify(messages)})`))
+  );
 
   dom.window.eval(injectorScript); // simulate reinjection after navigation
-  const after = JSON.parse(JSON.stringify(
-    dom.window.eval(`window.__et.console(${JSON.stringify(messages)})`)));
+  const after = JSON.parse(
+    JSON.stringify(dom.window.eval(`window.__et.console(${JSON.stringify(messages)})`))
+  );
 
-  assert(deepEqual(before, after),
-    'console detector output is byte-identical before/after reinjection');
+  assert(
+    deepEqual(before, after),
+    'console detector output is byte-identical before/after reinjection'
+  );
 
   const requests = json('network-level2-duplicate');
-  const netBefore = JSON.parse(JSON.stringify(
-    dom.window.eval(`window.__et.network(${JSON.stringify(requests)})`)));
-  const netAfter = JSON.parse(JSON.stringify(
-    dom.window.eval(`window.__et.network(${JSON.stringify(requests)})`)));
+  const netBefore = JSON.parse(
+    JSON.stringify(dom.window.eval(`window.__et.network(${JSON.stringify(requests)})`))
+  );
+  const netAfter = JSON.parse(
+    JSON.stringify(dom.window.eval(`window.__et.network(${JSON.stringify(requests)})`))
+  );
 
-  assert(deepEqual(netBefore, netAfter),
-    'network detector output is byte-identical before/after reinjection');
+  assert(
+    deepEqual(netBefore, netAfter),
+    'network detector output is byte-identical before/after reinjection'
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -521,6 +582,8 @@ if (failed > 0) {
   failures.forEach((f, i) => console.error(`  ${i + 1}. ${f}`));
   process.exit(1);
 } else {
-  console.log('All assertions passed. Detector correctness and paste≡inject equivalence confirmed.\n');
+  console.log(
+    'All assertions passed. Detector correctness and paste≡inject equivalence confirmed.\n'
+  );
   process.exit(0);
 }

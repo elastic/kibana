@@ -27,7 +27,7 @@ describe('templates client', () => {
         templateVersion: 1,
         deletedAt: null,
       },
-    } as SavedObject<Template>);
+    }) as SavedObject<Template>;
 
   const findRequest = (overrides: Partial<TemplatesFindRequest> = {}): TemplatesFindRequest => ({
     page: 1,

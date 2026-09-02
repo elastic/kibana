@@ -197,10 +197,10 @@ class ConversationClientImpl implements ConversationClient {
       pinned === undefined
         ? []
         : pinned
-        ? [{ term: { pinned: true } }]
-        : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
-          // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
-          [{ bool: { must_not: { term: { pinned: true } } } }];
+          ? [{ term: { pinned: true } }]
+          : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
+            // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
+            [{ bool: { must_not: { term: { pinned: true } } } }];
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -243,7 +243,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const hitsTotal = response.hits.total;
     const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      typeof hitsTotal === 'number' ? hitsTotal : (hitsTotal?.value ?? 0),
       MAX_RESULT_WINDOW
     );
 

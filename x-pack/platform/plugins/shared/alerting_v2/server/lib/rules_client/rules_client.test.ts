@@ -2196,9 +2196,9 @@ describe('RulesClient', () => {
     // Minimal BulkUpdateTaskResult builder for the task-manager mock: `tasks`
     // are the rotated task ids, `errors` the per-task failures.
     const rotationResult = (rotatedTaskIds: string[]) =>
-      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] } as unknown as Awaited<
+      ({ tasks: rotatedTaskIds.map((id) => ({ id })), errors: [] }) as unknown as Awaited<
         ReturnType<typeof taskManager.bulkUpdateSchedules>
-      >);
+      >;
 
     it('rotates the executor task API key and stamps audit metadata', async () => {
       const client = createClient();

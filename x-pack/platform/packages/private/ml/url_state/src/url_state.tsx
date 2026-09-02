@@ -188,7 +188,7 @@ export const useUrlState = (
   accessor: Accessor
 ): [
   Record<string, any>,
-  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void
+  (attribute: string | Dictionary<unknown>, value?: unknown, replaceState?: boolean) => void,
 ] => {
   const { searchString, setUrlState: setUrlStateContext } = useContext(urlStateStore);
 
@@ -369,7 +369,7 @@ export const usePageUrlState = <T extends PageUrlState>(
 ): [
   T['pageUrlState'],
   (update: Partial<T['pageUrlState']>, replaceState?: boolean) => void,
-  UrlStateService<T['pageUrlState']>
+  UrlStateService<T['pageUrlState']>,
 ] => {
   return useUrlStateService<'_a', T['pageUrlState']>('_a', { pageKey, defaultState });
 };
@@ -396,7 +396,7 @@ export const useGlobalUrlState = (
 ): [
   GlobalState,
   (update: Partial<GlobalState>, replaceState?: boolean) => void,
-  UrlStateService<GlobalState>
+  UrlStateService<GlobalState>,
 ] => {
   return useUrlStateService<'_g', GlobalState>('_g', { defaultState });
 };

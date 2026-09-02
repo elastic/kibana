@@ -38,7 +38,7 @@ export type VirtualVersionMap = Record<string, VirtualVersion>;
  */
 export const getLatestModelVersion = (type: SavedObjectsType): number => {
   const versionMap =
-    typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
+    typeof type.modelVersions === 'function' ? type.modelVersions() : (type.modelVersions ?? {});
   return Object.keys(versionMap).reduce<number>((memo, current) => {
     return Math.max(memo, assertValidModelVersion(current));
   }, 0);
@@ -51,7 +51,7 @@ export const getLatestModelVersion = (type: SavedObjectsType): number => {
  */
 export const getLatestMigrationVersion = (type: SavedObjectsType): string => {
   const migrationMap =
-    typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
+    typeof type.migrations === 'function' ? type.migrations() : (type.migrations ?? {});
   return Object.keys(migrationMap).reduce<string>((memo, current) => {
     return gt(memo, current) ? memo : current;
   }, '0.0.0');
@@ -112,7 +112,7 @@ export const getVirtualVersionMap = ({
  */
 export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number => {
   const versionMap =
-    typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
+    typeof type.modelVersions === 'function' ? type.modelVersions() : (type.modelVersions ?? {});
   return Object.entries(versionMap)
     .filter(([version, info]) =>
       info.changes?.some((change) => change.type === 'mappings_addition')

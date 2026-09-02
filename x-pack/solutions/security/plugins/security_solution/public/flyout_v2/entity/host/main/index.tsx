@@ -203,16 +203,16 @@ export const Host: FC<HostProps> = memo(function Host({
   useQueryInspector({
     deleteQuery,
     inspect: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.inspect ?? null
+      ? (entityFromStoreResult?.inspect ?? null)
       : inspectRiskScore,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
+    refetch: useEntityStoreInspectForRisk ? (entityFromStoreResult?.refetch ?? noop) : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedHost.entityRecord ?? undefined
+    ? (observedHost.entityRecord ?? undefined)
     : undefined;
   const riskScoreStateFromStore =
     entityStoreV2Enabled && observedHost.entityRecord
@@ -440,7 +440,9 @@ export const Host: FC<HostProps> = memo(function Host({
             recalculatingScore={recalculatingScore}
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
-            entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
+            entityRecord={
+              entityStoreV2Enabled ? (observedHost.entityRecord ?? undefined) : undefined
+            }
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}

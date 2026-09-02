@@ -87,7 +87,7 @@ export class InfluencersStateService extends StateService {
           string | undefined,
           InfluencersFilterQuery | undefined,
           TimeRangeBounds,
-          { lastRefresh: number }
+          { lastRefresh: number },
         ]
       >([
         this.anomalyExplorerCommonStateService.selectedJobs$,

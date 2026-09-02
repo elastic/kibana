@@ -22,15 +22,12 @@ import {
 import { registerAttachmentUiDefinitions } from './attachment_types';
 import { registerTelemetryEventTypes } from './analytics';
 
-export class ObservabilityAgentBuilderPlugin
-  implements
-    Plugin<
-      ObservabilityAgentBuilderPluginPublicSetup,
-      ObservabilityAgentBuilderPluginPublicStart,
-      ObservabilityAgentBuilderPluginSetupDependencies,
-      ObservabilityAgentBuilderPluginStartDependencies
-    >
-{
+export class ObservabilityAgentBuilderPlugin implements Plugin<
+  ObservabilityAgentBuilderPluginPublicSetup,
+  ObservabilityAgentBuilderPluginPublicStart,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+  ObservabilityAgentBuilderPluginStartDependencies
+> {
   constructor(initContext: PluginInitializerContext) {}
 
   public setup(

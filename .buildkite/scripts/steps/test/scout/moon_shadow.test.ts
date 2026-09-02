@@ -18,7 +18,7 @@ import { computeMoonShadow } from './moon_shadow';
 const mockGetAffectedProjectsMoon = getAffectedProjectsMoon as jest.Mock;
 
 const createMockLog = (): ToolingLog =>
-  ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+  ({ info: jest.fn(), warning: jest.fn() }) as unknown as ToolingLog;
 
 afterEach(() => {
   jest.clearAllMocks();

@@ -67,7 +67,7 @@ export const createSiemMigrationsDataClientMock = () =>
     resources: mockSiemMigrationsDataResourcesClient,
     migrations: mockSiemMigrationsDataMigrationClient,
     deleteMigration: mockDeleteMigration,
-  } as unknown as jest.MockedObjectDeep<SiemMigrationsDataClient>);
+  }) as unknown as jest.MockedObjectDeep<SiemMigrationsDataClient>;
 
 export const MockSiemMigrationsDataClient = jest
   .fn()

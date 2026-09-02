@@ -115,13 +115,13 @@ export const RemoteDocumentCallout: FC<RemoteDocumentCalloutProps> = ({ hit, chi
     ? isAttack
       ? LINKED_PROJECT_ATTACK_CALLOUT
       : isAlert
-      ? LINKED_PROJECT_ALERT_CALLOUT
-      : LINKED_PROJECT_EVENT_CALLOUT
+        ? LINKED_PROJECT_ALERT_CALLOUT
+        : LINKED_PROJECT_EVENT_CALLOUT
     : isAttack
-    ? REMOTE_ATTACK_CALLOUT
-    : isAlert
-    ? REMOTE_ALERT_CALLOUT
-    : REMOTE_EVENT_CALLOUT;
+      ? REMOTE_ATTACK_CALLOUT
+      : isAlert
+        ? REMOTE_ALERT_CALLOUT
+        : REMOTE_EVENT_CALLOUT;
 
   return (
     <>

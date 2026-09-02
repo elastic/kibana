@@ -47,15 +47,12 @@ export type EventAnnotationListingPluginStart = void;
 export type EventAnnotationListingPluginSetup = void;
 
 /** @public */
-export class EventAnnotationListingPlugin
-  implements
-    Plugin<
-      EventAnnotationListingPluginSetup,
-      EventAnnotationListingPluginStart,
-      SetupDependencies,
-      EventAnnotationListingStartDependencies
-    >
-{
+export class EventAnnotationListingPlugin implements Plugin<
+  EventAnnotationListingPluginSetup,
+  EventAnnotationListingPluginStart,
+  SetupDependencies,
+  EventAnnotationListingStartDependencies
+> {
   public setup(
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
@@ -104,9 +101,8 @@ export class EventAnnotationListingPlugin
         try {
           const [resolvedCoreStart, pluginsStart] = await core.getStartServices();
           coreStart = resolvedCoreStart;
-          const { navigateToLensForAnnotationGroup } = await import(
-            './components/use_navigate_to_lens'
-          );
+          const { navigateToLensForAnnotationGroup } =
+            await import('./components/use_navigate_to_lens');
           await navigateToLensForAnnotationGroup({
             core: coreStart,
             embeddable: pluginsStart.embeddable,

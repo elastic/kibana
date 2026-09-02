@@ -68,7 +68,7 @@ export const useDebouncedValue = <T>(
   const handleInputChange = (val: T) => {
     setInputValue(val);
     const valueToUpload = shouldUpdateWithFalsyValue
-      ? val ?? initialValue.current
+      ? (val ?? initialValue.current)
       : val || initialValue.current;
     onChangeDebounced(valueToUpload);
   };

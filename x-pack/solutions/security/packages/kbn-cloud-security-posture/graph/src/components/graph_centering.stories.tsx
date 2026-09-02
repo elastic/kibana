@@ -90,11 +90,11 @@ const createEntityNode = ({
       shape === 'ellipse'
         ? 'user'
         : shape === 'hexagon'
-        ? 'storage'
-        : shape === 'diamond'
-        ? 'globe'
-        : 'globe',
-  } as NodeViewModel);
+          ? 'storage'
+          : shape === 'diamond'
+            ? 'globe'
+            : 'globe',
+  }) as NodeViewModel;
 
 const createRelationshipStoryNode = ({
   id,
@@ -110,7 +110,7 @@ const createRelationshipStoryNode = ({
     shape: 'relationship',
     label,
     isOrigin,
-  } as NodeViewModel);
+  }) as NodeViewModel;
 
 const createLabelNode = ({
   id,

@@ -91,8 +91,7 @@ export interface TraceRootSpan {
 }
 
 export interface UnifiedSpanDocument
-  extends Omit<Span, 'transaction'>,
-    Pick<Transaction, 'transaction'> {
+  extends Omit<Span, 'transaction'>, Pick<Transaction, 'transaction'> {
   _id: string;
   _index: string;
   duration?: number[] | string; // OTel duration

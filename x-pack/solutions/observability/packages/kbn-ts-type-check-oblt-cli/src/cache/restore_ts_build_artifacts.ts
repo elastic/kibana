@@ -389,8 +389,8 @@ export async function resolveRestoreStrategy(
         effectiveRebuildSet.size === 1
           ? ' — only one project needs rebuilding'
           : effectiveRebuildSet.size > 1
-          ? ` — only ${effectiveRebuildSet.size} projects need rechecking`
-          : ' — no projects need rechecking'
+            ? ` — only ${effectiveRebuildSet.size} projects need rechecking`
+            : ' — no projects need rechecking'
       }`
     );
     // Invalidate .tsbuildinfo for stale projects so tsc is forced to recheck

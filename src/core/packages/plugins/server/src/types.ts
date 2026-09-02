@@ -44,10 +44,10 @@ export type ExposedToBrowserDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      ExposedToBrowserDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        ExposedToBrowserDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -61,10 +61,10 @@ export type DynamicConfigDescriptor<T> = {
     ? // handles arrays as primitive values
       boolean
     : T[Key] extends Maybe<object>
-    ? // can be nested for objects
-      DynamicConfigDescriptor<T[Key]> | boolean
-    : // primitives
-      boolean;
+      ? // can be nested for objects
+        DynamicConfigDescriptor<T[Key]> | boolean
+      : // primitives
+        boolean;
 };
 
 /**
@@ -143,10 +143,10 @@ export type MakeUsageFromSchema<T> = {
     ? // arrays of objects are always redacted
       false
     : T[Key] extends Maybe<any[]>
-    ? boolean
-    : T[Key] extends Maybe<object>
-    ? MakeUsageFromSchema<T[Key]> | boolean
-    : boolean;
+      ? boolean
+      : T[Key] extends Maybe<object>
+        ? MakeUsageFromSchema<T[Key]> | boolean
+        : boolean;
 };
 
 /**
@@ -292,7 +292,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends Record<string, any> = {},
-  TPluginsStart extends Record<string, any> = {}
+  TPluginsStart extends Record<string, any> = {},
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
@@ -455,7 +455,7 @@ export type PluginInitializer<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends Record<string, any> = never,
-  TPluginsStart extends Record<string, any> = never
+  TPluginsStart extends Record<string, any> = never,
 > = (
   core: PluginInitializerContext
 ) => Promise<

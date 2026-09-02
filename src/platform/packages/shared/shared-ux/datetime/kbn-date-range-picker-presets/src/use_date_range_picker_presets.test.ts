@@ -46,7 +46,7 @@ const createNotifications = (): NotificationsStart =>
       addDanger: jest.fn(),
       addWarning: jest.fn(),
     },
-  } as unknown as NotificationsStart);
+  }) as unknown as NotificationsStart;
 
 const renderPresetsHook = ({
   service = createServiceMock(),

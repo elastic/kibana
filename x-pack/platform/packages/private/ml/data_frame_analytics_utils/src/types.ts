@@ -157,8 +157,10 @@ export interface DataFrameAnalyticsMeta {
 /**
  * Interface for a DFA config with fix for estypes provided types
  */
-export interface DataFrameAnalyticsConfig
-  extends Omit<estypes.MlDataframeAnalyticsSummary, 'analyzed_fields'> {
+export interface DataFrameAnalyticsConfig extends Omit<
+  estypes.MlDataframeAnalyticsSummary,
+  'analyzed_fields'
+> {
   /**
    * Optional analyzed fields
    */
@@ -356,8 +358,10 @@ export interface EvaluateMetrics {
 /**
  * Interface for field selection item
  */
-export interface FieldSelectionItem
-  extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
+export interface FieldSelectionItem extends Omit<
+  estypes.MlDataframeAnalyticsFieldSelection,
+  'mapping_types'
+> {
   /**
    * Optional mapping types
    * @type {?string[]}

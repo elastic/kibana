@@ -77,7 +77,7 @@ const hasInvestigationFields = (
   action.value.field_names.every((field) =>
     (Array.isArray(investigationFields)
       ? investigationFields
-      : investigationFields?.field_names ?? []
+      : (investigationFields?.field_names ?? [])
     ).includes(field)
   );
 
@@ -91,7 +91,7 @@ const hasNoInvestigationFields = (
       !(
         Array.isArray(investigationFields)
           ? investigationFields
-          : investigationFields?.field_names ?? []
+          : (investigationFields?.field_names ?? [])
       ).includes(field)
   );
 

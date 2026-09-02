@@ -15,7 +15,7 @@ export function toRawAlertInstances<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   logger: Logger,
   maxAlerts: number,

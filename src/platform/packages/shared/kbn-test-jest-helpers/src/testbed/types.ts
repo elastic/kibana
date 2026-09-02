@@ -143,14 +143,16 @@ export interface BaseTestBedConfig<T extends object = Record<string, any>> {
   store?: (() => Store) | Store | null;
 }
 
-export interface AsyncTestBedConfig<T extends object = Record<string, any>>
-  extends BaseTestBedConfig<T> {
+export interface AsyncTestBedConfig<
+  T extends object = Record<string, any>,
+> extends BaseTestBedConfig<T> {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
   doMountAsync: true;
 }
 
-export interface TestBedConfig<T extends object = Record<string, any>>
-  extends BaseTestBedConfig<T> {
+export interface TestBedConfig<
+  T extends object = Record<string, any>,
+> extends BaseTestBedConfig<T> {
   /* Mount the component asynchronously. When using "hooked" components with _useEffect()_ calls, you need to set this to "true". */
   doMountAsync?: false;
 }

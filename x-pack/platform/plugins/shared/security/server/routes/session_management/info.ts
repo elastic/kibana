@@ -31,7 +31,7 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
         const expirationTime =
           sessionValue.idleTimeoutExpiration !== null && sessionValue.lifespanExpiration !== null
             ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)
-            : sessionValue.idleTimeoutExpiration ?? sessionValue.lifespanExpiration;
+            : (sessionValue.idleTimeoutExpiration ?? sessionValue.lifespanExpiration);
 
         const expirationReason: SessionInfo['expirationReason'] | undefined =
           expirationTime !== null

@@ -197,7 +197,7 @@ const combinedStat = (
   bucket: { doc_count: number } & EntityMetricsResult,
   isEntity: boolean
 ): RawTypeStat => ({
-  total: isEntity ? bucket.entityTotal?.value ?? 0 : bucket.doc_count,
+  total: isEntity ? (bucket.entityTotal?.value ?? 0) : bucket.doc_count,
 });
 
 const ownerPrefix = (owner: Owner): string => OWNER_TO_PREFIX_MAP[owner] ?? owner;

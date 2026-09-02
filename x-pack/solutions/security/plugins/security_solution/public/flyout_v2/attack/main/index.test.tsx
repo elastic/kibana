@@ -70,7 +70,7 @@ const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRec
       ...extra,
     },
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockAttack = {} as AttackDiscoveryAlert;
 

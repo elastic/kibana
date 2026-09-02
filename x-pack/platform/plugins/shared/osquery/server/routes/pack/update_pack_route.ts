@@ -140,16 +140,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const gatedQueries: Record<string, PackQueryInput> | undefined = isRruleFeatureEnabled
           ? (rawQueries as Record<string, PackQueryInput> | undefined)
           : rawQueries
-          ? (mapValues(rawQueries, (rawQuery) => {
-              const {
-                schedule_type: _scheduleType,
-                rrule_schedule: _rruleSchedule,
-                ...rest
-              } = rawQuery as PackQueryInput;
+            ? (mapValues(rawQueries, (rawQuery) => {
+                const {
+                  schedule_type: _scheduleType,
+                  rrule_schedule: _rruleSchedule,
+                  ...rest
+                } = rawQuery as PackQueryInput;
 
-              return rest;
-            }) as Record<string, PackQueryInput>)
-          : undefined;
+                return rest;
+              }) as Record<string, PackQueryInput>)
+            : undefined;
 
         let currentPackSO;
         try {

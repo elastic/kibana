@@ -83,7 +83,7 @@ export const getScheduledQueryResultsRoute = (
           const logger = osqueryContext.logFactory.get('scheduled_query_results');
 
           const spaceId = osqueryContext?.service?.getActiveSpace
-            ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+            ? ((await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID)
             : DEFAULT_SPACE_ID;
 
           if (osqueryContext?.service?.getIntegrationNamespaces) {

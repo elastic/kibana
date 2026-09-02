@@ -22,9 +22,12 @@ import type {
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
-export class SearchQueryRulesPlugin
-  implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart, {}, {}>
-{
+export class SearchQueryRulesPlugin implements Plugin<
+  SearchQueryRulesPluginSetup,
+  SearchQueryRulesPluginStart,
+  {},
+  {}
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

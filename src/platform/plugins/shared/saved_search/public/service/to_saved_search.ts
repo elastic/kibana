@@ -25,7 +25,7 @@ export interface SavedSearchUnwrapResult {
 
 export const byValueToSavedSearch = async <
   Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
 >(
   result: SavedSearchUnwrapResult,
   services: SavedSearchesServiceDeps,

@@ -125,7 +125,7 @@ const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>
     namespaces: ['default'],
     references: [],
     attributes: buildFullAttributes() as CasePersistedAttributes,
-  } as SavedObject<CasePersistedAttributes>);
+  }) as SavedObject<CasePersistedAttributes>;
 
 // ----- Helpers -----
 

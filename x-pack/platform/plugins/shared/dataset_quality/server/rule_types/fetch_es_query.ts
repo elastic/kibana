@@ -109,12 +109,15 @@ export async function fetchEsQuery({
     {} as Record<string, { bucketKey: string[]; docCount: number }>
   );
 
-  return Object.keys(groupedDataStreams).reduce((obj, bucket) => {
-    obj[groupedDataStreams[bucket].bucketKey.join(',')] = {
-      docCount: groupedDataStreams[bucket].docCount,
-      bucketKey: groupedDataStreams[bucket].bucketKey,
-    };
+  return Object.keys(groupedDataStreams).reduce(
+    (obj, bucket) => {
+      obj[groupedDataStreams[bucket].bucketKey.join(',')] = {
+        docCount: groupedDataStreams[bucket].docCount,
+        bucketKey: groupedDataStreams[bucket].bucketKey,
+      };
 
-    return obj;
-  }, {} as Record<string, { bucketKey: string[]; docCount: number }>);
+      return obj;
+    },
+    {} as Record<string, { bucketKey: string[]; docCount: number }>
+  );
 }

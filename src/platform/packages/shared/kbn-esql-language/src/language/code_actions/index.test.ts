@@ -13,10 +13,10 @@ import { getQuickFixesForMessage } from '.';
 import { getQuickFixesByMessageCode } from './fixes_by_message_code';
 
 const wiredStreamSource = (name: string) =>
-  ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM } as ESQLSourceResult);
+  ({ name, hidden: false, type: SOURCES_TYPES.WIRED_STREAM }) as ESQLSourceResult;
 
 const indexSource = (name: string) =>
-  ({ name, hidden: false, type: SOURCES_TYPES.INDEX } as ESQLSourceResult);
+  ({ name, hidden: false, type: SOURCES_TYPES.INDEX }) as ESQLSourceResult;
 
 describe('getQuickFixesForMessage', () => {
   it('returns an empty list when no quick fix is registered for the message code', async () => {

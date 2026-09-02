@@ -24,7 +24,7 @@ export const useQueryToggle = (id?: string): QueryToggle => {
   const storageKey = getUniqueStorageKey(pageName, id);
 
   const [storageValue, setStorageValue] = useState(
-    storageKey != null ? storage.get(storageKey) ?? true : true
+    storageKey != null ? (storage.get(storageKey) ?? true) : true
   );
 
   useEffect(() => {

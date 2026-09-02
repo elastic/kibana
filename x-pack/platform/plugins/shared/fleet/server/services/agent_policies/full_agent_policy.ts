@@ -228,10 +228,13 @@ export async function getFullAgentPolicy(
       return input;
     });
 
-  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
-    acc[name] = featureConfig;
-    return acc;
-  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
+  const features = (agentPolicy.agent_features || []).reduce(
+    (acc, { name, ...featureConfig }) => {
+      acc[name] = featureConfig;
+      return acc;
+    },
+    {} as NonNullable<FullAgentPolicy['agent']>['features']
+  );
 
   const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
   const fleetserverHostSecretReferences = fleetServerHost
@@ -847,8 +850,8 @@ export function getFullMonitoringSettings(
   const monitoring: FullAgentPolicyMonitoring = {
     enabled: Boolean(
       (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) ||
-        agentPolicy.monitoring_http?.enabled ||
-        agentPolicy.keep_monitoring_alive
+      agentPolicy.monitoring_http?.enabled ||
+      agentPolicy.keep_monitoring_alive
     ),
     logs: false,
     metrics: false,

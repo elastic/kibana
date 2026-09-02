@@ -14,7 +14,7 @@ import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
 
 export type EmbeddableTransforms<
   StoredEmbeddableState extends object = object,
-  EmbeddableState extends object = object
+  EmbeddableState extends object = object,
 > = {
   /**
    * Converts StoredEmbeddableState and injects references into EmbeddableState
@@ -45,7 +45,7 @@ export type EmbeddableTransforms<
 
 export type EmbeddableServerDefinition<
   StoredEmbeddableState extends object = object,
-  EmbeddableState extends object = object
+  EmbeddableState extends object = object,
 > = {
   /**
    * Title displayed in Open API documenation

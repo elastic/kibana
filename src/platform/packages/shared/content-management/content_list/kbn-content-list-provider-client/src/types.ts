@@ -57,8 +57,10 @@ export interface ContentListClientSortingConfig extends Omit<SortingConfig, 'fie
   fields?: SortingConfig['fields'] | ContentListSortFieldConfig;
 }
 
-export interface ContentListClientFeatures
-  extends Omit<ContentListFeatures, 'contentEditor' | 'sorting'> {
+export interface ContentListClientFeatures extends Omit<
+  ContentListFeatures,
+  'contentEditor' | 'sorting'
+> {
   /**
    * Content editor (metadata editing flyout) feature configuration.
    */

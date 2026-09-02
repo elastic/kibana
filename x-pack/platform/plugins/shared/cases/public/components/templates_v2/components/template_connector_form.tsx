@@ -45,7 +45,7 @@ const ConnectorFormSync: React.FC<{
     const next = {
       type: actionTypeId,
       id: connectorId,
-      fields: actionTypeId === ConnectorTypes.none ? null : fields ?? null,
+      fields: actionTypeId === ConnectorTypes.none ? null : (fields ?? null),
     } as CaseConnectorWithoutName;
 
     const serialized = JSON.stringify(next);

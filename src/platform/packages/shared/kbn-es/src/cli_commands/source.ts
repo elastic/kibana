@@ -73,8 +73,8 @@ export const source: Command = {
     const userEsArgs: string[] = Array.isArray(options.esArgs)
       ? options.esArgs
       : options.esArgs
-      ? [options.esArgs]
-      : [];
+        ? [options.esArgs]
+        : [];
 
     const { esArgs: samlEsArgs, resources: samlResources } = await configureMockIdpSamlRealm({
       userEsArgs,

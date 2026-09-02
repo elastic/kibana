@@ -28,9 +28,12 @@ const APP_TITLE = i18n.translate('xpack.pnd.appTitle', {
   defaultMessage: PND_PLUGIN_NAME,
 });
 
-export class PndPublicPlugin
-  implements Plugin<PndPublicSetup, PndPublicStart, PndSetupDependencies, PndStartDependencies>
-{
+export class PndPublicPlugin implements Plugin<
+  PndPublicSetup,
+  PndPublicStart,
+  PndSetupDependencies,
+  PndStartDependencies
+> {
   private readonly config: PndClientConfig;
 
   constructor(context: PluginInitializerContext<PndClientConfig>) {

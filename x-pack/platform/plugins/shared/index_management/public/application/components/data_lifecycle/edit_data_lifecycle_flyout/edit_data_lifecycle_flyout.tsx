@@ -273,8 +273,8 @@ export const EditDataLifecycleFlyout = ({
             successfulData.inheritLifecycle
               ? successfulData.dlm.defaultValue
               : dlmValue
-              ? { frozen: dlmValue.frozen, delete: dlmValue.delete }
-              : successfulData.dlm.defaultValue
+                ? { frozen: dlmValue.frozen, delete: dlmValue.delete }
+                : successfulData.dlm.defaultValue
           }
           isDisabled={successfulData.inheritLifecycle}
           serverless={isServerless}
@@ -300,10 +300,10 @@ export const EditDataLifecycleFlyout = ({
           // When inheriting, preview the template's configuration instead of the
           // data stream's own (possibly user-edited) value.
           failedData.inheritLifecycle
-            ? failedData.deletePhaseDefaultValue ?? { enabled: false, value: '60', unit: 'd' }
+            ? (failedData.deletePhaseDefaultValue ?? { enabled: false, value: '60', unit: 'd' })
             : forceFailedDeletePhaseEnabled
-            ? { ...failedDeletePhase, enabled: true }
-            : failedDeletePhase
+              ? { ...failedDeletePhase, enabled: true }
+              : failedDeletePhase
         }
         isCardDisabled={failedData.inheritLifecycle}
         // In serverless the failure store delete phase cannot be disabled, so the toggle is

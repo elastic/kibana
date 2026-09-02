@@ -47,7 +47,7 @@ describe('Endpoint Exceptions API validations', () => {
         osTypes: ['windows'],
         tags,
         entries,
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     const pathEntry = (value: string): CreateExceptionListItemOptions['entries'] => [
       { field: 'process.executable.caseless', type: 'match', operator: 'included', value },

@@ -234,9 +234,8 @@ export class AutomaticImportService {
       throw new Error('Saved Objects service not initialized.');
     }
     const integrationSO = await this.savedObjectService.getIntegration(integrationId);
-    const dataStreamsSO: DataStreamAttributes[] = await this.savedObjectService.getAllDataStreams(
-      integrationId
-    );
+    const dataStreamsSO: DataStreamAttributes[] =
+      await this.savedObjectService.getAllDataStreams(integrationId);
 
     const dataStreamsResponses: DataStreamResponse[] = dataStreamsSO.map((dataStream) => {
       const phase = getInProgressPhase(dataStream.job_info);

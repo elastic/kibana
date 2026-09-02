@@ -32,8 +32,10 @@ const labels = {
   }),
 };
 
-export interface EventAnnotationListingProviderProps
-  extends Pick<ContentListClientProviderProps, 'core' | 'onFetchSuccess'> {
+export interface EventAnnotationListingProviderProps extends Pick<
+  ContentListClientProviderProps,
+  'core' | 'onFetchSuccess'
+> {
   canDelete: boolean;
   canSave: boolean;
   children?: ReactNode;

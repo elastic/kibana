@@ -25,7 +25,7 @@ const MEMORY_WORKFLOW_IDS = [
 const createClientMock = () =>
   ({
     install: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install'>>);
+  }) as unknown as jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install'>>;
 
 describe('installMemoryWorkflows', () => {
   it('installs all four memory workflows globally', async () => {

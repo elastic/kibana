@@ -460,7 +460,7 @@ export class PackagePolicyService {
     );
 
     await this.revisionBatcher.schedule(
-      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : []))
+      result.flatMap(({ success, policy_ids: policyIds }) => (success ? (policyIds ?? []) : []))
     );
     return result;
   }

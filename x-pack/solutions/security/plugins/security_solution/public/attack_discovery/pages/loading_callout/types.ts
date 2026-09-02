@@ -9,8 +9,10 @@ import type { WorkflowExecutionsTracking } from '@kbn/elastic-assistant-common';
 import type { ExecutionStatus, WorkflowStepExecutionDto } from '@kbn/workflows';
 
 /** Extended step execution with workflow linking information. */
-export interface StepExecutionWithLink
-  extends Omit<WorkflowStepExecutionDto, 'workflowId' | 'workflowRunId'> {
+export interface StepExecutionWithLink extends Omit<
+  WorkflowStepExecutionDto,
+  'workflowId' | 'workflowRunId'
+> {
   /**
    * The pipeline phase this step belongs to ('retrieve_alerts', 'generate_discoveries',
    * 'validate_discoveries'). Used by the pipeline monitor to group multiple alert retrieval

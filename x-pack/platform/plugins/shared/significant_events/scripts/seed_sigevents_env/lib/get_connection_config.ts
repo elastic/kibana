@@ -54,8 +54,8 @@ function readKibanaConfig(log: ToolingLog): KibanaConfig {
     typeof rawPort === 'number'
       ? rawPort
       : typeof rawPort === 'string'
-      ? parseInt(rawPort, 10) || 5601
-      : 5601;
+        ? parseInt(rawPort, 10) || 5601
+        : 5601;
 
   return {
     elasticsearch: {

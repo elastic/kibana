@@ -30,8 +30,8 @@ export function getInputsWithIds(
       isEndpointPackage && packagePolicyId
         ? packagePolicyId
         : input.id
-        ? input.id
-        : getInputId(input, packagePolicyId, packageInfo);
+          ? input.id
+          : getInputId(input, packagePolicyId, packageInfo);
 
     return {
       ...input,
@@ -43,8 +43,8 @@ export function getInputsWithIds(
         id: stream?.id
           ? stream.id
           : packagePolicyId
-          ? `${getInputEffectiveName(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
-          : `${getInputEffectiveName(input)}-${stream.data_stream.dataset}`,
+            ? `${getInputEffectiveName(input)}-${stream.data_stream.dataset}-${packagePolicyId}`
+            : `${getInputEffectiveName(input)}-${stream.data_stream.dataset}`,
       })),
     };
   });

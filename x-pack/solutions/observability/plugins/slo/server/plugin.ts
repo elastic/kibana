@@ -66,10 +66,12 @@ import type {
   SLOServerStart,
 } from './types';
 
-export class SLOPlugin
-  implements
-    Plugin<SLOServerSetup, SLOServerStart, SLOPluginSetupDependencies, SLOPluginStartDependencies>
-{
+export class SLOPlugin implements Plugin<
+  SLOServerSetup,
+  SLOServerStart,
+  SLOPluginSetupDependencies,
+  SLOPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
@@ -215,7 +217,7 @@ export class SLOPlugin
               pluginsStart.alerting.getRulesClientWithRequest(request),
               pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
               pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-              this.isCpsEnabled ? plugins.cps?.isTierEligible() ?? false : false,
+              this.isCpsEnabled ? (plugins.cps?.isTierEligible() ?? false) : false,
             ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);

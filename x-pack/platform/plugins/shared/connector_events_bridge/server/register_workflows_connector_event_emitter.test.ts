@@ -45,7 +45,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
       getWorkflowsExtensionsStart:
         getWorkflowsExtensionsStart ??
         (async () =>
-          ({ getClient: resolvedGetClient } as unknown as WorkflowsExtensionsServerPluginStart)),
+          ({ getClient: resolvedGetClient }) as unknown as WorkflowsExtensionsServerPluginStart),
       logger,
     });
 

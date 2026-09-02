@@ -86,10 +86,10 @@ const buildDatasetAnalysis = (
         value == null
           ? '(no value)'
           : typeof value === 'string'
-          ? value.length > 120
-            ? value.slice(0, 120) + '...'
-            : value
-          : String(value);
+            ? value.length > 120
+              ? value.slice(0, 120) + '...'
+              : value
+            : String(value);
       const counts = fieldValueCounts[field];
       counts.set(strVal, (counts.get(strVal) ?? 0) + 1);
     }

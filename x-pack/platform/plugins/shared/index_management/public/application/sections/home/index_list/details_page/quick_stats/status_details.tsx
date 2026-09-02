@@ -109,8 +109,8 @@ export const StatusDetails: FunctionComponent<{
       docCount.approximateReason === 'closed_index'
         ? docCountClosedIndexTooltip
         : docCount.approximateReason === 'requires_read'
-        ? docCountApproximateTooltip
-        : undefined;
+          ? docCountApproximateTooltip
+          : undefined;
 
     const docCountContent = (
       <EuiFlexGroup gutterSize="xs" data-test-subj="indexDetailsStatusDocCount">

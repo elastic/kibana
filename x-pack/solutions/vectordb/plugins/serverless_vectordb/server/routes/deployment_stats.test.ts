@@ -61,7 +61,7 @@ describe('registerDeploymentStatsRoute', () => {
           elasticsearch: { client: esClient },
           savedObjects: { getClient: () => soClient },
         }),
-    } as unknown as RequestHandlerContext);
+    }) as unknown as RequestHandlerContext;
 
   it('returns index stats, dashboard count and api key stats combined in a single body', async () => {
     mockFetchIndexStats.mockResolvedValue({

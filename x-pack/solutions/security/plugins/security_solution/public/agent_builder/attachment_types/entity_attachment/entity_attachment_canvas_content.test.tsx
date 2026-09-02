@@ -55,11 +55,11 @@ const experimentalFeatures = {
 } as unknown as ExperimentalFeatures;
 
 const resolveSecurityCanvasContext = jest.fn(
-  async () => ({} as unknown as SecurityCanvasEmbeddedBundle)
+  async () => ({}) as unknown as SecurityCanvasEmbeddedBundle
 );
 
 const attachmentOf = (data: unknown): EntityAttachment =>
-  ({ id: 'a', type: 'security.entity', data } as unknown as EntityAttachment);
+  ({ id: 'a', type: 'security.entity', data }) as unknown as EntityAttachment;
 
 const renderCanvas = (data: unknown) =>
   render(

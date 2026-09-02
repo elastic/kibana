@@ -27,7 +27,7 @@ const createConversationExecution = (url: string | null = callbackUrl): AgentExe
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 const createStandaloneExecution = (): AgentExecution =>
   ({
     executionId: 'execution-1',
@@ -35,25 +35,25 @@ const createStandaloneExecution = (): AgentExecution =>
     agentParams: {
       nextInput: { message: 'hello' },
     },
-  } as unknown as AgentExecution);
+  }) as unknown as AgentExecution;
 
 const createReasoningEvent = (reasoning: string): ChatEvent =>
   ({
     type: ChatEventType.reasoning,
     data: { reasoning },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createMessageChunkEvent = (text: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { text_chunk: text, message_id: 'message-1' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const createRoundCompleteEvent = (): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
     data: { round: { id: 'round-1' } },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const createCallbackDeliveryServiceMock = () => {
   const transport = jest.fn().mockResolvedValue({ status: 200 });

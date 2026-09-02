@@ -25,15 +25,12 @@ import { SearchService } from './services/search';
 import { registerRoutes } from './routes';
 import { registerTaskDefinitions } from './tasks';
 
-export class ProductDocBasePlugin
-  implements
-    Plugin<
-      ProductDocBaseSetupContract,
-      ProductDocBaseStartContract,
-      ProductDocBaseSetupDependencies,
-      ProductDocBaseStartDependencies
-    >
-{
+export class ProductDocBasePlugin implements Plugin<
+  ProductDocBaseSetupContract,
+  ProductDocBaseStartContract,
+  ProductDocBaseSetupDependencies,
+  ProductDocBaseStartDependencies
+> {
   private logger: Logger;
   private internalServices?: InternalServices;
 

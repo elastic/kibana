@@ -52,15 +52,19 @@ const useStyles = ({
     panel: css`
       transition: border-color ${euiTheme.animation.extraSlow} ${euiTheme.animation.resistance};
       min-height: 50px;
-      ${isSelected &&
-      css`
-        border: ${euiTheme.border.thin};
-        border-color: ${euiTheme.colors.primary};
-      `}
-      ${isDimmedStyle &&
-      css`
-        box-shadow: none;
-      `}
+      ${
+        isSelected &&
+        css`
+          border: ${euiTheme.border.thin};
+          border-color: ${euiTheme.colors.primary};
+        `
+      }
+      ${
+        isDimmedStyle &&
+        css`
+          box-shadow: none;
+        `
+      }
     `,
     flexItemMinWidth: css`
       min-width: 0;
@@ -77,19 +81,23 @@ const useStyles = ({
     `,
     descriptionContainer: css`
       min-width: 0;
-      ${shouldHideDescription &&
-      css`
-        display: none;
-      `}
+      ${
+        shouldHideDescription &&
+        css`
+          display: none;
+        `
+      }
     `,
     moveButton: css`
       &:hover {
         transform: none !important;
       }
-      ${isCancelButton &&
-      css`
-        z-index: ${euiTheme.levels.menu};
-      `}
+      ${
+        isCancelButton &&
+        css`
+          z-index: ${euiTheme.levels.menu};
+        `
+      }
     `,
   };
 };

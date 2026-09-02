@@ -26,7 +26,7 @@ export interface IRuleDataClient {
 export interface IRuleDataReader {
   search<
     TSearchRequest extends ESSearchRequest,
-    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
   >(
     request: TSearchRequest
   ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>>;

@@ -70,7 +70,9 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
               // Make the visualization modifiers icon appear only on panel hover
               .embPanel__content:hover & {
                 background: ${euiTheme.colors.backgroundBasePlain};
-                transition: color ${euiTheme.animation.slow}, background ${euiTheme.animation.slow};
+                transition:
+                  color ${euiTheme.animation.slow},
+                  background ${euiTheme.animation.slow};
                 color: ${euiTheme.colors.textParagraph};
               }
             `}

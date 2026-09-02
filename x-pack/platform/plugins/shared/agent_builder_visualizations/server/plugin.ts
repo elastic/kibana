@@ -17,15 +17,12 @@ import { createVisualizationTool } from './tools/create_visualization';
 import { visualizationCreationSkill } from './skills/visualization_creation_skill';
 import { visualizationSmlType } from './sml_types/visualization';
 
-export class AgentBuilderVisualizationsPlugin
-  implements
-    Plugin<
-      AgentBuilderVisualizationsPluginSetup,
-      AgentBuilderVisualizationsPluginStart,
-      AgentBuilderVisualizationsSetupDependencies,
-      AgentBuilderVisualizationsStartDependencies
-    >
-{
+export class AgentBuilderVisualizationsPlugin implements Plugin<
+  AgentBuilderVisualizationsPluginSetup,
+  AgentBuilderVisualizationsPluginStart,
+  AgentBuilderVisualizationsSetupDependencies,
+  AgentBuilderVisualizationsStartDependencies
+> {
   constructor(_context: PluginInitializerContext) {}
 
   setup(

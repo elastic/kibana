@@ -138,8 +138,8 @@ export const usePushFlyoutFocus = ({
         const target = isFocusable(trigger.element)
           ? trigger.element
           : trigger.selector
-          ? document.querySelector<HTMLElement>(trigger.selector)
-          : null;
+            ? document.querySelector<HTMLElement>(trigger.selector)
+            : null;
         target?.focus();
       });
     };

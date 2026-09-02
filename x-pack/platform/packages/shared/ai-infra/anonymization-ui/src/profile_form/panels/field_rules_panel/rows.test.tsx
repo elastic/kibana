@@ -46,7 +46,7 @@ const createContextValue = (
     isManageMode: true,
     isSubmitting: false,
     ...overrides,
-  } as ReturnType<typeof useFieldRulesPanelContext>);
+  }) as ReturnType<typeof useFieldRulesPanelContext>;
 
 describe('FieldRulesPanelRows', () => {
   it('shows "Select all fields" when no filters are active', () => {

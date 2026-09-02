@@ -91,18 +91,16 @@ function StreamsCanvasInner() {
     const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
     return {
       ...nextGraph,
-      nodes: nextGraph.nodes.map(
-        (node): ClassicCanvasNode =>
-          node.type === DESTINATION_NODE_TYPE
-            ? {
-                ...node,
-                data: {
-                  ...node.data,
-                  onProcessingClick: (streamName: string) =>
-                    openFlyoutTab(streamName, 'processing'),
-                },
-              }
-            : node
+      nodes: nextGraph.nodes.map((node): ClassicCanvasNode =>
+        node.type === DESTINATION_NODE_TYPE
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                onProcessingClick: (streamName: string) => openFlyoutTab(streamName, 'processing'),
+              },
+            }
+          : node
       ),
     };
   }, [openFlyoutTab, value]);

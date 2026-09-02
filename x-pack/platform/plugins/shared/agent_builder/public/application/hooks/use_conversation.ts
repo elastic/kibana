@@ -202,7 +202,7 @@ export const useIsUnpersistedConversation = (conversation?: Conversation) => {
 
   return Boolean(
     (isConversationStreaming && conversation?.rounds[0]?.id === pendingRoundId) ||
-      (error && pendingMessage && conversation?.rounds.length === 0)
+    (error && pendingMessage && conversation?.rounds.length === 0)
   );
 };
 

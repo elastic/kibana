@@ -333,7 +333,7 @@ describe('processCertsResult', () => {
           },
         },
       },
-    } as unknown as CertificatesResults['hits']['hits'][number]);
+    }) as unknown as CertificatesResults['hits']['hits'][number];
 
   it('omits remote on local certs and local cert monitors', () => {
     const result = processCertsResult({

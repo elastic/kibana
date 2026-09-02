@@ -376,7 +376,7 @@ describe('createFieldDefinitionsSubClient', () => {
           total: 1,
           page: 1,
           per_page: 20,
-        } as never);
+        }) as never;
 
       beforeEach(() => {
         clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(globalSO);

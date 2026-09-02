@@ -10,7 +10,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { EsClient } from '@kbn/scout-oblt';
 
 export class ConversationsClient {
-  constructor(private readonly log: ToolingLog, private readonly esClient: EsClient) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly esClient: EsClient
+  ) {}
 
   async clear() {
     this.log.info('Clearing conversations');

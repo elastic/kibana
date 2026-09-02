@@ -166,8 +166,8 @@ const PipelineAccordion: React.FC<{
                 healthyCount === totalComponents
                   ? euiTheme.colors.backgroundFilledSuccess
                   : healthyCount === 0
-                  ? euiTheme.colors.backgroundFilledDanger
-                  : euiTheme.colors.backgroundFilledWarning
+                    ? euiTheme.colors.backgroundFilledDanger
+                    : euiTheme.colors.backgroundFilledWarning
               }
             >
               <strong>{pipelineId}</strong>
@@ -339,10 +339,10 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
           type === 'receiver'
             ? pipeline.receivers
             : type === 'processor'
-            ? pipeline.processors
-            : type === 'exporter'
-            ? pipeline.exporters
-            : undefined;
+              ? pipeline.processors
+              : type === 'exporter'
+                ? pipeline.exporters
+                : undefined;
 
         if (componentIds && componentIds.length > 0) {
           groups.push({

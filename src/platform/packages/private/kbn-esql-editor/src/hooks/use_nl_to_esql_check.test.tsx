@@ -30,12 +30,11 @@ describe('useNlToEsqlCheck', () => {
 
   const createWrapper =
     (esqlService?: { getLicense: typeof getLicenseMock }) =>
-    ({ children }: { children: React.ReactNode }) =>
-      (
-        <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
-          <>{children}</>
-        </KibanaContextProvider>
-      );
+    ({ children }: { children: React.ReactNode }) => (
+      <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
+        <>{children}</>
+      </KibanaContextProvider>
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -172,7 +172,7 @@ export class DetectionClient {
       rawHits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
     return rawHits.map(
-      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
+      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') }) as Detection
     );
   }
 }

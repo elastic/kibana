@@ -75,11 +75,8 @@ export const Workpad: FC<Props> = ({
   const workpadStyles = useMemo(
     () => css`
       .canvasGrid {
-        background-image: linear-gradient(
-            to right,
-            ${euiTheme.colors.mediumShade} 1px,
-            transparent 1px
-          ),
+        background-image:
+          linear-gradient(to right, ${euiTheme.colors.mediumShade} 1px, transparent 1px),
           linear-gradient(to bottom, ${euiTheme.colors.mediumShade} 1px, transparent 1px);
       }
     `,

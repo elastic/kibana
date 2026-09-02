@@ -16,7 +16,7 @@ import type { EntityRelationshipRecord } from './types';
 const makeCrudClient = (errors: Array<{ status: number }> = []): EntityUpdateClient =>
   ({
     bulkUpdateEntity: jest.fn().mockResolvedValue(errors),
-  } as unknown as EntityUpdateClient);
+  }) as unknown as EntityUpdateClient;
 
 // Stub esClient for tests that don't enable validateTargetIds — never called.
 const stubEsClient = {} as unknown as ElasticsearchClient;

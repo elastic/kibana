@@ -44,8 +44,8 @@ const apiIsPinnableControlParentApi = (
 export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
     apiHasUniqueId(api) &&
-      apiCanBePinned(api) &&
-      apiHasParentApi(api) &&
-      apiIsPinnableControlParentApi(api.parentApi) &&
-      api.parentApi.panelIsPinned(api.uuid)
+    apiCanBePinned(api) &&
+    apiHasParentApi(api) &&
+    apiIsPinnableControlParentApi(api.parentApi) &&
+    api.parentApi.panelIsPinned(api.uuid)
   );

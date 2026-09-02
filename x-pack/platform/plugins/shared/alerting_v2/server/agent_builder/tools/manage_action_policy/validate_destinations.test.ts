@@ -19,7 +19,7 @@ const createMockAttachments = (
 ): AttachmentStateManager =>
   ({
     getActive: jest.fn().mockReturnValue(active),
-  } as unknown as AttachmentStateManager);
+  }) as unknown as AttachmentStateManager;
 
 const createMockWorkflowLookup = (
   workflows: Map<string, { id: string; name?: string }> = new Map()

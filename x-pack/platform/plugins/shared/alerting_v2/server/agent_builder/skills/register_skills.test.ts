@@ -65,7 +65,7 @@ describe('registerSkills', () => {
       logger: logger as unknown as LoggerServiceContract,
       getWorkflow: jest.fn(),
       getAvailableConnectors: jest.fn(),
-    } as const);
+    }) as const;
 
   it('registers both skills and logs success at debug', () => {
     registerSkills(agentBuilder, deps());

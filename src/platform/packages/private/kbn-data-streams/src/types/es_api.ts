@@ -13,8 +13,9 @@ import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch'
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
-export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}>
-  extends Omit<api.SearchRequest, 'index' | 'fields' | 'track_total_hits' | 'size'> {
+export interface ClientSearchRequest<
+  SearchRuntimeMappings extends BaseSearchRuntimeMappings = {},
+> extends Omit<api.SearchRequest, 'index' | 'fields' | 'track_total_hits' | 'size'> {
   fields?: Array<Exclude<keyof SearchRuntimeMappings, number | symbol>>;
   track_total_hits?: boolean | number;
   size?: number;
@@ -31,7 +32,7 @@ export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRun
 
 export type ClientSearchResponse<
   TDocument,
-  TSearchRequest extends Omit<api.SearchRequest, 'index'>
+  TSearchRequest extends Omit<api.SearchRequest, 'index'>,
 > = api.SearchResponse<TDocument, TSearchRequest>;
 
 export type ClientCreateRequest<TDocument> = Omit<
@@ -60,7 +61,7 @@ export type ClientExists = () => Promise<boolean>;
 export interface InternalIDataStreamClient<
   S extends MappingsDefinition,
   FullDocumentType = GetFieldsOf<S>,
-  SRM extends BaseSearchRuntimeMappings = never
+  SRM extends BaseSearchRuntimeMappings = never,
 > {
   search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(
     req: ClientSearchRequest<SRM>,

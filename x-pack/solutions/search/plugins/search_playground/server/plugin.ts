@@ -25,15 +25,12 @@ import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_NAME, PLAYGROUND_SAVED_OBJECT_TYPE } from '../common';
 import { createPlaygroundSavedObjectType } from './playground_saved_object/playground_saved_object';
 
-export class SearchPlaygroundPlugin
-  implements
-    Plugin<
-      SearchPlaygroundPluginSetup,
-      SearchPlaygroundPluginStart,
-      {},
-      SearchPlaygroundPluginStartDependencies
-    >
-{
+export class SearchPlaygroundPlugin implements Plugin<
+  SearchPlaygroundPluginSetup,
+  SearchPlaygroundPluginStart,
+  {},
+  SearchPlaygroundPluginStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

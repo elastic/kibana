@@ -429,9 +429,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         height: 100%;
         display: ${isSidebarCollapsed && !isMobile ? 'none' : 'flex'};
         // Make Discover's field list background distinguished for the "new chrome"
-        background-color: ${chromeStyle === 'project'
-          ? euiTheme.colors.backgroundBasePlain
-          : euiTheme.colors.body};
+        background-color: ${
+          chromeStyle === 'project' ? euiTheme.colors.backgroundBasePlain : euiTheme.colors.body
+        };
       `}
     >
       <EuiFlexItem>

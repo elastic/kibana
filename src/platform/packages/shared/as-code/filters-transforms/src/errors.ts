@@ -8,7 +8,10 @@
  */
 
 export class FilterConversionError extends Error {
-  constructor(message: string, public readonly originalFilter?: unknown) {
+  constructor(
+    message: string,
+    public readonly originalFilter?: unknown
+  ) {
     super(message);
     this.name = 'FilterConversionError';
   }

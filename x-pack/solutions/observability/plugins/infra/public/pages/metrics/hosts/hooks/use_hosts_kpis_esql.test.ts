@@ -190,7 +190,7 @@ describe('parseKpiRow', () => {
     columns: Array<{ name: string }>,
     values: Array<Array<number | null>>
   ): estypes.EsqlAsyncQueryResponse =>
-    ({ columns, values } as unknown as estypes.EsqlAsyncQueryResponse);
+    ({ columns, values }) as unknown as estypes.EsqlAsyncQueryResponse;
 
   it('maps columns to KPIs by name regardless of column order', () => {
     expect(

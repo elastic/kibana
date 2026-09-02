@@ -18,8 +18,7 @@ import { EntityCard } from './entity_card/entity_card';
 import { EntityTable } from './entity_table/entity_table';
 import { entityAttachmentQueryClient } from './query_client';
 
-export interface EntityAttachmentInlineContentProps
-  extends AttachmentRenderProps<EntityAttachment> {
+export interface EntityAttachmentInlineContentProps extends AttachmentRenderProps<EntityAttachment> {
   experimentalFeatures: ExperimentalFeatures;
 }
 

@@ -15,7 +15,7 @@ export const useAlertMutedState = (alert?: Alert) => {
   const alertInstanceId = alert && (alert[ALERT_INSTANCE_ID]?.[0] as string);
   const ruleId = alert && (alert[ALERT_RULE_UUID]?.[0] as string);
   return useMemo(() => {
-    const rule = ruleId ? mutedAlerts?.[ruleId] ?? [] : [];
+    const rule = ruleId ? (mutedAlerts?.[ruleId] ?? []) : [];
     return {
       isMuted: alertInstanceId ? rule?.includes(alertInstanceId) : null,
       ruleId,

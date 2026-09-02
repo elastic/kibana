@@ -71,8 +71,8 @@ export const calculateShardValues = (target: Targets) => (data: Shard[]) => {
     target === 'searches'
       ? mutateSearchTimesTree
       : target === 'aggregations'
-      ? mutateAggsTimesTree
-      : null;
+        ? mutateAggsTimesTree
+        : null;
 
   if (mutateTimesTree) {
     for (const shard of data) {

@@ -28,7 +28,7 @@ const datasourceHasIndexPatternRefs = (
 ): unknownDatasource is TextBasedPrivateState => {
   return Boolean(
     unknownDatasource &&
-      (unknownDatasource as TextBasedPrivateState)?.indexPatternRefs !== undefined
+    (unknownDatasource as TextBasedPrivateState)?.indexPatternRefs !== undefined
   );
 };
 

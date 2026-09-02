@@ -33,7 +33,7 @@ const buildAlert = (ruleId?: string, instanceId?: string): TopAlert =>
       ...(ruleId != null && { [ALERT_RULE_UUID]: ruleId }),
       ...(instanceId != null && { [ALERT_INSTANCE_ID]: instanceId }),
     },
-  } as unknown as TopAlert);
+  }) as unknown as TopAlert;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

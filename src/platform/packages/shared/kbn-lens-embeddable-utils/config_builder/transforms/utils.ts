@@ -778,7 +778,7 @@ export const filtersAndQueryToLensState = (
 ) => {
   const query = extraQueryFromAPIState(state);
   const convertedFilters = state.filters
-    ? toStoredFilters(state.filters as AsCodeFilter[]) ?? []
+    ? (toStoredFilters(state.filters as AsCodeFilter[]) ?? [])
     : [];
   const { filters: extractedFilters, references: extractedReferences } = extractFilterReferences(
     convertedFilters,
@@ -795,22 +795,22 @@ export const filtersAndQueryToLensState = (
 export type DeepMutable<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
-  ? DeepMutable<U>[] // handle readonly arrays
-  : T extends object
-  ? {
-      -readonly [P in keyof T]: DeepMutable<T[P]>;
-    }
-  : T;
+    ? DeepMutable<U>[] // handle readonly arrays
+    : T extends object
+      ? {
+          -readonly [P in keyof T]: DeepMutable<T[P]>;
+        }
+      : T;
 
 export type DeepPartial<T> = T extends (...args: never[]) => unknown
   ? T // don't mutate functions
   : T extends ReadonlyArray<infer U>
-  ? DeepPartial<U>[] // handle readonly arrays
-  : T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
+    ? DeepPartial<U>[] // handle readonly arrays
+    : T extends object
+      ? {
+          [P in keyof T]?: DeepPartial<T[P]>;
+        }
+      : T;
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;

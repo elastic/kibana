@@ -27,7 +27,7 @@ const mockAlertsCount = (
     error: undefined,
     refetch: jest.fn(),
     ...overrides,
-  } as ReturnType<typeof useAlertsCount>);
+  }) as ReturnType<typeof useAlertsCount>;
 
 const renderBadge = () =>
   render(

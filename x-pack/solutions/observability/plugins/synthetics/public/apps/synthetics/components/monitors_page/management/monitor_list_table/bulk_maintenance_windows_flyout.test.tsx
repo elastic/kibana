@@ -80,7 +80,7 @@ const makeMonitor = (
     [ConfigKey.NAME]: name,
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.MAINTENANCE_WINDOWS]: maintenanceWindows,
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 describe('<BulkMaintenanceWindowsFlyout />', () => {
   const onClose = jest.fn();

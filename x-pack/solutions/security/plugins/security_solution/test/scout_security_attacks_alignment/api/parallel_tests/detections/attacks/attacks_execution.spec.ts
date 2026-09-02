@@ -62,9 +62,8 @@ spaceTest.describe(
       'successfully executes scheduled background task without "Saved object not found" error',
       async ({ kbnClient, scoutSpace, apiServices }) => {
         // 1. Seed the schedule with a 1m interval
-        const { id: scheduleId } = await apiServices.attackDiscovery.seedAttackInferenceSchedule(
-          '1m'
-        );
+        const { id: scheduleId } =
+          await apiServices.attackDiscovery.seedAttackInferenceSchedule('1m');
 
         // 2. Enable the schedule
         const enableResponse = await kbnClient.request({

@@ -45,7 +45,7 @@ const makeLevelValues = () =>
     ReturnType<typeof schema.literal<'info'>>,
     ReturnType<typeof schema.literal<'debug'>>,
     ReturnType<typeof schema.literal<'trace'>>,
-    ReturnType<typeof schema.literal<'off'>>
+    ReturnType<typeof schema.literal<'off'>>,
   ];
 
 const levelSchema = schema.oneOf(makeLevelValues(), { defaultValue: 'info' });

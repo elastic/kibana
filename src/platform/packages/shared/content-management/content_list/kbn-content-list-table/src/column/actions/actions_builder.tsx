@@ -74,8 +74,10 @@ const getActionsColumnDefaultWidth = (
  * These are the declarative attributes consumers pass in JSX. The actions builder
  * reads them directly from the parsed attributes.
  */
-export interface ActionsColumnProps
-  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
+export interface ActionsColumnProps extends Pick<
+  ColumnLayoutProps,
+  'width' | 'minWidth' | 'maxWidth'
+> {
   /** Custom column title. Defaults to `'Actions'`. */
   columnTitle?: string;
   /**

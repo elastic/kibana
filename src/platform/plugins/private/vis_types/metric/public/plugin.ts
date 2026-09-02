@@ -25,9 +25,12 @@ export interface MetricVisPluginStartDependencies {
 }
 
 /** @internal */
-export class MetricVisPlugin
-  implements Plugin<void, void, MetricVisPluginSetupDependencies, MetricVisPluginStartDependencies>
-{
+export class MetricVisPlugin implements Plugin<
+  void,
+  void,
+  MetricVisPluginSetupDependencies,
+  MetricVisPluginStartDependencies
+> {
   initializerContext: PluginInitializerContext<MetricPublicConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MetricPublicConfig>) {

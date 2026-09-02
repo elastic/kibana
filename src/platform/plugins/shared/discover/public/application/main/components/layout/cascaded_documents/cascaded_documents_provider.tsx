@@ -29,8 +29,10 @@ export type CascadedDocumentsDataGridUiStateMap = Record<
   Partial<UnifiedDataTableRestorableState>
 >;
 
-export interface CascadedDocumentsContext
-  extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
+export interface CascadedDocumentsContext extends Pick<
+  CascadedDocumentsState,
+  'availableCascadeGroups' | 'selectedCascadeGroups'
+> {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   cascadedColumnsMeta: DataTableColumnsMeta;
   esqlQuery: AggregateQuery;
@@ -66,7 +68,7 @@ export const isCascadedDocumentsVisible = (
   const isEsqlQuery = isOfAggregateQueryType(query);
   const isValidState = Boolean(
     availableCascadeGroups.length > 0 &&
-      availableCascadeGroups.length <= SUPPORTED_CASCADE_GROUPING_COUNT
+    availableCascadeGroups.length <= SUPPORTED_CASCADE_GROUPING_COUNT
   );
 
   return isEsqlQuery && isValidState;

@@ -70,7 +70,7 @@ export async function waitForConditionOrThrow<T>(
   const detail =
     typeof errorMessage === 'function'
       ? errorMessage(waitResult.result)
-      : errorMessage ?? `Last result: ${JSON.stringify(waitResult.result)}`;
+      : (errorMessage ?? `Last result: ${JSON.stringify(waitResult.result)}`);
 
   throw new Error(`Condition not met within ${timeout}ms. ${detail}`);
 }

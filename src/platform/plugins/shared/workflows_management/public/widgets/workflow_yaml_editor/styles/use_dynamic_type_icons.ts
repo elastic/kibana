@@ -206,8 +206,8 @@ export function useDynamicTypeIcons(
   // This ensures we re-run and retry when loading saved YAML that has a custom trigger before the extension has registered.
   const contentHasCustomTrigger = Boolean(
     editorValue &&
-      (customTriggerIds.some((id) => editorValue.includes(id)) ||
-        /type:\s*[\w.-]*\.[\w.-]+/.test(editorValue))
+    (customTriggerIds.some((id) => editorValue.includes(id)) ||
+      /type:\s*[\w.-]*\.[\w.-]+/.test(editorValue))
   );
 
   useEffect(() => {

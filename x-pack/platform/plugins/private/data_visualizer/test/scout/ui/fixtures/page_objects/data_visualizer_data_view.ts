@@ -24,7 +24,10 @@ export class DataVisualizerDataView {
   private readonly scriptCodeEditor: KibanaCodeEditorWrapper;
   private readonly applyTimeButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly table: DataVisualizerTable) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly table: DataVisualizerTable
+  ) {
     this.fieldEditorForm = this.page.testSubj.locator('indexPatternFieldEditorForm');
     this.dataSourceSelectorButton = this.page.testSubj.locator('mlDataSourceSelectorButton');
     this.addFieldButton = this.page.testSubj.locator('indexPattern-add-field');

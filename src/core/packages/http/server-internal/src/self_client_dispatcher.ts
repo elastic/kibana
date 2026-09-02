@@ -36,7 +36,7 @@ export class SelfHttpDispatcherProvider {
     // Local self calls loop back to this listener, so trust its leaf certificate directly.
     const additionalCertificateAuthorities = usesLocalTarget
       ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
-      : config.selfHttp.ssl.certificateAuthorities ?? [];
+      : (config.selfHttp.ssl.certificateAuthorities ?? []);
     const certificateAuthorities = additionalCertificateAuthorities.filter(
       (certificate): certificate is string => certificate !== undefined
     );

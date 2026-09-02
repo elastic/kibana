@@ -30,9 +30,8 @@ export function HostsPageObjectProvider({ getService, getPageObjects }: FtrProvi
      */
     async hostDetailsEndpointOverviewData(): Promise<Record<string, string>> {
       await this.ensureOnHostDetails();
-      const endpointDescriptionLists: WebElementWrapper[] = await testSubjects.findAll(
-        'endpoint-overview'
-      );
+      const endpointDescriptionLists: WebElementWrapper[] =
+        await testSubjects.findAll('endpoint-overview');
 
       const data: Record<string, string> = {};
 

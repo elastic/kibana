@@ -955,7 +955,7 @@ describe('invokeAlertRetrievalWorkflow', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.any(Function));
 
       const [[debugMessageFactory]] = (mockLogger.debug as unknown as jest.Mock).mock.calls as [
-        [() => string]
+        [() => string],
       ];
 
       expect(debugMessageFactory()).toContain('Waiting for workflow to complete');

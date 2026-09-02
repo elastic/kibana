@@ -49,7 +49,7 @@ const buildCaseData = (comments: Array<{ type: string; attachmentId?: string | s
     id: 'case-1',
     title: 'Case 1',
     comments,
-  } as never);
+  }) as never;
 
 describe('CaseViewTimelines', () => {
   beforeEach(() => {

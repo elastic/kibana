@@ -25,9 +25,8 @@ export interface UntilValidPromptOptions {
 export type UntilValidPromptResponseOf<
   TPrompt extends Prompt = Prompt,
   TPromptOptions extends PromptOptions<TPrompt> = PromptOptions<TPrompt>,
-  TToolCallbacks extends ToolCallbacksOfToolOptions<
-    ToolOptionsOfPrompt<TPrompt>
-  > = ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>
+  TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>> =
+    ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
 > = PromptResponse<TPromptOptions> & {
   input: Array<
     MessageOf<

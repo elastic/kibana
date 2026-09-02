@@ -233,7 +233,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined,
-            Promise<{ available: boolean; values: Record<string, unknown> }>
+            Promise<{ available: boolean; values: Record<string, unknown> }>,
           ])
     );
 

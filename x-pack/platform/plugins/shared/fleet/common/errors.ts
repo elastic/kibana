@@ -10,7 +10,10 @@ import type { FleetErrorResponse } from './types';
 
 export class FleetError<TMeta = unknown> extends Error {
   attributes?: FleetErrorResponse['attributes'];
-  constructor(message?: string, public readonly meta?: TMeta) {
+  constructor(
+    message?: string,
+    public readonly meta?: TMeta
+  ) {
     super(message);
     this.name = this.constructor.name; // for stack traces
 

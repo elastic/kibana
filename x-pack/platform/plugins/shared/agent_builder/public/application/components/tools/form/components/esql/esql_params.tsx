@@ -51,12 +51,15 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
   const inferParamsFromEsql = useCallback(() => {
     const inferredParamNamesFromEsql = getESQLQueryVariables(getValues('esql'));
 
-    const existingParamsNameMap = getValues('params').reduce((paramNamesMap, param) => {
-      if (!paramNamesMap[param.name]) {
-        paramNamesMap[param.name] = param;
-      }
-      return paramNamesMap;
-    }, {} as Record<string, EsqlParamFormData>);
+    const existingParamsNameMap = getValues('params').reduce(
+      (paramNamesMap, param) => {
+        if (!paramNamesMap[param.name]) {
+          paramNamesMap[param.name] = param;
+        }
+        return paramNamesMap;
+      },
+      {} as Record<string, EsqlParamFormData>
+    );
 
     const updatedParams: EsqlParamFormData[] = [...new Set(inferredParamNamesFromEsql)].map(
       (inferredParamName) => {

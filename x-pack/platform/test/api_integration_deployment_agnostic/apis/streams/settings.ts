@@ -37,8 +37,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const streamType = Streams.WiredStream.GetResponse.is(definition)
       ? 'wired'
       : Streams.ClassicStream.GetResponse.is(definition)
-      ? 'classic'
-      : 'query';
+        ? 'classic'
+        : 'query';
     const request = {
       ...emptyAssets,
       stream: {

@@ -25,10 +25,10 @@ import { createEsQuery } from '../utils/es_search';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
-  'issuer' = 'tls.server.x509.issuer.common_name',
-  'not_after' = 'tls.server.x509.not_after',
-  'not_before' = 'tls.server.x509.not_before',
-  'common_name' = 'tls.server.x509.subject.common_name',
+  issuer = 'tls.server.x509.issuer.common_name',
+  not_after = 'tls.server.x509.not_after',
+  not_before = 'tls.server.x509.not_before',
+  common_name = 'tls.server.x509.subject.common_name',
 }
 
 export const DEFAULT_SORT = 'not_after';
@@ -213,8 +213,8 @@ export const getCertsRequestBody = (
     wantsFirstParty && !wantsThirdParty
       ? [partyQuery(FIRST_PARTY)]
       : wantsThirdParty && !wantsFirstParty
-      ? [partyQuery(THIRD_PARTY)]
-      : [];
+        ? [partyQuery(THIRD_PARTY)]
+        : [];
   const hasResourceTypeFilter = Boolean(browserResourceTypes && browserResourceTypes.length > 0);
 
   const browserBranchFilter = [
@@ -240,18 +240,18 @@ export const getCertsRequestBody = (
   const certTypeFilter = !includeBrowserCerts
     ? lightweightBranchFilter
     : browserOnlyFilterActive
-    ? browserBranchFilter
-    : [
-        {
-          bool: {
-            minimum_should_match: 1,
-            should: [
-              { bool: { filter: lightweightBranchFilter } },
-              { bool: { filter: browserBranchFilter } },
-            ],
+      ? browserBranchFilter
+      : [
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { bool: { filter: lightweightBranchFilter } },
+                { bool: { filter: browserBranchFilter } },
+              ],
+            },
           },
-        },
-      ];
+        ];
 
   return createEsQuery({
     from: (pageIndex ?? 0) * size,

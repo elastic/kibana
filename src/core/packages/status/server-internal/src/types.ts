@@ -13,8 +13,10 @@ import type { ServiceStatus } from '@kbn/core-status-common';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
 
 /** @internal */
-export interface InternalStatusServiceSetup
-  extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
+export interface InternalStatusServiceSetup extends Pick<
+  StatusServiceSetup,
+  'core$' | 'overall$' | 'isStatusPageAnonymous'
+> {
   /**
    * Overall status of core's service.
    */

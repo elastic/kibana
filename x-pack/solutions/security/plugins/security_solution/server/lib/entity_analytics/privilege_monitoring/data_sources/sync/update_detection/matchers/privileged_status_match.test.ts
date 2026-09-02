@@ -56,7 +56,7 @@ const createDataClient = (): PrivilegeMonitoringDataClient =>
     },
     index: 'unit-test-index',
     log: jest.fn(),
-  } as unknown as PrivilegeMonitoringDataClient);
+  }) as unknown as PrivilegeMonitoringDataClient;
 
 // Defaults to integration type source, can be overridden for index usage.
 const createSource = (overrides: Partial<MonitoringEntitySource> = {}): MonitoringEntitySource => ({

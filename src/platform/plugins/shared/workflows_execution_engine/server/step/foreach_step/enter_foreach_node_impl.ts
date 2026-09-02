@@ -125,10 +125,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
             resolvedValue === null
               ? ' (null)'
               : resolvedValue === undefined
-              ? ' (undefined)'
-              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
-                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
-                }`
+                ? ' (undefined)'
+                : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
+                    JSON.stringify(resolvedValue).length > 100 ? '...' : ''
+                  }`
           }. `
       );
     }

@@ -518,7 +518,7 @@ export const createSignificantEventsMaintenanceService = ({
     sweep: Awaited<ReturnType<typeof runPauseSweep>>;
   }> => {
     const previousSummary = normalizeSummary(existing?.lastSummary);
-    const actor = mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert';
+    const actor = mode === 'pause' ? updatedBy : (existing?.updatedBy ?? 'system:reassert');
 
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     if (normalizeState(existing?.state) !== 'paused') {

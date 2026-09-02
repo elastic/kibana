@@ -18,7 +18,7 @@ import type {
 
 export function createServerRouteFactory<
   TRouteHandlerResources extends ServerRouteHandlerResources = DefaultRouteHandlerResources,
-  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined = undefined
+  TRouteCreateOptions extends DefaultRouteCreateOptions | undefined = undefined,
 >(): CreateServerRouteFactory<TRouteHandlerResources, TRouteCreateOptions> {
-  return (route) => ({ [route.endpoint]: route } as any);
+  return (route) => ({ [route.endpoint]: route }) as any;
 }

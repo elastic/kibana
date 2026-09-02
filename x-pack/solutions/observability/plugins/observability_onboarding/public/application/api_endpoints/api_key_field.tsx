@@ -61,8 +61,8 @@ export const ApiKeyField = ({
   const createButtonTooltip = !canCreate
     ? noPermissionMessage
     : isDisabled
-    ? apiKeyCreationInProgressMessage
-    : undefined;
+      ? apiKeyCreationInProgressMessage
+      : undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -78,11 +78,11 @@ export const ApiKeyField = ({
             value={encodedApiKey ?? ''}
             placeholder={
               wasKeyCreatedBefore
-                ? createdBeforePlaceholder ??
+                ? (createdBeforePlaceholder ??
                   i18n.translate(
                     'xpack.observability_onboarding.apiEndpoints.apiKeyCreatedBeforePlaceholder',
                     { defaultMessage: 'Existing key cannot be displayed. Create a new one' }
-                  )
+                  ))
                 : i18n.translate('xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder', {
                     defaultMessage: 'No API key yet',
                   })

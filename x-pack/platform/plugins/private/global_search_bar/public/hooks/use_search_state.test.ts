@@ -55,17 +55,17 @@ type Result =
 
 const createResult = (result: Result): GlobalSearchResult => {
   const id = typeof result === 'string' ? result : result.id;
-  const type = typeof result === 'string' ? 'application' : result.type ?? 'application';
-  const score = typeof result === 'string' ? 42 : result.score ?? 42;
+  const type = typeof result === 'string' ? 'application' : (result.type ?? 'application');
+  const score = typeof result === 'string' ? 42 : (result.score ?? 42);
 
   const categoryLabel =
     typeof result === 'string'
       ? 'Kibana'
       : result.categoryLabel !== undefined
-      ? result.categoryLabel
-      : type === 'application'
-      ? 'Kibana'
-      : 'Test';
+        ? result.categoryLabel
+        : type === 'application'
+          ? 'Kibana'
+          : 'Test';
 
   return {
     id,

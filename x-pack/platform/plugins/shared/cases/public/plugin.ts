@@ -44,15 +44,12 @@ import { registerAnalytics } from './analytics';
  * @public
  * A plugin for retrieving Cases UI components
  */
-export class CasesUiPlugin
-  implements
-    Plugin<
-      CasesPublicSetup,
-      CasesPublicStart,
-      CasesPublicSetupDependencies,
-      CasesPublicStartDependencies
-    >
-{
+export class CasesUiPlugin implements Plugin<
+  CasesPublicSetup,
+  CasesPublicStart,
+  CasesPublicSetupDependencies,
+  CasesPublicStartDependencies
+> {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
@@ -91,7 +88,7 @@ export class CasesUiPlugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             CasesPublicStartDependencies,
-            unknown
+            unknown,
           ];
 
           const { renderApp } = await import('./application');

@@ -24,7 +24,7 @@ const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
       breach: { segment: 'WHERE count > 10' },
     },
     ...overrides,
-  } as unknown as RuleResponse);
+  }) as unknown as RuleResponse;
 
 describe('isNonRepresentableRule', () => {
   it('returns false for a standard composed alert rule', () => {

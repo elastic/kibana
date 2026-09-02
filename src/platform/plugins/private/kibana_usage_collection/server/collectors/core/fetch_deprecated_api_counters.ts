@@ -52,14 +52,17 @@ const mergeCounter = (counter: CounterEvent, acc?: CoreDeprecatedApiUsageStats) 
 };
 
 function mergeCounters(counters: CounterEvent[]): CoreDeprecatedApiUsageStats[] {
-  const mergedCounters = counters.reduce((acc, counter) => {
-    const { counterName } = counter;
-    const existingCounter = acc[counterName];
+  const mergedCounters = counters.reduce(
+    (acc, counter) => {
+      const { counterName } = counter;
+      const existingCounter = acc[counterName];
 
-    acc[counterName] = mergeCounter(counter, existingCounter);
+      acc[counterName] = mergeCounter(counter, existingCounter);
 
-    return acc;
-  }, {} as Record<string, CoreDeprecatedApiUsageStats>);
+      return acc;
+    },
+    {} as Record<string, CoreDeprecatedApiUsageStats>
+  );
 
   return Object.values(mergedCounters);
 }

@@ -92,7 +92,7 @@ describe('POST /internal/evals/_evaluate', () => {
           },
         },
       }),
-    } as const);
+    }) as const;
 
   const setup = ({
     evaluatorRegistry,

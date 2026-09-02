@@ -22,9 +22,10 @@ import { defineRoutes } from './routes/define_routes';
 import { registerLanguageClients } from './language_clients';
 import { registerExternalIntegrations } from './external_integration';
 
-export class CustomIntegrationsPlugin
-  implements Plugin<CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart>
-{
+export class CustomIntegrationsPlugin implements Plugin<
+  CustomIntegrationsPluginSetup,
+  CustomIntegrationsPluginStart
+> {
   private readonly logger: Logger;
   private readonly customIngegrationRegistry: CustomIntegrationRegistry;
   private readonly branch: string;

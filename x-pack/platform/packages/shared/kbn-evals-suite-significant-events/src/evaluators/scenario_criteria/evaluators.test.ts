@@ -19,7 +19,7 @@ const createJudge = () => {
         kind: 'LLM',
         direction: 'maximize',
         evaluate,
-      } as Evaluator)
+      }) as Evaluator
   );
   return { criteriaFn, evaluate };
 };
@@ -106,7 +106,7 @@ describe('createScenarioCriteriaLlmEvaluator', () => {
     const evaluator = createScenarioCriteriaLlmEvaluator<Example, Output>({
       criteriaFn: criteriaFn as unknown as (c: EvaluationCriterion[]) => Evaluator<Example, Output>,
       criteria,
-      transformOutput: () => ({ queries: ['transformed'] } as Output),
+      transformOutput: () => ({ queries: ['transformed'] }) as Output,
     });
 
     await evaluator.evaluate({

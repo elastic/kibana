@@ -9,7 +9,10 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class TransactionsOverviewPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async goto(serviceName: string, rangeFrom: string, rangeTo: string) {
     await this.page.goto(

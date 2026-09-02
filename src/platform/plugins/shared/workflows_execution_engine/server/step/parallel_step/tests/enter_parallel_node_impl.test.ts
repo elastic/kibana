@@ -56,7 +56,7 @@ describe('EnterParallelNodeImpl', () => {
         steps: [],
         ...overrides,
       },
-    } as unknown as EnterParallelNode);
+    }) as unknown as EnterParallelNode;
 
   beforeEach(() => {
     persistedState = undefined;
@@ -126,7 +126,7 @@ describe('EnterParallelNodeImpl', () => {
               branchRunCalls.push(result.output.branch);
               return status;
             }),
-          } as unknown as NodeImplementation)
+          }) as unknown as NodeImplementation
       ),
     } as unknown as jest.Mocked<NodesFactory>;
 
@@ -233,7 +233,7 @@ describe('EnterParallelNodeImpl', () => {
     expect(stepRuntime.failStep).toHaveBeenCalledTimes(1);
     const [error, output] = stepRuntime.failStep.mock.calls[0] as [
       Error,
-      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> }
+      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> },
     ];
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toContain('fail-fast');
@@ -274,7 +274,7 @@ describe('EnterParallelNodeImpl', () => {
             ).getCurrentStepResult();
             ranNodes.push(result.output.node);
           }),
-        } as unknown as NodeImplementation)
+        }) as unknown as NodeImplementation
     ) as unknown as typeof nodesFactory.create;
 
     await runToCompletion();
@@ -310,7 +310,7 @@ describe('EnterParallelNodeImpl', () => {
             await new Promise<void>((resolve) => gates.push(resolve));
             inFlight -= 1;
           }),
-        } as unknown as NodeImplementation)
+        }) as unknown as NodeImplementation
     ) as unknown as typeof nodesFactory.create;
 
     const runPromise = build().run();
@@ -357,7 +357,7 @@ describe('EnterParallelNodeImpl', () => {
                 });
               })
           ),
-        } as unknown as NodeImplementation)
+        }) as unknown as NodeImplementation
     ) as unknown as typeof nodesFactory.create;
 
     await runToCompletion();
@@ -448,7 +448,7 @@ describe('EnterParallelNodeImpl', () => {
     expect(stepRuntime.finishStep).not.toHaveBeenCalled();
     const [, output] = stepRuntime.failStep.mock.calls[0] as [
       Error,
-      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> }
+      { succeeded: number; failed: number; status: string; results: Array<{ status: string }> },
     ];
     expect(output).toMatchObject({ succeeded: 0, failed: 1, status: 'failed' });
     expect(output.results.map((r) => r.status)).toEqual(['failed', 'skipped', 'skipped']);
@@ -522,7 +522,7 @@ describe('EnterParallelNodeImpl', () => {
       expect(stepRuntime.failStep).toHaveBeenCalledTimes(1);
       const [, output] = stepRuntime.failStep.mock.calls[0] as [
         Error,
-        { failed: number; status: string; results: Array<{ status: string }> }
+        { failed: number; status: string; results: Array<{ status: string }> },
       ];
       expect(output.status).toBe('failed');
       expect(output.results.every((r) => r.status === 'timed_out')).toBe(true);
@@ -678,7 +678,7 @@ describe('EnterParallelNodeImpl', () => {
           ({
             run: jest.fn(() => ExecutionStatus.WAITING),
             onCancel,
-          } as unknown as NodeImplementation)
+          }) as unknown as NodeImplementation
       ) as unknown as typeof nodesFactory.create;
 
       const impl = build();
@@ -713,7 +713,7 @@ describe('EnterParallelNodeImpl', () => {
           type: 'parallel',
           ...configOverrides,
         },
-      } as unknown as EnterParallelNode);
+      }) as unknown as EnterParallelNode;
 
     beforeEach(() => {
       // Each branch is a single node whose only successor is the exit node.
@@ -792,7 +792,7 @@ describe('EnterParallelNodeImpl', () => {
               await new Promise<void>((resolve) => gates.push(resolve));
               inFlight -= 1;
             }),
-          } as unknown as NodeImplementation)
+          }) as unknown as NodeImplementation
       ) as unknown as typeof nodesFactory.create;
 
       const runPromise = build().run();
@@ -932,7 +932,7 @@ describe('EnterParallelNodeImpl', () => {
                   branchRuntime.abortController.signal.addEventListener('abort', () => resolve());
                 })
             ),
-          } as unknown as NodeImplementation)
+          }) as unknown as NodeImplementation
       ) as unknown as typeof nodesFactory.create;
 
       await runToCompletion();

@@ -48,7 +48,7 @@ export interface BaseWatch {
     {
       id: string;
       type: string;
-    }
+    },
   ];
   watch: {
     actions: {

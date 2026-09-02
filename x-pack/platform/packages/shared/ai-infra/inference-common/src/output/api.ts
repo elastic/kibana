@@ -53,7 +53,7 @@ import type { Output, OutputEvent } from './events';
 export type OutputAPI = <
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 >(
   options: OutputOptions<TId, TOutputSchema, TStream>
 ) => OutputCompositeResponse<TId, TOutputSchema, TStream>;
@@ -64,7 +64,7 @@ export type OutputAPI = <
 export interface OutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 > {
   /**
    * The id of the operation.
@@ -150,7 +150,7 @@ export interface OutputOptions<
 export type OutputCompositeResponse<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 > = TStream extends true
   ? OutputStreamResponse<TId, TOutputSchema>
   : Promise<
@@ -185,7 +185,7 @@ export interface OutputResponse<TId extends string = string, TOutput extends Out
  */
 export type OutputStreamResponse<
   TId extends string = string,
-  TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined
+  TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
 > = Observable<
   OutputEvent<TId, TOutputSchema extends ToolSchema ? FromToolSchema<TOutputSchema> : undefined>
 >;

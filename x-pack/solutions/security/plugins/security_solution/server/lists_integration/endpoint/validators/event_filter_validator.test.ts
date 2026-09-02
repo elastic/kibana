@@ -42,7 +42,7 @@ describe('Endpoint Exceptions API validations', () => {
         osTypes: ['windows'],
         tags: [GLOBAL_ARTIFACT_TAG],
         entries: [{ field, type: 'match', operator: 'included', value: 'elastic' }],
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     it('accepts a field at the 1024 character limit', async () => {
       await expect(

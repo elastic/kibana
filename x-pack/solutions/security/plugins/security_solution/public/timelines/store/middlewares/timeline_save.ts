@@ -51,10 +51,9 @@ function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveT
   return action.type === saveTimeline.type;
 }
 
+// WARN: this is disabled because we need to support experimental data view picker here.
+// once it is stable, remove the override
 export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
-  // WARN: this is disabled because we need to support experimental data view picker here.
-  // once it is stable, remove the override
-
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     if (!isSaveTimelineAction(action)) {
       return next(action);

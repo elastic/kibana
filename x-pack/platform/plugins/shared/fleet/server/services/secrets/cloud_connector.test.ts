@@ -49,7 +49,7 @@ describe('extractAndCreateCloudConnectorSecrets', () => {
           ],
         },
       ],
-    } as unknown as NewPackagePolicy);
+    }) as unknown as NewPackagePolicy;
 
   beforeEach(() => {
     jest.clearAllMocks();

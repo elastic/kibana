@@ -55,7 +55,7 @@ export const getEntityAttachment = () =>
     id: SECURITY_ENTITY_ATTACHMENT_TYPE,
     getIcon: (props) => {
       const entityType = props.metadata?.entityType;
-      return entityType ? EntityIconByType[entityType as EntityType] ?? 'globe' : 'globe';
+      return entityType ? (EntityIconByType[entityType as EntityType] ?? 'globe') : 'globe';
     },
     getLabel: () => DISPLAY_NAME,
     schema: EntityAttachmentPayloadSchema,

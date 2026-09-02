@@ -23,8 +23,8 @@ const renderWithChrome = (position: 'left' | 'center' | 'right', controls: Chrom
     position === 'left'
       ? chrome.navControls.getLeft$
       : position === 'center'
-      ? chrome.navControls.getCenter$
-      : chrome.navControls.getRight$;
+        ? chrome.navControls.getCenter$
+        : chrome.navControls.getRight$;
   getter.mockReturnValue(controls$);
   return render(
     <TestChromeProviders chrome={chrome}>

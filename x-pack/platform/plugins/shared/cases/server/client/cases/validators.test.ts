@@ -713,7 +713,7 @@ describe('validators', () => {
           owner: 'securitySolution',
           template: templateId ? { id: templateId, version: 1 } : null,
         },
-      } as unknown as CaseSavedObjectTransformed);
+      }) as unknown as CaseSavedObjectTransformed;
 
     const makeTemplatesSO = (definition: object) => ({
       id: 'so-id',
@@ -1247,7 +1247,7 @@ describe('validators', () => {
         type: def.type ?? 'keyword',
         label: def.label ?? def.name ?? 'resolution',
         ...(def.validation ? { validation: def.validation } : {}),
-      } as unknown as InlineField);
+      }) as unknown as InlineField;
 
     const requiredOnCloseField = makeTemplateField({
       name: 'resolution',

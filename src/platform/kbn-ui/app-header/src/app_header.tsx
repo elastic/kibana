@@ -155,8 +155,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
           description
             ? APP_HEADER_TEST_SUBJECTS.description
             : metadata?.length
-            ? APP_HEADER_TEST_SUBJECTS.metadata
-            : undefined
+              ? APP_HEADER_TEST_SUBJECTS.metadata
+              : undefined
         }
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}

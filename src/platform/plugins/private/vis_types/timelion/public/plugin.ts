@@ -73,15 +73,12 @@ export interface VisTypeTimelionPluginStart {
 }
 
 /** @internal */
-export class TimelionVisPlugin
-  implements
-    Plugin<
-      void,
-      VisTypeTimelionPluginStart,
-      TimelionVisSetupDependencies,
-      TimelionVisStartDependencies
-    >
-{
+export class TimelionVisPlugin implements Plugin<
+  void,
+  VisTypeTimelionPluginStart,
+  TimelionVisSetupDependencies,
+  TimelionVisStartDependencies
+> {
   constructor(public initializerContext: PluginInitializerContext<TimelionPublicConfig>) {}
 
   public setup(

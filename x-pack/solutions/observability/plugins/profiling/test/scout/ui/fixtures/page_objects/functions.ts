@@ -13,7 +13,10 @@ export class FunctionsPage {
   public datacenterPUEField: Locator;
   public perCPUWattX86Field: Locator;
   public saveChangesButton: Locator;
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.co2PerKWHField = this.page.testSubj.locator(
       'management-settings-editField-profiling.co2PerKWH'
     );

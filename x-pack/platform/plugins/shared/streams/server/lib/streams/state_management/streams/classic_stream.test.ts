@@ -58,7 +58,7 @@ describe('ClassicStream', () => {
           }),
         },
       },
-    } as unknown as StateDependencies);
+    }) as unknown as StateDependencies;
 
   const createMockState = (
     streams: Map<string, { definition: Streams.all.Definition }> = new Map()
@@ -67,7 +67,7 @@ describe('ClassicStream', () => {
       get: (name: string) => streams.get(name),
       has: (name: string) => streams.has(name),
       all: () => Array.from(streams.values()),
-    } as unknown as State);
+    }) as unknown as State;
 
   const createBaseClassicStreamDefinition = (
     overrides: Partial<Streams.ClassicStream.Definition> = {}

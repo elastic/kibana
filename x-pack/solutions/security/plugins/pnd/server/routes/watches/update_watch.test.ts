@@ -19,7 +19,7 @@ const registerHandler = () => {
     logger: loggerMock.create(),
     config: { enabled: true, ui: { useMockData: false } },
     getSpaceId: () => 'space-a',
-    getWatchesService: () => ({ update } as never),
+    getWatchesService: () => ({ update }) as never,
   });
   return { handler: addVersion.mock.calls[0][1], update };
 };

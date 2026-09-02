@@ -59,7 +59,7 @@ const trendRows = [
 ] as never;
 
 const asQuery = (data: unknown, extra: object = {}) =>
-  ({ data, isLoading: false, isError: false, ...extra } as never);
+  ({ data, isLoading: false, isError: false, ...extra }) as never;
 
 describe('AlertEpisodeTrendChartSection', () => {
   beforeEach(() => jest.clearAllMocks());

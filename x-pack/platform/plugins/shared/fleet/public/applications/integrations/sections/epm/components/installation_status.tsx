@@ -117,14 +117,14 @@ const useInstallationStatusStyles = (): InstallationStatusStylesProps &
         height: 100%;
       `,
       compressedInstalledStatus: css`
-        background-color: ${isDarkMode
-          ? euiTheme.colors.warning
-          : euiTheme.colors.backgroundBaseWarning};
+        background-color: ${
+          isDarkMode ? euiTheme.colors.warning : euiTheme.colors.backgroundBaseWarning
+        };
       `,
       compressedActiveStatus: css`
-        background-color: ${isDarkMode
-          ? euiTheme.colors.success
-          : euiTheme.colors.backgroundBaseSuccess};
+        background-color: ${
+          isDarkMode ? euiTheme.colors.success : euiTheme.colors.backgroundBaseSuccess
+        };
       `,
       compressedInstalledStatusIcon: css`
         color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textWarning};

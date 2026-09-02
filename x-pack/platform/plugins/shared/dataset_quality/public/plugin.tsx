@@ -21,9 +21,10 @@ import type {
   DatasetQualityStartDeps,
 } from './types';
 
-export class DatasetQualityPlugin
-  implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
-{
+export class DatasetQualityPlugin implements Plugin<
+  DatasetQualityPluginSetup,
+  DatasetQualityPluginStart
+> {
   private telemetry = new TelemetryService();
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {

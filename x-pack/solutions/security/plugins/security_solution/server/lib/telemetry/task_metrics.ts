@@ -15,7 +15,10 @@ import { telemetryConfiguration } from './configuration';
 export class TaskMetricsService implements ITaskMetricsService {
   private readonly logger: TelemetryLogger;
 
-  constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
+  constructor(
+    logger: Logger,
+    private readonly sender: ITelemetryEventsSender
+  ) {
     this.logger = newTelemetryLogger(logger.get('telemetry_events.task_metrics'));
   }
 

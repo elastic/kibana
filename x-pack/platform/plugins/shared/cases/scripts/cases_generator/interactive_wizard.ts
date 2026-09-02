@@ -380,8 +380,8 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
       const ftLabel = tpl.useKitchenSink
         ? 'kitchen-sink YAML'
         : tpl.fieldTypes.length > 0
-        ? tpl.fieldTypes.join(', ')
-        : 'none';
+          ? tpl.fieldTypes.join(', ')
+          : 'none';
       logger.info(`  - ${tpl.name}: fields=[${ftLabel}]`);
     }
     if (legacyTemplates || legacyCustomFields) {

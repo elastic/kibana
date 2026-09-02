@@ -191,8 +191,8 @@ export const getPieVisualization = ({
     return state.layers.length > 0 && state.layers[0].colorMapping
       ? { type: 'colorMapping', value: state.layers[0].colorMapping }
       : state.palette
-      ? { type: 'legacyPalette', value: state.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: state.palette }
+        : undefined;
   },
 
   getSuggestions: suggestions,
@@ -235,11 +235,11 @@ export const getPieVisualization = ({
               triggerIconType: 'aggregate',
             }
           : firstNonCollapsedColumnId === accessor
-          ? {
-              triggerIconType: 'colorBy',
-              palette: colors,
-            }
-          : undefined),
+            ? {
+                triggerIconType: 'colorBy',
+                palette: colors,
+              }
+            : undefined),
       }));
 
       const primaryGroupConfigBaseProps = {

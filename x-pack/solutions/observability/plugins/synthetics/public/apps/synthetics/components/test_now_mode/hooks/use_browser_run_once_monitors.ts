@@ -258,7 +258,7 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
   // Once completed steps has been determined and shown, don't lower the number on UI due to re-fetch
   const completedSteps = curr.completedSteps
     ? Math.max(prev?.completedSteps ?? 0, curr.completedSteps ?? 0)
-    : prev?.completedSteps ?? 0;
+    : (prev?.completedSteps ?? 0);
 
   let steps = curr.steps ?? [];
   if (steps.length === 0 && (prev?.steps ?? []).length > 0) {

@@ -165,12 +165,12 @@ export function useDataSourceBrowser({
       // the browser component will fetch sources on its own.
       const shouldUsePreloaded = Boolean(
         (isTSCommandRef.current && preloadedTimeSeriesSources) ||
-          (!isTSCommandRef.current && preloadedFromSources)
+        (!isTSCommandRef.current && preloadedFromSources)
       );
       if (shouldUsePreloaded) {
         const normalized = isTSCommandRef.current
           ? normalizeTimeseriesIndices({ indices: preloadedTimeSeriesSources ?? [] })
-          : preloadedFromSources ?? [];
+          : (preloadedFromSources ?? []);
         preloadedSourcesRef.current = normalized;
       } else {
         preloadedSourcesRef.current = undefined;
@@ -281,7 +281,7 @@ export function useDataSourceBrowser({
           items: currentItems,
           at:
             openModeRef.current === IndicesBrowserOpenMode.Badge
-              ? openCursorOffsetRef.current ?? at
+              ? (openCursorOffsetRef.current ?? at)
               : at,
           sourceName,
           mode: openModeRef.current,

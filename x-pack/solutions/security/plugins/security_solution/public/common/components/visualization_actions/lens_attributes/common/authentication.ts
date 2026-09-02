@@ -199,4 +199,4 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({
         id: '{dataViewId}',
       },
     ],
-  } as LensAttributes);
+  }) as LensAttributes;

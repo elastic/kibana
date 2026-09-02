@@ -14,7 +14,7 @@ import { TriggerRegistry } from '../trigger_registry';
 import type { ServerTriggerDefinition } from '../types';
 
 const createTrigger = (id: string, schema: z.ZodType): ServerTriggerDefinition =>
-  ({ id, eventSchema: schema } as ServerTriggerDefinition);
+  ({ id, eventSchema: schema }) as ServerTriggerDefinition;
 
 describe('registerGetTriggerDefinitionsRoute', () => {
   it('registers a GET route at the expected path with internal access and authz disabled', () => {

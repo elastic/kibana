@@ -83,8 +83,8 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         const newQuickPrompt =
           quickPromptSelectorOption.length === 0
             ? undefined
-            : quickPrompts.find((qp) => qp.name === quickPromptSelectorOption[0]?.label) ??
-              quickPromptSelectorOption[0]?.label;
+            : (quickPrompts.find((qp) => qp.name === quickPromptSelectorOption[0]?.label) ??
+              quickPromptSelectorOption[0]?.label);
         if (newQuickPrompt) {
           onQuickPromptSelectionChange(newQuickPrompt, selectedColor);
         }

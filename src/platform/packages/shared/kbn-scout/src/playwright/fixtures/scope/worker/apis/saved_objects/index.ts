@@ -17,7 +17,7 @@ export interface SavedObjectReference {
 }
 
 export interface CreateSavedObjectParams<
-  TAttributes extends Record<string, unknown> = Record<string, unknown>
+  TAttributes extends Record<string, unknown> = Record<string, unknown>,
 > {
   type: string;
   id?: string;
@@ -30,7 +30,7 @@ export interface CreateSavedObjectParams<
 }
 
 export interface SavedObjectResponse<
-  TAttributes extends Record<string, unknown> = Record<string, unknown>
+  TAttributes extends Record<string, unknown> = Record<string, unknown>,
 > {
   id: string;
   type: string;
@@ -44,7 +44,7 @@ export interface SavedObjectResponse<
 }
 
 export interface SavedObjectApiResponse<
-  TAttributes extends Record<string, unknown> = Record<string, unknown>
+  TAttributes extends Record<string, unknown> = Record<string, unknown>,
 > {
   data: SavedObjectResponse<TAttributes>;
   status: number;
@@ -63,7 +63,7 @@ export const getSavedObjectsApiHelper = (
   const withSpace = (path: string, spaceId?: string) => (spaceId ? `/s/${spaceId}${path}` : path);
 
   const create: SavedObjectsApiService['create'] = async <
-    TAttributes extends Record<string, unknown>
+    TAttributes extends Record<string, unknown>,
   >({
     type,
     id,

@@ -36,7 +36,7 @@ const mkEdge = (id: string, source: string, target: string): ServiceMapEdge =>
     source,
     target,
     type: 'default',
-  } as ServiceMapEdge);
+  }) as ServiceMapEdge;
 
 describe('applyServiceMapRelayoutForFilteredView', () => {
   it('repositions remaining visible services together when the filter disconnects them', () => {

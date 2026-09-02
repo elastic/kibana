@@ -20,7 +20,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
           osquery: capabilities,
         }),
       },
-    } as unknown as CoreStart);
+    }) as unknown as CoreStart;
 
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();

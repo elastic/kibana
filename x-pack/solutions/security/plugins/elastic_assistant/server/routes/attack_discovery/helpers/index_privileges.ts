@@ -50,10 +50,13 @@ const hasAttackDiscoveryAlertsPrivileges = async ({
   const spaceId = (await elasticAssistant).getSpaceId();
 
   const allAlertsIndices = getAllAlertsIndices();
-  const indexPrivileges = allAlertsIndices.reduce((acc, value) => {
-    acc[`${value}-${spaceId}`] = privileges;
-    return acc;
-  }, {} as Record<string, string[]>);
+  const indexPrivileges = allAlertsIndices.reduce(
+    (acc, value) => {
+      acc[`${value}-${spaceId}`] = privileges;
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
 
   const { hasAllRequested } = await elasticAssistant.checkPrivileges().atSpace(spaceId, {
     elasticsearch: { index: indexPrivileges, cluster: [] },

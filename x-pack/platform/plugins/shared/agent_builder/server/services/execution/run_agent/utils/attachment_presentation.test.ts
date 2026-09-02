@@ -55,7 +55,7 @@ const makeRef = (
 const makeStateManager = (records: VersionedAttachment[]): AttachmentStateManager =>
   ({
     getAttachmentRecord: (id: string) => records.find((r) => r.id === id),
-  } as AttachmentStateManager);
+  }) as AttachmentStateManager;
 
 describe('formatAttachmentsMetadata', () => {
   it('returns empty string for no attachment refs', () => {

@@ -1527,8 +1527,7 @@ describe('SentinelOneActionsClient class', () => {
       });
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
     });
 
     it('should throw error if action id is not for an agent type of sentinelOne', async () => {
@@ -1590,8 +1589,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw an error if command is `runscript` and feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = false;
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
@@ -1625,8 +1623,7 @@ describe('SentinelOneActionsClient class', () => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
 
       const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
         s1DataGenerator.generateActionEsHit({
@@ -1753,8 +1750,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw an error if command is `runscript` and feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = false;
       applyEsClientSearchMock({
         esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
         index: ENDPOINT_ACTIONS_INDEX,
@@ -1786,8 +1782,7 @@ describe('SentinelOneActionsClient class', () => {
 
     beforeEach(() => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
 
       runScriptRequest = sentinelOneMock.createRunScriptOptions({
         endpoint_ids: [sentinelOneMock.createSentinelOneAgentDetails().id],
@@ -1800,8 +1795,7 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = false;
       await expect(s1ActionsClient.runscript(runScriptRequest)).rejects.toThrow(
         `'runscript' response action not supported for [sentinel_one]. Feature disabled`
       );
@@ -2301,14 +2295,12 @@ describe('SentinelOneActionsClient class', () => {
   describe('#getCustomScripts()', () => {
     beforeEach(() => {
       // @ts-expect-error update readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
     });
 
     it('should throw an error when feature flag is disabled', async () => {
       // @ts-expect-error update readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-        false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = false;
       await expect(s1ActionsClient.getCustomScripts()).rejects.toThrow(
         "'runscript' response action not supported for [sentinel_one]"
       );
@@ -2512,8 +2504,7 @@ describe('SentinelOneActionsClient class', () => {
 
         if (methodName === 'runscript') {
           // @ts-expect-error write to readonly prop
-          classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
-            true;
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled = true;
         }
 
         // @ts-expect-error `options` type is too broad because we're getting it from a helper

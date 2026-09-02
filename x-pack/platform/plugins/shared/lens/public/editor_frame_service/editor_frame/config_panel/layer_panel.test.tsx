@@ -1133,12 +1133,12 @@ describe('LayerPanel', () => {
         columns: [],
         rows,
         meta: { type: 'esql' },
-      } as unknown as Datatable);
+      }) as unknown as Datatable;
 
     const makeLensAdapters = (tables: Record<string, Datatable>) =>
       ({
         tables: { tables },
-      } as unknown as ReturnType<LensInspector['getInspectorAdapters']>);
+      }) as unknown as ReturnType<LensInspector['getInspectorAdapters']>;
 
     const makeMultiLayerFrameAPI = (): FramePublicAPI => {
       const secondDatasource = createMockDatasource('formBased');

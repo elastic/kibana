@@ -20,12 +20,12 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
           },
         },
       }),
-    } as unknown as InfraPluginRequestHandlerContext);
+    }) as unknown as InfraPluginRequestHandlerContext;
 
   const createFramework = (callWithRequest: jest.Mock) =>
     ({
       callWithRequest,
-    } as unknown as KibanaFramework);
+    }) as unknown as KibanaFramework;
 
   describe('getIndexStatus', () => {
     it('bounds the underlying search with a requestTimeout so it cannot hang indefinitely', async () => {

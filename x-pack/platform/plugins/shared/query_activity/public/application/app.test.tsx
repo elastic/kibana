@@ -67,7 +67,7 @@ const mockContext = (overrides: Partial<QueryActivityAppContextValue> = {}) =>
       missingClusterPrivileges: [],
     },
     ...overrides,
-  } as QueryActivityAppContextValue);
+  }) as QueryActivityAppContextValue;
 
 describe('QueryActivityApp', () => {
   beforeEach(() => {

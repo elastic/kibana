@@ -13,12 +13,12 @@ import type { GaugeShape } from '../../../common';
 import { GaugeShapes } from '../../../common';
 
 export const getSubtypeByGaugeType = (type: GaugeShape): BulletProps['subtype'] =>
-  ((
-    {
+  (
+    ({
       [GaugeShapes.HORIZONTAL_BULLET]: BulletSubtype.horizontal,
       [GaugeShapes.VERTICAL_BULLET]: BulletSubtype.vertical,
       [GaugeShapes.SEMI_CIRCLE]: BulletSubtype.halfCircle,
       [GaugeShapes.ARC]: BulletSubtype.twoThirdsCircle,
       [GaugeShapes.CIRCLE]: BulletSubtype.circle,
-    } as const
-  )[type]);
+    }) as const
+  )[type];

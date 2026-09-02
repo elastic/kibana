@@ -26,8 +26,7 @@ import type { PackageManagement } from '../shared/types';
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
 export interface InfraSynthtraceEsClient
-  extends SynthtraceEsClient<InfraDocument>,
-    PackageManagement {}
+  extends SynthtraceEsClient<InfraDocument>, PackageManagement {}
 
 export class InfraSynthtraceEsClientImpl
   extends SynthtraceEsClientBase<InfraDocument>

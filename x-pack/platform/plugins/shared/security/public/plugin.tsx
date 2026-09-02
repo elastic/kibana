@@ -66,15 +66,12 @@ export interface PluginStartDependencies {
   cloud?: CloudStart;
 }
 
-export class SecurityPlugin
-  implements
-    Plugin<
-      SecurityPluginSetup,
-      SecurityPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class SecurityPlugin implements Plugin<
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   private readonly config: ConfigType;
   private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();

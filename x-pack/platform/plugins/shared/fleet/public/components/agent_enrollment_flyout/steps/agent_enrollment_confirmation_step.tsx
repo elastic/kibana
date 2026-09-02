@@ -72,12 +72,12 @@ export const AgentEnrollmentConfirmationStep = ({
             defaultMessage: 'Confirm collector connection',
           })
       : isComplete
-      ? i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationComplete', {
-          defaultMessage: 'Agent enrollment confirmed',
-        })
-      : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
-          defaultMessage: 'Confirm agent enrollment',
-        }),
+        ? i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmationComplete', {
+            defaultMessage: 'Agent enrollment confirmed',
+          })
+        : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
+            defaultMessage: 'Confirm agent enrollment',
+          }),
     children: (
       <>
         {!!isComplete || poll ? (

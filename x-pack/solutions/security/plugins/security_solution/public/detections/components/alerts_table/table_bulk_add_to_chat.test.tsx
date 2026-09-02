@@ -124,7 +124,7 @@ jest.mock('../../../timelines/components/timeline/body/control_columns', () => (
 }));
 
 const makeItem = (id: string): TimelineItem =>
-  ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);
+  ({ _id: id, data: [], ecs: { _id: id, _index: '' } }) as unknown as TimelineItem;
 
 describe('Alerts Page Table — bulkAddToChatConfig', () => {
   let mockReportAddToChat: jest.Mock;

@@ -164,7 +164,7 @@ function makeService(params?: {
   const soClient = makeSoClient();
   // `null` models the alerting v2 plugin being unavailable.
   const v2RulesClient =
-    params?.v2RulesClient === null ? undefined : params?.v2RulesClient ?? makeV2RulesClient();
+    params?.v2RulesClient === null ? undefined : (params?.v2RulesClient ?? makeV2RulesClient());
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );

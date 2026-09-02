@@ -17,8 +17,9 @@
  * type RawInput = OrStringRecursive<Input>;
  * // Result: { name: string; age: number | string; items: Array<{ id: number | string }> | string }
  */
-export type OrStringRecursive<T> = T extends Array<infer U>
-  ? Array<OrStringRecursive<U>> | string
-  : T extends object
-  ? { [K in keyof T]: OrStringRecursive<T[K]> }
-  : T | string;
+export type OrStringRecursive<T> =
+  T extends Array<infer U>
+    ? Array<OrStringRecursive<U>> | string
+    : T extends object
+      ? { [K in keyof T]: OrStringRecursive<T[K]> }
+      : T | string;

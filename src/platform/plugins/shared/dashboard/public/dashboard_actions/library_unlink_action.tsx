@@ -43,11 +43,11 @@ export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
 export const isApiCompatible = (api: unknown | null): api is UnlinkPanelFromLibraryActionApi =>
   Boolean(
     apiCanAccessViewMode(api) &&
-      apiHasLibraryTransforms(api) &&
-      apiHasUniqueId(api) &&
-      apiHasType(api) &&
-      apiHasParentApi(api) &&
-      typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
+    apiHasLibraryTransforms(api) &&
+    apiHasUniqueId(api) &&
+    apiHasType(api) &&
+    apiHasParentApi(api) &&
+    typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function'
   );
 
 export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {

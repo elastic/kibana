@@ -17,7 +17,7 @@ import {
 } from '../conversation_complete';
 
 export function throwSerializedChatCompletionErrors<
-  T extends StreamingChatResponseEvent | BufferFlushEvent
+  T extends StreamingChatResponseEvent | BufferFlushEvent,
 >(): OperatorFunction<T, Exclude<T, ChatCompletionErrorEvent>> {
   return (source$) =>
     source$.pipe(

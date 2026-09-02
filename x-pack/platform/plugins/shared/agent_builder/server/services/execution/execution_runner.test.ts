@@ -94,7 +94,7 @@ const createDeps = ({
     conversationService: {
       getConversationRoundAuthor,
     },
-  } as never);
+  }) as never;
 
 describe('handleAgentExecution', () => {
   beforeEach(() => {

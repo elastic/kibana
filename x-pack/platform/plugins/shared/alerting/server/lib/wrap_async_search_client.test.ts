@@ -54,13 +54,14 @@ describe('wrapScopedClusterClient', () => {
 
   test('searches with the correct params', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
-      (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
+    client.search = jest
+      .fn()
+      .mockImplementation((): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
           isRunning: false,
           rawResponse: { took: 1, columns: [], values: [] },
         })
-    );
+      );
 
     const asyncSearchClient = wrapAsyncSearchClient({
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
@@ -94,13 +95,14 @@ describe('wrapScopedClusterClient', () => {
 
   test('returns the rawResponse', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
-      (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
+    client.search = jest
+      .fn()
+      .mockImplementation((): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of({
           isRunning: false,
           rawResponse: { took: 1, columns: [], values: [] },
         })
-    );
+      );
 
     const asyncSearchClient = wrapAsyncSearchClient({
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,
@@ -174,8 +176,9 @@ describe('wrapScopedClusterClient', () => {
 
   test('keeps the metrics', async () => {
     const abortController = new AbortController();
-    client.search = jest.fn().mockImplementation(
-      (): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
+    client.search = jest
+      .fn()
+      .mockImplementation((): Observable<IKibanaSearchResponse<ESQLSearchResponse>> =>
         of(
           {
             isRunning: true,
@@ -186,7 +189,7 @@ describe('wrapScopedClusterClient', () => {
             rawResponse: { took: 100, columns: [], values: [] },
           }
         )
-    );
+      );
 
     const asyncSearchClient = wrapAsyncSearchClient({
       strategy: ESQL_ASYNC_SEARCH_STRATEGY,

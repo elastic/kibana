@@ -231,8 +231,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           <EuiFormPrepend
             iconLeft={
               connector.service_type
-                ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
-                    ?.iconPath ?? ''
+                ? (connectorTypes.find((conn) => conn.serviceType === connector.service_type)
+                    ?.iconPath ?? '')
                 : 'plugs'
             }
           />

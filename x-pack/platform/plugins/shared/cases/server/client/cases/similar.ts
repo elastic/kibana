@@ -95,20 +95,23 @@ export const similar = async (
       await authorization.getAuthorizationFilter(Operations.findCases);
 
     const similarCasesFilter = buildObservablesFieldsFilter(
-      retrievedCase.attributes.observables.reduce((observableMap, observable) => {
-        // NOTE: skip non-existent observable types
-        if (!availableObservableTypesMap.has(observable.typeKey)) {
+      retrievedCase.attributes.observables.reduce(
+        (observableMap, observable) => {
+          // NOTE: skip non-existent observable types
+          if (!availableObservableTypesMap.has(observable.typeKey)) {
+            return observableMap;
+          }
+
+          if (!observableMap[observable.typeKey]) {
+            observableMap[observable.typeKey] = [];
+          }
+
+          observableMap[observable.typeKey].push(observable.value);
+
           return observableMap;
-        }
-
-        if (!observableMap[observable.typeKey]) {
-          observableMap[observable.typeKey] = [];
-        }
-
-        observableMap[observable.typeKey].push(observable.value);
-
-        return observableMap;
-      }, {} as Record<string, string[]>)
+        },
+        {} as Record<string, string[]>
+      )
     );
 
     // NOTE: empty similar cases filter means that we are unable to show similar cases

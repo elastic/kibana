@@ -347,17 +347,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const warnings: string[] = [];
 
-    const response = policyIds.reduce((dict, policyId) => {
-      const policy = agentPolicies.find((agentPolicy) => agentPolicy.id === policyId);
+    const response = policyIds.reduce(
+      (dict, policyId) => {
+        const policy = agentPolicies.find((agentPolicy) => agentPolicy.id === policyId);
 
-      if (policy) {
-        dict[policyId] = policy.name;
-      } else {
-        warnings.push(`Policy id [${policyId}] was not found!`);
-      }
+        if (policy) {
+          dict[policyId] = policy.name;
+        } else {
+          warnings.push(`Policy id [${policyId}] was not found!`);
+        }
 
-      return dict;
-    }, {} as Record<string, string>);
+        return dict;
+      },
+      {} as Record<string, string>
+    );
 
     if (warnings.length > 0) {
       this.getLogger('getPolicyIdNameDictionary').warn(warnings.join('\n'));
@@ -559,12 +562,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
-    return tokens.reduce((acc, { policy_id: policyId, token }) => {
-      if (policyId && token) {
-        acc[policyId] = this.hashToken(token);
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    return tokens.reduce(
+      (acc, { policy_id: policyId, token }) => {
+        if (policyId && token) {
+          acc[policyId] = this.hashToken(token);
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 
   public async getAllHashedTokens(): Promise<Record<string, string>> {
@@ -595,13 +601,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ? policyIds
       : policyIds.filter((policyId) => !existingTokens.has(policyId));
 
-    const newTokensMap = missingTokenPolicyIds.reduce((acc, policyId) => {
-      const token = this.generateToken();
-      return {
-        ...acc,
-        [policyId]: token,
-      };
-    }, {} as Record<string, string>);
+    const newTokensMap = missingTokenPolicyIds.reduce(
+      (acc, policyId) => {
+        const token = this.generateToken();
+        return {
+          ...acc,
+          [policyId]: token,
+        };
+      },
+      {} as Record<string, string>
+    );
     await this.persistTokens(missingTokenPolicyIds, newTokensMap);
     if (force) {
       const config = appContextService.getConfig();
@@ -678,10 +687,13 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
         appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         policyIds.map((id) => ({ id, spaceId: '*' }))
       );
-      const policiesSpacesIndexedById = policies.reduce((acc, p) => {
-        acc[p.id] = p.space_ids;
-        return acc;
-      }, {} as { [k: string]: string[] | undefined });
+      const policiesSpacesIndexedById = policies.reduce(
+        (acc, p) => {
+          acc[p.id] = p.space_ids;
+          return acc;
+        },
+        {} as { [k: string]: string[] | undefined }
+      );
       await this.soClient.bulkCreate<Partial<UninstallTokenSOAttributes>>(
         policyIdsBatch.map((policyId) => ({
           type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,

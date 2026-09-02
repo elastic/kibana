@@ -73,12 +73,15 @@ export function OverviewPage() {
   // we need to filter out unwanted apps
   const hasData = useMemo<Partial<Pick<HasDataMap, DataSectionsApps>>>(
     () =>
-      Object.entries(hasDataMap).reduce((acc, [app, value]) => {
-        if (DATA_SECTIONS.includes(app as DataSectionsApps)) {
-          acc[app as DataSectionsApps] = value;
-        }
-        return acc;
-      }, {} as Partial<Pick<HasDataMap, DataSectionsApps>>),
+      Object.entries(hasDataMap).reduce(
+        (acc, [app, value]) => {
+          if (DATA_SECTIONS.includes(app as DataSectionsApps)) {
+            acc[app as DataSectionsApps] = value;
+          }
+          return acc;
+        },
+        {} as Partial<Pick<HasDataMap, DataSectionsApps>>
+      ),
     [hasDataMap]
   );
 

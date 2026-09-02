@@ -17,15 +17,12 @@ import type {
 
 import { setKibanaServices } from './services/kibana_services';
 
-export class PresentationUtilPlugin
-  implements
-    Plugin<
-      PresentationUtilPluginSetup,
-      PresentationUtilPluginStart,
-      PresentationUtilPluginSetupDeps,
-      PresentationUtilPluginStartDeps
-    >
-{
+export class PresentationUtilPlugin implements Plugin<
+  PresentationUtilPluginSetup,
+  PresentationUtilPluginStart,
+  PresentationUtilPluginSetupDeps,
+  PresentationUtilPluginStartDeps
+> {
   public setup(
     _coreSetup: CoreSetup<PresentationUtilPluginStartDeps, PresentationUtilPluginStart>,
     _setupPlugins: PresentationUtilPluginSetupDeps

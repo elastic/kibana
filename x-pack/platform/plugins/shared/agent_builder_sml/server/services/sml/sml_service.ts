@@ -561,7 +561,7 @@ const checkItemsAccess = async ({
           const source = hit._source!;
           return [source.id ?? '', source.permissions?.kibana?.privileges ?? []] as [
             string,
-            SmlKibanaPrivilegeGroup[]
+            SmlKibanaPrivilegeGroup[],
           ];
         })
     );

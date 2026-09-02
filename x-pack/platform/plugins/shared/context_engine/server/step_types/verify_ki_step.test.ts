@@ -26,7 +26,7 @@ const makeHandlerContext = (
     abortSignal: new AbortController().signal,
     stepId: 'verify_ki',
     stepType: 'context-engine.verifyKi',
-  } as unknown as VerifyKiHandlerContext);
+  }) as unknown as VerifyKiHandlerContext;
 
 describe('verify_ki workflow step', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;

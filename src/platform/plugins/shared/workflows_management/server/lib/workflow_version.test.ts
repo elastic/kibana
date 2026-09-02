@@ -29,7 +29,7 @@ const baseDocument = (): WorkflowProperties =>
     deleted_at: null,
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: '2024-01-01T00:00:00.000Z',
-  } as WorkflowProperties);
+  }) as WorkflowProperties;
 
 describe('getNextWorkflowVersion', () => {
   it('returns 1 when existing document has no version', () => {

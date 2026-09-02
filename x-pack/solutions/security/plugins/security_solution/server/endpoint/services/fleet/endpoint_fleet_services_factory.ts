@@ -474,10 +474,13 @@ const fetchIntegrationNamespaces = async ({
   agentPolicyService,
   integrationNames = [],
 }: FetchIntegrationNamespacesOptions): Promise<Record<string, string[]>> => {
-  const integrationToNamespaceMap = integrationNames.reduce((acc, name) => {
-    acc[name] = new Set<string>();
-    return acc;
-  }, {} as Record<string, Set<string>>);
+  const integrationToNamespaceMap = integrationNames.reduce(
+    (acc, name) => {
+      acc[name] = new Set<string>();
+      return acc;
+    },
+    {} as Record<string, Set<string>>
+  );
   const agentPolicyIdsToRetrieve: Record<string, Set<Set<string>>> = {};
 
   if (integrationNames.length > 0) {

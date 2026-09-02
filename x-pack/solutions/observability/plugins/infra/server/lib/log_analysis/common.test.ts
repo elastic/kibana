@@ -14,7 +14,7 @@ const createMlJob = (datafeedConfig?: Record<string, unknown>): estypes.MlJob =>
   ({
     job_id: 'test-job',
     ...(datafeedConfig ? { datafeed_config: datafeedConfig } : {}),
-  } as unknown as estypes.MlJob);
+  }) as unknown as estypes.MlJob;
 
 describe('resolveJobProjectRouting', () => {
   it('returns the stored project routing when the datafeed has one', () => {

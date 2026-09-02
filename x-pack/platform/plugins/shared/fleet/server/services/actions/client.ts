@@ -25,7 +25,10 @@ import {
 } from './actions';
 
 export class FleetActionsClient implements FleetActionsClientInterface {
-  constructor(private esClient: ElasticsearchClient, private packageName: string) {
+  constructor(
+    private esClient: ElasticsearchClient,
+    private packageName: string
+  ) {
     if (!packageName) {
       throw new FleetActionsClientError('packageName is required');
     }

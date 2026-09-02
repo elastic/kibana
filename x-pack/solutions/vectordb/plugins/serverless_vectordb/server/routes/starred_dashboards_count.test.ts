@@ -43,7 +43,7 @@ describe('registerStarredDashboardsCountRoute', () => {
   const createContext = (coreOverride?: Promise<never>) =>
     ({
       core: coreOverride ?? Promise.resolve({ savedObjects: { getClient: () => soClient } }),
-    } as unknown as RequestHandlerContext);
+    }) as unknown as RequestHandlerContext;
 
   it('registers a POST route with authz delegated to the saved objects client', () => {
     const [config] = router.post.mock.calls[0];

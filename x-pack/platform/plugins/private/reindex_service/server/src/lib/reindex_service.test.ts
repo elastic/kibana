@@ -35,7 +35,7 @@ const versionMock = {
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
-  } as TransportResult<T>);
+  }) as TransportResult<T>;
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;

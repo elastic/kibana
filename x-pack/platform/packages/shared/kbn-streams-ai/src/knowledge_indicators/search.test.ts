@@ -56,16 +56,14 @@ describe('searchKnowledgeIndicators', () => {
 
   it('supports kind=[query] (queries-only)', async () => {
     const getFeatures = jest.fn();
-    const getQueries = jest.fn(
-      async (): Promise<QueryLink[]> => [
-        {
-          query: makeStreamQuery({ id: 'q1' }),
-          rule_backed: false,
-          rule_id: 'rule-1',
-          stream_name: 'logs.test',
-        },
-      ]
-    );
+    const getQueries = jest.fn(async (): Promise<QueryLink[]> => [
+      {
+        query: makeStreamQuery({ id: 'q1' }),
+        rule_backed: false,
+        rule_id: 'rule-1',
+        stream_name: 'logs.test',
+      },
+    ]);
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['query'] },
@@ -222,22 +220,20 @@ describe('searchKnowledgeIndicators', () => {
   });
 
   it('passes query filters through and excludes non-matching results defensively', async () => {
-    const getQueries = jest.fn(
-      async (): Promise<QueryLink[]> => [
-        {
-          query: makeStreamQuery({ id: 'matching', type: 'match' }),
-          rule_backed: true,
-          rule_id: 'rule-1',
-          stream_name: 'logs.test',
-        },
-        {
-          query: makeStreamQuery({ id: 'wrong-rule', type: 'match' }),
-          rule_backed: true,
-          rule_id: 'rule-2',
-          stream_name: 'logs.test',
-        },
-      ]
-    );
+    const getQueries = jest.fn(async (): Promise<QueryLink[]> => [
+      {
+        query: makeStreamQuery({ id: 'matching', type: 'match' }),
+        rule_backed: true,
+        rule_id: 'rule-1',
+        stream_name: 'logs.test',
+      },
+      {
+        query: makeStreamQuery({ id: 'wrong-rule', type: 'match' }),
+        rule_backed: true,
+        rule_id: 'rule-2',
+        stream_name: 'logs.test',
+      },
+    ]);
 
     const res = await searchKnowledgeIndicators({
       params: {

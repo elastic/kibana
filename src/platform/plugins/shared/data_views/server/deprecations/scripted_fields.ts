@@ -114,10 +114,10 @@ const buildDataViewsListEntry = (
   so: SavedObjectsFindResult<DataViewAttributesWithFields>
 ) => `- **${dataViewIdLabel}:** ${so.id}
   - **${dataViewNameLabel}:** ${
-  so.attributes.name
-    ? `!{tooltip[${so.attributes.name}](${so.attributes.title})}`
-    : so.attributes.title
-}
+    so.attributes.name
+      ? `!{tooltip[${so.attributes.name}](${so.attributes.title})}`
+      : so.attributes.title
+  }
   - **${dataViewSpacesLabel}:** ${so.namespaces?.join(', ')}`;
 
 const buildMessage = ({

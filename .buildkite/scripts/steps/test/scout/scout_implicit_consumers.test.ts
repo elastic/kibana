@@ -13,7 +13,7 @@ import { expandWithImplicitConsumers } from './scout_implicit_consumers';
 const WORKFLOWS_EXTENSIONS_MODULE = '@kbn/workflows-extensions';
 
 const createMockLog = (): ToolingLog =>
-  ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+  ({ info: jest.fn(), warning: jest.fn() }) as unknown as ToolingLog;
 
 describe('expandWithImplicitConsumers — workflow trigger catalog', () => {
   it('adds workflows_extensions when a publisher changes common trigger schemas', () => {

@@ -246,7 +246,7 @@ export function pickOutboundMessage({
   const category = isOk ? undefined : deriveErrorCategory(httpStatus);
   const template = isOk
     ? protocolPool.success[runtime]
-    : (category && protocolPool.error[category]?.[runtime]) ?? protocolPool.error.failed[runtime];
+    : ((category && protocolPool.error[category]?.[runtime]) ?? protocolPool.error.failed[runtime]);
 
   if (!template) {
     return {

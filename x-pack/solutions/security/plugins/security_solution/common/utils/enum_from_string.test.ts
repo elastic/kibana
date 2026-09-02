@@ -9,8 +9,8 @@ import { enumFromString } from './enum_from_string';
 
 describe('enumFromString', () => {
   enum TestStringEnum {
-    'foo' = 'foo',
-    'bar' = 'bar',
+    foo = 'foo',
+    bar = 'bar',
   }
 
   const testEnumFromString = enumFromString(TestStringEnum);

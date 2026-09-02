@@ -87,8 +87,8 @@ export const processFieldCapsResponsePerIndex = (
         capability.indices == null
           ? allIndices
           : Array.isArray(capability.indices)
-          ? (capability.indices as string[])
-          : [capability.indices as string];
+            ? (capability.indices as string[])
+            : [capability.indices as string];
 
       for (const idx of targetIndices) {
         result[idx]?.push(field);
@@ -103,10 +103,13 @@ const extractMeta = (fieldCaps: FieldCapsFieldCapability): Record<string, string
   if (!fieldCaps.meta) {
     return {};
   }
-  return Object.entries(fieldCaps.meta).reduce((acc, [key, value]) => {
-    acc[key] = Array.isArray(value) ? value.join(',') : `${value}`;
-    return acc;
-  }, {} as Record<string, string>);
+  return Object.entries(fieldCaps.meta).reduce(
+    (acc, [key, value]) => {
+      acc[key] = Array.isArray(value) ? value.join(',') : `${value}`;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 };
 
 const processField = (

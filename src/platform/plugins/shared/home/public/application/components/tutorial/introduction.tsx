@@ -97,7 +97,7 @@ function IntroductionUI({
   const backLink = getTutorialIntroductionBackLink({
     // Without a getUrlForApp, return params can't be resolved to a real href,
     // so treat the tutorial as if it has none and fall back to the Integrations link.
-    hash: getUrlForApp ? hash ?? '' : '',
+    hash: getUrlForApp ? (hash ?? '') : '',
     addBasePath: (path) => basePath.prepend(path),
     getUrlForApp: getUrlForApp ?? (() => ''),
   });

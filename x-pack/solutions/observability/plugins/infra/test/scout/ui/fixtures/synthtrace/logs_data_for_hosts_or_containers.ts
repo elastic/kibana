@@ -14,14 +14,13 @@ export function generateLogsDataForHostsOrContainers({
   to,
   hostNames,
   containerIds,
-}:
-  | {
-      from: string;
-      to: string;
-    } & (
-      | { hostNames: string[]; containerIds?: undefined }
-      | { containerIds: string[]; hostNames?: undefined }
-    )): SynthtraceGenerator<LogDocument> {
+}: {
+  from: string;
+  to: string;
+} & (
+  | { hostNames: string[]; containerIds?: undefined }
+  | { containerIds: string[]; hostNames?: undefined }
+)): SynthtraceGenerator<LogDocument> {
   const range = timerange(from, to);
 
   // Logs Data logic

@@ -219,7 +219,7 @@ export interface Command<
    * >;
    * const script = enteredCommand.argSate.script[0].store.selection; // type === `ResponseActionScript`
    */
-  TSelectorArgsState extends object = any
+  TSelectorArgsState extends object = any,
 > {
   /** The raw input entered by the user */
   input: string;
@@ -247,7 +247,7 @@ export interface CommandExecutionComponentProps<
   /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
   /** The metadata defined on the Command Definition */
-  TMeta = any
+  TMeta = any,
 > {
   command: Command<CommandDefinition<TMeta>, TArgs>;
 
@@ -293,7 +293,7 @@ export type CommandExecutionComponent<
   /** Internal store for the Command execution */
   TStore extends object = any,
   /** The metadata defined on the Command Definition */
-  TMeta = any
+  TMeta = any,
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
 
 /**
@@ -307,7 +307,7 @@ export interface CommandArgumentValueSelectorProps<
   /** List of arguments that the command supports and that the console parses by default */
   TArgs extends SupportedArguments = any,
   /** The `state` that is stored for Argument Selectors. See the full definition under the ` Command ` type */
-  TSelectorArgsState extends object = any
+  TSelectorArgsState extends object = any,
 > {
   /**
    * The current value that was selected. This will not be displayed in the UI, but will

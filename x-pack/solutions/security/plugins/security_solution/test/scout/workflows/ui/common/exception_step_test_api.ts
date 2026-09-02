@@ -57,7 +57,10 @@ const WORKFLOWS_URL = '/api/workflows';
 export class ExceptionStepTestApi {
   private readonly basePath: string;
 
-  constructor(spaceId: string, private readonly kbnClient: KbnClient) {
+  constructor(
+    spaceId: string,
+    private readonly kbnClient: KbnClient
+  ) {
     this.basePath = `/s/${spaceId}`;
   }
 

@@ -94,12 +94,12 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...(conversationsSettingsBulkActions.update ?? {}),
               [updatedConversation.id]: {
                 ...(conversationsSettingsBulkActions.update
-                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                   : {}),
                 apiConfig: {
                   ...updatedConversation.apiConfig,
                   ...((conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                     : {}
                   ).apiConfig ?? {}),
                   defaultSystemPromptId: newSystemPromptId,
@@ -148,12 +148,12 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...(conversationsSettingsBulkActions.update ?? {}),
               [updatedConversation.id]: {
                 ...(conversationsSettingsBulkActions.update
-                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                   : {}),
                 apiConfig: {
                   ...updatedConversation.apiConfig,
                   ...((conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                     : {}
                   ).apiConfig ?? {}),
                   connectorId: connector?.id,
@@ -193,12 +193,12 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...(conversationsSettingsBulkActions.update ?? {}),
               [updatedConversation.id]: {
                 ...(conversationsSettingsBulkActions.update
-                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                   : {}),
                 apiConfig: {
                   ...updatedConversation.apiConfig,
                   ...((conversationsSettingsBulkActions.update
-                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                     : {}
                   ).apiConfig ?? {}),
                   model,
@@ -232,7 +232,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...(conversationsSettingsBulkActions.update ?? {}),
               [updatedConversation.id]: {
                 ...(conversationsSettingsBulkActions.update
-                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  ? (conversationsSettingsBulkActions.update[updatedConversation.id] ?? {})
                   : {}),
                 users,
                 id: updatedConversation.id,

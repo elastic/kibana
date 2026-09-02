@@ -114,7 +114,7 @@ const formatValue = (value: unknown): string => {
 
 export const withLowScoreLogging = <
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(
   evaluator: Evaluator<TExample, TTaskOutput>,
   log: ToolingLog,

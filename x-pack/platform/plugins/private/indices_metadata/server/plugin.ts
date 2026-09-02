@@ -28,15 +28,12 @@ import { ArtifactService } from './lib/services/artifact';
 import { ConfigurationService } from './lib/services/configuration';
 import { TelemetryConfigProvider } from './lib/services/telemetry_config_provider';
 
-export class IndicesMetadataPlugin
-  implements
-    Plugin<
-      IndicesMetadataPluginSetup,
-      IndicesMetadataPluginStart,
-      IndicesMetadataPluginSetupDeps,
-      IndicesMetadataPluginStartDeps
-    >
-{
+export class IndicesMetadataPlugin implements Plugin<
+  IndicesMetadataPluginSetup,
+  IndicesMetadataPluginStart,
+  IndicesMetadataPluginSetupDeps,
+  IndicesMetadataPluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly config$: Observable<PluginConfig>;
 

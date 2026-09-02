@@ -95,7 +95,7 @@ describe('convert processors to json', () => {
       // prettier-ignore
       input_output: [{ 1: "aaa\"bbb" }],
       // prettier-ignore
-      customProcessor: "aaa\"bbb"
+      customProcessor: "aaa\"bbb",
     });
   });
 

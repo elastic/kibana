@@ -23,7 +23,7 @@ const asHidden = (...ids: string[]): NavigationCustomization['hidden'] =>
   ids as NavigationCustomization['hidden'];
 
 const makeAnalytics = () =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart & { reportEvent: jest.Mock });
+  ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceStart & { reportEvent: jest.Mock };
 
 describe('NavigationCustomizationReporter', () => {
   describe('reportLoadedOnce()', () => {

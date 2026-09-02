@@ -25,7 +25,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
 
-type UseGetSettingsQueryType = typeof import('@kbn/fleet-plugin/public')['useGetSettingsQuery'];
+type UseGetSettingsQueryType = (typeof import('@kbn/fleet-plugin/public'))['useGetSettingsQuery'];
 
 interface FleetHooks {
   useAvailablePackages: AvailablePackagesHookType;
@@ -149,11 +149,11 @@ export const FleetCardsProvider = ({
 
   const value = useMemo<FleetCardsValue>(
     () => ({
-      allCards: enabled ? packages?.allCards ?? EMPTY_CARDS : EMPTY_CARDS,
+      allCards: enabled ? (packages?.allCards ?? EMPTY_CARDS) : EMPTY_CARDS,
       // Nothing is on its way while disabled. Otherwise no snapshot yet means the
       // pump has not reported, so loading unless the module failed.
       isLoading: enabled ? (packages ? packages.isLoading : !moduleError) : false,
-      error: enabled ? packages?.error ?? moduleError : undefined,
+      error: enabled ? (packages?.error ?? moduleError) : undefined,
       retry,
       useLocalSearch: fleetHooks?.useLocalSearch ?? null,
     }),

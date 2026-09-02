@@ -80,9 +80,7 @@ export const registerObservabilityRuleTypes = (
     format: ({ fields }) => formatCustomThresholdAlert(fields, logsLocator),
     alertDetailsAppSection: lazy(
       () =>
-        import(
-          '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
-        )
+        import('../components/custom_threshold/components/alert_details_app_section/alert_details_app_section')
     ),
     priority: 110,
     getDescriptionFields,

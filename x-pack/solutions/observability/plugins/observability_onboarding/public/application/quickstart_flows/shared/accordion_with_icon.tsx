@@ -14,8 +14,10 @@ import {
   type EuiAccordionProps,
 } from '@elastic/eui';
 
-interface AccordionWithIconProps
-  extends Omit<EuiAccordionProps, 'buttonContent' | 'buttonProps' | 'paddingSize'> {
+interface AccordionWithIconProps extends Omit<
+  EuiAccordionProps,
+  'buttonContent' | 'buttonProps' | 'paddingSize'
+> {
   title: string;
   icon: React.ReactNode;
 }

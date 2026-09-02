@@ -25,7 +25,7 @@ const buildToolContext = (): ToolHandlerContext =>
       update: jest.fn(),
       list: jest.fn(),
     },
-  } as unknown as ToolHandlerContext);
+  }) as unknown as ToolHandlerContext;
 
 const buildTool = (getCasesClientFn = jest.fn()) => {
   return getAttachmentsTool(getCasesClientFn);

@@ -44,10 +44,13 @@ export function isObjectDescriptor(value: any) {
 }
 
 export function descriptorToObject(descriptor: Descriptor | DescriptorValue) {
-  return Object.entries(descriptor).reduce((acc, [key, value]) => {
-    acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
-    return acc;
-  }, {} as Record<string, any>);
+  return Object.entries(descriptor).reduce(
+    (acc, [key, value]) => {
+      acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 }
 
 export function kindToDescriptorName(kind: number) {
@@ -184,10 +187,13 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       const constraints = getConstraints(constraint, program);
       const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
       if (typeof constraintsArray[0] === 'string') {
-        return constraintsArray.reduce((acc, c) => {
-          acc[c] = descriptor;
-          return acc;
-        }, {} as Record<string, unknown>);
+        return constraintsArray.reduce(
+          (acc, c) => {
+            acc[c] = descriptor;
+            return acc;
+          },
+          {} as Record<string, unknown>
+        );
       }
     }
     return { '@@INDEX@@': descriptor };

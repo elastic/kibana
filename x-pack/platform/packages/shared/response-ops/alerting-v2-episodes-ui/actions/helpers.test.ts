@@ -7,7 +7,7 @@
 
 import { uniqueByGroup, successOrPartialToast } from './helpers';
 
-const ep = (group_hash: string, id = group_hash) => ({ group_hash, 'episode.id': id } as any);
+const ep = (group_hash: string, id = group_hash) => ({ group_hash, 'episode.id': id }) as any;
 
 describe('uniqueByGroup', () => {
   it('dedupes by group_hash', () => {

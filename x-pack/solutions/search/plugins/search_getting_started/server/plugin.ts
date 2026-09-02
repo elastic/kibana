@@ -15,9 +15,11 @@ import type {
 import type { SearchGettingStartedSetupDependencies } from './types';
 import { registerSearchSkills } from './skills/register_search_skills';
 
-export class SearchGettingStartedPlugin
-  implements Plugin<{}, {}, SearchGettingStartedSetupDependencies>
-{
+export class SearchGettingStartedPlugin implements Plugin<
+  {},
+  {},
+  SearchGettingStartedSetupDependencies
+> {
   private readonly logger: Logger;
 
   constructor(initContext: PluginInitializerContext) {

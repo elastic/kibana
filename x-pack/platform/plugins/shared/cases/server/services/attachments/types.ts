@@ -68,8 +68,10 @@ export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> &
   error?: SavedObjectError;
 };
 
-export interface BulkOptionalAttributes<T>
-  extends Omit<SavedObjectsBulkResponse<T>, 'saved_objects'> {
+export interface BulkOptionalAttributes<T> extends Omit<
+  SavedObjectsBulkResponse<T>,
+  'saved_objects'
+> {
   saved_objects: Array<OptionalAttributes<T>>;
 }
 

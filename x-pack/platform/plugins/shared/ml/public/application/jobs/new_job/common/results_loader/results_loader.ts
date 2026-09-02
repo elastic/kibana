@@ -233,7 +233,7 @@ export class ResultsLoader {
     const anomalies: Record<number, Anomaly[]> = {};
     anomalies[0] = Object.entries(results).map(
       ([time, value]) =>
-        ({ time: +time, value, severity: getSeverityType(value as number) } as Anomaly)
+        ({ time: +time, value, severity: getSeverityType(value as number) }) as Anomaly
     );
     return anomalies;
   }
@@ -251,7 +251,7 @@ export class ResultsLoader {
     const anomalies: Record<number, Anomaly[]> = {};
     Object.entries(resp.results).forEach(([dtrIdx, results]) => {
       anomalies[+dtrIdx] = results.map(
-        (r) => ({ ...r, severity: getSeverityType(r.value as number) } as Anomaly)
+        (r) => ({ ...r, severity: getSeverityType(r.value as number) }) as Anomaly
       );
     });
     return anomalies;

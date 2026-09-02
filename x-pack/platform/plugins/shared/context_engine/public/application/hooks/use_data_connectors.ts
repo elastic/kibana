@@ -99,7 +99,7 @@ export const useDataConnectors = ({
 
   const isLoading = enabled && (isTypesLoading || isConnectorsLoading);
   const isError = enabled && (isTypesError || isConnectorsError);
-  const error = enabled ? typesError ?? connectorsError ?? undefined : undefined;
+  const error = enabled ? (typesError ?? connectorsError ?? undefined) : undefined;
 
   return {
     connectors,

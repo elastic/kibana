@@ -102,7 +102,7 @@ describe('utils', () => {
 
     it('falls back to serializeState.ref_id', () => {
       const api = getMockLensApi(undefined, {
-        serializeState: () => ({ ref_id: 'from-serialize' } as never),
+        serializeState: () => ({ ref_id: 'from-serialize' }) as never,
       });
 
       expect(getLensLibrarySavedObjectId(api)).toBe('from-serialize');
@@ -110,7 +110,7 @@ describe('utils', () => {
 
     it('falls back to legacy savedObjectId', () => {
       const api = getMockLensApi(undefined, {
-        getLegacySerializedState: () => ({ savedObjectId: 'from-legacy' } as never),
+        getLegacySerializedState: () => ({ savedObjectId: 'from-legacy' }) as never,
       });
 
       expect(getLensLibrarySavedObjectId(api)).toBe('from-legacy');

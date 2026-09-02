@@ -141,9 +141,9 @@ export const isOnlyAgentlessIntegration = (
 export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemplate) => {
   return Boolean(
     policyTemplate.deployment_modes &&
-      policyTemplate.deployment_modes.agentless?.enabled === true &&
-      (!policyTemplate.deployment_modes.default ||
-        policyTemplate.deployment_modes.default.enabled === false)
+    policyTemplate.deployment_modes.agentless?.enabled === true &&
+    (!policyTemplate.deployment_modes.default ||
+      policyTemplate.deployment_modes.default.enabled === false)
   );
 };
 
@@ -263,8 +263,8 @@ export const getAgentlessRelease = (
   const template = integrationToEnable
     ? templates.find(({ name }) => name === integrationToEnable)
     : templates.length === 1
-    ? templates[0]
-    : undefined;
+      ? templates[0]
+      : undefined;
 
   if (!template?.deployment_modes?.agentless?.enabled) return undefined;
   const integrationName = integrationToEnable ?? template.name;

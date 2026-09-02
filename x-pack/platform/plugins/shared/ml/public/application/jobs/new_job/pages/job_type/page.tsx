@@ -132,7 +132,7 @@ export const Page: FC = () => {
   const addSelectionToRecentlyAccessed = async () => {
     const title = !selectedSavedSearch
       ? selectedDataView.getName()
-      : selectedSavedSearch.title ?? '';
+      : (selectedSavedSearch.title ?? '');
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
 
     const dataVisualizerLink = await mlLocator.getUrl(

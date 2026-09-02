@@ -17,15 +17,12 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './unified_field_list.png';
 
-export class UnifiedFieldListExamplesPlugin
-  implements
-    Plugin<
-      UnifiedFieldListExamplesPluginSetup,
-      UnifiedFieldListExamplesPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    >
-{
+export class UnifiedFieldListExamplesPlugin implements Plugin<
+  UnifiedFieldListExamplesPluginSetup,
+  UnifiedFieldListExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples }: AppPluginSetupDependencies

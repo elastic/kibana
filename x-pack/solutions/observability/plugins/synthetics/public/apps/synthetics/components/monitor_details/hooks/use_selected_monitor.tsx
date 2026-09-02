@@ -86,12 +86,12 @@ export const useSelectedMonitor = ({
   const availableLocalMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
-    ? monitorFromList
-    : null;
+      ? monitorFromList
+      : null;
 
   const availableMonitor: SelectedSyntheticsMonitor | null = isRemote
-    ? externalMonitor ?? null
-    : availableLocalMonitor ?? externalMonitor ?? null;
+    ? (externalMonitor ?? null)
+    : (availableLocalMonitor ?? externalMonitor ?? null);
 
   // Remote (`?remoteName=`) and heartbeat (local SO 404) both come from the
   // ES probe. `localSoMissing` is that 404 — not merely `!isRemote`.

@@ -152,7 +152,7 @@ export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
   const managedBulkUrls = new Set(
     (config ? getPreconfiguredOutputFromConfig(config) : [])
       .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
-      .flatMap((output) => ('hosts' in output ? output.hosts ?? [] : []))
+      .flatMap((output) => ('hosts' in output ? (output.hosts ?? []) : []))
       .flatMap((host) => {
         try {
           return [normalizeHostsForAgents(host)];

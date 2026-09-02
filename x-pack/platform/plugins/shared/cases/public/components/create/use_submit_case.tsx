@@ -55,7 +55,7 @@ export const useSubmitCase = ({
         if (theCase) {
           const resolvedAttachments = getAttachments
             ? getAttachments(theCase.owner)
-            : attachments ?? [];
+            : (attachments ?? []);
 
           startTransaction({ appId, attachments: resolvedAttachments });
 

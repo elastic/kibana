@@ -81,7 +81,7 @@ describe('getMonitorAgentAssignment route', () => {
       () =>
         ({
           getByIds: mockGetByIds,
-        } as unknown as PackagePolicyService)
+        }) as unknown as PackagePolicyService
     );
   });
 

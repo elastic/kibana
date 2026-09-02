@@ -47,8 +47,8 @@ export const IndexSearchPattern: React.FC = () => {
     pattern: patternValue,
   });
 
-  const items = useMemo(() => (hasQuery ? data?.results ?? [] : []), [data, hasQuery]);
-  const total = hasQuery ? data?.total ?? 0 : 0;
+  const items = useMemo(() => (hasQuery ? (data?.results ?? []) : []), [data, hasQuery]);
+  const total = hasQuery ? (data?.total ?? 0) : 0;
 
   const pageOfItems = useMemo(() => {
     const start = pageIndex * pageSize;
@@ -69,10 +69,10 @@ export const IndexSearchPattern: React.FC = () => {
             {type === EsResourceType.index
               ? labels.tools.indexTypeLabel
               : type === EsResourceType.alias
-              ? labels.tools.aliasTypeLabel
-              : type === EsResourceType.dataStream
-              ? labels.tools.dataStreamTypeLabel
-              : undefined}
+                ? labels.tools.aliasTypeLabel
+                : type === EsResourceType.dataStream
+                  ? labels.tools.dataStreamTypeLabel
+                  : undefined}
           </EuiBadge>
         );
       },

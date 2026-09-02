@@ -39,7 +39,7 @@ export function ColorMappingByValues<T>({
 }: ColorMappingByValuesProps) {
   const colors =
     palette.name === CUSTOM_PALETTE
-      ? (palette.params?.colorStops ?? palette.params?.stops)?.map(({ color }) => color) ?? []
+      ? ((palette.params?.colorStops ?? palette.params?.stops)?.map(({ color }) => color) ?? [])
       : paletteService.get(palette.name).getCategoricalColors(palette.params?.steps || 10, palette);
 
   return (

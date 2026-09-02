@@ -24,7 +24,7 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
     definition: {},
     yaml: 'steps: []',
     ...overrides,
-  } as EsWorkflow);
+  }) as EsWorkflow;
 
 describe('WorkflowExecuteAsyncStrategy', () => {
   let strategy: WorkflowExecuteAsyncStrategy;

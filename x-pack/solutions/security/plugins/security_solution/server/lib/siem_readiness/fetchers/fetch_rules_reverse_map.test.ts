@@ -17,7 +17,7 @@ const createMockLogger = (): Logger =>
     warn: jest.fn(),
     debug: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createMockEsClient = (overrides: Partial<ElasticsearchClient> = {}): ElasticsearchClient =>
   ({
@@ -33,7 +33,7 @@ const createMockEsClient = (overrides: Partial<ElasticsearchClient> = {}): Elast
       },
     }),
     ...overrides,
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const createMockRulesClient = (rules: unknown[] = []): RulesClient =>
   ({
@@ -43,14 +43,14 @@ const createMockRulesClient = (rules: unknown[] = []): RulesClient =>
       page: 1,
       perPage: 1000,
     }),
-  } as unknown as RulesClient);
+  }) as unknown as RulesClient;
 
 const createMockDataViewsService = (): DataViewsService =>
   ({
     get: jest.fn().mockResolvedValue({
       getIndexPattern: () => 'logs-*',
     }),
-  } as unknown as DataViewsService);
+  }) as unknown as DataViewsService;
 
 describe('fetchRulesReverseMap', () => {
   describe('index-pattern rules', () => {

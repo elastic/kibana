@@ -145,10 +145,10 @@ const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContext
         reusedExpectedId
           ? `Reused expected id "${expected.expectedId}"`
           : entityFeatures.length === 1
-          ? `Emitted entity id "${entityFeatures[0].id}" instead of "${expected.expectedId}"`
-          : `Expected exactly 1 entity feature with id "${expected.expectedId}", got ${
-              entityFeatures.length
-            }: ${entityFeatures.map(({ id }) => id).join(', ')}`,
+            ? `Emitted entity id "${entityFeatures[0].id}" instead of "${expected.expectedId}"`
+            : `Expected exactly 1 entity feature with id "${expected.expectedId}", got ${
+                entityFeatures.length
+              }: ${entityFeatures.map(({ id }) => id).join(', ')}`,
         expected.expectEntitySearch
           ? `Entity semantic search calls: ${entitySearchCalls.length}`
           : `Unexpected entity semantic search calls: ${entitySearchCalls.length}`,

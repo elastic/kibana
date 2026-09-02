@@ -47,8 +47,8 @@ jest.mock('../../../../../hooks', () => {
         items: query.kuery.includes('osquery_manager')
           ? [{ policy_ids: ['policy-1'] }]
           : query.kuery.includes('apm')
-          ? [{ policy_ids: ['policy-2'] }]
-          : [],
+            ? [{ policy_ids: ['policy-2'] }]
+            : [],
       },
       error: undefined,
       isLoading: false,

@@ -81,7 +81,7 @@ const cssOverride = ({ euiTheme }: UseEuiTheme) =>
         },
       },
     },
-  } as const);
+  }) as const;
 
 export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
   <EuiTitle size="xs">

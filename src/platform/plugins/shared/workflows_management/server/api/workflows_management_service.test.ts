@@ -86,7 +86,7 @@ const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
     bulk: jest.fn(),
     delete: jest.fn(),
     deleteByQuery: jest.fn(),
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
   ({
@@ -104,13 +104,13 @@ const makePluginsStart = (): WorkflowsServerPluginStartDeps =>
     workflowsExtensions: {
       getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
     },
-  } as unknown as WorkflowsServerPluginStartDeps);
+  }) as unknown as WorkflowsServerPluginStartDeps;
 
 const makeCoreStart = (esClient: ElasticsearchClient): CoreStart =>
   ({
     ...coreMock.createStart(),
     elasticsearch: { client: { asInternalUser: esClient } },
-  } as unknown as CoreStart);
+  }) as unknown as CoreStart;
 
 const makeCoreSetup = (
   startServices: () => Promise<[CoreStart, WorkflowsServerPluginStartDeps]>
@@ -120,10 +120,10 @@ const makeCoreSetup = (
     status: {
       core$: { subscribe: jest.fn() },
     },
-  } as unknown as CoreSetup<WorkflowsServerPluginStartDeps>);
+  }) as unknown as CoreSetup<WorkflowsServerPluginStartDeps>;
 
 const makePluginsSetup = (): WorkflowsServerPluginSetupDeps =>
-  ({} as unknown as WorkflowsServerPluginSetupDeps);
+  ({}) as unknown as WorkflowsServerPluginSetupDeps;
 
 describe('WorkflowsService (facade)', () => {
   let crudSpies: PrototypeSpies;
@@ -153,7 +153,7 @@ describe('WorkflowsService (facade)', () => {
         ({
           initialize: jest.fn().mockResolvedValue(undefined),
           isInitialized: jest.fn().mockReturnValue(true),
-        } as unknown as WorkflowChangeHistoryService)
+        }) as unknown as WorkflowChangeHistoryService
     );
     mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
     crudSpies = spyPrototype(WorkflowCrudService, [
@@ -345,7 +345,7 @@ describe('WorkflowsService (facade)', () => {
             initialize: jest.fn().mockResolvedValue(undefined),
             isInitialized: jest.fn().mockReturnValue(true),
             getHistory,
-          } as unknown as WorkflowChangeHistoryService)
+          }) as unknown as WorkflowChangeHistoryService
       );
 
       crudSpies.getWorkflowDocumentSource.mockResolvedValue({

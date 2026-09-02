@@ -487,8 +487,8 @@ const scanConsoleEnd = (
   );
   const isRequestLine = Boolean(
     requestLine &&
-      !analysisBeforeLastLine.insideString &&
-      (requestLine.startsAfterPrefix || (!fullAnalysis.insideString && !fullAnalysis.insideComment))
+    !analysisBeforeLastLine.insideString &&
+    (requestLine.startsAfterPrefix || (!fullAnalysis.insideString && !fullAnalysis.insideComment))
   );
   // `trackJsonValue` is deliberately not forwarded to the request-line rescan: a request line has
   // no JSON body context, and its indices would point into the sliced line rather than `text`

@@ -61,11 +61,10 @@ export function createDispatcherPipelineInput(
  * through their raw source data (`episodes`, `rules`, `policies`) and folded
  * into the value objects here.
  */
-export interface DispatcherPipelineStateOverrides
-  extends Omit<
-    Partial<DispatcherPipelineState>,
-    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
-  > {
+export interface DispatcherPipelineStateOverrides extends Omit<
+  Partial<DispatcherPipelineState>,
+  'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
+> {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
   suppressions?: AlertEpisodeSuppression[];

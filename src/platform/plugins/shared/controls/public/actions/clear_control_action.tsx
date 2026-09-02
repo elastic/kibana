@@ -38,11 +38,11 @@ type ClearControlActionApi = HasType &
 const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =>
   Boolean(
     apiHasType(api) &&
-      apiHasUniqueId(api) &&
-      isClearableControl(api) &&
-      api.hasSelections$.getValue() &&
-      apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi)
+    apiHasUniqueId(api) &&
+    isClearableControl(api) &&
+    api.hasSelections$.getValue() &&
+    apiHasParentApi(api) &&
+    apiCanAccessViewMode(api.parentApi)
   );
 
 export class ClearControlAction

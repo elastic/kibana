@@ -27,10 +27,10 @@ const pointerDown = (clientX: number) =>
     pointerId: 1,
     // The rail captures the pointer so the drag survives passing over an embeddable.
     currentTarget: { setPointerCapture: jest.fn() },
-  } as unknown as ReactPointerEvent<HTMLButtonElement>);
+  }) as unknown as ReactPointerEvent<HTMLButtonElement>;
 
 const arrowKey = (key: string, preventDefault = jest.fn()) =>
-  ({ key, preventDefault } as unknown as ReactKeyboardEvent<HTMLButtonElement>);
+  ({ key, preventDefault }) as unknown as ReactKeyboardEvent<HTMLButtonElement>;
 
 const dragTo = (clientX: number) =>
   window.dispatchEvent(new MouseEvent('pointermove', { clientX }));

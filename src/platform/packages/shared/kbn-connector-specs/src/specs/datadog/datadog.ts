@@ -90,7 +90,7 @@ function formatDatadogError(action: string, error: unknown): Error {
   if (data) {
     if (Array.isArray(data.errors) && data.errors.length > 0) {
       detail = data.errors
-        .map((e) => (typeof e === 'string' ? e : e.detail ?? e.title ?? JSON.stringify(e)))
+        .map((e) => (typeof e === 'string' ? e : (e.detail ?? e.title ?? JSON.stringify(e))))
         .join('; ');
     } else if (typeof data.error === 'string') {
       detail = data.error;

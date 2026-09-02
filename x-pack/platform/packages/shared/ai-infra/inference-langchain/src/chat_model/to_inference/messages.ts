@@ -47,8 +47,8 @@ export const messagesToInference = (messages: BaseMessage[]) => {
           toolCalls: message.tool_calls?.length
             ? message.tool_calls.map(toolCallToInference)
             : message.additional_kwargs?.tool_calls?.length
-            ? message.additional_kwargs.tool_calls.map(legacyToolCallToInference)
-            : undefined,
+              ? message.additional_kwargs.tool_calls.map(legacyToolCallToInference)
+              : undefined,
         });
       }
       if (isToolMessage(message)) {
@@ -129,24 +129,27 @@ const convertMessageContent = (message: BaseMessage): InferenceMessageContent =>
   if (typeof message.content === 'string') {
     return message.content;
   }
-  return message.content.reduce((messages, part) => {
-    if (isMessageContentText(part)) {
-      messages.push({
-        type: 'text',
-        text: part.text,
-      });
-    } else if (isMessageContentImageUrl(part)) {
-      const imageUrl = typeof part.image_url === 'string' ? part.image_url : part.image_url.url;
-      // Parse "data:<mimeType>;base64,<data>" — adapters need mimeType and raw base64 separately.
-      const dataUrlMatch = imageUrl.match(/^data:([^;]+);base64,(.+)$/s);
-      messages.push({
-        type: 'image',
-        source: {
-          data: dataUrlMatch ? dataUrlMatch[2] : imageUrl,
-          mimeType: dataUrlMatch ? dataUrlMatch[1] : '',
-        },
-      });
-    }
-    return messages;
-  }, [] as Exclude<InferenceMessageContent, string>);
+  return message.content.reduce(
+    (messages, part) => {
+      if (isMessageContentText(part)) {
+        messages.push({
+          type: 'text',
+          text: part.text,
+        });
+      } else if (isMessageContentImageUrl(part)) {
+        const imageUrl = typeof part.image_url === 'string' ? part.image_url : part.image_url.url;
+        // Parse "data:<mimeType>;base64,<data>" — adapters need mimeType and raw base64 separately.
+        const dataUrlMatch = imageUrl.match(/^data:([^;]+);base64,(.+)$/s);
+        messages.push({
+          type: 'image',
+          source: {
+            data: dataUrlMatch ? dataUrlMatch[2] : imageUrl,
+            mimeType: dataUrlMatch ? dataUrlMatch[1] : '',
+          },
+        });
+      }
+      return messages;
+    },
+    [] as Exclude<InferenceMessageContent, string>
+  );
 };

@@ -28,7 +28,7 @@ const buildContext = (
     getInferenceClient: jest.fn(async () => ({ chatComplete })),
     callKibanaApi: jest.fn(),
     ...overrides,
-  } as unknown as EvalsTaskContext);
+  }) as unknown as EvalsTaskContext;
 
 describe('inference task provider', () => {
   beforeEach(() => jest.clearAllMocks());

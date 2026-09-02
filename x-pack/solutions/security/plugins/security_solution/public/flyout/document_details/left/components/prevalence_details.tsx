@@ -49,8 +49,8 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
             data.field === 'host.name' && data.documentHostEntityIdentifiers
               ? data.documentHostEntityIdentifiers
               : data.field === 'user.name' && data.documentUserEntityIdentifiers
-              ? data.documentUserEntityIdentifiers
-              : { [data.field]: value };
+                ? data.documentUserEntityIdentifiers
+                : { [data.field]: value };
           return (
             <EuiFlexItem key={value}>
               <CellActions field={data.field} value={value}>

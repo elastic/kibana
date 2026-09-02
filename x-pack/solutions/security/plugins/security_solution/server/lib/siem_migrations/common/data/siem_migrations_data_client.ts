@@ -13,7 +13,7 @@ import type { SiemMigrationsDataMigrationClient } from './siem_migrations_data_m
 
 export abstract class SiemMigrationsDataClient<
   M extends MigrationDocument = MigrationDocument,
-  I extends ItemDocument = ItemDocument
+  I extends ItemDocument = ItemDocument,
 > {
   // Data clients use the ES client `asInternalUser` by default.
   // We may want to use `asCurrentUser` instead in the future if the APIs are made public.

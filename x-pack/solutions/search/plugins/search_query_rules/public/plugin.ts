@@ -18,9 +18,10 @@ import { QUERY_RULES_UI_FLAG } from '../common/ui_flags';
 import { docLinks } from '../common/doc_links';
 import { PLUGIN_ROUTE_ROOT } from '../common/api_routes';
 
-export class QueryRulesPlugin
-  implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart>
-{
+export class QueryRulesPlugin implements Plugin<
+  SearchQueryRulesPluginSetup,
+  SearchQueryRulesPluginStart
+> {
   constructor() {}
 
   public setup(

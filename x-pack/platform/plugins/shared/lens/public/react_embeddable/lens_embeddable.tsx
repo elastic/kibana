@@ -166,10 +166,13 @@ export const createLensEmbeddableFactory = (
           // set all comparators to 'skip' when inline editing is in progress
           if (internalApi.isEditingInProgress()) {
             const keys = Object.keys(comparators) as (keyof typeof comparators)[];
-            return keys.reduce((acc, key) => {
-              acc[key] = 'skip';
-              return acc;
-            }, {} as Record<keyof typeof comparators, 'skip'>);
+            return keys.reduce(
+              (acc, key) => {
+                acc[key] = 'skip';
+                return acc;
+              },
+              {} as Record<keyof typeof comparators, 'skip'>
+            );
           }
           return comparators;
         },

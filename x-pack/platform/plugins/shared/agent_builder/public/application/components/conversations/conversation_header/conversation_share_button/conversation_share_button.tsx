@@ -245,14 +245,16 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
         <EuiHorizontalRule margin="none" />
         <div
           css={css`
-            ${canUpdateAccessControl
-              ? css`
-                  padding: ${euiTheme.size.m};
-                  padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.s};
-                `
-              : css`
-                  padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
-                `}
+            ${
+              canUpdateAccessControl
+                ? css`
+                    padding: ${euiTheme.size.m};
+                    padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.s};
+                  `
+                : css`
+                    padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
+                  `
+            }
           `}
         >
           {canUpdateAccessControl ? (

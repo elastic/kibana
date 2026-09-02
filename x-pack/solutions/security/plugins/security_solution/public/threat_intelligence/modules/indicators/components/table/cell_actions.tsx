@@ -20,8 +20,10 @@ import {
   TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
 
-export interface CellActionsProps
-  extends Omit<EuiDataGridColumnCellActionProps, 'colIndex' | 'isExpanded'> {
+export interface CellActionsProps extends Omit<
+  EuiDataGridColumnCellActionProps,
+  'colIndex' | 'isExpanded'
+> {
   /**
    * Array of {@link Indicator} to retrieve field and values for the cell actions.
    */

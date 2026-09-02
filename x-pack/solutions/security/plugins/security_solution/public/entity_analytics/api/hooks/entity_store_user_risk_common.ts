@@ -43,12 +43,12 @@ const rewriteEntityStoreUserRiskFieldPaths = (value: unknown): unknown => {
       key === 'user.risk.calculated_level'
         ? 'entity.risk.calculated_level'
         : key === 'user.risk.calculated_score_norm'
-        ? 'entity.risk.calculated_score_norm'
-        : key === 'user.risk.calculated_score'
-        ? 'entity.risk.calculated_score'
-        : key === 'user.risk.@timestamp'
-        ? '@timestamp'
-        : key;
+          ? 'entity.risk.calculated_score_norm'
+          : key === 'user.risk.calculated_score'
+            ? 'entity.risk.calculated_score'
+            : key === 'user.risk.@timestamp'
+              ? '@timestamp'
+              : key;
     out[mappedKey] = rewriteEntityStoreUserRiskFieldPaths(val);
   }
   return out;

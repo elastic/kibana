@@ -46,10 +46,10 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
   }, [outputHealthResponse, notifications.toasts]);
 
   const outputHost = isBeatsOutput(output)
-    ? output.hosts?.join(',') ?? ''
+    ? (output.hosts?.join(',') ?? '')
     : isOtlpOutput(output)
-    ? output.otlp_exporter?.endpoint ?? ''
-    : '';
+      ? (output.otlp_exporter?.endpoint ?? '')
+      : '';
 
   const EditOutputStatus: { [status: string]: JSX.Element | null } = {
     DEGRADED: (

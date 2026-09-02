@@ -43,7 +43,7 @@ describe('removeRemoteClusterSourceIndicesOnServerless', () => {
     ({
       installationName: 'endpoint.metadata_united-default-9.5.0-prerelease.1',
       content: { source: { index } },
-    } as unknown as TransformArg);
+    }) as unknown as TransformArg;
 
   beforeEach(() => {
     logger = loggerMock.create();

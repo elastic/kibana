@@ -44,7 +44,7 @@ export const useDestinationMetrics = (destinations: Destination[]) => {
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     getCanReadFailureStore: (streamName: string | undefined) =>
-      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+      streamName ? (privilegeMap.get(streamName) ?? false) : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
     fetchIngestionDocCounts: true,
   });

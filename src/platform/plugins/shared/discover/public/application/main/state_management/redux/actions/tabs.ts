@@ -142,7 +142,7 @@ export const updateTabs: InternalStateThunkActionCreator<
       selectedItem: TabState | TabItem | null;
       updatedDiscoverSession?: DiscoverSession;
     },
-    void
+    void,
   ],
   Promise<void>
 > = ({ items, selectedItem, updatedDiscoverSession }) =>
@@ -474,7 +474,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
-    }
+    },
   ],
   Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
@@ -536,7 +536,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
   [
     {
       searchSession: UISession;
-    }
+    },
   ],
   Promise<void>
 > = ({ searchSession }) =>

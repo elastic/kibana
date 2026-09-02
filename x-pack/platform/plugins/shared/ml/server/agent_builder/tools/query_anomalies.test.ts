@@ -39,7 +39,7 @@ const createContext = (esClient = createEsClientMock()) =>
   ({
     esClient,
     request: {},
-  } as any);
+  }) as any;
 
 describe('extractReferencedIndices', () => {
   it('parses a single FROM index', () => {

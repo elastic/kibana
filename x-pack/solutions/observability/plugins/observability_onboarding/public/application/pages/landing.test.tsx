@@ -218,7 +218,7 @@ const fleetServiceWithGrouping = (enabled: boolean) =>
   ({
     config: { enableExperimental: enabled ? ['enableIntegrationCollectionTiles'] : [] },
     authz: { fleet: { readSettings: true } },
-  } as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>);
+  }) as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>;
 
 const createObservabilityServices = (
   coreStart: ReturnType<typeof coreMock.createStart>,

@@ -24,7 +24,7 @@ describe('urlField', () => {
       path: 'url',
       form: {
         getFormData: () => ({}),
-        getFields: () => ({} as any),
+        getFields: () => ({}) as any,
       },
       formData: {},
       errors: [],

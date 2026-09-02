@@ -34,11 +34,11 @@ const createRouteContext = () =>
     monitorConfigRepository: {
       find: jest.fn().mockResolvedValue({ saved_objects: [monitor] }),
     },
-  } as unknown as RouteContext<
+  }) as unknown as RouteContext<
     { projectName: string },
     Record<string, never>,
     { monitors: string[] }
-  >);
+  >;
 
 const installExecuteResult = (executeResult: object) => {
   const { DeleteMonitorAPI } = jest.requireMock('../services/delete_monitor_api');

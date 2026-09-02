@@ -69,15 +69,12 @@ type StartServices$ = Observable<StartServices>;
  * @internal
  * @implements Plugin
  */
-export class ReportingPublicPlugin
-  implements
-    Plugin<
-      ReportingSetup,
-      ReportingStart,
-      ReportingPublicPluginSetupDependencies,
-      ReportingPublicPluginStartDependencies
-    >
-{
+export class ReportingPublicPlugin implements Plugin<
+  ReportingSetup,
+  ReportingStart,
+  ReportingPublicPluginSetupDependencies,
+  ReportingPublicPluginStartDependencies
+> {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new ReplaySubject<void>(1);

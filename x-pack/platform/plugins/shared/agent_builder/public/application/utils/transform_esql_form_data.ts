@@ -57,21 +57,24 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
       query: data.esql,
       params: data.params
         .filter((param) => esqlParams.has(param.name))
-        .reduce((paramsMap, param) => {
-          const paramConfig: EsqlToolParam = {
-            type: param.type,
-            description: param.description,
-            optional: param.optional,
-          };
+        .reduce(
+          (paramsMap, param) => {
+            const paramConfig: EsqlToolParam = {
+              type: param.type,
+              description: param.description,
+              optional: param.optional,
+            };
 
-          // Add defaultValue if provided and parameter is optional
-          if (param.optional && param.defaultValue != null && param.defaultValue !== '') {
-            paramConfig.defaultValue = param.defaultValue;
-          }
+            // Add defaultValue if provided and parameter is optional
+            if (param.optional && param.defaultValue != null && param.defaultValue !== '') {
+              paramConfig.defaultValue = param.defaultValue;
+            }
 
-          paramsMap[param.name] = paramConfig;
-          return paramsMap;
-        }, {} as Record<string, EsqlToolParam>),
+            paramsMap[param.name] = paramConfig;
+            return paramsMap;
+          },
+          {} as Record<string, EsqlToolParam>
+        ),
     },
     type: ToolType.esql,
     tags: data.labels,

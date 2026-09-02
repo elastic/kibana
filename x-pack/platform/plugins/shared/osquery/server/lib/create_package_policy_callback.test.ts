@@ -29,7 +29,7 @@ const updateGlobalPacksCreateCallbackMock = updateGlobalPacksCreateCallback as j
 const buildSoClient = (spaceId: string | undefined): SavedObjectsClientContract =>
   ({
     getCurrentNamespace: jest.fn().mockReturnValue(spaceId),
-  } as unknown as SavedObjectsClientContract);
+  }) as unknown as SavedObjectsClientContract;
 
 const buildNewPackagePolicy = (packageName: string): NewPackagePolicy =>
   ({
@@ -39,7 +39,7 @@ const buildNewPackagePolicy = (packageName: string): NewPackagePolicy =>
     policy_ids: ['agent-policy-1'],
     package: { name: packageName, title: 'Osquery Manager', version: '1.30.0' },
     inputs: [],
-  } as unknown as NewPackagePolicy);
+  }) as unknown as NewPackagePolicy;
 
 describe('getPackagePolicyCreateCallback', () => {
   const core = {} as CoreStart;

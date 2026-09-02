@@ -13,9 +13,12 @@ export interface GlobalSearchProvidersPluginSetupDeps {
   globalSearch: GlobalSearchPluginSetup;
 }
 
-export class GlobalSearchProvidersPlugin
-  implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}>
-{
+export class GlobalSearchProvidersPlugin implements Plugin<
+  {},
+  {},
+  GlobalSearchProvidersPluginSetupDeps,
+  {}
+> {
   setup(
     { getStartServices }: CoreSetup<{}, {}>,
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps

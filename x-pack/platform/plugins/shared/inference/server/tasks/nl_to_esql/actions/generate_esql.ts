@@ -42,8 +42,10 @@ type LlmEsqlTask<TToolOptions extends ToolOptions = ToolOptions> = (
   options: LlmEsqlTaskOptions
 ) => Observable<NlToEsqlTaskEvent<TToolOptions>>;
 
-interface GenerateEsqlTaskOptions
-  extends Pick<ChatCompleteOptions, 'maxRetries' | 'retryConfiguration' | 'functionCalling'> {
+interface GenerateEsqlTaskOptions extends Pick<
+  ChatCompleteOptions,
+  'maxRetries' | 'retryConfiguration' | 'functionCalling'
+> {
   connectorId: string;
   messages: Message[];
   chatCompleteApi: ChatCompleteAPI;

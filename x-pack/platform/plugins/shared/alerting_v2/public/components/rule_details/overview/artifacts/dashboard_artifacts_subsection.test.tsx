@@ -141,8 +141,9 @@ describe('DashboardArtifactsSubsection', () => {
     mockResolveDashboardsByIds.mockResolvedValue({ resolved: [], missing: [] });
     mockSearchRelatedDashboard.mockResolvedValue([]);
     mockMapArtifacts.mockImplementation(
-      (artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined) =>
-        artifacts?.length ? artifacts : undefined
+      (
+        artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
+      ) => (artifacts?.length ? artifacts : undefined)
     );
     mockResolveArtifactId.mockImplementation(
       (type: string, existingId?: string) => existingId?.trim() || `generated-${type}`

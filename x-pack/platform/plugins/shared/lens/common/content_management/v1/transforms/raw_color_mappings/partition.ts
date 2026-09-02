@@ -27,8 +27,10 @@ interface DeprecatedColorMappingLayer extends Omit<LensPartitionLayerState, 'col
  *
  * @deprecated
  */
-export interface DeprecatedColorMappingLensPartitionVisualizationState
-  extends Omit<LensPartitionVisualizationState, 'layers'> {
+export interface DeprecatedColorMappingLensPartitionVisualizationState extends Omit<
+  LensPartitionVisualizationState,
+  'layers'
+> {
   layers: Array<LensPartitionLayerState | DeprecatedColorMappingLayer>;
 }
 

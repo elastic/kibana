@@ -86,7 +86,7 @@ const createAuthorizedAuthzMock = () =>
     checkPrivilegesWithRequest: () => ({
       atSpace: async () => ({ hasAllRequested: true, privileges: { kibana: [] } }),
     }),
-  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+  }) as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'];
 
 /**
  * Unauthorized authz mock: `hasAllRequested` is false so the guard at the top of
@@ -99,7 +99,7 @@ const createUnauthorizedAuthzMock = () =>
     checkPrivilegesWithRequest: () => ({
       atSpace: async () => ({ hasAllRequested: false, privileges: { kibana: [] } }),
     }),
-  } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz']);
+  }) as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'];
 
 describe('executeGenerationWorkflow', () => {
   beforeEach(() => {

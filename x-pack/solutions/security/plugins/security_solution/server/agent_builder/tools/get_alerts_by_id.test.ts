@@ -12,7 +12,7 @@ import { getAlertsById } from './get_alerts_by_id';
 const makeClient = (hits: Array<{ _id?: string; _source?: unknown }>) =>
   ({
     search: jest.fn().mockResolvedValue({ hits: { hits } }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('getAlertsById', () => {
   const index = '.alerts-security.alerts-default';

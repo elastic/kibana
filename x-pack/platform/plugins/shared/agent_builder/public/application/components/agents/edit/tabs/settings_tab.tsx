@@ -508,11 +508,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     }
                   )
                 : !canChangeAccessControl
-                ? i18n.translate('xpack.agentBuilder.agents.form.accessControlModeDisabledReason', {
-                    defaultMessage:
-                      'Only the owner or an administrator can change the access control mode.',
-                  })
-                : undefined
+                  ? i18n.translate(
+                      'xpack.agentBuilder.agents.form.accessControlModeDisabledReason',
+                      {
+                        defaultMessage:
+                          'Only the owner or an administrator can change the access control mode.',
+                      }
+                    )
+                  : undefined
             }
             isInvalid={!!formState.errors.access_control?.access_mode}
             error={formState.errors.access_control?.access_mode?.message}

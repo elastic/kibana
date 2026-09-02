@@ -24,12 +24,12 @@ const extractSnippetsBatchMock = extractSnippetsBatch as jest.MockedFunction<
 const createMockEsClient = (response: unknown = { hits: { hits: [] } }) =>
   ({
     search: jest.fn().mockResolvedValue(response),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 const createMockLogger = () =>
   ({
     debug: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const textField = (path: string): MappingField => ({ path, type: 'text', meta: {} });
 const keywordField = (path: string): MappingField => ({ path, type: 'keyword', meta: {} });

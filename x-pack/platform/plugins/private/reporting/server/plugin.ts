@@ -38,9 +38,12 @@ import { setupSavedObjects } from './saved_objects';
 /*
  * @internal
  */
-export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
-{
+export class ReportingPlugin implements Plugin<
+  ReportingSetup,
+  ReportingStart,
+  ReportingSetupDeps,
+  ReportingStartDeps
+> {
   private readonly telemetryLogger: Logger;
   private logger: Logger;
   private reportingCore?: ReportingCore;

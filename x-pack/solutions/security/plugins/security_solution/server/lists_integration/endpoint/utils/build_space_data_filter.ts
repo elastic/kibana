@@ -54,13 +54,13 @@ export const buildSpaceDataFilter = async (
       (
         (
           exception-list-agnostic.attributes.tags:("${GLOBAL_ARTIFACT_TAG}"${
-    allEndpointPolicyIds.length === 0
-      ? ')'
-      : ` OR ${allEndpointPolicyIds
-          .map((policyId) => `"${buildPerPolicyTag(policyId)}"`)
-          .join(' OR ')}
+            allEndpointPolicyIds.length === 0
+              ? ')'
+              : ` OR ${allEndpointPolicyIds
+                  .map((policyId) => `"${buildPerPolicyTag(policyId)}"`)
+                  .join(' OR ')}
           )`
-  }
+          }
         )
         OR
         (

@@ -32,15 +32,12 @@ export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPubli
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}
 
-export class ElasticAssistantPublicPlugin
-  implements
-    Plugin<
-      ElasticAssistantPublicPluginSetup,
-      ElasticAssistantPublicPluginStart,
-      ElasticAssistantPublicPluginSetupDependencies,
-      ElasticAssistantPublicPluginStartDependencies
-    >
-{
+export class ElasticAssistantPublicPlugin implements Plugin<
+  ElasticAssistantPublicPluginSetup,
+  ElasticAssistantPublicPluginStart,
+  ElasticAssistantPublicPluginSetupDependencies,
+  ElasticAssistantPublicPluginStartDependencies
+> {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
   isServerless: boolean;

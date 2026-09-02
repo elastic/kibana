@@ -31,14 +31,10 @@ export default function maintenanceWindowExternalTests({
       require.resolve('../../../group3/tests/maintenance_window/external/delete_maintenance_window')
     );
     loadTestFile(
-      require.resolve(
-        '../../../group3/tests/maintenance_window/external/archive_maintenance_window'
-      )
+      require.resolve('../../../group3/tests/maintenance_window/external/archive_maintenance_window')
     );
     loadTestFile(
-      require.resolve(
-        '../../../group3/tests/maintenance_window/external/unarchive_maintenance_window'
-      )
+      require.resolve('../../../group3/tests/maintenance_window/external/unarchive_maintenance_window')
     );
     loadTestFile(
       require.resolve('../../../group3/tests/maintenance_window/external/update_maintenance_window')

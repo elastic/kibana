@@ -20,9 +20,12 @@ import type {
 } from './types';
 import { CPSManager } from './services/cps_manager';
 
-export class CpsPlugin
-  implements Plugin<CPSPluginSetup, CPSPluginStart, {}, CPSPluginStartDependencies>
-{
+export class CpsPlugin implements Plugin<
+  CPSPluginSetup,
+  CPSPluginStart,
+  {},
+  CPSPluginStartDependencies
+> {
   private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
   private readonly appAccessResolvers = new Map<string, CPSAppAccessResolver>();
 

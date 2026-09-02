@@ -72,11 +72,10 @@ const FilterControlsErrorView = memo(({ resetFilters }: { resetFilters: () => vo
   );
 });
 
-export interface UrlSyncedAlertsSearchBarProps
-  extends Omit<
-    AlertsSearchBarProps,
-    'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
-  > {
+export interface UrlSyncedAlertsSearchBarProps extends Omit<
+  AlertsSearchBarProps,
+  'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
+> {
   showFilterControls?: boolean;
   urlStorageKey?: string;
   filterControlsStorageKey?: string;

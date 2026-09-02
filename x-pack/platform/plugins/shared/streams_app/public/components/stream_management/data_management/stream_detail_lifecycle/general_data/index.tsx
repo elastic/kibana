@@ -262,7 +262,7 @@ const StreamDetailGeneralDataInner = ({
   }, [definition]);
 
   const previewHeader = successfulLifecycleFlyout.isOpen
-    ? successfulLifecycleFlyout.previewHeader ?? baselinePreviewHeader
+    ? (successfulLifecycleFlyout.previewHeader ?? baselinePreviewHeader)
     : baselinePreviewHeader;
 
   const openEditSuccessfulDeletePhaseFlyout = useCallback(() => {
@@ -409,7 +409,7 @@ const StreamDetailGeneralDataInner = ({
     (next: EditDeletePhaseFlyoutValue) => {
       const retentionPeriod = next.deletePhaseEnabled ? next.dataRetention : undefined;
       const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
-      const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+      const downsampleSteps = 'dsl' in baseline ? (baseline.dsl.downsample ?? null) : null;
       // Preserve the frozen phase from the baseline lifecycle — editing the delete phase must not
       // drop it from the preview.
       const frozenAfter = 'dsl' in baseline ? baseline.dsl.frozen_after : undefined;
@@ -471,7 +471,7 @@ const StreamDetailGeneralDataInner = ({
     (next: IngestStreamLifecycleDSL['dsl'], meta?: EditDataPhasesFlyoutChangeMeta) => {
       setDataPhaseInvalidPhases(meta?.invalidPhases ?? []);
       const baseline = effectiveToIngestLifecycle(definition.effective_lifecycle);
-      const downsampleSteps = 'dsl' in baseline ? baseline.dsl.downsample ?? null : null;
+      const downsampleSteps = 'dsl' in baseline ? (baseline.dsl.downsample ?? null) : null;
       const model = buildDlmPreviewModel({
         isServerless,
         hotColor: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,

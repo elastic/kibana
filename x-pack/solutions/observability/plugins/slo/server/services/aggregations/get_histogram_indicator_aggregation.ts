@@ -15,7 +15,10 @@ type HistogramIndicatorDef =
   | HistogramIndicator['params']['total'];
 
 export class GetHistogramIndicatorAggregation {
-  constructor(private indicator: HistogramIndicator, private dataView?: DataView) {}
+  constructor(
+    private indicator: HistogramIndicator,
+    private dataView?: DataView
+  ) {}
 
   private buildAggregation(indicator: HistogramIndicatorDef): AggregationsAggregationContainer {
     const filter = indicator.filter

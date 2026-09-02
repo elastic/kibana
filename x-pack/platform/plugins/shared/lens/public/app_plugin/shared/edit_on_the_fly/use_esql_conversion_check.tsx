@@ -352,10 +352,10 @@ function isValidDatasourceState(
 ): datasourceState is { layers: Record<string, FormBasedLayer> } {
   return Boolean(
     datasourceState &&
-      typeof datasourceState === 'object' &&
-      datasourceState !== null &&
-      'layers' in datasourceState &&
-      (datasourceState as { layers?: unknown }).layers !== undefined
+    typeof datasourceState === 'object' &&
+    datasourceState !== null &&
+    'layers' in datasourceState &&
+    (datasourceState as { layers?: unknown }).layers !== undefined
   );
 }
 

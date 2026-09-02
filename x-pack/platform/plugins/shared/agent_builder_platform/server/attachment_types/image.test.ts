@@ -44,7 +44,7 @@ const createFilesPluginStub = (bytes: Buffer) => {
 describe('image attachment type', () => {
   describe('validate', () => {
     const definition = createImageAttachmentType({
-      getFilesPlugin: async () => ({} as FilesStart),
+      getFilesPlugin: async () => ({}) as FilesStart,
     });
 
     it('accepts a payload with file_id, name and mime_type', async () => {

@@ -128,7 +128,7 @@ describe('workflowComputationMiddleware', () => {
 
   describe('setWorkflow — computed reset on workflow-id change (item 2 bug fix)', () => {
     const makeWorkflow = (id: string): WorkflowDetailDto =>
-      ({ id, yaml: '', definition: {} } as unknown as WorkflowDetailDto);
+      ({ id, yaml: '', definition: {} }) as unknown as WorkflowDetailDto;
 
     it('resets computed, cursorPosition, focusedStepId when the workflow id changes', () => {
       const mockComputed: ComputedData = {

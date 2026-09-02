@@ -42,7 +42,7 @@ const makeAttachment = (
       embeddable_id: 'panel-1',
       ...data,
     },
-  } as CustomContentAttachment);
+  }) as CustomContentAttachment;
 
 const getButtons = (attachment: CustomContentAttachment, isCanvas = false) =>
   customContentContextAttachmentUiDefinition.getActionButtons!({

@@ -32,12 +32,12 @@ const createRouter = () =>
     push: jest.fn(),
     replace: jest.fn(),
     link: jest.fn(),
-  } as unknown as StatefulStreamsAppRouter);
+  }) as unknown as StatefulStreamsAppRouter;
 
 const createNotifications = () =>
   ({
     toasts: { addSuccess: jest.fn() },
-  } as unknown as CoreStart['notifications']);
+  }) as unknown as CoreStart['notifications'];
 
 const createShare = (
   locatorGetUrl = jest.fn(async () => '/app/management/data/index_management'),
@@ -49,7 +49,7 @@ const createShare = (
         get: jest.fn(() => (hasLocator ? { getUrl: locatorGetUrl } : undefined)),
       },
     },
-  } as unknown as SharePublicStart);
+  }) as unknown as SharePublicStart;
 
 const createClassicStreamWithImportPrivileges = () =>
   createMockClassicStreamDefinition({

@@ -17,9 +17,11 @@ export type ApmSourceAccessPluginSetup = ReturnType<ApmSourceAccessPlugin['setup
  */
 export type ApmSourceAccessPluginStart = ReturnType<ApmSourceAccessPlugin['start']>;
 
-export class ApmSourceAccessPlugin
-  implements Plugin<ApmSourceAccessPluginSetup, ApmSourceAccessPluginStart, {}>
-{
+export class ApmSourceAccessPlugin implements Plugin<
+  ApmSourceAccessPluginSetup,
+  ApmSourceAccessPluginStart,
+  {}
+> {
   public setup() {}
 
   public start(core: CoreStart) {

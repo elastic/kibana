@@ -60,7 +60,7 @@ export function jobsQueryFactory(
   { isInternal }: { isInternal: boolean }
 ): JobsQueryFactory {
   async function execQuery<
-    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>,
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();

@@ -38,15 +38,12 @@ import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
 
-export class ContextEnginePlugin
-  implements
-    Plugin<
-      ContextEnginePluginSetup,
-      ContextEnginePluginStart,
-      ContextEngineSetupDependencies,
-      ContextEngineStartDependencies
-    >
-{
+export class ContextEnginePlugin implements Plugin<
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+  ContextEngineSetupDependencies,
+  ContextEngineStartDependencies
+> {
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;

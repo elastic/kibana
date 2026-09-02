@@ -65,7 +65,7 @@ const makeAttachmentSO = (
         ? { comment: 'legacy comment' }
         : { data: { content: 'unified comment' } }),
     },
-  } as unknown as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>);
+  }) as unknown as SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>;
 
 /**
  * Stubs the SO client's `find` to dispatch on the requested `type`,
@@ -102,7 +102,7 @@ const stubDualSourceFinds = (
         page: 1,
       } as SavedObjectsFindResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>;
     }
-    const sos = type === CASE_COMMENT_SAVED_OBJECT ? pages.legacy ?? [] : pages.unified ?? [];
+    const sos = type === CASE_COMMENT_SAVED_OBJECT ? (pages.legacy ?? []) : (pages.unified ?? []);
     return {
       saved_objects: sos.map((so, i) => ({ ...so, score: 1, sort: [i] })) as never,
       total: sos.length,

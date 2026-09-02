@@ -17,7 +17,7 @@ import type { DiscoverSessionAttributes } from '../../server';
 
 export const fromDiscoverSessionAttributesToSavedSearch = <
   Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
+  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch,
 >(
   id: string | undefined,
   { title, description, tabs }: DiscoverSessionAttributes,

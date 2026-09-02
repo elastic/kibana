@@ -64,13 +64,11 @@ export function buildBreadcrumbs({
   const navBreadcrumbPath = activePath.filter(
     (n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
   );
-  const navBreadcrumbs = navBreadcrumbPath.map(
-    (node): ChromeBreadcrumb => ({
-      href: node.deepLink?.url ?? node.href,
-      deepLinkId: node.deepLink?.id as AppDeepLinkId,
-      text: node.title,
-    })
-  );
+  const navBreadcrumbs = navBreadcrumbPath.map((node): ChromeBreadcrumb => ({
+    href: node.deepLink?.url ?? node.href,
+    deepLinkId: node.deepLink?.id as AppDeepLinkId,
+    text: node.title,
+  }));
 
   // if there are project breadcrumbs set, use them
   if (projectBreadcrumbs.breadcrumbs.length !== 0) {

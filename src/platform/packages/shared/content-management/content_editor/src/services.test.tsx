@@ -39,21 +39,17 @@ const createCoreMock = (): ContentEditorKibanaDependencies['core'] =>
     rendering: {
       addContext: (element: React.ReactNode) => <>{element}</>,
     },
-  } as unknown as ContentEditorKibanaDependencies['core']);
+  }) as unknown as ContentEditorKibanaDependencies['core'];
 
 // `ContentEditorKibanaProvider` self-provides `QueryClientProvider` and
 // `UserProfilesKibanaProvider`, so no consumer-side wrapping is required.
 const createWrapper =
   (savedObjectsTagging: ContentEditorKibanaDependencies['savedObjectsTagging']) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentEditorKibanaProvider
-        core={createCoreMock()}
-        savedObjectsTagging={savedObjectsTagging}
-      >
-        {children}
-      </ContentEditorKibanaProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentEditorKibanaProvider core={createCoreMock()} savedObjectsTagging={savedObjectsTagging}>
+      {children}
+    </ContentEditorKibanaProvider>
+  );
 
 const TagListConsumer = ({ tagIds }: { tagIds: string[] }) => {
   const { TagList } = useServices();

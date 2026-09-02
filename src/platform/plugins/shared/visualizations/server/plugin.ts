@@ -27,9 +27,10 @@ import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './save
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
 
-export class VisualizationsPlugin
-  implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
-{
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsServerSetup,
+  VisualizationsServerStart
+> {
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

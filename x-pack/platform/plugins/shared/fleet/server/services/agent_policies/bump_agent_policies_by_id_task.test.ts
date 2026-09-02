@@ -49,7 +49,7 @@ const getRegisteredTaskRunner = (
 };
 
 const buildTaskInstance = (params: Record<string, unknown>): ConcreteTaskInstance =>
-  ({ params } as unknown as ConcreteTaskInstance);
+  ({ params }) as unknown as ConcreteTaskInstance;
 
 describe('bump_agent_policies_by_id_task', () => {
   beforeEach(() => {

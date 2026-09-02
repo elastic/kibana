@@ -12,10 +12,12 @@ import { customRasterLayerWizard } from './classes/custom_raster_layer_wizard';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './third_party_maps_source_example.png';
 
-export class MapsCustomRasterSourcePlugin
-  implements
-    Plugin<void, void, MapsCustomRasterSourcePluginSetup, MapsCustomRasterSourcePluginStart>
-{
+export class MapsCustomRasterSourcePlugin implements Plugin<
+  void,
+  void,
+  MapsCustomRasterSourcePluginSetup,
+  MapsCustomRasterSourcePluginStart
+> {
   public setup(
     core: CoreSetup<MapsCustomRasterSourcePluginStart>,
     { developerExamples, maps: mapsSetup }: MapsCustomRasterSourcePluginSetup

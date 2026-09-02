@@ -43,22 +43,31 @@ function getCapabilitiesFromFeature(
   if (feature.catalogue) {
     UIFeatureCapabilities.catalogue = {
       ...UIFeatureCapabilities.catalogue,
-      ...feature.catalogue.reduce((acc, capability) => {
-        acc[capability] = true;
-        return acc;
-      }, {} as Record<string, boolean>),
+      ...feature.catalogue.reduce(
+        (acc, capability) => {
+          acc[capability] = true;
+          return acc;
+        },
+        {} as Record<string, boolean>
+      ),
     };
   }
 
   if (feature.management) {
     const sectionEntries = Object.entries(feature.management);
-    UIFeatureCapabilities.management = sectionEntries.reduce((acc, [sectionId, sectionItems]) => {
-      acc[sectionId] = sectionItems.reduce((acc2, item) => {
-        acc2[item] = true;
-        return acc2;
-      }, {} as Record<string, boolean>);
-      return acc;
-    }, {} as Record<string, any>);
+    UIFeatureCapabilities.management = sectionEntries.reduce(
+      (acc, [sectionId, sectionItems]) => {
+        acc[sectionId] = sectionItems.reduce(
+          (acc2, item) => {
+            acc2[item] = true;
+            return acc2;
+          },
+          {} as Record<string, boolean>
+        );
+        return acc;
+      },
+      {} as Record<string, any>
+    );
   }
 
   const featurePrivileges = Object.values(feature.privileges ?? {}) as Writable<
@@ -79,10 +88,13 @@ function getCapabilitiesFromFeature(
   featurePrivileges.forEach((privilege) => {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
-      ...privilege.ui.reduce((privilegeAcc, capability) => {
-        privilegeAcc[capability] = true;
-        return privilegeAcc;
-      }, {} as Record<string, boolean>),
+      ...privilege.ui.reduce(
+        (privilegeAcc, capability) => {
+          privilegeAcc[capability] = true;
+          return privilegeAcc;
+        },
+        {} as Record<string, boolean>
+      ),
     };
   });
 

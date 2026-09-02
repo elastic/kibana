@@ -125,7 +125,7 @@ describe('check metadata transforms task', () => {
             },
           ],
         },
-      } as unknown as TransportResult<TransformGetTransformStatsResponse>);
+      }) as unknown as TransportResult<TransformGetTransformStatsResponse>;
 
     it('should not run if task is outdated', async () => {
       const result = await runTask({ ...MOCK_TASK_INSTANCE, id: 'old-id' });

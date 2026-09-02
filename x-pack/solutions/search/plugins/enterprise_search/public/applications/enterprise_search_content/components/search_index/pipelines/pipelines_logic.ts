@@ -245,7 +245,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     closePipelineSettings: () =>
       actions.setPipelineState(
         isConnectorIndex(values.index)
-          ? values.index.connector?.pipeline ?? values.defaultPipelineValues
+          ? (values.index.connector?.pipeline ?? values.defaultPipelineValues)
           : values.defaultPipelineValues
       ),
     createCustomPipelineSuccess: (created) => {
@@ -417,9 +417,9 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ) =>
         Boolean(
           hasCustomPipeline &&
-            customPipelineData &&
-            !customPipelineData[pipelineName] &&
-            isConnectorIndex(index)
+          customPipelineData &&
+          !customPipelineData[pipelineName] &&
+          isConnectorIndex(index)
         ),
     ],
   }),

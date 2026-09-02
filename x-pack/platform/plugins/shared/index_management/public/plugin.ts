@@ -49,15 +49,12 @@ import { IndexTemplateFlyout } from './application/sections/home/template_list/t
 import { indexDataEnricher, type IndexDataEnricher } from './services';
 import { indexStatsEnricher } from './index_stats_enricher';
 
-export class IndexMgmtUIPlugin
-  implements
-    Plugin<
-      IndexManagementPluginSetup,
-      IndexManagementPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class IndexMgmtUIPlugin implements Plugin<
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private extensionsService = new ExtensionsService();
   private apiService?: PublicApiService;
   private locator?: IndexManagementLocator;
@@ -151,9 +148,8 @@ export class IndexMgmtUIPlugin
           title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
           order: 0,
           mount: async (params) => {
-            const { mountManagementSection } = await import(
-              './application/mount_management_section'
-            );
+            const { mountManagementSection } =
+              await import('./application/mount_management_section');
             return mountManagementSection({
               coreSetup,
               usageCollection,

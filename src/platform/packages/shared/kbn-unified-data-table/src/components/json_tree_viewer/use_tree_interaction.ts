@@ -178,7 +178,7 @@ export const useRovingTreeNavigation = (
 
   const [activeId, setActiveId] = useState<string | null>(null);
   // Exactly one row is part of the tab order (roving tabindex).
-  const activeRowId = activeId && orderedIdSet.has(activeId) ? activeId : orderedIds[0] ?? null;
+  const activeRowId = activeId && orderedIdSet.has(activeId) ? activeId : (orderedIds[0] ?? null);
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const refCallbacks = useRef(new Map<string, (element: HTMLDivElement | null) => void>());

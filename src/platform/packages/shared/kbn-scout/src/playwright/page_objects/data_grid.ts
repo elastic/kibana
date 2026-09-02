@@ -476,8 +476,8 @@ export class DataGrid {
         const decoration = textDecoration.includes('line-through')
           ? ('removed' as const)
           : textDecoration.includes('underline')
-          ? ('added' as const)
-          : undefined;
+            ? ('added' as const)
+            : undefined;
         return { decoration, value: (el as HTMLElement).innerText.trim() };
       });
     }, colIndex - 1);

@@ -811,7 +811,7 @@ describe('esql query helpers', () => {
         ({
           lineNumber: 1,
           column: queryString.indexOf(matcherPrefix) + matcherPrefix.length + 1,
-        } as monaco.Position);
+        }) as monaco.Position;
 
       it('should return the label name after a matcher operator', () => {
         const queryString = 'PROMQL index=metrics sum(bytes{agent= })';

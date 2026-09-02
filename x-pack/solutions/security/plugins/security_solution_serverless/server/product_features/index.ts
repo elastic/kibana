@@ -62,8 +62,8 @@ export const getSecurityAiSocProductTier = (
   const tier = securityProductType
     ? securityProductType.product_tier
     : ai4SocProductType
-    ? ai4SocProductType.product_tier
-    : 'none';
+      ? ai4SocProductType.product_tier
+      : 'none';
   if (tier === 'none') {
     logger.error(`Failed to fetch security/aiSoc product tier, config: ${JSON.stringify(config)}`);
   }

@@ -60,9 +60,9 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     `;
 
     const buttonStyles = css`
-      --high-contrast-hover-indicator-color: ${isHighlighted
-        ? euiTheme.colors.textPrimary
-        : euiTheme.colors.textParagraph};
+      --high-contrast-hover-indicator-color: ${
+        isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph
+      };
       ${highContrastModeStyles}
     `;
 

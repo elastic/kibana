@@ -163,7 +163,7 @@ export const projectSkillsFromDefinition = (
           const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
           // When the step has no overrides, fall back to the agent's own skill list.
           const agentSkills: readonly string[] =
-            overrideSkillIds === null ? agentDef.configuration.skill_ids ?? [] : [];
+            overrideSkillIds === null ? (agentDef.configuration.skill_ids ?? []) : [];
           for (const id of [...baseSkills, ...(overrideSkillIds ?? agentSkills)]) {
             if (id) skillIds.add(id);
           }
@@ -241,7 +241,7 @@ export const projectWorkflowToWatch = (
   const recentRuns = projectRecentRunsFromHistory(item.history);
   const lastRun = recentRuns[0]?.startedAt ?? null;
   // List DTOs often omit top-level `tags`; fall back to definition.tags.
-  const tags = item.tags?.length ? item.tags : definition?.tags ?? [];
+  const tags = item.tags?.length ? item.tags : (definition?.tags ?? []);
   const sortOrder = asNumber(policy?.ui?.order, Number.MAX_SAFE_INTEGER);
 
   return {

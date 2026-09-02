@@ -78,7 +78,7 @@ const createCompletedRound = (): ConversationRound =>
     input: { message: 'hello' },
     steps: [],
     response: { message: 'hi' },
-  } as unknown as ConversationRound);
+  }) as unknown as ConversationRound;
 
 describe('RoundResponseActions', () => {
   beforeEach(() => {

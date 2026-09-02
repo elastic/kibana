@@ -131,7 +131,8 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
                 justify-content: center;
                 position: relative;
                 width: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});
-                transition: background ${euiTheme.animation.slow} ease,
+                transition:
+                  background ${euiTheme.animation.slow} ease,
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >

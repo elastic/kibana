@@ -217,10 +217,10 @@ const normalizeControllerError = (error: unknown): Error => {
       typeof body.detail === 'string'
         ? body.detail
         : typeof body.message === 'string'
-        ? body.message
-        : typeof body.error === 'string'
-        ? body.error
-        : JSON.stringify(body).slice(0, 500);
+          ? body.message
+          : typeof body.error === 'string'
+            ? body.error
+            : JSON.stringify(body).slice(0, 500);
     const code = typeof status === 'number' ? ` (${status})` : '';
     return new Error(`Ansible Controller API error${code}: ${message}`);
   }
@@ -675,8 +675,8 @@ export const AnsibleControllerConnector: ConnectorSpec = {
           typeof data === 'string'
             ? data
             : typeof (data as { content?: unknown })?.content === 'string'
-            ? (data as { content: string }).content
-            : JSON.stringify(data);
+              ? (data as { content: string }).content
+              : JSON.stringify(data);
         const truncated = raw.length > MAX_STDOUT_CHARS;
         return {
           jobId: input.id,

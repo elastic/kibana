@@ -945,15 +945,15 @@ const groupEventRecords = (
     const rawActorIds = Array.isArray(record.actorEntityId)
       ? record.actorEntityId
       : record.actorEntityId
-      ? [record.actorEntityId]
-      : [];
+        ? [record.actorEntityId]
+        : [];
     if (rawActorIds.length === 0) continue;
 
     const rawTargetIds = Array.isArray(record.targetEntityId)
       ? record.targetEntityId
       : record.targetEntityId
-      ? [record.targetEntityId]
-      : [];
+        ? [record.targetEntityId]
+        : [];
 
     const pinned = record.pinned ?? null;
 
@@ -1062,8 +1062,8 @@ export const regroupEvents = (
       targetEntityIds.length === 0
         ? null
         : targetEntityIds.length === 1
-        ? targetEntityIds[0]
-        : hashIds(targetEntityIds);
+          ? targetEntityIds[0]
+          : hashIds(targetEntityIds);
 
     const docIds = [...group.docIds];
     // Label node is keyed on this group's own documents (already restricted, via targetDocMap, to
@@ -1188,8 +1188,8 @@ export const regroupRelationships = (
     const rawActorIds = Array.isArray(record.actorIds)
       ? record.actorIds
       : record.actorIds
-      ? [record.actorIds]
-      : [];
+        ? [record.actorIds]
+        : [];
     if (rawActorIds.length === 0) continue;
 
     // Pinned actors/targets are isolated into their own group via the ES|QL pinned column —
@@ -1333,10 +1333,10 @@ export const regroupRelationships = (
       actorEntitySubType: group.actorEntitySubType,
       actorEntityName:
         actorNames.length === 0
-          ? group.actorEntityName ?? null
+          ? (group.actorEntityName ?? null)
           : actorNames.length === 1
-          ? actorNames[0]
-          : actorNames,
+            ? actorNames[0]
+            : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
       actorsDocData: [...group.actorsDocData],
       targetNodeId,

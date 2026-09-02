@@ -123,7 +123,7 @@ export class AutoFollowPatternEdit extends PureComponent<
               values: { name },
             }
           )
-        : body?.message ?? error.message;
+        : (body?.message ?? error.message);
 
     const listNav = reactRouterNavigate(this.props.history, `/auto_follow_patterns`);
 

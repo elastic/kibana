@@ -508,7 +508,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
           restOfBody.policy_id === undefined ? packagePolicy.policy_id : restOfBody.policy_id,
         enabled:
           'enabled' in restOfBody
-            ? restOfBody.enabled ?? packagePolicy.enabled
+            ? (restOfBody.enabled ?? packagePolicy.enabled)
             : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,

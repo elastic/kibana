@@ -38,6 +38,6 @@ export const getJobConfig = (numOfJobs: number) => {
         },
         data_description: { time_field: '@timestamp' },
         analysis_limits: { model_memory_limit: '10mb' },
-      } as unknown as MlJob)
+      }) as unknown as MlJob
   );
 };

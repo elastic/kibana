@@ -74,9 +74,8 @@ export class IncrementalIdTaskManager {
 
               try {
                 // Increment the case ids
-                const processedAmount = await casesIncrementService.incrementCaseIds(
-                  casesWithoutIncrementalId
-                );
+                const processedAmount =
+                  await casesIncrementService.incrementCaseIds(casesWithoutIncrementalId);
                 this.logger.debug(
                   `Applied incremental ids to ${processedAmount} out of ${casesWithoutIncrementalId.length} cases`
                 );

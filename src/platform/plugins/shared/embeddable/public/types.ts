@@ -103,7 +103,7 @@ export interface EmbeddableStart {
   getAddFromLibraryContentComponent: () => Promise<React.FC<AddFromLibraryContentProps>>;
   getEmbeddableDefinition: <
     SerializedState extends object = object,
-    Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+    Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   >(
     type: string
   ) => Promise<EmbeddablePublicDefinition<SerializedState, Api>>;

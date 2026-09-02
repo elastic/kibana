@@ -22,15 +22,12 @@ import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
 import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
 
-export class AgentBuilderPlatformPlugin
-  implements
-    Plugin<
-      AgentBuilderPlatformPluginSetup,
-      AgentBuilderPlatformPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class AgentBuilderPlatformPlugin implements Plugin<
+  AgentBuilderPlatformPluginSetup,
+  AgentBuilderPlatformPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   private logger: Logger;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {

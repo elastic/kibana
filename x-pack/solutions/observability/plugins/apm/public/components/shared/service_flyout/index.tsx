@@ -106,7 +106,7 @@ export function ServiceFlyout({
   const { indices: indicesValue, loading: indicesLoading } = useApmIndices({
     http: deps.core.http,
   });
-  const indices = indicesLoading ? undefined : indicesValue ?? null;
+  const indices = indicesLoading ? undefined : (indicesValue ?? null);
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID

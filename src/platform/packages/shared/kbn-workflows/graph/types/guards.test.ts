@@ -51,7 +51,7 @@ import type { GraphNodeUnion } from './nodes/union';
 // Guards only inspect `type` and `stepType` — other GraphNodeUnion fields
 // (label, edges, etc.) are omitted because they are irrelevant to guard logic.
 const makeNode = (type: string, stepType = 'custom'): GraphNodeUnion =>
-  ({ id: 'n1', type, stepId: 's1', stepType } as GraphNodeUnion);
+  ({ id: 'n1', type, stepId: 's1', stepType }) as GraphNodeUnion;
 
 describe('graph/types/guards', () => {
   describe('simple single-field guards', () => {

@@ -274,10 +274,10 @@ export const useEntityAnalyticsRoutes = () => {
         const riskEngineStatus = !riskScoreMaintainer
           ? 'NOT_INSTALLED'
           : riskScoreMaintainer.taskStatus === 'started'
-          ? 'ENABLED'
-          : riskScoreMaintainer.taskStatus === 'stopped'
-          ? 'DISABLED'
-          : 'NOT_INSTALLED';
+            ? 'ENABLED'
+            : riskScoreMaintainer.taskStatus === 'stopped'
+              ? 'DISABLED'
+              : 'NOT_INSTALLED';
         const runAt = riskScoreMaintainer?.nextRunAt;
 
         // The maintainer API doesn't expose the underlying TaskManager status directly,

@@ -34,7 +34,7 @@ import { pluginName } from '../../constants';
 import type { InternalFieldType } from '../../types';
 
 export const defaultValueFormatter = (value: unknown) => {
-  const content = typeof value === 'object' ? JSON.stringify(value) : String(value) ?? '-';
+  const content = typeof value === 'object' ? JSON.stringify(value) : (String(value) ?? '-');
   return renderToString(<>{content}</>);
 };
 
@@ -601,18 +601,18 @@ export class PreviewController {
           },
         }
       : isDocumentFound === false
-      ? {
-          code: 'DOC_NOT_FOUND',
-          error: {
-            message: i18n.translate(
-              'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
-              {
-                defaultMessage: 'Document ID not found',
-              }
-            ),
-          },
-        }
-      : null;
+        ? {
+            code: 'DOC_NOT_FOUND',
+            error: {
+              message: i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
+                {
+                  defaultMessage: 'Document ID not found',
+                }
+              ),
+            },
+          }
+        : null;
 
     this.setFetchDocError(error);
 

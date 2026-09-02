@@ -205,47 +205,52 @@ function buildTemplateVariables(
   metaVariable: MetaVariable
 ) {
   const yamlValues: { [k: string]: any } = {};
-  const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
-    // support variables with . like key.patterns
-    const keyParts = key.split('.');
-    const lastKeyPart = keyParts.pop();
+  const vars = Object.entries(variables).reduce(
+    (acc, [key, recordEntry]) => {
+      // support variables with . like key.patterns
+      const keyParts = key.split('.');
+      const lastKeyPart = keyParts.pop();
 
-    if (!lastKeyPart || !isValidKey(lastKeyPart)) {
-      throw new PackageInvalidArchiveError(
-        `Error while compiling agent template: Invalid key ${lastKeyPart}`
-      );
-    }
-
-    let varPart = acc;
-    for (const keyPart of keyParts) {
-      if (!isValidKey(keyPart)) {
+      if (!lastKeyPart || !isValidKey(lastKeyPart)) {
         throw new PackageInvalidArchiveError(
-          `Error while compiling agent template: Invalid key ${keyPart}`
+          `Error while compiling agent template: Invalid key ${lastKeyPart}`
         );
       }
-      if (!varPart[keyPart]) {
-        varPart[keyPart] = {};
-      }
-      varPart = varPart[keyPart];
-    }
 
-    if (recordEntry.type && recordEntry.type === 'yaml') {
-      const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
-      // Coerce to string before parsing to match the behavior of js-yaml.load,
-      // which internally calls String(input). The yaml package requires a string.
-      yamlValues[yamlKeyPlaceholder] = recordEntry.value ? parse(String(recordEntry.value)) : null;
-    } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      if (recordEntry.value.ids) {
-        varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
-      } else {
-        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      let varPart = acc;
+      for (const keyPart of keyParts) {
+        if (!isValidKey(keyPart)) {
+          throw new PackageInvalidArchiveError(
+            `Error while compiling agent template: Invalid key ${keyPart}`
+          );
+        }
+        if (!varPart[keyPart]) {
+          varPart[keyPart] = {};
+        }
+        varPart = varPart[keyPart];
       }
-    } else {
-      varPart[lastKeyPart] = recordEntry.value;
-    }
-    return acc;
-  }, {} as { [k: string]: any });
+
+      if (recordEntry.type && recordEntry.type === 'yaml') {
+        const yamlKeyPlaceholder = `##${key}##`;
+        varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
+        // Coerce to string before parsing to match the behavior of js-yaml.load,
+        // which internally calls String(input). The yaml package requires a string.
+        yamlValues[yamlKeyPlaceholder] = recordEntry.value
+          ? parse(String(recordEntry.value))
+          : null;
+      } else if (recordEntry.value && recordEntry.value.isSecretRef) {
+        if (recordEntry.value.ids) {
+          varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
+        } else {
+          varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+        }
+      } else {
+        varPart[lastKeyPart] = recordEntry.value;
+      }
+      return acc;
+    },
+    {} as { [k: string]: any }
+  );
 
   vars._meta = metaVariable;
 

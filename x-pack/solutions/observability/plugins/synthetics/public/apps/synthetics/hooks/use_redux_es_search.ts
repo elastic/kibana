@@ -19,7 +19,7 @@ import {
 
 export const useReduxEsSearch = <
   DocumentSource extends unknown,
-  TParams extends estypes.SearchRequest
+  TParams extends estypes.SearchRequest,
 >(
   params: TParams,
   fnDeps: any[],

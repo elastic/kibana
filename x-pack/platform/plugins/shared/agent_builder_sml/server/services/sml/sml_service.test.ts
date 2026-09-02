@@ -31,7 +31,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
     esql: {
       query: jest.fn(),
     },
-  } as unknown as jest.Mocked<ElasticsearchClient>);
+  }) as unknown as jest.Mocked<ElasticsearchClient>;
 
 const PRIVILEGES_PATH = 'permissions.kibana.privileges';
 const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name`;

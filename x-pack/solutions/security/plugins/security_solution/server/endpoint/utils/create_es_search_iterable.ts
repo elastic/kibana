@@ -13,7 +13,7 @@ import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/a
 
 export interface CreateEsSearchIterableOptions<
   TDocument = unknown,
-  TResultDocument = SearchResponse<TDocument>
+  TResultDocument = SearchResponse<TDocument>,
 > {
   esClient: ElasticsearchClient;
   searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort' | 'pit' | 'index'> &
@@ -60,7 +60,7 @@ export const createEsSearchIterable = <
   /** The ES Document type */
   TDocument = unknown,
   /** Type that is returned after the Mapper (if any) has manipulated the data */
-  TResultDocument = SearchResponse<TDocument>
+  TResultDocument = SearchResponse<TDocument>,
 >({
   esClient,
   searchRequest: { size = 1000, index, ...searchOptions },

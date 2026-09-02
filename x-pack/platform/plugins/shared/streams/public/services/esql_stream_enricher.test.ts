@@ -27,7 +27,7 @@ const makeView = (name: string, extra: Partial<EsqlView> = {}): EsqlView => ({
 const makeRepositoryClient = (summaries: StreamSummary[]): jest.Mocked<StreamsRepositoryClient> =>
   ({
     fetch: jest.fn().mockResolvedValue({ summaries }),
-  } as unknown as jest.Mocked<StreamsRepositoryClient>);
+  }) as unknown as jest.Mocked<StreamsRepositoryClient>;
 
 const makeApplication = (
   getUrlForApp = jest

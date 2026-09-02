@@ -71,11 +71,11 @@ export const setTimeline = (
     status:
       parsedTimeline.status === TimelineStatusEnum.draft
         ? TimelineStatusEnum.active
-        : parsedTimeline.status ?? TimelineStatusEnum.active,
+        : (parsedTimeline.status ?? TimelineStatusEnum.active),
     templateTimelineVersion: isTemplateTimeline
-      ? parsedTimeline.templateTimelineVersion ?? 1
+      ? (parsedTimeline.templateTimelineVersion ?? 1)
       : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuidv4() : null,
+    templateTimelineId: isTemplateTimeline ? (parsedTimeline.templateTimelineId ?? uuidv4()) : null,
   };
 };
 

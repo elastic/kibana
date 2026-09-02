@@ -141,18 +141,18 @@ export const useDslLifecycleSummary = ({
     const hotSizeInBytes = !canShowPerPhaseStats
       ? undefined
       : hasPhaseStats
-      ? phaseStats.hot?.size_in_bytes ?? 0
-      : stats?.sizeBytes;
+        ? (phaseStats.hot?.size_in_bytes ?? 0)
+        : stats?.sizeBytes;
     const hotDocsCount = !canShowPerPhaseStats
       ? undefined
       : hasPhaseStats
-      ? phaseStats.hot?.docs_count ?? 0
-      : stats?.totalDocs;
+        ? (phaseStats.hot?.docs_count ?? 0)
+        : stats?.totalDocs;
     // Frozen fields only ever come from per-phase stats, so guard them on `hasPhaseStats` alone.
     // (Hot uses `canShowPerPhaseStats` because it can also fall back to whole-stream totals before
     // per-phase stats resolve; frozen has no such fallback.)
-    const frozenSizeInBytes = hasPhaseStats ? phaseStats.frozen?.size_in_bytes ?? 0 : undefined;
-    const frozenDocsCount = hasPhaseStats ? phaseStats.frozen?.docs_count ?? 0 : undefined;
+    const frozenSizeInBytes = hasPhaseStats ? (phaseStats.frozen?.size_in_bytes ?? 0) : undefined;
+    const frozenDocsCount = hasPhaseStats ? (phaseStats.frozen?.docs_count ?? 0) : undefined;
 
     return buildLifecyclePhases({
       label: isServerless
@@ -301,7 +301,7 @@ export const useDslLifecycleSummary = ({
 
   const downsampleSteps = isDsl
     ? uiState.isEditDslStepsFlyoutOpen
-      ? uiState.previewSteps?.dsl.downsample ?? effectiveLifecycle.dsl.downsample
+      ? (uiState.previewSteps?.dsl.downsample ?? effectiveLifecycle.dsl.downsample)
       : effectiveLifecycle.dsl.downsample
     : undefined;
 

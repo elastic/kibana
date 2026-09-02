@@ -27,7 +27,7 @@ const createMockBucket = (
     success_count: { doc_count: 5, agents: { value: 2 } },
     error_count: { doc_count: 3, agents: { value: 1 } },
     ...overrides,
-  } as ScheduledExecutionBucket);
+  }) as ScheduledExecutionBucket;
 
 const defaultPackAttributes: PackSO['attributes'] = {
   saved_object_id: 'pack-1',

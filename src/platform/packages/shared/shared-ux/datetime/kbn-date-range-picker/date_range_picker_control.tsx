@@ -239,8 +239,8 @@ export function DateRangePickerControl() {
         width === 'restricted'
           ? wrapperRestrictedStyles
           : width === 'auto' && isEditing
-          ? wrapperAutoInputStyles
-          : undefined,
+            ? wrapperAutoInputStyles
+            : undefined,
         disabled && disabledIconOverrideStyles,
       ]}
       data-test-subj="dateRangePickerControlWrapper"

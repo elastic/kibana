@@ -416,7 +416,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   ({ ariaLevels }, graphNodeGetter) =>
     (nodeID: string) => {
       const node = graphNodeGetter(nodeID);
-      return node ? ariaLevels.get(node) ?? null : null;
+      return node ? (ariaLevels.get(node) ?? null) : null;
     }
 );
 

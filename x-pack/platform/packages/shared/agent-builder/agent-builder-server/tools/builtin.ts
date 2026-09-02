@@ -74,14 +74,14 @@ export type ToolAvailabilityConfig = AvailabilityConfig;
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
 export interface BuiltInToolConfirmationContext<
-  TParams extends Record<string, unknown> = Record<string, unknown>
+  TParams extends Record<string, unknown> = Record<string, unknown>,
 > {
   toolParams: TParams;
   context: ToolHandlerContext;
 }
 
 export interface BuiltInToolConfirmationPolicy<
-  TParams extends Record<string, unknown> = Record<string, unknown>
+  TParams extends Record<string, unknown> = Record<string, unknown>,
 > extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
@@ -92,7 +92,7 @@ export interface BuiltInToolConfirmationPolicy<
 }
 
 export interface BuiltInToolSpecificConfig<
-  TParams extends Record<string, unknown> = Record<string, unknown>
+  TParams extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Optional dynamic availability configuration.
@@ -148,11 +148,10 @@ export type ToolReturnSummarizerFn = (
  */
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
-  TResult extends ToolResult = ToolResult
-> extends Omit<
-      ToolDefinition,
-      'type' | 'readonly' | 'configuration' | 'experimental' | 'confirmation'
-    >,
+  TResult extends ToolResult = ToolResult,
+>
+  extends
+    Omit<ToolDefinition, 'type' | 'readonly' | 'configuration' | 'experimental' | 'confirmation'>,
     BuiltInToolSpecificConfig<z.infer<RunInput>> {
   /**
    * built-in tool types
@@ -185,7 +184,7 @@ export interface BuiltinToolDefinition<
  */
 export type InternalBuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
-  TResult extends ToolResult = ToolResult
+  TResult extends ToolResult = ToolResult,
 > = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations'>;
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
@@ -197,7 +196,7 @@ export type StaticWorkflowTool = StaticToolRegistrationMixin<WorkflowToolDefinit
 
 export type StaticToolRegistration<
   RunInput extends ZodObject<any> = ZodObject<any>,
-  TResult extends ToolResult = ToolResult
+  TResult extends ToolResult = ToolResult,
 > =
   | BuiltinToolDefinition<RunInput, TResult>
   | StaticEsqlTool

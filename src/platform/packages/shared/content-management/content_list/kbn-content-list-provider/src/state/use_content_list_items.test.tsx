@@ -25,12 +25,10 @@ const sampleItems: ContentListItem[] = [
 ];
 
 describe('useContentListItems', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: sampleItems,
-      total: sampleItems.length,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: sampleItems,
+    total: sampleItems.length,
+  }));
 
   const createWrapper = (props?: Partial<ContentListProviderProps>) => {
     const defaultProps: ContentListProviderProps = {
@@ -193,12 +191,10 @@ describe('useContentListItems', () => {
 
     it('warms the profile cache from fetched items for direct-provider user filters', async () => {
       const userItems: ContentListItem[] = [{ id: '1', title: 'Dashboard A', createdBy: 'u_jane' }];
-      const userFindItems = jest.fn(
-        async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-          items: userItems,
-          total: userItems.length,
-        })
-      );
+      const userFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+        items: userItems,
+        total: userItems.length,
+      }));
       const bulkResolve = jest.fn(async (uids: string[]) =>
         uids.includes('u_jane')
           ? [

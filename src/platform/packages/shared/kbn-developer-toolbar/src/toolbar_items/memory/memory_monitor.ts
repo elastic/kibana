@@ -194,7 +194,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     const baseline =
       baselineWindow.length > 0
         ? baselineWindow.reduce((s, v) => s + v, 0) / baselineWindow.length
-        : h[0] ?? 0;
+        : (h[0] ?? 0);
 
     const recentShort = h.slice(-10); // last 10 samples
     const recentLong = h.slice(-20); // last 20 samples

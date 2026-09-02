@@ -38,16 +38,14 @@ const mockTags = [
   },
 ];
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [
-      { id: 'item-1', title: 'Item 1', tags: ['tag-1', 'tag-2'] },
-      { id: 'item-2', title: 'Item 2', tags: ['tag-1'] },
-      { id: 'item-3', title: 'Item 3', tags: ['tag-3'] },
-    ],
-    total: 3,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [
+    { id: 'item-1', title: 'Item 1', tags: ['tag-1', 'tag-2'] },
+    { id: 'item-2', title: 'Item 2', tags: ['tag-1'] },
+    { id: 'item-3', title: 'Item 3', tags: ['tag-3'] },
+  ],
+  total: 3,
+}));
 
 const mockTagsService: ContentManagementTagsServices = {
   getTagList: () => mockTags,
@@ -58,14 +56,12 @@ const mockTagsService: ContentManagementTagsServices = {
  */
 const mockTagsFeatureConfig: FilterFacetConfig<Tag> = {
   getFacets: async () =>
-    mockTags.map(
-      (tag): FilterFacet<Tag> => ({
-        key: tag.id ?? tag.name,
-        label: tag.name,
-        count: undefined,
-        data: tag,
-      })
-    ),
+    mockTags.map((tag): FilterFacet<Tag> => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      count: undefined,
+      data: tag,
+    })),
 };
 
 const createWrapper = (options?: { tagsService?: ContentManagementTagsServices }) => {
@@ -203,14 +199,12 @@ describe('TagFilterRenderer', () => {
 
       const tagsFeatureWithCounts: FilterFacetConfig<Tag> = {
         getFacets: async () =>
-          mockTags.map(
-            (tag): FilterFacet<Tag> => ({
-              key: tag.id ?? tag.name,
-              label: tag.name,
-              count: tag.id === 'tag-1' ? 2 : tag.id === 'tag-2' ? 1 : 0,
-              data: tag,
-            })
-          ),
+          mockTags.map((tag): FilterFacet<Tag> => ({
+            key: tag.id ?? tag.name,
+            label: tag.name,
+            count: tag.id === 'tag-1' ? 2 : tag.id === 'tag-2' ? 1 : 0,
+            data: tag,
+          })),
       };
 
       const WrapperWithCounts = ({ children }: { children: React.ReactNode }) => (

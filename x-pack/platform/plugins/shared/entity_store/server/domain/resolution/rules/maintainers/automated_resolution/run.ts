@@ -249,7 +249,7 @@ async function findMatchingGroups(
       const totalUnresolved =
         typeof unresolvedTopHits.hits.total === 'number'
           ? unresolvedTopHits.hits.total
-          : unresolvedTopHits.hits.total?.value ?? 0;
+          : (unresolvedTopHits.hits.total?.value ?? 0);
       if (totalUnresolved > TOP_HITS_SIZE) {
         logger.warn(
           `Email bucket '${

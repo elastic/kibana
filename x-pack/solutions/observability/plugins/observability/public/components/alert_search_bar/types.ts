@@ -55,9 +55,7 @@ export interface Services {
 }
 
 export interface ObservabilityAlertSearchBarProps
-  extends AlertSearchBarContainerState,
-    AlertSearchBarStateTransitions,
-    CommonAlertSearchBarProps {
+  extends AlertSearchBarContainerState, AlertSearchBarStateTransitions, CommonAlertSearchBarProps {
   services: Services;
   filterControls?: Filter[];
   onFilterControlsChange: (filterControls: Filter[]) => void;

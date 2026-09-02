@@ -181,8 +181,8 @@ export const KubernetesOtelPage: React.FC = () => {
       status: (dataReceived
         ? 'complete'
         : isMonitoringStepActive
-        ? 'current'
-        : 'incomplete') as EuiStepStatus,
+          ? 'current'
+          : 'incomplete') as EuiStepStatus,
       children: (
         <OtelKubernetesVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}

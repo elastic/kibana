@@ -98,7 +98,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
 
   function createADJobInWizard() {
     const partitionField = selectedPartitionFieldOptions.length
-      ? dataView.getFieldByName(selectedPartitionFieldOptions[0].label) ?? null
+      ? (dataView.getFieldByName(selectedPartitionFieldOptions[0].label) ?? null)
       : null;
     redirectToADJobWizards(
       categorizationType,
@@ -125,7 +125,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
 
   async function createADJob({ jobId, bucketSpan, startJob, runInRealTime }: CreateADJobParams) {
     const partitionField = selectedPartitionFieldOptions.length
-      ? dataView.getFieldByName(selectedPartitionFieldOptions[0].label) ?? null
+      ? (dataView.getFieldByName(selectedPartitionFieldOptions[0].label) ?? null)
       : null;
     const result = await quickJobCreator.createAndSaveJob(
       categorizationType,

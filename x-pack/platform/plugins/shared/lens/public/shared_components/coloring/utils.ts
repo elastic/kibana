@@ -46,10 +46,10 @@ export function getPaletteDisplayColors(
   return colorMapping
     ? getColorsFromMapping(palettes, isDarkMode, colorMapping)
     : palette?.name === CUSTOM_PALETTE
-    ? palette?.params?.stops?.map(({ color }) => color) ?? []
-    : paletteService
-        .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
-        .getCategoricalColors(palette?.params?.steps || 10, palette);
+      ? (palette?.params?.stops?.map(({ color }) => color) ?? [])
+      : paletteService
+          .get(palette?.name || DEFAULT_FALLBACK_PALETTE)
+          .getCategoricalColors(palette?.params?.steps || 10, palette);
 }
 
 export function getAccessorTypeFromOperation(

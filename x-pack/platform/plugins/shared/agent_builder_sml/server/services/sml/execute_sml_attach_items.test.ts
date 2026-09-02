@@ -16,7 +16,7 @@ const createMockScopedClient = (): IScopedClusterClient =>
   ({
     asInternalUser: { search: jest.fn() } as unknown as ElasticsearchClient,
     asCurrentUser: { search: jest.fn() } as unknown as ElasticsearchClient,
-  } as unknown as IScopedClusterClient);
+  }) as unknown as IScopedClusterClient;
 
 const mockCheckItemsAccess = jest.fn();
 const mockGetDocuments = jest.fn();
@@ -27,7 +27,7 @@ const createSmlService = (): SmlService =>
     checkItemsAccess: mockCheckItemsAccess,
     getDocuments: mockGetDocuments,
     getTypeDefinition: mockGetTypeDefinition,
-  } as unknown as SmlService);
+  }) as unknown as SmlService;
 
 const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   id: 'entry-1',

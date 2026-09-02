@@ -675,7 +675,7 @@ export const createLeadDataClient = ({
       });
 
       const total =
-        typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+        typeof resp.hits.total === 'number' ? resp.hits.total : (resp.hits.total?.value ?? 0);
 
       const leads = resp.hits.hits
         .map((hit) => hit._source)
@@ -752,7 +752,7 @@ export const createLeadDataClient = ({
         .map(esDocToLead);
 
       const cursor =
-        pageHits.length > 0 ? buildCursor(pageHits[pageHits.length - 1]) : encodedCursor ?? null;
+        pageHits.length > 0 ? buildCursor(pageHits[pageHits.length - 1]) : (encodedCursor ?? null);
 
       return { changed, cursor, hasMore };
     } catch (e) {
@@ -857,7 +857,7 @@ export const createLeadDataClient = ({
 
       indexExists = true;
       totalLeads =
-        typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+        typeof resp.hits.total === 'number' ? resp.hits.total : (resp.hits.total?.value ?? 0);
 
       const latestHit = resp.hits.hits[0];
       if (latestHit?._source) {

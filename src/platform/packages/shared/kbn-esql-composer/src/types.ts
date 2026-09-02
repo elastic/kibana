@@ -21,7 +21,7 @@ type AllowedParamChar = AlphaLower | Uppercase<AlphaLower> | StringToUnion<'0123
 
 type ExtractSingleParam<
   S extends string,
-  Acc extends string = ''
+  Acc extends string = '',
 > = S extends `${infer First}${infer Rest}`
   ? First extends AllowedParamChar
     ? ExtractSingleParam<Rest, `${Acc}${First}`>
@@ -30,16 +30,16 @@ type ExtractSingleParam<
 
 export type ExtractNamedParamNames<
   S extends string,
-  Acc extends string = never
+  Acc extends string = never,
 > = S extends `${infer _Before}\?${infer After}`
   ? ExtractNamedParamNames<After, Acc>
   : S extends `${infer _Before}?${infer After}`
-  ? ExtractSingleParam<After> extends [infer Param extends string, infer Rest extends string]
-    ? Param extends ''
-      ? ExtractNamedParamNames<Rest, Acc>
-      : ExtractNamedParamNames<Rest, Acc | Param>
-    : Acc
-  : Acc;
+    ? ExtractSingleParam<After> extends [infer Param extends string, infer Rest extends string]
+      ? Param extends ''
+        ? ExtractNamedParamNames<Rest, Acc>
+        : ExtractNamedParamNames<Rest, Acc | Param>
+      : Acc
+    : Acc;
 export type FieldValue = number | string | boolean | null;
 
 export type NamedParameter<TQuery extends string = string> = Record<

@@ -71,12 +71,12 @@ const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): Workflo
     yaml: 'triggers: [{ type: "cases.updated" }]\nsteps: []',
     valid: true,
     ...overrides,
-  } as WorkflowDetailDto);
+  }) as WorkflowDetailDto;
 
 const createWorkflowRepositoryMock = (subscribed: WorkflowDetailDto[] = []): WorkflowRepository =>
   ({
     getWorkflowsSubscribedToTrigger: jest.fn().mockResolvedValue(subscribed),
-  } as unknown as WorkflowRepository);
+  }) as unknown as WorkflowRepository;
 
 function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEventHandlerDeps {
   const mockLogger: Logger = {

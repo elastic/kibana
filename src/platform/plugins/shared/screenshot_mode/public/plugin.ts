@@ -16,15 +16,12 @@ import type {
   ScreenshotModePublicStartDependencies,
 } from './types';
 
-export class ScreenshotModePlugin
-  implements
-    Plugin<
-      ScreenshotModePublicSetup,
-      ScreenshotModePublicStart,
-      ScreenshotModePublicSetupDependencies,
-      ScreenshotModePublicStartDependencies
-    >
-{
+export class ScreenshotModePlugin implements Plugin<
+  ScreenshotModePublicSetup,
+  ScreenshotModePublicStart,
+  ScreenshotModePublicSetupDependencies,
+  ScreenshotModePublicStartDependencies
+> {
   private publicContract = Object.freeze({
     getScreenshotContext,
     isScreenshotMode: () => getScreenshotMode() === true,

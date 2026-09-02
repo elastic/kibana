@@ -22,7 +22,10 @@ interface LensDragDropDeps {
  * (geo, extra drop types, reorder, keyboard DnD, field-list / data-panel helpers).
  */
 export class LensDragDrop {
-  constructor(private readonly page: ScoutPage, private readonly deps: LensDragDropDeps) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly deps: LensDragDropDeps
+  ) {}
 
   /**
    * Geo workspace drop target only mounts after dragstart on a geo field, so

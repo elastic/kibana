@@ -210,7 +210,7 @@ export const chatCompleteRoute = (
 
           // Do not persist conversation messages if `persist = false`
           const conversationId = request.body.persist
-            ? existingConversationId ?? newConversation?.id
+            ? (existingConversationId ?? newConversation?.id)
             : undefined;
 
           const systemPromptParts: string[] = [];

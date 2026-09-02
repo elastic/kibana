@@ -30,7 +30,7 @@ export interface SubmitNotificationResult {
  */
 export interface NotificationSubmitter<
   N extends NotificationNamespace,
-  T extends NotificationTypeName<N>
+  T extends NotificationTypeName<N>,
 > {
   /**
    * Validate the content, check the type's feature flag, build the `notification_id` from the

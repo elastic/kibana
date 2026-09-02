@@ -106,7 +106,7 @@ describe('project watch', () => {
         enabled: true,
         triggers: [{ type: 'manual' }],
         steps: [agentStep],
-      } as unknown as WorkflowYaml);
+      }) as unknown as WorkflowYaml;
 
     /**
      * Build an AgentLookup that knows one agent ('my-agent' of type 'my-type').
@@ -197,7 +197,7 @@ describe('project watch', () => {
             ({
               type: undefined,
               configuration: { skill_ids: ['skill-a'] },
-            } as unknown as InternalAgentDefinition),
+            }) as unknown as InternalAgentDefinition,
           getAgentType,
           getSkill: () => null,
         };
@@ -212,7 +212,7 @@ describe('project watch', () => {
             ({
               type: 'unknown-type',
               configuration: { skill_ids: ['skill-a'] },
-            } as unknown as InternalAgentDefinition),
+            }) as unknown as InternalAgentDefinition,
           getAgentType: () => null,
           getSkill: () => null,
         };

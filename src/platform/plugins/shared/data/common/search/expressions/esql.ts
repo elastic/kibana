@@ -312,7 +312,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           : undefined;
 
         const filters = [
-          ...(ignoreGlobalFilters ? [] : input.filters ?? []),
+          ...(ignoreGlobalFilters ? [] : (input.filters ?? [])),
           ...(timeFilter ? [timeFilter] : []),
           ...(delayFilter ? [delayFilter] : []),
         ];

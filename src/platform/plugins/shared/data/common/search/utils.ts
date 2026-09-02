@@ -58,5 +58,5 @@ export function strategyToString(strategy?: string | symbol): string {
 
   return typeof strategy === 'string'
     ? strategy
-    : strategy.description ?? ENHANCED_ES_SEARCH_STRATEGY;
+    : (strategy.description ?? ENHANCED_ES_SEARCH_STRATEGY);
 }

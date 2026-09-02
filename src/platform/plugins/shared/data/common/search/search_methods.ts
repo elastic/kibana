@@ -209,7 +209,7 @@ export class SearchMethodsService implements ISearchMethods {
     const totalValue =
       typeof rawResponse.hits?.total === 'number'
         ? rawResponse.hits.total
-        : rawResponse.hits?.total?.value ?? 0;
+        : (rawResponse.hits?.total?.value ?? 0);
     const hasNextPage = Boolean(lastHit?.sort) && totalValue > currentCount;
 
     return {

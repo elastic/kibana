@@ -16,10 +16,13 @@ export async function getDataStreamsCreationDate({
   dataStreams: string[];
 }) {
   const matchingStreams = await dataStreamService.getMatchingDataStreams(esClient, dataStreams);
-  const streamByIndex = matchingStreams.reduce((acc, { name, indices }) => {
-    if (indices[0]) acc[indices[0].index_name] = name;
-    return acc;
-  }, {} as Record<string, string>);
+  const streamByIndex = matchingStreams.reduce(
+    (acc, { name, indices }) => {
+      if (indices[0]) acc[indices[0].index_name] = name;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
   const indices = Object.keys(streamByIndex);
   if (indices.length === 0) {
@@ -34,12 +37,15 @@ export async function getDataStreamsCreationDate({
     format: 'json',
   });
 
-  return catIndices.reduce((acc, index) => {
-    const creationDate = index['creation.date'];
-    const indexName = index.index!;
-    const stream = streamByIndex[indexName];
+  return catIndices.reduce(
+    (acc, index) => {
+      const creationDate = index['creation.date'];
+      const indexName = index.index!;
+      const stream = streamByIndex[indexName];
 
-    acc[stream] = creationDate ? Number(creationDate) : undefined;
-    return acc;
-  }, {} as Record<string, number | undefined>);
+      acc[stream] = creationDate ? Number(creationDate) : undefined;
+      return acc;
+    },
+    {} as Record<string, number | undefined>
+  );
 }

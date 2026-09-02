@@ -251,20 +251,19 @@ describe('MetricsExperienceStateProvider', () => {
         props: { metricsSort?: MetricsSort; onMetricsSortChange?: (sort: MetricsSort) => void },
         { sortingEnabled = true }: { sortingEnabled?: boolean } = {}
       ) =>
-      ({ children }: { children: React.ReactNode }) =>
-        (
-          <ExternalServicesProvider
-            externalServices={{
-              featureFlags: createFeatureFlagsMock({
-                [FEATURE_FLAGS.IS_SORTING_ENABLED]: sortingEnabled,
-              }),
-            }}
-          >
-            <MetricsExperienceStateProvider profileId="test-profile" {...props}>
-              {children}
-            </MetricsExperienceStateProvider>
-          </ExternalServicesProvider>
-        );
+      ({ children }: { children: React.ReactNode }) => (
+        <ExternalServicesProvider
+          externalServices={{
+            featureFlags: createFeatureFlagsMock({
+              [FEATURE_FLAGS.IS_SORTING_ENABLED]: sortingEnabled,
+            }),
+          }}
+        >
+          <MetricsExperienceStateProvider profileId="test-profile" {...props}>
+            {children}
+          </MetricsExperienceStateProvider>
+        </ExternalServicesProvider>
+      );
 
     it('defaults to METRICS_GRID_SORT_DEFAULTS when the prop is omitted', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), {

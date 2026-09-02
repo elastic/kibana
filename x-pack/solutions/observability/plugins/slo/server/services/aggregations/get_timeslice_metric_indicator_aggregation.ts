@@ -16,7 +16,10 @@ type TimesliceMetricDef = TimesliceMetricIndicator['params']['metric'];
 type TimesliceMetricMetricDef = t.TypeOf<typeof timesliceMetricMetricDef>;
 
 export class GetTimesliceMetricIndicatorAggregation {
-  constructor(private indicator: TimesliceMetricIndicator, private dataView?: DataView) {}
+  constructor(
+    private indicator: TimesliceMetricIndicator,
+    private dataView?: DataView
+  ) {}
 
   private buildAggregation(metric: TimesliceMetricMetricDef) {
     const { aggregation } = metric;

@@ -90,15 +90,12 @@ export const resolveReplacementsEncryptionKey = async ({
   return policyService.getReplacementsEncryptionKey(namespace);
 };
 
-export class InferencePlugin
-  implements
-    Plugin<
-      InferenceServerSetup,
-      InferenceServerStart,
-      InferenceSetupDependencies,
-      InferenceStartDependencies
-    >
-{
+export class InferencePlugin implements Plugin<
+  InferenceServerSetup,
+  InferenceServerStart,
+  InferenceSetupDependencies,
+  InferenceStartDependencies
+> {
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;

@@ -18,7 +18,7 @@ type ReturnOf<TActionDefinition extends Omit<ScreenContextActionDefinition, 'res
 
 export function createScreenContextAction<
   TActionDefinition extends Omit<ScreenContextActionDefinition, 'respond'>,
-  TRespondFunction extends ScreenContextActionRespondFunction<ReturnOf<TActionDefinition>>
+  TRespondFunction extends ScreenContextActionRespondFunction<ReturnOf<TActionDefinition>>,
 >(
   definition: TActionDefinition,
   respond: TRespondFunction

@@ -19,7 +19,7 @@ const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
     triggers: [{ type: 'manual', enabled: true }],
     steps: [],
     ...overrides,
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 /** Minimal step-execution factory — only the fields the layout hook reads. */
 const stepExec = (
@@ -41,7 +41,7 @@ const stepExec = (
           },
         ]
       : [],
-  } satisfies Partial<WorkflowStepExecutionDto> as WorkflowStepExecutionDto);
+  }) satisfies Partial<WorkflowStepExecutionDto> as WorkflowStepExecutionDto;
 
 const traversedOf = (edge: { data?: unknown } | undefined): boolean | undefined =>
   (edge?.data as Record<string, unknown> | undefined)?.traversed as boolean | undefined;

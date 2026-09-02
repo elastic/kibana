@@ -10,7 +10,10 @@ import { testData } from '..';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class MobileTransactionsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoTransactions(
     serviceName: string,

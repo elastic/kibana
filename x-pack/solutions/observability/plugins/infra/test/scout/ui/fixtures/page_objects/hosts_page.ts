@@ -52,7 +52,10 @@ export class HostsPage {
   public readonly excludeButton: Locator;
   public readonly availableFilterOptions: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.tableLoaded = this.page.getByTestId('hostsView-table-loaded');
     this.tableRows = this.page.getByTestId('hostsView-tableRow');
     // EuiBasicTable renders noItemsMessage in both caption (a11y) and body cell; scope to cell.

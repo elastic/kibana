@@ -12,9 +12,7 @@ import {
 } from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 
-export class SloDetailsHistoryLocatorDefinition
-  implements LocatorDefinition<SloDetailsHistoryLocatorParams>
-{
+export class SloDetailsHistoryLocatorDefinition implements LocatorDefinition<SloDetailsHistoryLocatorParams> {
   public readonly id = sloDetailsHistoryLocatorID;
 
   public readonly getLocation = async ({

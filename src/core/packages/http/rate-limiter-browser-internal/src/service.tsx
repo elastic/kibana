@@ -29,9 +29,10 @@ export type InternalRateLimiterSetup = void;
 export type InternalRateLimiterStart = void;
 
 /** @internal */
-export class HttpRateLimiterService
-  implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
-{
+export class HttpRateLimiterService implements CoreService<
+  InternalRateLimiterSetup,
+  InternalRateLimiterStart
+> {
   public setup({ http, fatalErrors }: SetupDeps): InternalRateLimiterSetup {
     fatalErrors.catch(
       (error): error is FatalError<IHttpFetchError> => isRateLimiterError(error.error),

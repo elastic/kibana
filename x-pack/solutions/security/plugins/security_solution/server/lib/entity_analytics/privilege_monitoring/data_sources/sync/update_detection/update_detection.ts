@@ -25,9 +25,8 @@ export const createUpdateDetectionService = (
   });
   const statusUpdateService = createPrivilegeStatusUpdateService(dataClient);
   const updateDetection = async (source: MonitoringEntitySource) => {
-    const users: PrivMonBulkUser[] = await patternMatcherService.findPrivilegedUsersFromMatchers(
-      source
-    );
+    const users: PrivMonBulkUser[] =
+      await patternMatcherService.findPrivilegedUsersFromMatchers(source);
 
     await statusUpdateService.updatePrivilegedStatus(uniq(users), source); // ensure users are unique before updating
     dataClient.log(

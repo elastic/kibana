@@ -22,15 +22,12 @@ import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/de
  *
  * It has no enabled flag of its own. It follows `xpack.evals.enabled` (off by default).
  */
-export class EvalsSkillsPlugin
-  implements
-    Plugin<
-      EvalsSkillsPluginSetup,
-      EvalsSkillsPluginStart,
-      EvalsSkillsSetupDependencies,
-      EvalsSkillsStartDependencies
-    >
-{
+export class EvalsSkillsPlugin implements Plugin<
+  EvalsSkillsPluginSetup,
+  EvalsSkillsPluginStart,
+  EvalsSkillsSetupDependencies,
+  EvalsSkillsStartDependencies
+> {
   private readonly logger: Logger;
 
   constructor(context: PluginInitializerContext) {

@@ -100,14 +100,14 @@ export const useObservabilityCuratedCategories = ({
       id: category.id,
       label: category.label,
       tiles: category.tiles.map((tile) => {
-        const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
+        const resolvedLogo = colorMode === 'DARK' ? (tile.darkLogo ?? tile.logo) : tile.logo;
         const navigation =
           collectionNavigation(tile.collectionGroup) ??
           (tile.route
             ? reactRouterNavigate(history, tile.route)
             : tile.eprPackage
-            ? eprDetailNavigation(tile.eprPackage, tile.eprIntegration)
-            : dynamicNavigation[tile.id] ?? {});
+              ? eprDetailNavigation(tile.eprPackage, tile.eprIntegration)
+              : (dynamicNavigation[tile.id] ?? {}));
 
         return {
           id: tile.id,
@@ -188,10 +188,10 @@ export const useObservabilityMiniTiles = ({
               badge: <VariantCountBadge count={collection.groupMembers.length} />,
             }
           : tile.route
-          ? reactRouterNavigate(history, tile.route)
-          : tile.eprPackage
-          ? { href: eprUrl ? addPathParamToUrl(eprUrl, {}) : undefined }
-          : dynamicNavigation[tile.id] ?? {};
+            ? reactRouterNavigate(history, tile.route)
+            : tile.eprPackage
+              ? { href: eprUrl ? addPathParamToUrl(eprUrl, {}) : undefined }
+              : (dynamicNavigation[tile.id] ?? {});
 
       return {
         id: tile.id,

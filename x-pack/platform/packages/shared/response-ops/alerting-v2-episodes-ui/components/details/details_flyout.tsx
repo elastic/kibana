@@ -207,29 +207,29 @@ export const AlertEpisodeDetailsFlyout = ({
                   flex-direction: column;
                 }
                 [class*='euiFlexItem']:has(
-                    > [class*='euiFormControlLayout']
-                      [data-test-subj='unifiedDocViewerFieldsSearchInput']
-                  ),
+                  > [class*='euiFormControlLayout']
+                    [data-test-subj='unifiedDocViewerFieldsSearchInput']
+                ),
                 [class*='euiFlexItem']:has(
-                    > [class*='euiFlexGroup'] > [class*='euiFlexItem'] > [class*='euiSwitch']
-                  ) {
+                  > [class*='euiFlexGroup'] > [class*='euiFlexItem'] > [class*='euiSwitch']
+                ) {
                   padding-inline: ${euiTheme.size.m};
                 }
               `
             : effectiveTab === 'timeline'
-            ? css`
-                padding: ${euiTheme.size.m};
-                // EuiFlyoutBody applies a static overflow-shadow mask that fades
-                // the top/bottom edges of the scroll container regardless of
-                // scrollability. The timeline's comment list starts flush at the
-                // top, so add inner top padding to clear the mask's fade band.
-                [class*='euiFlyoutBody__overflowContent'] {
-                  padding-block-start: ${euiTheme.size.s};
-                }
-              `
-            : css`
-                padding: ${euiTheme.size.m};
-              `
+              ? css`
+                  padding: ${euiTheme.size.m};
+                  // EuiFlyoutBody applies a static overflow-shadow mask that fades
+                  // the top/bottom edges of the scroll container regardless of
+                  // scrollability. The timeline's comment list starts flush at the
+                  // top, so add inner top padding to clear the mask's fade band.
+                  [class*='euiFlyoutBody__overflowContent'] {
+                    padding-block-start: ${euiTheme.size.s};
+                  }
+                `
+              : css`
+                  padding: ${euiTheme.size.m};
+                `
         }
       >
         {effectiveTab === 'overview' && (

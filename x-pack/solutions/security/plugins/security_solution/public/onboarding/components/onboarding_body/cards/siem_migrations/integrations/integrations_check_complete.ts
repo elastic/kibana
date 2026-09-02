@@ -18,9 +18,8 @@ import {
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  const { isComplete, activePackages: activeIntegrations } = await getActiveIntegrationList(
-    services
-  );
+  const { isComplete, activePackages: activeIntegrations } =
+    await getActiveIntegrationList(services);
 
   const { isAgentRequired } = await getAgentsData(services, isComplete);
 

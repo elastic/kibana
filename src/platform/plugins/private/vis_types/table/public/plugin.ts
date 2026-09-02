@@ -31,9 +31,12 @@ export interface TablePluginStartDependencies {
 }
 
 /** @internal */
-export class TableVisPlugin
-  implements Plugin<void, void, TablePluginSetupDependencies, TablePluginStartDependencies>
-{
+export class TableVisPlugin implements Plugin<
+  void,
+  void,
+  TablePluginSetupDependencies,
+  TablePluginStartDependencies
+> {
   initializerContext: PluginInitializerContext<TablePublicConfig>;
 
   constructor(initializerContext: PluginInitializerContext<TablePublicConfig>) {

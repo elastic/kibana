@@ -70,11 +70,10 @@ export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
   </EuiPopover>
 );
 
-interface ExtraActionsPopOverWithAnchorProps
-  extends Pick<
-    ActionsPopOverProps,
-    'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions' | 'extraActionsColor'
-  > {
+interface ExtraActionsPopOverWithAnchorProps extends Pick<
+  ActionsPopOverProps,
+  'anchorPosition' | 'actionContext' | 'closePopOver' | 'isOpen' | 'actions' | 'extraActionsColor'
+> {
   anchorRef: React.RefObject<HTMLElement>;
 }
 

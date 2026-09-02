@@ -14,9 +14,7 @@ export interface MetricsExplorerLocatorParams extends SerializableRecord {}
 
 export const METRICS_EXPLORER_LOCATOR_ID = 'METRICS_EXPLORER_LOCATOR';
 
-export class MetricsExplorerLocatorDefinition
-  implements LocatorDefinition<MetricsExplorerLocatorParams>
-{
+export class MetricsExplorerLocatorDefinition implements LocatorDefinition<MetricsExplorerLocatorParams> {
   public readonly id = METRICS_EXPLORER_LOCATOR_ID;
 
   public readonly getLocation = async (params: MetricsExplorerLocatorParams) => {

@@ -31,7 +31,7 @@ export type SortFields = [
   {
     '@timestamp': string;
   },
-  { [x: string]: { order: string; unmapped_type?: string } }
+  { [x: string]: { order: string; unmapped_type?: string } },
 ];
 
 /**

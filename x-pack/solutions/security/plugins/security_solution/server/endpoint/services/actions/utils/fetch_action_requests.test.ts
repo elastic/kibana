@@ -654,7 +654,7 @@ describe('fetchActionRequests()', () => {
         [
           {
             query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
-          }
+          },
         ]
       >;
       const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
@@ -671,7 +671,7 @@ describe('fetchActionRequests()', () => {
         [
           {
             query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
-          }
+          },
         ]
       >;
       const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
@@ -692,7 +692,7 @@ describe('fetchActionRequests()', () => {
                 must: Array<{ bool: { filter: { bool: { minimum_should_match: number } } } }>;
               };
             };
-          }
+          },
         ]
       >;
       const spaceFilter = query.bool.must[0].bool.filter as {

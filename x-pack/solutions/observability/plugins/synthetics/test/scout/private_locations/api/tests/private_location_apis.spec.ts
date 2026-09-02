@@ -148,13 +148,11 @@ apiTest.describe('PrivateLocationAPI', { tag: ['@local-stateful-classic'] }, () 
 
     const { apiKeyHeader: adminKey } = await requestAuth.getApiKeyForAdmin();
     adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
-    const { apiKeyHeader: minimalKey } = await requestAuth.getApiKeyForCustomRole(
-      UPTIME_MINIMAL_ALL_ROLE
-    );
+    const { apiKeyHeader: minimalKey } =
+      await requestAuth.getApiKeyForCustomRole(UPTIME_MINIMAL_ALL_ROLE);
     minimalAllHeaders = mergeSyntheticsApiHeaders(minimalKey, { Accept: 'application/json' });
-    const { apiKeyHeader: canManageKey } = await requestAuth.getApiKeyForCustomRole(
-      UPTIME_CAN_MANAGE_ROLE
-    );
+    const { apiKeyHeader: canManageKey } =
+      await requestAuth.getApiKeyForCustomRole(UPTIME_CAN_MANAGE_ROLE);
     canManageHeaders = mergeSyntheticsApiHeaders(canManageKey, { Accept: 'application/json' });
   });
 

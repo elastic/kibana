@@ -103,7 +103,7 @@ const querySchema = schema.object({
   collapse: schema.maybe(
     schema.oneOf(
       WorkflowExecutionCollapseFields.map((f) => schema.literal(f)) as [
-        Type<WorkflowExecutionCollapseField>
+        Type<WorkflowExecutionCollapseField>,
       ],
       { meta: { description: 'Field to collapse execution results by.' } }
     )

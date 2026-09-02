@@ -327,11 +327,11 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   }
 
   .react-flow__node:not(.non-interactive)
-    ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled)
-    &,
+  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled)
+  &,
   .react-flow__node:not(.non-interactive)
-    ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled)
-    & {
+  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled)
+  & {
     opacity: 1; /* Show when expand button is toggled */
   }
 

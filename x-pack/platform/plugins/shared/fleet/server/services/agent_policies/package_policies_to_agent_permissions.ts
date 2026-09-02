@@ -262,7 +262,7 @@ export function storedPackagePoliciesToAgentPermissions(
 
                   const rawDataset = isOtelInput
                     ? getEffectiveOtelStreamDataset(stream)
-                    : stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset;
+                    : (stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset);
 
                   // Look up dataset_is_prefix from the registry data stream definition —
                   // it is not stored on the policy stream's data_stream object.

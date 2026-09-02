@@ -47,7 +47,7 @@ export const useTraceExists = (
     )) as TraceExistsResponse;
 
     const total = response.rawResponse?.hits?.total;
-    const count = typeof total === 'number' ? total : total?.value ?? 0;
+    const count = typeof total === 'number' ? total : (total?.value ?? 0);
     return count > 0;
   }, [search, traceId, indexPattern]);
 

@@ -15,15 +15,12 @@ import type {
 import { registerAttachmentUiDefinitions } from './attachment_types';
 import { registerConversationTemplateTabs } from './conversation_template_tabs';
 
-export class AgentBuilderPlatformPlugin
-  implements
-    Plugin<
-      AgentBuilderPlatformPluginSetup,
-      AgentBuilderPlatformPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class AgentBuilderPlatformPlugin implements Plugin<
+  AgentBuilderPlatformPluginSetup,
+  AgentBuilderPlatformPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   setup(
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>,
     setupDeps: PluginSetupDependencies

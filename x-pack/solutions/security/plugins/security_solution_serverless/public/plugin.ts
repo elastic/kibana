@@ -34,15 +34,12 @@ import { setOnboardingSettings } from './onboarding';
 import { getAdditionalChargesMessage } from './components/additional_charges_message';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
-export class SecuritySolutionServerlessPlugin
-  implements
-    Plugin<
-      SecuritySolutionServerlessPluginSetup,
-      SecuritySolutionServerlessPluginStart,
-      SecuritySolutionServerlessPluginSetupDeps,
-      SecuritySolutionServerlessPluginStartDeps
-    >
-{
+export class SecuritySolutionServerlessPlugin implements Plugin<
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStartDeps
+> {
   private config: ServerlessSecurityPublicConfig;
   private experimentalFeatures: ExperimentalFeatures;
   private managementCardsSubscription?: Subscription;

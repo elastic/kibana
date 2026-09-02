@@ -107,8 +107,8 @@ export const BulkOperations = ({
   const disabledTooltip = !canEditSynthetics
     ? CANNOT_PERFORM_ACTION_SYNTHETICS
     : !isServiceAllowed
-    ? SERVICE_NOT_ALLOWED
-    : undefined;
+      ? SERVICE_NOT_ALLOWED
+      : undefined;
 
   // Tags/schedule/locations/etc. still reject project/terraform monitors
   // (and public locations without the capability). Disable those items when

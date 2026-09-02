@@ -56,8 +56,8 @@ export const OverallUploadStatus: FC = () => {
               uploadStatus.indexSearchable
                 ? STATUS.COMPLETED
                 : uploadStatus.overallImportStatus === STATUS.ABORTED
-                ? STATUS.ABORTED
-                : STATUS.NOT_STARTED,
+                  ? STATUS.ABORTED
+                  : STATUS.NOT_STARTED,
             ]),
           },
         ]
@@ -102,8 +102,8 @@ export const OverallUploadStatus: FC = () => {
         uploadStatus.overallImportStatus === STATUS.ABORTED
           ? STATUS.ABORTED
           : uploadStatus.overallImportStatus === STATUS.COMPLETED
-          ? STATUS.COMPLETED
-          : STATUS.NOT_STARTED,
+            ? STATUS.COMPLETED
+            : STATUS.NOT_STARTED,
       ]),
     },
     {
@@ -115,8 +115,8 @@ export const OverallUploadStatus: FC = () => {
         uploadStatus.overallImportStatus === STATUS.ABORTED
           ? STATUS.ABORTED
           : uploadStatus.allDocsSearchable
-          ? STATUS.COMPLETED
-          : STATUS.NOT_STARTED,
+            ? STATUS.COMPLETED
+            : STATUS.NOT_STARTED,
       ]),
     },
   ];

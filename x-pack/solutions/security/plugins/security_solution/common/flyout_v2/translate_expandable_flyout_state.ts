@@ -495,7 +495,7 @@ export const translateLegacyStateToDescriptors = (
   // Preview wins over right as the child (it is the deepest thing the user viewed).
   const lastPreview = preview?.at(-1);
   const childDescriptor: TranslatedFlyoutDescriptor = lastPreview
-    ? rightPanelToMainDescriptor(lastPreview) ?? mainDescriptor
+    ? (rightPanelToMainDescriptor(lastPreview) ?? mainDescriptor)
     : mainDescriptor;
 
   return [toolDescriptor, childDescriptor];

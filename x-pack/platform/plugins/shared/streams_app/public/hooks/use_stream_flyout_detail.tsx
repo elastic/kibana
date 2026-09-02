@@ -122,7 +122,7 @@ export function StreamFlyoutDetailContextProvider({
 
   const context = React.useMemo(
     // useMemo cannot be used conditionally after the definition narrowing, the assertion is to narrow correctly the context value
-    () => ({ definition, loading, refresh } as StreamDetailContextValue),
+    () => ({ definition, loading, refresh }) as StreamDetailContextValue,
     [definition, loading, refresh]
   );
 

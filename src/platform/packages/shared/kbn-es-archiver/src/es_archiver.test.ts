@@ -22,8 +22,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { EsArchiver } from './es_archiver';
 import { loadAction } from './actions';
 
-const createMockClient = () => ({} as unknown as Client);
-const createMockKbnClient = () => ({} as unknown as KbnClient);
+const createMockClient = () => ({}) as unknown as Client;
+const createMockKbnClient = () => ({}) as unknown as KbnClient;
 const log = new ToolingLog();
 
 describe('EsArchiver', () => {

@@ -29,7 +29,7 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
     ({
       id: 'agent-policy-1',
       agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
-    } as any);
+    }) as any;
 
   const buildPackagePolicy = (cloudConnectorId?: string): NewPackagePolicy =>
     ({
@@ -37,9 +37,9 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
       namespace: 'default',
       inputs: [],
       cloud_connector_id: cloudConnectorId,
-    } as any);
+    }) as any;
 
-  const buildPackageInfo = (name: string): PackageInfo => ({ name } as any);
+  const buildPackageInfo = (name: string): PackageInfo => ({ name }) as any;
 
   const mockConnectorUsage = (
     soClient: ReturnType<typeof savedObjectsClientMock.create>,

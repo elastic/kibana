@@ -104,10 +104,12 @@ export function isUnauthenticated(http: HttpSetup) {
   return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
-export class UsageCollectionPlugin
-  implements
-    Plugin<UsageCollectionSetup, UsageCollectionStart, {}, UsageCollectionStartDependencies>
-{
+export class UsageCollectionPlugin implements Plugin<
+  UsageCollectionSetup,
+  UsageCollectionStart,
+  {},
+  UsageCollectionStartDependencies
+> {
   private applicationUsageTracker?: ApplicationUsageTracker;
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;

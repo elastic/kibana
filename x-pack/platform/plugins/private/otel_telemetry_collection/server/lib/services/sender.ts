@@ -12,7 +12,10 @@ import type { OtelPerServiceResult } from './types';
 export class OtelTelemetrySender {
   private readonly logger: Logger;
 
-  constructor(logger: Logger, private readonly analytics: AnalyticsServiceStart) {
+  constructor(
+    logger: Logger,
+    private readonly analytics: AnalyticsServiceStart
+  ) {
     this.logger = logger.get(OtelTelemetrySender.name);
   }
 

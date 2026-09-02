@@ -350,7 +350,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
               isInvalid={destinationIndexInvalidMessage !== undefined || destinationIndexExists}
               error={
                 destinationIndexInvalidMessage || destinationIndexExists
-                  ? destinationIndexInvalidMessage ?? destIndexExists
+                  ? (destinationIndexInvalidMessage ?? destIndexExists)
                   : undefined
               }
             >

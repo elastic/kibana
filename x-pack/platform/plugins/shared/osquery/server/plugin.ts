@@ -167,9 +167,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     plugins.fleet
       ?.fleetSetupCompleted()
       .then(async () => {
-        const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
-          OSQUERY_INTEGRATION_NAME
-        );
+        const packageInfo =
+          await plugins.fleet?.packageService.asInternalUser.getInstallation(
+            OSQUERY_INTEGRATION_NAME
+          );
         const client = await getInternalSavedObjectsClient(core);
 
         const esClient = core.elasticsearch.client.asInternalUser;

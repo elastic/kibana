@@ -67,15 +67,12 @@ interface FeatureFlagDefinition {
   fn: (enabled: boolean) => boolean | Promise<boolean>;
 }
 
-export class ElasticAssistantPlugin
-  implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
-{
+export class ElasticAssistantPlugin implements Plugin<
+  ElasticAssistantPluginSetup,
+  ElasticAssistantPluginStart,
+  ElasticAssistantPluginSetupDependencies,
+  ElasticAssistantPluginStartDependencies
+> {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;

@@ -45,7 +45,11 @@ export class MetricsTab extends AssetDetailsTab {
   public readonly logSectionTitle: Locator;
   public readonly logRateChart: Locator;
 
-  constructor(page: ScoutPage, kbnUrl: KibanaUrl, private readonly assetType: 'Host' | 'Docker') {
+  constructor(
+    page: ScoutPage,
+    kbnUrl: KibanaUrl,
+    private readonly assetType: 'Host' | 'Docker'
+  ) {
     super(page, kbnUrl);
     this.tab = this.page.getByTestId(`infraAssetDetails${this.tabName}Tab`);
 

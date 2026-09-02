@@ -325,9 +325,12 @@ export interface FleetStartContract {
   createOutputClient: (request: KibanaRequest) => Promise<OutputClientInterface>;
 }
 
-export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps>
-{
+export class FleetPlugin implements Plugin<
+  FleetSetupContract,
+  FleetStartContract,
+  FleetSetupDeps,
+  FleetStartDeps
+> {
   private config$: Observable<FleetConfigType>;
   private configInitialValue: FleetConfigType;
   private cloud?: CloudSetup;

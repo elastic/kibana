@@ -32,7 +32,7 @@ const searchResponse = (body: { hits: unknown }): estypes.SearchResponse =>
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     ...body,
-  } as estypes.SearchResponse);
+  }) as estypes.SearchResponse;
 
 const makeSearchResponse = (
   hits: Array<{ _id: string; status: string; _index?: string }>,

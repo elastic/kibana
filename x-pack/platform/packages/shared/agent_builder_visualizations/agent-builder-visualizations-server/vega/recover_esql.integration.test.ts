@@ -45,7 +45,7 @@ const existingSpec = JSON.stringify({
 });
 
 const createMockLogger = (): Logger =>
-  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
+  ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() }) as unknown as Logger;
 
 // Failing: See https://github.com/elastic/kibana/issues/276821
 describe.skip('recover_esql end-to-end (real build_config + real graph)', () => {

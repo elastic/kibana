@@ -163,23 +163,19 @@ export function observeWorker(
       }),
       // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       observeStdio$(proc.stdout!).pipe(
-        map(
-          (line): WorkerStdio => ({
-            type: 'worker stdio',
-            line,
-            stream: 'stdout',
-          })
-        )
+        map((line): WorkerStdio => ({
+          type: 'worker stdio',
+          line,
+          stream: 'stdout',
+        }))
       ),
       // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
       observeStdio$(proc.stderr!).pipe(
-        map(
-          (line): WorkerStdio => ({
-            type: 'worker stdio',
-            line,
-            stream: 'stderr',
-          })
-        )
+        map((line): WorkerStdio => ({
+          type: 'worker stdio',
+          line,
+          stream: 'stderr',
+        }))
       ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(

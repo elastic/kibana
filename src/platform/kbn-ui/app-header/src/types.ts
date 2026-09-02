@@ -128,7 +128,7 @@ export type AppHeaderMetadataItem =
 export type AppHeaderMetadataItems = readonly [
   AppHeaderMetadataItem,
   AppHeaderMetadataItem?,
-  AppHeaderMetadataItem?
+  AppHeaderMetadataItem?,
 ];
 
 export interface AppHeaderMetadataTextItem {

@@ -119,7 +119,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
           ({
             ...(componentRef.current || {}),
             ...(restorableStateProviderRef.current || {}),
-          } as TRef & RestorableStateProviderApi)
+          }) as TRef & RestorableStateProviderApi
       );
 
       // Function components cannot forward refs and show a warning if you try to do so.

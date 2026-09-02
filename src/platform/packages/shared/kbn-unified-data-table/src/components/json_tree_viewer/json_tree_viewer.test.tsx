@@ -399,23 +399,22 @@ describe('JsonTreeViewer', () => {
   describe('getLeafActions', () => {
     const twoActions =
       (onFilterFor: () => void, onFilterOut: () => void): GetLeafActions =>
-      ({ path }) =>
-        [
-          {
-            id: 'filterFor',
-            iconType: 'plusCircle',
-            label: 'Filter for',
-            'data-test-subj': `treeFilterFor-${path.join('.')}`,
-            onClick: onFilterFor,
-          },
-          {
-            id: 'filterOut',
-            iconType: 'minusCircle',
-            label: 'Filter out',
-            'data-test-subj': `treeFilterOut-${path.join('.')}`,
-            onClick: onFilterOut,
-          },
-        ];
+      ({ path }) => [
+        {
+          id: 'filterFor',
+          iconType: 'plusCircle',
+          label: 'Filter for',
+          'data-test-subj': `treeFilterFor-${path.join('.')}`,
+          onClick: onFilterFor,
+        },
+        {
+          id: 'filterOut',
+          iconType: 'minusCircle',
+          label: 'Filter out',
+          'data-test-subj': `treeFilterOut-${path.join('.')}`,
+          onClick: onFilterOut,
+        },
+      ];
 
     it('renders the host actions after the copy button on a leaf row', () => {
       render(

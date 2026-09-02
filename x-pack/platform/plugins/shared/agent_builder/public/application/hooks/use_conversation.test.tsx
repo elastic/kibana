@@ -29,7 +29,7 @@ const createConversation = (roundIds: string[]) =>
   ({
     id: 'conversation-1',
     rounds: roundIds.map((id) => ({ id })),
-  } as Conversation);
+  }) as Conversation;
 
 const renderUseIsUnpersistedConversation = ({
   conversation = createConversation([]),

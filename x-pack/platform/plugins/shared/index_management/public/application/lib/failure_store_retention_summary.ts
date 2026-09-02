@@ -63,8 +63,8 @@ export const buildFailureStoreRetentionSummary = (
     !retentionDisabled && hasFiniteRetention
       ? finitePhaseCount
       : showPhaseCounts
-      ? infinitePhaseCount
-      : undefined;
+        ? infinitePhaseCount
+        : undefined;
   const phasesLabel =
     showPhaseCounts && phaseCount != null ? getDlmDataPhasesLabel(phaseCount) : undefined;
 

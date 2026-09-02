@@ -120,10 +120,10 @@ export class FieldRow {
       const fieldType = columnIconType
         ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(this.name, this.#dataView)
-        ? 'nested'
-        : this.dataViewField
-        ? getFieldIconType(this.dataViewField)
-        : undefined;
+          ? 'nested'
+          : this.dataViewField
+            ? getFieldIconType(this.dataViewField)
+            : undefined;
 
       this.#fieldType = fieldType;
     }

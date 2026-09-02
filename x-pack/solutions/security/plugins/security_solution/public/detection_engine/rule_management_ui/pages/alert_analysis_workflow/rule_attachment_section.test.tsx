@@ -48,7 +48,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [
         string,
-        { method?: string; query?: Record<string, unknown>; body?: string }
+        { method?: string; query?: Record<string, unknown>; body?: string },
       ];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
@@ -315,7 +315,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [
         string,
-        { method?: string; query?: Record<string, unknown>; body?: string }
+        { method?: string; query?: Record<string, unknown>; body?: string },
       ];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE) {
@@ -438,7 +438,7 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
     coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
       const [path, options] = args as [
         string,
-        { method?: string; query?: Record<string, unknown>; body?: string }
+        { method?: string; query?: Record<string, unknown>; body?: string },
       ];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE) {

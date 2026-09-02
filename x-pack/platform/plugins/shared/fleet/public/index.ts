@@ -94,9 +94,9 @@ export { FleetStatusProvider } from './hooks/use_fleet_status';
 export type { FleetStatusProviderProps } from './hooks/use_fleet_status';
 
 export const LazyPackagePolicyInputVarField = lazy(() =>
-  import(
-    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
-  ).then((module) => ({ default: module.PackagePolicyInputVarField }))
+  import('./applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field').then(
+    (module) => ({ default: module.PackagePolicyInputVarField })
+  )
 );
 export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
 export type { AvailablePackagesHookType } from './applications/integrations/sections/epm/screens/home/hooks/use_available_packages';
@@ -107,9 +107,7 @@ export const PackageList = () => {
   return import('./applications/integrations/sections/epm/components/package_list_grid');
 };
 export const AvailablePackagesHook = () => {
-  return import(
-    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
-  );
+  return import('./applications/integrations/sections/epm/screens/home/hooks/use_available_packages');
 };
 export const LocalSearchHook = () => {
   return import('./applications/integrations/hooks/use_local_search');

@@ -57,9 +57,8 @@ const RELATIONSHIP_METADATA_FIELD_PATHS = [
 // without a matching entry in `RELATIONSHIP_METADATA_FIELD_PATHS` makes
 // this resolve to `false`, so the assertion at the bottom of this describe
 // fails compilation.
-type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-  ? true
-  : false;
+type Equals<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 
 type EnumeratedKeys = (typeof RELATIONSHIP_METADATA_FIELD_PATHS)[number];
 

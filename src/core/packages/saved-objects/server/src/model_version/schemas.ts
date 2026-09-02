@@ -95,7 +95,7 @@ export interface SavedObjectsFullModelVersionSchemaDefinitions {
  */
 export type SavedObjectModelVersionForwardCompatibilitySchema<
   InAttrs = unknown,
-  OutAttrs = unknown
+  OutAttrs = unknown,
 > =
   | SavedObjectModelVersionForwardCompatibilityObjectSchema
   | SavedObjectModelVersionForwardCompatibilityFn<InAttrs, OutAttrs>;

@@ -170,8 +170,8 @@ export function ActionsPopover({
   const readOnlyActionTooltip = isHeartbeat
     ? NOT_AVAILABLE_FOR_HEARTBEAT
     : isRemote
-    ? NOT_AVAILABLE_FOR_REMOTE_MONITORS
-    : undefined;
+      ? NOT_AVAILABLE_FOR_REMOTE_MONITORS
+      : undefined;
   const { space } = useKibanaSpace();
 
   // Precedence mirrors the flyout: prop → overview metadata → lazy CCS fetch.
@@ -350,8 +350,8 @@ export function ActionsPopover({
       disabled: isHeartbeat
         ? true
         : isRemote
-        ? !remoteEditUrl
-        : !canEditSynthetics || !isServiceAllowed,
+          ? !remoteEditUrl
+          : !canEditSynthetics || !isServiceAllowed,
       href: isHeartbeat ? undefined : isRemote ? remoteEditUrl : editUrl,
       target: isRemote ? '_blank' : undefined,
       toolTipContent: isHeartbeat
@@ -371,13 +371,13 @@ export function ActionsPopover({
       disabled: isHeartbeat
         ? true
         : isRemote
-        ? !remoteCloneUrl
-        : !canEditSynthetics || !isServiceAllowed,
+          ? !remoteCloneUrl
+          : !canEditSynthetics || !isServiceAllowed,
       href: isHeartbeat
         ? undefined
         : isRemote
-        ? remoteCloneUrl
-        : http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
+          ? remoteCloneUrl
+          : http?.basePath.prepend(`synthetics/add-monitor?cloneId=${monitor.configId}`),
       target: isRemote ? '_blank' : undefined,
       toolTipContent: isHeartbeat
         ? NOT_AVAILABLE_FOR_HEARTBEAT

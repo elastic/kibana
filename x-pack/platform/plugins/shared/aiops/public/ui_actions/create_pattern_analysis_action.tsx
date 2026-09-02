@@ -62,9 +62,8 @@ export function createAddPatternAnalysisEmbeddableAction(
           'aria-labelledby': 'patternAnalysisConfig',
         },
         loadContent: async ({ closeFlyout }) => {
-          const { PatternAnalysisEmbeddableInitializer } = await import(
-            '../embeddables/pattern_analysis/pattern_analysis_initializer'
-          );
+          const { PatternAnalysisEmbeddableInitializer } =
+            await import('../embeddables/pattern_analysis/pattern_analysis_initializer');
 
           return (
             <AiopsAppContext.Provider

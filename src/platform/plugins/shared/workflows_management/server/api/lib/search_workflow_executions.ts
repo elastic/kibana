@@ -106,7 +106,9 @@ function transformToWorkflowExecutionListModel(
   size: number
 ): WorkflowExecutionListDto {
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   return {
     results: response.hits.hits.reduce<WorkflowExecutionListDto['results']>((acc, hit) => {

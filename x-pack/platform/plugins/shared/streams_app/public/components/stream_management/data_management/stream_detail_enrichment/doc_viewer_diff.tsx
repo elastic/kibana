@@ -37,10 +37,13 @@ function orderObjectKeys(obj: unknown): unknown {
   } else if (obj && typeof obj === 'object') {
     return Object.keys(obj)
       .sort()
-      .reduce((acc, key) => {
-        acc[key] = orderObjectKeys((obj as Record<string, unknown>)[key]);
-        return acc;
-      }, {} as Record<string, unknown>);
+      .reduce(
+        (acc, key) => {
+          acc[key] = orderObjectKeys((obj as Record<string, unknown>)[key]);
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
   }
   return obj;
 }

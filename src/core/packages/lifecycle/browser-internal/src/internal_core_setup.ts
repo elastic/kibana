@@ -18,18 +18,17 @@ import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-bro
 import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 
 /** @internal */
-export interface InternalCoreSetup
-  extends Omit<
-    CoreSetup,
-    | 'application'
-    | 'chrome'
-    | 'injection'
-    | 'plugins'
-    | 'getStartServices'
-    | 'http'
-    | 'security'
-    | 'userProfile'
-  > {
+export interface InternalCoreSetup extends Omit<
+  CoreSetup,
+  | 'application'
+  | 'chrome'
+  | 'injection'
+  | 'plugins'
+  | 'getStartServices'
+  | 'http'
+  | 'security'
+  | 'userProfile'
+> {
   application: InternalApplicationSetup;
   chrome: InternalChromeSetup;
   featureFlags: FeatureFlagsSetup;

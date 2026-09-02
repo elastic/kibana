@@ -85,7 +85,7 @@ describe('stepResolveDependencies', () => {
       spaceId: 'default',
       installSource: 'registry',
       ...overrides,
-    } as unknown as InstallContext);
+    }) as unknown as InstallContext;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();

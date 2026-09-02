@@ -12,7 +12,7 @@ import type { HasDrilldowns } from './types';
 export const apiHasDrilldowns = (api: unknown): api is HasDrilldowns => {
   return Boolean(
     api &&
-      typeof (api as HasDrilldowns).setDrilldowns === 'function' &&
-      (api as HasDrilldowns).drilldowns$
+    typeof (api as HasDrilldowns).setDrilldowns === 'function' &&
+    (api as HasDrilldowns).drilldowns$
   );
 };

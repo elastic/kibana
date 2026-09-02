@@ -186,7 +186,7 @@ export function LensRenderer({
           isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
-        } satisfies LensParentApi)
+        }) satisfies LensParentApi
       }
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}

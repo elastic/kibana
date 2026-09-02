@@ -50,7 +50,7 @@ const DEFAULT_VALUE_LABEL = i18n.translate('xpack.synthetics.keyValuePairsField.
 
 export type Pair = [
   string, // key
-  string // value
+  string, // value
 ];
 
 export interface KeyValuePairsFieldProps {

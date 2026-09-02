@@ -16,8 +16,7 @@ import { getFormattedComments } from '../utils/get_formatted_comments';
 import { SHOW_COMMENTS_LABEL, HIDE_COMMENTS_LABEL } from './translations';
 
 export interface CardCommentsProps
-  extends CardActionsFlexItemProps,
-    Pick<CommonProps, 'data-test-subj'> {
+  extends CardActionsFlexItemProps, Pick<CommonProps, 'data-test-subj'> {
   comments: ArtifactInfo['comments'];
 }
 

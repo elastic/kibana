@@ -25,7 +25,7 @@ const createExtendedFieldsAttributes = (
     },
     owner: 'securitySolution',
     ...overrides,
-  } as UserActionTransformedAttributes);
+  }) as UserActionTransformedAttributes;
 
 describe('projectUserActionForSearch', () => {
   it('returns attributes unchanged when search is empty', () => {

@@ -29,7 +29,7 @@ const createMockSecurityContext = ({ isExternalDetectionsEnabled = false } = {})
       isEnabled: (key: string) =>
         key === ProductFeatureRulesKey.externalDetections && isExternalDetectionsEnabled,
     }),
-  } as unknown);
+  }) as unknown;
 
 const createMockInitializationFlowContext = ({
   isExternalDetectionsEnabled = false,
@@ -39,7 +39,7 @@ const createMockInitializationFlowContext = ({
       securitySolution: Promise.resolve(createMockSecurityContext({ isExternalDetectionsEnabled })),
     },
     logger: loggerMock.create(),
-  } as unknown as InitializationFlowContext);
+  }) as unknown as InitializationFlowContext;
 
 describe('initEndpointProtectionFlow', () => {
   beforeEach(() => {

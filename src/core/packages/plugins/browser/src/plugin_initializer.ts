@@ -22,7 +22,7 @@ export type PluginInitializer<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends Record<string, any> = never,
-  TPluginsStart extends Record<string, any> = never
+  TPluginsStart extends Record<string, any> = never,
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**

@@ -15,8 +15,7 @@ export type GetInvestigationsClient = (
   spaceId?: string
 ) => NightshiftInvestigationsClient;
 
-export interface NightshiftInvestigationsRouteHandlerResources
-  extends DefaultRouteHandlerResources {
+export interface NightshiftInvestigationsRouteHandlerResources extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
   getTriggerEmitter: GetTriggerEmitter;
 }

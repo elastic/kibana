@@ -67,8 +67,8 @@ export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
     (signal.evidence === undefined || signal.evidence === null
       ? 'not_checked'
       : signal.evidence.result === 'found'
-      ? 'off_topic'
-      : 'inconclusive');
+        ? 'off_topic'
+        : 'inconclusive');
 
   return { ...normalizedSignal, verdict } as SignalEntry;
 };

@@ -66,8 +66,8 @@ export const SecretFormRow: React.FC<{
     secretType === 'output'
       ? OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
       : secretType === 'download_source_auth'
-      ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
-      : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
+        ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+        : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (

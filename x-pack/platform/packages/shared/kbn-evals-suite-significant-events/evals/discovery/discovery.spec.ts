@@ -427,15 +427,13 @@ evaluate.describe(
                   },
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
-                    .map(
-                      ([path, ruleNames]): ContinuationPlan => ({
-                        path,
-                        expectTopologyEventSearch: true,
-                        sequence: ruleNames
-                          .map((name) => byRuleName.get(name))
-                          .filter((d): d is Detection => Boolean(d)),
-                      })
-                    ),
+                    .map(([path, ruleNames]): ContinuationPlan => ({
+                      path,
+                      expectTopologyEventSearch: true,
+                      sequence: ruleNames
+                        .map((name) => byRuleName.get(name))
+                        .filter((d): d is Detection => Boolean(d)),
+                    })),
                 ];
                 const plans = allPlans.filter(
                   (plan) => plan.sequence.length >= 2 && continuationSuite.includesPath(plan.path)
@@ -615,7 +613,7 @@ evaluate.describe(
                             converseResult.steps
                           ),
                           writeItems: extractWriteItemsFromToolCall(converseResult.steps),
-                          expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
+                          expectReuse: i === 0 ? undefined : (run.expectReuse ?? true),
                           expectTopologyEventSearch: run.expectTopologyEventSearch,
                           steps: converseResult.steps,
                         });

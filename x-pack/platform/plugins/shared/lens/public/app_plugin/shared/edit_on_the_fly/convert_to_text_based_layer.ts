@@ -134,8 +134,8 @@ function buildTextBasedState(
           | undefined;
         const hadUserFormat = Boolean(
           originalCol?.params &&
-            'format' in originalCol.params &&
-            originalCol.params.format !== undefined
+          'format' in originalCol.params &&
+          originalCol.params.format !== undefined
         );
 
         // Only set format when the user had explicitly configured it on the form-based column.

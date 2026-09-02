@@ -20,7 +20,7 @@ const baseDoc = (): RelationshipMetadataDoc =>
       scan_id: 'scan-1',
       lookback_window: 'now-30d',
     },
-  } as RelationshipMetadataDoc);
+  }) as RelationshipMetadataDoc;
 
 describe('normalizeRelationshipRecord', () => {
   it.each([...RELATIONSHIP_KINDS])('extracts kind=%s when its target field is present', (kind) => {

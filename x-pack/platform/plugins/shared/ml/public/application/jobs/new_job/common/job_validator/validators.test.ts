@@ -21,7 +21,7 @@ describe('jobIdValidator', () => {
     },
   });
 
-  const makeJobCreator = (jobId: string, mlApi: any) => ({ jobId, mlApi } as any);
+  const makeJobCreator = (jobId: string, mlApi: any) => ({ jobId, mlApi }) as any;
 
   it('emits valid=true when id does not exist', (done) => {
     const mlApi = makeMlApi({}); // no existing ids

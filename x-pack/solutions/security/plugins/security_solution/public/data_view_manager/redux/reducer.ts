@@ -31,10 +31,13 @@ const REGISTERED_SCOPES = [
  * Helper function to create objects with Registered Scope names as keys
  */
 const createScopeMap = <T>(valueCreator: (scopeName: PageScope) => T): Record<PageScope, T> => {
-  return REGISTERED_SCOPES.reduce((acc, scopeName) => {
-    acc[scopeName] = valueCreator(scopeName);
-    return acc;
-  }, {} as Record<PageScope, T>);
+  return REGISTERED_SCOPES.reduce(
+    (acc, scopeName) => {
+      acc[scopeName] = valueCreator(scopeName);
+      return acc;
+    },
+    {} as Record<PageScope, T>
+  );
 };
 
 /*

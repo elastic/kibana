@@ -134,8 +134,8 @@ export const useConversationsUpdater = (
         isDeleteAll || excludedIds?.length > 0
           ? await deleteAllConversations({ http, toasts, excludedIds })
           : hasBulkConversations
-          ? await bulkUpdateConversations(http, bulkUpdates, toasts)
-          : undefined;
+            ? await bulkUpdateConversations(http, bulkUpdates, toasts)
+            : undefined;
       const didUpdateAssistantStreamingEnabled =
         assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
 

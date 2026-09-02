@@ -28,7 +28,7 @@ const StringOrArraySchema = schema.maybe(
 );
 
 const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
-  Type<string>
+  Type<string>,
 ];
 
 const CommonQuerySchema = {

@@ -30,7 +30,7 @@ type GetStartServices = () => Promise<
     {
       dataViews: DataViewsServerPluginStart;
       data: DataPluginStart;
-    }
+    },
   ]
 >;
 

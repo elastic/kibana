@@ -118,8 +118,8 @@ export function alertAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `${actor} is ${progressive} ${doc}`
-    : `${actor} has ${past} ${doc}${reasonSuffix}`;
+      ? `${actor} is ${progressive} ${doc}`
+      : `${actor} has ${past} ${doc}${reasonSuffix}`;
   const type = eventTypes[action];
 
   return {

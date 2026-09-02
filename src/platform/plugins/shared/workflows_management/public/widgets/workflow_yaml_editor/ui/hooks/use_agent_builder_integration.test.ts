@@ -109,7 +109,7 @@ const createMockModel = (value = 'name: test-workflow') => {
 let mockModel: ReturnType<typeof createMockModel>;
 
 const createMockEditor = (model: ReturnType<typeof createMockModel>) =>
-  ({ getModel: jest.fn().mockReturnValue(model) } as any);
+  ({ getModel: jest.fn().mockReturnValue(model) }) as any;
 
 const embeddableChatAccessReady = {
   hasRequiredLicense: true,
@@ -1174,7 +1174,7 @@ describe('useAgentBuilderIntegration', () => {
       ({
         id: 'conv-1',
         ...(attachments ? { conversation: { attachments } } : {}),
-      } as ActiveConversation);
+      }) as ActiveConversation;
 
     const renderSavedEditor = async (agentBuilder: ReturnType<typeof createMockAgentBuilder>) => {
       setupKibanaMock(agentBuilder);

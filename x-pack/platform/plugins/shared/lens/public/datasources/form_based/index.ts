@@ -51,9 +51,8 @@ export class FormBasedDatasource {
     }: FormBasedDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const { getFormBasedDatasource, getSuffixFormatter, suffixFormatterId } = await import(
-        '../../async_services'
-      );
+      const { getFormBasedDatasource, getSuffixFormatter, suffixFormatterId } =
+        await import('../../async_services');
 
       if (!fieldFormatsSetup.has(suffixFormatterId)) {
         const startServices = createStartServicesGetter(core.getStartServices);

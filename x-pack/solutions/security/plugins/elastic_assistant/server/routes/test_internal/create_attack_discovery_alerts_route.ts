@@ -111,8 +111,8 @@ const pollForAttackDiscoveryAlertDocumentIds = async ({
           Array.isArray(raw) && typeof raw[0] === 'string'
             ? raw[0]
             : typeof raw === 'string'
-            ? raw
-            : null;
+              ? raw
+              : null;
         if (!instanceId || !h._id) return [];
         return [{ documentId: h._id, instanceId, concreteIndex: h._index }];
       });

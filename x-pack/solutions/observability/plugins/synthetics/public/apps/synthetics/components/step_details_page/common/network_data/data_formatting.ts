@@ -126,7 +126,7 @@ export const getFilterMatcher = (filters: string[] | undefined): ItemMatcher => 
 
   return (item: NetworkEvent) => {
     const resolvedMimeType = item.mimeType
-      ? MimeTypesMap[item.mimeType] ?? MimeType.Other
+      ? (MimeTypesMap[item.mimeType] ?? MimeType.Other)
       : MimeType.Other;
 
     return filtersByMimeType.has(resolvedMimeType);

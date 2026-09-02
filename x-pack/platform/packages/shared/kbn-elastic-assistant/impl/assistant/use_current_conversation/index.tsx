@@ -181,11 +181,11 @@ export const useCurrentConversation = ({
         (currentConversation?.apiConfig
           ? currentConversation.apiConfig
           : defaultConnector
-          ? {
-              connectorId: defaultConnector.id ?? '',
-              actionTypeId: defaultConnector.actionTypeId ?? '',
-            }
-          : undefined);
+            ? {
+                connectorId: defaultConnector.id ?? '',
+                actionTypeId: defaultConnector.actionTypeId ?? '',
+              }
+            : undefined);
 
       const newConversationDefaultSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
       setLastConversation({

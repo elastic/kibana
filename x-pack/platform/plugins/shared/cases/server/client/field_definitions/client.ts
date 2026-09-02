@@ -114,9 +114,8 @@ export const createFieldDefinitionsSubClient = (
       return false;
     }
 
-    const definitionSavedObjects = await fieldDefinitionsService.getFieldDefinitionSavedObjects(
-      owner
-    );
+    const definitionSavedObjects =
+      await fieldDefinitionsService.getFieldDefinitionSavedObjects(owner);
     const indexes = buildFieldLinkIndexes(definitionSavedObjects);
     const activeIds = getActivelyLinkedDefinitionIds(configuredFields, indexes);
     return activeIds.has(fieldDef.attributes.fieldDefinitionId);

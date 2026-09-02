@@ -28,7 +28,7 @@ const Illustration = ({ urlLight, urlDark }: { urlLight: string; urlDark?: strin
 
   return (
     <img
-      src={colorMode === 'DARK' ? urlDark ?? urlLight : urlLight}
+      src={colorMode === 'DARK' ? (urlDark ?? urlLight) : urlLight}
       alt=""
       aria-hidden="true"
       css={illustrationStyles}

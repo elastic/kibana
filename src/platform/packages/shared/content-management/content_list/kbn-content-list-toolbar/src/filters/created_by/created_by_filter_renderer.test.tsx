@@ -37,12 +37,10 @@ const mockUsers: UserProfileEntry[] = [
   },
 ];
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockUserProfilesService: ContentListUserProfilesServices = {
   bulkResolve: async (uids) => mockUsers.filter((u) => uids.includes(u.uid)),

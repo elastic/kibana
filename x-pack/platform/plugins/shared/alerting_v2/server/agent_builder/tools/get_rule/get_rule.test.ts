@@ -64,7 +64,7 @@ describe('getRuleTool', () => {
       episodeId: 'ep-1',
       ruleId: 'rule-1',
       logger: loggerService,
-      getRulesClient: () => ({ getRule } as unknown as RulesClient),
+      getRulesClient: () => ({ getRule }) as unknown as RulesClient,
       getPrivilegeChecker: () => createPrivilegeCheckerMock(canReadResult),
     });
 

@@ -121,7 +121,7 @@ interface TrackSearchHandler {
    */
   beforePoll(): [
     currentSearchState: { isSearchStored: boolean },
-    afterPoll: (newSearchState: { isSearchStored: boolean }) => void
+    afterPoll: (newSearchState: { isSearchStored: boolean }) => void,
   ];
 }
 

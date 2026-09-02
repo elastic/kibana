@@ -66,13 +66,13 @@ export const transformScheduleToApi = (
               alert_retrieval_mode: alertRetrievalMode,
               alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
               alert_retrieval_workflows_enabled: isComposite
-                ? wc.alertRetrievalWorkflowsEnabled ?? false
+                ? (wc.alertRetrievalWorkflowsEnabled ?? false)
                 : alertRetrievalWorkflowIds.length > 0,
               default_retrieval_enabled: isComposite
-                ? wc.defaultRetrievalEnabled ?? false
-                : wc.defaultAlertRetrievalEnabled ?? !isCustomOnly,
+                ? (wc.defaultRetrievalEnabled ?? false)
+                : (wc.defaultAlertRetrievalEnabled ?? !isCustomOnly),
               ...(wc.esqlQuery != null ? { esql_query: wc.esqlQuery } : {}),
-              skill_enabled: isComposite ? wc.skillEnabled ?? true : true,
+              skill_enabled: isComposite ? (wc.skillEnabled ?? true) : true,
               validation_workflow_id: wc.validationWorkflowId ?? 'default',
             };
           })()

@@ -41,7 +41,7 @@ const createMockLog = (): jest.Mocked<ToolingLog> =>
   ({
     debug: jest.fn(),
     error: jest.fn(),
-  } as unknown as jest.Mocked<ToolingLog>);
+  }) as unknown as jest.Mocked<ToolingLog>;
 
 describe('getPlugin', () => {
   beforeEach(() => {

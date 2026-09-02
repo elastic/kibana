@@ -79,9 +79,12 @@ import { registerEmbeddables } from './lib/register_embeddables';
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
-export class MlServerPlugin
-  implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart>
-{
+export class MlServerPlugin implements Plugin<
+  MlPluginSetup,
+  MlPluginStart,
+  PluginsSetup,
+  PluginsStart
+> {
   private log: Logger;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;

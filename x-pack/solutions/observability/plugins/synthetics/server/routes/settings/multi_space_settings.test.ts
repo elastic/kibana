@@ -26,12 +26,12 @@ const buildServer = ({
   ({
     isElasticsearchServerless,
     syntheticsIndicesCache: { invalidate: invalidateCache, get: jest.fn() },
-  } as unknown as RouteContext['server']);
+  }) as unknown as RouteContext['server'];
 
 const buildResponse = () =>
   ({
     notFound: jest.fn().mockReturnValue(NOT_FOUND_SENTINEL),
-  } as unknown as RouteContext['response']);
+  }) as unknown as RouteContext['response'];
 
 const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext =>
   ({
@@ -39,7 +39,7 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
     server: buildServer(),
     response: buildResponse(),
     ...overrides,
-  } as unknown as RouteContext);
+  }) as unknown as RouteContext;
 
 describe('multi space settings routes', () => {
   afterEach(() => {

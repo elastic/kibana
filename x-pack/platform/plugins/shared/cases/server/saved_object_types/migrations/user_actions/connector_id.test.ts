@@ -51,9 +51,13 @@ const create_7_14_0_userAction = (params: {
         username: 'elastic',
       },
       new_value:
-        new_value && typeof new_value === 'object' ? JSON.stringify(new_value) : new_value ?? null,
+        new_value && typeof new_value === 'object'
+          ? JSON.stringify(new_value)
+          : (new_value ?? null),
       old_value:
-        old_value && typeof old_value === 'object' ? JSON.stringify(old_value) : old_value ?? null,
+        old_value && typeof old_value === 'object'
+          ? JSON.stringify(old_value)
+          : (old_value ?? null),
       owner: SECURITY_SOLUTION_OWNER,
     },
   };

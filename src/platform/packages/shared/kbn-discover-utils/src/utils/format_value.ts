@@ -124,7 +124,7 @@ export const formatFieldStringValueWithHighlights = ({
   // Pass field name for highlight lookup in hit.highlight.
   // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
   const field = fieldName
-    ? dataView?.fields.getByName(fieldName) ?? { name: fieldName }
+    ? (dataView?.fields.getByName(fieldName) ?? { name: fieldName })
     : undefined;
 
   return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING).convertToReact(value, {

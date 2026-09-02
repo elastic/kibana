@@ -12,7 +12,7 @@ import { useLogicalAndFields } from '../../constants/filters_fields_with_logical
 const useLogicalAndFileLiteral = useLogicalAndFields.map((f) => t.literal(f)) as unknown as [
   Mixed,
   Mixed,
-  ...Mixed[]
+  ...Mixed[],
 ];
 
 const FetchMonitorQueryArgsCommon = {

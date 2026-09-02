@@ -55,8 +55,8 @@ export const createSettingsApplicationServicesMock = (
     scope === 'namespace'
       ? getSettingsMock(undefined, undefined, settingsSolution)
       : hasGlobalSettings
-      ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
-      : {},
+        ? getGlobalSettingsMock(undefined, undefined, settingsSolution)
+        : {},
   getSections: () => [],
   getCapabilities: getSettingsCapabilitiesMock,
   setBadge: jest.fn(),

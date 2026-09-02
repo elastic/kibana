@@ -28,13 +28,16 @@ const rawArgs = process.argv.slice(2);
 const isFtr = rawArgs.includes('--ftr');
 const modeTotal = rawArgs.includes('--total');
 const modeMd = rawArgs.includes('--md');
-const linkPrefixArg = rawArgs.find(a => a.startsWith('--link-prefix='));
+const linkPrefixArg = rawArgs.find((a) => a.startsWith('--link-prefix='));
 const linkPrefix = linkPrefixArg ? linkPrefixArg.split('=').slice(1).join('=') : '../../';
-const filePaths = rawArgs.filter(a => !a.startsWith('--'));
+const filePaths = rawArgs.filter((a) => !a.startsWith('--'));
 
 let repoRoot;
 try {
-  repoRoot = execSync('git rev-parse --show-toplevel', { cwd: SCRIPT_DIR, encoding: 'utf8' }).trim();
+  repoRoot = execSync('git rev-parse --show-toplevel', {
+    cwd: SCRIPT_DIR,
+    encoding: 'utf8',
+  }).trim();
 } catch {
   repoRoot = process.cwd();
 }
@@ -49,28 +52,63 @@ function clean(src) {
   let i = 0;
   while (i < L) {
     if (src[i] === '/' && src[i + 1] === '/') {
-      buf[i] = buf[i + 1] = ' '; i += 2;
-      while (i < L && src[i] !== '\n') { buf[i++] = ' '; }
+      buf[i] = buf[i + 1] = ' ';
+      i += 2;
+      while (i < L && src[i] !== '\n') {
+        buf[i++] = ' ';
+      }
     } else if (src[i] === '/' && src[i + 1] === '*') {
-      buf[i] = buf[i + 1] = ' '; i += 2;
+      buf[i] = buf[i + 1] = ' ';
+      i += 2;
       while (i < L && !(src[i] === '*' && src[i + 1] === '/')) {
-        if (src[i] !== '\n') buf[i] = ' '; i++;
+        if (src[i] !== '\n') buf[i] = ' ';
+        i++;
       }
-      if (i < L) { buf[i] = buf[i + 1] = ' '; i += 2; }
+      if (i < L) {
+        buf[i] = buf[i + 1] = ' ';
+        i += 2;
+      }
     } else if (src[i] === "'" || src[i] === '"') {
-      const q = src[i]; buf[i] = ' '; i++;
+      const q = src[i];
+      buf[i] = ' ';
+      i++;
       while (i < L && src[i] !== q && src[i] !== '\n') {
-        if (src[i] === '\\') { buf[i] = ' '; i++; if (i < L) { buf[i] = ' '; i++; } continue; }
-        buf[i] = ' '; i++;
+        if (src[i] === '\\') {
+          buf[i] = ' ';
+          i++;
+          if (i < L) {
+            buf[i] = ' ';
+            i++;
+          }
+          continue;
+        }
+        buf[i] = ' ';
+        i++;
       }
-      if (i < L && src[i] !== '\n') { buf[i] = ' '; i++; }
+      if (i < L && src[i] !== '\n') {
+        buf[i] = ' ';
+        i++;
+      }
     } else if (src[i] === '`') {
-      buf[i] = ' '; i++;
+      buf[i] = ' ';
+      i++;
       while (i < L && src[i] !== '`') {
-        if (src[i] === '\\') { buf[i] = ' '; i++; if (i < L) { buf[i] = ' '; i++; } continue; }
-        if (src[i] !== '\n') buf[i] = ' '; i++;
+        if (src[i] === '\\') {
+          buf[i] = ' ';
+          i++;
+          if (i < L) {
+            buf[i] = ' ';
+            i++;
+          }
+          continue;
+        }
+        if (src[i] !== '\n') buf[i] = ' ';
+        i++;
       }
-      if (i < L) { buf[i] = ' '; i++; }
+      if (i < L) {
+        buf[i] = ' ';
+        i++;
+      }
     } else {
       i++;
     }
@@ -80,7 +118,8 @@ function clean(src) {
 
 // ── Brace helpers ────────────────────────────────────────────────────────────
 function findMatchingBrace(s, openPos) {
-  let depth = 1, i = openPos + 1;
+  let depth = 1,
+    i = openPos + 1;
   while (i < s.length && depth > 0) {
     if (s[i] === '{') depth++;
     else if (s[i] === '}') depth--;
@@ -112,7 +151,8 @@ function findCallbackBrace(s, pos, limit = 2000) {
 function countTCs(s, from, to) {
   const chunk = s.slice(from, to);
   const re = /\bit\s*\(|\bspecify\s*\(/g;
-  let n = 0, m;
+  let n = 0,
+    m;
   while ((m = re.exec(chunk)) !== null) {
     const before = m.index > 0 ? chunk[m.index - 1] : ' ';
     if (before !== '.') n++;
@@ -136,22 +176,35 @@ function analyzeFile(filepath, cypress) {
     const brace = findCallbackBrace(cl, m.index);
     if (brace === -1) continue;
     const close = findMatchingBrace(cl, brace);
-    skips.push({ file: filepath, mechanism: 'static', count: countTCs(cl, brace + 1, close), bodyStart: brace + 1, bodyEnd: close });
+    skips.push({
+      file: filepath,
+      mechanism: 'static',
+      count: countTCs(cl, brace + 1, close),
+      bodyStart: brace + 1,
+      bodyEnd: close,
+    });
   }
 
   // Test-level static skips: it.skip / xit
   const testSkipRe = /\bit\.skip\s*\(|\bxit\s*\(/g;
   let nTestSkip = 0;
-  while ((testSkipRe.exec(cl)) !== null) nTestSkip++;
+  while (testSkipRe.exec(cl) !== null) nTestSkip++;
   if (nTestSkip > 0) {
-    skips.push({ file: filepath, mechanism: 'test-level static', count: nTestSkip, bodyStart: -1, bodyEnd: -1 });
+    skips.push({
+      file: filepath,
+      mechanism: 'test-level static',
+      count: nTestSkip,
+      bodyStart: -1,
+      bodyEnd: -1,
+    });
   }
 
   // Cypress @skipIn tagged suites (skip if already inside a static skip body)
   if (cypress) {
     const descRe = /\b(?:describe|context)\s*\(/g;
     while ((m = descRe.exec(cl)) !== null) {
-      if (skips.some(s => s.bodyStart >= 0 && m.index >= s.bodyStart && m.index <= s.bodyEnd)) continue;
+      if (skips.some((s) => s.bodyStart >= 0 && m.index >= s.bodyStart && m.index <= s.bodyEnd))
+        continue;
       const win = src.slice(m.index, Math.min(m.index + 600, src.length));
       const tags = win.match(/@skipIn\w+/g);
       if (!tags) continue;
@@ -159,7 +212,13 @@ function analyzeFile(filepath, cypress) {
       if (brace === -1) continue;
       const close = findMatchingBrace(cl, brace);
       const uniqTags = [...new Set(tags)].join('; ');
-      skips.push({ file: filepath, mechanism: `tags: ${uniqTags}`, count: countTCs(cl, brace + 1, close), bodyStart: brace + 1, bodyEnd: close });
+      skips.push({
+        file: filepath,
+        mechanism: `tags: ${uniqTags}`,
+        count: countTCs(cl, brace + 1, close),
+        bodyStart: brace + 1,
+        bodyEnd: close,
+      });
     }
   }
 
@@ -181,18 +240,30 @@ for (const fp of filePaths) {
 if (modeTotal) {
   process.stdout.write(String(agg.total) + '\n');
 } else if (modeMd) {
-  const suites = agg.skips.filter(s => s.mechanism !== 'test-level static');
-  const testLevel = agg.skips.filter(s => s.mechanism === 'test-level static');
+  const suites = agg.skips.filter((s) => s.mechanism !== 'test-level static');
+  const testLevel = agg.skips.filter((s) => s.mechanism === 'test-level static');
   const mTCs = suites.reduce((s, x) => s + x.count, 0);
   const nTestLevelTCs = testLevel.reduce((s, x) => s + x.count, 0);
-  const header = nTestLevelTCs > 0
-    ? `${suites.length} Suites (${mTCs} TCs) + ${nTestLevelTCs} test-level skips`
-    : `${suites.length} Suites (${mTCs} TCs)`;
+  const header =
+    nTestLevelTCs > 0
+      ? `${suites.length} Suites (${mTCs} TCs) + ${nTestLevelTCs} test-level skips`
+      : `${suites.length} Suites (${mTCs} TCs)`;
   process.stdout.write(header + '\n');
   for (const s of [...suites, ...testLevel]) {
     const rel = path.relative(repoRoot, s.file).replace(/\\/g, '/');
-    process.stdout.write(`- [${path.basename(s.file)}](${linkPrefix}${rel}) - ${s.count} TC (${s.mechanism})\n`);
+    process.stdout.write(
+      `- [${path.basename(s.file)}](${linkPrefix}${rel}) - ${s.count} TC (${s.mechanism})\n`
+    );
   }
 } else {
-  process.stdout.write(JSON.stringify({ total: agg.total, skips: agg.skips.map(({ file, mechanism, count }) => ({ file, mechanism, count })) }, null, 2) + '\n');
+  process.stdout.write(
+    JSON.stringify(
+      {
+        total: agg.total,
+        skips: agg.skips.map(({ file, mechanism, count }) => ({ file, mechanism, count })),
+      },
+      null,
+      2
+    ) + '\n'
+  );
 }

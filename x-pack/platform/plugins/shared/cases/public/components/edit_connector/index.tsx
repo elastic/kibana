@@ -82,7 +82,7 @@ export const EditConnector = React.memo(
       ...caseData.connector,
       name: isEmpty(caseActionConnector?.name)
         ? caseData.connector.name
-        : caseActionConnector?.name ?? '',
+        : (caseActionConnector?.name ?? ''),
     };
 
     const {

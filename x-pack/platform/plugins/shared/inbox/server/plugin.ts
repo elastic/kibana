@@ -39,10 +39,12 @@ import type { InboxActionProvider } from './services/inbox_action_provider';
  */
 export type InboxSpaceIdResolver = (request: KibanaRequest) => string;
 
-export class InboxPlugin
-  implements
-    Plugin<InboxPluginSetup, InboxPluginStart, InboxSetupDependencies, InboxStartDependencies>
-{
+export class InboxPlugin implements Plugin<
+  InboxPluginSetup,
+  InboxPluginStart,
+  InboxSetupDependencies,
+  InboxStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: InboxConfig;
 

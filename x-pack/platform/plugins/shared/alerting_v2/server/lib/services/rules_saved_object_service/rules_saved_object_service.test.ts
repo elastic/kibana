@@ -232,7 +232,7 @@ describe('RulesSavedObjectService', () => {
         page: 1,
         per_page: 0,
         aggregations: { tags: { buckets } },
-      } as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>);
+      }) as unknown as Awaited<ReturnType<SavedObjectsClientContract['find']>>;
 
     it('aggregates tags with size 20 and _count:desc when no search or filter', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(

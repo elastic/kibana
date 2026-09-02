@@ -89,15 +89,12 @@ export interface SavedSearchPublicStartDependencies {
   embeddable: EmbeddableStart;
 }
 
-export class SavedSearchPublicPlugin
-  implements
-    Plugin<
-      SavedSearchPublicPluginSetup,
-      SavedSearchPublicPluginStart,
-      SavedSearchPublicSetupDependencies,
-      SavedSearchPublicStartDependencies
-    >
-{
+export class SavedSearchPublicPlugin implements Plugin<
+  SavedSearchPublicPluginSetup,
+  SavedSearchPublicPluginStart,
+  SavedSearchPublicSetupDependencies,
+  SavedSearchPublicStartDependencies
+> {
   public setup(
     { getStartServices }: CoreSetup,
     { contentManagement, expressions }: SavedSearchPublicSetupDependencies

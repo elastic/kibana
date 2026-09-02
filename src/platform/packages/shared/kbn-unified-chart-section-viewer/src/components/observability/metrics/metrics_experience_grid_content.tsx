@@ -32,11 +32,10 @@ import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
 import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
-export interface MetricsExperienceGridContentProps
-  extends Pick<
-    UnifiedMetricsGridProps,
-    'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
-  > {
+export interface MetricsExperienceGridContentProps extends Pick<
+  UnifiedMetricsGridProps,
+  'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
+> {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];

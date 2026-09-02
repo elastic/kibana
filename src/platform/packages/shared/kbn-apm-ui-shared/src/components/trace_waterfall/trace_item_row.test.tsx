@@ -511,7 +511,7 @@ describe('getCriticalPathOverlays', () => {
       spanLinksCount: { incoming: 0, outgoing: 0 },
       docType: 'span',
       ...overrides,
-    } as TraceWaterfallItem);
+    }) as TraceWaterfallItem;
 
   const mockSegment = (
     item: TraceWaterfallItem,

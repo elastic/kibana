@@ -356,11 +356,14 @@ export function useFetchAgentsData() {
         );
         const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 
-        const agentPoliciesIndexedById = policies.reduce((acc, agentPolicy) => {
-          acc[agentPolicy.id] = agentPolicy;
+        const agentPoliciesIndexedById = policies.reduce(
+          (acc, agentPolicy) => {
+            acc[agentPolicy.id] = agentPolicy;
 
-          return acc;
-        }, {} as { [k: string]: AgentPolicy });
+            return acc;
+          },
+          {} as { [k: string]: AgentPolicy }
+        );
         const agentsStatus = agentStatusesToSummary(statusSummary);
 
         const newAllTags = [...agentTagsResponse.items];

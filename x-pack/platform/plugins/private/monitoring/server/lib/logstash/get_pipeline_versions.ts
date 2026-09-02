@@ -152,13 +152,11 @@ export function _handleResponse(response: any) {
     []
   );
 
-  const versions = pipelines.concat(pipelinesMb).map(
-    (pipelineHash: any): PipelineVersion => ({
-      hash: pipelineHash.key,
-      firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
-      lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),
-    })
-  );
+  const versions = pipelines.concat(pipelinesMb).map((pipelineHash: any): PipelineVersion => ({
+    hash: pipelineHash.key,
+    firstSeen: get(pipelineHash, 'path_to_root.first_seen.value'),
+    lastSeen: get(pipelineHash, 'path_to_root.last_seen.value'),
+  }));
 
   // we could have continuous data about a pipeline version spread across legacy and
   // metricbeat indices, make sure to join the start and end dates for these occurrences

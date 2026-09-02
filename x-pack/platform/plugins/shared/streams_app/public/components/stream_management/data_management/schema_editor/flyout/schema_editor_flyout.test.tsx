@@ -71,7 +71,7 @@ const createMockWiredStream = (name: string) =>
         routing: [],
       },
     },
-  } as unknown as Streams.ingest.all.Definition);
+  }) as unknown as Streams.ingest.all.Definition;
 
 const createMockClassicStream = (name: string) =>
   ({
@@ -87,7 +87,7 @@ const createMockClassicStream = (name: string) =>
         field_overrides: {},
       },
     },
-  } as unknown as Streams.ingest.all.Definition);
+  }) as unknown as Streams.ingest.all.Definition;
 
 const renderFlyout = ({
   field,

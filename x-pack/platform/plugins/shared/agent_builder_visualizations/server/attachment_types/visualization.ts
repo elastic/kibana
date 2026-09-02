@@ -89,8 +89,8 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
           data.renderer === 'vega'
             ? 'Renderer: Vega'
             : data.chart_type
-            ? `Chart type: ${data.chart_type}`
-            : 'Renderer: Lens';
+              ? `Chart type: ${data.chart_type}`
+              : 'Renderer: Lens';
         return {
           type: 'text',
           value: [

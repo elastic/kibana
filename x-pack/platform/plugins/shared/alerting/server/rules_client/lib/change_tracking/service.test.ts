@@ -45,7 +45,7 @@ describe('ChangeTrackingService', () => {
   let service: ChangeTrackingService;
 
   const ruleSnapshot = (name: string): RuleChangeHistorySnapshot =>
-    ({ name } as unknown as RuleChangeHistorySnapshot);
+    ({ name }) as unknown as RuleChangeHistorySnapshot;
 
   const initializeService = (user: { username: string; profile_uid?: string } | null) => {
     const authService = coreMock.createStart().security.authc;

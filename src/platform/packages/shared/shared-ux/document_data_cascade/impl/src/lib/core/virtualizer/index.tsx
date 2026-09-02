@@ -31,17 +31,16 @@ type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
 
 export type { ChildVirtualizerController, UseVirtualizerReturnType };
 
-export interface CascadeVirtualizerProps<G extends GroupNode>
-  extends Pick<
-    UseVirtualizerOptions,
-    | 'getScrollElement'
-    | 'overscan'
-    | 'initialOffset'
-    | 'initialRect'
-    | 'scrollMargin'
-    | 'observeElementOffset'
-    | 'observeElementRect'
-  > {
+export interface CascadeVirtualizerProps<G extends GroupNode> extends Pick<
+  UseVirtualizerOptions,
+  | 'getScrollElement'
+  | 'overscan'
+  | 'initialOffset'
+  | 'initialRect'
+  | 'scrollMargin'
+  | 'observeElementOffset'
+  | 'observeElementRect'
+> {
   rows: Row<G>[];
   /**
    * setting a value of true causes the active group root row
@@ -93,11 +92,10 @@ export interface VirtualizedRowScrollState {
   scrollMargin: number;
 }
 
-export interface VirtualizedCascadeListProps<G extends GroupNode>
-  extends Pick<
-    CascadeVirtualizerReturnValue,
-    'virtualizedRowComputedTranslateValue' | 'getVirtualItems'
-  > {
+export interface VirtualizedCascadeListProps<G extends GroupNode> extends Pick<
+  CascadeVirtualizerReturnValue,
+  'virtualizedRowComputedTranslateValue' | 'getVirtualItems'
+> {
   rows: Row<G>[];
   activeStickyIndex: number | null;
   listItemRenderer: (props: {
@@ -152,19 +150,18 @@ export function calculateActiveStickyIndex<G extends GroupNode>(
     : nearestExpandedParentIndex;
 }
 
-export interface CascadeVirtualizerReturnValue
-  extends Pick<
-    UseVirtualizerReturnType,
-    | 'getTotalSize'
-    | 'getVirtualItems'
-    | 'isScrolling'
-    | 'measureElement'
-    | 'scrollOffset'
-    | 'scrollElement'
-    | 'range'
-    | 'measurementsCache'
-    | 'calculateRange'
-  > {
+export interface CascadeVirtualizerReturnValue extends Pick<
+  UseVirtualizerReturnType,
+  | 'getTotalSize'
+  | 'getVirtualItems'
+  | 'isScrolling'
+  | 'measureElement'
+  | 'scrollOffset'
+  | 'scrollElement'
+  | 'range'
+  | 'measurementsCache'
+  | 'calculateRange'
+> {
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<string, number>;
   scrollToVirtualizedIndex: (

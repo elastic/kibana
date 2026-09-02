@@ -74,10 +74,10 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
     initialTemporaryKeys
       ? 'temporary_keys'
       : initialStaticKeys
-      ? 'static_keys'
-      : showIdentityFederation
-      ? 'identity_federation'
-      : 'static_keys'
+        ? 'static_keys'
+        : showIdentityFederation
+          ? 'identity_federation'
+          : 'static_keys'
   );
   const [isFormReady, setIsFormReady] = useState(false);
 

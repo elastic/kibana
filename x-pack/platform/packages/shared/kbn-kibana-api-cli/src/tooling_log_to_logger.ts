@@ -52,10 +52,10 @@ export function toolingLogToLogger({ flags, log }: { flags: Flags; log: ToolingL
         message instanceof Error
           ? message
           : typeof message === 'function'
-          ? message()
-          : typeof message === 'object'
-          ? JSON.stringify(message)
-          : message;
+            ? message()
+            : typeof message === 'object'
+              ? JSON.stringify(message)
+              : message;
 
       method(message);
     };

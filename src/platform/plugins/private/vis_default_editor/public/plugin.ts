@@ -17,9 +17,12 @@ export interface VisDefaultEditorSetupDependencies {
   visualizations: VisualizationsSetup;
 }
 
-export class VisDefaultEditorPlugin
-  implements Plugin<void, void, VisDefaultEditorSetupDependencies, {}>
-{
+export class VisDefaultEditorPlugin implements Plugin<
+  void,
+  void,
+  VisDefaultEditorSetupDependencies,
+  {}
+> {
   public setup(core: CoreSetup, { visualizations }: VisDefaultEditorSetupDependencies) {
     setAnalytics(core.analytics);
     setTheme(core.theme);

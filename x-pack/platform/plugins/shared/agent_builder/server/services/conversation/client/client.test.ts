@@ -126,7 +126,7 @@ describe('ConversationClient', () => {
           entries,
         },
       },
-    } as Document);
+    }) as Document;
 
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
@@ -1589,7 +1589,7 @@ describe('ConversationClient', () => {
         ...(templateVersion !== undefined ? { template_version: templateVersion } : {}),
         ...(Object.keys(metadata).length ? { metadata } : {}),
       },
-    } as Document);
+    }) as Document;
 
   describe('template metadata response conversion', () => {
     const template = makeTemplate('template-1', {

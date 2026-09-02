@@ -21,7 +21,8 @@ import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import type { MockGroupData } from '../__fixtures__/types';
 
 interface RenderComponentProps
-  extends Pick<ComponentProps<typeof DataCascade>, 'onCascadeGroupingChange'>,
+  extends
+    Pick<ComponentProps<typeof DataCascade>, 'onCascadeGroupingChange'>,
     Omit<DataCascadeRowProps<MockGroupData, any>, 'children'>,
     Omit<DataCascadeRowCellProps<MockGroupData, any>, 'children'> {
   query: string;

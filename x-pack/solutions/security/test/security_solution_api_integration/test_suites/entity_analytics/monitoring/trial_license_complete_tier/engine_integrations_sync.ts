@@ -38,9 +38,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should sync integrations during update detection ', async () => {
         // schedule a sync
-        const monitoringSource = await privMonUtils.getIntegrationMonitoringSource(
-          'entityanalytics_okta'
-        );
+        const monitoringSource =
+          await privMonUtils.getIntegrationMonitoringSource('entityanalytics_okta');
         expect(monitoringSource).toBeDefined();
         expect(monitoringSource?.name).toBe(
           '.entity_analytics.monitoring.sources.entityanalytics_okta-default'

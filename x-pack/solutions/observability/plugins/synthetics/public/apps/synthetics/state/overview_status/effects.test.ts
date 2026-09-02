@@ -25,7 +25,7 @@ const makeMeta = (
     overallStatus: 'pending',
     locations: [{ id: 'us_east', label: 'US East', status: 'pending' }],
     ...overrides,
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 const statusWithPending = (configIds: string[]) =>
   ({
@@ -33,7 +33,7 @@ const statusWithPending = (configIds: string[]) =>
       acc[id] = makeMeta({ configId: id });
       return acc;
     }, {}),
-  } as unknown as OverviewStatus);
+  }) as unknown as OverviewStatus;
 
 describe('augmentStaleStatusWorker', () => {
   const liveWindow = {

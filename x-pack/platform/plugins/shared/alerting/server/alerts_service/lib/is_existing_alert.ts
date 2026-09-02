@@ -43,8 +43,8 @@ export async function isExistingAlert({
       response.hits.total == null
         ? 0
         : typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total.value;
+          ? response.hits.total
+          : response.hits.total.value;
 
     return total > 0;
   } catch (error) {

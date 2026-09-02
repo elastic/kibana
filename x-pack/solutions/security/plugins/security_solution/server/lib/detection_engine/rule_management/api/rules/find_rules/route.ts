@@ -68,9 +68,8 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
 
           if (gapFillStatuses.length > 0 && query.gaps_range_start && query.gaps_range_end) {
             const uiSettingsClient = ctx.core.uiSettings.client;
-            const excludedReasons = await uiSettingsClient.get<GapReasonType[]>(
-              EXCLUDED_GAP_REASONS_KEY
-            );
+            const excludedReasons =
+              await uiSettingsClient.get<GapReasonType[]>(EXCLUDED_GAP_REASONS_KEY);
 
             const { ruleIds: gapRuleIds, truncated } = await getGapFilteredRuleIds({
               rulesClient,

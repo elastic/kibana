@@ -17,7 +17,10 @@ import { SESSION_ERROR_REASON_HEADER } from '../../common/constants';
 import { LogoutReason } from '../../common/types';
 
 export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
-  constructor(private sessionExpired: SessionExpired, private anonymousPaths: IAnonymousPaths) {}
+  constructor(
+    private sessionExpired: SessionExpired,
+    private anonymousPaths: IAnonymousPaths
+  ) {}
 
   responseError(
     httpErrorResponse: HttpInterceptorResponseError,

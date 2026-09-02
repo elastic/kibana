@@ -14,8 +14,7 @@ import type { TelemetryCollectionManagerPlugin } from './plugin';
 /**
  * Public contract coming from the setup method.
  */
-export interface TelemetryCollectionManagerPluginSetup
-  extends TelemetryCollectionManagerPluginStart {
+export interface TelemetryCollectionManagerPluginSetup extends TelemetryCollectionManagerPluginStart {
   setCollectionStrategy: <T extends BasicStatsPayload>(
     collectionConfig: CollectionStrategyConfig<T>
   ) => void;

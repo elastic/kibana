@@ -479,10 +479,10 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             typeof explicitFailureStoreEnabled === 'boolean'
               ? explicitFailureStoreEnabled
               : typeof effectiveFailureStoreEnabled === 'boolean'
-              ? effectiveFailureStoreEnabled
-              : typeof templateFailureStoreEnabled === 'boolean'
-              ? templateFailureStoreEnabled
-              : baseBody.matchesFailureStoreClusterPattern === true;
+                ? effectiveFailureStoreEnabled
+                : typeof templateFailureStoreEnabled === 'boolean'
+                  ? templateFailureStoreEnabled
+                  : baseBody.matchesFailureStoreClusterPattern === true;
 
           const body =
             baseBody.failureStoreEnabled === resolvedFailureStoreEnabled

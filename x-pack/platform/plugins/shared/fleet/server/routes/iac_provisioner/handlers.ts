@@ -74,7 +74,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
         const resolvedPolicyTemplates = (packageInfo.policy_templates ?? [])
           .filter(({ name }) => policyTemplates.has(name))
           .map((template) => {
-            const inputs = 'inputs' in template ? template.inputs ?? [] : [];
+            const inputs = 'inputs' in template ? (template.inputs ?? []) : [];
             const enabledInputs = Array.from(
               new Set(
                 inputs

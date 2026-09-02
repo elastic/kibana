@@ -360,8 +360,8 @@ const resolveTimeResultColumn = ({
   const bucketStatsCommand = tsStatsCommand ?? tbucketStatsCommand ?? statsCommand;
   const bucketColumn = tsStatsCommand
     ? getTbucketResultColumn(tsStatsCommand)
-    : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
-      (statsCommand && getBucketResultColumnForField(statsCommand, timeField));
+    : ((tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
+      (statsCommand && getBucketResultColumnForField(statsCommand, timeField)));
 
   if (bucketColumn && bucketStatsCommand) {
     return applyRenamesToColumn(

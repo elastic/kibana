@@ -39,7 +39,7 @@ const AgentBuilderError = ServerSentEventError;
  */
 export type AgentBuilderError<
   TCode extends AgentBuilderErrorCode,
-  TMeta extends Record<string, any> = Record<string, any>
+  TMeta extends Record<string, any> = Record<string, any>,
 > = ServerSentEventError<TCode, TMeta>;
 
 export type SerializedAgentBuilderError = ReturnType<
@@ -426,7 +426,7 @@ export const createWorkflowExecutionError = (
  * Represents an error related to agent execution
  */
 export type AgentBuilderAgentExecutionError<
-  ErrCode extends AgentExecutionErrorCode = AgentExecutionErrorCode
+  ErrCode extends AgentExecutionErrorCode = AgentExecutionErrorCode,
 > = AgentBuilderError<
   AgentBuilderErrorCode.agentExecutionError,
   { errCode: ErrCode } & ExecutionErrorMetaOf<ErrCode>

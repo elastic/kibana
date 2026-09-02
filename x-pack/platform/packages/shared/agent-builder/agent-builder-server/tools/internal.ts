@@ -24,7 +24,7 @@ import type { LlmDescriptionHandler } from '../runner';
 export interface InternalToolDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > extends ToolDefinition<TType, TConfig> {
   /**
    * When true, this tool is only available when experimental features are enabled.

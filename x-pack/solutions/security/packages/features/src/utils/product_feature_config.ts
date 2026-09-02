@@ -38,7 +38,7 @@ export const featureConfigMerger = (objValue: unknown, srcValue: unknown) => {
  */
 export const extendProductFeatureConfigs = <
   C extends ProductFeaturesConfig<ProductFeaturesConfigKey<C> & ProductFeatureKeyType>,
-  S extends string = string
+  S extends string = string,
 >(
   ...productFeatureConfigs: C[]
 ): ProductFeaturesConfig<ProductFeatureKeyType, S> => {

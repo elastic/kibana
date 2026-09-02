@@ -121,7 +121,7 @@ const resolveLegacyCandidates = (packKey: string): Array<{ spaceId: string; pack
     { spaceId: DEFAULT_SPACE_ID, packName: packKey },
   ];
 
-  for (let i = packKey.indexOf(PACK_KEY_SEPARATOR); i !== -1; ) {
+  for (let i = packKey.indexOf(PACK_KEY_SEPARATOR); i !== -1;) {
     const spaceId = packKey.slice(0, i);
     const packName = packKey.slice(i + PACK_KEY_SEPARATOR.length);
     if (spaceId.length && packName.length) {

@@ -104,8 +104,8 @@ export function createCloudUsageCollector(
         ...(organizationInTrial
           ? { inTrial: true }
           : trialEndDateMs
-          ? { inTrial: Date.now() <= trialEndDateMs }
-          : {}),
+            ? { inTrial: Date.now() <= trialEndDateMs }
+            : {}),
         deploymentId,
         projectId,
         projectType,

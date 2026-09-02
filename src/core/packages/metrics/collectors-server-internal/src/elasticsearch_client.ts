@@ -10,9 +10,7 @@
 import type { ElasticsearchClientsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
 import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 
-export class ElasticsearchClientsMetricsCollector
-  implements MetricsCollector<ElasticsearchClientsMetrics>
-{
+export class ElasticsearchClientsMetricsCollector implements MetricsCollector<ElasticsearchClientsMetrics> {
   constructor(private readonly agentStatsProvider: AgentStatsProvider) {}
 
   public async collect(): Promise<ElasticsearchClientsMetrics> {

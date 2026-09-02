@@ -201,7 +201,7 @@ const buildPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolic
     group_by: undefined,
     throttle: undefined,
     ...overrides,
-  } as ActionPolicyResponse);
+  }) as ActionPolicyResponse;
 
 const renderContainer = () =>
   render(

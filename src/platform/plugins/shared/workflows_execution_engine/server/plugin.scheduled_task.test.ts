@@ -118,7 +118,7 @@ describe('workflow:scheduled task runner', () => {
       status: TaskStatus.Running,
       ownerId: 'kibana-instance-id',
       schedule: { interval: '1h' },
-    } as ConcreteTaskInstance);
+    }) as ConcreteTaskInstance;
 
   const setupPlugin = () => {
     taskDefinitions = {};

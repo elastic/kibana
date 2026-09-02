@@ -25,9 +25,12 @@ export function tryPausingQueue(
     const delayInMinutes = schedule.delayInMinutes || 0;
     logger.info('Pausing queue');
     queue.pause();
-    setTimeout(() => {
-      logger.info('Resuming queue');
-      queue.resume();
-    }, delayInMinutes * 60 * 1000);
+    setTimeout(
+      () => {
+        logger.info('Resuming queue');
+        queue.resume();
+      },
+      delayInMinutes * 60 * 1000
+    );
   }
 }

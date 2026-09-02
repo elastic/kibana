@@ -32,8 +32,9 @@ interface FormBasedDatasourceState extends Partial<Pick<FormBasedPrivateState, '
   [key: string]: unknown;
 }
 
-interface TextBasedDatasourceState
-  extends Partial<Pick<TextBasedPrivateState, 'layers' | 'indexPatternRefs'>> {
+interface TextBasedDatasourceState extends Partial<
+  Pick<TextBasedPrivateState, 'layers' | 'indexPatternRefs'>
+> {
   [key: string]: unknown;
 }
 

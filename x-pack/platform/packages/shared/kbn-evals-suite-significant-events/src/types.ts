@@ -13,5 +13,4 @@ export interface SignificantEventsSpecificEvaluationWorkerFixtures {
 }
 
 export interface SignificantEventsEvaluationWorkerFixtures
-  extends EvaluationWorkerFixtures,
-    SignificantEventsSpecificEvaluationWorkerFixtures {}
+  extends EvaluationWorkerFixtures, SignificantEventsSpecificEvaluationWorkerFixtures {}

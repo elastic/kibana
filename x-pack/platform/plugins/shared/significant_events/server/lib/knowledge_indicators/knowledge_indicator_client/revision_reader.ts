@@ -28,7 +28,10 @@ import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 export const REVISION_SIZE_LIMIT = 10_000;
 
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger
+  ) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,

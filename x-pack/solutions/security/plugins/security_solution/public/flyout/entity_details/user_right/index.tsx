@@ -187,11 +187,11 @@ export const UserPanel = memo(function UserPanel({
 
   useQueryInspector({
     deleteQuery,
-    inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
-    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    inspect: useEntityStoreInspectForRisk ? (entityFromStoreResult?.inspect ?? null) : inspect,
+    loading: useEntityStoreInspectForRisk ? (entityFromStoreResult?.isLoading ?? false) : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
     refetch: useEntityStoreInspectForRisk
-      ? entityFromStoreResult?.refetch ?? (() => {})
+      ? (entityFromStoreResult?.refetch ?? (() => {}))
       : riskScoreState.refetch,
     setQuery,
   });

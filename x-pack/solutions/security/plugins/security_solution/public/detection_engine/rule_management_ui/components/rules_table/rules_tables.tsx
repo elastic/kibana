@@ -237,7 +237,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         setSelectedRuleIds(selected.map(({ id }) => id));
         setIsAllSelected(false);
       },
-      selected: selectedRuleIds.map((id) => ({ id } as Rule)), // EuiBasicTable only needs the itemId
+      selected: selectedRuleIds.map((id) => ({ id }) as Rule), // EuiBasicTable only needs the itemId
     }),
     [loadingRuleIds, setIsAllSelected, setSelectedRuleIds, selectedRuleIds]
   );
@@ -284,7 +284,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const shouldShowLinearProgress =
     (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
-  const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
+  const rulesCount = Math.max(isAllSelected ? pagination.total : (selectedRuleIds?.length ?? 0), 1);
 
   return (
     <>

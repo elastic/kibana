@@ -21,7 +21,10 @@ export class MigrationsStorage<T> {
   private readonly storage: Storage;
   public key: string;
 
-  constructor(private readonly objectName: string, private readonly options?: Options) {
+  constructor(
+    private readonly objectName: string,
+    private readonly options?: Options
+  ) {
     this.storage = storages[this.options?.storageType ?? 'local'];
     this.key = this.getKey();
   }

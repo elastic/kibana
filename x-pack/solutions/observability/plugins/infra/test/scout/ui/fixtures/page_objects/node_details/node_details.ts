@@ -60,7 +60,10 @@ export class NodeDetailsPage {
   public readonly logsTabContent: Locator;
   public readonly logsSearchInput: Locator;
 
-  constructor(public readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    public readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     // Tabs
     this.overviewTab = this.page.testSubj.locator('infraAssetDetailsOverviewTab');
     this.metadataTab = this.page.testSubj.locator('infraAssetDetailsMetadataTab');

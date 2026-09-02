@@ -70,6 +70,6 @@ export type SchemaFieldMapKeys<T extends Record<string, any>, Key = keyof T> = K
       ? `${Key}` | `${Key}.${SchemaFieldMapKeys<NonNullable<T[Key]>[number]>}`
       : `${Key}`
     : NonNullable<T[Key]> extends Record<string, any>
-    ? `${Key}` | `${Key}.${SchemaFieldMapKeys<NonNullable<T[Key]>>}`
-    : `${Key}`
+      ? `${Key}` | `${Key}.${SchemaFieldMapKeys<NonNullable<T[Key]>>}`
+      : `${Key}`
   : never;

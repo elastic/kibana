@@ -91,12 +91,14 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
               grow={!alignDotToEnd}
               css={css`
                 min-width: 0;
-                ${alignDotToEnd
-                  ? `
+                ${
+                  alignDotToEnd
+                    ? `
                   flex: 0 0 8px;
                   min-width: 8px;
                 `
-                  : ''}
+                    : ''
+                }
               `}
             >
               <MitreTacticDot

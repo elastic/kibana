@@ -487,7 +487,7 @@ export const projectionMatrix: (state: CameraState) => (time: number) => Matrix3
         0, 0, 1,
         0, 0, 1,
         0, 0, 0
-      ]
+      ];
 
       /**
        * 4. convert from 0->2 to 0->rasterDimension by multiplying by rasterDimension/2

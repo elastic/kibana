@@ -123,7 +123,7 @@ const createRound = (version: number): ConversationRound =>
       input_tokens: 1,
       output_tokens: 1,
     },
-  } as ConversationRound);
+  }) as ConversationRound;
 
 describe('RoundLayout', () => {
   beforeEach(() => {

@@ -83,7 +83,7 @@ const makeSecurityMock = (username: string = 'alice') =>
     authc: {
       getCurrentUser: jest.fn().mockReturnValue({ username }),
     },
-  } as any);
+  }) as any;
 
 const makeDeps = (
   clientOverrides?: Partial<ReturnType<typeof makeStorageClient>>,
@@ -113,7 +113,7 @@ const makeDeps = (
     getTaskScheduler: () => null,
     executionQueryService,
     validationService,
-    getCoreStart: () => ({} as CoreStart),
+    getCoreStart: () => ({}) as CoreStart,
     changeHistoryService: {
       isInitialized: () => false,
       asScoped: jest.fn(),

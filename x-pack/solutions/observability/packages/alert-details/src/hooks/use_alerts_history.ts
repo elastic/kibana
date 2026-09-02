@@ -79,7 +79,7 @@ export function useAlertsHistory({
   });
 
   return {
-    data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
+    data: isInitialLoading ? EMPTY_ALERTS_HISTORY : (data ?? EMPTY_ALERTS_HISTORY),
     isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
     isSuccess,
     isError,

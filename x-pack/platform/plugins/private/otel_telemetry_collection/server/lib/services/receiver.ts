@@ -79,7 +79,10 @@ interface CompositeResponse {
 export class OtelTelemetryReceiver {
   private readonly logger: Logger;
 
-  constructor(logger: Logger, private readonly esClient: ElasticsearchClient) {
+  constructor(
+    logger: Logger,
+    private readonly esClient: ElasticsearchClient
+  ) {
     this.logger = logger.get(OtelTelemetryReceiver.name);
   }
 

@@ -163,9 +163,8 @@ export const createExtendedFieldsUserActionBuilder: UserActionBuilder = ({
         // Distinct per field so each row is addressable, while the copy-link stays on the first row
         // only: there is one user action behind these rows, so one permalink — repeating it would
         // both duplicate DOM ids and imply each field could be linked to separately.
-        entry[
-          'data-test-subj'
-        ] = `${userAction.type}-${userAction.action}-action-${userAction.id}-${key}`;
+        entry['data-test-subj'] =
+          `${userAction.type}-${userAction.action}-action-${userAction.id}-${key}`;
         if (index > 0) {
           delete entry.actions;
         }

@@ -215,15 +215,15 @@ export const workflowExecutor = async ({
         alert_retrieval_mode: alertRetrievalMode,
         alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
         alert_retrieval_workflows_enabled: isComposite
-          ? paramsWorkflowConfig?.alertRetrievalWorkflowsEnabled ?? false
+          ? (paramsWorkflowConfig?.alertRetrievalWorkflowsEnabled ?? false)
           : alertRetrievalWorkflowIds.length > 0,
         default_retrieval_enabled: isComposite
-          ? paramsWorkflowConfig?.defaultRetrievalEnabled ?? false
+          ? (paramsWorkflowConfig?.defaultRetrievalEnabled ?? false)
           : !isCustomOnly,
         ...(paramsWorkflowConfig?.esqlQuery != null
           ? { esql_query: paramsWorkflowConfig.esqlQuery }
           : {}),
-        skill_enabled: isComposite ? paramsWorkflowConfig?.skillEnabled ?? true : true,
+        skill_enabled: isComposite ? (paramsWorkflowConfig?.skillEnabled ?? true) : true,
         validation_workflow_id:
           paramsWorkflowConfig?.validationWorkflowId ??
           getDefaultWorkflowConfig().validation_workflow_id,

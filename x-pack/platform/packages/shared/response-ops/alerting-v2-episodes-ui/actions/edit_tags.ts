@@ -42,7 +42,7 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const currentTags = episodes.length === 1 ? (episodes[0].last_tags ?? []) : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,

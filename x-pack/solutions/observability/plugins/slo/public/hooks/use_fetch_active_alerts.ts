@@ -140,7 +140,7 @@ export function useFetchActiveAlerts({
   });
 
   return {
-    data: isInitialLoading ? EMPTY_ACTIVE_ALERTS_MAP : data ?? EMPTY_ACTIVE_ALERTS_MAP,
+    data: isInitialLoading ? EMPTY_ACTIVE_ALERTS_MAP : (data ?? EMPTY_ACTIVE_ALERTS_MAP),
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

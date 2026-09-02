@@ -34,12 +34,14 @@ const panelContainerStyles = (isProjectStyle: boolean) => (theme: UseEuiTheme) =
     min-width: 0; // Allow panel to shrink
     overflow: hidden; // Force children to respect border radius and shadow
 
-    ${isProjectStyle &&
-    css`
-      border-radius: ${theme.euiTheme.border.radius.medium};
-      outline: ${getHighContrastBorder(theme)};
-      ${euiShadow(theme, 'xs', { border: 'none' })};
-    `}
+    ${
+      isProjectStyle &&
+      css`
+        border-radius: ${theme.euiTheme.border.radius.medium};
+        outline: ${getHighContrastBorder(theme)};
+        ${euiShadow(theme, 'xs', { border: 'none' })};
+      `
+    }
   `;
 
 export interface SidebarPanelProps {

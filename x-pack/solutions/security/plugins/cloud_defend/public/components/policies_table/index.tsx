@@ -22,10 +22,8 @@ import { useKibana } from '../../common/hooks/use_kibana';
 import * as TEST_SUBJ from '../../pages/policies/test_subjects';
 
 interface PoliciesTableProps
-  extends Pick<
-      EuiBasicTableProps<CloudDefendPolicy>,
-      'loading' | 'error' | 'noItemsMessage' | 'sorting'
-    >,
+  extends
+    Pick<EuiBasicTableProps<CloudDefendPolicy>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
     Pagination {
   policies: CloudDefendPolicy[];
   setQuery(pagination: CriteriaWithPagination<CloudDefendPolicy>): void;

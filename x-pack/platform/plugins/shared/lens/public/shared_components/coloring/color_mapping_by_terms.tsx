@@ -155,8 +155,8 @@ export function ColorMappingByTerms({
                   const newColorMapping = isLegacy
                     ? undefined
                     : palette
-                    ? getConfigFromPalette(palettes, palette.name as KbnPaletteId)
-                    : { ...DEFAULT_COLOR_MAPPING_CONFIG };
+                      ? getConfigFromPalette(palettes, palette.name as KbnPaletteId)
+                      : { ...DEFAULT_COLOR_MAPPING_CONFIG };
 
                   trackUiCounterEvents(`color_mapping_switch_${isLegacy ? 'disabled' : 'enabled'}`);
 

@@ -192,15 +192,12 @@ export interface ObservabilityPublicPluginsStart {
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
-export class Plugin
-  implements
-    PluginClass<
-      ObservabilityPublicSetup,
-      ObservabilityPublicStart,
-      ObservabilityPublicPluginsSetup,
-      ObservabilityPublicPluginsStart
-    >
-{
+export class Plugin implements PluginClass<
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+  ObservabilityPublicPluginsSetup,
+  ObservabilityPublicPluginsStart
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;

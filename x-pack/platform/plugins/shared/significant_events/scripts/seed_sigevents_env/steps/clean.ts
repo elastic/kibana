@@ -122,7 +122,7 @@ export async function cleanSeedData(
     throw new Error(`clean: failed to list queries (HTTP ${listRes.status})`);
   }
   const allQueries =
-    listRes.status < 300 ? (listRes.data as { queries?: StreamQuery[] })?.queries ?? [] : [];
+    listRes.status < 300 ? ((listRes.data as { queries?: StreamQuery[] })?.queries ?? []) : [];
   const queryIds = allQueries
     .map((q) => q.id)
     .filter((id): id is string => typeof id === 'string' && id.length > 0);

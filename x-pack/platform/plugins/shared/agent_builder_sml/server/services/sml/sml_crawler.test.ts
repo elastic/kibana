@@ -108,7 +108,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
 };
 
 const createMockSavedObjectsClient = (): jest.Mocked<ISavedObjectsRepository> =>
-  ({} as jest.Mocked<ISavedObjectsRepository>);
+  ({}) as jest.Mocked<ISavedObjectsRepository>;
 
 describe('SmlCrawlerImpl', () => {
   let logger: ReturnType<typeof createMockLogger>;

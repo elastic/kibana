@@ -22,7 +22,7 @@ const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-com
 
 type ConnectorLists = [
   preConfigured: ConnectorSelectableComponentProps['preConfiguredConnectors'],
-  custom: ConnectorSelectableComponentProps['customConnectors']
+  custom: ConnectorSelectableComponentProps['customConnectors'],
 ];
 export function ChatActionsMenu({
   connectors,

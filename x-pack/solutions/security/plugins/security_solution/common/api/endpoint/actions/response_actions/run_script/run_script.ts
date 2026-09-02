@@ -131,7 +131,7 @@ export type EndpointRunScriptActionRequestParams = DeepMutable<
 >;
 
 export type RunScriptActionRequestBody<
-  TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters
+  TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters,
 > = Omit<TypeOf<typeof RunScriptActionRequestSchema.body>, 'parameters'> & {
   parameters: TParams;
 };

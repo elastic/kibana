@@ -438,11 +438,11 @@ export const GraphQLConnector: ConnectorSpec = {
                 defaultMessage: 'Authentication failed — check your credentials',
               })
             : status === 403
-            ? i18n.translate('connectorSpecs.graphQL.test.forbiddenMessage', {
-                defaultMessage:
-                  'Access denied — the credentials lack permission to query this endpoint',
-              })
-            : err.message ?? 'Unknown error';
+              ? i18n.translate('connectorSpecs.graphQL.test.forbiddenMessage', {
+                  defaultMessage:
+                    'Access denied — the credentials lack permission to query this endpoint',
+                })
+              : (err.message ?? 'Unknown error');
 
         throw new Error(
           i18n.translate('connectorSpecs.graphQL.test.failureMessage', {

@@ -201,11 +201,14 @@ export function countErrors(
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter
-    mergeScan(({ count, isBlockException }, next) => {
-      return next === FLUSH_MARKER
-        ? of(emitErrorCount(count, isBlockException), resetErrorCount())
-        : of(incrementOrEmitErrorCount(count, isClusterBlockException(next as Error)));
-    }, emitErrorCount(0, false)),
+    mergeScan(
+      ({ count, isBlockException }, next) => {
+        return next === FLUSH_MARKER
+          ? of(emitErrorCount(count, isBlockException), resetErrorCount())
+          : of(incrementOrEmitErrorCount(count, isClusterBlockException(next as Error)));
+      },
+      emitErrorCount(0, false)
+    ),
     filter(isEmitEvent),
     map(({ count, isBlockException }) => {
       return { count, isBlockException };

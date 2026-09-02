@@ -130,8 +130,8 @@ const generateWorkflowInsightsDoc = ({
     os === 'linux'
       ? undefined
       : os === 'windows'
-      ? 'process.Ext.code_signature'
-      : 'process.code_signature';
+        ? 'process.Ext.code_signature'
+        : 'process.code_signature';
 
   const signatureValue = os === 'linux' ? undefined : 'Elastic';
   return {

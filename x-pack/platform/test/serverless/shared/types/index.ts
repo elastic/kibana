@@ -15,23 +15,19 @@ export type InheritedFtrProviderContext = GenericFtrProviderContext<
   typeof pageObjects
 >;
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  infer TPageObjects
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, infer TPageObjects>
+    ? TServices
+    : {};
 
-export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  infer TPageObjects
->
-  ? TPageObjects
-  : {};
+export type InheritedPageObjects =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, infer TPageObjects>
+    ? TPageObjects
+    : {};
 
 export interface CreateTestConfigOptions<
   TServices extends {} = InheritedServices,
-  TPageObjects extends {} = InheritedPageObjects
+  TPageObjects extends {} = InheritedPageObjects,
 > {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];

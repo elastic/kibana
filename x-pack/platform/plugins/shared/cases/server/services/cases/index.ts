@@ -543,7 +543,9 @@ export class CasesService {
       });
     }
     const total =
-      typeof cases.hits.total === 'object' ? cases.hits.total.value ?? 0 : cases.hits.total ?? 0;
+      typeof cases.hits.total === 'object'
+        ? (cases.hits.total.value ?? 0)
+        : (cases.hits.total ?? 0);
 
     return {
       casesMap: casesWithComments,
@@ -1280,35 +1282,41 @@ export class CasesService {
       // `bulkCreateCases`.
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
 
-      const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSavedObjectErrorResult(theCase)) {
-          acc.push(theCase);
+      const res = updatedCases.saved_objects.reduce(
+        (acc, theCase) => {
+          if (isSavedObjectErrorResult(theCase)) {
+            acc.push(theCase);
+            return acc;
+          }
+
+          // Same synthesize-from-originalCase pattern as patchCase: convert the
+          // external-model base to the persisted model before spreading the patch.
+          const ctx = updateContextById.get(theCase.id);
+          if (ctx) {
+            analyticsV2Mirrors.push({
+              ...ctx.originalCase,
+              attributes: {
+                ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
+                ...ctx.esAttributes,
+              } as CasePersistedAttributes,
+              version: theCase.version ?? ctx.originalCase.version,
+              references: ctx.references ?? [],
+            });
+          }
+
+          const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
+          const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+          const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
+
+          acc.push(soWithDecodedRes);
+
           return acc;
-        }
-
-        // Same synthesize-from-originalCase pattern as patchCase: convert the
-        // external-model base to the persisted model before spreading the patch.
-        const ctx = updateContextById.get(theCase.id);
-        if (ctx) {
-          analyticsV2Mirrors.push({
-            ...ctx.originalCase,
-            attributes: {
-              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
-              ...ctx.esAttributes,
-            } as CasePersistedAttributes,
-            version: theCase.version ?? ctx.originalCase.version,
-            references: ctx.references ?? [],
-          });
-        }
-
-        const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
-        const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
-
-        acc.push(soWithDecodedRes);
-
-        return acc;
-      }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+        },
+        [] as Array<
+          | SavedObjectsUpdateResponse<CaseTransformedAttributes>
+          | SOWithErrors<CaseTransformedAttributes>
+        >
+      );
 
       this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
 

@@ -8,7 +8,10 @@
 export type TraceReadinessErrorKind = 'not_ready' | 'unresolvable';
 
 export class TraceReadinessError extends Error {
-  constructor(message: string, public readonly kind: TraceReadinessErrorKind) {
+  constructor(
+    message: string,
+    public readonly kind: TraceReadinessErrorKind
+  ) {
     super(message);
     this.name = 'TraceReadinessError';
   }

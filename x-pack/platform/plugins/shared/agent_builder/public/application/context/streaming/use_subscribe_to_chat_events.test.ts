@@ -36,7 +36,7 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
     setCompactionStepComplete: jest.fn(),
     deleteConversation: jest.fn(),
     renameConversation: jest.fn(),
-  } as unknown as jest.Mocked<ConversationActions>);
+  }) as unknown as jest.Mocked<ConversationActions>;
 
 const buildRound = (): ConversationRound => ({
   id: 'round-1',

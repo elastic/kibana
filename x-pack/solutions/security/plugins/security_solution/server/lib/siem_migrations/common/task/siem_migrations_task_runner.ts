@@ -60,7 +60,7 @@ export type SiemTaskRunnerConstructor<
   I extends ItemDocument = ItemDocument,
   P extends object = {},
   C extends object = {},
-  O extends object = {}
+  O extends object = {},
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = new (...params: any[]) => SiemMigrationTaskRunner<M, I, P, C, O>;
 
@@ -69,7 +69,7 @@ export abstract class SiemMigrationTaskRunner<
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
   P extends object = {}, // The migration task input parameters schema
   C extends object = {}, // The migration task config schema
-  O extends object = {} // The migration task output schema
+  O extends object = {}, // The migration task output schema
 > {
   protected telemetry?: SiemMigrationTelemetryClient<I>;
   protected task?: MigrationTask<P, C, O>;

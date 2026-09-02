@@ -171,7 +171,7 @@ describe('types/utils', () => {
   describe('step type guards', () => {
     // Step is a discriminated union — guards only inspect `type`, so we construct
     // a minimal BaseStep-shaped object. The cast is needed because guards accept Step.
-    const makeStep = (type: string) => ({ name: 'test-step', type } as unknown as Step);
+    const makeStep = (type: string) => ({ name: 'test-step', type }) as unknown as Step;
 
     it.each([
       ['isWaitStep', isWaitStep, 'wait', 'elasticsearch'],

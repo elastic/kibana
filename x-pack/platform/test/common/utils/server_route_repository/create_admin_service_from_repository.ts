@@ -21,9 +21,8 @@ import type {
 } from '../../../api_integration_deployment_agnostic/services/role_scoped_supertest';
 import type { CustomRoleScopedSupertestProvider } from '../../../api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
 
-type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
-  ? [TArgs] | []
-  : [TArgs];
+type MaybeOptional<TArgs extends Record<string, any>> =
+  RequiredKeys<TArgs> extends never ? [TArgs] | [] : [TArgs];
 
 export interface RepositorySupertestClient<TServerRouteRepository extends ServerRouteRepository> {
   fetch: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
@@ -45,7 +44,7 @@ export interface RepositorySupertestClient<TServerRouteRepository extends Server
 
 type RepositorySupertestReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends EndpointOf<TServerRouteRepository>
+  TEndpoint extends EndpointOf<TServerRouteRepository>,
 > = OverwriteThisMethods<
   WithoutPromise<supertest.Test>,
   Promise<{
@@ -196,53 +195,53 @@ type OverloadedParameters<T> = T extends {
 }
   ? A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8
   : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-      (...args: infer A3): any;
-      (...args: infer A4): any;
-      (...args: infer A5): any;
-      (...args: infer A6): any;
-      (...args: infer A7): any;
-    }
-  ? A1 | A2 | A3 | A4 | A5 | A6 | A7
-  : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-      (...args: infer A3): any;
-      (...args: infer A4): any;
-      (...args: infer A5): any;
-      (...args: infer A6): any;
-    }
-  ? A1 | A2 | A3 | A4 | A5 | A6
-  : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-      (...args: infer A3): any;
-      (...args: infer A4): any;
-      (...args: infer A5): any;
-    }
-  ? A1 | A2 | A3 | A4 | A5
-  : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-      (...args: infer A3): any;
-      (...args: infer A4): any;
-    }
-  ? A1 | A2 | A3 | A4
-  : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-      (...args: infer A3): any;
-    }
-  ? A1 | A2 | A3
-  : T extends {
-      (...args: infer A1): any;
-      (...args: infer A2): any;
-    }
-  ? A1 | A2
-  : T extends (...args: infer A) => any
-  ? A
-  : any;
+        (...args: infer A1): any;
+        (...args: infer A2): any;
+        (...args: infer A3): any;
+        (...args: infer A4): any;
+        (...args: infer A5): any;
+        (...args: infer A6): any;
+        (...args: infer A7): any;
+      }
+    ? A1 | A2 | A3 | A4 | A5 | A6 | A7
+    : T extends {
+          (...args: infer A1): any;
+          (...args: infer A2): any;
+          (...args: infer A3): any;
+          (...args: infer A4): any;
+          (...args: infer A5): any;
+          (...args: infer A6): any;
+        }
+      ? A1 | A2 | A3 | A4 | A5 | A6
+      : T extends {
+            (...args: infer A1): any;
+            (...args: infer A2): any;
+            (...args: infer A3): any;
+            (...args: infer A4): any;
+            (...args: infer A5): any;
+          }
+        ? A1 | A2 | A3 | A4 | A5
+        : T extends {
+              (...args: infer A1): any;
+              (...args: infer A2): any;
+              (...args: infer A3): any;
+              (...args: infer A4): any;
+            }
+          ? A1 | A2 | A3 | A4
+          : T extends {
+                (...args: infer A1): any;
+                (...args: infer A2): any;
+                (...args: infer A3): any;
+              }
+            ? A1 | A2 | A3
+            : T extends {
+                  (...args: infer A1): any;
+                  (...args: infer A2): any;
+                }
+              ? A1 | A2
+              : T extends (...args: infer A) => any
+                ? A
+                : any;
 
 type OverrideReturnType<T extends (...args: any[]) => any, TNextReturnType> = (
   ...args: OverloadedParameters<T>

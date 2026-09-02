@@ -273,7 +273,7 @@ describe('UiActionsService', () => {
           ({
             id: ACTION_HELLO_WORLD,
             order: 13,
-          } as unknown as ActionDefinition)
+          }) as unknown as ActionDefinition
       );
 
       expect(await actions.get(ACTION_HELLO_WORLD)?.()).toMatchObject({

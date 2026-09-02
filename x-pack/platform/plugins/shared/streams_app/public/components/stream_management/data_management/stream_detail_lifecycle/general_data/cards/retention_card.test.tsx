@@ -126,7 +126,7 @@ describe('RetentionCard', () => {
       index_mode: indexMode,
       privileges,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    }) as any;
 
   beforeEach(() => {
     jest.clearAllMocks();

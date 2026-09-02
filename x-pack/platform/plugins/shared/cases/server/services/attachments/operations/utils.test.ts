@@ -37,7 +37,7 @@ const createByValueLens = () =>
     owner: 'cases',
     data: { state: { visualization: {} } },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  }) as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
 
 // A saved-object reference lens carries `metadata.soType` and, optionally, a
 // snapshot of the referenced SO under `data.attributes`. It has no by-value
@@ -50,7 +50,7 @@ const createByReferenceLens = (withSnapshot = false) =>
     metadata: { title: 'My lens', soType: LENS_SO_TYPE },
     ...(withSnapshot ? { data: { attributes: { title: 'My lens' } } } : {}),
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  }) as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
 
 // A unified file attachment is SO-backed (`metadata.soType`) but, unlike Lens-by-ref,
 // maps cleanly onto a legacy externalReference, so it must stay legacy-writeable.
@@ -66,7 +66,7 @@ const createUnifiedFile = () =>
       ],
     },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  }) as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
 
 // Every unified type that maps onto a legacy externalReference. These are SO-backed
 // (`metadata.soType`) yet always have a legacy form, so they are never unified-only.
@@ -84,7 +84,7 @@ const createExternalReference = (type: string) =>
     attachmentId: `${type}-1`,
     metadata: { soType: type },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  }) as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
 
 // Every persistable-state subtype. Their legacy form is by-value, so a by-value
 // instance is legacy-writeable (only a by-reference instance would be unified-only).
@@ -100,7 +100,7 @@ const createByValuePersistableState = (type: string) =>
     owner: 'cases',
     data: { state: {} },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  }) as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
 
 describe('transformAttributesForMode', () => {
   it('maps legacy user comments to unified schema when mode is unified', () => {

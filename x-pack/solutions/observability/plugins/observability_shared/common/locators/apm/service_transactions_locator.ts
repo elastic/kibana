@@ -13,9 +13,7 @@ export { SERVICE_TRANSACTIONS_LOCATOR_ID, type ServiceTransactionsLocatorParams 
 
 export type ServiceTransactionsLocator = LocatorPublic<ServiceTransactionsLocatorParams>;
 
-export class ServiceTransactionsLocatorDefinition
-  implements LocatorDefinition<ServiceTransactionsLocatorParams>
-{
+export class ServiceTransactionsLocatorDefinition implements LocatorDefinition<ServiceTransactionsLocatorParams> {
   public readonly id = SERVICE_TRANSACTIONS_LOCATOR_ID;
 
   public readonly getLocation = async ({

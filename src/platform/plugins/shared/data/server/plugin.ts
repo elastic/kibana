@@ -66,15 +66,12 @@ export interface DataPluginStartDependencies {
   licensing?: LicensingPluginStart;
 }
 
-export class DataServerPlugin
-  implements
-    Plugin<
-      DataPluginSetup,
-      DataPluginStart,
-      DataPluginSetupDependencies,
-      DataPluginStartDependencies
-    >
-{
+export class DataServerPlugin implements Plugin<
+  DataPluginSetup,
+  DataPluginStart,
+  DataPluginSetupDependencies,
+  DataPluginStartDependencies
+> {
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;

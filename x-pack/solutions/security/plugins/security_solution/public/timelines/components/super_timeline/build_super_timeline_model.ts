@@ -90,10 +90,10 @@ const mergeDateRange = (timelines: TimelineModel[]) => {
         dateMath.parse(toDateMathInput(timeline.dateRange.end), { roundUp: true })?.valueOf() ??
         -Infinity;
       const accStartMs = acc.start
-        ? dateMath.parse(toDateMathInput(acc.start))?.valueOf() ?? Infinity
+        ? (dateMath.parse(toDateMathInput(acc.start))?.valueOf() ?? Infinity)
         : Infinity;
       const accEndMs = acc.end
-        ? dateMath.parse(toDateMathInput(acc.end), { roundUp: true })?.valueOf() ?? -Infinity
+        ? (dateMath.parse(toDateMathInput(acc.end), { roundUp: true })?.valueOf() ?? -Infinity)
         : -Infinity;
       return {
         start: startMs < accStartMs ? timeline.dateRange.start : acc.start,

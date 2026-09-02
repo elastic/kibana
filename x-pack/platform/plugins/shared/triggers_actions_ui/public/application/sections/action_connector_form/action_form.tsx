@@ -319,8 +319,8 @@ export const ActionForm = ({
         // Disable system action if it's already selected and doesn't allow multiple instances
         const isSystemActionSelected = Boolean(
           actionTypesIndex[item.id].isSystemActionType &&
-            !actionTypesIndex[item.id].allowMultipleSystemActions &&
-            actions.find((action) => action.actionTypeId === item.id)
+          !actionTypesIndex[item.id].allowMultipleSystemActions &&
+          actions.find((action) => action.actionTypeId === item.id)
         );
 
         const isDisabled = !checkEnabledResult.isEnabled || isSystemActionSelected;

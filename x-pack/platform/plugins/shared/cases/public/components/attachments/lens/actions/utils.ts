@@ -69,7 +69,7 @@ export const getLensByValueAttachment = ({
     data: {
       state: { attributes, timeRange, metadata },
     },
-  } as unknown as Omit<UnifiedValueAttachmentPayload, 'owner'>);
+  }) as unknown as Omit<UnifiedValueAttachmentPayload, 'owner'>;
 
 /**
  * By-ref attachment: the Lens panel is backed by a library saved object, so

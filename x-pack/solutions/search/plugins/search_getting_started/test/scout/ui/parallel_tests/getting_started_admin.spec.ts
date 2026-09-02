@@ -59,9 +59,8 @@ test.describe(
         const searchBasicsCard = await pageObjects.gettingStarted.getTutorialCard('search_basics');
         await expect(searchBasicsCard).toBeVisible();
 
-        const semanticSearchCard = await pageObjects.gettingStarted.getTutorialCard(
-          'semantic_search'
-        );
+        const semanticSearchCard =
+          await pageObjects.gettingStarted.getTutorialCard('semantic_search');
         await expect(semanticSearchCard).toBeVisible();
 
         const esqlCard = await pageObjects.gettingStarted.getTutorialCard('esql');

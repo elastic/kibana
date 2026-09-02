@@ -16,12 +16,10 @@ import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import type { ContentListItem } from '../../item';
 import { DeleteConfirmationModal } from './delete_confirmation';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockOnDelete = jest.fn(async () => {});
 

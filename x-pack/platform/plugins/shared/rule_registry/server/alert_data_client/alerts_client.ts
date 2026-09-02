@@ -1340,7 +1340,7 @@ export class AlertsClient {
 
   public async find<
     Params extends RuleTypeParams = never,
-    TAggregations = Record<AggregateName, AggregationsAggregate>
+    TAggregations = Record<AggregateName, AggregationsAggregate>,
   >({
     aggs,
     ruleTypeIds,

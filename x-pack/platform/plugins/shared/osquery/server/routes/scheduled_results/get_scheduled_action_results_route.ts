@@ -163,7 +163,7 @@ export const getScheduledActionResultsRoute = (
           const total =
             typeof res.rawResponse.hits.total === 'number'
               ? res.rawResponse.hits.total
-              : res.rawResponse.hits.total?.value ?? 0;
+              : (res.rawResponse.hits.total?.value ?? 0);
 
           const currentPage = page;
 

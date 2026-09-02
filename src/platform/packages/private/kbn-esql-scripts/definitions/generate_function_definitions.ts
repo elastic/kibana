@@ -115,8 +115,8 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
             ? param.name === 'field'
               ? { fieldsOnly: true }
               : !param.hint
-              ? { hint: { kind: 'constant' as const } }
-              : {}
+                ? { hint: { kind: 'constant' as const } }
+                : {}
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
@@ -332,10 +332,10 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
   type: FunctionDefinitionTypes.${type.toUpperCase()},
   name: EsqlFunctionNames.${name.toUpperCase()},
     description: i18n.translate('kbn-esql-language.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-    removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-  )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}${
-    functionDefinition.tsdbCompatible === false ? '\n  tsdbCompatible: false,' : ''
-  }
+      removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}${
+      functionDefinition.tsdbCompatible === false ? '\n  tsdbCompatible: false,' : ''
+    }
   preview: ${functionDefinition.preview || 'false'},
   alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
   signatures: ${JSON.stringify(signaturesWithLicenseLowerCase, null, 2)},
@@ -497,8 +497,8 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.${type.toUpperCase()},
   name: '${name}',
   description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      description
-    )} }),
+    description
+  )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
   preview: ${preview || false},
   signatures: ${JSON.stringify(transformedSignatures, null, 2)},
@@ -549,8 +549,8 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   name: '${name}',
   operator: '${operator}',
   description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      description
-    )} }),
+    description
+  )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
   preview: ${preview || false},
   signatures: ${JSON.stringify(transformedSignatures, null, 2)},
@@ -601,8 +601,8 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   name: '${name}',
   operator: '${operator}',
   description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
-      description
-    )} }),
+    description
+  )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
   preview: ${preview || false},
   signatures: ${JSON.stringify(transformedSignatures, null, 2)},

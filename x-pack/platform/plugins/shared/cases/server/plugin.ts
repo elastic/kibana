@@ -79,15 +79,12 @@ import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { initUiSettings } from './ui_settings';
 
-export class CasePlugin
-  implements
-    Plugin<
-      CasesServerSetup,
-      CasesServerStart,
-      CasesServerSetupDependencies,
-      CasesServerStartDependencies
-    >
-{
+export class CasePlugin implements Plugin<
+  CasesServerSetup,
+  CasesServerStart,
+  CasesServerSetupDependencies,
+  CasesServerStartDependencies
+> {
   private readonly caseConfig: ConfigType;
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];

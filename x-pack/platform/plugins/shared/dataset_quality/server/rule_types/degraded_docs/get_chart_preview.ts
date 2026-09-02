@@ -125,28 +125,31 @@ export async function getChartPreview({
   const seriesBuckets = (esResult.aggregations?.series?.buckets ??
     []) as estypes.AggregationsStringTermsBucket[];
 
-  const seriesDataMap: Record<string, DataStreamTotals[]> = seriesBuckets.reduce((acc, bucket) => {
-    const bucketKey = extractKey({
-      groupBy,
-      bucketKey: Array.isArray(bucket.key) ? bucket.key : [bucket.key],
-    });
-    const timeSeriesBuckets = bucket.timeseries as estypes.AggregationsTimeSeriesAggregate;
-    const timeseries = timeSeriesBuckets.buckets as estypes.AggregationsTimeSeriesBucket[];
-    timeseries.forEach((timeseriesBucket: estypes.AggregationsTimeSeriesBucket) => {
-      const x = (timeseriesBucket as Record<string, estypes.FieldValue>).key as number;
-      const totalCount = timeseriesBucket.doc_count ?? 0;
-      const ignoredCount =
-        (timeseriesBucket.ignored_fields as estypes.AggregationsMultiBucketBase)?.doc_count ?? 0;
+  const seriesDataMap: Record<string, DataStreamTotals[]> = seriesBuckets.reduce(
+    (acc, bucket) => {
+      const bucketKey = extractKey({
+        groupBy,
+        bucketKey: Array.isArray(bucket.key) ? bucket.key : [bucket.key],
+      });
+      const timeSeriesBuckets = bucket.timeseries as estypes.AggregationsTimeSeriesAggregate;
+      const timeseries = timeSeriesBuckets.buckets as estypes.AggregationsTimeSeriesBucket[];
+      timeseries.forEach((timeseriesBucket: estypes.AggregationsTimeSeriesBucket) => {
+        const x = (timeseriesBucket as Record<string, estypes.FieldValue>).key as number;
+        const totalCount = timeseriesBucket.doc_count ?? 0;
+        const ignoredCount =
+          (timeseriesBucket.ignored_fields as estypes.AggregationsMultiBucketBase)?.doc_count ?? 0;
 
-      if (acc[bucketKey.join(',')]) {
-        acc[bucketKey.join(',')].push({ x, totalCount, ignoredCount });
-      } else {
-        acc[bucketKey.join(',')] = [{ x, totalCount, ignoredCount }];
-      }
-    });
+        if (acc[bucketKey.join(',')]) {
+          acc[bucketKey.join(',')].push({ x, totalCount, ignoredCount });
+        } else {
+          acc[bucketKey.join(',')] = [{ x, totalCount, ignoredCount }];
+        }
+      });
 
-    return acc;
-  }, {} as Record<string, DataStreamTotals[]>);
+      return acc;
+    },
+    {} as Record<string, DataStreamTotals[]>
+  );
 
   const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,

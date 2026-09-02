@@ -14,4 +14,4 @@ export const createMockTelemetryConfigProvider = (
     getIsOptedIn: jest.fn().mockReturnValue(isOptedIn),
     start: jest.fn(),
     stop: jest.fn(),
-  } as any);
+  }) as any;

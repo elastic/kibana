@@ -75,15 +75,12 @@ export interface ExploratoryViewPublicPluginsStart {
 export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;
 export type ExploratoryViewPublicStart = ReturnType<Plugin['start']>;
 
-export class Plugin
-  implements
-    PluginClass<
-      ExploratoryViewPublicSetup,
-      ExploratoryViewPublicStart,
-      ExploratoryViewPublicPluginsSetup,
-      ExploratoryViewPublicPluginsStart
-    >
-{
+export class Plugin implements PluginClass<
+  ExploratoryViewPublicSetup,
+  ExploratoryViewPublicStart,
+  ExploratoryViewPublicPluginsSetup,
+  ExploratoryViewPublicPluginsStart
+> {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private analyticsService?: AnalyticsServiceSetup;

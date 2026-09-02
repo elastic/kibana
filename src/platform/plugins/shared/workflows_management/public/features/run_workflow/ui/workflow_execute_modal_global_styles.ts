@@ -44,7 +44,7 @@ export const getWorkflowExecuteModalGlobalStyles = (
     }
 
     .euiOverlayMask:has(.${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS})
-      .workflowExecuteModal {
+    .workflowExecuteModal {
       width: 100vw !important;
       max-width: none !important;
       height: 100dvh !important;
@@ -57,7 +57,7 @@ export const getWorkflowExecuteModalGlobalStyles = (
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS} .euiModalBody,
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS} .euiModalBody__overflow,
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS}
-      [data-test-subj='workflowExecuteModalBodyContent'],
+    [data-test-subj='workflowExecuteModalBodyContent'],
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS} .euiModalBody__overflow > .euiFlexGroup {
       overflow: visible !important;
       flex: 1;
@@ -68,9 +68,9 @@ export const getWorkflowExecuteModalGlobalStyles = (
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS} .unifiedDataTable__inner,
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS} .unifiedDataTable__table,
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS}
-      [data-test-subj='workflowExecuteModalBodyContent'],
+    [data-test-subj='workflowExecuteModalBodyContent'],
     .${WORKFLOW_EXECUTE_MODAL_TABLE_GRID_FULLSCREEN_CLASS}
-      .${WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS} {
+    .${WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS} {
       display: flex;
       flex-direction: column;
       flex: 1;

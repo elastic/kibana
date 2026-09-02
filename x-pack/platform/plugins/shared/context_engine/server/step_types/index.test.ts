@@ -19,7 +19,7 @@ describe('registerStepDefinitions', () => {
 
     registerStepDefinitions({
       workflowsExtensions,
-      getAiIndexService: () => ({} as AiIndexService),
+      getAiIndexService: () => ({}) as AiIndexService,
       isContextEngineEnabled: async () => true,
       checkWritePrivilege: async () => true,
       ...mockKiStepTelemetry(),

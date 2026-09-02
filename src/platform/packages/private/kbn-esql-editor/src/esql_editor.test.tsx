@@ -119,7 +119,7 @@ describe('ESQLEditor', () => {
       (contextId, options) =>
         ({
           webkitBackingStorePixelRatio: 1,
-        } as unknown as RenderingContext)
+        }) as unknown as RenderingContext
     );
 
     localStorage.clear();

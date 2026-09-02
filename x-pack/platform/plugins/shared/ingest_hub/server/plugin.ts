@@ -9,9 +9,12 @@ import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kb
 
 import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types';
 
-export class IngestHubPlugin
-  implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
-{
+export class IngestHubPlugin implements Plugin<
+  void,
+  void,
+  IngestHubServerSetupDeps,
+  IngestHubServerStartDeps
+> {
   constructor(_initializerContext: PluginInitializerContext) {}
 
   public setup(_core: CoreSetup<IngestHubServerStartDeps, void>): void {}

@@ -14,7 +14,7 @@ const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecuti
     stepType: 'ai.agent',
     output: null,
     ...overrides,
-  } as WorkflowStepExecutionDto);
+  }) as WorkflowStepExecutionDto;
 
 describe('alert-analysis conversation id extraction', () => {
   it('maps every agent step to a plain conversation id for the trace reader', () => {

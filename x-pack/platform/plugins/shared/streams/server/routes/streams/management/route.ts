@@ -64,8 +64,8 @@ export const forkStreamsRoute = createServerRoute({
     const conditionStatus = params.body.status
       ? params.body.status
       : isNeverCondition(params.body.where)
-      ? 'disabled'
-      : 'enabled';
+        ? 'disabled'
+        : 'enabled';
 
     return await streamsClient.forkStream({
       parent: params.path.name,

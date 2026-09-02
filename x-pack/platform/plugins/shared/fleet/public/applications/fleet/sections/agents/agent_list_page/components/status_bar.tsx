@@ -27,14 +27,17 @@ export const AgentStatusBar: React.FC<{
 }> = ({ agentStatus }) => {
   const { euiTheme } = useEuiTheme();
   const palette = useMemo(() => {
-    return AGENT_STATUSES.reduce((acc, status) => {
-      const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
-      acc.push({
-        stop: previousStop + (agentStatus[status] || 0),
-        color: getColorForAgentStatus(status, euiTheme),
-      });
-      return acc;
-    }, [] as Array<{ stop: number; color: string }>);
+    return AGENT_STATUSES.reduce(
+      (acc, status) => {
+        const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
+        acc.push({
+          stop: previousStop + (agentStatus[status] || 0),
+          color: getColorForAgentStatus(status, euiTheme),
+        });
+        return acc;
+      },
+      [] as Array<{ stop: number; color: string }>
+    );
   }, [agentStatus, euiTheme]);
 
   const hasNoAgent = palette[palette.length - 1].stop === 0;

@@ -38,7 +38,7 @@ import {
 } from './schemas/inference_schema';
 
 export function filterForEnabledFeatureModels<
-  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig,
 >(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {

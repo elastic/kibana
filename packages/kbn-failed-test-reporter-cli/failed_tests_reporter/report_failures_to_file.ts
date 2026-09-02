@@ -207,8 +207,8 @@ const renderAbortedRunSection = (cascading: TestFailure[]) => {
     <h2>This failure aborted the run</h2>
     <p>
       This timeout aborted the config run, so the ${cascading.length} hook${
-    cascading.length === 1 ? '' : 's'
-  } below never ran:
+        cascading.length === 1 ? '' : 's'
+      } below never ran:
       each was cancelled with a forced 1ms timeout. They are not tracked separately.
     </p>
     <ul class="aborted">

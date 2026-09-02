@@ -538,11 +538,12 @@ export class EndpointMetadataService {
     // rather than skipping it, which would fail the whole list on the first fanned-in row. Only the
     // fanned-out read passes the option, so the origin-only call is left exactly as it was.
     const agentPolicies =
-      (await (cpsRead
-        ? this.fleetServices.agentPolicy.getByIds(this.soClient, agentPolicyIds, {
-            ignoreMissing: true,
-          })
-        : this.fleetServices.agentPolicy.getByIds(this.soClient, agentPolicyIds)
+      (await (
+        cpsRead
+          ? this.fleetServices.agentPolicy.getByIds(this.soClient, agentPolicyIds, {
+              ignoreMissing: true,
+            })
+          : this.fleetServices.agentPolicy.getByIds(this.soClient, agentPolicyIds)
       ).catch(catchAndWrapError)) ?? [];
 
     const agentPoliciesMap = agentPolicies.reduce<Record<string, AgentPolicy>>(

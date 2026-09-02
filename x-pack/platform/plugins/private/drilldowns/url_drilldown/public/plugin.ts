@@ -23,9 +23,12 @@ export interface SetupContract {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
-export class UrlDrilldownPlugin
-  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies>
-{
+export class UrlDrilldownPlugin implements Plugin<
+  SetupContract,
+  StartContract,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(protected readonly context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {

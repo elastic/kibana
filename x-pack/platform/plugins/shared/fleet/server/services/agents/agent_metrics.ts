@@ -30,10 +30,13 @@ export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, 
     }),
   ]);
 
-  const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce((acc, agent) => {
-    acc[agent.id] = agent.metrics;
-    return acc;
-  }, {} as Record<string, Agent['metrics']>);
+  const metricsMap = [...fleetAgentsMetrics, ...opampAgentsMetrics].reduce(
+    (acc, agent) => {
+      acc[agent.id] = agent.metrics;
+      return acc;
+    },
+    {} as Record<string, Agent['metrics']>
+  );
 
   return agents.map((agent) => ({
     ...agent,
@@ -100,16 +103,19 @@ async function _fetchAndAssignOtelMetrics(esClient: ElasticsearchClient, agents:
   });
 
   const formattedResults =
-    res.aggregations?.agents.buckets.reduce((acc, bucket) => {
-      const agentId = instanceIdToAgentId.get(bucket.key);
-      if (agentId) {
-        acc[agentId] = {
-          avg_memory_size: bucket.max_memory_size.value,
-          avg_cpu: bucket.avg_cpu.value,
-        };
-      }
-      return acc;
-    }, {} as Record<string, { avg_memory_size: number; avg_cpu: number }>) ?? {};
+    res.aggregations?.agents.buckets.reduce(
+      (acc, bucket) => {
+        const agentId = instanceIdToAgentId.get(bucket.key);
+        if (agentId) {
+          acc[agentId] = {
+            avg_memory_size: bucket.max_memory_size.value,
+            avg_cpu: bucket.avg_cpu.value,
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, { avg_memory_size: number; avg_cpu: number }>
+    ) ?? {};
 
   return agents.map((agent) => {
     const results = formattedResults[agent.id];
@@ -226,13 +232,16 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
   });
 
   const formattedResults =
-    res.aggregations?.agents.buckets.reduce((acc, bucket) => {
-      acc[bucket.key] = {
-        sum_memory_size: bucket.sum_memory_size.value,
-        sum_cpu: bucket.sum_cpu.value,
-      };
-      return acc;
-    }, {} as Record<string, { sum_memory_size: number; sum_cpu: number }>) ?? {};
+    res.aggregations?.agents.buckets.reduce(
+      (acc, bucket) => {
+        acc[bucket.key] = {
+          sum_memory_size: bucket.sum_memory_size.value,
+          sum_cpu: bucket.sum_cpu.value,
+        };
+        return acc;
+      },
+      {} as Record<string, { sum_memory_size: number; sum_cpu: number }>
+    ) ?? {};
 
   return agents.map((agent) => {
     const results = formattedResults[agent.id];

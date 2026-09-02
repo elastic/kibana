@@ -89,8 +89,10 @@ export interface AnalysisSetupProjectScopeFormProps {
   disabled?: boolean;
 }
 
-interface AnalysisSetupProjectScopeFormInnerProps
-  extends Omit<AnalysisSetupProjectScopeFormProps, 'isCpsEnabled'> {
+interface AnalysisSetupProjectScopeFormInnerProps extends Omit<
+  AnalysisSetupProjectScopeFormProps,
+  'isCpsEnabled'
+> {
   cpsManager: ICPSManager;
 }
 

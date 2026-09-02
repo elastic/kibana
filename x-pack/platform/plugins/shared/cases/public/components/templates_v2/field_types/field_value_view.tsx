@@ -269,8 +269,8 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
   const requirementLabel = isRequiredOnClose
     ? commonI18n.REQUIRED_ON_CLOSE
     : isRequired && valueText === undefined
-    ? commonI18n.REQUIRED
-    : undefined;
+      ? commonI18n.REQUIRED
+      : undefined;
 
   return (
     <FieldValueRow

@@ -95,12 +95,12 @@ export class ComboBoxService extends FtrService {
 
     // Find options by visible text content.
     const optionsWithText = await Promise.all(
-      (
-        await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)
-      ).map(async (e) => {
-        const text = (await e.getVisibleText()) ?? '';
-        return { element: e, text, formattedText: text.toLowerCase().trim() };
-      })
+      (await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)).map(
+        async (e) => {
+          const text = (await e.getVisibleText()) ?? '';
+          return { element: e, text, formattedText: text.toLowerCase().trim() };
+        }
+      )
     );
 
     const exactMatch = optionsWithText.find(({ formattedText }) => formattedText === trimmedValue);

@@ -688,8 +688,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
-      (id) => desiredState.get(id)!
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map((id) =>
+      desiredState.get(id)!
     ) as WiredStream[];
 
     const inheritedSettings = getInheritedSettings(
@@ -1076,8 +1076,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }),
     });
 
-    const ancestors = getAncestorsAndSelf(this._definition.name).map(
-      (id) => desiredState.get(id)!
+    const ancestors = getAncestorsAndSelf(this._definition.name).map((id) =>
+      desiredState.get(id)!
     ) as WiredStream[];
     if (ancestors.some((ancestor) => ancestor.hasChangedSettings())) {
       const settings = getInheritedSettings(

@@ -115,7 +115,7 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  */
 
 export interface CellActionCompatibilityContext<
-  C extends CellActionExecutionContext = CellActionExecutionContext
+  C extends CellActionExecutionContext = CellActionExecutionContext,
 > extends ActionExecutionContext {
   /**
    * CellActionsData containing the field spec but not the value for the compatibility check
@@ -128,8 +128,9 @@ export interface CellActionCompatibilityContext<
   metadata: C['metadata'] | undefined;
 }
 
-export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
-  extends Omit<Action<C>, 'isCompatible'> {
+export interface CellAction<
+  C extends CellActionExecutionContext = CellActionExecutionContext,
+> extends Omit<Action<C>, 'isCompatible'> {
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.

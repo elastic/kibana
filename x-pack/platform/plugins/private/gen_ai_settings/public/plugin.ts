@@ -35,15 +35,12 @@ export interface GenAiSettingsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GenAiSettingsPluginStart {}
 
-export class GenAiSettingsPlugin
-  implements
-    Plugin<
-      GenAiSettingsPluginSetup,
-      GenAiSettingsPluginStart,
-      GenAiSettingsSetupDeps,
-      GenAiSettingsStartDeps
-    >
-{
+export class GenAiSettingsPlugin implements Plugin<
+  GenAiSettingsPluginSetup,
+  GenAiSettingsPluginStart,
+  GenAiSettingsSetupDeps,
+  GenAiSettingsStartDeps
+> {
   private registeredApp?: ManagementApp;
   private licensingSubscription?: Subscription;
 

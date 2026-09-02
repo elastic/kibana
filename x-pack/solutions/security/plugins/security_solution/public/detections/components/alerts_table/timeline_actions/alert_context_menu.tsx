@@ -326,8 +326,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     const tooltipContent = isRemoteDocument
       ? i18n.REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE
       : hasItems
-      ? i18n.MORE_ACTIONS
-      : i18n.INSUFFICIENT_PRIVILEGES;
+        ? i18n.MORE_ACTIONS
+        : i18n.INSUFFICIENT_PRIVILEGES;
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>

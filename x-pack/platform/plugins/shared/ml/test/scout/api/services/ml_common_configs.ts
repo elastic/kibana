@@ -91,7 +91,7 @@ export const getADFqFilterStatsJobConfig1 = (jobId: string) =>
     allow_lazy_open: false,
     model_snapshot_retention_days: 0,
     results_index_name: '',
-  } satisfies estypes.MlJob);
+  }) satisfies estypes.MlJob;
 
 /**
  * Returns AD job config 2 used by get_filters_stats tests: max+min(responsetime) with one filter rule.
@@ -136,7 +136,7 @@ export const getADFqFilterStatsJobConfig2 = (jobId: string) =>
     allow_lazy_open: false,
     model_snapshot_retention_days: 0,
     results_index_name: '',
-  } satisfies estypes.MlJob);
+  }) satisfies estypes.MlJob;
 
 /**
  * Returns a datafeed config targeting the ft_farequote index for the given AD job.

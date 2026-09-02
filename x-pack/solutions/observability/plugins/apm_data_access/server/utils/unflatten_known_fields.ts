@@ -22,7 +22,7 @@ export function unflattenKnownApmEventFields<T extends Record<string, any> | und
 
 export function unflattenKnownApmEventFields<
   T extends Record<string, any> | undefined,
-  U extends Array<keyof Exclude<T, undefined>>
+  U extends Array<keyof Exclude<T, undefined>>,
 >(
   fields: T,
   required: U

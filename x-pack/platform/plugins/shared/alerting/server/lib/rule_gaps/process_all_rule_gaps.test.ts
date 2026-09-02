@@ -253,10 +253,13 @@ describe('processAllRuleGaps', () => {
     const ruleIds = generateRuleIds(3);
     const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3, ruleIds);
     const { start, end } = searchRange;
-    const processedGapsCount = ruleIds.reduce((acc, ruleId) => {
-      acc[ruleId] = 0;
-      return acc;
-    }, {} as Record<string, number>);
+    const processedGapsCount = ruleIds.reduce(
+      (acc, ruleId) => {
+        acc[ruleId] = 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
     beforeEach(async () => {
       processGapsBatchMock.mockImplementation(
         getProcessGapsBatchImplementation(processedGapsCount)
@@ -304,10 +307,13 @@ describe('processAllRuleGaps', () => {
     // Make it stop after the first result
     findGapsSearchReturnValues[0].searchAfter = null;
     const { start, end } = searchRange;
-    const processedGapsCount = ruleIds.reduce((acc, ruleId) => {
-      acc[ruleId] = 0;
-      return acc;
-    }, {} as Record<string, number>);
+    const processedGapsCount = ruleIds.reduce(
+      (acc, ruleId) => {
+        acc[ruleId] = 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
     beforeEach(async () => {
       processGapsBatchMock.mockImplementation(
         getProcessGapsBatchImplementation(processedGapsCount)

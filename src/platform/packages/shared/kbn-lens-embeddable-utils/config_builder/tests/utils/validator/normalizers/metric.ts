@@ -154,7 +154,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       viz.secondaryNameVisibility =
         viz.secondaryLabel === ''
           ? 'hidden'
-          : viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+          : (viz.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT);
     } else {
       // Comparison fill only; the transform does not persist these without a secondary metric.
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
@@ -444,7 +444,7 @@ const alignIds: NormalizerConfig<MetricAttributes> = {
       getColumnRemapping(viz).filter((pair): pair is [string, string] => pair[0] != null)
     );
     const remap = (id: string | undefined): string | undefined =>
-      id == null ? id : idMap.get(id) ?? id;
+      id == null ? id : (idMap.get(id) ?? id);
 
     viz.layerId = DEFAULT_LAYER_ID;
     if (viz.trendlineLayerId) viz.trendlineLayerId = TRENDLINE_LAYER_ID;

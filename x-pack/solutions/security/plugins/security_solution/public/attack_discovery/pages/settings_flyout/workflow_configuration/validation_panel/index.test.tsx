@@ -121,7 +121,7 @@ const mockSuccessResult = (data: WorkflowItem[]): ReturnType<typeof useListWorkf
     refetch: jest.fn(),
     remove: jest.fn(),
     status: 'success' as const,
-  } as ReturnType<typeof useListWorkflows>);
+  }) as ReturnType<typeof useListWorkflows>;
 
 const mockLoadingResult = (): ReturnType<typeof useListWorkflows> =>
   ({
@@ -151,7 +151,7 @@ const mockLoadingResult = (): ReturnType<typeof useListWorkflows> =>
     refetch: jest.fn(),
     remove: jest.fn(),
     status: 'loading' as const,
-  } as ReturnType<typeof useListWorkflows>);
+  }) as ReturnType<typeof useListWorkflows>;
 
 describe('ValidationPanel', () => {
   beforeEach(() => {

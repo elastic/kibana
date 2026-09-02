@@ -450,15 +450,15 @@ const extractValidationResult = ({
     persistedDiscoveries != null && persistedDiscoveries.length > 0
       ? persistedDiscoveries.length
       : discoveriesToPersist.length > 0
-      ? discoveriesToPersist.length
-      : persistedDiscoveries != null
-      ? persistedDiscoveries.length
-      : !persistStepInvoked
-      ? 0
-      : Math.max(
-          0,
-          generatedCount - (duplicatesDroppedCount ?? 0) - (hallucinationsFilteredCount ?? 0)
-        );
+        ? discoveriesToPersist.length
+        : persistedDiscoveries != null
+          ? persistedDiscoveries.length
+          : !persistStepInvoked
+            ? 0
+            : Math.max(
+                0,
+                generatedCount - (duplicatesDroppedCount ?? 0) - (hallucinationsFilteredCount ?? 0)
+              );
 
   const validationSummary: ValidationSummary = {
     ...(duplicatesDroppedCount != null ? { duplicatesDroppedCount } : {}),

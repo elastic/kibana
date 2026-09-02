@@ -32,15 +32,12 @@ import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data'
 import { NavigationCustomizationService } from './navigation_customization';
 import { registerNavigationCustomizationEvents } from './navigation_customization/telemetry';
 
-export class NavigationPublicPlugin
-  implements
-    Plugin<
-      NavigationPublicSetup,
-      NavigationPublicStart,
-      NavigationPublicSetupDependencies,
-      NavigationPublicStartDependencies
-    >
-{
+export class NavigationPublicPlugin implements Plugin<
+  NavigationPublicSetup,
+  NavigationPublicStart,
+  NavigationPublicSetupDependencies,
+  NavigationPublicStartDependencies
+> {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);

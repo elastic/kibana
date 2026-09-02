@@ -64,7 +64,7 @@ const createDashboardApi = ({
         panels,
       },
     }),
-  } as unknown as DashboardApi);
+  }) as unknown as DashboardApi;
 
 const createDraftAttachmentId = (id = 'draft-attachment-id'): IdGenerator => ({
   current: id,
@@ -73,12 +73,10 @@ const createDraftAttachmentId = (id = 'draft-attachment-id'): IdGenerator => ({
 
 const createAction = ({
   openChat = jest.fn(),
-  getAgentBuilderAccess = jest.fn(
-    async (): Promise<EmbeddableChatAccess> => ({
-      hasRequiredLicense: true,
-      hasLlmConnector: true,
-    })
-  ),
+  getAgentBuilderAccess = jest.fn(async (): Promise<EmbeddableChatAccess> => ({
+    hasRequiredLicense: true,
+    hasLlmConnector: true,
+  })),
   canWriteDashboards = true,
   draftAttachmentId = createDraftAttachmentId(),
 } = {}) => {

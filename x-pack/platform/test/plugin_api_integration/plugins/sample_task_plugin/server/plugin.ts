@@ -34,10 +34,12 @@ export interface SampleTaskManagerFixtureStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export class SampleTaskManagerFixturePlugin
-  implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
-{
+export class SampleTaskManagerFixturePlugin implements Plugin<
+  void,
+  void,
+  SampleTaskManagerFixtureSetupDeps,
+  SampleTaskManagerFixtureStartDeps
+> {
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 

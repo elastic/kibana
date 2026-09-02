@@ -25,9 +25,12 @@ export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
-export class RemoteClustersServerPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, any, any>
-{
+export class RemoteClustersServerPlugin implements Plugin<
+  RemoteClustersPluginSetup,
+  void,
+  any,
+  any
+> {
   licenseStatus: LicenseStatus;
   log: Logger;
   config: RemoteClustersConfig | RemoteClustersConfig7x;

@@ -60,7 +60,7 @@ const makeStoredEvent = (
     summary: 'Test summary',
     confidence: 0.8,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 /**
  * Returns a typed eventClient mock with default no-op implementations.
@@ -76,7 +76,7 @@ const makeEventClient = (
     bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     emitTrigger: jest.fn(),
     ...overrides,
-  } as jest.Mocked<EventClient>);
+  }) as jest.Mocked<EventClient>;
 
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {

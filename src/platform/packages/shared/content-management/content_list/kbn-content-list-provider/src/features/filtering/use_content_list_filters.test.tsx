@@ -26,26 +26,23 @@ const mockFavoritesClient: FavoritesClientPublic = {
 };
 
 describe('useContentListFilters', () => {
-  const mockFindItems = jest.fn(
-    async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-      items: [],
-      total: 0,
-    })
-  );
+  const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+    items: [],
+    total: 0,
+  }));
 
   const createWrapper =
     (services?: { favorites?: FavoritesClientPublic }) =>
-    ({ children }: { children: React.ReactNode }) =>
-      (
-        <ContentListProvider
-          id="test-list"
-          labels={{ entity: 'item', entityPlural: 'items' }}
-          dataSource={{ findItems: mockFindItems }}
-          services={services}
-        >
-          {children}
-        </ContentListProvider>
-      );
+    ({ children }: { children: React.ReactNode }) => (
+      <ContentListProvider
+        id="test-list"
+        labels={{ entity: 'item', entityPlural: 'items' }}
+        dataSource={{ findItems: mockFindItems }}
+        services={services}
+      >
+        {children}
+      </ContentListProvider>
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();

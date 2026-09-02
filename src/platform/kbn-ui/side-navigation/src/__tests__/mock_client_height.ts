@@ -18,7 +18,7 @@ export const mockClientHeight = (menuItemHeight: number) =>
       return this.id.includes(PRIMARY_NAVIGATION_ID)
         ? PRIMARY_NAVIGATION_HEIGHT
         : this['data-menu-item'] === 'true'
-        ? menuItemHeight
-        : 0;
+          ? menuItemHeight
+          : 0;
     },
   });

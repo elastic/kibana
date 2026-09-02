@@ -21,9 +21,12 @@ export interface CasesExamplePublicStartDeps {
   cases: CasesPublicStart;
 }
 
-export class CasesFixturePlugin
-  implements Plugin<Setup, Start, CasesExamplePublicSetupDeps, CasesExamplePublicStartDeps>
-{
+export class CasesFixturePlugin implements Plugin<
+  Setup,
+  Start,
+  CasesExamplePublicSetupDeps,
+  CasesExamplePublicStartDeps
+> {
   public setup(
     core: CoreSetup<CasesExamplePublicStartDeps>,
     _plugins: CasesExamplePublicSetupDeps

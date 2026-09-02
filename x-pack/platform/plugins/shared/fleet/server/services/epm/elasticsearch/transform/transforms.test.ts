@@ -192,7 +192,7 @@ _meta:
           id: 'endpoint',
           attributes: currentAttributes,
           references: [],
-        } as any)
+        }) as any
     );
     savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
       currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
@@ -1376,7 +1376,7 @@ describe('installTransforms - cross-cluster source indices', () => {
           id: 'endpoint',
           attributes: currentAttributes,
           references: [],
-        } as any)
+        }) as any
     );
     savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
       currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };

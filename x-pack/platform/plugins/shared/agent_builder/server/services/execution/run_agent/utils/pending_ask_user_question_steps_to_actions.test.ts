@@ -36,7 +36,7 @@ const makeRound = (...steps: any[]): ConversationRound =>
     time_to_last_token: 0,
     response: { message: '' },
     steps,
-  } as unknown as ConversationRound);
+  }) as unknown as ConversationRound;
 
 describe('pendingAskUserQuestionStepsToActions', () => {
   it('emits a toolCall + executeTool action pair for each pending ask_user_question step', () => {

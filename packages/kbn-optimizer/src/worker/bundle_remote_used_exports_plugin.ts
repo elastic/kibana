@@ -21,8 +21,8 @@ export class BundleRemoteUsedExportsPlugin {
       const builtPattern = !targets.length
         ? 'public'
         : targets.length === 1
-        ? targets[0]
-        : `{${targets}}`;
+          ? targets[0]
+          : `{${targets}}`;
       return [`**/${builtPattern}/index${extensions}`, `**/${builtPattern}${extensions}`];
     };
 

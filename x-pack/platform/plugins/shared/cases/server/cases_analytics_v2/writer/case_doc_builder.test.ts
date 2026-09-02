@@ -56,7 +56,7 @@ const fullCaseSO = (
       extended_fields: { riskScore_as_long: '42' },
       ...overrides,
     } as CasePersistedAttributes,
-  } as SavedObject<CasePersistedAttributes>);
+  }) as SavedObject<CasePersistedAttributes>;
 
 describe('buildCaseDoc', () => {
   it('sets @timestamp to updated_at when present', () => {

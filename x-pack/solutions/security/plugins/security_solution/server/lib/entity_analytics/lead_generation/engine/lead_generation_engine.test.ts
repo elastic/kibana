@@ -52,7 +52,7 @@ const createMockModule = (
     config: { id, name: id, priority: 50, weight },
     isEnabled: jest.fn().mockReturnValue(true),
     collect: collectFn,
-  } as ObservationModule);
+  }) as ObservationModule;
 
 /** Test helper: prepare all candidates then synthesize (sorted by priority). */
 const runEngine = async (

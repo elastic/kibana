@@ -98,7 +98,7 @@ export async function searchEntitiesV2(
   const query =
     entityTypeFilter && parsedQuery
       ? { bool: { must: [entityTypeFilter, parsedQuery] } }
-      : entityTypeFilter ?? parsedQuery;
+      : (entityTypeFilter ?? parsedQuery);
 
   const response = await esClient.search({
     index,
@@ -110,7 +110,7 @@ export async function searchEntitiesV2(
   });
 
   const { hits } = response;
-  const total = typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+  const total = typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
 
   const records = hits.hits.map((hit) => {
     const raw = (hit._source ?? {}) as Record<string, unknown>;

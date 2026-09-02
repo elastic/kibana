@@ -40,7 +40,7 @@ const createRuleAssetsClient = () =>
     fetchAssetsByVersion: jest.fn(),
     fetchTagsByVersion: jest.fn(),
     fetchDeprecatedRules: jest.fn(),
-  } as unknown as jest.Mocked<IPrebuiltRuleAssetsClient>);
+  }) as unknown as jest.Mocked<IPrebuiltRuleAssetsClient>;
 
 describe('getInstallableRulesForReview', () => {
   const logger = loggingSystemMock.createLogger();

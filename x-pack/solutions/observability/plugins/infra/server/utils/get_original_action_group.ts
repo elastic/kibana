@@ -11,7 +11,7 @@ import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 
 export const getOriginalActionGroup = <
-  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields),
 >(
   alertHitSource: Partial<T> | undefined | null
 ) => {

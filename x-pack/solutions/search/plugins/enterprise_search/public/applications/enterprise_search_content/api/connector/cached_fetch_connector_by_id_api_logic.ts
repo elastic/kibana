@@ -120,7 +120,7 @@ export const CachedFetchConnectorByIdApiLogic = kea<
         apiSuccess: (currentState, newConnectorData) => {
           return isEqual(currentState, newConnectorData.connector)
             ? currentState
-            : newConnectorData.connector ?? null;
+            : (newConnectorData.connector ?? null);
         },
       },
     ],

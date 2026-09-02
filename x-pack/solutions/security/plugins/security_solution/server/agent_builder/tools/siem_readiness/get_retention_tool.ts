@@ -113,14 +113,14 @@ export const getRetentionTool = (
         categorizedItems.length === 0
           ? ('noData' as const)
           : nonCompliantCount > 0
-          ? ('actionsRequired' as const)
-          : ('healthy' as const);
+            ? ('actionsRequired' as const)
+            : ('healthy' as const);
       const filteredSummary =
         filteredStatus === 'noData'
           ? 'No retention data available for categorized indices.'
           : nonCompliantCount > 0
-          ? `${nonCompliantCount} of ${categorizedItems.length} data streams or indices have retention below the 365-day threshold.`
-          : `All ${categorizedItems.length} data streams and indices meet the 365-day retention requirement.`;
+            ? `${nonCompliantCount} of ${categorizedItems.length} data streams or indices have retention below the 365-day threshold.`
+            : `All ${categorizedItems.length} data streams and indices meet the 365-day retention requirement.`;
 
       return {
         results: [

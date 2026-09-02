@@ -76,7 +76,7 @@ export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
 
 type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
   keyof TState,
-  ProfileStateDescriptor<TState>[keyof TState]
+  ProfileStateDescriptor<TState>[keyof TState],
 ];
 
 const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(

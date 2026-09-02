@@ -157,7 +157,7 @@ describe('alerts_actions#utils', () => {
 
   describe('#mapDataViewFieldToRuntimeType', () => {
     const getField = (overrides: Partial<DataViewFieldBase>): DataViewFieldBase =>
-      ({ name: 'f', type: 'string', ...overrides } as DataViewFieldBase);
+      ({ name: 'f', type: 'string', ...overrides }) as DataViewFieldBase;
 
     // Single-esType cases: each ES type maps to its closest runtime field type.
     it.each([
@@ -230,7 +230,7 @@ describe('alerts_actions#utils', () => {
 
   describe('#collectRuntimeFieldTypes', () => {
     const getAlertsDataView = (names: string[]): DataViewBase =>
-      ({ title: 'alerts', fields: names.map((name) => ({ name })) } as DataViewBase);
+      ({ title: 'alerts', fields: names.map((name) => ({ name })) }) as DataViewBase;
 
     const getSourceDataView = (
       fields: Array<Partial<DataViewFieldBase> & { name: string }>
@@ -238,7 +238,7 @@ describe('alerts_actions#utils', () => {
       ({
         title: 'source',
         fields: fields.map((f) => ({ type: 'string', ...f })) as DataViewFieldBase[],
-      } as DataViewBase);
+      }) as DataViewBase;
 
     const getExceptionItem = (entries: EntriesArray): ExceptionListItemSchema => ({
       ...getExceptionListItemSchemaMock(),

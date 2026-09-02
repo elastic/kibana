@@ -253,7 +253,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
               }
               isInvalid={Boolean(
                 someNewAgentPoliciesHaveLimitedPackage ||
-                  someNewAgentPoliciesHaveAllAgentIncompatible
+                someNewAgentPoliciesHaveAllAgentIncompatible
               )}
               error={
                 someNewAgentPoliciesHaveLimitedPackage ? (

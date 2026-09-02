@@ -488,22 +488,22 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 }
                               )
                             : !isNamespacePrefixAllowed
-                            ? i18n.translate(
-                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
-                                {
-                                  defaultMessage:
-                                    'This namespace does not match an allowed prefix for this space, so namespace index templates cannot be enabled.',
-                                }
-                              )
-                            : isManaged
-                            ? i18n.translate(
-                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
-                                {
-                                  defaultMessage:
-                                    'Namespace index templates cannot be enabled on a managed integration policy.',
-                                }
-                              )
-                            : undefined
+                              ? i18n.translate(
+                                  'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
+                                  {
+                                    defaultMessage:
+                                      'This namespace does not match an allowed prefix for this space, so namespace index templates cannot be enabled.',
+                                  }
+                                )
+                              : isManaged
+                                ? i18n.translate(
+                                    'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
+                                    {
+                                      defaultMessage:
+                                        'Namespace index templates cannot be enabled on a managed integration policy.',
+                                    }
+                                  )
+                                : undefined
                         }
                       >
                         <EuiSwitch

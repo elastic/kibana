@@ -37,7 +37,7 @@ const getPostHandler = (router: ReturnType<typeof serverMock.create>['router']) 
 };
 
 const mockAnalytics = (): AnalyticsServiceStart =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
+  ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceStart;
 
 describe('entityResolutionCsvUploadRoute — license gating', () => {
   const logger = loggingSystemMock.create().get();

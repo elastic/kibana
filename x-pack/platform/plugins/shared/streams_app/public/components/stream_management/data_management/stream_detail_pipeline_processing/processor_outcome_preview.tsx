@@ -123,9 +123,9 @@ const isGrokDraftProcessor = (
 ): processor is { action: 'grok'; field?: string; patterns?: Array<string | GrokPatternField> } => {
   return Boolean(
     processor &&
-      typeof processor === 'object' &&
-      'action' in processor &&
-      processor.action === 'grok'
+    typeof processor === 'object' &&
+    'action' in processor &&
+    processor.action === 'grok'
   );
 };
 
@@ -146,10 +146,13 @@ const PreviewDocumentsGroupBy = () => {
     const total = filteredDocs.length;
     if (total === 0) return undefined;
 
-    const counts = filteredDocs.reduce((acc, doc) => {
-      acc[doc.status] = (acc[doc.status] ?? 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const counts = filteredDocs.reduce(
+      (acc, doc) => {
+        acc[doc.status] = (acc[doc.status] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       failed_rate: (counts.failed ?? 0) / total,
@@ -522,12 +525,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   // Calculate if view mode should be forced to 'columns'
   const isViewModeForced = Boolean(
     validGrokField ||
-      validCurrentProcessorSourceFields.length > 0 ||
-      validCurrentProcessorDestinationField
+    validCurrentProcessorSourceFields.length > 0 ||
+    validCurrentProcessorDestinationField
   );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
-  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
+  const effectiveViewMode = isViewModeForced ? 'columns' : (userSelectedViewMode ?? 'summary');
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({

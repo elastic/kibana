@@ -35,7 +35,7 @@ const buildDefaultEvaluatorsStub = (): DefaultEvaluators =>
       toolCalls: stubTraceEvaluator('Tool Calls'),
       latency: stubTraceEvaluator('Latency'),
     },
-  } as unknown as DefaultEvaluators);
+  }) as unknown as DefaultEvaluators;
 
 const buildBuildArgs = () => ({
   evaluators: buildDefaultEvaluatorsStub(),
@@ -157,9 +157,9 @@ describe('createAlertsRagTrajectoryEvaluator', () => {
       expected,
       output: { steps } as unknown,
       metadata: { category: 'field_specific_lookup', dataset_split: ['regression'] },
-    } as unknown as Parameters<
+    }) as unknown as Parameters<
       ReturnType<typeof createAlertsRagTrajectoryEvaluator>['evaluate']
-    >[0]);
+    >[0];
 
   it('returns N/A when the example has no tool_sequence annotation', async () => {
     const evaluator = createAlertsRagTrajectoryEvaluator();

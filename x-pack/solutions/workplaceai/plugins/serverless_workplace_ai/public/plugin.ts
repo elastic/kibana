@@ -16,15 +16,12 @@ import type {
 } from './types';
 import { createNavigationTree } from './navigation_tree';
 
-export class WorkplaceAIServerlessPlugin
-  implements
-    Plugin<
-      WorkplaceAIServerlessPluginSetup,
-      WorkplaceAIServerlessPluginStart,
-      WorkplaceAIServerlessPluginSetupDeps,
-      WorkplaceAIServerlessPluginStartDeps
-    >
-{
+export class WorkplaceAIServerlessPlugin implements Plugin<
+  WorkplaceAIServerlessPluginSetup,
+  WorkplaceAIServerlessPluginStart,
+  WorkplaceAIServerlessPluginSetupDeps,
+  WorkplaceAIServerlessPluginStartDeps
+> {
   constructor() {}
 
   public setup(

@@ -56,9 +56,9 @@ export type StateType = typeof StateAnnotation.State;
 const isPatternTargetEnabled = (state: StateType): state is StateType & { targetPattern: string } =>
   Boolean(
     state.allowPatternTarget &&
-      state.targetPattern &&
-      isIndexPattern(state.targetPattern) &&
-      state.targetPattern !== '*'
+    state.targetPattern &&
+    isIndexPattern(state.targetPattern) &&
+    state.targetPattern !== '*'
   );
 
 export const createSearchToolGraph = async ({

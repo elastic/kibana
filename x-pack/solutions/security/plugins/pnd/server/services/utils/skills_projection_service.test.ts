@@ -39,7 +39,7 @@ const makeWatch = (id: string, skillIds: string[]): Watch =>
       name: skillId,
       summary: '',
     })),
-  } as unknown as Watch);
+  }) as unknown as Watch;
 
 const makeWorkflowListDto = (items: Array<{ id: string }>, total?: number) =>
   ({
@@ -47,7 +47,7 @@ const makeWorkflowListDto = (items: Array<{ id: string }>, total?: number) =>
     total: total ?? items.length,
     page: 1,
     size: 100,
-  } as any);
+  }) as any;
 
 describe('SkillsProjectionService', () => {
   let management: jest.Mocked<Pick<WatchWorkflowsManagementClient, 'getWorkflows'>>;

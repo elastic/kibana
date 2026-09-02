@@ -35,8 +35,8 @@ export const stringifyJson = (json: any, renderAsArray: boolean = true): string 
   (!renderAsArray && json && typeof json === 'object' && !Array.isArray(json))
     ? stringifyPreservingNumberFormatting(json)
     : renderAsArray
-    ? '[\n\n]'
-    : '{\n\n}';
+      ? '[\n\n]'
+      : '{\n\n}';
 
 /**
  * Parses JSON string and stores the original string for format preservation.

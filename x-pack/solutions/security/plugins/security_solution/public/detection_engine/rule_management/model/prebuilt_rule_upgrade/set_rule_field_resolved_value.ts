@@ -11,7 +11,7 @@ import type {
 } from '../../../../../common/api/detection_engine';
 
 export type SetRuleFieldResolvedValueFn<
-  FieldName extends keyof DiffableAllFields = keyof DiffableAllFields
+  FieldName extends keyof DiffableAllFields = keyof DiffableAllFields,
 > = (params: {
   ruleId: RuleSignatureId;
   fieldName: FieldName;

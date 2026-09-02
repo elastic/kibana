@@ -129,7 +129,7 @@ export const getTopNavConfig = (
   const savedVis = visInstance.savedVis;
   const isOriginatingFromDashboardPanel = Boolean(
     originatingApp &&
-      !(originatingApp === 'dashboards' && Boolean(originatingPath?.includes('/list/')))
+    !(originatingApp === 'dashboards' && Boolean(originatingPath?.includes('/list/')))
   );
 
   /**
@@ -302,12 +302,12 @@ export const getTopNavConfig = (
           defaultMessage: 'Save to library',
         })
       : isOriginatingFromDashboardPanel && savedVis.id
-      ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
-          defaultMessage: 'Save as',
-        })
-      : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
-          defaultMessage: 'Save',
-        });
+        ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
+            defaultMessage: 'Save',
+          });
 
   const showSaveButton =
     visualizeCapabilities.save ||

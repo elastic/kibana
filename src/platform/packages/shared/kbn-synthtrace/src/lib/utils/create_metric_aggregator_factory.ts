@@ -16,7 +16,7 @@ import { PassThrough } from 'stream';
 export function createMetricAggregatorFactory<TFields extends Fields>() {
   return function <
     TMetric extends Record<string, unknown>,
-    TOutput extends Record<string, unknown>
+    TOutput extends Record<string, unknown>,
   >(
     {
       filter,

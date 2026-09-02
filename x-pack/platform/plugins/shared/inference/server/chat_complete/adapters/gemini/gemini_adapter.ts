@@ -162,8 +162,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         const enumValues = def.enum
           ? (def.enum as string[])
           : def.const
-          ? [def.const as string]
-          : undefined;
+            ? [def.const as string]
+            : undefined;
         // Vertex AI treats `format: 'enum'` as a promise that `enum` is
         // non-empty and rejects the request otherwise, so only emit an enum
         // schema when the schema actually constrains the value to an enum/const.

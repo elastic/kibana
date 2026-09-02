@@ -90,7 +90,7 @@ const makeInstalledPkg = (
       installed_kibana: refs,
       additional_spaces_installed_kibana: {},
     } as unknown as Installation,
-  } as SavedObject<Installation>);
+  }) as SavedObject<Installation>;
 
 const makeFindResult = (
   objects: Array<{ id: string; type: string; originId?: string }>,

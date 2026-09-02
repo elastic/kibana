@@ -25,15 +25,12 @@ import type {
   WorkplaceAIAppPluginStartDependencies,
 } from './types';
 
-export class WorkplaceAIAppPlugin
-  implements
-    Plugin<
-      WorkplaceAIAppPluginSetup,
-      WorkplaceAIAppPluginStart,
-      WorkplaceAIAppPluginSetupDependencies,
-      WorkplaceAIAppPluginStartDependencies
-    >
-{
+export class WorkplaceAIAppPlugin implements Plugin<
+  WorkplaceAIAppPluginSetup,
+  WorkplaceAIAppPluginStart,
+  WorkplaceAIAppPluginSetupDependencies,
+  WorkplaceAIAppPluginStartDependencies
+> {
   private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkplaceAIAppConfig;
   private services?: InternalServices;

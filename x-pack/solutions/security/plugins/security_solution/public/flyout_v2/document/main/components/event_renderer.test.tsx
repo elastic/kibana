@@ -23,7 +23,7 @@ const createMockHit = (): DataTableRecord =>
     raw: { _id: 'test-event-id', _index: 'test-index' },
     flattened: {},
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const mockDataAsNestedObject = {
   _id: 'test-event-id',

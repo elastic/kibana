@@ -108,12 +108,12 @@ export class ValidationHelper {
       const stackVersionSchemas =
         typeof savedObjectType?.schemas === 'function'
           ? savedObjectType.schemas()
-          : savedObjectType?.schemas ?? {};
+          : (savedObjectType?.schemas ?? {});
 
       const modelVersionCreateSchemas =
         typeof savedObjectType?.modelVersions === 'function'
           ? savedObjectType.modelVersions()
-          : savedObjectType?.modelVersions ?? {};
+          : (savedObjectType?.modelVersions ?? {});
 
       const combinedSchemas = { ...stackVersionSchemas };
       Object.entries(modelVersionCreateSchemas).reduce((map, [key, modelVersion]) => {

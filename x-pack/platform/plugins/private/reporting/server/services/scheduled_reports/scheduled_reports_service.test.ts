@@ -43,7 +43,7 @@ const getMockResponseFactory = () =>
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
     customError: (err: unknown) => err,
-  } as unknown as KibanaResponseFactory);
+  }) as unknown as KibanaResponseFactory;
 
 const payload =
   '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}';

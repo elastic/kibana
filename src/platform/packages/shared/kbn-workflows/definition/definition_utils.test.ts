@@ -20,7 +20,7 @@ import type { Step } from '../spec/schema';
 // The function under test only reads `name`, `type`, and nested arrays,
 // so we build minimal shapes and cast through `unknown` to satisfy the union.
 const waitStep = (name: string): Step =>
-  ({ name, type: 'wait', duration: '1s' } as unknown as Step);
+  ({ name, type: 'wait', duration: '1s' }) as unknown as Step;
 
 describe('collectAllSteps', () => {
   it('returns flat steps unchanged', () => {

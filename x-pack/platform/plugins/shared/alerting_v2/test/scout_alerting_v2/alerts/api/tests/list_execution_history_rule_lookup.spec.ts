@@ -47,7 +47,7 @@ const buildSeedEvent = (ruleId: string): AlertEvent =>
     status: 'breached',
     source: 'internal',
     space_id: 'default',
-  } as AlertEvent);
+  }) as AlertEvent;
 
 apiTest.describe(
   'List execution history — tolerates missing rule ids',

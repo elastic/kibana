@@ -244,7 +244,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const flyoutContainer = useMemo(
     () =>
       typeof document !== 'undefined'
-        ? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
+        ? (document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined)
         : undefined,
     []
   );

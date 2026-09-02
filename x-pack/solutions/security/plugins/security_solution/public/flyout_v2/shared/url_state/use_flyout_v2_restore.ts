@@ -395,8 +395,8 @@ export const openDescriptorAsStart = (
         entityId && entityDocId
           ? { entityId, entityDocId }
           : entityId
-          ? { entityId }
-          : { entityDocId: entityDocId as string };
+            ? { entityId }
+            : { entityDocId: entityDocId as string };
       api.openGenericEntityFlyout({ scopeId, ...idProps, ...originParams });
       break;
     }
@@ -645,8 +645,8 @@ export const openDescriptorAsChild = (
         entityId && entityDocId
           ? { entityId, entityDocId }
           : entityId
-          ? { entityId }
-          : { entityDocId: entityDocId as string };
+            ? { entityId }
+            : { entityDocId: entityDocId as string };
       api.openGenericEntityFlyoutAsChild({ scopeId, ...idProps, ...originParams });
       break;
     }

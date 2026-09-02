@@ -399,7 +399,7 @@ describe('trace evidence reconstruction integration', () => {
           },
         },
       }),
-    } as const);
+    }) as const;
 
   beforeAll(async () => {
     const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });

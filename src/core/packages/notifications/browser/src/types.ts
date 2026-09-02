@@ -110,7 +110,7 @@ export interface NotificationCoordinatorPublicApi {
   optInToCoordination: <
     T extends Array<{
       id: string;
-    }>
+    }>,
   >(
     $: Observable<T>,
     cond: (coordinatorState: NotificationCoordinatorState) => boolean

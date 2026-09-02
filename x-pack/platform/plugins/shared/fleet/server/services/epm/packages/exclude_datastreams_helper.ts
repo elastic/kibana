@@ -55,32 +55,35 @@ export function filterOutExcludedDataStreamTypes<T extends RegistrySearchResult>
 ): Array<Installable<T>> {
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
-    return packageList.reduce((acc, pkg) => {
-      const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
-      if (shouldInclude) {
-        // filter out excluded data stream types
-        const filteredDataStreams =
-          pkg.data_streams?.filter(
-            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
-          ) ?? [];
+    return packageList.reduce(
+      (acc, pkg) => {
+        const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
+        if (shouldInclude) {
+          // filter out excluded data stream types
+          const filteredDataStreams =
+            pkg.data_streams?.filter(
+              (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
+            ) ?? [];
 
-        // filter out excluded policy templates
-        const filteredPolicyTemplates = pkg.policy_templates?.filter((policyTemplate: any) => {
-          return shouldIncludePolicyTemplateWithDatastreamTypes(
-            pkg,
-            policyTemplate,
-            excludeDataStreamTypes
-          );
-        });
+          // filter out excluded policy templates
+          const filteredPolicyTemplates = pkg.policy_templates?.filter((policyTemplate: any) => {
+            return shouldIncludePolicyTemplateWithDatastreamTypes(
+              pkg,
+              policyTemplate,
+              excludeDataStreamTypes
+            );
+          });
 
-        acc.push({
-          ...pkg,
-          data_streams: filteredDataStreams,
-          policy_templates: filteredPolicyTemplates,
-        });
-      }
-      return acc;
-    }, [] as Array<Installable<RegistrySearchResult>>);
+          acc.push({
+            ...pkg,
+            data_streams: filteredDataStreams,
+            policy_templates: filteredPolicyTemplates,
+          });
+        }
+        return acc;
+      },
+      [] as Array<Installable<RegistrySearchResult>>
+    );
   }
   return packageList;
 }

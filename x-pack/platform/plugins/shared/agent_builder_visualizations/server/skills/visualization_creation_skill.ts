@@ -64,13 +64,13 @@ Do **not** use this skill when:
    - Default path: pass the natural-language \`query\` to ${
      platformCoreTools.createVisualization
    } and let it generate the ES|QL. This is the right choice for almost every request — do **not** call ${
-    platformCoreTools.generateEsql
-  } first just to build a query.
+     platformCoreTools.generateEsql
+   } first just to build a query.
    - Only for genuinely complex aggregations or joins you want to control precisely: pre-generate with ${
      platformCoreTools.generateEsql
    }, optionally validate the shape with ${platformCoreTools.executeEsql}, then hand the query to ${
-    platformCoreTools.createVisualization
-  } via \`esql\`.
+     platformCoreTools.createVisualization
+   } via \`esql\`.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:

@@ -36,28 +36,32 @@ const root = (appearance: LayoutAppearance = 'plain'): EmotionFn => {
       flex-direction: column;
 
       // Only apply distinguished background styling for framed appearance
-      ${isFramedAppearance &&
-      css`
-        background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
-        border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
+      ${
+        isFramedAppearance &&
+        css`
+          background-color: ${useEuiTheme.euiTheme.colors.backgroundBasePlain};
+          border-radius: ${useEuiTheme.euiTheme.border.radius.medium};
 
-        // use outline so it doesn't affect size/layout and cause a scrollbar
-        outline: ${getHighContrastBorder(useEuiTheme)};
-
-        // Keep the decorative frame unchanged by global focus-ring styles.
-        &:focus:not(:focus-visible) {
+          // use outline so it doesn't affect size/layout and cause a scrollbar
           outline: ${getHighContrastBorder(useEuiTheme)};
-          outline-offset: 0;
-        }
 
-        ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
-      `}
-      ${!isFramedAppearance &&
-      css`
-        background-color: transparent;
-        border-radius: 0;
-        border: none;
-      `}
+          // Keep the decorative frame unchanged by global focus-ring styles.
+          &:focus:not(:focus-visible) {
+            outline: ${getHighContrastBorder(useEuiTheme)};
+            outline-offset: 0;
+          }
+
+          ${euiShadow(useEuiTheme, 'xs', { border: 'none' })};
+        `
+      }
+      ${
+        !isFramedAppearance &&
+        css`
+          background-color: transparent;
+          border-radius: 0;
+          border: none;
+        `
+      }
 
       &:focus-visible {
         border: 2px solid ${useEuiTheme.euiTheme.colors.textParagraph};

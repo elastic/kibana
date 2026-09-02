@@ -119,45 +119,45 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
           rightSideItems: isLoading
             ? []
             : !isCrawler
-            ? [
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem>
-                    <EuiButton
-                      data-test-subj="entSearchContent-connectors-newConnectorButton"
-                      data-telemetry-id="entSearchContent-connectors-newConnectorButton"
-                      key="newConnector"
-                      color="primary"
-                      iconType="plusCircle"
-                      fill
-                      onClick={() => {
-                        KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
-                        defaultMessage="New Connector"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>,
-                ...(productFeatures.hasDefaultIngestPipeline
-                  ? [
+              ? [
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
                       <EuiButton
+                        data-test-subj="entSearchContent-connectors-newConnectorButton"
+                        data-telemetry-id="entSearchContent-connectors-newConnectorButton"
+                        key="newConnector"
                         color="primary"
-                        data-test-subj="entSearchContent-searchIndices-defaultSettings"
-                        onClick={() => setShowDefaultSettingsFlyout(true)}
+                        iconType="plusCircle"
+                        fill
+                        onClick={() => {
+                          KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                        }}
                       >
-                        {i18n.translate(
-                          'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
-                          {
-                            defaultMessage: 'Default settings',
-                          }
-                        )}
-                      </EuiButton>,
-                    ]
-                  : []),
-              ]
-            : undefined,
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                          defaultMessage="New Connector"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>,
+                  ...(productFeatures.hasDefaultIngestPipeline
+                    ? [
+                        <EuiButton
+                          color="primary"
+                          data-test-subj="entSearchContent-searchIndices-defaultSettings"
+                          onClick={() => setShowDefaultSettingsFlyout(true)}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.searchIndices.defaultSettings',
+                            {
+                              defaultMessage: 'Default settings',
+                            }
+                          )}
+                        </EuiButton>,
+                      ]
+                    : []),
+                ]
+              : undefined,
         }}
       >
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (

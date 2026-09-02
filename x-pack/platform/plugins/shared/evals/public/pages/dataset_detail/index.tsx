@@ -497,8 +497,8 @@ export const DatasetDetailPage: React.FC = () => {
         render: (_name: string | null | undefined, row: EvaluationExperimentSummary) => {
           const isSuiteRun = !!row.suite_id;
           const displayName = isSuiteRun
-            ? row.suite_id ?? row.experiment_name ?? truncate(row.experiment_id, 12)
-            : row.experiment_name ?? truncate(row.experiment_id, 12);
+            ? (row.suite_id ?? row.experiment_name ?? truncate(row.experiment_id, 12))
+            : (row.experiment_name ?? truncate(row.experiment_id, 12));
           const executionId = row.execution_id ?? row.experiment_id;
           const dsParam = encodeURIComponent(datasetId);
           const query = `?execution_id=${encodeURIComponent(executionId)}&dataset_id=${dsParam}`;

@@ -24,7 +24,7 @@ import { convertToSchemaConfig } from '../../vis_schemas';
 
 export const getLabel = (agg: SchemaConfig) => {
   return agg.aggParams && 'customLabel' in agg.aggParams
-    ? agg.aggParams.customLabel ?? agg.label
+    ? (agg.aggParams.customLabel ?? agg.label)
     : agg.label;
 };
 

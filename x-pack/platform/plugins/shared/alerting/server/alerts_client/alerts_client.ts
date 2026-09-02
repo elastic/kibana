@@ -91,10 +91,14 @@ export class AlertsClient<
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> implements
-    IAlertsClient<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
-{
+  RecoveryActionGroupId extends string,
+> implements IAlertsClient<
+  AlertData,
+  LegacyState,
+  LegacyContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+> {
   private legacyAlertsClient: LegacyAlertsClient<
     LegacyState,
     LegacyContext,

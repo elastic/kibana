@@ -38,8 +38,8 @@ export function isComingFromContainerView(
 ): boolean {
   return Boolean(
     incomingState?.originatingApp &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
+    incomingState?.originatingPath &&
+    !incomingState.originatingPath.includes('/list/')
   );
 }
 

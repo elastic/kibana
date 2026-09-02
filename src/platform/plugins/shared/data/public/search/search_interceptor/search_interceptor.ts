@@ -469,8 +469,8 @@ export class SearchInterceptor {
         // TODO — can we fix this?
         moment.duration(this.deps.searchConfig.asyncSearch.pollInterval).asMilliseconds()
       : this.protocolSupportsMultiplexing
-      ? 0
-      : undefined;
+        ? 0
+        : undefined;
 
     return pollSearch(search, cancel, {
       pollInterval,
@@ -579,9 +579,9 @@ export class SearchInterceptor {
           wait_for_completion_timeout: options?.pollLength
             ? options.pollLength
             : // don't set or override user-configured pollLength, it will be applied server-side
-            !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
-            ? DEFAULT_MULTIPLEXING_POLL_LENGTH
-            : undefined,
+              !this.deps.searchConfig.asyncSearch.pollLength && this.protocolSupportsMultiplexing
+              ? DEFAULT_MULTIPLEXING_POLL_LENGTH
+              : undefined,
 
           // FIXME: the dropNullColumns param shouldn't be needed during polling
           // once https://github.com/elastic/elasticsearch/issues/138439 is resolved

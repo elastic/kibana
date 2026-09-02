@@ -25,13 +25,11 @@ describe('ContentManagementTagsContextProvider', () => {
   ];
 
   const mockGetTagList = jest.fn(() => mockTags);
-  const mockParseSearchQuery = jest.fn(
-    (query: string): ParsedQuery => ({
-      searchQuery: query,
-      tagIds: undefined,
-      tagIdsToExclude: undefined,
-    })
-  );
+  const mockParseSearchQuery = jest.fn((query: string): ParsedQuery => ({
+    searchQuery: query,
+    tagIds: undefined,
+    tagIdsToExclude: undefined,
+  }));
 
   const createWrapper = (props?: { parseSearchQuery?: (searchQuery: string) => ParsedQuery }) => {
     return ({ children }: { children: React.ReactNode }) => (

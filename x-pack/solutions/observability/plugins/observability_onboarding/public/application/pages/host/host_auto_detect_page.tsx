@@ -158,8 +158,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
                 status === 'dataReceived'
                   ? ('complete' as const)
                   : status === 'awaitingData' || status === 'inProgress'
-                  ? ('current' as const)
-                  : ('incomplete' as const),
+                    ? ('current' as const)
+                    : ('incomplete' as const),
               children: (
                 <AutoDetectVisualizeStep
                   status={status}

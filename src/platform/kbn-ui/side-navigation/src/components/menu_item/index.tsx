@@ -72,9 +72,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const iconWrapperClassName = `${NAVIGATION_SELECTOR_PREFIX}-iconWrapper`;
 
     const buttonStyles = css`
-      --menu-item-text-color: ${isHighlighted
-        ? euiTheme.components.buttons.textColorPrimary
-        : euiTheme.components.buttons.textColorText};
+      --menu-item-text-color: ${
+        isHighlighted
+          ? euiTheme.components.buttons.textColorPrimary
+          : euiTheme.components.buttons.textColorText
+      };
       --high-contrast-hover-indicator-color: var(--menu-item-text-color);
       ${useHighContrastModeStyles(`.${iconWrapperClassName}`)};
 
@@ -100,9 +102,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimary
-          : euiTheme.colors.backgroundTransparent};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimary
+            : euiTheme.colors.backgroundTransparent
+        };
         z-index: 1;
       }
 
@@ -121,15 +125,19 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       &:hover .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryHover
-          : euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimaryHover
+            : euiTheme.components.buttons.backgroundTextHover
+        };
       }
 
       &:active .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryActive
-          : euiTheme.components.buttons.backgroundTextActive};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimaryActive
+            : euiTheme.components.buttons.backgroundTextActive
+        };
       }
     `;
 

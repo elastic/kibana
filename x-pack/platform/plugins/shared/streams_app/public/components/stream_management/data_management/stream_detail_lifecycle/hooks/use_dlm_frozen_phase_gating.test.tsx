@@ -54,7 +54,7 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
 const createDefinition = (canCreateSnapshotRepository: boolean): Streams.ingest.all.GetResponse =>
   ({
     privileges: { create_snapshot_repository: canCreateSnapshotRepository },
-  } as unknown as Streams.ingest.all.GetResponse);
+  }) as unknown as Streams.ingest.all.GetResponse;
 
 const setSnapshotRepositories = (defaultRepository?: string, repositories?: string[]) => {
   mockUseSnapshotRepositories.mockReturnValue({

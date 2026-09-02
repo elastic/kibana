@@ -21,7 +21,7 @@ import {
 } from './update_rule_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceStart =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
+  ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceStart;
 
 const mockLogger = (): Logger =>
   ({
@@ -30,7 +30,7 @@ const mockLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const createMockRuleUpdateContext = (
   overrides: Partial<RuleUpgradeContext> = {}
@@ -729,8 +729,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
         i <= 3
           ? ThreeWayDiffConflict.NON_SOLVABLE
           : i <= 6
-          ? ThreeWayDiffConflict.SOLVABLE
-          : ThreeWayDiffConflict.NONE;
+            ? ThreeWayDiffConflict.SOLVABLE
+            : ThreeWayDiffConflict.NONE;
 
       ruleContextsMap.set(
         `success-${i}`,

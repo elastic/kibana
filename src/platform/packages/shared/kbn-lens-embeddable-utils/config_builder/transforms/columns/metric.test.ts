@@ -313,7 +313,7 @@ describe('Metric Transforms', () => {
         { col1: MovingAverageIndexPatternColumn },
         { col1: DerivativeIndexPatternColumn },
         { col1: CumulativeSumIndexPatternColumn },
-        { col1: CounterRateIndexPatternColumn }
+        { col1: CounterRateIndexPatternColumn },
       ] = [
         {
           col1: {

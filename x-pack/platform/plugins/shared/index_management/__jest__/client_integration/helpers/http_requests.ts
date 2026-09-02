@@ -93,8 +93,8 @@ const registerHttpRequestMockHelpers = (
     const legacyResponse = Array.isArray(response)
       ? response
       : response && typeof response === 'object'
-      ? Object.values(response as Record<string, unknown>)
-      : response;
+        ? Object.values(response as Record<string, unknown>)
+        : response;
     mockResponse('GET', `${API_BASE_PATH}/indices`, legacyResponse, error);
   };
 

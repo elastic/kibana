@@ -49,7 +49,7 @@ const buildHit = (
       'kibana.alert.workflow_status': 'open',
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 describe('<Status /> (v2)', () => {
   const onAttackUpdated = jest.fn();

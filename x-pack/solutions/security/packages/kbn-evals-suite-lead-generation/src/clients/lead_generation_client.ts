@@ -33,7 +33,10 @@ interface FindLeadsResponse {
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class LeadGenerationClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: ToolingLog) {}
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog
+  ) {}
 
   async generate({
     connectorId,

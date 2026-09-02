@@ -12,7 +12,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 
 describe('hasAnyFieldWithPrefixes', () => {
   const makeRecord = (flattened: Record<string, unknown>): DataTableRecord =>
-    ({ flattened } as DataTableRecord);
+    ({ flattened }) as DataTableRecord;
 
   it('returns true if any prefix matches a non-null field', () => {
     const record = makeRecord({

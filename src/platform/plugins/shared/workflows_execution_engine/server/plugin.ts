@@ -129,15 +129,12 @@ const BULK_CANCEL_PAGE_SIZE = 10;
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
-export class WorkflowsExecutionEnginePlugin
-  implements
-    Plugin<
-      WorkflowsExecutionEnginePluginSetup,
-      WorkflowsExecutionEnginePluginStart,
-      WorkflowsExecutionEnginePluginSetupDeps,
-      WorkflowsExecutionEnginePluginStartDeps
-    >
-{
+export class WorkflowsExecutionEnginePlugin implements Plugin<
+  WorkflowsExecutionEnginePluginSetup,
+  WorkflowsExecutionEnginePluginStart,
+  WorkflowsExecutionEnginePluginSetupDeps,
+  WorkflowsExecutionEnginePluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
@@ -1127,7 +1124,7 @@ export class WorkflowsExecutionEnginePlugin
       // Only honoured for internal API requests (KbnClient sets x-elastic-internal-origin).
       if (request?.isInternalApiRequest) {
         const raw = request.headers['x-kbn-test-run-delay-ms'];
-        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
+        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : (raw ?? '0')), 10);
         if (delayMs > 0) {
           await new Promise((r) => setTimeout(r, delayMs));
         }

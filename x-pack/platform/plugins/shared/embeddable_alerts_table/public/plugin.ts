@@ -15,15 +15,12 @@ import type {
 } from './types';
 import { registerAddAlertsTableAction } from './actions/register_add_alerts_table_action';
 
-export class EmbeddableAlertsTablePlugin
-  implements
-    Plugin<
-      EmbeddableAlertsTablePublicSetup,
-      EmbeddableAlertsTablePublicStart,
-      EmbeddableAlertsTablePublicSetupDependencies,
-      EmbeddableAlertsTablePublicStartDependencies
-    >
-{
+export class EmbeddableAlertsTablePlugin implements Plugin<
+  EmbeddableAlertsTablePublicSetup,
+  EmbeddableAlertsTablePublicStart,
+  EmbeddableAlertsTablePublicSetupDependencies,
+  EmbeddableAlertsTablePublicStartDependencies
+> {
   public setup(
     core: CoreSetup<EmbeddableAlertsTablePublicStartDependencies>,
     { embeddable }: EmbeddableAlertsTablePublicSetupDependencies

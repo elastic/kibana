@@ -186,10 +186,10 @@ describe('computeAndPersistCompositeSummaries', () => {
         ({
           computeSummary: jest.fn(),
           computeSummaries: mockComputeSummaries,
-        } as any)
+        }) as any
     );
     (DefaultBurnRatesClient as jest.MockedClass<typeof DefaultBurnRatesClient>).mockImplementation(
-      () => ({ calculate: jest.fn(), calculateBatch: jest.fn() } as any)
+      () => ({ calculate: jest.fn(), calculateBatch: jest.fn() }) as any
     );
     mockComputeCompositeSummary.mockReturnValue(buildCompositeSummary());
 

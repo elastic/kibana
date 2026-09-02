@@ -112,9 +112,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('allows non-owner to overwrite objects in default mode', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
 
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -220,9 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('failure modes', function () {
       it('rejects when overwriting and all objects are write-restricted and inaccessible', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
 
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -297,9 +295,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('return status when overwriting objects and all objects are write-restricted but some are owned by current user', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
 
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -367,9 +364,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('return status when overwriting objects and some objects are in default mode', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
 
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')
@@ -436,9 +432,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('return stauts when overwriting and some authorized types do not support access control', async () => {
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          supertestWithoutAuth
-        );
+        const { cookie: adminCookie, profileUid: adminProfileUid } =
+          await loginAsKibanaAdmin(supertestWithoutAuth);
 
         const firstObject = await supertestWithoutAuth
           .post('/access_control_objects/create')

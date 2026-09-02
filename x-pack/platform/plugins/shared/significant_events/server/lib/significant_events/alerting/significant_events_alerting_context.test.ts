@@ -79,7 +79,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
       getAlertingV2RulesClient: async () =>
         ({
           createRule,
-        } as unknown as RulesClientApi),
+        }) as unknown as RulesClientApi,
       isServerless,
     })();
 

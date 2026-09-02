@@ -236,7 +236,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Omit<Context, 'resolve'>
+        ContextName extends keyof Omit<Context, 'resolve'>,
       >(
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>

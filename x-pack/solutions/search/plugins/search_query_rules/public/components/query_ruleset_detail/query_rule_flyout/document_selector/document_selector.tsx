@@ -49,8 +49,8 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
   const error = isError
     ? fetchDocumentError?.body?.message
     : formError
-    ? formError?.message
-    : undefined;
+      ? formError?.message
+      : undefined;
 
   return (
     <EditableResult

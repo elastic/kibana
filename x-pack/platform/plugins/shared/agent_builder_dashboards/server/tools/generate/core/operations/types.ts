@@ -45,7 +45,7 @@ type OperationSchema = z.ZodObject<{ operation: z.ZodLiteral<string> }>;
 
 export interface OperationDefinition<
   TSchema extends OperationSchema,
-  TOperation = z.infer<TSchema>
+  TOperation = z.infer<TSchema>,
 > {
   schema: TSchema;
   handler: OperationHandler<TOperation>;

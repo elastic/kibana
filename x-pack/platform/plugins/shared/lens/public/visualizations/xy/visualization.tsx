@@ -465,8 +465,8 @@ export const getXyVisualization = ({
     // Check locally if it has one accessor OR one accessor per axis
     const layerHasOnlyOneAccessor = Boolean(
       dataLayer.accessors.length < 2 ||
-        (left.length && left.length < 2) ||
-        (right.length && right.length < 2)
+      (left.length && left.length < 2) ||
+      (right.length && right.length < 2)
     );
     // Check also for multiple layers that can stack for percentage charts
     // Make sure that if multiple dimensions are defined for a single dataLayer, they should belong to the same axis
@@ -543,8 +543,8 @@ export const getXyVisualization = ({
                 triggerIconType: dataLayer.collapseFn
                   ? 'aggregate'
                   : i === 0
-                  ? 'colorBy'
-                  : undefined,
+                    ? 'colorBy'
+                    : undefined,
                 palette: dataLayer.collapseFn ? undefined : i === 0 ? colors : undefined,
               }))
             : [],
@@ -570,8 +570,8 @@ export const getXyVisualization = ({
     return firstDataLayer?.colorMapping
       ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
       : firstDataLayer?.palette
-      ? { type: 'legacyPalette', value: firstDataLayer.palette }
-      : undefined;
+        ? { type: 'legacyPalette', value: firstDataLayer.palette }
+        : undefined;
   },
 
   getDropProps(dropProps) {

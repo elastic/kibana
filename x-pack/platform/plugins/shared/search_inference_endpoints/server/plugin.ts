@@ -40,15 +40,12 @@ import {
   PLUGIN_NAME,
 } from '../common/constants';
 
-export class SearchInferenceEndpointsPlugin
-  implements
-    Plugin<
-      SearchInferenceEndpointsPluginSetup,
-      SearchInferenceEndpointsPluginStart,
-      SearchInferenceEndpointsPluginSetupDependencies,
-      SearchInferenceEndpointsPluginStartDependencies
-    >
-{
+export class SearchInferenceEndpointsPlugin implements Plugin<
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+  SearchInferenceEndpointsPluginSetupDependencies,
+  SearchInferenceEndpointsPluginStartDependencies
+> {
   private readonly logger: Logger;
   private readonly config: SearchInferenceEndpointsConfig;
   private dynamicConnectorsPoller?: DynamicConnectorsPoller;

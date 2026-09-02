@@ -51,10 +51,16 @@ console.log('\n── Baseline: clean action produces no findings ────�
 {
   const r = reduceAction(json('action-clean'));
   assert(
-    r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0 && r.suppressed.length === 0,
+    r.level1.length === 0 &&
+      r.level2.length === 0 &&
+      r.level3.length === 0 &&
+      r.suppressed.length === 0,
     'action-clean → all arrays empty'
   );
-  assert(typeof r.state === 'object' && r.state.history, 'action-clean → state.history is always returned');
+  assert(
+    typeof r.state === 'object' && r.state.history,
+    'action-clean → state.history is always returned'
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -64,10 +70,15 @@ console.log('\n── Baseline: clean action produces no findings ────�
 console.log('\n── Silent HTTP 500: no console error was ever logged for it ────────────');
 {
   const r = reduceAction(json('action-silent-500'));
-  assert(r.level1.some((i) => i.type === 'silent_server_error'), 'action-silent-500 → Level 1 silent_server_error');
+  assert(
+    r.level1.some((i) => i.type === 'silent_server_error'),
+    'action-silent-500 → Level 1 silent_server_error'
+  );
   assert(r.level1[0].status === 500, 'action-silent-500 → status is preserved on the finding');
   assert(
-    r.level1[0].url.startsWith('https://kibana.example/internal/entity_analytics/monitoring/entity_source'),
+    r.level1[0].url.startsWith(
+      'https://kibana.example/internal/entity_analytics/monitoring/entity_source'
+    ),
     'action-silent-500 → full URL (redacted form) is preserved as evidence'
   );
 }
@@ -81,7 +92,9 @@ console.log('\n── 500 already surfaced via console → not double-reported �
   );
 }
 
-console.log('\n── 500 surfaced only via the browser\'s own auto-generated console message (no path in text) → still not double-reported ──');
+console.log(
+  "\n── 500 surfaced only via the browser's own auto-generated console message (no path in text) → still not double-reported ──"
+);
 {
   // Regression test for a real gap found during Task 8 live browser validation
   // (browser_run_code_unsafe against a real fetch() 500 with no app-level error
@@ -136,7 +149,10 @@ console.log(
       },
     ],
     console: [
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
@@ -152,7 +168,9 @@ console.log(
   );
 }
 
-console.log('\n── Two 500s with TWO native messages → both are covered, neither double-reported ──');
+console.log(
+  '\n── Two 500s with TWO native messages → both are covered, neither double-reported ──'
+);
 {
   const r = reduceAction({
     network: [
@@ -178,8 +196,14 @@ console.log('\n── Two 500s with TWO native messages → both are covered, ne
       },
     ],
     console: [
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   assert(
@@ -189,7 +213,9 @@ console.log('\n── Two 500s with TWO native messages → both are covered, ne
   );
 }
 
-console.log('\n── Different statuses each keep their own native-message pool (no cross-status leakage) ──');
+console.log(
+  '\n── Different statuses each keep their own native-message pool (no cross-status leakage) ──'
+);
 {
   const r = reduceAction({
     network: [
@@ -215,7 +241,10 @@ console.log('\n── Different statuses each keep their own native-message pool
       },
     ],
     console: [
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
@@ -261,7 +290,10 @@ console.log(
     },
   ];
   const consoleMessages = [
-    { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    {
+      type: 'error',
+      text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+    },
     { type: 'error', text: '500 @ /api/b' },
   ];
 
@@ -369,7 +401,10 @@ console.log(
   const r = reduceAction({
     network: [abandonedEvent, unrelatedRealEvent],
     console: [
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   assert(
@@ -379,7 +414,7 @@ console.log(
   );
   assert(
     r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('unrelated')),
-    "the sole native credit is reserved for the abandoned event, so the unrelated real 500 is now correctly reported as silent rather than wrongly suppressed",
+    'the sole native credit is reserved for the abandoned event, so the unrelated real 500 is now correctly reported as silent rather than wrongly suppressed',
     JSON.stringify(r.level1)
   );
 
@@ -389,13 +424,19 @@ console.log(
   const r2 = reduceAction({
     network: [abandonedEvent, unrelatedRealEvent],
     console: [
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   assert(
     !r2.level1.some((i) => i.type === 'silent_server_error'),
-    'with a second native message available, the real event is still covered once the abandoned event\'s reservation is satisfied',
+    "with a second native message available, the real event is still covered once the abandoned event's reservation is satisfied",
     JSON.stringify(r2.level1)
   );
 }
@@ -449,12 +490,15 @@ console.log(
       // Ground truth this fixture asserts: this message was actually
       // logged for /api/normal's failure, not for the abandoned request.
       // The reducer cannot know that from a native message alone.
-      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      {
+        type: 'error',
+        text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)',
+      },
     ],
   });
   assert(
     r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('normal')),
-    'accepted false positive: /api/normal is reported as silent even though this fixture\'s ground truth is that the console message was really its own — indistinguishable from the true-positive fixture above given only { type, text } console events',
+    "accepted false positive: /api/normal is reported as silent even though this fixture's ground truth is that the console message was really its own — indistinguishable from the true-positive fixture above given only { type, text } console events",
     JSON.stringify(r.level1)
   );
 }
@@ -545,14 +589,19 @@ console.log(
 console.log('\n── Pending request: still in flight at the end of one action ───────────');
 {
   const r = reduceAction(json('action-pending-request'));
-  assert(r.level3.some((i) => i.type === 'pending_request'), 'action-pending-request → Level 3 pending_request');
+  assert(
+    r.level3.some((i) => i.type === 'pending_request'),
+    'action-pending-request → Level 3 pending_request'
+  );
   assert(
     !r.level2.some((i) => i.type === 'stuck_request'),
     'action-pending-request → not yet a Level 2 stuck_request on its first sighting'
   );
 }
 
-console.log('\n── Headers received but body still streaming: NOT settled — respondedAt, not status, decides "still open" ─');
+console.log(
+  '\n── Headers received but body still streaming: NOT settled — respondedAt, not status, decides "still open" ─'
+);
 {
   const r = reduceAction(json('action-headers-received-body-still-streaming'));
   assert(
@@ -598,7 +647,9 @@ console.log('\n── Stuck request: still pending across a SECOND action (cumul
   );
 }
 
-console.log('\n── Settle-then-repend: a request that fully resolves must not poison a LATER, unrelated pending sighting of the same signature ─');
+console.log(
+  '\n── Settle-then-repend: a request that fully resolves must not poison a LATER, unrelated pending sighting of the same signature ─'
+);
 {
   const pendingEvent = {
     method: 'GET',
@@ -611,10 +662,24 @@ console.log('\n── Settle-then-repend: a request that fully resolves must not
     resourceType: 'xhr',
   };
   const a1 = reduceAction({ network: [pendingEvent] });
-  assert(a1.level3.some((i) => i.type === 'pending_request'), 'settle-then-repend A1 → plain pending_request');
+  assert(
+    a1.level3.some((i) => i.type === 'pending_request'),
+    'settle-then-repend A1 → plain pending_request'
+  );
 
   const a2 = reduceAction(
-    { network: [{ ...pendingEvent, status: 200, ok: true, failure: null, requestedAt: 1000, respondedAt: 1050 }] },
+    {
+      network: [
+        {
+          ...pendingEvent,
+          status: 200,
+          ok: true,
+          failure: null,
+          requestedAt: 1000,
+          respondedAt: 1050,
+        },
+      ],
+    },
     a1.state
   );
   assert(
@@ -636,7 +701,9 @@ console.log('\n── Settle-then-repend: a request that fully resolves must not
   );
 }
 
-console.log('\n── Abandon-then-repend: an abandoned-by-navigation request must not poison a LATER pending sighting either ─');
+console.log(
+  '\n── Abandon-then-repend: an abandoned-by-navigation request must not poison a LATER pending sighting either ─'
+);
 {
   const pendingEvent = {
     method: 'GET',
@@ -649,7 +716,10 @@ console.log('\n── Abandon-then-repend: an abandoned-by-navigation request mu
     resourceType: 'xhr',
   };
   const a1 = reduceAction({ network: [pendingEvent] });
-  const a2 = reduceAction({ network: [{ ...pendingEvent, requestedAt: 500, abandonedByNavigation: true }] }, a1.state);
+  const a2 = reduceAction(
+    { network: [{ ...pendingEvent, requestedAt: 500, abandonedByNavigation: true }] },
+    a1.state
+  );
   assert(
     a2.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
     'abandon-then-repend A2 (abandoned after a genuine pending A1) → request_abandoned_by_navigation',
@@ -669,7 +739,9 @@ console.log('\n── Abandon-then-repend: an abandoned-by-navigation request mu
   );
 }
 
-console.log('\n── Same-drain settle+repend: an old request settling and a NEW same-URL request starting, both observed in ONE call, must not escalate the new one to stuck_request ─');
+console.log(
+  '\n── Same-drain settle+repend: an old request settling and a NEW same-URL request starting, both observed in ONE call, must not escalate the new one to stuck_request ─'
+);
 {
   const sig = {
     method: 'GET',
@@ -677,9 +749,14 @@ console.log('\n── Same-drain settle+repend: an old request settling and a NE
     resourceType: 'xhr',
   };
   const a1 = reduceAction({
-    network: [{ ...sig, id: 1, status: null, ok: null, failure: null, requestedAt: 0, respondedAt: null }],
+    network: [
+      { ...sig, id: 1, status: null, ok: null, failure: null, requestedAt: 0, respondedAt: null },
+    ],
   });
-  assert(a1.level3.some((i) => i.type === 'pending_request'), 'same-drain setup A1 → plain pending_request (id 1)');
+  assert(
+    a1.level3.some((i) => i.type === 'pending_request'),
+    'same-drain setup A1 → plain pending_request (id 1)'
+  );
 
   // A2, in ONE call: id 1 settles AND a brand-new id 2 for the identical
   // signature is already pending by the time this same drain fires.
@@ -687,7 +764,15 @@ console.log('\n── Same-drain settle+repend: an old request settling and a NE
     {
       network: [
         { ...sig, id: 1, status: 200, ok: true, failure: null, requestedAt: 0, respondedAt: 1000 },
-        { ...sig, id: 2, status: null, ok: null, failure: null, requestedAt: 950, respondedAt: null },
+        {
+          ...sig,
+          id: 2,
+          status: null,
+          ok: null,
+          failure: null,
+          requestedAt: 950,
+          respondedAt: null,
+        },
       ],
     },
     a1.state
@@ -706,7 +791,19 @@ console.log('\n── Same-drain settle+repend: an old request settling and a NE
   // And the genuine continuation case must still escalate: id 2 (the one
   // actually left pending after A2) still pending in A3 → stuck_request.
   const a3 = reduceAction(
-    { network: [{ ...sig, id: 2, status: null, ok: null, failure: null, requestedAt: 2000, respondedAt: null }] },
+    {
+      network: [
+        {
+          ...sig,
+          id: 2,
+          status: null,
+          ok: null,
+          failure: null,
+          requestedAt: 2000,
+          respondedAt: null,
+        },
+      ],
+    },
     a2.state
   );
   assert(
@@ -724,7 +821,8 @@ console.log('\n── Navigation reset: an in-flight request abandoned by naviga
     'action-abandoned-by-navigation → Level 3 request_abandoned_by_navigation'
   );
   assert(
-    !r.level3.some((i) => i.type === 'pending_request') && !r.level2.some((i) => i.type === 'stuck_request'),
+    !r.level3.some((i) => i.type === 'pending_request') &&
+      !r.level2.some((i) => i.type === 'stuck_request'),
     'action-abandoned-by-navigation → never counted as pending_request or stuck_request'
   );
 
@@ -749,7 +847,8 @@ console.log('\n── Navigation reset: an in-flight request abandoned by naviga
     r.state
   );
   assert(
-    second.level3.some((i) => i.type === 'pending_request') && !second.level2.some((i) => i.type === 'stuck_request'),
+    second.level3.some((i) => i.type === 'pending_request') &&
+      !second.level2.some((i) => i.type === 'stuck_request'),
     'action-abandoned-by-navigation → a fresh pending sighting after an abandoned one is not pre-escalated'
   );
 }
@@ -777,11 +876,19 @@ console.log('\n── An abandoned request with a known 5xx status is not a sile
     ],
     console: [],
   });
-  assert(!r.level1.some((i) => i.type === 'silent_server_error'), 'an abandoned request with a known 500 status → never Level 1 silent_server_error');
-  assert(r.level3.some((i) => i.type === 'request_abandoned_by_navigation'), 'still correctly reported as Level 3 request_abandoned_by_navigation');
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    'an abandoned request with a known 500 status → never Level 1 silent_server_error'
+  );
+  assert(
+    r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+    'still correctly reported as Level 3 request_abandoned_by_navigation'
+  );
 }
 
-console.log('\n── A same-URL retry right after an abandoned (not truly settled) request is not a duplicate/retry ─');
+console.log(
+  '\n── A same-URL retry right after an abandoned (not truly settled) request is not a duplicate/retry ─'
+);
 {
   // The first attempt was torn down by navigation mid-flight (status known
   // from headers, but respondedAt never set) — from the app's perspective it
@@ -790,7 +897,8 @@ console.log('\n── A same-URL retry right after an abandoned (not truly settl
   // against a call that, in effect, never happened.
   const r = reduceAction(json('action-abandoned-then-retry'));
   assert(
-    !r.level2.some((i) => i.type === 'duplicate_api_call') && !r.level3.some((i) => i.type === 'retry_after_failure' || i.type === 'repeated_api_call'),
+    !r.level2.some((i) => i.type === 'duplicate_api_call') &&
+      !r.level3.some((i) => i.type === 'retry_after_failure' || i.type === 'repeated_api_call'),
     'action-abandoned-then-retry → the abandoned attempt is excluded, so the real attempt is never classified as a duplicate/retry/repeat',
     JSON.stringify({ level2: r.level2, level3: r.level3 })
   );
@@ -808,7 +916,8 @@ console.log('\n── Meaningfully different queries are never grouped as duplic
 {
   const r = reduceAction(json('action-query-variants'));
   assert(
-    !r.level2.some((i) => i.type === 'duplicate_api_call') && !r.level3.some((i) => i.type === 'repeated_api_call'),
+    !r.level2.some((i) => i.type === 'duplicate_api_call') &&
+      !r.level3.some((i) => i.type === 'repeated_api_call'),
     'action-query-variants (?page=1 vs ?page=2) → no duplicate/repeated finding for either'
   );
 }
@@ -816,10 +925,16 @@ console.log('\n── Meaningfully different queries are never grouped as duplic
 console.log('\n── Same exact call fired twice within the duplicate window → Level 2 ───');
 {
   const r = reduceAction(json('action-duplicate-concurrent'));
-  assert(r.level2.some((i) => i.type === 'duplicate_api_call'), 'action-duplicate-concurrent → Level 2 duplicate_api_call');
+  assert(
+    r.level2.some((i) => i.type === 'duplicate_api_call'),
+    'action-duplicate-concurrent → Level 2 duplicate_api_call'
+  );
   const finding = r.level2.find((i) => i.type === 'duplicate_api_call');
   assert(finding.count === 2, 'action-duplicate-concurrent → count is 2');
-  assert(Array.isArray(finding.evidence) && finding.evidence.length === 2, 'action-duplicate-concurrent → evidence timestamps preserved');
+  assert(
+    Array.isArray(finding.evidence) && finding.evidence.length === 2,
+    'action-duplicate-concurrent → evidence timestamps preserved'
+  );
 }
 
 console.log('\n── Adjacent gaps within the window but a longer total span → NOT concurrent ─');
@@ -855,11 +970,19 @@ console.log('\n── Intentional retry (fail, then succeed) is not a duplicate-
 console.log('\n── Same call repeated but spaced far apart → soft Level 3, not Level 2 ─');
 {
   const r = reduceAction(json('action-repeated-spaced'));
-  assert(r.level3.some((i) => i.type === 'repeated_api_call'), 'action-repeated-spaced → Level 3 repeated_api_call');
-  assert(!r.level2.some((i) => i.type === 'duplicate_api_call'), 'action-repeated-spaced → not escalated to duplicate_api_call');
+  assert(
+    r.level3.some((i) => i.type === 'repeated_api_call'),
+    'action-repeated-spaced → Level 3 repeated_api_call'
+  );
+  assert(
+    !r.level2.some((i) => i.type === 'duplicate_api_call'),
+    'action-repeated-spaced → not escalated to duplicate_api_call'
+  );
 }
 
-console.log('\n── Action boundaries: the same call succeeding in two SEPARATE actions is not a duplicate ─');
+console.log(
+  '\n── Action boundaries: the same call succeeding in two SEPARATE actions is not a duplicate ─'
+);
 {
   const event = {
     method: 'GET',
@@ -874,7 +997,8 @@ console.log('\n── Action boundaries: the same call succeeding in two SEPARAT
   const first = reduceAction({ network: [event] });
   const second = reduceAction({ network: [{ ...event, requestedAt: 0 }] }, first.state);
   assert(
-    !second.level2.some((i) => i.type === 'duplicate_api_call') && !second.level3.some((i) => i.type === 'repeated_api_call'),
+    !second.level2.some((i) => i.type === 'duplicate_api_call') &&
+      !second.level3.some((i) => i.type === 'repeated_api_call'),
     'two separate single-call actions are never combined into a cross-action duplicate finding'
   );
 }
@@ -888,7 +1012,8 @@ console.log('\n── Known polling endpoints are suppressed, not flagged as dup
   const r = reduceAction(json('action-polling-noise'));
   assert(r.suppressed.length === 2, 'action-polling-noise → both calls land in suppressed[]');
   assert(
-    !r.level2.some((i) => i.type === 'duplicate_api_call') && !r.level3.some((i) => i.type === 'repeated_api_call'),
+    !r.level2.some((i) => i.type === 'duplicate_api_call') &&
+      !r.level3.some((i) => i.type === 'repeated_api_call'),
     'action-polling-noise → never flagged as a duplicate/repeated finding'
   );
 }
@@ -931,7 +1056,10 @@ console.log('\n── Delayed elements: spinner visible > 10s escalates to Level
 console.log('\n── Delayed elements: spinner within the 10s grace period stays Level 3 ─');
 {
   const r = reduceAction(json('action-spinner-ok'));
-  assert(r.level3.some((i) => i.type === 'spinner_present'), 'action-spinner-ok (3s) → Level 3 spinner_present');
+  assert(
+    r.level3.some((i) => i.type === 'spinner_present'),
+    'action-spinner-ok (3s) → Level 3 spinner_present'
+  );
   assert(
     !r.level2.some((i) => i.type === 'loading_indicator_unresolved'),
     'action-spinner-ok (3s) → not escalated to Level 2'
@@ -951,26 +1079,35 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   };
 
   assert(
-    REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?api_key=super-secret&q=1'), 'api_key')) &&
-      redactUrl('https://kibana.example/api?api_key=super-secret&q=1').endsWith('&q=1'),
+    REDACTED_RE.test(
+      valueOf(redactUrl('https://kibana.example/api?api_key=super-secret&q=1'), 'api_key')
+    ) && redactUrl('https://kibana.example/api?api_key=super-secret&q=1').endsWith('&q=1'),
     'redactUrl → strips api_key value (leaving an opaque hashed placeholder), unrelated params untouched'
   );
   assert(
-    REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?Authorization=Bearer%20xyz'), 'Authorization')),
+    REDACTED_RE.test(
+      valueOf(redactUrl('https://kibana.example/api?Authorization=Bearer%20xyz'), 'Authorization')
+    ),
     'redactUrl → case-insensitive match on param name'
   );
   assert(
     redactUrl('https://kibana.example/api?q=1') === 'https://kibana.example/api?q=1',
     'redactUrl → URLs with no sensitive params are returned unchanged'
   );
-  assert(redactUrl('https://kibana.example/api') === 'https://kibana.example/api', 'redactUrl → URLs with no query string are returned unchanged');
+  assert(
+    redactUrl('https://kibana.example/api') === 'https://kibana.example/api',
+    'redactUrl → URLs with no query string are returned unchanged'
+  );
   assert(
     redactUrl('https://kibana.example/api?token=abc123#somefragment').endsWith('#somefragment') &&
-      REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?token=abc123#somefragment'), 'token')),
+      REDACTED_RE.test(
+        valueOf(redactUrl('https://kibana.example/api?token=abc123#somefragment'), 'token')
+      ),
     'redactUrl → a hash fragment after a redacted sensitive param is preserved, not dropped'
   );
   assert(
-    redactUrl('https://kibana.example/api?bad%zzkey=secret&page=2') === 'https://kibana.example/api?bad%zzkey=secret&page=2',
+    redactUrl('https://kibana.example/api?bad%zzkey=secret&page=2') ===
+      'https://kibana.example/api?bad%zzkey=secret&page=2',
     'redactUrl → a malformed %-escape in a query KEY (decodeURIComponent throws) never aborts classification; it just fails to decode-and-match that one key',
     'threw instead of returning a value'
   );
@@ -978,11 +1115,7 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   // Previously-missed credential-shaped names (P2 review finding).
   for (const key of ['x-api-key', 'x_api_key', 'client_secret', 'client-secret']) {
     const redacted = redactUrl(`https://kibana.example/api?${key}=super-secret&q=1`);
-    assert(
-      REDACTED_RE.test(valueOf(redacted, key)),
-      `redactUrl → ${key} is redacted`,
-      redacted
-    );
+    assert(REDACTED_RE.test(valueOf(redacted, key)), `redactUrl → ${key} is redacted`, redacted);
   }
 
   // Redaction-before-grouping collision (P2 review finding): two DIFFERENT
@@ -991,7 +1124,11 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   // genuinely different requests into one just because both had a "token".
   const redactedA = redactUrl('https://kibana.example/api?token=a&page=1');
   const redactedB = redactUrl('https://kibana.example/api?token=b&page=1');
-  assert(redactedA !== redactedB, 'redactUrl → different sensitive values produce different redacted placeholders (no signature collision)', `${redactedA} vs ${redactedB}`);
+  assert(
+    redactedA !== redactedB,
+    'redactUrl → different sensitive values produce different redacted placeholders (no signature collision)',
+    `${redactedA} vs ${redactedB}`
+  );
   // ...but the SAME value redacts to the SAME placeholder every time, so a
   // genuinely repeated call with a constant token is still grouped/detected
   // as a duplicate, not artificially split by a random per-call salt.
@@ -1012,12 +1149,19 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   };
   const r = reduceAction({ network: [withSecret, { ...withSecret, requestedAt: 50 }] });
   const finding = r.level2.find((i) => i.type === 'duplicate_api_call');
-  assert(finding && !finding.url.includes('abc123'), 'a finding built from a URL with a token query param never leaks the token value');
+  assert(
+    finding && !finding.url.includes('abc123'),
+    'a finding built from a URL with a token query param never leaks the token value'
+  );
 
   // A duplicate finding built from two requests with DIFFERENT token values
   // must not exist — they are different signatures, not one duplicated call.
   const withSecretA = { ...withSecret, url: 'https://kibana.example/internal/foo?token=a&page=2' };
-  const withSecretB = { ...withSecret, url: 'https://kibana.example/internal/foo?token=b&page=2', requestedAt: 50 };
+  const withSecretB = {
+    ...withSecret,
+    url: 'https://kibana.example/internal/foo?token=b&page=2',
+    requestedAt: 50,
+  };
   const r2 = reduceAction({ network: [withSecretA, withSecretB] });
   assert(
     !r2.level2.some((i) => i.type === 'duplicate_api_call'),
@@ -1037,8 +1181,13 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
 console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (reducer) ──────');
 {
   const doc = readFileSync(resolve(__dirname, '../action-scoped-collector.md'), 'utf8');
-  const match = doc.match(/const shortHash = [\s\S]*?return base \+ '\?' \+ rest \+ hash;\n  \};\n/);
-  assert(!!match, 'action-scoped-collector.md contains the expected `const shortHash` / `const SENSITIVE` / `redact` bridge snippet');
+  const match = doc.match(
+    /const shortHash = [\s\S]*?return base \+ '\?' \+ rest \+ hash;\n  \};\n/
+  );
+  assert(
+    !!match,
+    'action-scoped-collector.md contains the expected `const shortHash` / `const SENSITIVE` / `redact` bridge snippet'
+  );
 
   if (match) {
     const redactFromDoc = new Function(`${match[0]}\nreturn redact;`)();
@@ -1093,8 +1242,7 @@ console.log('\n── Live-captured fixtures: documented outcome per scenario is
     {
       name: 'live-drain-scenario3-query-variants',
       describe: 'three ?q=/?page= variants of the same path',
-      check: (r) =>
-        r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+      check: (r) => r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
       label: 'query-variants → 0 findings (full-URL grouping correctly treats them as distinct)',
     },
     {
@@ -1127,7 +1275,8 @@ console.log('\n── Live-captured fixtures: documented outcome per scenario is
       name: 'live-drain-scenario7-permission-gating',
       describe: 'a 403 from an admin-only endpoint',
       check: (r) => r.level1.length === 0 && r.level2.length === 0,
-      label: 'permission-gating (403) → 0 Level 1/2 findings (status < 500 is out of scope by design)',
+      label:
+        'permission-gating (403) → 0 Level 1/2 findings (status < 500 is out of scope by design)',
     },
     {
       name: 'live-drain-scenario8-cancellation',
@@ -1139,13 +1288,18 @@ console.log('\n── Live-captured fixtures: documented outcome per scenario is
       name: 'live-drain-scenario9-refresh-mid-request',
       describe: 'a page refresh while a request is still in flight',
       check: (r) => r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
-      label: 'refresh-mid-request → Level 3 request_abandoned_by_navigation (value-add over legacy, which has no equivalent)',
+      label:
+        'refresh-mid-request → Level 3 request_abandoned_by_navigation (value-add over legacy, which has no equivalent)',
     },
   ];
 
   for (const { name, describe, check, label } of expectations) {
     const r = reduceAction(json(name));
-    assert(check(r), `${name} (${describe}) → ${label}`, JSON.stringify({ level1: r.level1, level2: r.level2, level3: r.level3 }));
+    assert(
+      check(r),
+      `${name} (${describe}) → ${label}`,
+      JSON.stringify({ level1: r.level1, level2: r.level2, level3: r.level3 })
+    );
   }
 }
 

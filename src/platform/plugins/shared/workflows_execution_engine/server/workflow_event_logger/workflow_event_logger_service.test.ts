@@ -14,7 +14,7 @@ import { WorkflowEventLoggerService } from './workflow_event_logger_service';
 const createLoggerMock = () =>
   ({
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('WorkflowEventLoggerService', () => {
   it('maps paging fields for repository search helpers', async () => {

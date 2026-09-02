@@ -23,15 +23,12 @@ import type {
 const OBSERVABILITY_COMPLETE_OVERVIEW_FEATURE_ID = 'observability:complete_overview';
 const OBSERVABILITY_GEN_AI_SETTINGS_FEATURE_ID = 'observability:gen_ai_settings';
 
-export class ServerlessObservabilityPlugin
-  implements
-    Plugin<
-      ServerlessObservabilityPluginSetup,
-      ServerlessObservabilityPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ServerlessObservabilityPlugin implements Plugin<
+  ServerlessObservabilityPluginSetup,
+  ServerlessObservabilityPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private logger: Logger;
 
   constructor(context: PluginInitializerContext) {

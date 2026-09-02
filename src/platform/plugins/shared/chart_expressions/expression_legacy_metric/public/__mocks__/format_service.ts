@@ -15,4 +15,4 @@ export const getFormatService = () =>
       convertToText: (text: string) => text,
       convertToReact: (text: string) => text,
     }),
-  } as FieldFormatsStart);
+  }) as FieldFormatsStart;

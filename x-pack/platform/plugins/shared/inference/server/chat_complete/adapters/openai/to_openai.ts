@@ -86,13 +86,13 @@ export function toolChoiceToOpenAI(
     typeof toolChoice === 'string'
       ? toolChoice
       : toolChoice
-      ? {
-          function: {
-            name: toolChoice.function,
-          },
-          type: 'function' as const,
-        }
-      : undefined;
+        ? {
+            function: {
+              name: toolChoice.function,
+            },
+            type: 'function' as const,
+          }
+        : undefined;
 
   // For OpenAI-compatible ("Other") providers:
   // - When native tool calling is enabled (enableNativeFunctionCalling), and

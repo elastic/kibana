@@ -28,15 +28,12 @@ import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
-export class AgentBuilderSmlPlugin
-  implements
-    Plugin<
-      AgentBuilderSmlPluginSetup,
-      AgentBuilderSmlPluginStart,
-      AgentBuilderSmlSetupDependencies,
-      AgentBuilderSmlStartDependencies
-    >
-{
+export class AgentBuilderSmlPlugin implements Plugin<
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+  AgentBuilderSmlSetupDependencies,
+  AgentBuilderSmlStartDependencies
+> {
   private logger: Logger;
   private smlServiceInstance: SmlServiceInstance;
   private smlService?: SmlService;

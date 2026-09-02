@@ -247,7 +247,7 @@ const internalStateSliceDef = createSlice({
     ) => {
       withTab(state, action.payload, (tab) => {
         const nextExpandedDocOwner = action.payload.expandedDoc
-          ? action.payload.expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER
+          ? (action.payload.expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER)
           : undefined;
 
         if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
@@ -615,7 +615,7 @@ export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyo
 
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
-  TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never
+  TPayload = TActionCreator extends PayloadActionCreator<infer T> ? T : never,
 > = ListenerEffect<
   ReturnType<TActionCreator>,
   DiscoverInternalState,

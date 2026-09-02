@@ -27,10 +27,13 @@ export const chartsServiceMock = {
   },
 };
 
-const defaultCapabilities = Object.keys(getDefaultMlCapabilities()).reduce((acc, key) => {
-  acc[key] = true;
-  return acc;
-}, {} as Record<string, boolean>);
+const defaultCapabilities = Object.keys(getDefaultMlCapabilities()).reduce(
+  (acc, key) => {
+    acc[key] = true;
+    return acc;
+  },
+  {} as Record<string, boolean>
+);
 
 export const kibanaContextMock = {
   services: {

@@ -36,9 +36,12 @@ export interface MarkdownStartDeps {
   uiActions: UiActionsStart;
 }
 
-export class DashboardMarkdownPlugin
-  implements Plugin<void, void, MarkdownSetupDeps, MarkdownStartDeps>
-{
+export class DashboardMarkdownPlugin implements Plugin<
+  void,
+  void,
+  MarkdownSetupDeps,
+  MarkdownStartDeps
+> {
   public setup(
     core: CoreSetup<MarkdownStartDeps>,
     { contentManagement, embeddable, expressions, visualizations }: MarkdownSetupDeps

@@ -13,7 +13,7 @@ import { getAggregatedStatus } from '.';
 const createExecution = (status: ExecutionStatus): WorkflowExecutionDto =>
   ({
     status,
-  } as unknown as WorkflowExecutionDto);
+  }) as unknown as WorkflowExecutionDto;
 
 describe('getAggregatedStatus', () => {
   it('returns PENDING when there are no executions', () => {

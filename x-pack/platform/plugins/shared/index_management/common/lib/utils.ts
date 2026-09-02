@@ -56,8 +56,8 @@ export const buildTemplateSettings = (
 
   // Only migrate source mode from mappings if we prefer it (e.g. during serialization)
   const sourceMode = preferMappingsSourceMode
-    ? sourceModeFromMappings ?? existingSourceSettings?.mode ?? flatSourceMode
-    : existingSourceSettings?.mode ?? flatSourceMode;
+    ? (sourceModeFromMappings ?? existingSourceSettings?.mode ?? flatSourceMode)
+    : (existingSourceSettings?.mode ?? flatSourceMode);
 
   const hasSourceMode = sourceMode !== undefined;
   const hasOtherMappingSettings = Object.keys(otherMappingSettings).length > 0;

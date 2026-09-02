@@ -18,7 +18,11 @@ export type KibanaClientFetchOptions = RequestInit & { ignore?: number[]; timeou
 type KibanaClientFetchOptionsWithIgnore = RequestInit & { ignore: number[]; timeout?: number };
 
 export class KibanaClientHttpError extends Error {
-  constructor(message: string, public readonly statusCode: number, public readonly data?: unknown) {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly data?: unknown
+  ) {
     super(`${statusCode}: ${message}`);
 
     if (typeof data !== 'undefined' && this.stack) {

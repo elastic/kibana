@@ -127,8 +127,10 @@ export type DataVisualizerGridEmbeddableApi = Partial<FieldStatsTableEmbeddableS
 
 export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
 
-export interface ESQLDataVisualizerIndexBasedAppState
-  extends Omit<DataVisualizerIndexBasedAppState, 'query'> {
+export interface ESQLDataVisualizerIndexBasedAppState extends Omit<
+  DataVisualizerIndexBasedAppState,
+  'query'
+> {
   limitSize: ESQLDefaultLimitSizeOption;
   query?: ESQLQuery;
 }

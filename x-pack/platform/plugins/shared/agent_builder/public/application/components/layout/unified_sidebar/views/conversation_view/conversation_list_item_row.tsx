@@ -179,10 +179,12 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         background-color: ${bg};
       }
 
-      ${(isActive || isPopoverOpen) &&
-      css`
-        background-color: ${bg};
-      `}
+      ${
+        (isActive || isPopoverOpen) &&
+        css`
+          background-color: ${bg};
+        `
+      }
 
       .${STATUS_INDICATOR_CLASS} {
         opacity: 1;
@@ -194,28 +196,32 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         transition: opacity 150ms ease;
       }
 
-      ${showActionsMenu &&
-      css`
-        &:hover .${STATUS_INDICATOR_CLASS}, &:focus-within .${STATUS_INDICATOR_CLASS} {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
-          opacity: 1;
-        }
-
-        ${isPopoverOpen &&
+      ${
+        showActionsMenu &&
         css`
-          .${STATUS_INDICATOR_CLASS} {
+          &:hover .${STATUS_INDICATOR_CLASS}, &:focus-within .${STATUS_INDICATOR_CLASS} {
             opacity: 0;
             pointer-events: none;
           }
-          .${ACTIONS_CLASS} {
+
+          &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
             opacity: 1;
           }
-        `}
-      `}
+
+          ${
+            isPopoverOpen &&
+            css`
+              .${STATUS_INDICATOR_CLASS} {
+                opacity: 0;
+                pointer-events: none;
+              }
+              .${ACTIONS_CLASS} {
+                opacity: 1;
+              }
+            `
+          }
+        `
+      }
     `;
   }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, status]);
 

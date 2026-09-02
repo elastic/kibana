@@ -347,7 +347,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 colorMapping={
                   isLegacyTermsMode
                     ? undefined
-                    : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
+                    : (column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG)
                 }
                 palette={isLegacyTermsMode ? activePalette : undefined}
                 palettes={props.palettes}

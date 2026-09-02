@@ -286,7 +286,7 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
 }
 
 function getLastPathSegment(lineUpToCursor: string, pathSegments: string[] | null) {
-  return lineUpToCursor.endsWith('.') ? null : pathSegments?.at(-1) ?? null;
+  return lineUpToCursor.endsWith('.') ? null : (pathSegments?.at(-1) ?? null);
 }
 
 function cleanKey(key: string) {

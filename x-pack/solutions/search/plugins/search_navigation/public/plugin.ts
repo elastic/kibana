@@ -33,9 +33,10 @@ import type {
 import { classicNavigationFactory } from './classic_navigation';
 import { SearchIndexManagementLocatorDefinition } from './locator';
 
-export class SearchNavigationPlugin
-  implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
-{
+export class SearchNavigationPlugin implements Plugin<
+  SearchNavigationPluginSetup,
+  SearchNavigationPluginStart
+> {
   private readonly logger: Logger;
   private contextEngineSetup: AppPluginSetupDependencies['contextEngine'] = undefined;
   private currentChromeStyle: ChromeStyle | undefined = undefined;

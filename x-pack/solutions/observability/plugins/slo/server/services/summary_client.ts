@@ -186,7 +186,10 @@ const toSummaryResult = (
 };
 
 export class DefaultSummaryClient implements SummaryClient {
-  constructor(private esClient: ElasticsearchClient, private burnRatesClient: BurnRatesClient) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private burnRatesClient: BurnRatesClient
+  ) {}
 
   async computeSummary(params: Params): Promise<SummaryResult> {
     const resolved = resolveParams(params);

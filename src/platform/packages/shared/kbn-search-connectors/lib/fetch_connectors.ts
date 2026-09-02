@@ -67,10 +67,10 @@ export const fetchConnectors = async (
         query: q,
       }
     : indexNames
-    ? {
-        index_name: indexNames.join(','),
-      }
-    : {};
+      ? {
+          index_name: indexNames.join(','),
+        }
+      : {};
 
   let hits: Connector[] = [];
   let accumulator: Connector[] = [];

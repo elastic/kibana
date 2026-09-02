@@ -219,7 +219,7 @@ describe('action policy events queries', () => {
             (shouldClause) =>
               Boolean(
                 shouldClause?.terms &&
-                  'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
+                'kibana.alerting_v2.dispatcher.rule_ids' in (shouldClause.terms as object)
               )
           )
         );
@@ -273,7 +273,7 @@ describe('action policy events queries', () => {
           filters.find((clause) =>
             Boolean(
               clause?.terms &&
-                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
+              'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
             )
           )
         ).toBeUndefined();
@@ -285,7 +285,7 @@ describe('action policy events queries', () => {
           filters.find((clause) =>
             Boolean(
               clause?.terms &&
-                'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
+              'kibana.alerting_v2.dispatcher.episode_ids' in (clause.terms as object)
             )
           )
         ).toBeUndefined();

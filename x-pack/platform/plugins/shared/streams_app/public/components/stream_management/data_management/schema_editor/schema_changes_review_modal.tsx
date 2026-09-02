@@ -361,8 +361,8 @@ export function SchemaChangesReviewModal({
                 isSimulating
                   ? 'streamsAppSchemaChangesCheckingConflicts'
                   : fieldConflicts.length > 0
-                  ? 'streamsAppSchemaChangesFieldConflictsWarning'
-                  : 'streamsAppSchemaChangesNoConflicts'
+                    ? 'streamsAppSchemaChangesFieldConflictsWarning'
+                    : 'streamsAppSchemaChangesNoConflicts'
               }
             >
               {isSimulating ? (

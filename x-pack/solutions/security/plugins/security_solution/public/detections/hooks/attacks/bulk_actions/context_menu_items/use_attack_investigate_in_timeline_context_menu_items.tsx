@@ -15,8 +15,7 @@ import type {
   BulkAttackContextMenuItems,
 } from '../types';
 
-export interface UseAttackInvestigateInTimelineContextMenuItemsProps
-  extends BaseAttackContextMenuItemsProps {
+export interface UseAttackInvestigateInTimelineContextMenuItemsProps extends BaseAttackContextMenuItemsProps {
   /** Array of attacks with alert ids used to investigate in Timeline */
   attacksWithTimelineAlerts: AttackWithTimelineAlerts[];
 }

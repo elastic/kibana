@@ -44,7 +44,10 @@ export class GraphPage {
   private readonly clickableEdges: Locator;
   private readonly selectionListFields: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.contentList = new ContentListWrapper(page);
     this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
 

@@ -163,10 +163,10 @@ export const InsightsTabCsp = memo(
       return hasMisconfigurationFindings
         ? CspInsightLeftPanelSubTab.MISCONFIGURATIONS
         : hasVulnerabilitiesFindings
-        ? CspInsightLeftPanelSubTab.VULNERABILITIES
-        : hasNonClosedAlerts
-        ? CspInsightLeftPanelSubTab.ALERTS
-        : '';
+          ? CspInsightLeftPanelSubTab.VULNERABILITIES
+          : hasNonClosedAlerts
+            ? CspInsightLeftPanelSubTab.ALERTS
+            : '';
     };
 
     const [activeInsightsId, setActiveInsightsId] = useState(getDefaultTab());

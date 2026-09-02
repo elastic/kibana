@@ -48,9 +48,8 @@ export class LegacyAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
-{
+  RecoveryActionGroupId extends string,
+> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId> {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
   private ruleLogPrefix = '';

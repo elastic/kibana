@@ -23,9 +23,10 @@ import { createNewsfeedSidebarController } from './sidebar/controller';
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
 
-export class NewsfeedPublicPlugin
-  implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
-{
+export class NewsfeedPublicPlugin implements Plugin<
+  NewsfeedPublicPluginSetup,
+  NewsfeedPublicPluginStart
+> {
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);

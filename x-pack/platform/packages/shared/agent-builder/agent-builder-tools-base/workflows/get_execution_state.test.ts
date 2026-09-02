@@ -24,7 +24,7 @@ describe('getExecutionState', () => {
   const createWorkflowApi = () =>
     ({
       getWorkflowExecution: jest.fn(),
-    } as unknown as Parameters<typeof getExecutionState>[0]['workflowApi']);
+    }) as unknown as Parameters<typeof getExecutionState>[0]['workflowApi'];
 
   it('returns null when execution is not found', async () => {
     const workflowApi = createWorkflowApi();

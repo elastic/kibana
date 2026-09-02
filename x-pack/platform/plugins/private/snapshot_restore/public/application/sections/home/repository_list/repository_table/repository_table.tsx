@@ -232,22 +232,22 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                               { defaultMessage: 'This repository is already the default.' }
                             )
                           : !isDefaultRepositoryFeatureAvailable
-                          ? i18n.translate(
-                              'xpack.snapshotRestore.repositoryList.table.actionSetDefaultUnavailableTooltip',
-                              {
-                                defaultMessage:
-                                  'The default repository feature is currently unavailable.',
-                              }
-                            )
-                          : isReadOnly
-                          ? i18n.translate(
-                              'xpack.snapshotRestore.repositoryList.table.actionSetDefaultReadOnlyTooltip',
-                              {
-                                defaultMessage:
-                                  'Read-only repositories cannot be set as the default.',
-                              }
-                            )
-                          : undefined
+                            ? i18n.translate(
+                                'xpack.snapshotRestore.repositoryList.table.actionSetDefaultUnavailableTooltip',
+                                {
+                                  defaultMessage:
+                                    'The default repository feature is currently unavailable.',
+                                }
+                              )
+                            : isReadOnly
+                              ? i18n.translate(
+                                  'xpack.snapshotRestore.repositoryList.table.actionSetDefaultReadOnlyTooltip',
+                                  {
+                                    defaultMessage:
+                                      'Read-only repositories cannot be set as the default.',
+                                  }
+                                )
+                              : undefined
                       }
                       onClick={
                         !isDefault && !isReadOnly && isDefaultRepositoryFeatureAvailable
@@ -276,11 +276,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                         { defaultMessage: 'The default repository cannot be removed.' }
                       )
                     : isManaged
-                    ? i18n.translate(
-                        'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
-                        { defaultMessage: 'You cannot delete a managed repository.' }
-                      )
-                    : undefined;
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+                          { defaultMessage: 'You cannot delete a managed repository.' }
+                        )
+                      : undefined;
 
                   const removeItem = (
                     <EuiContextMenuItem

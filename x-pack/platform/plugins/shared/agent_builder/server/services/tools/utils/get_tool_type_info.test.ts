@@ -10,7 +10,7 @@ import type { AnyToolTypeDefinition } from '../tool_types/definitions';
 import { getToolTypeInfo } from './get_tool_type_info';
 
 const enabled = (toolType: ToolType): AnyToolTypeDefinition =>
-  ({ toolType } as AnyToolTypeDefinition);
+  ({ toolType }) as AnyToolTypeDefinition;
 
 describe('getToolTypeInfo', () => {
   const definitions = [enabled(ToolType.esql), enabled(ToolType.workflow)];

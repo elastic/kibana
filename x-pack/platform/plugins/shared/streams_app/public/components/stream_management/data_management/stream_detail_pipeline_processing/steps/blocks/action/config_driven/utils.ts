@@ -10,7 +10,7 @@ import type { ConfigDrivenProcessorFormState, FieldConfiguration, FieldOptions }
 
 export const getConvertFormStateToConfig = <
   FormState extends ConfigDrivenProcessorFormState,
-  ProcessorState extends object
+  ProcessorState extends object,
 >(
   fieldConfigurations: FieldConfiguration[],
   fieldOptions: FieldOptions

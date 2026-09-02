@@ -11,9 +11,12 @@ import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
 import type { SetupDependencies, StartDependencies } from './types';
 
-export class LicenseManagementServerPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class LicenseManagementServerPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   private readonly apiRoutes = new ApiRoutes();
 
   setup(

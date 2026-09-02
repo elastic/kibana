@@ -25,7 +25,7 @@ const policy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
     policy_ids: ['agent-policy-1'],
     spaceIds: ['default'],
     ...over,
-  } as PackagePolicy);
+  }) as PackagePolicy;
 
 const browserPolicy = (over: Partial<PackagePolicy> & { id: string }): PackagePolicy =>
   policy({

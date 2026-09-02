@@ -14,7 +14,7 @@ const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
   ({
     getDataFieldNames: jest.fn(),
     getSuggestions: jest.fn(),
-  } as unknown as jest.Mocked<MatcherSuggestionsService>);
+  }) as unknown as jest.Mocked<MatcherSuggestionsService>;
 
 describe('MatcherRuleEventFieldsRoute', () => {
   it('calls getDataFieldNames with undefined when no matcher query param is provided', async () => {

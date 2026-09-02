@@ -32,7 +32,7 @@ type RequirementEntry = [
   Extract<ServiceName, 'kibana'>,
   {
     version: string;
-  }
+  },
 ];
 
 export function Requirements(props: RequirementsProps) {

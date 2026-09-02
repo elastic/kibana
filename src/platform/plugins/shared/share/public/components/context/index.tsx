@@ -68,7 +68,7 @@ export const useShareContext = () => {
 
 export const useShareTypeContext = <
   T extends Exclude<ShareTypes, 'legacy'>,
-  G extends T extends 'integration' ? string : never
+  G extends (T extends 'integration' ? string : never),
 >(
   shareType: T,
   groupId?: G

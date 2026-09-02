@@ -273,8 +273,8 @@ export const ExperimentDetailPage: React.FC = () => {
   const pageTitle = suiteId
     ? i18n.getRunPageTitle(suiteId)
     : experimentName
-    ? i18n.getPageTitleWithName(experimentName)
-    : i18n.getPageTitle(experimentId);
+      ? i18n.getPageTitleWithName(experimentName)
+      : i18n.getPageTitle(experimentId);
 
   const updateSearchParams = useCallback(
     (updater: (params: URLSearchParams) => void) => {
@@ -527,7 +527,7 @@ export const ExperimentDetailPage: React.FC = () => {
                           </span>
                         </EuiToolTip>
                       ) : (
-                        evaluatorModelIds[0] ?? '-'
+                        (evaluatorModelIds[0] ?? '-')
                       )
                     }
                     description={i18n.STAT_EVALUATOR_MODEL}

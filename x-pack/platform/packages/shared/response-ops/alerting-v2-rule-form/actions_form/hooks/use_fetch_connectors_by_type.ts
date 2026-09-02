@@ -76,7 +76,7 @@ export const useFetchConnectorsByType = ({
     () =>
       connectorTypeId
         ? (query.data ?? []).filter((c) => c.connectorTypeId === connectorTypeId)
-        : query.data ?? [],
+        : (query.data ?? []),
     [query.data, connectorTypeId]
   );
 

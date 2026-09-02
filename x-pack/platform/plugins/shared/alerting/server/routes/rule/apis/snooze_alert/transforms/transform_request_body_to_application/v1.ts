@@ -15,5 +15,5 @@ export const transformRequestBodyToApplication = (
   conditions: body.conditions,
   // Default conditionOperator to 'any' only when conditions are present but the
   // operator was not explicitly supplied.
-  conditionOperator: body.conditions ? body.condition_operator ?? 'any' : undefined,
+  conditionOperator: body.conditions ? (body.condition_operator ?? 'any') : undefined,
 });

@@ -111,7 +111,7 @@ export const FrequencySelector = ({
   // the only supported way to lay the options out in a row.
   const { euiTheme } = useEuiTheme();
   const horizontalGroupCss = useMemo(
-    () => ({ flexDirection: 'row', flexWrap: 'wrap', gap: euiTheme.size.base } as const),
+    () => ({ flexDirection: 'row', flexWrap: 'wrap', gap: euiTheme.size.base }) as const,
     [euiTheme.size.base]
   );
   const repeatUnitAppendCss = useMemo(

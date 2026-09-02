@@ -86,13 +86,15 @@ const cardCss = (theme: UseEuiTheme, isLoading: boolean) => css`
     pointer-events: none;
   }
   /* disabled + not‐loading → fade title & hint */
-  ${!isLoading &&
-  css`
-    &:disabled p[data-title],
-    &:disabled p[data-hint] {
-      color: ${theme.euiTheme.colors.mediumShade};
-    }
-  `}
+  ${
+    !isLoading &&
+    css`
+      &:disabled p[data-title],
+      &:disabled p[data-hint] {
+        color: ${theme.euiTheme.colors.mediumShade};
+      }
+    `
+  }
   &:focus {
     border-color: transparent;
     border-radius: ${theme.euiTheme.border.radius.medium};

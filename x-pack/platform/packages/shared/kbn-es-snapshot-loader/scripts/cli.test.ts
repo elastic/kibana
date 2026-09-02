@@ -36,7 +36,7 @@ const createLog = (): ToolingLog =>
     warning: jest.fn(),
     success: jest.fn(),
     error: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 const createRunContext = (flags: Record<string, unknown>): RunContext =>
   ({
@@ -51,7 +51,7 @@ const createRunContext = (flags: Record<string, unknown>): RunContext =>
       unexpected: [],
       ...flags,
     },
-  } as unknown as RunContext);
+  }) as unknown as RunContext;
 
 describe('createEsClientFromUrl auth precedence', () => {
   beforeEach(() => {
