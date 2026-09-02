@@ -169,6 +169,7 @@ export function fetchEsql({
         interceptedWarnings: [],
         esqlQueryColumns: [],
         esqlHeaderWarning: undefined,
+        approximationApplied: undefined,
       };
     })
     .catch((err) => {
