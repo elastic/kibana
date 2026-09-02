@@ -15,9 +15,11 @@ import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
   logger,
+  ensureAgentForSpace,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
+  ensureAgentForSpace?: (spaceId: string) => Promise<void>;
 }): Promise<PluginScopedManagedWorkflowsApi> => {
   const client = await workflowsExtensions.initManagedWorkflowsClient(
     PND_MANAGED_WORKFLOW_OWNER_ID

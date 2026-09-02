@@ -17,10 +17,7 @@ import {
   ListWatchesResponse,
   type WatchSkill,
 } from '@kbn/pnd-common';
-import {
-  listSkills as listStoredSkills,
-  setSkillEnabled as setStoredSkillEnabled,
-} from '../watch_store/watch_store';
+import { listSkills as listStoredSkills } from '../watch_store/watch_store';
 
 export class WatchesService {
   async list(_spaceId: string): Promise<ListWatchesResponse> {
@@ -37,11 +34,19 @@ export class WatchesService {
     });
   }
 
-  listSkills(): WatchSkill[] {
+  async listSkills(/* request: KibanaRequest, spaceId: string*/): Promise<WatchSkill[]> {
     return listStoredSkills();
-  }
+    /* if (this.useMockData) {
 
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
-    return setStoredSkillEnabled(skillId, enabled);
+    }
+
+    await this.ensureAgent(spaceId);
+
+    if (this.skillsProjectionService) {
+      return await this.skillsProjectionService.list(request, spaceId);
+    }
+
+    return [];
+    */
   }
 }

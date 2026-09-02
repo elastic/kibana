@@ -28,7 +28,7 @@ describe('WatchesService', () => {
           enabled: false,
           mandate: '',
           description: '',
-          callables: [],
+          skills: [],
           coverage: [],
           scopes: [],
           recentRuns: [],
