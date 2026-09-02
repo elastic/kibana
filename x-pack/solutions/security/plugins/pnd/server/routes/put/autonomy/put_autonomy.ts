@@ -73,7 +73,7 @@ export const registerPutAutonomyRoute = ({
         try {
           const spaceId = getSpaceId(request);
           const service = getWatchesService();
-          const current = await service.get(watchId, spaceId, request);
+          const current = await service.get(request, watchId, spaceId);
           const result = await service.update(
             watchId,
             { autonomyLevel, settingsRevision: current?.settingsRevision ?? null },

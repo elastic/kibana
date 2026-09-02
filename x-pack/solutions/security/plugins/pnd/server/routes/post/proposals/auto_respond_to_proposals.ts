@@ -109,7 +109,7 @@ export const registerAutoRespondToProposalsRoute = ({
 
         try {
           const spaceId = getSpaceId(request);
-          const current = await getWatchesService().get(watchId, spaceId, request);
+          const current = await getWatchesService().get(request, watchId, spaceId);
           // Narrowed rather than trusted, for the same reason `GET /autonomy` narrows it: a legacy
           // ordinal must auto-respond to nothing rather than clamp up to Supervised and accept gates.
           const autonomyLevel = asWatchAutonomyLevel(current?.settings?.autonomy);

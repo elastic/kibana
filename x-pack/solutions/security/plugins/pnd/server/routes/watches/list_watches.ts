@@ -38,7 +38,8 @@ export const registerListWatchesRoute = ({
         try {
           const body: ListWatchesResponse = await getWatchesService().list(
             request,
-            getSpaceId(request)          );
+            getSpaceId(request)
+          );
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);

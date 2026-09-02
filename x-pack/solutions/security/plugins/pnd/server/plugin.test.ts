@@ -165,7 +165,10 @@ describe('PndPlugin feature-flag gating', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
-      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const workflowsExtensions = {
+        registerManagedWorkflowOwner: jest.fn(),
+        registerTriggerDefinition: jest.fn(),
+      };
       const agentBuilder = { agents: { registerType: jest.fn() } };
 
       plugin.setup(

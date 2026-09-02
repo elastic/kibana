@@ -45,9 +45,8 @@ import {
   getWatch as getStoredWatch,
   listSkills as listStoredSkills,
   listWatches as listStoredWatches,
-  setSkillEnabled as setStoredSkillEnabled,
 } from '../watch_store/watch_store';
-import { fetchWatchWorkflows } from './fetch_watch_workflows';
+import { fetchWatchWorkflows, toWatchListItem } from './fetch_watch_workflows';
 import { projectWorkers } from './project_workers';
 
 const projectNotInstalledWatch = (watch: Watch): Watch => structuredClone(watch);
@@ -165,7 +164,8 @@ export class WatchesService {
   /* ---------------------------------------------------------------------- */
 
   async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
-    await this.ensureAgent(spaceId);    if (this.useMockData) {
+    await this.ensureAgent(spaceId);
+    if (this.useMockData) {
       const watches = await this.withWorkflowEnablement(listStoredWatches(), spaceId);
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
     }
@@ -190,7 +190,8 @@ export class WatchesService {
     watchId: string,
     spaceId: string
   ): Promise<GetWatchResponse | undefined> {
-    await this.ensureAgent(spaceId);    if (this.useMockData) {
+    await this.ensureAgent(spaceId);
+    if (this.useMockData) {
       const stored = getStoredWatch(watchId);
       if (!stored) {
         return undefined;
@@ -426,7 +427,8 @@ export class WatchesService {
       await management.updateWorkflow(watchId, { enabled }, spaceId, request);
       this.skillsProjectionService?.invalidate(spaceId);
     }
-    const response = await this.get(request, watchId, spaceId);    return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
+    const response = await this.get(request, watchId, spaceId);
+    return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
   private async updateManagedWatch(
@@ -489,7 +491,8 @@ export class WatchesService {
     if (patch.enabled != null) {
       if (!status.installed) {
         if (!patch.enabled) {
-          const response = await this.get(request, registration.id, spaceId);          return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
+          const response = await this.get(request, registration.id, spaceId);
+          return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
         }
 
         if (registration.settings) {
@@ -520,7 +523,8 @@ export class WatchesService {
     }
 
     this.skillsProjectionService?.invalidate(spaceId);
-    const response = await this.get(request, registration.id, spaceId);    return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
+    const response = await this.get(request, registration.id, spaceId);
+    return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
   /* ---------------------------------------------------------------------- */
@@ -544,7 +548,4 @@ export class WatchesService {
 
     return [];
   }
-
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
-    return setStoredSkillEnabled(skillId, enabled);  }
 }

@@ -19,7 +19,8 @@ import { i18n } from '@kbn/i18n';
 import {
   detectionChangeSignalTriggerCommonDefinition,
   PND_MANAGE_AUTONOMY_PRIVILEGE_ID,
-} from '@kbn/pnd-common';import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+} from '@kbn/pnd-common';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   PND_API_PRIVILEGE_AUTONOMY_WRITE,
   PND_API_PRIVILEGE_PROPOSALS_RESPOND,
@@ -173,11 +174,13 @@ export class PndPlugin
       return {};
     }
 
-    void ensureAgentSafe({
-      agentBuilder: plugins.agentBuilder,
-      spaceId: DEFAULT_SPACE_ID,
-      logger: this.logger,
-    });
+    if (plugins.agentBuilder) {
+      void ensureAgentSafe({
+        agentBuilder: plugins.agentBuilder,
+        spaceId: DEFAULT_SPACE_ID,
+        logger: this.logger,
+      });
+    }
 
     this.workflowsManagementClient =
       this.workflowsManagementApi == null

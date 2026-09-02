@@ -65,7 +65,7 @@ export const registerGetAutonomyRoute = ({
 
         try {
           const spaceId = getSpaceId(request);
-          const current = await getWatchesService().get(watchId, spaceId, request);
+          const current = await getWatchesService().get(request, watchId, spaceId);
           const autonomyLevel = asWatchAutonomyLevel(current?.settings?.autonomy);
 
           return response.ok({ body: buildAutonomyResponse(watchId, autonomyLevel) });

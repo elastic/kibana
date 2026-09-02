@@ -127,7 +127,18 @@ const autonomy: GetAutonomyResponse = {
   watchId: SYSTEM_SECURITY_WATCH_DEEP_ID,
 };
 
-const deepWatch = WATCHES_SEED.find(({ id }) => id === SYSTEM_SECURITY_WATCH_DEEP_ID) as Watch;
+const deepWatch = {
+  ...(WATCHES_SEED.find(({ id }) => id === SYSTEM_SECURITY_WATCH_DEEP_ID) as Watch),
+  skills: [
+    {
+      id: 'mitre-attack-mapping',
+      kind: 'skill' as const,
+      lastRun: null,
+      name: 'MITRE ATT&CK mapping',
+      summary: '',
+    },
+  ],
+};
 
 /**
  * PND's phase-4 watch, the one watch whose Triggers section is signal-driven.

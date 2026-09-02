@@ -175,7 +175,8 @@ it.each([
   [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '6:add36220'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '13:971b27fd'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '8:c9f95029'],
-  [PND_WATCH_POST_INCIDENT_WORKFLOW_ID, WATCH_POST_INCIDENT_YAML, '14:58a5b54e'],] as const)(
+  [PND_WATCH_POST_INCIDENT_WORKFLOW_ID, WATCH_POST_INCIDENT_YAML, '14:58a5b54e'],
+] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);

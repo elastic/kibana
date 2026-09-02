@@ -75,14 +75,12 @@ const floorWatchBase: Watch = {
     { name: 'SLOs', access: 'full', label: 'Read' },
     { name: 'Finance PII', access: 'masked', label: 'Masked' },
   ],
-  callables: [
+  skills: [
     {
       id: 'alert-analysis',
       name: 'Alert analysis',
       kind: 'skill',
       summary: 'On alert · classifies FP / TP / inconclusive',
-      gated: false,
-      enabled: true,
       lastRun: '2026-07-20T14:02:00Z',
     },
   ],
@@ -142,7 +140,7 @@ const officerWatchBase: Watch = {
     { name: 'On-call schedule', access: 'full', label: 'Read' },
     { name: 'Deploy history', access: 'full', label: 'Read' },
   ],
-  callables: [],
+  skills: [],
   metrics: {
     lastRun: '2026-07-20T11:30:00Z',
   },
@@ -196,7 +194,7 @@ const darkWatchBase: Watch = {
     { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
-  callables: [],
+  skills: [],
   metrics: {
     lastRun: '2026-07-20T03:00:00Z',
   },
@@ -241,7 +239,7 @@ const deepWatchBase: Watch = {
     { name: 'EDR telemetry', access: 'full', label: 'Read' },
     { name: 'DNS · netflow', access: 'full', label: 'Read' },
   ],
-  callables: [],
+  skills: [],
   metrics: {
     lastRun: '2026-07-19T16:45:00Z',
   },
@@ -289,7 +287,7 @@ const detectionWatchBase: Watch = {
     { name: 'Security indices', access: 'full', label: 'Read' },
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
-  callables: [],
+  skills: [],
   metrics: {
     lastRun: '2026-07-20T13:44:00Z',
   },

@@ -551,6 +551,7 @@ describe('project watch', () => {
       condition?: string;
       steps?: NestedStep[];
       else?: NestedStep[];
+      with?: Record<string, unknown>;
     }
 
     const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
@@ -724,9 +725,7 @@ describe('project watch', () => {
     });
 
     describe('rule tuning alert marking', () => {
-      const tuning = parse(
-        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
-      ) as WorkflowYaml;
+      const tuning = parse(getManagedYaml(PND_RULE_TUNING_WORKFLOW_ID)) as WorkflowYaml;
       const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
       const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
       const harvestQuery = String(harvest.with?.query);

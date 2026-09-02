@@ -187,7 +187,8 @@ describe('WatchesService', () => {
 
   describe('list', () => {
     it('projects uninstalled live catalog entries without fixture runtime data', async () => {
-      const response = await createPersistentHarness().createService().list(request, SPACE);      const floor = response.watches.find(({ id }) => id === FLOOR);
+      const response = await createPersistentHarness().createService().list(request, SPACE);
+      const floor = response.watches.find(({ id }) => id === FLOOR);
 
       expect(floor).toEqual(
         expect.objectContaining({
@@ -220,7 +221,8 @@ describe('WatchesService', () => {
       const response = await service.list(request, SPACE);
       const floor = response.watches.find(({ id }) => id === FLOOR);
 
-      expect(response.watches).toHaveLength(5);      expect(floor).toEqual(
+      expect(response.watches).toHaveLength(5);
+      expect(floor).toEqual(
         expect.objectContaining({
           id: FLOOR,
           enabled: true,
@@ -235,7 +237,8 @@ describe('WatchesService', () => {
 
       const response = await service.list(request, SPACE);
 
-      expect(response.watches.find(({ id }) => id === FLOOR)?.enabled).toBe(true);    });
+      expect(response.watches.find(({ id }) => id === FLOOR)?.enabled).toBe(true);
+    });
   });
 
   describe('managed settings persistence', () => {
@@ -272,7 +275,8 @@ describe('WatchesService', () => {
         (await harness.createService().get(request, FLOOR, 'space-a'))?.settings?.autonomy
       ).toBe('supervised');
       expect(
-        (await harness.createService().get(request, FLOOR, 'space-b'))?.settings?.autonomy      ).toBe('assisted');
+        (await harness.createService().get(request, FLOOR, 'space-b'))?.settings?.autonomy
+      ).toBe('assisted');
     });
 
     it('omits settings when durable workflow state cannot be read', async () => {
@@ -430,7 +434,6 @@ describe('WatchesService', () => {
 
       expect(service.listWorkers().length).toBeGreaterThan(0);
       expect((await service.listSkills(request, SPACE)).length).toBeGreaterThan(0);
-
-      expect(service.setSkillEnabled('nope', false)).toBeUndefined();    });
+    });
   });
 });

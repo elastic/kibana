@@ -13,11 +13,11 @@ import {
   listSkills,
   listWatches,
   resetWatchStore,
-  setSkillEnabled,
   setWatchEnabled,
   setWatchScopeRouting,
   setWatchSkillsEnabled,
-  setWatchTriggers,} from './watch_store';
+  setWatchTriggers,
+} from './watch_store';
 
 const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
 
@@ -40,7 +40,6 @@ describe('watch store', () => {
 
     it('does not mutate the shared seed constants', () => {
       setWatchEnabled(FLOOR, false);
-      setSkillEnabled('alert-triage', false);
 
       expect(WATCHES_SEED.find(({ id }) => id === FLOOR)?.enabled).toBe(true);
       resetWatchStore();
@@ -147,23 +146,17 @@ describe('watch store', () => {
     });
   });
 
-  describe('global flags versus per-watch attachments (skills)', () => {
-    it('keeps the per-watch attachment independent of the global flag', () => {
-      expect(setSkillEnabled('alert-triage', false)).toBeDefined();
-
-      // The global flag flipped, but Watch Floor's attachment is untouched — the UI ANDs the two.
-      expect(listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(false);
-      expect(
-        getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
-      ).toBe(true);
+  describe('per-watch skill attachments', () => {
+    it('exports no global skill-enable writer', () => {
+      expect(Object.keys(watchStore).filter((name) => name === 'setSkillEnabled')).toEqual([]);
     });
 
-    it('leaves the global flag alone when a per-watch attachment is toggled', () => {
+    it('toggles a per-watch attachment without changing the catalog row', () => {
       expect(
         setWatchSkillsEnabled(FLOOR, [{ enabled: false, skillId: 'alert-triage' }])
       ).toBeDefined();
 
-      expect(listSkills().find(({ id }) => id === 'alert-triage')?.enabled).toBe(true);
+      expect(listSkills().find(({ id }) => id === 'alert-triage')).toBeDefined();
       expect(
         getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(false);
@@ -197,10 +190,6 @@ describe('watch store', () => {
       expect(
         getWatchSettings(FLOOR)?.skills?.find(({ skillId }) => skillId === 'alert-triage')?.enabled
       ).toBe(true);
-    });
-
-    it('returns undefined for unknown global ids', () => {
-      expect(setSkillEnabled('nope', false)).toBeUndefined();
     });
   });
 
