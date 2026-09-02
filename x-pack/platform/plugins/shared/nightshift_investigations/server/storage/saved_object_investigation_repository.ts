@@ -140,7 +140,6 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
       perPage: query.perPage,
-      ...(query.fields?.length ? { fields: query.fields } : {}),
     });
 
     return {

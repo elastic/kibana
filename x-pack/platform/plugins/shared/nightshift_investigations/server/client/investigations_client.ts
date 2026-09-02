@@ -496,7 +496,9 @@ export class NightshiftInvestigationsClient {
    * Ensures the investigation record exists and is running. Called by the workflow's
    * persist_investigation_started step. If a pending record exists (created by start()), transitions
    * it to running. If no record exists (workflow triggered without start()), creates one as running
-   * from the execution document. Already-running or terminal records are left untouched.
+   * from the execution document. Already-running records are left untouched. A settled record
+   * (completed, failed, or cancelled) throws so the persist step fails the run rather than
+   * continuing through the agent.
    *
    * Both write paths read the execution document, so `started_at` and `executed_by` mean the same
    * thing however the record came to exist: `start()` cannot know the id the engine assigns to the
@@ -505,6 +507,9 @@ export class NightshiftInvestigationsClient {
    */
   async ensureOrCreate(investigationId: string): Promise<void> {
     const existing = await this.investigationRepository.get(investigationId);
+    if (existing && isTerminalStatus(existing.status)) {
+      throw InvestigationConflictError.settled(investigationId, existing.status);
+    }
     if (existing && existing.status !== 'pending') {
       return;
     }

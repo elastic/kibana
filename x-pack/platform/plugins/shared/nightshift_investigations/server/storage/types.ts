@@ -53,7 +53,6 @@ export interface FindInvestigationsQuery {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
-  fields?: Array<keyof InvestigationAttributes>;
 }
 
 export type FindInvestigationsResult = PaginatedResponse<InvestigationRecord>;
