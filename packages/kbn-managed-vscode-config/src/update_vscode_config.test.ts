@@ -35,8 +35,8 @@ const TEST_KEYS: ManagedConfigKey[] = [
 
 const run = (json?: string) => updateVscodeConfig(TEST_KEYS, '', json);
 
-it('updates the passed JSON with the managed settings', () => {
-  expect(run(`{}`)).toMatchInlineSnapshot(`
+it('updates the passed JSON with the managed settings', async () => {
+  expect(await run(`{}`)).toMatchInlineSnapshot(`
     // @managed
     {
       "key": {
@@ -54,8 +54,8 @@ it('updates the passed JSON with the managed settings', () => {
   `);
 });
 
-it('initialized empty or undefined json values', () => {
-  expect(run('')).toMatchInlineSnapshot(`
+it('initialized empty or undefined json values', async () => {
+  expect(await run('')).toMatchInlineSnapshot(`
     // @managed
     {
       "key": {
@@ -72,26 +72,7 @@ it('initialized empty or undefined json values', () => {
 
   `);
 
-  expect(run()).toMatchInlineSnapshot(`
-    // @managed
-    {
-      "key": {
-        // @managed
-        "hello": true,
-        // @managed
-        "world": [1, 2, 3]
-      },
-      // @managed
-      "stringKey": "foo",
-      // @managed
-      "arrayKey": ["foo", "bar"]
-    }
-
-  `);
-});
-
-it('replaces conflicting managed keys which do not have matching value types', () => {
-  expect(run(`{ "key": false, "stringKey": { "a": "B" } }`)).toMatchInlineSnapshot(`
+  expect(await run()).toMatchInlineSnapshot(`
     // @managed
     {
       "key": {
@@ -109,20 +90,39 @@ it('replaces conflicting managed keys which do not have matching value types', (
   `);
 });
 
-it(`throws if the JSON file doesn't contain an object`, () => {
-  expect(() => run('[]')).toThrowErrorMatchingInlineSnapshot(
+it('replaces conflicting managed keys which do not have matching value types', async () => {
+  expect(await run(`{ "key": false, "stringKey": { "a": "B" } }`)).toMatchInlineSnapshot(`
+    // @managed
+    {
+      "key": {
+        // @managed
+        "hello": true,
+        // @managed
+        "world": [1, 2, 3]
+      },
+      // @managed
+      "stringKey": "foo",
+      // @managed
+      "arrayKey": ["foo", "bar"]
+    }
+
+  `);
+});
+
+it(`throws if the JSON file doesn't contain an object`, async () => {
+  await expect(run('[]')).rejects.toThrowErrorMatchingInlineSnapshot(
     `expected VSCode config to contain a JSON object`
   );
-  expect(() => run('1')).toThrowErrorMatchingInlineSnapshot(
+  await expect(run('1')).rejects.toThrowErrorMatchingInlineSnapshot(
     `expected VSCode config to contain a JSON object`
   );
-  expect(() => run('"foo"')).toThrowErrorMatchingInlineSnapshot(
+  await expect(run('"foo"')).rejects.toThrowErrorMatchingInlineSnapshot(
     `expected VSCode config to contain a JSON object`
   );
 });
 
-it('persists comments in the original file', () => {
-  const newJson = run(`
+it('persists comments in the original file', async () => {
+  const newJson = await run(`
     /**
      * This is a top level comment
      */
@@ -156,8 +156,8 @@ it('persists comments in the original file', () => {
   `);
 });
 
-it('overrides old values for managed keys', () => {
-  const newJson = run(`
+it('overrides old values for managed keys', async () => {
+  const newJson = await run(`
     {
       "foo": 0,
       "bar": "some other config",
@@ -186,8 +186,8 @@ it('overrides old values for managed keys', () => {
   `);
 });
 
-it('does not modify files starting with // SELF MANAGED', () => {
-  const newJson = run(dedent`
+it('does not modify files starting with // SELF MANAGED', async () => {
+  const newJson = await run(dedent`
     // self managed
     {
       "invalid": "I know what I am doing",
@@ -202,8 +202,8 @@ it('does not modify files starting with // SELF MANAGED', () => {
   `);
 });
 
-it('does not modify properties with leading `// self managed` comment', () => {
-  const newJson = run(dedent`
+it('does not modify properties with leading `// self managed` comment', async () => {
+  const newJson = await run(dedent`
     {
       // self managed
       "key": {
@@ -230,8 +230,8 @@ it('does not modify properties with leading `// self managed` comment', () => {
   `);
 });
 
-it('does not modify child properties with leading `// self managed` comment', () => {
-  const newJson = run(dedent`
+it('does not modify child properties with leading `// self managed` comment', async () => {
+  const newJson = await run(dedent`
     {
       "key": {
         // self managed
@@ -258,8 +258,8 @@ it('does not modify child properties with leading `// self managed` comment', ()
   `);
 });
 
-it('does not modify unknown child properties', () => {
-  const newJson = run(dedent`
+it('does not modify unknown child properties', async () => {
+  const newJson = await run(dedent`
     {
       "key": {
         "foo": "bar",
@@ -288,8 +288,8 @@ it('does not modify unknown child properties', () => {
   `);
 });
 
-it('removes managed properties which are no longer managed', () => {
-  const newJson = run(dedent`
+it('removes managed properties which are no longer managed', async () => {
+  const newJson = await run(dedent`
     {
       "key": {
         // @managed
@@ -318,8 +318,8 @@ it('removes managed properties which are no longer managed', () => {
   `);
 });
 
-it('wipes out child keys which conflict with newly managed child keys', () => {
-  const newJson = run(dedent`
+it('wipes out child keys which conflict with newly managed child keys', async () => {
+  const newJson = await run(dedent`
     {
       "key": {
         // some user specified comment
@@ -346,8 +346,8 @@ it('wipes out child keys which conflict with newly managed child keys', () => {
   `);
 });
 
-it('correctly formats info text when specified', () => {
-  const newJson = updateVscodeConfig(TEST_KEYS, 'info users\nshould know', `{}`);
+it('correctly formats info text when specified', async () => {
+  const newJson = await updateVscodeConfig(TEST_KEYS, 'info users\nshould know', `{}`);
 
   expect(newJson).toMatchInlineSnapshot(`
     /**
@@ -372,8 +372,8 @@ it('correctly formats info text when specified', () => {
   `);
 });
 
-it('allows "// self managed" comments conflicting with "// @managed" comments to win', () => {
-  const newJson = run(dedent`
+it('allows "// self managed" comments conflicting with "// @managed" comments to win', async () => {
+  const newJson = await run(dedent`
     {
       "key": {
         // @managed

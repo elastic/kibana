@@ -133,15 +133,15 @@ export const generate = async (config: GeneratorConfig) => {
     );
   }
 
-  // Format the output folder using prettier as the generator produces
-  // unformatted code and fix any eslint errors
+  // Fix any eslint errors, then format with oxfmt as the generator produces
+  // unformatted code and eslint fixes are not formatting-aware
   console.log(`💅  Formatting output`);
   if (bundle) {
-    await formatOutput(bundle.outFile);
     await fixEslint(bundle.outFile);
+    await formatOutput(bundle.outFile);
   } else {
     const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
-    await formatOutput(generatedArtifactsGlob);
     await fixEslint(generatedArtifactsGlob);
+    await formatOutput(generatedArtifactsGlob);
   }
 };

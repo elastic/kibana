@@ -8,10 +8,10 @@ _Note: Run the commands from the root of Kibana._
 node scripts/type_check.js --project x-pack/solutions/observability/plugins/apm/tsconfig.json
 ```
 
-### Prettier
+### Formatting
 
 ```
-yarn prettier  "./x-pack/solutions/observability/plugins/apm/**/*.{tsx,ts,js}" --write
+node scripts/oxfmt x-pack/solutions/observability/plugins/apm
 ```
 
 ### ESLint

@@ -84,17 +84,17 @@ describe('convert processors to json', () => {
       field1: 'mustNotChange',
       field2: 123,
       field3: '{1: "mustNotChange"}',
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       pattern_definitions: { 1: "aaa\"bbb" },
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       processor: { 1: "aaa\"bbb" },
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       inference_config: { 1: "aaa\"bbb" },
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       field_map: { 1: "aaa\"bbb" },
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       input_output: [{ 1: "aaa\"bbb" }],
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       customProcessor: "aaa\"bbb"
     });
   });

@@ -163,7 +163,7 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
     path.join(rootDir, filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
-      prettierPath: require.resolve('prettier'),
+      prettierPath: require.resolve('../../../jest/oxfmt_prettier'),
       snapshotFormat: { escapeString: true, printBasicPrototype: true },
       rootDir,
     }

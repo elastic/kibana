@@ -31,15 +31,16 @@ All filenames should use `snake_case`.
 We use a version management system. If a line of code is no longer needed,
 remove it, don't simply comment it out.
 
-### Prettier and Linting
+### Formatting and Linting
 
-We are gradually moving the Kibana code base over to Prettier. All TypeScript code
-and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node scripts/eslint --fix` to fix linting issues and apply Prettier formatting.
-We recommend you to enable running ESLint via your IDE.
+All JavaScript and TypeScript code is formatted with [oxfmt](https://oxc.rs/docs/guide/usage/formatter),
+configured in `.oxfmtrc.json`. Run `node scripts/oxfmt [paths...]` to format files
+(`--check` only reports) and `node scripts/eslint --fix` to fix linting issues. We recommend
+enabling the oxfmt editor extension (format on save) and running ESLint via your IDE; ESLint no
+longer formats code.
 
-Whenever possible we are trying to use Prettier and linting, instead of maintaining a set of written style guide rules.
-Consider every linting rule and every Prettier rule to be also part of our style guide
+Whenever possible we are trying to use the formatter and linting, instead of maintaining a set of written style guide rules.
+Consider every linting rule and every formatting rule to be also part of our style guide
 and disable them only in exceptional cases and ideally leave a comment why they are
 disabled at that specific place.
 

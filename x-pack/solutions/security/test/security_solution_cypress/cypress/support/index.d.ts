@@ -36,7 +36,7 @@ declare namespace Mocha {
     (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
     (
       title: string,
-      ftrConfig?: Record<string, string | number>,
+      ftrConfig: Record<string, string | number> | undefined,
       config: Cypress.TestConfigOverrides,
       fn: (this: Suite) => void
     ): Suite;
@@ -46,7 +46,7 @@ declare namespace Mocha {
     (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
     (
       title: string,
-      ftrConfig?: Record<string, string | number>,
+      ftrConfig: Record<string, string | number> | undefined,
       config: Cypress.TestConfigOverrides,
       fn: (this: Suite) => void
     ): Suite;
@@ -56,7 +56,7 @@ declare namespace Mocha {
     (title: string, ftrConfig: Record<string, string | number>, fn: (this: Suite) => void): Suite;
     (
       title: string,
-      ftrConfig?: Record<string, string | number>,
+      ftrConfig: Record<string, string | number> | undefined,
       config: Cypress.TestConfigOverrides,
       fn: (this: Suite) => void
     ): Suite | void;

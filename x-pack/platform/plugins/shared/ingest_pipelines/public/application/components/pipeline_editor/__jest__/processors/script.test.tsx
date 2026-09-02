@@ -58,7 +58,7 @@ describe('Processor: Script', () => {
 
     expect(processors[0][SCRIPT_TYPE]).toEqual({
       source: 'ctx._source[params.sum_field]',
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       params: { sum_field: 'aaa\"bbb' },
     });
   });
