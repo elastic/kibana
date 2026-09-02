@@ -85,7 +85,11 @@ const setEsqlQueryAndRun = async (page: ScoutPage, query: string): Promise<void>
   // Monaco setValue is sync; wait until the model reflects STATS before Run.
   await expect.poll(async () => codeEditor.getCodeEditorValue()).toContain('STATS');
   await runButton.click();
-  await page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+  const chart = page.testSubj.locator('xyVisChart');
+  await expect(chart).toBeVisible();
+  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+    state: 'attached',
+  });
 };
 
 spaceTest.describe(
@@ -203,7 +207,7 @@ spaceTest.describe(
         await spaceTest.step('reopen the inline editor and change the query', async () => {
           const esqlPanel = page.testSubj
             .locator('dashboardPanel')
-            .filter({ has: page.locator('.echCanvasRenderer') });
+            .filter({ has: page.testSubj.locator('xyVisChart') });
           const panelElementId = await esqlPanel.getAttribute('id');
           const embeddableId = panelElementId!.replace('panel-', '');
 
