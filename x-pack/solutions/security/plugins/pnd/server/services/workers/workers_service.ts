@@ -222,7 +222,8 @@ export class WorkersService {
       );
     }
 
-    const worker = await this.projectWorker(registration, spaceId);
+    const agentLookup = await this.buildAgentLookup(request);
+    const worker = await this.projectWorker(registration, spaceId, agentLookup);
     return { outcome: 'updated', response: { worker } };
   }
 
