@@ -6,6 +6,8 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -35,7 +37,7 @@ describe('alertsTool', () => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
     // Existing handler tests assume the space alerts alias is present.
-    (mockEsClient.asInternalUser.indices.exists as jest.Mock).mockResolvedValue(true);
+    mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
   });
 
   describe('schema', () => {
@@ -116,7 +118,7 @@ describe('alertsTool', () => {
 
   describe('handler', () => {
     it('returns 0 alerts without searching when the space alerts alias does not exist', async () => {
-      (mockEsClient.asInternalUser.indices.exists as jest.Mock).mockResolvedValue(false);
+      mockEsClient.asInternalUser.indices.exists.mockResolvedValue(false);
 
       const result = await tool.handler(
         { query: 'how many alerts', isCount: true },
@@ -131,8 +133,9 @@ describe('alertsTool', () => {
         index: `${DEFAULT_ALERTS_INDEX}-testing`,
       });
       expect(runSearchTool).not.toHaveBeenCalled();
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0]).toMatchObject({
+      expect(isToolHandlerStandardReturn(result)).toBe(true);
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      expect((result as ToolHandlerStandardReturn).results[0]).toMatchObject({
         type: ToolResultType.other,
         data: {
           count: 0,
