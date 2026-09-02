@@ -505,11 +505,14 @@ describe('overviewStatusReducer', () => {
   });
 
   describe('fetchOverviewStatusAction.success (accumulated card-view window)', () => {
-    it('does not shrink allConfigs when a shorter refresh has the same total', () => {
+    const pageState = { page: 1, perPage: 2 } as any;
+
+    it('does not shrink allConfigs when a shorter silent refresh has the same total', () => {
       const page1 = overviewStatusReducer(
         undefined,
         fetchOverviewStatusAction.success(
           makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            page: 1,
             total: 4,
           })
         )
@@ -518,6 +521,7 @@ describe('overviewStatusReducer', () => {
         page1,
         appendOverviewStatusAction.success(
           makePaginated([makeMeta({ configId: 'mon3' }), makeMeta({ configId: 'mon4' })], {
+            page: 2,
             total: 4,
           })
         )
@@ -525,43 +529,50 @@ describe('overviewStatusReducer', () => {
       expect(accumulated.allConfigs).toHaveLength(4);
 
       // Timer refresh of page 1 (2 items) while 4 are already loaded.
-      const refreshed = overviewStatusReducer(
+      let state = overviewStatusReducer(
         accumulated,
+        quietFetchOverviewStatusAction.get({ pageState, silent: true })
+      );
+      state = overviewStatusReducer(
+        state,
         fetchOverviewStatusAction.success(
           makePaginated(
             [makeMeta({ configId: 'mon1', name: 'updated' }), makeMeta({ configId: 'mon2' })],
-            { total: 4 }
+            { page: 1, total: 4 }
           )
         )
       );
 
-      expect(refreshed.allConfigs?.map((config) => config.configId)).toEqual([
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual([
         'mon1',
         'mon2',
         'mon3',
         'mon4',
       ]);
-      expect(refreshed.allConfigs?.find((config) => config.configId === 'mon1')?.name).toBe(
-        'updated'
-      );
+      expect(state.allConfigs?.find((config) => config.configId === 'mon1')?.name).toBe('updated');
     });
 
-    it('keeps appended pages when a page-1 refresh completes after the append', () => {
-      const pageState = { page: 1, perPage: 2 } as any;
+    it('keeps appended pages when a silent page-1 refresh completes after the append', () => {
       let state = overviewStatusReducer(undefined, fetchOverviewStatusAction.get({ pageState }));
       state = overviewStatusReducer(
         state,
         fetchOverviewStatusAction.success(
           makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            page: 1,
             total: 4,
           })
         )
+      );
+      state = overviewStatusReducer(
+        state,
+        quietFetchOverviewStatusAction.get({ pageState, silent: true })
       );
       state = overviewStatusReducer(state, appendOverviewStatusAction.get({ pageState }));
       state = overviewStatusReducer(
         state,
         appendOverviewStatusAction.success(
           makePaginated([makeMeta({ configId: 'mon3' }), makeMeta({ configId: 'mon4' })], {
+            page: 2,
             total: 4,
           })
         )
@@ -570,6 +581,7 @@ describe('overviewStatusReducer', () => {
         state,
         fetchOverviewStatusAction.success(
           makePaginated([makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })], {
+            page: 1,
             total: 4,
           })
         )
@@ -581,6 +593,61 @@ describe('overviewStatusReducer', () => {
         'mon3',
         'mon4',
       ]);
+    });
+
+    it('replaces when navigating to a shorter compact-table page', () => {
+      const page4Configs = Array.from({ length: 20 }, (_, i) => makeMeta({ configId: `p4-${i}` }));
+      const page5Configs = Array.from({ length: 5 }, (_, i) => makeMeta({ configId: `p5-${i}` }));
+
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated(page4Configs, { page: 4, perPage: 20, total: 85 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        quietFetchOverviewStatusAction.get({
+          pageState: { page: 5, perPage: 20 } as any,
+        })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated(page5Configs, { page: 5, perPage: 20, total: 85 })
+        )
+      );
+
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(
+        page5Configs.map((config) => config.configId)
+      );
+      expect(state.allConfigs).toHaveLength(5);
+    });
+
+    it('replaces when reducing compact-table perPage', () => {
+      const largePage = Array.from({ length: 50 }, (_, i) => makeMeta({ configId: `p1-${i}` }));
+      const smallPage = Array.from({ length: 20 }, (_, i) => makeMeta({ configId: `p1-${i}` }));
+
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated(largePage, { page: 1, perPage: 50, total: 85 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        quietFetchOverviewStatusAction.get({
+          pageState: { page: 1, perPage: 20 } as any,
+        })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated(smallPage, { page: 1, perPage: 20, total: 85 })
+        )
+      );
+
+      expect(state.allConfigs).toHaveLength(20);
     });
   });
 

@@ -54,6 +54,10 @@ export interface OverviewStatusStateReducer {
   // Filter context of an in-flight append. Compared on success so a page
   // requested under the previous filters is not merged into a newer result.
   pendingAppendRequest?: { scopeStatusByLocation?: boolean; statusFilter?: string };
+  // Set while a silent (timer) replace is in flight. A late page-1 response
+  // must merge into the card view's accumulated window instead of shrinking it;
+  // table paging is non-silent and must always replace.
+  silentReplaceInFlight?: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -227,6 +231,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.get, (state, action) => {
       state.status = null;
       state.loading = true;
+      state.silentReplaceInFlight = false;
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -238,6 +243,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       if (!action.payload.silent) {
         state.loading = true;
       }
+      state.silentReplaceInFlight = Boolean(action.payload.silent);
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -246,17 +252,22 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       const incoming = action.payload;
       const existing = state.status;
-      // A silent refresh of page 1 can complete after the card view has already
-      // appended later pages. Same `total` + a shorter `configs` means "this
-      // response is a prefix of the accumulated window" — merge so extra pages
-      // are not wiped. Filter changes go through `.get` which nulls `status`.
-      const preserveExtraPages =
+      const silentReplaceInFlight = state.silentReplaceInFlight;
+      state.silentReplaceInFlight = false;
+      // A silent page-1 refresh can complete after the card view has already
+      // appended later pages. Merge that prefix into the accumulated window.
+      // Compact table paging is non-silent and must replace: a shorter last
+      // page or a reduced `perPage` would otherwise keep stale rows.
+      const isPageOne = incoming.page == null || incoming.page === 1;
+      const preserveAccumulatedWindow =
+        silentReplaceInFlight &&
+        isPageOne &&
         Boolean(existing?.configs) &&
         Boolean(incoming.configs) &&
         existing!.configs!.length > incoming.configs!.length &&
         incoming.total === existing!.total;
 
-      if (preserveExtraPages) {
+      if (preserveAccumulatedWindow) {
         applyMergedPaginated(state, incoming);
         return;
       }
