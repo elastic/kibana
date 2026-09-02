@@ -103,7 +103,8 @@ export interface UpdateDataStreamMappingsAction {
   type: 'update_data_stream_mappings';
   request: {
     name: string;
-    mappings: StreamsMappingProperties;
+    // undefined resets the data stream level mappings override
+    mappings?: StreamsMappingProperties;
   };
 }
 

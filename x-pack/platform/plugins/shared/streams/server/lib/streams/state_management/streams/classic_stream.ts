@@ -582,18 +582,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
 
     if (this._changes.field_overrides) {
-      const mappings = getClassicFieldOverrideMappings(
-        this._definition.ingest.classic.field_overrides
-      );
-      if (mappings) {
-        actions.push({
-          type: 'update_data_stream_mappings',
-          request: {
-            name: this._definition.name,
-            mappings,
-          },
-        });
-      }
+      // When the override set changed and is now empty, `mappings` is undefined and
+      // the action resets the data stream level override instead of leaving it stale.
+      actions.push({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: this._definition.name,
+          mappings: getClassicFieldOverrideMappings(
+            this._definition.ingest.classic.field_overrides
+          ),
+        },
+      });
     }
 
     actions.push({
