@@ -35,6 +35,7 @@ interface UserOption extends EuiComboBoxOptionOption<string> {
 }
 
 const SEARCH_DEBOUNCE_MS = 200;
+const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
 /**
  * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
@@ -47,8 +48,6 @@ const hiddenOptionIndicatorCss = css`
     display: none;
   }
 `;
-
-const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
 
 const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   label: getUserDisplayName(profile.user),
