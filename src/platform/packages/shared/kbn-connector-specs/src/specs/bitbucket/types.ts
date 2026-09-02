@@ -168,6 +168,7 @@ export const ListPullRequestsInputSchema = lazySchema(() =>
     repoSlug: repoSlug(),
     state: z
       .array(z.enum(['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED']))
+      .min(1)
       .max(4)
       .optional()
       .describe(

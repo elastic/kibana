@@ -336,6 +336,12 @@ describe('Bitbucket', () => {
       );
     });
 
+    it('rejects an empty state array', () => {
+      expect(() =>
+        parse('listPullRequests', { repoSlug: 'my-repo', state: [], query: 'title ~ "fix"' })
+      ).toThrow();
+    });
+
     it('keeps the OPEN default when only a query is given', async () => {
       mockClient.get.mockResolvedValue({ data: { values: [] } });
       await Bitbucket.actions.listPullRequests.handler(
