@@ -7,15 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { EqlShardFailure } from '../../../../containers';
 import { PartialResultsCallout } from './partial_results_callout';
 import { PARTIAL_RESULTS_WARNING_TITLE } from './translations';
 
 const defaultProps = {
-  shardFailures: [] as Array<{
-    index?: string;
-    shard?: number;
-    reason?: { type?: string; reason?: string };
-  }>,
+  shardFailures: [] as EqlShardFailure[],
   timedOut: false,
 };
 

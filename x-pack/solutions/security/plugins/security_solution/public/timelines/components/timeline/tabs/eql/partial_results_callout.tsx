@@ -37,75 +37,65 @@ const PartialResultsCalloutComponent: React.FC<PartialResultsCalloutProps> = ({
   const hasDetails = shardFailures.length > 0 || timedOut;
 
   return (
-    <>
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
-        title={i18n.PARTIAL_RESULTS_WARNING_TITLE}
-        data-test-subj="eql-partial-results-warning"
-      >
-        <p>{i18n.PARTIAL_RESULTS_WARNING_BODY}</p>
-        {hasDetails ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiAccordion
-              id="eql-partial-results-warning-details"
-              buttonContent={i18n.PARTIAL_RESULTS_WARNING_DETAILS}
-              data-test-subj="eql-partial-results-warning-details"
-            >
+    <EuiCallOut
+      color="warning"
+      iconType="warning"
+      title={i18n.PARTIAL_RESULTS_WARNING_TITLE}
+      data-test-subj="eql-partial-results-warning"
+    >
+      <p>{i18n.PARTIAL_RESULTS_WARNING_BODY}</p>
+      {hasDetails ? (
+        <EuiAccordion
+          id="eql-partial-results-warning-details"
+          buttonContent={i18n.PARTIAL_RESULTS_WARNING_DETAILS}
+          data-test-subj="eql-partial-results-warning-details"
+        >
+          {timedOut ? (
+            <>
+              <EuiText size="s">{i18n.PARTIAL_RESULTS_WARNING_TIMED_OUT}</EuiText>
               <EuiSpacer size="s" />
-              {timedOut ? (
-                <>
-                  <EuiText size="s">{i18n.PARTIAL_RESULTS_WARNING_TIMED_OUT}</EuiText>
-                  <EuiSpacer size="s" />
-                </>
-              ) : null}
-              {shardFailures.map((failure, index) => {
-                const reason = formatFailureReason(failure);
-                return (
-                  <React.Fragment key={`${failure.index ?? 'unknown'}-${failure.shard ?? index}`}>
+            </>
+          ) : null}
+          {shardFailures.map((failure, index) => {
+            const reason = formatFailureReason(failure);
+            return (
+              <React.Fragment
+                key={`${failure.index ?? 'unknown'}-${failure.shard ?? 'unknown'}-${index}`}
+              >
+                <EuiText size="s">
+                  <strong>
+                    {i18n.PARTIAL_RESULTS_WARNING_INDEX}
+                    {': '}
+                  </strong>
+                  {failure.index ?? '\u2014'}
+                  {' \u00b7 '}
+                  <strong>
+                    {i18n.PARTIAL_RESULTS_WARNING_SHARD}
+                    {': '}
+                  </strong>
+                  {failure.shard ?? '\u2014'}
+                </EuiText>
+                {reason !== '' ? (
+                  <>
+                    <EuiSpacer size="xs" />
                     <EuiText size="s">
                       <strong>
-                        {i18n.PARTIAL_RESULTS_WARNING_INDEX}
-                        {': '}
+                        {i18n.PARTIAL_RESULTS_WARNING_REASON}
+                        {':'}
                       </strong>
-                      {failure.index ?? '\u2014'}
-                      {' \u00b7 '}
-                      <strong>
-                        {i18n.PARTIAL_RESULTS_WARNING_SHARD}
-                        {': '}
-                      </strong>
-                      {failure.shard ?? '\u2014'}
                     </EuiText>
-                    {reason !== '' ? (
-                      <>
-                        <EuiSpacer size="xs" />
-                        <EuiText size="s">
-                          <strong>
-                            {i18n.PARTIAL_RESULTS_WARNING_REASON}
-                            {':'}
-                          </strong>
-                        </EuiText>
-                        <EuiCodeBlock
-                          language="text"
-                          fontSize="s"
-                          paddingSize="s"
-                          isCopyable={false}
-                        >
-                          {reason}
-                        </EuiCodeBlock>
-                      </>
-                    ) : null}
-                    <EuiSpacer size="s" />
-                  </React.Fragment>
-                );
-              })}
-            </EuiAccordion>
-          </>
-        ) : null}
-      </EuiCallOut>
-      <EuiSpacer size="s" />
-    </>
+                    <EuiCodeBlock language="text" fontSize="s" paddingSize="s">
+                      {reason}
+                    </EuiCodeBlock>
+                  </>
+                ) : null}
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            );
+          })}
+        </EuiAccordion>
+      ) : null}
+    </EuiCallOut>
   );
 };
 

@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { Subscription } from 'rxjs';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -81,10 +82,7 @@ export interface EqlShardFailure {
   index?: string;
   shard?: number;
   node?: string;
-  reason?: {
-    type?: string;
-    reason?: string;
-  };
+  reason?: estypes.ErrorCause;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
