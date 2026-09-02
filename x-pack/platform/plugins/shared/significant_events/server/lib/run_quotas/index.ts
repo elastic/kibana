@@ -8,14 +8,12 @@
 export { consumeRunQuota } from './consume';
 export {
   createRunQuotaExecutionReader,
-  validateHeartbeatProvenance,
   validateInvestigationProvenance,
   validateWorkerProvenance,
 } from './provenance';
 export type {
   RunQuotaExecutionReader,
   RunQuotaWorkflowExecution,
-  ValidatedHeartbeatProvenance,
   ValidatedWorkerProvenance,
 } from './provenance';
 export { reserveInvestigationRunQuota } from './reserve';

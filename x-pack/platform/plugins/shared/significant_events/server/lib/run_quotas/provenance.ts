@@ -178,39 +178,6 @@ export const validateWorkerProvenance = async ({
   return { execution, parent, grantKey, taskRunAt };
 };
 
-export interface ValidatedHeartbeatProvenance {
-  execution: RunQuotaWorkflowExecution;
-  recordedAt: string;
-}
-
-export const validateHeartbeatProvenance = async ({
-  request,
-  executionId,
-  group,
-  spaceId,
-  executionReader,
-}: {
-  request: KibanaRequest;
-  executionId: string;
-  group: WorkerRunBudgetGroupId;
-  spaceId: string;
-  executionReader: RunQuotaExecutionReader;
-}): Promise<ValidatedHeartbeatProvenance> => {
-  requireEmitterMatch(request, executionId);
-  const execution = await requireExecution(executionReader, executionId);
-  if (
-    execution.workflowId !== getExpectedDriverId(group, spaceId) ||
-    execution.spaceId !== spaceId ||
-    execution.triggeredBy !== 'scheduled' ||
-    !isNonTerminal(execution.status) ||
-    !execution.taskRunAt
-  ) {
-    throw provenanceError();
-  }
-
-  return { execution, recordedAt: execution.taskRunAt };
-};
-
 export const validateInvestigationProvenance = async ({
   request,
   executionId,

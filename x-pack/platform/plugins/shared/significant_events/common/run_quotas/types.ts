@@ -68,20 +68,11 @@ export interface RunQuotasResponse {
   groups: RunBudgetGroupUsage[];
 }
 
-export type RunQuotaDriverHealthStatus = 'healthy' | 'degraded' | 'unknown' | 'not_applicable';
-
-export interface RunQuotaDriverHealth {
-  status: RunQuotaDriverHealthStatus;
-  staleSpaceCount?: number;
-  staleSpaceIds?: string[];
-}
-
 export interface RunQuotaStatusResponse {
   enabled: boolean;
   enabledAt?: string;
   enabledBy?: string;
   canManageLimits: boolean;
-  driverHealth: Record<RunBudgetGroupId, RunQuotaDriverHealth>;
 }
 
 export interface RunQuotaLimitsUpdate {
@@ -91,10 +82,6 @@ export interface RunQuotaLimitsUpdate {
 export interface RunQuotaEnforcementUpdate {
   enabled: boolean;
   limits?: Partial<Record<ControlledRunBudgetGroupId, RunLimit>>;
-}
-
-export interface RunQuotaHeartbeatResponse {
-  recorded: boolean;
 }
 
 export interface RunQuotaConsumeResponse {

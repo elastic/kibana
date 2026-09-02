@@ -15,7 +15,6 @@ import {
 } from '@kbn/workflows/managed';
 import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import {
-  validateHeartbeatProvenance,
   validateWorkerProvenance,
   type RunQuotaExecutionReader,
   type RunQuotaWorkflowExecution,
@@ -214,52 +213,5 @@ describe('validateWorkerProvenance', () => {
     ]);
 
     expect(spaceAKey).not.toBe(spaceBKey);
-  });
-});
-
-describe('validateHeartbeatProvenance', () => {
-  it('uses the persisted task run timestamp', async () => {
-    const execution: RunQuotaWorkflowExecution = {
-      id: 'driver',
-      workflowId: `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
-      spaceId: 'space-a',
-      status: ExecutionStatus.RUNNING,
-      triggeredBy: 'scheduled',
-      taskRunAt: '2026-08-31T10:00:00.000Z',
-    };
-
-    await expect(
-      validateHeartbeatProvenance({
-        request: makeRequest('driver'),
-        executionId: 'driver',
-        group: 'detection',
-        spaceId: 'space-a',
-        executionReader: makeExecutionReader([execution]),
-      })
-    ).resolves.toEqual({
-      execution,
-      recordedAt: '2026-08-31T10:00:00.000Z',
-    });
-  });
-
-  it('rejects a terminal driver', async () => {
-    const execution: RunQuotaWorkflowExecution = {
-      id: 'driver',
-      workflowId: `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
-      spaceId: 'space-a',
-      status: ExecutionStatus.COMPLETED,
-      triggeredBy: 'scheduled',
-      taskRunAt: '2026-08-31T10:00:00.000Z',
-    };
-
-    await expect(
-      validateHeartbeatProvenance({
-        request: makeRequest('driver'),
-        executionId: 'driver',
-        group: 'detection',
-        spaceId: 'space-a',
-        executionReader: makeExecutionReader([execution]),
-      })
-    ).rejects.toMatchObject({ output: { statusCode: 403 } });
   });
 });
