@@ -179,6 +179,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { OpenSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
-import type { BlindSpotItem, InvestigationRecommendation } from './investigation_presentation';
+import type { BlindSpotItem, RecommendationItem } from './investigation_presentation';
 
 const formatInvestigationItemContent = (title: string, description?: string): string =>
   description ? `${title} · ${description}` : title;
@@ -58,7 +58,7 @@ export const buildHypothesisChatOptions = (
 });
 
 export const buildRecommendationChatOptions = (
-  recommendation: InvestigationRecommendation,
+  recommendation: RecommendationItem,
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,

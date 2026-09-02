@@ -758,7 +758,7 @@ export const getTestProjectSyntheticsPolicy = (
             screenshots: { value: 'on', type: 'text' },
             synthetics_args: { value: null, type: 'text' },
             ignore_https_errors: { value: false, type: 'bool' },
-            certificate_error_spki_allowlist: { type: 'yaml' },
+            certificate_error_spki_allowlist: { value: null, type: 'yaml' },
             'throttling.config': {
               value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
               type: 'text',

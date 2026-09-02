@@ -172,10 +172,10 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 "breach": Object {
                   "additionalProperties": false,
-                  "description": "Breach detection configuration (required).",
+                  "description": "Breach detection configuration. Omit to treat every base row as a breach.",
                   "properties": Object {
                     "segment": Object {
-                      "description": "Appendable ES|QL segment for breach detection (required).",
+                      "description": "A clause appended to the end of the rule's ES|QL query. Required in breach blocks.",
                       "maxLength": 10000,
                       "minLength": 1,
                       "type": "string",
@@ -210,7 +210,6 @@ describe('rule template create-rule schema coupling', () => {
               "required": Array [
                 "format",
                 "base",
-                "breach",
               ],
               "type": "object",
             },
@@ -404,7 +403,7 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`.",
+              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` is a type-specific object (for example a \`runbook\` may carry \`content\`, a \`dashboard\` may carry \`dashboardId\`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },

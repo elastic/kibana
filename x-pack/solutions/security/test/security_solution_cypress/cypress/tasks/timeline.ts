@@ -352,7 +352,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
@@ -388,8 +388,9 @@ export const createTimelineTemplateFromBottomBar = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  const selector = `${SEARCH_OR_FILTER_CONTAINER} textarea`;
+  typeAndVerifyValue(selector, query);
+  cy.get(selector).type(' {enter}');
 };
 
 export const executeTimelineSearch = (query: string) => {

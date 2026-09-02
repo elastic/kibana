@@ -21,8 +21,8 @@ import { EsqlSettingNames, settings } from '../generated/settings';
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {
   return (
     settings
-      // Filter out serverless-only settings if not in serverless mode, if not flavour is provided don't return serverlessOnly settings.
-      .filter((setting) => (isServerless ? setting.serverlessOnly : !setting.serverlessOnly))
+      // Filter out serverless-only settings if not in serverless mode.
+      .filter((setting) => isServerless || !setting.serverlessOnly)
       // Filter out settings we don't want as suggestions
       .filter((setting) => !setting.ignoreAsSuggestion)
       .map((setting) =>

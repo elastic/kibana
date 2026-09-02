@@ -9,10 +9,13 @@ import React from 'react';
 import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { ListPageTestProviders } from '../../../test_utils/test_providers';
 import { ActionPoliciesTable } from './action_policies_table';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn();
 const mockFindItems = jest.fn();
 const mockCreateActionPolicy = jest.fn();
@@ -28,6 +31,8 @@ const mockBulkGet = jest.fn();
 const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+let mockAgentBuilderShow = true;
+let mockExperimentalFeaturesEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -39,7 +44,14 @@ jest.mock('@kbn/core-di-browser', () => {
         return new ActualUserCapabilities({ capabilities: mockCapabilities });
       }
       if (token === 'application') {
-        return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+        return {
+          navigateToUrl: mockNavigateToUrl,
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+          capabilities: {
+            agentBuilder: { show: mockAgentBuilderShow },
+          },
+        };
       }
       if (token === 'chrome') {
         return { docTitle: { change: jest.fn() } };
@@ -49,6 +61,14 @@ jest.mock('@kbn/core-di-browser', () => {
       }
       if (token === 'settings') {
         return { client: { get: mockSettingsClientGet } };
+      }
+      if (token === 'uiSettings') {
+        return {
+          get: (id: string) =>
+            id === 'agentBuilder:experimentalFeatures'
+              ? mockExperimentalFeaturesEnabled
+              : undefined,
+        };
       }
       if (token === 'userProfile') {
         return { bulkGet: mockBulkGet };
@@ -128,7 +148,7 @@ jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
 
 jest.mock('../action_policies_data_source', () => ({
   ...jest.requireActual('../action_policies_data_source'),
-  useActionPoliciesDataSource: () => ({ findItems: mockFindItems }),
+  useActionPoliciesDataSource: () => ({ findItems: mockFindItems, debounceMs: 0 }),
 }));
 
 jest.mock('../../../components/action_policy/delete_confirmation_modal', () => ({
@@ -185,6 +205,8 @@ describe('ActionPoliciesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCapabilities = WRITE_CAPABILITIES;
+    mockAgentBuilderShow = true;
+    mockExperimentalFeaturesEnabled = true;
     mockTagNames = [];
 
     mockBulkGet.mockResolvedValue([]);
@@ -208,6 +230,54 @@ describe('ActionPoliciesTable', () => {
       isLoading: false,
       isError: false,
       error: null,
+    });
+  });
+
+  it('renders the experimental badge in the page header', async () => {
+    renderTable();
+
+    await waitFor(() =>
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Action Policies'
+      )
+    );
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('renders the create button when policies exist and the user can write', async () => {
+    renderTable();
+
+    await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+  });
+
+  it('navigates to create action policy when the header create button is clicked', async () => {
+    const user = userEvent.setup();
+    renderTable();
+
+    await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
+    await user.click(screen.getByTestId('createActionPolicyButton'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/alertingV2/action_policies/create'
+    );
+  });
+
+  it('opens agent chat from the header create split button', async () => {
+    const user = userEvent.setup();
+    renderTable();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument()
+    );
+    await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
+    await waitFor(() =>
+      expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
+    );
+    await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT },
     });
   });
 
@@ -593,9 +663,96 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
+  describe('empty state', () => {
+    beforeEach(() => {
+      mockFindItems.mockResolvedValue({ items: [], total: 0 });
+    });
+
+    it('shows create-policy and create-with-agent cards when there are no policies', async () => {
+      renderTable();
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('heading', {
+            level: 2,
+            name: /no action policies yet\. let's get started!/i,
+          })
+        ).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
+      expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
+    });
+
+    it('hides the header create button in the empty state', async () => {
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('navigates to the create form from the empty state create-policy card', async () => {
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      await user.click(screen.getByTestId('createActionPolicyCard'));
+
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(
+        '/app/management/alertingV2/action_policies/create'
+      );
+    });
+
+    it('opens agent chat from the empty state create-with-agent card', async () => {
+      const user = userEvent.setup();
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument()
+      );
+      await user.click(screen.getByTestId('createActionPolicyWithAgentCard'));
+
+      expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+        path: '/agents/elastic-ai-agent/conversations/new',
+        state: { initialMessage: CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT },
+      });
+    });
+
+    it('disables the empty state agent card when agent builder is not available', async () => {
+      mockAgentBuilderShow = false;
+      mockExperimentalFeaturesEnabled = false;
+      renderTable();
+
+      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
+      expect(agentCard).toBeInTheDocument();
+      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+      fireEvent.click(agentCard);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
+    });
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
+    });
+
+    it('hides the header create button', async () => {
+      renderTable();
+
+      await waitFor(() => expect(screen.getByText('Policy One')).toBeInTheDocument());
+      expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
+    });
+
+    it('shows a read-only empty prompt when there are no policies', async () => {
+      mockFindItems.mockResolvedValue({ items: [], total: 0 });
+      renderTable();
+
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesListReadOnlyEmpty')).toBeInTheDocument()
+      );
+      expect(screen.queryByTestId('createActionPolicyCard')).toBeNull();
+      expect(screen.queryByTestId('createActionPolicyWithAgentCard')).toBeNull();
     });
 
     it('hides the snooze button in the notify column', async () => {

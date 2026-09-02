@@ -8,13 +8,15 @@
  */
 
 import { type Container, ContainerModule } from 'inversify';
-import { inject, injectable } from 'inversify';
-import { OnSetup } from '@kbn/core-di';
+import { inject, injectable, optional } from 'inversify';
+import { createToken, OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-server';
 import { loadHttp } from './http';
+
+const AsyncValue = createToken<string>('AsyncValue');
 
 @injectable()
 class TestRoute {
@@ -36,11 +38,12 @@ class TestRoute {
 
   constructor(
     @inject(Request) public readonly request: unknown,
-    @inject(Response) public readonly response: KibanaResponseFactory
+    @inject(Response) public readonly response: KibanaResponseFactory,
+    @inject(AsyncValue) @optional() public readonly value?: string
   ) {}
 
   handle() {
-    return this.response.ok();
+    return this.response.ok(this.value == null ? undefined : { body: this.value });
   }
 }
 
@@ -122,6 +125,21 @@ describe('http', () => {
     expect(route.request).toBe(request);
     expect(route.response).toBe(response);
     expect(unbindAllSpy).toHaveBeenCalled();
+  });
+
+  it('should handle a request with an asynchronously bound dependency', async () => {
+    container.bind(AsyncValue).toResolvedValue(async () => 'resolved-value');
+    setup();
+
+    const [, handler] = router.post.mock.lastCall!;
+    const response = {
+      ok: jest.fn(() => 'something'),
+    } as unknown as jest.Mocked<KibanaResponseFactory>;
+
+    await expect(handler({} as any, {} as unknown as KibanaRequest, response)).resolves.toBe(
+      'something'
+    );
+    expect(response.ok).toHaveBeenCalledWith({ body: 'resolved-value' });
   });
 
   it('should wrap a route handler to handle legacy errors', () => {

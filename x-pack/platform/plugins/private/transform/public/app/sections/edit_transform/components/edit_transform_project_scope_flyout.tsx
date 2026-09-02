@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING, ProjectScopePickerFlyoutContent } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
@@ -42,13 +42,11 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   const { cps } = useAppDependencies();
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
-  const defaultProjectRouting = cps?.cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL;
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cps?.cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL;
+  }, [cps?.cpsManager]);
   const persistedProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as NonNullable<ProjectRouting>;
-  const [stagedProjectRouting, setStagedProjectRouting] = useState<
-    NonNullable<ProjectRouting> | undefined
-  >();
-  const draftProjectRouting = stagedProjectRouting ?? persistedProjectRouting;
-  const [pickerResetCounter, setPickerResetCounter] = useState(0);
+
   const availableProjects = useMemo(
     () =>
       projects.originProject
@@ -57,19 +55,19 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
     [projects.linkedProjects, projects.originProject]
   );
 
-  const applyProjectScope = useCallback(() => {
-    if (stagedProjectRouting === undefined) {
-      return;
-    }
+  const applyProjectScope = useCallback(
+    (projectRouting: NonNullable<ProjectRouting>) => {
+      setFormField({ field: 'projectRouting', value: projectRouting });
+      onClose();
+    },
+    [onClose, setFormField]
+  );
 
-    setFormField({ field: 'projectRouting', value: draftProjectRouting });
-    onClose();
-  }, [draftProjectRouting, onClose, setFormField, stagedProjectRouting]);
-
-  const discardProjectScopeChanges = useCallback(() => {
-    setStagedProjectRouting(undefined);
-    setPickerResetCounter((counter) => counter + 1);
-  }, []);
+  const fetchProjectsByRouting = useCallback(
+    (projectRouting?: ProjectRouting) =>
+      cps?.cpsManager?.fetchProjects(projectRouting) ?? Promise.resolve(null),
+    [cps?.cpsManager]
+  );
 
   return (
     <ProjectScopePickerFlyoutContent
@@ -81,23 +79,21 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
       )}
       availableProjects={availableProjects}
       backButtonLabel={backToEditTransformLabel}
-      defaultProjectRouting={defaultProjectRouting}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      fetchProjectsByRouting={fetchProjectsByRouting}
       discardButtonLabel={i18n.translate(
         'xpack.transform.transformList.editFlyoutProjectScopeDiscardButtonText',
         {
           defaultMessage: 'Discard changes',
         }
       )}
-      key={pickerResetCounter}
-      isApplyDisabled={stagedProjectRouting === undefined}
       onApplyChanges={applyProjectScope}
       onClose={onClose}
-      onDiscardChanges={discardProjectScopeChanges}
-      onProjectRoutingChange={setStagedProjectRouting}
       originProjectId={projects.originProject?._id}
-      projectRouting={draftProjectRouting}
+      projectRouting={persistedProjectRouting}
       title={changeProjectScopeTitle}
       titleId="transformEditProjectScopeFlyoutTitle"
+      projectRoutingStrategy="snapshot"
     />
   );
 };

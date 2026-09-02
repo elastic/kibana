@@ -91,14 +91,17 @@ const countVectors = async (client: IScopedClusterClient): Promise<number> => {
 
 /**
  * Counts top-level documents via `_count`. This matches only root documents and reads a single
- * copy of each shard. A partial result is reported as unavailable rather than as an undercount,
- * since `_count` cannot opt out of partial search results.
+ * copy of each shard. It runs with the caller's own credentials because the internal user can only
+ * read Kibana-owned patterns such as `kibana_sample_data_*`. Against a wildcard, that silently
+ * resolves to whichever of those indices exist and undercounts instead of erroring. A failed-shard
+ * result is reported as unavailable rather than as an undercount, since `_count` cannot opt out of
+ * partial search results.
  */
 const countDocuments = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<number | null> => {
-  const { count, _shards: shards } = await client.asInternalUser.count({
+  const { count, _shards: shards } = await client.asCurrentUser.count({
     index: USER_INDICES_PATTERN,
     expand_wildcards: ['open'],
   });

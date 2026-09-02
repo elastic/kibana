@@ -27,6 +27,7 @@ import type {
   AttachmentType,
 } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import { Streams } from '@kbn/streams-schema';
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAttachmentsApi } from '../../hooks/use_attachments_api';
@@ -232,9 +233,17 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      justifyContent={hasNoAttachments ? 'center' : undefined}
+      alignItems={hasNoAttachments ? 'center' : undefined}
+      css={css`
+        height: 100%;
+      `}
+    >
       {hasNoAttachments ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <AttachmentsEmptyPrompt
             onAddAttachments={openAddAttachmentFlyout}
             disabled={!canLinkAttachments}

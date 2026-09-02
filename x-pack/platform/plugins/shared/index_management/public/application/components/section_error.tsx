@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export interface Error {
   cause?: string[];
@@ -33,18 +33,14 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
   const cause = causeAttributes ?? causeRoot;
 
   return (
-    <EuiCallOut announceOnMount title={title} color="danger" iconType="warning" {...rest}>
-      <div>{message || statusText}</div>
+    <KbnDangerCallout announceOnMount title={title} text={message || statusText} {...rest}>
       {cause && (
-        <>
-          <EuiSpacer size="m" />
-          <ul>
-            {cause.map((causeMsg, i) => (
-              <li key={i}>{causeMsg}</li>
-            ))}
-          </ul>
-        </>
+        <ul>
+          {cause.map((causeMsg, i) => (
+            <li key={i}>{causeMsg}</li>
+          ))}
+        </ul>
       )}
-    </EuiCallOut>
+    </KbnDangerCallout>
   );
 };

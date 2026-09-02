@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
+import { resolveMetadataDataStreamName } from '../asset_manager/resolve_entity_store_indices';
 import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 import { runWithSpan } from '../../telemetry/traces';
 import type { BulkCreateEntityMetadataDocsResult } from '../../infra/elasticsearch/entity_metadata';
@@ -91,7 +91,7 @@ export class EntityMetadataClient {
     await ensureMetadataDataStreamMappingsOnce(this.esClient, this.namespace, this.logger);
 
     const { successful, failed, dropsByType } = await bulkCreateEntityMetadataDocs(this.esClient, {
-      index: getMetadataEntitiesDataStreamName(this.namespace),
+      index: await resolveMetadataDataStreamName(this.esClient, this.namespace),
       docs,
     });
 
@@ -122,9 +122,9 @@ export class EntityMetadataClient {
         'entity_store.metadata.operation': 'get_latest_by_entity_id',
         'entity_store.metadata.event_action': eventAction,
       },
-      cb: () =>
+      cb: async () =>
         getLatestEntityMetadataDoc<TDoc>(this.esClient, {
-          index: getMetadataEntitiesDataStreamName(this.namespace),
+          index: await resolveMetadataDataStreamName(this.esClient, this.namespace),
           entityId,
           eventAction,
         }),

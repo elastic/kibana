@@ -49,6 +49,7 @@ import { isLatestTransform } from '../../../../../../common/types/transform';
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
+import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
 
 import type { StepDefineExposedState } from '../step_define';
 import { applyTransformConfigToDefineState, getDefaultStepDefineState } from '../step_define';
@@ -70,9 +71,6 @@ const styles = {
     .euiStep__content {
       padding-right: 0;
     }
-  `,
-  projectScopeSelector: css`
-    min-inline-size: 180px;
   `,
 };
 
@@ -119,7 +117,12 @@ export const Wizard: FC<WizardProps> = React.memo(
     const appDependencies = useAppDependencies();
     const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
     const cpsManager = cps?.cpsManager;
-    const shouldUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const linkedProjectsState = useTransformHasLinkedProjects(cpsManager);
+    const canUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const shouldUseProjectScope = Boolean(
+      canUseProjectScope && linkedProjectsState.hasLinkedProjects !== false
+    );
+    const isProjectScopeDiscoveryPending = canUseProjectScope && linkedProjectsState.isLoading;
     const dataView = searchItems?.dataView;
     const defaultTransformFunction = getInitialTransformFunction(
       cloneConfig,
@@ -139,6 +142,8 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [pendingDataViewId, setPendingDataViewId] = useState<string>();
     const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>();
     const projectRoutingRef = useRef(projectRouting);
+    const shouldUseProjectScopeRef = useRef(shouldUseProjectScope);
+    const cpsManagerRef = useRef(cpsManager);
     const hasUserSelectedProjectRouting = useRef(false);
     const changeDataViewModalTitleId = useGeneratedHtmlId();
 
@@ -147,14 +152,23 @@ export const Wizard: FC<WizardProps> = React.memo(
     }, [projectRouting]);
 
     useEffect(() => {
-      if (!shouldUseProjectScope || !cpsManager) {
+      shouldUseProjectScopeRef.current = shouldUseProjectScope;
+      cpsManagerRef.current = cpsManager;
+    }, [cpsManager, shouldUseProjectScope]);
+
+    useEffect(() => {
+      if (!shouldUseProjectScope || !cpsManager || isProjectScopeDiscoveryPending) {
         return;
       }
 
       let canceled = false;
 
       cpsManager.whenReady().then(() => {
-        if (canceled || hasUserSelectedProjectRouting.current) {
+        if (
+          canceled ||
+          hasUserSelectedProjectRouting.current ||
+          !shouldUseProjectScopeRef.current
+        ) {
           return;
         }
 
@@ -168,7 +182,20 @@ export const Wizard: FC<WizardProps> = React.memo(
       return () => {
         canceled = true;
       };
-    }, [cpsManager, shouldUseProjectScope]);
+    }, [cpsManager, isProjectScopeDiscoveryPending, shouldUseProjectScope]);
+
+    useEffect(() => {
+      if (shouldUseProjectScope) {
+        return;
+      }
+
+      setProjectRouting(undefined);
+      setStepDefineState((prevState) =>
+        prevState && prevState.projectRouting !== undefined
+          ? { ...prevState, projectRouting: undefined }
+          : prevState
+      );
+    }, [shouldUseProjectScope]);
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -180,9 +207,9 @@ export const Wizard: FC<WizardProps> = React.memo(
           cloneConfig,
           nextSearchItems.dataView
         );
-        if (shouldUseProjectScope && nextStepDefineState.projectRouting === undefined) {
+        if (shouldUseProjectScopeRef.current && nextStepDefineState.projectRouting === undefined) {
           nextStepDefineState.projectRouting =
-            projectRoutingRef.current ?? cpsManager?.getDefaultProjectRouting();
+            projectRoutingRef.current ?? cpsManagerRef.current?.getDefaultProjectRouting();
         }
 
         setStepDefineState(nextStepDefineState);
@@ -195,7 +222,7 @@ export const Wizard: FC<WizardProps> = React.memo(
         setStepCreateState(getDefaultStepCreateState());
         setCurrentStep(WIZARD_STEPS.DEFINE);
       },
-      [cloneConfig, cpsManager, shouldUseProjectScope]
+      [cloneConfig]
     );
 
     useEffect(() => {
@@ -253,18 +280,18 @@ export const Wizard: FC<WizardProps> = React.memo(
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
     const projectScopeSelector =
       shouldUseProjectScope && cpsManager ? (
-        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
-          <ProjectScopeSelector
-            cpsManager={cpsManager}
-            onProjectRoutingChange={handleProjectRoutingChange}
-            projectRouting={projectRouting}
-          />
-        </EuiFlexItem>
+        <ProjectScopeSelector
+          cpsManager={cpsManager}
+          onProjectRoutingChange={handleProjectRoutingChange}
+          projectRouting={projectRouting}
+        />
       ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker
         compressed={false}
         currentDataViewId={dataView?.id}
+        showDataViewLabel={false}
+        showDropdownIcon={false}
         savedDataViews={savedDataViews}
         isDisabled={isDataViewPickerDisabled}
         onChangeDataView={requestDataViewChange}
@@ -279,6 +306,8 @@ export const Wizard: FC<WizardProps> = React.memo(
             : undefined
         }
         trigger={{
+          iconSide: 'right',
+          iconType: 'chevronSingleDown',
           label:
             dataView?.getName() ??
             i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
@@ -318,8 +347,10 @@ export const Wizard: FC<WizardProps> = React.memo(
       </EuiFormRow>
     );
     const dataViewPicker = (
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
-        {projectScopeSelector}
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        {projectScopeSelector ? (
+          <EuiFlexItem grow={false}>{projectScopeSelector}</EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
       </EuiFlexGroup>
     );

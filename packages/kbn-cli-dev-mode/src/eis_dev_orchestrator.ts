@@ -30,6 +30,14 @@
  *
  * This module does NOT start or stop Elasticsearch — that is handled separately
  * by `yarn es snapshot --eis`.
+ *
+ * Environment variables:
+ *  - KBN_EIS_ES_HOST     — full ES base URL including protocol (default:
+ *                           `http://localhost:9200`). Set to
+ *                           `https://localhost:9200` when ES was started with
+ *                           `--ssl` (e.g. `yarn es snapshot --eis --ssl`).
+ *  - KBN_EIS_ES_USERNAME — ES username (default: `elastic`)
+ *  - KBN_EIS_ES_PASSWORD — ES password (default: `changeme`)
  */
 
 import chalk from 'chalk';
@@ -207,15 +215,14 @@ const buildConnectors = (
 export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResult> => {
   log.good('eis', 'Setting up EIS connectors from Elasticsearch...');
 
-  // yarn start --eis always targets a local dev ES instance started via
-  // yarn es snapshot --eis, which binds to http://localhost:9200 without SSL.
+  const baseUrl = process.env.KBN_EIS_ES_HOST ?? 'http://localhost:9200';
   const es: EisElasticsearchConnection = {
-    baseUrl: 'http://localhost:9200',
+    baseUrl,
     credentials: {
       username: process.env.KBN_EIS_ES_USERNAME || 'elastic',
       password: process.env.KBN_EIS_ES_PASSWORD || 'changeme',
     },
-    ssl: false,
+    ssl: baseUrl.startsWith('https://'),
   };
 
   // Phase 1: wait for ES itself (generous timeout).
