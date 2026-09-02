@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { z } from '@kbn/zod/v4';
-
-export class InvestigationNotFoundError extends Error {
-  constructor(investigationId: string) {
-    super(`Investigation "${investigationId}" not found`);
-    this.name = 'InvestigationNotFoundError';
-  }
-}
 
 /**
  * Thrown when an investigation's context does not match the contract for its subject type.
