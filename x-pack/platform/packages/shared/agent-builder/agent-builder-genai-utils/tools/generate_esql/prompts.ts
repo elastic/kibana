@@ -172,7 +172,7 @@ const getDocumentationSection = ({
   documentation: EsqlLoadedDocumentation;
   tsDocRequested?: boolean;
 }): string => {
-  const isTsdb = (resource?.isTsdb ?? false) || tsDocRequested;
+  const isTsdb = resource?.isTsdb || tsDocRequested;
 
   return `# ES|QL Documentation
 

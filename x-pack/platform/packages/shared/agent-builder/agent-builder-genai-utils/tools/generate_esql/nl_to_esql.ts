@@ -178,7 +178,7 @@ export const generateEsql = async ({
           // Pre-fetch doc keywords from the NL query alone, in parallel with index discovery.
           // The resource-less prompt is an accepted quality tradeoff for the latency win.
           const requestDocCallConfig: Partial<InferenceChatModelCallOptions> = {
-            sessionId: sessionId ? `${sessionId}:request-doc` : undefined,
+            sessionId: sessionId ? `${sessionId}:request-doc-prefetch` : undefined,
           };
           const requestDocModel = model.chatModel
             .withStructuredOutput(requestDocumentationSchema, {
