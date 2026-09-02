@@ -44,7 +44,13 @@ import type {
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
-import type { NewBeatsOutput, UpdateOutput, UpdateTypedOutput } from '../../common/types';
+import type {
+  NewBeatsOutput,
+  OtlpGrpcExporterConfig,
+  OtlpHttpExporterConfig,
+  UpdateOutput,
+  UpdateTypedOutput,
+} from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -62,6 +68,8 @@ import {
   kafkaCompressionType,
   kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
+  otlpProtocol,
+  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -91,7 +99,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
-import { findAgentlessPolicies } from './outputs/helpers';
+import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
   validateOutputSslPaths,
@@ -472,6 +480,18 @@ class OutputService {
     return appContextService.getEncryptedSavedObjects();
   }
 
+  private async assertOtlpOutputAllowed(
+    output: { type: ValueOf<OutputType> },
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ): Promise<void> {
+    if (!isOtlpOutput(output)) return;
+    const { result, error } = await checkOtlpOutputAllowed(esClient, soClient);
+    if (!result) {
+      throw new OutputInvalidError(error!);
+    }
+  }
+
   private async _getDefaultDataOutputsSO() {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
@@ -656,9 +676,7 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().enableOtlpOutput) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await this.assertOtlpOutputAllowed(output, esClient, soClient);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -822,10 +840,8 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -1116,12 +1132,7 @@ class OutputService {
     const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const isTypeChanged = mergedType !== originalOutput.type;
 
-    if (
-      mergedType === outputType.Otlp &&
-      !appContextService.getExperimentalFeatures().enableOtlpOutput
-    ) {
-      throw new OutputInvalidError('OTLP output type is not enabled');
-    }
+    await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
@@ -1182,6 +1193,62 @@ class OutputService {
       target.broker_timeout = null;
       target.required_acks = null;
       target.ssl = null;
+    };
+
+    const removeBeatsFields = (target: Nullable<Partial<BeatsSoBaseAttributes>>) => {
+      target.hosts = null;
+      target.ca_sha256 = null;
+      target.ca_trusted_fingerprint = null;
+      target.config_yaml = null;
+      target.ssl = null;
+      target.shipper = null;
+      target.preset = null;
+      target.proxy_id = null;
+      target.write_to_logs_streams = null;
+      target.otel_exporter_config_yaml = null;
+      target.otel_disable_beatsauth = null;
+    };
+
+    // Null out fields that are exclusive to HTTP when switching to gRPC.
+    const removeOtlpHttpFields = (target: Nullable<Partial<OtlpHttpExporterConfig>>) => {
+      target.encoding = null;
+      target.traces_endpoint = null;
+      target.metrics_endpoint = null;
+      target.logs_endpoint = null;
+      target.profiles_endpoint = null;
+      target.proxy_url = null;
+      target.max_idle_conns = null;
+      target.max_idle_conns_per_host = null;
+      target.max_conns_per_host = null;
+      target.idle_conn_timeout = null;
+      target.disable_keep_alives = null;
+      target.http2_read_idle_timeout = null;
+      target.http2_ping_timeout = null;
+      target.force_attempt_http2 = null;
+      target.compression_params = null;
+      target.cookies = null;
+    };
+
+    // Null out fields that are exclusive to gRPC when switching to HTTP.
+    const removeOtlpGrpcFields = (
+      target: Nullable<Partial<OtlpGrpcExporterConfig>>,
+      original: { compression?: string }
+    ) => {
+      target.balancer_name = null;
+      target.keepalive = null;
+      target.wait_for_ready = null;
+      target.user_agent = null;
+      target.authority = null;
+      // compression is valid on both protocols but snappy/zstd are gRPC-only. The stored value
+      // survives the deep merge, so clear it — unless this update supplies its own (already
+      // validated against the HTTP schema).
+      if (
+        target.compression === undefined &&
+        original.compression !== undefined &&
+        OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(original.compression)
+      ) {
+        target.compression = null;
+      }
     };
 
     if (isTypeChanged) {
@@ -1280,6 +1347,38 @@ class OutputService {
           updateData.password = null;
         }
       }
+
+      if (isOtlpOutput(originalOutput)) {
+        // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
+        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+      }
+
+      if (isOtlpOutput(updateData)) {
+        // clear beats-only fields when switching to OTLP
+        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
+      }
+    }
+
+    const isOtlpProtocolChange =
+      isOtlpOutput(updateData) &&
+      isOtlpOutput(originalOutput) &&
+      updateData.otlp_exporter?.protocol !== undefined &&
+      updateData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
+
+    if (isOtlpProtocolChange && isOtlpOutput(updateData) && isOtlpOutput(originalOutput)) {
+      const exporterUpdate = updateData.otlp_exporter;
+      if (exporterUpdate.protocol === otlpProtocol.Grpc) {
+        // Switching to gRPC — null out HTTP-exclusive fields left over in the stored SO
+        removeOtlpHttpFields(
+          exporterUpdate as unknown as Nullable<Partial<OtlpHttpExporterConfig>>
+        );
+      } else {
+        // Switching to HTTP — null out gRPC-exclusive fields left over in the stored SO
+        removeOtlpGrpcFields(
+          exporterUpdate as unknown as Nullable<Partial<OtlpGrpcExporterConfig>>,
+          originalOutput.otlp_exporter
+        );
+      }
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1375,10 +1474,8 @@ class OutputService {
     }
     await remoteSyncIntegrationsCheck(esClient, data);
 
-    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
-
     // Store secret values if enabled; if not, store plain text values
-    if (useSecretStorage) {
+    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,
