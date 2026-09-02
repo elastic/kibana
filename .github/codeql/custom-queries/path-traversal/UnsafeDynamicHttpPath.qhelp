@@ -1,0 +1,105 @@
+<!DOCTYPE qhelp SYSTEM "qhelp.dtd">
+<qhelp>
+
+<overview>
+<p>
+This query detects a dynamically-constructed string — a template literal or a string
+concatenation — that flows into the path of a browser <code>http.*</code> request
+(<code>http.get</code>, <code>http.post</code>, <code>http.delete</code>,
+<code>http.fetch</code>, etc.) without being encoded through
+<code>buildPath()</code> (from <code>@kbn/core-http-browser</code>) or
+<code>encodeURIComponent()</code>.
+</p>
+<p>
+When a user-controllable value (such as a saved-object <code>id</code>) is interpolated
+into a request path without encoding, an attacker can inject <code>../</code> sequences
+or an encoded <code>..%2F</code> to escape the intended route and target a different
+endpoint. This "stored path traversal" pattern has produced real IDOR vulnerabilities in
+Kibana, for example a crafted dashboard <code>id</code> of
+<code>../../../internal/security/users/&lt;user&gt;</code> reaching a security endpoint.
+</p>
+<p>
+This query is the data-flow companion to the <code>@kbn/eslint/no_unsafe_dynamic_http_path</code>
+ESLint rule. The ESLint rule only inspects the path expression written inline at the call
+site; it cannot follow a path that is built into a variable, returned from a helper, or
+assembled across files. This query tracks the value flow and reports the unsafe path
+wherever it was constructed.
+</p>
+</overview>
+
+<recommendation>
+<p>
+Use <code>buildPath()</code> from <code>@kbn/core-http-browser</code>. It takes a route
+template with <code>{param}</code> placeholders and URI-encodes each supplied value, so
+traversal sequences in a parameter are neutralised:
+</p>
+<sample language="typescript">
+// Before (vulnerable)
+http.delete(`/api/dashboards/${id}`);
+
+// After (safe) — the value of `id` is URI-encoded
+http.delete(buildPath('/api/dashboards/{id}', { id }));
+</sample>
+<p>
+If a full template is not practical, wrap each dynamic segment in
+<code>encodeURIComponent()</code>:
+</p>
+<sample language="typescript">
+http.delete('/api/dashboards/' + encodeURIComponent(id));
+</sample>
+<p>
+A finding on a segment that is genuinely constant and never user-controllable is an
+expected false positive. Prefer restructuring to <code>buildPath()</code>; if that is not
+possible, suppress the specific finding with a comment on the line above the call:
+</p>
+<sample language="typescript">
+// codeql[js/kibana/unsafe-dynamic-http-path] segment is a controlled enum, not user input
+http.get(`/api/status/${knownEnumValue}`);
+</sample>
+</recommendation>
+
+<example>
+<p>
+The following handler deletes a dashboard by an <code>id</code> taken from user input.
+Because the <code>id</code> is interpolated into the path unencoded, a value such as
+<code>..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Fadmin</code> is sent as a path that
+escapes the dashboards route:
+</p>
+<sample language="typescript">
+import { coreServices } from './kibana_services';
+
+// BAD: unencoded id — vulnerable to path traversal / IDOR
+const deleteDashboard = (id: string) =>
+  coreServices.http.delete(`/api/dashboards/dashboard/${id}`);
+</sample>
+<p>
+Encoding the parameter with <code>buildPath()</code> keeps the value confined to a single
+path segment:
+</p>
+<sample language="typescript">
+import { buildPath } from '@kbn/core-http-browser';
+import { coreServices } from './kibana_services';
+
+// GOOD: id is URI-encoded, `../` becomes `..%2F`
+const deleteDashboard = (id: string) =>
+  coreServices.http.delete(buildPath('/api/dashboards/dashboard/{id}', { id }));
+</sample>
+</example>
+
+<references>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/22.html">CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/88.html">CWE-88: Improper Neutralization of Argument Delimiters in a Command ('Argument Injection')</a>
+</li>
+<li>
+  <a href="https://owasp.org/www-community/attacks/Path_Traversal">OWASP: Path Traversal</a>
+</li>
+<li>
+  Kibana <code>buildPath</code> utility in <code>@kbn/core-http-browser</code> and the
+  <code>@kbn/eslint/no_unsafe_dynamic_http_path</code> ESLint rule.
+</li>
+</references>
+
+</qhelp>
