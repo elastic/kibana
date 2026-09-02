@@ -78,16 +78,16 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fix the Fleet agent-status-change task failing when the {{es}} response is too large [#286324]({{kib-pull}}286324).
 * Fix sorting the Agents table by **Host** so it uses the hostname keyword field instead of the analyzed text field [#286383]({{kib-pull}}286383).
 * Fix package policies accepting a whitespace-only namespace, which saved while ingestion failed silently [#286385]({{kib-pull}}286385).
-* Fix the CPU and memory tooltip on offline agents showing incorrect values [#286386]({{kib-pull}}286386).
-* Fix agentless throughput index patterns for streams that use a dynamic dataset [#286758]({{kib-pull}}286758).
-* Fix update and delete of legacy agentless managed-integration policies returning HTTP 404, or reporting success while the deployment kept running [#287011]({{kib-pull}}287011).
+* Fix the CPU and memory tooltip on offline agents showing misleading messages instead of clearly stating the agent is offline [#286386]({{kib-pull}}286386).
+* Fix managed integration throughput index patterns for streams that use a dynamic dataset [#286758]({{kib-pull}}286758).
+* Fix update and delete of legacy managed integration policies returning HTTP 404 or reporting success while the deployment kept running [#287011]({{kib-pull}}287011).
 * Fix stale version-specific Fleet policies remaining after their agent version dropped out of the bounded set, and refresh variants that still have enrolled agents [#287095]({{kib-pull}}287095).
-* Fix slow Fleet outputs fetching on Fleet setup and the Integrations page [#287113]({{kib-pull}}287113).
+* Fix slow Fleet outputs fetching on Fleet setup and Integrations UI page load  [#287113]({{kib-pull}}287113).
 * Fix Fleet API-key invalidation failing when more than 10,000 keys need to be invalidated at once [#287252]({{kib-pull}}287252).
 * Fix the Fleet integration policy editor showing the wrong credential method for policies created before the package introduced `var_groups` [#287389]({{kib-pull}}287389).
 * Fix the version-specific policy icon showing on agents that already meet the policy's version requirements [#287504]({{kib-pull}}287504).
-* Fix the Fleet policy editor not validating `data_stream.dataset` on integration packages. The check previously applied only to `type: input` packages [#287557]({{kib-pull}}287557).
-* Fix agentless orphan cleanup so it respects package-policy ownership and the force flag [#287571]({{kib-pull}}287571).
+* Fix the Fleet policy editor not validating `data_stream.dataset` on integration packages [#287557]({{kib-pull}}287557).
+* Fix managed integration orphan cleanup so it respects package-policy ownership and the force flag [#287571]({{kib-pull}}287571).
 * Fix Fleet package policies keeping stale secret references after you rotate credentials [#287642]({{kib-pull}}287642).
 
 **Developer tools**:
