@@ -32,6 +32,9 @@ describe('<AddToBlockListContextMenu />', () => {
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
     expect(getAllByText('Add blocklist entry')).toHaveLength(1);
+    expect(
+      getByTestId(TEST_ID).querySelector('[data-euiicon-type="stopSlash"]')
+    ).toBeInTheDocument();
   });
 
   it('should render a disabled EuiContextMenuItem if data is null', () => {

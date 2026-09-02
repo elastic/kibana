@@ -59,7 +59,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
   }
 
   return (
-    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSub}>
+    <EuiContextMenuItem icon="timeline" onClick={menuItemClicked} data-test-subj={dataTestSub}>
       <FormattedMessage
         defaultMessage="Investigate in Timeline"
         id="xpack.securitySolution.threatIntelligence.investigateInTimelineButton"
