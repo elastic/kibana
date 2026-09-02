@@ -123,6 +123,8 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
       ['created_at', query.createdAfter, '>='],
       ['created_at', query.createdBefore, '<='],
+      ['started_at', query.startedAfter, '>='],
+      ['started_at', query.startedBefore, '<='],
       ['completed_at', query.completedAfter, '>='],
       ['completed_at', query.completedBefore, '<='],
     ];

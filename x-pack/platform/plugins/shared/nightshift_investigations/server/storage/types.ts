@@ -47,6 +47,8 @@ export interface FindInvestigationsQuery {
   concurrencyKey?: string;
   createdAfter?: string;
   createdBefore?: string;
+  startedAfter?: string;
+  startedBefore?: string;
   completedAfter?: string;
   completedBefore?: string;
   sortField?: 'created_at' | 'completed_at';
