@@ -41,7 +41,7 @@ Apply this gate to every finding, especially Critical checks:
 
 1. Read the exact best-practices section linked by the matching skill rule. Copying the rule name or URL from the skill does not count as consulting the source.
 2. Positively verify every premise needed for the finding against repository content. Absence from the PR diff is not evidence that code or configuration is absent elsewhere.
-3. Before claiming that a file, config, helper, or abstraction is missing, inspect its expected parent directory at the PR head SHA. Before suggesting an API or option, verify it in a type definition, implementation, or existing usage.
+3. Discover repository paths through documentation, parent-directory listings, package exports, or existing references; do not infer filesystem layout from an import package name. Before claiming that a file, config, helper, or abstraction is missing, inspect its expected parent directory at the PR head SHA. Before suggesting an API or option, verify it in a type definition, implementation, or existing usage.
 4. Treat `404`, `429`, empty results, truncated results, and other failed or incomplete tool responses as unresolved verification — never as evidence of absence. Honor retry guidance or use a materially different read path. If a required premise remains unresolved, omit that finding; if no verified findings remain, call `noop`.
 5. Re-read the final comment payload before submitting it. Ensure code samples preserve their quotes and are valid examples copied or adapted from a verified repository API. When using the shell to construct a multiline body, write the Markdown with a quoted heredoc and encode the file as JSON; do not embed it in a shell single-quoted argument.
 
