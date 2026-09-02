@@ -342,6 +342,13 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.5
+   */
+  perOsPolicySettings: false,
+
+  /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
