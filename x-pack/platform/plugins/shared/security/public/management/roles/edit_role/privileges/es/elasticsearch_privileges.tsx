@@ -57,16 +57,11 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
     'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-security#privileges';
 
   private ensureGlobalPrivilege = (): estypes.SecurityGlobalPrivilege => {
+    // @ts-expect-error SecurityGlobalPrivilege expects application attribute but it should be optional
     return (
       (Array.isArray(this.props.role.elasticsearch.global)
         ? this.props.role.elasticsearch.global[0]
-        : this.props.role.elasticsearch.global) ?? {
-        application: {
-          manage: {
-            applications: [],
-          },
-        },
-      }
+        : this.props.role.elasticsearch.global) ?? {}
     );
   };
 
