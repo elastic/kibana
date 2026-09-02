@@ -195,6 +195,24 @@ describe('buildSequenceEsql', () => {
     );
   });
 
+  it('uses all rule IDs in recovery tracking columns for an OR step', () => {
+    const state: SequenceFormValues = {
+      steps: [
+        { id: 's1', rules: [makeRule('rule-a')], operator: 'or' },
+        { id: 's2', rules: [makeRule('rule-b'), makeRule('rule-c')], operator: 'or' },
+      ],
+      hopWindows: [{ value: 5, unit: 'm' }],
+      recoveryStepIndex: 1,
+    };
+    const query = buildSequenceEsql(state);
+
+    expect(query).toContain(
+      'r_1 = MAX(CASE(rule.id IN ("rule-b", "rule-c") AND status == "recovered", @timestamp, NULL))'
+    );
+    expect(query).toContain('a_1 = MAX(CASE(rule.id IN ("rule-b", "rule-c"), @timestamp, NULL))');
+    expect(query).toContain('WHERE NOT ((r_1 IS NOT NULL AND r_1 == a_1))');
+  });
+
   it('deduplicates rule IDs in the IN(...) pre-filter', () => {
     const state: SequenceFormValues = {
       steps: [
@@ -328,6 +346,46 @@ describe('buildSequenceRecoveryEsql', () => {
     expect(query).toContain(
       '(r_1_0 IS NOT NULL AND r_1_0 == a_1_0) OR (r_1_1 IS NOT NULL AND r_1_1 == a_1_1)'
     );
+  });
+
+  it('watches all rules in an OR recovery step (uncorrelated last-step mode)', () => {
+    const state: SequenceFormValues = {
+      steps: [
+        { id: 's1', rules: [makeRule('rule-a')], operator: 'or' },
+        { id: 's2', rules: [makeRule('rule-b'), makeRule('rule-c')], operator: 'or' },
+      ],
+      hopWindows: [{ value: 5, unit: 'm' }],
+      recoveryStepIndex: 1,
+    };
+    const query = buildSequenceRecoveryEsql(state);
+
+    expect(query).toContain('rule.id IN ("rule-b", "rule-c")');
+    expect(query).toContain('SORT @timestamp DESC');
+    expect(query).toContain('LIMIT 1');
+    expect(query).toContain('WHERE status == "recovered"');
+  });
+
+  it('watches all rules in an OR recovery step (custom multi-step mode)', () => {
+    const state: SequenceFormValues = {
+      steps: [
+        { id: 's1', rules: [makeRule('rule-a'), makeRule('rule-d')], operator: 'or' },
+        { id: 's2', rules: [makeRule('rule-b'), makeRule('rule-c')], operator: 'or' },
+      ],
+      hopWindows: [{ value: 5, unit: 'm' }],
+      recoveryStepIndex: 0,
+      recoveryStepIndices: [0, 1],
+    };
+    const query = buildSequenceRecoveryEsql(state);
+
+    expect(query).toContain(
+      'r_0 = MAX(CASE(rule.id IN ("rule-a", "rule-d") AND status == "recovered"'
+    );
+    expect(query).toContain('a_0 = MAX(CASE(rule.id IN ("rule-a", "rule-d")');
+    expect(query).toContain(
+      'r_1 = MAX(CASE(rule.id IN ("rule-b", "rule-c") AND status == "recovered"'
+    );
+    expect(query).toContain('a_1 = MAX(CASE(rule.id IN ("rule-b", "rule-c")');
+    expect(query).toContain('rule.id IN ("rule-a", "rule-d", "rule-b", "rule-c")');
   });
 
   it('generates a correlated recovery query using MAX(CASE) per group_hash', () => {

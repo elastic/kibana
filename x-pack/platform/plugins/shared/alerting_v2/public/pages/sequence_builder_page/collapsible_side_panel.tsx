@@ -63,6 +63,7 @@ export const CollapsibleSidePanel: React.FC<CollapsibleSidePanelProps> = ({
           <EuiButtonIcon
             iconType={isOpen ? 'menuLeft' : 'menuRight'}
             aria-label={isOpen ? collapseLabel : expandLabel}
+            aria-expanded={isOpen}
             color="text"
             onClick={onToggle}
             data-test-subj="sequenceBuilderToggleRuleList"
