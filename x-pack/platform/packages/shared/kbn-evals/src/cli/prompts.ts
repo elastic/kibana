@@ -174,8 +174,7 @@ export const promptForProject = async (
     name: 'selected',
     message,
     choices: connectors.map(formatConnectorChoice),
-    validate: (answer: string[]) =>
-      answer.length > 0 ? true : 'Select at least one model to evaluate.',
+    validate: (answer) => (answer.length > 0 ? true : 'Select at least one model to evaluate.'),
   });
 
   return selected;

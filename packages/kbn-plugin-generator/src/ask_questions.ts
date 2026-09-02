@@ -10,6 +10,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { DistinctQuestion } from 'inquirer';
 import inquirer from 'inquirer';
 import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
@@ -65,25 +66,28 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
   })),
 ];
 
-export const QUESTIONS = [
+export const QUESTIONS: Array<DistinctQuestion<Answers>> = [
   {
+    type: 'input',
     name: 'name',
     message: 'Plugin name (use camelCase)',
     default: undefined,
     validate: (name: string) => (!name ? 'name is required' : true),
   },
   {
+    type: 'input',
     name: 'description',
     message: 'Provide a description for your plugin.',
     default: undefined,
   },
   {
+    type: 'input',
     name: 'ownerName',
     message: 'Who is developing and maintaining this plugin?',
     // Required by the external-plugin kibana.json manifest parser; --yes must not leave this empty.
     default: 'Plugin Author',
     validate: (ownerName: string) => (!ownerName ? 'owner is required' : true),
-    when: ({ internal }: Answers) => !internal,
+    when: ({ internal }: Partial<Answers>) => !internal,
   },
   {
     name: 'di',
@@ -103,7 +107,7 @@ export const QUESTIONS = [
     message: 'Should a server plugin be generated?',
     default: true,
   },
-] as const;
+];
 
 export async function askQuestions(overrides: Partial<Answers>) {
   return await inquirer.prompt<Answers>(QUESTIONS, overrides);
