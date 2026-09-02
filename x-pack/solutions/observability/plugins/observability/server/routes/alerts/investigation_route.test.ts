@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
 import { alertInvestigationRouteRepository } from './investigation_route';
 
 const request = {} as KibanaRequest;
@@ -105,4 +106,26 @@ it('preserves alert lookup failures', async () => {
       params: { path: { alertId: 'alert-1' } },
     } as never)
   ).rejects.toBe(lookupError);
+});
+
+it('returns service unavailable when investigation start is unavailable', async () => {
+  const { handler } =
+    alertInvestigationRouteRepository['POST /internal/observability/alerts/{alertId}/investigate'];
+  const unavailableDependencies = {
+    ...dependencies,
+    nightshiftInvestigations: {
+      ...dependencies.nightshiftInvestigations,
+      getInvestigationsClient: jest.fn().mockReturnValue({
+        start: jest.fn().mockRejectedValue(new InvestigationUnavailableError('Unavailable')),
+      }),
+    },
+  };
+
+  await expect(
+    handler({
+      request,
+      dependencies: unavailableDependencies,
+      params: { path: { alertId: 'alert-1' } },
+    } as never)
+  ).rejects.toMatchObject({ output: { statusCode: 503 } });
 });

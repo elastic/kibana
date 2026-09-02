@@ -6,6 +6,7 @@
  */
 
 import { badRequest, notFound, serverUnavailable } from '@hapi/boom';
+import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { ALERTS_API_URLS } from '../../../common/constants';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
@@ -47,7 +48,7 @@ const investigateRoute = createObservabilityServerRoute({
       if (!snapshot) {
         throw badRequest('Alert does not contain the fields required for an investigation');
       }
-      return nightshiftInvestigations.getInvestigationsClient(request).start({
+      return await nightshiftInvestigations.getInvestigationsClient(request).start({
         subject: { type: 'alert', id: snapshot.id },
         concurrency_key: snapshot.id,
         context: { alerts: [snapshot] },
@@ -55,6 +56,9 @@ const investigateRoute = createObservabilityServerRoute({
     } catch (error) {
       if (error instanceof AlertNotFoundError) {
         throw notFound(error.message);
+      }
+      if (error instanceof InvestigationUnavailableError) {
+        throw serverUnavailable(error.message);
       }
       throw error;
     }
