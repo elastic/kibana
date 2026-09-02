@@ -64,23 +64,6 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName', { timeout: 30_000 });
   }
 
-  async navigateToStepDetails({
-    configId,
-    stepIndex,
-    checkGroup,
-    locationId,
-  }: {
-    checkGroup: string;
-    configId: string;
-    stepIndex: number;
-    locationId?: string;
-  }) {
-    const locationQuery = locationId ? `?locationId=${locationId}` : '';
-    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}${locationQuery}`;
-    await this.page.goto(this.kbnUrl.get(stepDetailsPath));
-    await this.page.testSubj.waitForSelector('synth-step-metrics');
-  }
-
   async waitForMonitorManagementLoadingToFinish() {
     await expect(this.page.testSubj.locator('syntheticsMonitorList-loaded')).toBeVisible({
       timeout: 30_000,
