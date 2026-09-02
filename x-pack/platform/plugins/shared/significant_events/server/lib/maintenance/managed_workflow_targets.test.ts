@@ -18,7 +18,6 @@ import {
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
   MEMORY_WORKFLOW_IDS,
-  PER_SPACE_MAINTENANCE_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
@@ -27,7 +26,7 @@ describe('managed_workflow_targets registry', () => {
     const maintenanceIds = new Set<string>([
       ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,
       ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
-      ...PER_SPACE_MAINTENANCE_WORKFLOW_IDS,
+      ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
     ]);
 
     for (const id of ALL_INSTALLABLE_WORKFLOW_IDS) {
@@ -53,11 +52,8 @@ describe('managed_workflow_targets registry', () => {
     }
   });
 
-  it('tracks cleanup as a per-space workflow without coupling it to scheduled discovery', () => {
-    expect(PER_SPACE_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
-    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).not.toContain(
-      SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID
-    );
+  it('tracks cleanup as a per-space scheduled workflow', () => {
+    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
     expect(buildDisableTargets(['space-a'])).toContainEqual({
       id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
       spaceId: 'space-a',

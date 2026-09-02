@@ -57,11 +57,6 @@ export const MEMORY_WORKFLOW_IDS = [
 export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-] as const;
-
-/** Dynamic workflows that may be installed independently in each space. */
-export const PER_SPACE_MAINTENANCE_WORKFLOW_IDS = [
-  ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
 ] as const;
 
@@ -89,7 +84,6 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 ] as const;
@@ -111,7 +105,7 @@ export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarg
     spaceId: DEFAULT_SPACE_ID,
   })),
   ...spaceIds.flatMap((spaceId) =>
-    PER_SPACE_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
+    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
       id: `${baseId}-${spaceId}`,
       spaceId,
     }))
@@ -130,7 +124,7 @@ export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarge
     spaceId: DEFAULT_SPACE_ID,
   })),
   ...spaceIds.flatMap((spaceId) =>
-    PER_SPACE_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
+    SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
       id: `${baseId}-${spaceId}`,
       spaceId,
     }))
