@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import userEvent from '@testing-library/user-event';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -25,6 +25,8 @@ import {
   ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
   ATTACK_TAB_GRID_TEST_ID,
+  ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID,
+  ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID,
   ATTACK_TAB_ROW_SELECT_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
@@ -33,6 +35,7 @@ import {
   ATTACK_TAB_TABLE_TEST_ID,
   INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID,
   REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
+  REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -43,6 +46,7 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
+import { EXPLORE_IN_ATTACKS_TEST_ID } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items';
 import { STATUS_BUTTON_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
 import {
   ATTACK_CASE_ATTACHMENT_COLUMNS_LOCAL_STORAGE_KEY,
@@ -123,6 +127,9 @@ const liveAttack = {
   id: 'attack-id-1',
   title: 'Live attack title',
   summaryMarkdown: 'The adversary escalated on {{ host.name win-01 }}',
+  detailsMarkdown: 'The adversary escalated privileges',
+  entitySummaryMarkdown: '{{ host.name win-01 }}',
+  mitreAttackTactics: ['Privilege Escalation'],
   riskScore: 77,
   alertIds: ['a', 'b', 'c'],
   alertWorkflowStatus: 'acknowledged',
@@ -159,12 +166,17 @@ const renderAttachments = (comments: unknown[]) =>
 
 const cellTexts = (testId: string) => screen.getAllByTestId(testId).map((cell) => cell.textContent);
 
-/** Both row actions are keyed by the attachment saved object id, not the attack document id. */
+/** Every row action is keyed by the attachment saved object id, not the attack document id. */
 const showAttackButton = (savedObjectId: string) =>
   screen.getByTestId(`${SHOW_ATTACK_BUTTON_TEST_ID}-${savedObjectId}`);
 
 const investigateInTimelineButton = (savedObjectId: string) =>
   screen.getByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-${savedObjectId}`);
+
+const moreActionsButton = (savedObjectId: string) =>
+  screen.getByTestId(`${ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID}-${savedObjectId}`);
+
+const moreActionsMenu = () => screen.getByTestId(ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID);
 
 /** The grid cell wrapping a rendered cell body, which is where the grid puts column order. */
 const gridCellOf = (testId: string): HTMLElement => {
@@ -763,8 +775,33 @@ describe('AttackTabContent', () => {
       expect(screen.getAllByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID)).toHaveLength(2);
       expect(showAttackButton('so-1')).toBeInTheDocument();
       expect(investigateInTimelineButton('so-1')).toBeInTheDocument();
+      expect(moreActionsButton('so-1')).toBeInTheDocument();
       expect(showAttackButton('so-2')).toBeInTheDocument();
       expect(investigateInTimelineButton('so-2')).toBeInTheDocument();
+      expect(moreActionsButton('so-2')).toBeInTheDocument();
+    });
+
+    it('carries exactly three controls, in the order the alerts grid uses', () => {
+      renderTab();
+
+      const buttons = Array.from(
+        screen.getByTestId(ATTACK_TAB_COLUMN_ACTIONS_TEST_ID).querySelectorAll('button')
+      );
+
+      expect(buttons).toEqual([
+        showAttackButton('so-1'),
+        investigateInTimelineButton('so-1'),
+        moreActionsButton('so-1'),
+      ]);
+    });
+
+    it('renders the more actions control as an overflow icon button', () => {
+      renderTab();
+
+      expect(moreActionsButton('so-1')).toHaveAttribute('aria-label', 'More actions');
+      expect(
+        moreActionsButton('so-1').querySelector('[data-euiicon-type="boxesVertical"]')
+      ).toBeInTheDocument();
     });
 
     it('leads the row, ahead of the first data column', () => {
@@ -794,6 +831,10 @@ describe('AttackTabContent', () => {
       await user.tab();
 
       expect(investigateInTimelineButton('so-1')).toHaveFocus();
+
+      await user.tab();
+
+      expect(moreActionsButton('so-1')).toHaveFocus();
     });
 
     it('opens Timeline on the attack when the investigate action is used', async () => {
@@ -826,6 +867,7 @@ describe('AttackTabContent', () => {
         screen.queryByTestId(`${INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID}-so-1`)
       ).not.toBeInTheDocument();
       expect(showAttackButton('so-1')).toBeInTheDocument();
+      expect(moreActionsButton('so-1')).toBeInTheDocument();
     });
 
     it('opens the attack flyout when the show action is activated by keyboard', async () => {
@@ -837,6 +879,107 @@ describe('AttackTabContent', () => {
       expect(mockOpenAttackFlyout).toHaveBeenCalledWith(
         expect.objectContaining({ attackId: 'attack-id-1' })
       );
+    });
+
+    it('offers no way to remove an attachment', async () => {
+      renderTab();
+
+      await user.click(moreActionsButton('so-1'));
+
+      expect(screen.queryByText(/remove/i)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(REMOVE_ATTACK_MODAL_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    describe('the more actions menu', () => {
+      it('opens the take action menu the flyout offers', async () => {
+        renderTab();
+
+        expect(
+          screen.queryByTestId(ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID)
+        ).not.toBeInTheDocument();
+
+        await user.click(moreActionsButton('so-1'));
+
+        expect(within(moreActionsMenu()).getByText('Add to existing case')).toBeInTheDocument();
+        expect(within(moreActionsMenu()).getByText('Add to new case')).toBeInTheDocument();
+      });
+
+      it('opens by keyboard', async () => {
+        renderTab();
+
+        moreActionsButton('so-1').focus();
+        await user.keyboard('{Enter}');
+
+        expect(moreActionsMenu()).toBeInTheDocument();
+      });
+
+      it('omits the navigation item the row already offers as an icon button', async () => {
+        renderTab();
+
+        await user.click(moreActionsButton('so-1'));
+
+        expect(
+          within(moreActionsMenu()).queryByTestId(EXPLORE_IN_ATTACKS_TEST_ID)
+        ).not.toBeInTheDocument();
+        expect(within(moreActionsMenu()).queryByText('Explore in Attacks')).not.toBeInTheDocument();
+        expect(
+          within(moreActionsMenu()).queryByText('Investigate in Timeline')
+        ).not.toBeInTheDocument();
+      });
+
+      it('omits the AI assistant item, as the flyout footer does', async () => {
+        renderTab();
+
+        await user.click(moreActionsButton('so-1'));
+
+        expect(
+          within(moreActionsMenu()).queryByTestId('viewInAiAssistant')
+        ).not.toBeInTheDocument();
+        expect(
+          within(moreActionsMenu()).queryByTestId('viewInAgentBuilder')
+        ).not.toBeInTheDocument();
+      });
+
+      it('closes when an item is selected', async () => {
+        renderTab();
+
+        await user.click(moreActionsButton('so-1'));
+        await user.click(within(moreActionsMenu()).getByText('Add to existing case'));
+
+        await waitFor(() =>
+          expect(
+            screen.queryByTestId(ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID)
+          ).not.toBeInTheDocument()
+        );
+      });
+
+      it('is disabled, and opens nothing, for an attack that could not be resolved', async () => {
+        mockFindResult([]);
+
+        renderTab();
+
+        expect(moreActionsButton('so-1')).toBeDisabled();
+
+        await user.click(moreActionsButton('so-1'));
+
+        expect(
+          screen.queryByTestId(ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID)
+        ).not.toBeInTheDocument();
+      });
+
+      it('explains why it is disabled for an attack that could not be resolved', async () => {
+        mockFindResult([]);
+
+        renderTab();
+
+        fireEvent.mouseOver(moreActionsButton('so-1'));
+
+        expect(
+          await screen.findByText(
+            'This attack could not be loaded. It may have been deleted, aged into a frozen tier, or be outside your access. The details shown were captured when it was attached.'
+          )
+        ).toBeInTheDocument();
+      });
     });
   });
 

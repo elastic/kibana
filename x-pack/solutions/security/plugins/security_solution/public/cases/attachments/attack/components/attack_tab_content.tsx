@@ -16,17 +16,20 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
+  EuiButtonIcon,
   EuiCheckbox,
   EuiDataGrid,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiProgress,
   EuiTextColor,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -45,6 +48,8 @@ import {
   ATTACK_TAB_COLUMN_TITLE_TEST_ID,
   ATTACK_TAB_EMPTY_TEST_ID,
   ATTACK_TAB_GRID_TEST_ID,
+  ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID,
+  ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID,
   ATTACK_TAB_ROW_SELECT_TEST_ID,
   ATTACK_TAB_ROW_STATUS_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
@@ -63,6 +68,7 @@ import { TruncatableText } from '../../../../common/components/truncatable_text'
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
 import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
+import { AttacksGroupTakeActionItems } from '../../../../detections/components/attacks/table/attacks_group_take_action_items';
 import type { RemoveAttackConfirmation } from './connected_remove_attack_modal';
 import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
 import { useInvestigateAttackInTimeline } from '../hooks/use_investigate_attack_in_timeline';
@@ -191,6 +197,16 @@ const UNRESOLVED_TOOLTIP = i18n.translate(
       'This attack could not be loaded. It may have been deleted, aged into a frozen tier, or be outside your access. The details shown were captured when it was attached.',
   }
 );
+
+const MORE_ACTIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.cases.tab.moreActions',
+  {
+    defaultMessage: 'More actions',
+  }
+);
+
+/** The telemetry source every action taken from this grid is attributed to. */
+const TELEMETRY_SOURCE = 'case_attachment_table';
 
 const COLUMN_HEADERS: Record<AttackTabColumnId, string> = {
   [ATTACK_TAB_COLUMN_ID.actions]: i18n.translate(
@@ -507,6 +523,67 @@ const AttackActionsHeaderCell = () => <>{COLUMN_HEADERS[ATTACK_TAB_COLUMN_ID.act
 
 AttackActionsHeaderCell.displayName = 'AttackActionsHeaderCell';
 
+/**
+ * The row's overflow, carrying the same menu the attack flyout's "Take action" button opens,
+ * minus the navigation item the row already offers as its own icon button.
+ */
+const AttackMoreActionsButton = ({ row }: { row: AttackRow }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
+
+  const { attack, savedObjectId } = row;
+
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(attack?.index ?? ''), [attack?.index]);
+
+  // The menu reads the live document — its alert ids, tags, assignees and workflow status — so a
+  // row that resolved to nothing but its snapshot has nothing to take action on.
+  const isDisabled = attack == null;
+
+  const button = (
+    <EuiToolTip content={isDisabled ? UNRESOLVED_TOOLTIP : MORE_ACTIONS_LABEL} position="top">
+      <EuiButtonIcon
+        aria-label={MORE_ACTIONS_LABEL}
+        color="text"
+        data-test-subj={`${ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID}-${savedObjectId}`}
+        iconType="boxesVertical"
+        id={`${savedObjectId}-attack-more-actions`}
+        isDisabled={isDisabled}
+        onClick={togglePopover}
+      />
+    </EuiToolTip>
+  );
+
+  if (attack == null) {
+    return button;
+  }
+  return (
+    <EuiPopover
+      anchorPosition="downLeft"
+      aria-label={MORE_ACTIONS_LABEL}
+      button={button}
+      closePopover={closePopover}
+      id={`${savedObjectId}-attack-more-actions-popover`}
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+      panelProps={{ 'data-test-subj': ATTACK_TAB_ROW_MORE_ACTIONS_POPOVER_TEST_ID }}
+      repositionOnScroll
+    >
+      <AttacksGroupTakeActionItems
+        attack={attack}
+        closePopover={closePopover}
+        isRemoteDocument={isRemoteDocument}
+        showAiAssistantAction={false}
+        showNavigationAction={false}
+        telemetrySource={TELEMETRY_SOURCE}
+      />
+    </EuiPopover>
+  );
+};
+
+AttackMoreActionsButton.displayName = 'AttackMoreActionsButton';
+
 const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
   const { canInvestigateInTimeline, investigateAttackInTimeline, rows } =
     useAttackGridCellContext();
@@ -546,6 +623,9 @@ const AttackActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
           />
         </EuiFlexItem>
       ) : null}
+      <EuiFlexItem grow={false}>
+        <AttackMoreActionsButton row={row} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
