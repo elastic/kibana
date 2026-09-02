@@ -160,8 +160,13 @@ const dirOf = (path: string): string => {
  * Strips the leading/trailing `.*` anchors from a Lucene RLIKE pattern to
  * produce an equivalent ERE pattern for `git grep --extended-regexp`.
  */
-const rlikeToEre = (rlike: string): string =>
-  rlike.replace(/^\.\*/, '').replace(/\.\*$/, '') || rlike;
+const rlikeToEre = (rlike: string): string => {
+  const stripped = rlike.replace(/^\.\*/, '').replace(/\.\*$/, '');
+  if (!stripped) {
+    throw new Error(`rlikeToEre: pattern "${rlike}" reduces to match-all after anchor stripping`);
+  }
+  return stripped;
+};
 
 /**
  * Lists file paths in a repository matching a path regex pattern.

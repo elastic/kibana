@@ -39,8 +39,13 @@ export interface CodeGrepOptions {
  * RLIKE is implicitly anchored (`^...$`), so `.*foo.*` matches any line
  * containing `foo`; ERE is unanchored by default, so `foo` suffices.
  */
-const rlikeToEre = (rlike: string): string =>
-  rlike.replace(/^\.\*/, '').replace(/\.\*$/, '') || rlike;
+const rlikeToEre = (rlike: string): string => {
+  const stripped = rlike.replace(/^\.\*/, '').replace(/\.\*$/, '');
+  if (!stripped) {
+    throw new Error(`rlikeToEre: pattern "${rlike}" reduces to match-all after anchor stripping`);
+  }
+  return stripped;
+};
 
 /**
  * Greps file contents via the Codebox grep endpoint. This is the server-side

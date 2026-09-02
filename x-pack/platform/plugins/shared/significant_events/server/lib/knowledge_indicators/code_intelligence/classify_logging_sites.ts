@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { InferenceClient } from '@kbn/inference-common';
+import pLimit from 'p-limit';
 import {
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -18,8 +19,9 @@ import type { LoggingCandidate, LoggingChunk } from './types';
  * calls. The idiom grep matches log-shaped lines but cannot tell a real emission
  * from a test assertion, a build script, or a commented-out call, and cannot
  * infer a severity level for a bare `panic("...")`. The classifier does both —
- * keep/drop + level + the static message — in sequential batches of at most 200
- * candidates. The task is a per-line judgment, so batching is order-independent.
+ * keep/drop + level + the static message — in bounded concurrent batches of at
+ * most 200 candidates. The task is a per-line judgment, so batching is
+ * order-independent.
  *
  * Bounded, tool-less, temperature 0: the cheapest inference tier handles it.
  * The connector is the KI-extraction inference feature's mapped connector, so
@@ -69,6 +71,7 @@ const classifySchema = {
 
 const VALID_LEVELS = new Set(['fatal', 'error', 'warn', 'warning', 'info', 'debug', 'trace']);
 const CLASSIFY_BATCH_SIZE = 200;
+const CLASSIFY_BATCH_CONCURRENCY = 5;
 
 export interface ClassifyLoggingSitesOptions {
   inferenceClient: InferenceClient;
@@ -100,55 +103,78 @@ export async function classifyLoggingSites({
 
   const decisions = new Map<number, { keep: boolean; level?: string; message?: string }>();
   const batchCount = Math.ceil(candidates.length / CLASSIFY_BATCH_SIZE);
-  for (let start = 0; start < candidates.length; start += CLASSIFY_BATCH_SIZE) {
-    const batch = candidates.slice(start, start + CLASSIFY_BATCH_SIZE);
-    const input =
-      'Classify these excerpts (TAB-separated: id, file path, language, excerpt; newlines shown as \u23ce):\n' +
-      batch
-        .map((candidate, offset) => {
-          const path = candidate.location?.replace(/:\d+$/, '') || 'unknown';
-          const language = candidate.language || 'unknown';
-          const excerpt = candidate.content.replace(/\n/g, ' \u23ce ');
-          return `${start + offset}\t${path}\t${language}\t${excerpt}`;
-        })
-        .join('\n');
+  const totalStart = Date.now();
+  const limit = pLimit(CLASSIFY_BATCH_CONCURRENCY);
 
-    try {
-      const { output } = await inferenceClient.output({
-        id: 'classify_logging_sites',
-        connectorId,
-        system: CLASSIFY_SYSTEM,
-        input,
-        schema: classifySchema,
-        abortSignal,
-        metadata: {
-          connectorTelemetry: {
-            pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
-            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-          },
-        },
-      });
-      for (const result of output?.results ?? []) {
-        if (typeof result?.id === 'number') {
-          decisions.set(result.id, {
-            keep: Boolean(result.keep),
-            level: result.level,
-            message: result.message,
+  await Promise.all(
+    Array.from({ length: batchCount }, (_, batchIndex) =>
+      limit(async () => {
+        const start = batchIndex * CLASSIFY_BATCH_SIZE;
+        const batchStart = Date.now();
+        const batch = candidates.slice(start, start + CLASSIFY_BATCH_SIZE);
+        const input =
+          'Classify these excerpts (TAB-separated: id, file path, language, excerpt; newlines shown as \u23ce):\n' +
+          batch
+            .map((candidate, offset) => {
+              const path = candidate.location?.replace(/:\d+$/, '') || 'unknown';
+              const language = candidate.language || 'unknown';
+              const excerpt = candidate.content.replace(/\n/g, ' \u23ce ');
+              return `${start + offset}\t${path}\t${language}\t${excerpt}`;
+            })
+            .join('\n');
+
+        try {
+          const { output } = await inferenceClient.output({
+            id: 'classify_logging_sites',
+            connectorId,
+            system: CLASSIFY_SYSTEM,
+            input,
+            schema: classifySchema,
+            abortSignal,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+                aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+              },
+            },
           });
+          for (const result of output?.results ?? []) {
+            if (
+              typeof result?.id === 'number' &&
+              result.id >= start &&
+              result.id < start + batch.length
+            ) {
+              decisions.set(result.id, {
+                keep: Boolean(result.keep),
+                level: result.level,
+                message: result.message,
+              });
+            }
+          }
+          logger.debug(
+            `classify_logging_sites: completed batch ${batchIndex + 1}/${batchCount} in ${
+              Date.now() - batchStart
+            }ms`
+          );
+        } catch (error) {
+          // Degrade only this batch: the missing-decision fallback below keeps its
+          // candidates unjudged rather than dropping them.
+          logger.warn(
+            `classify_logging_sites: inference failed for batch ${
+              batchIndex + 1
+            }/${batchCount} after ${
+              Date.now() - batchStart
+            }ms, keeping its idiom candidates unjudged (${
+              error instanceof Error ? error.message : String(error)
+            })`
+          );
         }
-      }
-    } catch (error) {
-      // Degrade only this batch: the missing-decision fallback below keeps its
-      // candidates unjudged rather than dropping them.
-      logger.warn(
-        `classify_logging_sites: inference failed for batch ${
-          Math.floor(start / CLASSIFY_BATCH_SIZE) + 1
-        }/${batchCount}, keeping its idiom candidates unjudged (${
-          error instanceof Error ? error.message : String(error)
-        })`
-      );
-    }
-  }
+      })
+    )
+  );
+  logger.debug(
+    `classify_logging_sites: completed ${batchCount} batch(es) in ${Date.now() - totalStart}ms`
+  );
 
   const chunks: LoggingChunk[] = [];
   let keptWithClassification = 0;

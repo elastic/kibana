@@ -407,6 +407,14 @@ export const isNonEmittingLine = (line: string): boolean => {
 export const OVER_CAPTURE_CEILING = 0.01;
 
 /**
+ * Safety cap for `git grep --max-count`. Any single grep returning more than
+ * this many lines is almost certainly a degenerate pattern (match-all, overly
+ * broad wildcard). The cap prevents the .http connector from timing out on
+ * massive responses and keeps memory bounded.
+ */
+export const MAX_GREP_HITS = 50_000;
+
+/**
  * Drift ratio for {@link detectLoggingProfileDrift}: a stored grep's recount is
  * flagged for refresh when it drops to zero OR falls by more than this fraction
  * of its stored `expect_call_sites` (e.g. `0.5` = a >50% drop). A failed count

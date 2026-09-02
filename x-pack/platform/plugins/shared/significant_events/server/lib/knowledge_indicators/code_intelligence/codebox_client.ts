@@ -81,6 +81,7 @@ export interface CodeboxLanguagesOptions {
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { MAX_GREP_HITS } from './constants';
 
 /**
  * Deterministic connector ID for the Codebox `.http` connector, provisioned by
@@ -149,7 +150,9 @@ export class CodeboxClient {
     if (path) query.set('path', path);
     if (ignoreCase) query.set('ignoreCase', 'true');
     if (contextLines !== undefined) query.set('contextLines', String(contextLines));
-    if (maxCount !== undefined) query.set('maxCount', String(maxCount));
+    // Always cap maxCount to prevent unbounded responses from degenerate
+    // patterns. Callers may pass a lower value; the cap is a safety net.
+    query.set('maxCount', String(maxCount ?? MAX_GREP_HITS));
 
     const data = await this.request('GET', `/repos/${org}/${repo}/grep?${query}`);
     if (typeof data === 'string') {

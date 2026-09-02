@@ -1,11 +1,20 @@
 # Codebox-driven KI (Knowledge Indicator) extraction proof of concept.
 #
-# Two-phase pipeline:
+# Three-phase pipeline:
 #  1. _list_repos enumerates indexed repositories (lightweight, no grepping).
 #  2. Per-repo fan-out: _discover_services(repository) greps one repo's deploy
 #     markers/manifests, classifies candidate service roots, then the inner
-#     foreach fans out per-service to _identify_service for logging-site
-#     discovery, classification, and query generation.
+#     foreach fans out per-service.
+#  3. Per-service "generic first" flow:
+#     a. _identify_service runs with built-in idiom patterns (no wrapper greps).
+#     b. If generic patterns produced zero queries AND the service is not OTel,
+#        the wrapper agent dives deeper to find house logging wrappers.
+#     c. If the agent finds wrappers, _identify_service re-runs with the
+#        profile greps to generate queries from the discovered wrappers.
+#
+# The wrapper agent is the most expensive step (~30-120s per repo). Running
+# generic patterns first means it only fires for repos where the built-in
+# idioms found nothing — typically ~30% of the corpus.
 #
 # Both stages query a Codebox git repository service over HTTP via the .http
 # connector. The plugin gates on the Codebox connector's presence.
@@ -88,100 +97,10 @@ steps:
                   continue: true
                 steps:
                   # ---------------------------------------------------------------
-                  # Logging profile lane (Tasks 4, 7). Checked per service; the
-                  # gate (INV-003) ensures the agent runs at most once per
-                  # repository + commit.
+                  # Step 1: Run _identify_service with built-in idiom patterns
+                  # (no wrapper greps). This is the fast, cheap path that works
+                  # for most repos.
                   # ---------------------------------------------------------------
-                  - name: check_logging_profile
-                    type: kibana.request
-                    with:
-                      method: POST
-                      path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_check_logging_profile'
-                      headers:
-                        x-elastic-internal-origin: 'kibana'
-                      body:
-                        repository: '{{ foreach.item.repository }}'
-                        gitSha: '{{ foreach.item.gitSha }}'
-                        gitRefKey: '{{ foreach.item.refKey }}'
-                        runId: '{{ execution.id }}'
-                    on-failure:
-                      continue: true
-
-                  - name: needs_logging_profile
-                    type: if
-                    condition: '${{ steps.check_logging_profile.error == null and steps.check_logging_profile.output.needs_refresh == true }}'
-                    steps:
-                      - name: run_logging_wrappers_agent
-                        type: ai.agent
-                        agent-id: 'significant-events.logging-wrappers'
-                        connector-id-by-feature: 'significant_events_ki_extraction'
-                        plugin-id: 'significant_events_code_intelligence'
-                        aggregate-by: 'significant_events'
-                        create-conversation: true
-                        with:
-                          message: |
-                            Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
-
-                            Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`, passing `git_ref_key` (`{{ foreach.item.refKey }}`) alongside `git_commit`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
-                          configuration_overrides:
-                            enable_elastic_capabilities: false
-                            tools:
-                              - tool_ids:
-                                  - git-grep
-                                  - git-show
-                                  - git-ls-tree
-                                  - platform.sig_events.logging_queries_validate
-                          metadata:
-                            workflow_execution_id: "{{ execution.id }}"
-                          schema:
-                            type: object
-                            properties:
-                              greps:
-                                type: array
-                                description: >-
-                                  Validated Lucene RLIKE greps matching this repository's
-                                  house logging-wrapper call sites. Empty when the repository
-                                  has no house wrapper.
-                                items:
-                                  type: object
-                                  properties:
-                                    regex:
-                                      type: string
-                                      description: 'Lucene RLIKE, whole-value anchored (wrap in .*). A literal paren is [()].'
-                                    expect_call_sites:
-                                      type: integer
-                                      description: 'Validated hit count on the indexed commit (the drift baseline).'
-                                    evidence:
-                                      type: object
-                                      properties:
-                                        path:
-                                          type: string
-                                          description: 'Repository-relative file path the grep was written to match.'
-                                        line:
-                                          type: integer
-                                          description: 'Line number in that file the grep was written to match.'
-                                      required: [path, line]
-                                  required: [regex, expect_call_sites, evidence]
-                            required: [greps]
-                        on-failure:
-                          continue: true
-
-                      - name: persist_logging_profile
-                        type: kibana.request
-                        with:
-                          method: POST
-                          path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_persist_logging_profile'
-                          headers:
-                            x-elastic-internal-origin: 'kibana'
-                          body:
-                            repository: '{{ foreach.item.repository }}'
-                            gitSha: '{{ foreach.item.gitSha }}'
-                            gitRefKey: '{{ foreach.item.refKey }}'
-                            runId: '{{ execution.id }}'
-                            greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
-                        on-failure:
-                          continue: true
-
                   - name: identify_service
                     type: kibana.request
                     with:
@@ -205,6 +124,134 @@ steps:
                         max-attempts: 2
                         delay: '5s'
                         strategy: exponential
+
+                  # ---------------------------------------------------------------
+                  # Step 2: If generic patterns found zero logging sites AND
+                  # the service is not OTel-instrumented, dive deeper with the
+                  # wrapper agent. This is the expensive LLM path — only fires
+                  # when the built-in idioms missed everything. Gate on coverage,
+                  # not newly written queries: idempotent query dedup can make
+                  # queriesGenerated zero even when generic sites were found.
+                  # ---------------------------------------------------------------
+                  - name: needs_wrapper_investigation
+                    type: if
+                    condition: '${{ steps.identify_service.error == null and steps.identify_service.output.loggingSitesFound == 0 and foreach.item.hasOtel != true }}'
+                    steps:
+                      - name: check_logging_profile
+                        type: kibana.request
+                        with:
+                          method: POST
+                          path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_check_logging_profile'
+                          headers:
+                            x-elastic-internal-origin: 'kibana'
+                          body:
+                            repository: '{{ foreach.item.repository }}'
+                            gitSha: '{{ foreach.item.gitSha }}'
+                            gitRefKey: '{{ foreach.item.refKey }}'
+                            runId: '{{ execution.id }}'
+                        on-failure:
+                          continue: true
+
+                      - name: needs_logging_profile
+                        type: if
+                        condition: '${{ steps.check_logging_profile.error == null and steps.check_logging_profile.output.needs_refresh == true }}'
+                        steps:
+                          - name: run_logging_wrappers_agent
+                            type: ai.agent
+                            agent-id: 'significant-events.logging-wrappers'
+                            connector-id-by-feature: 'significant_events_ki_extraction'
+                            plugin-id: 'significant_events_code_intelligence'
+                            aggregate-by: 'significant_events'
+                            create-conversation: true
+                            with:
+                              message: |
+                                Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
+
+                                The built-in logging idiom patterns found zero call sites for this service, so it likely uses house logging wrappers. Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`, passing `git_ref_key` (`{{ foreach.item.refKey }}`) alongside `git_commit`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
+                              configuration_overrides:
+                                enable_elastic_capabilities: false
+                                tools:
+                                  - tool_ids:
+                                      - git-grep
+                                      - git-show
+                                      - git-ls-tree
+                                      - platform.sig_events.logging_queries_validate
+                              metadata:
+                                workflow_execution_id: "{{ execution.id }}"
+                              schema:
+                                type: object
+                                properties:
+                                  greps:
+                                    type: array
+                                    description: >-
+                                      Validated Lucene RLIKE greps matching this repository's
+                                      house logging-wrapper call sites. Empty when the repository
+                                      has no house wrapper.
+                                    items:
+                                      type: object
+                                      properties:
+                                        regex:
+                                          type: string
+                                          description: 'Lucene RLIKE, whole-value anchored (wrap in .*). A literal paren is [()].'
+                                        expect_call_sites:
+                                          type: integer
+                                          description: 'Validated hit count on the indexed commit (the drift baseline).'
+                                        evidence:
+                                          type: object
+                                          properties:
+                                            path:
+                                              type: string
+                                              description: 'Repository-relative file path the grep was written to match.'
+                                            line:
+                                              type: integer
+                                              description: 'Line number in that file the grep was written to match.'
+                                          required: [path, line]
+                                      required: [regex, expect_call_sites, evidence]
+                                required: [greps]
+                            on-failure:
+                              continue: true
+
+                          - name: persist_logging_profile
+                            type: kibana.request
+                            with:
+                              method: POST
+                              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_persist_logging_profile'
+                              headers:
+                                x-elastic-internal-origin: 'kibana'
+                              body:
+                                repository: '{{ foreach.item.repository }}'
+                                gitSha: '{{ foreach.item.gitSha }}'
+                                gitRefKey: '{{ foreach.item.refKey }}'
+                                runId: '{{ execution.id }}'
+                                greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
+                            on-failure:
+                              continue: true
+
+                      # Step 3: Re-run _identify_service now that profile
+                      # greps exist. The route reads them from the KI index.
+                      - name: identify_service_with_wrappers
+                        type: kibana.request
+                        with:
+                          method: POST
+                          path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_identify_service'
+                          headers:
+                            x-elastic-internal-origin: 'kibana'
+                          body:
+                            repository: '{{ foreach.item.repository }}'
+                            gitSha: '{{ foreach.item.gitSha }}'
+                            gitRefKey: '{{ foreach.item.refKey }}'
+                            repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
+                            iacSignals: '${{ foreach.item.iacSignals }}'
+                            hasOtel: '${{ foreach.item.hasOtel }}'
+                            service:
+                              name: '{{ foreach.item.name }}'
+                              serviceRoot: '{{ foreach.item.serviceRoot }}'
+                              language: '{{ foreach.item.language }}'
+                        on-failure:
+                          retry:
+                            max-attempts: 2
+                            delay: '5s'
+                            strategy: exponential
 
               - name: process_otel_services
                 type: foreach

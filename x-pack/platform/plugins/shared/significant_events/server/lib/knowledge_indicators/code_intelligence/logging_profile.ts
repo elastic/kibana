@@ -32,6 +32,24 @@ const LOGGING_PROFILE_FEATURE_ID = CODE_FEATURE_SUBTYPE_LOGGING_PROFILE;
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
+/**
+ * Returns true when a regex pattern contains at least one literal character
+ * that discriminates against arbitrary input. Strips regex metacharacters
+ * (`.`, `*`, `+`, `?`, `^`, `$`, `|`), character classes (`[...]`), grouping
+ * (`(`, `)`), and quantifier braces (`{n,m}`) — if nothing remains, the
+ * pattern is effectively match-all.
+ */
+const hasLiteralDiscriminator = (pattern: string): boolean => {
+  const stripped = pattern
+    // Remove character classes (including negated) and their contents
+    .replace(/\[\^?[^\]]*\]/g, '')
+    // Remove quantifier braces {n}, {n,}, {n,m}
+    .replace(/\{\d+(?:,\d*)?\}/g, '')
+    // Remove regex metacharacters and grouping
+    .replace(/[.*+?^$|()\\]/g, '');
+  return stripped.length > 0;
+};
+
 const asNumber = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
@@ -43,7 +61,7 @@ const asNumber = (value: unknown): number | undefined =>
 export class LoggingProfileValidationError extends Error {
   constructor(
     public readonly regex: string,
-    public readonly reason: 'zero_hits' | 'over_capture',
+    public readonly reason: 'zero_hits' | 'over_capture' | 'match_all',
     message: string
   ) {
     super(message);
@@ -172,6 +190,20 @@ function validateGreps(
   ceiling: number
 ): void {
   for (const grep of greps) {
+    // Guard against match-all patterns. A valid wrapper grep must contain at
+    // least one literal character that discriminates (a letter, digit, or
+    // escaped literal like `[(]`). Patterns composed entirely of wildcards,
+    // quantifiers, and character classes (e.g. `.*`, `.+`, `.*[^x]*.*`) would
+    // match the entire repo during drift recounts.
+    if (!hasLiteralDiscriminator(grep.regex)) {
+      throw new LoggingProfileValidationError(
+        grep.regex,
+        'match_all',
+        `logging_profile: rejecting grep ${JSON.stringify(
+          grep.regex
+        )} — pattern has no literal discriminator (would match every line)`
+      );
+    }
     if (!grep.expect_call_sites || grep.expect_call_sites <= 0) {
       throw new LoggingProfileValidationError(
         grep.regex,
@@ -384,8 +416,14 @@ async function recountOneGrep({
 }): Promise<GrepDriftResult> {
   const expected = stored.expect_call_sites;
   try {
-    // Strip leading/trailing .* anchors for ERE compatibility with Codebox grep
-    const erePattern = stored.regex.replace(/^\.\*/, '').replace(/\.\*$/, '') || stored.regex;
+    // Strip leading/trailing .* anchors for ERE compatibility with Codebox grep.
+    // If stripping yields an empty string the original was a match-all pattern
+    // (e.g. ".*") which would grep the entire repo — skip the recount.
+    const stripped = stored.regex.replace(/^\.\*/, '').replace(/\.\*$/, '');
+    if (!stripped) {
+      return classifyDrift(stored.regex, expected, expected, false, null, driftRatio);
+    }
+    const erePattern = stripped;
     const hits = await codebox.grep({
       org,
       repo,

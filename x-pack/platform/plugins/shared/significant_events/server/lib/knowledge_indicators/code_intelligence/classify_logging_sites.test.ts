@@ -147,61 +147,96 @@ describe('classifyLoggingSites', () => {
     expect(chunk.classified).toBeUndefined();
   });
 
-  it('classifies 450 candidates in 3 sequential batches with global ids', async () => {
-    const candidates = Array.from({ length: 450 }, (_, index) =>
-      candidate({ location: `src/main.ts:${index}`, content: `logger.info("${index}")` })
+  it('classifies batches concurrently with a maximum concurrency of 5', async () => {
+    const candidates = Array.from({ length: 1_200 }, (_, index) =>
+      candidate({ location: `src/main.ts:${index}` })
     );
+    let active = 0;
+    let maxActive = 0;
     const output = jest.fn(async (request: { input: string }) => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      active -= 1;
       const results = request.input
         .split('\n')
         .slice(1)
         .map((line) => ({ id: Number(line.split('\t')[0]), keep: true }));
       return { id: 'classify_logging_sites', output: { results }, content: '' };
     });
-    const inferenceClient = { output } as unknown as InferenceClient;
 
     const chunks = await classifyLoggingSites({
-      inferenceClient,
+      inferenceClient: { output } as unknown as InferenceClient,
       connectorId: 'c',
       candidates,
       logger: loggerMock.create(),
     });
 
-    expect(output).toHaveBeenCalledTimes(3);
-    expect(chunks).toHaveLength(450);
-    expect(chunks[449].location).toBe('src/main.ts:449');
+    expect(output).toHaveBeenCalledTimes(6);
+    expect(maxActive).toBe(5);
+    expect(chunks).toHaveLength(1_200);
+    expect(chunks[1_199].location).toBe('src/main.ts:1199');
   });
 
-  it('degrades only a failed batch and classifies the other batches', async () => {
+  it('degrades only a failed batch and merges successful batch decisions by global id', async () => {
     const candidates = Array.from({ length: 450 }, (_, index) =>
       candidate({ location: `src/main.ts:${index}` })
     );
-    let call = 0;
     const output = jest.fn(async (request: { input: string }) => {
-      call += 1;
-      if (call === 2) {
-        throw new Error('batch down');
-      }
-      const results = request.input
+      const ids = request.input
         .split('\n')
         .slice(1)
-        .map((line) => ({ id: Number(line.split('\t')[0]), keep: true }));
-      return { id: 'classify_logging_sites', output: { results }, content: '' };
+        .map((line) => Number(line.split('\t')[0]));
+      if (ids[0] === 200) {
+        throw new Error('batch down');
+      }
+      return {
+        id: 'classify_logging_sites',
+        output: { results: ids.map((id) => ({ id, keep: false })) },
+        content: '',
+      };
     });
-    const inferenceClient = { output } as unknown as InferenceClient;
 
     const chunks = await classifyLoggingSites({
-      inferenceClient,
+      inferenceClient: { output } as unknown as InferenceClient,
       connectorId: 'c',
       candidates,
       logger: loggerMock.create(),
     });
 
     expect(output).toHaveBeenCalledTimes(3);
-    // The failed batch's candidates survive unjudged (they matched a logger idiom).
-    expect(chunks.some(({ location }) => location === 'src/main.ts:201')).toBe(true);
-    expect(chunks.some(({ location }) => location === 'src/main.ts:202')).toBe(true);
-    expect(chunks.some(({ location }) => location === 'src/main.ts:449')).toBe(true);
+    // The failed batch's candidates survive unjudged; successful false decisions drop theirs.
+    expect(chunks).toHaveLength(200);
+    expect(chunks[0].location).toBe('src/main.ts:200');
+    expect(chunks[199].location).toBe('src/main.ts:399');
+  });
+
+  it('ignores a successful batch decision for another batch id', async () => {
+    const candidates = Array.from({ length: 400 }, (_, index) =>
+      candidate({ location: `src/main.ts:${index}` })
+    );
+    const output = jest.fn(async (request: { input: string }) => {
+      const firstId = Number(request.input.split('\n')[1].split('\t')[0]);
+      if (firstId === 0) {
+        return {
+          id: 'classify_logging_sites',
+          output: { results: [{ id: 200, keep: false }] },
+          content: '',
+        };
+      }
+      throw new Error('batch down');
+    });
+
+    const chunks = await classifyLoggingSites({
+      inferenceClient: { output } as unknown as InferenceClient,
+      connectorId: 'c',
+      candidates,
+      logger: loggerMock.create(),
+    });
+
+    // Batch 2 failed, so a batch 1 response cannot drop any of its candidates.
+    expect(chunks).toHaveLength(400);
+    expect(chunks[200].location).toBe('src/main.ts:200');
   });
 
   it('keeps every candidate unjudged when inference throws', async () => {

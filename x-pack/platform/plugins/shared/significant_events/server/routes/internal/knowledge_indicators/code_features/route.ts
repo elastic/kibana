@@ -1075,6 +1075,7 @@ const identifyServiceRoute = createServerRoute({
     status: 'updated' | 'noop' | 'no_repo';
     streamName: string;
     featuresPersisted: number;
+    loggingSitesFound: number;
     queriesGenerated: number;
   }> => {
     const scopedClients = await getScopedClients({ request });
@@ -1216,6 +1217,7 @@ const identifyServiceRoute = createServerRoute({
       status: featureResult.status,
       streamName: featureResult.streamName,
       featuresPersisted: featureResult.features?.length ?? 0,
+      loggingSitesFound: loggingChunks.length,
       queriesGenerated: queryResult.status === 'generated' ? queryResult.generatedCount ?? 0 : 0,
     };
   },
