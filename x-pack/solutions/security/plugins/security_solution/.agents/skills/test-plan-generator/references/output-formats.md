@@ -51,7 +51,7 @@ For `update` / `regenerate`, if the invocation contains no level keyword, fall b
 | `Feature Background` | One sentence stating the problem this feature solves. | 2–4 sentences per template. | Same as `standard`. |
 | `Assumptions` | **Only bullets whose value was confirmed from a concrete source in Step 1** (issue body, PR description, Figma, sub-issue). Rendered as a single-line, `; `-separated inline form: `<value 1>; <value 2>.` If no bullet was confirmed, keep the `## Assumptions` heading and emit a one-liner `See _Known Limitations_ for open assumptions.` Do not repeat any ⚠️ from *Known Limitations* here. | Four labelled bullets per template; each unconfirmed bullet is flagged with ⚠️ inline and mirrored in *Known Limitations*. | Same as `standard`, plus a provenance suffix on each confirmed value: `Enterprise (#1234 body)`, `at least one active alert (Figma flow "Alert list")`. |
 | Scenario `**Automation coverage**:` line | Single tag: `🤖 automated (N tests)` when at least one matching test exists in the coverage catalog, or `🧪 manual only` when no matching test exists. `N` is the total count of matching tests across all types. Never list individual test names or file paths under `lean`. | Full itemised list per the *Automation coverage rules* under *Scenario format* below. | Same as `standard`. |
-| Scenario `**Source:**` line (new) | Omitted. | Omitted. | A line placed **immediately after `**Priority:**`** and **before `**Automation coverage**:`**, citing the specific sources the scenario derives from — the AC number(s) with issue reference (`AC1 (#1234)`), and/or PR artifacts (`PR #5678 (endpoint POST /rules)`, `PR #5678 (component RuleForm)`). Never invent a source — if a scenario has no traceable source, apply the Core rule and stop. Multiple sources are `; `-separated on the same line. |
+| Scenario `**Source:**` line (new) | Omitted. | Omitted. | A line placed **immediately after `**Priority:**`** and **before `**Automation coverage**:`**, citing the specific sources the scenario derives from. Four allowed categories: consolidated AC (`AC1 (#1234)`), PR artifact (`PR #5678 (endpoint POST /rules)`), Always-evaluated coverage (`Always-evaluated coverage (upgrade — new SO type)`), and Code-derived (`Code-derived (new endpoint … in <path>)`). Never invent an AC number or fabricate any source; if the scenario has no traceable input in any of the four categories, apply the Core rule and stop. Multiple sources are `; `-separated on the same line. Full rules under [Scenario format § Source line rules](#scenario-format). |
 
 ### Draft-save marker
 
@@ -104,10 +104,17 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Source line rules (`detailed` level only):**
 - Emit a `**Source:**` line **immediately after `**Priority:**`** and **before `**Automation coverage**:`**.
-- Cite the specific inputs the scenario derives from: consolidated AC item numbers (with the issue number in parentheses, e.g. `AC1 (#1234)`) and/or PR artifacts (e.g. `PR #5678 (endpoint POST /rules)`, `PR #5678 (component RuleForm)`).
-- Multiple sources are `; `-separated on the same line.
-- Never invent a source. If a scenario has no traceable AC or PR artifact, apply the Core rule and stop — do not fabricate a `**Source:**` value. This is a hard failure of `detailed` traceability, not a soft downgrade to `standard`.
-- The `Source` line derives from the corpus already gathered in Step 1 and consolidated in Step 2. It never triggers new fetches.
+- Cite the specific inputs the scenario derives from. Multiple sources are `; `-separated on the same line. Allowed source categories:
+
+  | Category | Format | When to use |
+  |---|---|---|
+  | Consolidated AC | `AC<n> (#<issue>)` — e.g. `AC1 (#1234)` | Scenario maps to a numbered item in the consolidated AC list built in Step 2. Never invent an AC number: if the scenario has no matching AC row, fall through to one of the other categories below rather than fabricate one. |
+  | PR artifact | `PR #<n> (<artifact type> <name>)` — e.g. `PR #5678 (endpoint POST /rules)`, `PR #5678 (component RuleForm)`, `PR #5678 (saved object type alert-notes)` | Scenario covers a PR artifact from the inventory built in Step 1 (new API route, service method, UI component, saved object type, feature flag, schema, etc.). |
+  | Always-evaluated coverage | `Always-evaluated coverage (<trigger> — <one-clause justification>)` — e.g. `Always-evaluated coverage (upgrade — new SO type alert-notes)`, `Always-evaluated coverage (CRUD — persisted rule object)`, `Always-evaluated coverage (dependency data lifecycle — referenced index deletion)` | Scenario was required by the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) rule (upgrade / CRUD per persisted object / dependency data lifecycle) rather than by any explicit AC or PR artifact. The justification must name the trigger so a reader can trace it back to the rule. |
+  | Code-derived | `Code-derived (<what was found> in <path>)` — e.g. `Code-derived (new endpoint POST /rules in escalation_service.ts)` | Scenario covers a fact discovered only in code (a route registered outside the PR description, a schema change surfaced in a `.gen.ts` file consumers rely on, etc.). Used sparingly; if the same fact is also cited in a PR body, prefer the PR-artifact category. |
+
+- Never invent a source. If a scenario has no traceable AC, PR artifact, always-evaluated trigger, or code-derived fact, apply the Core rule and stop — do not fabricate a `**Source:**` value. This is a hard failure of `detailed` traceability, not a soft downgrade to `standard`.
+- The `Source` line derives from the corpus already gathered in Step 1 and consolidated in Step 2 (and, for Always-evaluated coverage, the trigger rule in `optional-scenarios.md`). It never triggers new fetches.
 
 **Execution block rules:**
 - Render exactly the three task-list items shown above, in that order, with the leading emoji on each line. The italic instruction line is part of the canonical block — do not reword or omit it.

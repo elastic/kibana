@@ -18,12 +18,16 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
 
    This map is consumed by the *Execution block preservation* sub-step in step 6.
 
-   **Resolve `VERBOSITY_LEVEL` for this run.** Precedence:
-   1. **User override** — if the current invocation contains a level keyword per the grammar in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) (`update a lean test plan …`, `regenerate detailed test plan …`, etc.), use it.
-   2. **Published marker** — otherwise, search the published body for a line matching `<!-- verbosity: (lean|standard|detailed) -->` and adopt the captured value as `VERBOSITY_LEVEL`. Store this as `PUBLISHED_VERBOSITY_LEVEL` regardless (used by Step 7 to announce level changes).
-   3. **Fallback** — if neither an override nor a published marker exists (plan predates this feature), use `standard` and record the migration in `SKILL_RULE_MIGRATIONS` (see Step 5) under check ID `Vmig` with the one-line description *"published plan missing `<!-- verbosity: … -->` marker; defaulted to `standard`."* The refreshed draft written in Step 6 will emit the marker so subsequent runs stop hitting the fallback.
+   **Resolve `VERBOSITY_LEVEL` for this run.** In two ordered sub-steps:
 
-   If `VERBOSITY_LEVEL` differs from `PUBLISHED_VERBOSITY_LEVEL`, treat the level change as an identified change (Step 5) — the whole plan will be re-rendered at the new level. Non-negotiable invariants (scenario count, priorities, ⚠️ entries) remain identical; only prose density and per-scenario metadata differ (see [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels)).
+   1. **Parse `PUBLISHED_VERBOSITY_LEVEL` unconditionally** — always search the published body for a line matching `<!-- verbosity: (lean|standard|detailed) -->` and capture the value into `PUBLISHED_VERBOSITY_LEVEL`. If no such line exists (plan predates this feature), leave `PUBLISHED_VERBOSITY_LEVEL` as `none` and append the entry `Vmig` to `SKILL_RULE_MIGRATIONS` (see Step 5) with the one-line description *"published plan missing `<!-- verbosity: … -->` marker; defaulted to `standard`."*. This sub-step always runs — the value is consumed by Step 7's level-change announcement regardless of which branch chose `VERBOSITY_LEVEL`.
+
+   2. **Select `VERBOSITY_LEVEL`** — precedence:
+      - **User override** — if the current invocation contains a level keyword per the grammar in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) (`update a lean test plan …`, `regenerate detailed test plan …`, etc.), use it. This is `INVOCATION_VERBOSITY_KEYWORD` from [`../SKILL.md` § Modes of operation](../SKILL.md#modes-of-operation).
+      - **Published marker** — otherwise, use `PUBLISHED_VERBOSITY_LEVEL` when it is not `none`.
+      - **Fallback** — otherwise (no override and `PUBLISHED_VERBOSITY_LEVEL` is `none`), use `standard`. The `Vmig` entry appended in sub-step 1 already records the migration; do not append it a second time here.
+
+   If `VERBOSITY_LEVEL` differs from `PUBLISHED_VERBOSITY_LEVEL` (including the `none` case), treat the level change as an identified change (Step 5) — the whole plan will be re-rendered at the new level. Non-negotiable invariants (scenario count, priorities, ⚠️ entries) remain identical; only prose density and per-scenario metadata differ (see [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels)).
 
 2. **Re-fetch all non-PR GitHub sources** — the issue, sub-issues, comments, and the parent issue (if any). Use the exact `gh` commands for each source type defined in [`gathering-context.md`](gathering-context.md) (*GitHub fetches*, *Parent issue*, *Sub-issues*, *Acceptance criterion extraction and origin tagging*). The *one level up only* and *background context only* constraints from the [Parent issue](gathering-context.md#parent-issue) section still apply.
 
@@ -56,7 +60,7 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
 
    **If this comparison produces an empty change list** (no new ACs, no incorrect scenarios, no outdated sections, no new/resolved limitations, no new test files or PR artifacts, no implemented Pending sub-issues, no change to the Issue Clarity Assessment, no scenarios in `PUBLISHED_EXECUTION_STATE` flagged as *no published state*, no verbosity level change, **and** no failing checks in `SKILL_RULE_MIGRATIONS`): skip Steps 6 and 7, do not save a draft, and tell the user *"The existing test plan for issue #&lt;number&gt; appears to be up to date — no draft saved."* Then jump directly to Step 8 and output the Sources Summary so the user can see what was checked.
 
-6. **Apply only the identified changes.** Do not rewrite accurate sections.
+6. **Apply only the identified changes.** Do not rewrite accurate sections — **with one exception: when `VERBOSITY_LEVEL != PUBLISHED_VERBOSITY_LEVEL`, every prose section whose shape depends on the level (`Overview`, `Feature Background`, `Assumptions`) and every per-scenario metadata line whose shape depends on the level (`Automation coverage`, `**Source:**` under `detailed`) must be re-rendered at the new level, even if the underlying sources are unchanged. See *Render sections at `VERBOSITY_LEVEL`* below.**
 
    **Special handling: implemented Pending sub-issues** (per the *Pending work pattern* in [`document-structure.md`](document-structure.md)):
    - Remove the `(Pending #N)` prefix from each AC item and from the matching scenario title.

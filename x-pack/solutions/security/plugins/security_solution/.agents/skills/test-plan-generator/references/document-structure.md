@@ -17,6 +17,8 @@ This file defines the required sections of a test plan, their order, and the con
 
 ## Template
 
+**Before filling in the template below**, read [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) and render `Overview` / `Feature Background` / `Assumptions` at `VERBOSITY_LEVEL`. The prose lengths shown below are the `standard` shape — the actual placeholders (`[One paragraph …]`, `[… 2–4 sentences]`, four `Assumptions` bullets) are only correct for `standard`. Under `lean` / `detailed` the shape changes per that reference; do not follow the placeholders verbatim if `VERBOSITY_LEVEL` is not `standard`.
+
 ```markdown
 # Test Plan: [Feature Name]
 
@@ -149,16 +151,9 @@ This file defines the required sections of a test plan, their order, and the con
 
 ## Verbosity levels
 
-The template above shows the `standard` (default) rendering. Three levels — `lean`, `standard`, `detailed` — control **prose density only** for `Overview`, `Feature Background`, `Assumptions`, and per-scenario metadata. Non-negotiable invariants (scenario count, priorities, ⚠️ entries in *Known Limitations*, *Out of scope* reasons) are identical across all levels.
+The template above shows the `standard` (default) rendering. Three levels — `lean`, `standard`, `detailed` — control **prose density and per-scenario metadata only** for `Overview`, `Feature Background`, `Assumptions`, `Automation coverage`, and the `detailed`-only `**Source:**` line. Non-negotiable invariants (scenario count, priorities, ⚠️ entries in *Known Limitations*, *Out of scope* reasons) are identical across all levels.
 
-The **canonical per-level render rules, invocation grammar, and non-negotiable constraint** live in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels). Do not duplicate them here — read that section when writing sections whose length changes with the level.
-
-Level-specific reminders for the template above:
-
-- **`Overview`** — under `lean`, replace the paragraph with one sentence covering the feature name and validation scope. Under `standard`/`detailed`, keep the paragraph.
-- **`Feature Background`** — under `lean`, one sentence stating the problem. Under `standard`/`detailed`, keep the 2–4 sentence motivation.
-- **`Assumptions`** — under `lean`, render only bullets whose value was confirmed from a concrete Step 1 source, on a single line, `; `-separated (`Enterprise license; at least one active alert.`). Emit `See _Known Limitations_ for open assumptions.` when nothing was confirmed. Never invent defaults — that violates the Core rule at the top of [`SKILL.md`](../SKILL.md#core-rule--never-assume-always-ask). Under `standard`, the four labelled bullets each flag missing values with ⚠️ inline; under `detailed`, confirmed values carry a provenance suffix. ⚠️ entries in *Known Limitations* are identical across all three levels.
-- **Scenario metadata** — the `**Automation coverage**:` line and the `detailed`-only `**Source:**` line follow the rules in [`output-formats.md`](output-formats.md#scenario-format).
+The **canonical per-level render rules, invocation grammar, and non-negotiable constraint** live in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels). This file does not restate them — read that section (and the surrounding [Scenario format](output-formats.md#scenario-format)) when writing sections whose shape changes with the level. Per-section placeholders in the template above are correct for `standard`; under `lean` / `detailed` follow `output-formats.md`, not the template.
 
 ## Pending work pattern
 

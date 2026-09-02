@@ -124,17 +124,26 @@ gh issue view <number> --repo <owner>/<repo> --json comments
 
 Scan the returned comments for one whose body starts with `<!-- test-plan-generated -->`. Fall back to GitHub MCP only if `gh` is unavailable.
 
-**In parallel with mode detection, extract the verbosity level** from the same invocation and store it as `VERBOSITY_LEVEL`. Match the invocation string against these three case-insensitive patterns (the same rules apply to `generate` / `create` / `write` / `update` / `regenerate`):
+**In parallel with mode detection, extract the verbosity keyword** from the same invocation. Match the invocation string against these three case-insensitive patterns (the same matching applies to `generate` / `create` / `write` / `update` / `regenerate`):
 
-| Invocation contains (after the verb) | `VERBOSITY_LEVEL` |
+| Invocation contains (after the verb) | `INVOCATION_VERBOSITY_KEYWORD` |
 |---|---|
 | `a lean` or `lean` immediately before `test plan` | `lean` |
+| `a standard` or `standard` immediately before `test plan` | `standard` |
 | `a detailed` or `detailed` immediately before `test plan` | `detailed` |
-| Any other phrasing (including `a standard` / `standard`, or no level keyword at all) | `standard` |
+| Anything else (no level keyword at all) | *unset* |
 
-Update mode has an additional fallback to the published `<!-- verbosity: … -->` marker when the invocation contains no level keyword — see [`references/mode-update.md`](references/mode-update.md) Step 1. The render rules for each level and the non-negotiable constraint (verbosity is prose-density-only — never affects scenario count, priorities, ⚠️ entries in *Known Limitations*, or *Out of scope* reasons) are defined in [`references/output-formats.md` § Verbosity levels](references/output-formats.md#verbosity-levels); read that section when writing the sections whose rendering changes.
+**Do not** default an unset keyword to `standard` at this point — defaulting differs by flow (not by mode phrase alone, because an `update` invocation with no existing plan falls through to the same Steps 1–3 flow as a fresh `generate`) and is applied in exactly one place per flow:
 
-`VERBOSITY_LEVEL` propagates through Step 3 (draft-save marker + section rendering) and Step 4 (marker preservation). Steps 1 and 2 are level-independent.
+| Flow selected by *Modes of operation* below | How `VERBOSITY_LEVEL` is resolved from `INVOCATION_VERBOSITY_KEYWORD` |
+|---|---|
+| **Steps 1–3 flow** — fresh draft. Includes: `generate` / `create` / `write` with no existing published plan; `update` / `regenerate` with no existing published plan (the "treating as a fresh generate" fallback row of the modes table); the *B) Generate from scratch* branch of [`references/mode-generate.md`](references/mode-generate.md). | Keyword if set; otherwise `standard`. Resolve `VERBOSITY_LEVEL` here — set it before entering Step 1 and do not revisit. |
+| **`mode-update.md` flow** — incremental update against an existing published plan. Includes: `update` / `regenerate` with an existing plan; the *A) Check and update if needed* branch of [`references/mode-generate.md`](references/mode-generate.md). | Do **not** resolve `VERBOSITY_LEVEL` here. The resolution — keyword override, else published marker, else `standard` — happens in [`references/mode-update.md`](references/mode-update.md) Step 1, which parses `PUBLISHED_VERBOSITY_LEVEL` unconditionally first. |
+| **Publish flow** — `publish` / `post`. | Level-independent. Neither `INVOCATION_VERBOSITY_KEYWORD` nor `VERBOSITY_LEVEL` is consulted; Step 4 preserves whatever markers the draft carries. |
+
+The render rules for each level and the non-negotiable constraint (verbosity is prose-density-only — never affects scenario count, priorities, ⚠️ entries in *Known Limitations*, or *Out of scope* reasons) are defined in [`references/output-formats.md` § Verbosity levels](references/output-formats.md#verbosity-levels); read that section when writing the sections whose rendering changes.
+
+Once resolved, `VERBOSITY_LEVEL` propagates through Step 3 (draft-save marker + section rendering) and Step 4 (marker preservation). Steps 1 and 2 are level-independent.
 
 | User phrase | Existing plan? | Action |
 |---|---|---|
