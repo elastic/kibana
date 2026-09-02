@@ -94,7 +94,6 @@ describe('rulesPage', () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
-    // Just rules and logs
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
@@ -106,7 +105,6 @@ describe('rulesPage', () => {
 
     renderRulesPage(history);
 
-    // Just rules
     expect(await screen.findAllByRole('tab')).toHaveLength(1);
   });
 
@@ -122,13 +120,18 @@ describe('rulesPage', () => {
     );
   });
 
-  it('points the back button at Rules when viewing logs', async () => {
+  it('keeps classic Logs on the Rules heading with a back button to Alerts', async () => {
+    useKibanaMock().services.application.getUrlForApp = jest.fn(
+      () => '/app/observability-overview/alerts'
+    );
     const history = createMemoryHistory({ initialEntries: ['/logs'] });
     renderRulesPage(history);
 
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(await screen.findAllByRole('tab')).toHaveLength(2);
     const back = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
-    expect(back).toHaveAccessibleName('Back to Rules');
-    expect(back).toHaveAttribute('href', expect.stringContaining('triggersActions'));
+    expect(back).toHaveAccessibleName('Back to Alerts');
+    expect(back).toHaveAttribute('href', '/app/observability-overview/alerts');
   });
 
   describe('setHeaderActions', () => {
@@ -151,7 +154,6 @@ describe('rulesPage', () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
-      // The primary action renders directly in the header.
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
 
       // Secondary and static menu items collapse into the "More" overflow popover at the jsdom
@@ -245,6 +247,7 @@ describe('rulesPage', () => {
         expect(back).toHaveAttribute('href', expect.stringContaining('triggersActions'));
         expect(screen.queryByTestId('v1RulesTab')).not.toBeInTheDocument();
         expect(screen.queryByTestId('v2RulesTab')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
 
         await openAppMenuOverflow();
         expect(screen.queryByTestId('rulesLogsLink')).not.toBeInTheDocument();
@@ -256,6 +259,10 @@ describe('rulesPage', () => {
 
         await openAppMenuOverflow();
         expect(await screen.findByTestId('rulesLogsLink')).toBeInTheDocument();
+        // EUI overflow popovers set pointer-events: none in jsdom; fireEvent still invokes run.
+        fireEvent.click(await screen.findByTestId('rulesLogsLink'));
+        expect(history.location.pathname).toBe('/logs');
+        expect(await screen.findByTestId('globalRuleEventLogList')).toBeInTheDocument();
       });
 
       it('omits the Logs menu item if the read rules privilege is missing', async () => {

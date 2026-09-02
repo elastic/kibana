@@ -12,7 +12,6 @@ import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-ut
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -22,14 +21,15 @@ import { RulesPageHeader } from '../rules_page/rules_page_header';
 import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
+import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
 
 const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
 
 export const LogsListContainer = () => {
   const history = useHistory();
-  const kibanaServices = useKibana().services;
   const {
     application: {
+      getUrlForApp,
       capabilities: { rulesSettings = {} },
     },
     chrome: { docTitle },
@@ -37,7 +37,7 @@ export const LogsListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
-  } = kibanaServices;
+  } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -50,7 +50,8 @@ export const LogsListContainer = () => {
 
   const docLink = docLinks.links.alerting.guide;
   const rulesListHref = http.basePath.prepend(triggersActionsRoute);
-  const alertingV2Enabled = isAlertingV2Enabled(kibanaServices);
+  const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
+  const mode = useRulesPageMode();
 
   useEffect(() => {
     setBreadcrumbs?.([getRulesBreadcrumbWithHref(), getAlertingSectionBreadcrumb('logs')]);
@@ -73,26 +74,27 @@ export const LogsListContainer = () => {
     [authorizedToReadAnyRules, history]
   );
 
-  const heading = alertingV2Enabled ? (
-    <LogsListHeader
-      backHref={rulesListHref}
-      canShowSettings={canShowSettings}
-      docLink={docLink}
-      onOpenSettings={openSettingsFlyout}
-    />
-  ) : (
-    <RulesPageHeader
-      back={{
-        href: rulesListHref,
-        label: i18n.translate('xpack.triggersActionsUI.rulesPage.backToRulesButtonLabel', {
-          defaultMessage: 'Rules',
-        }),
-      }}
-      tabs={classicLogsTabs}
-      menu={classicLogsMenu}
-      docLink={docLink}
-    />
-  );
+  const heading =
+    mode !== RULES_PAGE_MODE.v1Classic ? (
+      <LogsListHeader
+        backHref={rulesListHref}
+        canShowSettings={canShowSettings}
+        docLink={docLink}
+        onOpenSettings={openSettingsFlyout}
+      />
+    ) : (
+      <RulesPageHeader
+        back={{
+          href: alertsBackHref,
+          label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
+            defaultMessage: 'Alerts',
+          }),
+        }}
+        tabs={classicLogsTabs}
+        menu={classicLogsMenu}
+        docLink={docLink}
+      />
+    );
 
   return (
     <>

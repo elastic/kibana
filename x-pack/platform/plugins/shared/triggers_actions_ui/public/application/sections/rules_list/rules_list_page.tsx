@@ -10,12 +10,7 @@ import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
-import {
-  RULES_PAGE_TAB_IDS,
-  getRulesPageHeaderTabs,
-  shouldShowAlertingV2RulesTab,
-} from '@kbn/response-ops-rules-page-tabs';
+import { RULES_PAGE_TAB_IDS, getRulesPageHeaderTabs } from '@kbn/response-ops-rules-page-tabs';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
@@ -24,12 +19,12 @@ import { RulesPageHeader } from '../rules_page/rules_page_header';
 import { getClassicTabs } from '../rules_page/get_classic_tabs';
 import { getRulesPageMenu } from '../rules_page/get_rules_page_menu';
 import { useRulesPageActions } from '../rules_page/rules_page_actions';
+import { RULES_PAGE_MODE, useRulesPageMode } from '../rules_page/use_rules_page_mode';
 
 const RulesList = lazy(() => import('./components/rules_list'));
 
 export const RulesListContainer = () => {
   const history = useHistory();
-  const kibanaServices = useKibana().services;
   const {
     application: {
       getUrlForApp,
@@ -40,7 +35,7 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
-  } = kibanaServices;
+  } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -58,8 +53,7 @@ export const RulesListContainer = () => {
 
   const docLink = docLinks.links.alerting.guide;
   const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
-  const alertingV2Enabled = isAlertingV2Enabled(kibanaServices);
-  const showV2Tabs = shouldShowAlertingV2RulesTab(kibanaServices);
+  const mode = useRulesPageMode();
 
   useEffect(() => {
     setBreadcrumbs?.([getAlertingSectionBreadcrumb('rules')]);
@@ -67,7 +61,7 @@ export const RulesListContainer = () => {
   }, [docTitle, setBreadcrumbs]);
 
   const rulesListTabs = useMemo(() => {
-    if (showV2Tabs) {
+    if (mode === RULES_PAGE_MODE.v1WithV2Tabs) {
       return getRulesPageHeaderTabs({
         selectedTab: RULES_PAGE_TAB_IDS.v1,
         prepend: http.basePath.prepend,
@@ -75,16 +69,16 @@ export const RulesListContainer = () => {
       });
     }
 
-    if (alertingV2Enabled) {
+    if (mode === RULES_PAGE_MODE.v2) {
       return [];
     }
 
     return getClassicTabs('rules', authorizedToReadAnyRules, history);
-  }, [alertingV2Enabled, authorizedToReadAnyRules, history, http.basePath.prepend, showV2Tabs]);
+  }, [mode, authorizedToReadAnyRules, history, http.basePath.prepend]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
     const extraItems: NonNullable<AppMenuConfig['items']> =
-      alertingV2Enabled && authorizedToReadAnyRules
+      mode !== RULES_PAGE_MODE.v1Classic && authorizedToReadAnyRules
         ? [
             {
               id: 'rulesLogs',
@@ -107,7 +101,7 @@ export const RulesListContainer = () => {
       onOpenSettings: openSettingsFlyout,
     });
   }, [
-    alertingV2Enabled,
+    mode,
     authorizedToCreateAnyRules,
     authorizedToReadAnyRules,
     canShowSettings,

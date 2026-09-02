@@ -36,12 +36,6 @@ export const useRulesPageActions = (): RulesPageActions => {
   return context;
 };
 
-/**
- * Owns the page-level singletons shared by every Rules route: the create-rule
- * modal and the settings flyout, plus the location-aware navigation used to
- * open the rule form. Routes consume these via {@link useRulesPageActions}
- * instead of each rendering their own copy.
- */
 export const RulesPageActionsProvider = ({ children }: PropsWithChildren) => {
   const history = useHistory();
   const location = useLocation();

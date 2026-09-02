@@ -21,10 +21,6 @@ const RULES_PAGE_TITLE = i18n.translate('xpack.triggersActionsUI.rulesPage.pageT
   defaultMessage: 'Rules',
 });
 
-/**
- * Heading for the v1 Rules list (and the classic in-page Logs tab). The v2 Logs
- * destination uses {@link LogsListHeader} instead.
- */
 export const RulesPageHeader = ({ back, tabs, menu, docLink }: RulesPageHeaderProps) => {
   return (
     <AppHeader
