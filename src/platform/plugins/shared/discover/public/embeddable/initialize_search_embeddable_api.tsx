@@ -121,6 +121,9 @@ export const initializeSearchEmbeddableApi = async ({
     Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
     PublishesProjectRoutingOverrides &
     PublishesEsqlUsage;
+  internalApi: {
+    setApproximationApplied: (approximationApplied?: boolean) => void;
+  };
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
@@ -296,10 +299,19 @@ export const initializeSearchEmbeddableApi = async ({
     }
   });
 
+  const setApproximationApplied = (value: boolean | undefined) => {
+    if (approximationApplied$.getValue() !== value) {
+      approximationApplied$.next(value);
+    }
+  };
+
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
       syncProjectRoutingOverrides.unsubscribe();
+    },
+    internalApi: {
+      setApproximationApplied,
     },
     api: {
       setDataViews,

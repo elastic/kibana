@@ -136,7 +136,7 @@ export function initializeFetch({
   refreshTrigger$,
   setDataLoading,
   setBlockingError,
-  approximationApplied$,
+  setApproximationApplied,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -145,7 +145,7 @@ export function initializeFetch({
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
-  approximationApplied$: BehaviorSubject<boolean | undefined>;
+  setApproximationApplied: (value: boolean | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -301,9 +301,7 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
-      if (approximationApplied$.getValue() !== next.approximationApplied) {
-        approximationApplied$.next(next.approximationApplied);
-      }
+      setApproximationApplied(next.approximationApplied);
     });
 
   return {
