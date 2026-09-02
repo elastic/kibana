@@ -426,12 +426,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           />
         )}
         <EuiFlexGroup direction="column" gutterSize="s">
-          {hasMLPermissions && !hasSemanticText && (
+          {!hasSemanticText && !isPlatinumLicense && isSemanticTextEnabled && (
             <EuiFlexItem grow={false}>
-              <SemanticTextBanner
-                isSemanticTextEnabled={isSemanticTextEnabled}
-                isPlatinumLicense={isPlatinumLicense}
-              />
+              <SemanticTextBanner />
             </EuiFlexItem>
           )}
           {!hasMappings &&
