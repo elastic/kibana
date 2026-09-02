@@ -329,8 +329,7 @@ describe('EpisodeRuleCell', () => {
     });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ 'v1-rule-id': makeRule('Classic CPU Rule') }}
         isLoadingRules={false}
@@ -351,8 +350,7 @@ describe('EpisodeRuleCell', () => {
     });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ 'v1-rule-id': v1Rule }}
         isLoadingRules={false}
