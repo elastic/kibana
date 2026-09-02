@@ -10,9 +10,9 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
-import { API_VERSIONS, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
 
 interface PackagePolicy {
   id: string;
@@ -20,21 +20,18 @@ interface PackagePolicy {
 }
 
 interface PackagePoliciesResponse {
-  items: PackagePolicy[];
-}
-
-interface AgentPoliciesResponse {
-  items: Array<{ id: string; name: string }>;
+  items?: PackagePolicy[];
 }
 
 interface TargetingWarningCalloutProps {
-  policyIds: string[];
+  /**
+   * Every agent policy this pack will be written to — the combo-box selection
+   * AND the shard keys. Must match the `policy_ids` the form submits, or this
+   * warning will contradict the server's own check.
+   */
+  targetPolicyIds: string[];
+  agentPoliciesById?: Record<string, GetAgentPoliciesResponseItem>;
 }
-
-// Fleet's package-policy list is offset-paginated. Osquery Manager is a limited
-// package (one policy per agent policy), so this is bounded by the number of
-// agent policies; 1000 matches the plugin-wide convention for these lookups.
-const FLEET_LOOKUP_PER_PAGE = 1000;
 
 /**
  * Warns that a pack targeted at specific agent policies will ALSO reach agent
@@ -54,35 +51,32 @@ const FLEET_LOOKUP_PER_PAGE = 1000;
  * user saves.
  */
 const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> = ({
-  policyIds,
+  targetPolicyIds,
+  agentPoliciesById,
 }) => {
   const { http } = useKibana().services;
 
+  // Osquery's own internal wrapper, not `/api/fleet/package_policies`: the Fleet
+  // public route is `fleetAuthz`-gated, so a user with only `osquery: all` would
+  // get a 403 and silently never see this warning. The wrapper is `osquery-read`
+  // gated and reads through an internal SO client, which is the whole reason
+  // every other Fleet lookup in this plugin goes through `fleet_wrapper`.
   const { data: packagePoliciesData } = useQuery<PackagePoliciesResponse>(
     ['osquery-package-policies-for-targeting-check'],
     () =>
-      http.get('/api/fleet/package_policies', {
-        // Public versioned route: without an explicit version it 400s in
-        // production (dev mode masks this by falling back to the latest).
-        version: API_VERSIONS.public.v1,
-        query: {
-          // Prefix is the saved-object type, not `package_policies.` (Fleet
-          // rejects an unknown type with a 400) and without `.attributes.`
-          // (this endpoint rejects that path as a non-existent key).
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${OSQUERY_INTEGRATION_NAME}"`,
-          perPage: FLEET_LOOKUP_PER_PAGE,
-        },
+      http.get('/internal/osquery/fleet_wrapper/package_policies', {
+        version: API_VERSIONS.internal.v1,
       }),
     {
       staleTime: 30_000,
-      enabled: policyIds.length > 0,
+      enabled: targetPolicyIds.length > 0,
     }
   );
 
   const untargetedPolicyIds = useMemo(() => {
-    if (!policyIds.length || !packagePoliciesData?.items) return [];
+    if (!targetPolicyIds.length || !packagePoliciesData?.items) return [];
 
-    const targetSet = new Set(policyIds);
+    const targetSet = new Set(targetPolicyIds);
     const untargeted = new Set<string>();
 
     for (const packagePolicy of packagePoliciesData.items) {
@@ -98,42 +92,15 @@ const TargetingWarningCalloutComponent: React.FC<TargetingWarningCalloutProps> =
     }
 
     return [...untargeted];
-  }, [packagePoliciesData, policyIds]);
+  }, [packagePoliciesData, targetPolicyIds]);
 
-  // `useQuery` keys must be stable: a fresh array each render would refetch on
-  // every keystroke elsewhere in the form.
-  const untargetedIdsKey = useMemo(
-    () => [...untargetedPolicyIds].sort().join(','),
-    [untargetedPolicyIds]
-  );
-
-  // `_bulk_get` rather than a `kuery` on `/agent_policies`: an agent policy's id
-  // is the saved-object id, which is not a queryable field on that endpoint
-  // (`agent_policies.id:"<id>"` is rejected as a non-existent key, and `id:"<id>"`
-  // silently matches nothing). This mirrors the server's `getByIds`, including
-  // `ignoreMissing` for a policy deleted since the package-policy read.
-  const { data: agentPoliciesData } = useQuery<AgentPoliciesResponse>(
-    ['osquery-agent-policies-for-targeting-warning', untargetedIdsKey],
+  const untargetedNames = useMemo(
     () =>
-      http.post('/api/fleet/agent_policies/_bulk_get', {
-        version: API_VERSIONS.public.v1,
-        body: JSON.stringify({ ids: untargetedPolicyIds, ignoreMissing: true }),
-      }),
-    {
-      enabled: untargetedPolicyIds.length > 0,
-      staleTime: 30_000,
-    }
+      // Fall back to the raw id for an agent policy that did not resolve: listing
+      // fewer policies than actually receive the pack would understate the reach.
+      untargetedPolicyIds.map((id) => agentPoliciesById?.[id]?.name || id),
+    [agentPoliciesById, untargetedPolicyIds]
   );
-
-  const untargetedNames = useMemo(() => {
-    if (!untargetedPolicyIds.length) return [];
-
-    const nameById = new Map((agentPoliciesData?.items ?? []).map((ap) => [ap.id, ap.name]));
-
-    // Fall back to the raw id for an agent policy that did not resolve: listing
-    // fewer policies than actually receive the pack would understate the reach.
-    return untargetedPolicyIds.map((id) => nameById.get(id) || id);
-  }, [agentPoliciesData, untargetedPolicyIds]);
 
   const messageValues = useMemo(
     () => ({ count: untargetedNames.length, names: untargetedNames.join(', ') }),

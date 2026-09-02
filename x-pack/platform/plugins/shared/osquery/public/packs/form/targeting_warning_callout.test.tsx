@@ -6,10 +6,12 @@
  */
 
 /**
- * The callout is the only pre-save signal that a pack will over-deliver, and the
- * Fleet lookups behind it are easy to get subtly wrong (an unknown kuery type
- * prefix 400s; an agent policy's id is not a queryable field). These tests pin
- * the request shapes as well as the rendered output.
+ * The callout is the only pre-save signal that a pack will over-deliver. Two
+ * things about it are easy to regress and are pinned here: it must read through
+ * osquery's own `fleet_wrapper` route (the Fleet public API is `fleetAuthz`-gated,
+ * so an osquery-only user would get a 403 and silently never see the warning),
+ * and its target set must match what the form actually submits — combo-box
+ * selection PLUS shard keys.
  */
 
 import React from 'react';
@@ -17,6 +19,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 
 import { TargetingWarningCallout } from './targeting_warning_callout';
 
@@ -34,7 +37,16 @@ jest.mock('../../common/lib/kibana', () => ({
   }),
 }));
 
-const renderCallout = (policyIds: string[]) => {
+const agentPoliciesById = {
+  'policy-a': { id: 'policy-a', name: 'Policy A' },
+  'policy-b': { id: 'policy-b', name: 'Policy B' },
+  'policy-c': { id: 'policy-c', name: 'Policy C' },
+} as unknown as Record<string, GetAgentPoliciesResponseItem>;
+
+const renderCallout = (
+  targetPolicyIds: string[],
+  policiesById: Record<string, GetAgentPoliciesResponseItem> | undefined = agentPoliciesById
+) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -43,7 +55,10 @@ const renderCallout = (policyIds: string[]) => {
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <TargetingWarningCallout policyIds={policyIds} />
+          <TargetingWarningCallout
+            targetPolicyIds={targetPolicyIds}
+            agentPoliciesById={policiesById}
+          />
         </QueryClientProvider>
       </IntlProvider>
     </EuiProvider>
@@ -63,7 +78,6 @@ describe('TargetingWarningCallout', () => {
   describe('when the integration is shared with an untargeted agent policy', () => {
     beforeEach(() => {
       mockHttpGet.mockResolvedValue(sharedPackagePolicies);
-      mockHttpPost.mockResolvedValue({ items: [{ id: 'policy-b', name: 'Policy B' }] });
     });
 
     it('should warn and name the untargeted agent policy', async () => {
@@ -73,39 +87,32 @@ describe('TargetingWarningCallout', () => {
       expect(screen.getByText(/Policy B/)).toBeInTheDocument();
     });
 
-    it('should query package policies by saved-object type, not the `package_policies.` prefix', async () => {
-      // `package_policies.package.name:...` is rejected by Fleet with a 400,
-      // which would silently disable the whole callout.
+    it('should read package policies through the osquery internal route', async () => {
+      // Not `/api/fleet/package_policies`: that route is `fleetAuthz`-gated, so a
+      // user with only `osquery: all` would 403 and never see this warning.
       renderCallout(['policy-a']);
 
       await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
       const [path, options] = mockHttpGet.mock.calls[0];
-      expect(path).toBe('/api/fleet/package_policies');
-      expect(options.query.kuery).toBe('fleet-package-policies.package.name:"osquery_manager"');
-      expect(options.query.kuery).not.toContain('package_policies.package');
-      // Public versioned route: omitting the version 400s in production.
-      expect(options.version).toBe('2023-10-31');
+      expect(path).toBe('/internal/osquery/fleet_wrapper/package_policies');
+      expect(path).not.toContain('/api/fleet/');
+      expect(options.version).toBe('1');
     });
 
-    it('should resolve agent policy names via _bulk_get, not a kuery on the id', async () => {
-      // An agent policy's id is its saved-object id and is not a queryable
-      // field: `agent_policies.id:"<id>"` 400s and `id:"<id>"` matches nothing.
+    it('should render for a user with no Fleet privileges', async () => {
+      // Regression guard: the whole point of the internal wrapper is that an
+      // osquery-only user still gets the warning. Nothing here may 403.
       renderCallout(['policy-a']);
 
-      await waitFor(() => expect(mockHttpPost).toHaveBeenCalled());
-      const [path, options] = mockHttpPost.mock.calls[0];
-      expect(path).toBe('/api/fleet/agent_policies/_bulk_get');
-      expect(JSON.parse(options.body)).toEqual({
-        ids: ['policy-b'],
-        ignoreMissing: true,
-      });
-      expect(options.version).toBe('2023-10-31');
+      expect(await screen.findByTestId('packTargetingWarningCallout')).toBeInTheDocument();
+      // Names come from the form's already-loaded osquery-scoped hook, so there
+      // is no second, differently-privileged Fleet request.
+      expect(mockHttpPost).not.toHaveBeenCalled();
     });
 
     it('should fall back to the raw id when an agent policy no longer resolves', async () => {
       // Dropping the name would understate how many policies receive the pack.
-      mockHttpPost.mockResolvedValue({ items: [] });
-      renderCallout(['policy-a']);
+      renderCallout(['policy-a'], {});
 
       expect(await screen.findByTestId('packTargetingWarningCallout')).toBeInTheDocument();
       expect(screen.getByText(/policy-b/)).toBeInTheDocument();
@@ -119,8 +126,17 @@ describe('TargetingWarningCallout', () => {
 
       await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
       expect(screen.queryByTestId('packTargetingWarningCallout')).not.toBeInTheDocument();
-      // No untargeted policies means no name lookup at all.
-      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
+
+    it('should not warn about an agent policy targeted via a shard', async () => {
+      // The form submits `[...policy_ids, ...Object.keys(shards)]`, so a policy
+      // targeted at a percentage in the shards accordion IS targeted. Warning
+      // about it would contradict the server's own post-save check.
+      mockHttpGet.mockResolvedValue(sharedPackagePolicies);
+      renderCallout(['policy-a', 'policy-b']);
+
+      await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
+      expect(screen.queryByTestId('packTargetingWarningCallout')).not.toBeInTheDocument();
     });
 
     it('should ignore package policies that do not cover any targeted agent policy', async () => {
@@ -131,7 +147,6 @@ describe('TargetingWarningCallout', () => {
 
       await waitFor(() => expect(mockHttpGet).toHaveBeenCalled());
       expect(screen.queryByTestId('packTargetingWarningCallout')).not.toBeInTheDocument();
-      expect(mockHttpPost).not.toHaveBeenCalled();
     });
   });
 
@@ -140,7 +155,6 @@ describe('TargetingWarningCallout', () => {
       renderCallout([]);
 
       expect(mockHttpGet).not.toHaveBeenCalled();
-      expect(mockHttpPost).not.toHaveBeenCalled();
       expect(screen.queryByTestId('packTargetingWarningCallout')).not.toBeInTheDocument();
     });
 
@@ -167,11 +181,11 @@ describe('TargetingWarningCallout', () => {
           { id: 'pp-2', policy_ids: ['policy-a', 'policy-c'] },
         ],
       });
-      mockHttpPost.mockResolvedValue({ items: [{ id: 'policy-c', name: 'Policy C' }] });
       renderCallout(['policy-a']);
 
-      await waitFor(() => expect(mockHttpPost).toHaveBeenCalled());
-      expect(JSON.parse(mockHttpPost.mock.calls[0][1].body).ids).toEqual(['policy-c']);
+      expect(await screen.findByTestId('packTargetingWarningCallout')).toBeInTheDocument();
+      // "Policy C" once, not twice.
+      expect(screen.getAllByText(/Policy C/)).toHaveLength(1);
     });
   });
 });

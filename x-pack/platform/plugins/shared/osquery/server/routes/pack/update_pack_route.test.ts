@@ -4206,7 +4206,7 @@ describe('updatePackRoute', () => {
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
       expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-pp-ab');
       // The over-reach onto policy-b is surfaced rather than silently enforced.
-      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toEqual({
+      expect((mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning).toEqual({
         untargeted_agent_policy_names: ['policy-b'],
       });
     });

@@ -595,7 +595,7 @@ describe('createPackRoute', () => {
         ];
       expect(writtenPack.pack_name).toBe('my-pack');
 
-      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toEqual({
+      expect((mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning).toEqual({
         untargeted_agent_policy_names: ['policy-b'],
       });
     });
@@ -622,7 +622,7 @@ describe('createPackRoute', () => {
       await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toEqual({
+      expect((mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning).toEqual({
         untargeted_agent_policy_names: ['agent-policy-b'],
       });
     });
@@ -648,7 +648,9 @@ describe('createPackRoute', () => {
 
       expect(mockResponse.ok).toHaveBeenCalled();
       expect(packagePolicyUpdate).not.toHaveBeenCalled();
-      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toBeUndefined();
+      expect(
+        (mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning
+      ).toBeUndefined();
     });
 
     it('global pack (shards.*) is exactly targeted and carries no warning', async () => {
@@ -675,7 +677,9 @@ describe('createPackRoute', () => {
       // not over-reach and the shared policy is still written.
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
       expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-pp-ab');
-      expect(mockResponse.ok.mock.calls[0][0].body.data.targeting_warning).toBeUndefined();
+      expect(
+        (mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning
+      ).toBeUndefined();
     });
   });
 });

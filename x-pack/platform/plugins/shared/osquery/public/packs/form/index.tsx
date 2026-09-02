@@ -412,6 +412,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [agentPoliciesById]
   );
 
+  // Must mirror the `policy_ids` built in the submit handler (combo-box selection
+  // plus shard keys). Passing only `policyIds` would flag a shard-targeted policy
+  // as collateral damage, contradicting the server's own post-save check.
+  const targetPolicyIds = useMemo(
+    () => [
+      ...(policyIds ?? []),
+      ...filter(
+        map(shards, (shard, key) => key),
+        (key) => !isEmpty(key)
+      ),
+    ],
+    [policyIds, shards]
+  );
+
   const availableOptions = useMemo(() => {
     const currentShardsFieldValues = map(shards, (shard, key) => key);
     const currentPolicyIdsFieldValues = map(policyIds, (policy) => policy);
@@ -457,9 +471,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {/* The callout renders nothing when targeting is exact, so the
-                spacer stays unconditional to keep the layout stable. */}
-            <TargetingWarningCallout policyIds={policyIds} />
+            {/* The callout supplies its own leading spacer when it renders. */}
+            <TargetingWarningCallout
+              targetPolicyIds={targetPolicyIds}
+              agentPoliciesById={agentPoliciesById}
+            />
             <EuiSpacer size="m" />
 
             <EuiFlexGroup>

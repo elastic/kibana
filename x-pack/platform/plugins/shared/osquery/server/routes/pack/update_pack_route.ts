@@ -54,7 +54,7 @@ import {
 import { convertShardsToArray, convertShardsToObject } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData, TargetingWarning } from './types';
-import type { PackQueryInput, PreservableQueryFields } from './utils';
+import type { PackagePolicyScopeResult, PackQueryInput, PreservableQueryFields } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
@@ -467,6 +467,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.ok({ body: { data: buildResponseData() } });
         }
 
+        // Scope results from whichever write branch ran. The targeting warning is
+        // built from these rather than recomputed, so it always describes the set
+        // actually written — including edit-branch wire-scan-only package policies,
+        // which a recompute from `policiesList` alone cannot surface.
+        let writtenScopeResults: PackagePolicyScopeResult[] | undefined;
+
         // The pack SO (source of truth) is already committed. These Fleet writes
         // only project it onto the wire, so a concurrent-write 409 → response.conflict
         // (client retries; reconciler also repairs). Other errors propagate.
@@ -485,6 +491,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 packagePolicyWriteTargets,
                 Boolean(effectiveShards?.['*'])
               );
+              writtenScopeResults = enableScopeResults;
 
               const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
@@ -551,6 +558,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               retargetWriteTargets,
               Boolean(effectiveShards?.['*'])
             );
+            writtenScopeResults = retargetScopeResults;
             const writeTargetIds = new Set(
               retargetScopeResults.map(({ packagePolicy }) => packagePolicy.id)
             );
@@ -642,19 +650,17 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               editWriteTargetsForScope,
               Boolean(effectiveShards?.['*'])
             );
+            writtenScopeResults = editScopeResults;
 
             const editPk = makePackKey(updatedPackSO.attributes.name, spaceId);
 
             // Over-broad policies are written as-is — see the enable branch.
             await Promise.all(
               editScopeResults.map(({ packagePolicy, agentPolicyIds }) => {
-                // Wire-scan-only entries (drift repair) have an empty intersection
-                // with policiesList — fall back to the original intersection
-                // logic so the shard is preserved from the wire.
-                const effectiveIds =
-                  agentPolicyIds.length > 0
-                    ? agentPolicyIds
-                    : (packagePolicy.policy_ids ?? []).filter((id) => policiesList.includes(id));
+                // Wire-scan-only entries (drift repair) legitimately resolve to an
+                // empty id list; the pack block is still rewritten so the drifted
+                // block is healed, and `existingShard` below preserves its shard.
+                const effectiveIds = agentPolicyIds;
 
                 return packagePolicyService?.update(
                   spaceScopedClient,
@@ -791,17 +797,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         // warning about over-reach would be misleading.
         const isPackEnabled = enabled ?? currentPackSO.attributes.enabled;
         let targetingWarning: TargetingWarning | undefined;
-        if (isPackEnabled && policiesList.length) {
-          const writeTargets = groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies);
-          const scopeResults = resolvePackTargetScope(
-            writeTargets,
-            Boolean(effectiveShards?.['*'])
-          );
-          targetingWarning = await buildTargetingWarning(
-            scopeResults,
-            agentPolicyService,
-            spaceScopedClient
-          );
+        if (isPackEnabled && writtenScopeResults?.length) {
+          // Advisory only, and the pack SO plus every Fleet write are already
+          // committed — a failed name lookup must not turn a successful save into
+          // an error response. Same best-effort contract as the reference heal.
+          try {
+            targetingWarning = await buildTargetingWarning(
+              writtenScopeResults,
+              agentPolicyService,
+              spaceScopedClient
+            );
+          } catch (err) {
+            logger.warn(
+              `Failed to build targeting warning for pack ${request.params.id}: ${err.message}`
+            );
+          }
         }
 
         const responseData = buildResponseData();
