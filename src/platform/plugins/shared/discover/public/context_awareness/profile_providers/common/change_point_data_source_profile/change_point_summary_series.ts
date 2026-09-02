@@ -102,12 +102,8 @@ const evictOldestDoneEntries = (keepKey: string): void => {
 
 const downsampleSeriesByEntity = (
   seriesByEntity: ChangePointSeriesByEntity
-): ChangePointSeriesByEntity => {
-  for (const [key, points] of seriesByEntity) {
-    seriesByEntity.set(key, downsampleSparklinePoints(points));
-  }
-  return seriesByEntity;
-};
+): ChangePointSeriesByEntity =>
+  new Map([...seriesByEntity].map(([key, points]) => [key, downsampleSparklinePoints(points)]));
 
 /**
  * Loads the pre-CHANGE_POINT line series (same ES|QL Lens uses).
@@ -116,40 +112,29 @@ const downsampleSeriesByEntity = (
 const loadLineSeries = async ({
   fetchParams,
   data,
-  esql,
+  seriesColumns,
+  baseLineEsql,
   entityColumnIds,
   abortSignal,
   cards,
 }: {
   fetchParams: ChangePointFetchParams;
   data: DataPublicPluginStart;
-  esql: string | undefined;
+  seriesColumns: { timeColumn: string; valueColumn: string } | undefined;
+  baseLineEsql: string | undefined;
   entityColumnIds: string[];
   abortSignal: AbortSignal;
   cards: ChangePointCardModel[] | undefined;
 }): Promise<ChangePointSummarySeriesState> => {
   const table = fetchParams.table;
-  if (!esql || !table?.columns?.length) {
-    return { status: 'idle' };
-  }
-
-  const seriesColumns = getChangePointSeriesColumns(esql);
-  if (!seriesColumns) {
+  if (!seriesColumns || !baseLineEsql || !table?.columns?.length) {
     return { status: 'idle' };
   }
 
   const { timeColumn, valueColumn } = seriesColumns;
   const earliestAnnotationMs = getEarliestAnnotationTimeFromCards(cards);
 
-  let lineEsql = buildChangePointLineDataQuery(esql);
-  if (!lineEsql) {
-    return {
-      status: 'error',
-      error: new Error('Unable to build change point line query'),
-      entityColumnIds,
-      cards,
-    };
-  }
+  let lineEsql = baseLineEsql;
 
   if (entityColumnIds.length > 0 && table.rows) {
     lineEsql = appendDistinctEntityWhereToLineEsql(
@@ -230,8 +215,10 @@ export const getChangePointSummarySeries$ = (
     ? fixESQLQueryWithVariables(rawEsql, fetchParams.esqlVariables ?? [])
     : undefined;
   const table = fetchParams.table;
-  const entityColumnIds = esql && table?.columns?.length ? getEntityColumnIds(esql, table) : [];
   const cards = esql && table?.columns?.length ? buildChangePointCards({ table, esql }) : undefined;
+  const entityColumnIds = esql && table?.columns?.length ? getEntityColumnIds(esql, table) : [];
+  const seriesColumns = esql ? getChangePointSeriesColumns(esql) : undefined;
+  const baseLineEsql = esql ? buildChangePointLineDataQuery(esql) : undefined;
 
   const abortController = new AbortController();
   const subscribers = new Set<{
@@ -270,7 +257,8 @@ export const getChangePointSummarySeries$ = (
   loadLineSeries({
     fetchParams,
     data,
-    esql,
+    seriesColumns,
+    baseLineEsql,
     entityColumnIds,
     abortSignal: abortController.signal,
     cards,

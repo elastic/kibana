@@ -44,12 +44,11 @@ interface ChangePointSummaryCellProps extends DataGridCellValueElementProps {
 
 const shouldRenderChangePointChart = (
   row: Readonly<Record<string, unknown>>,
-  table: { columns: Array<{ id: string }> } | undefined,
+  columnIds: ReadonlySet<string> | undefined,
   typeColumnId: string,
   pvalueColumnId: string
 ): boolean => {
-  if (!table?.columns.length) return false;
-  const columnIds = new Set(table.columns.map((c) => c.id));
+  if (!columnIds?.size) return false;
   const hasTypedColumns = columnIds.has(typeColumnId) && columnIds.has(pvalueColumnId);
   return hasTypedColumns ? isChangePointTableRow(row, typeColumnId, pvalueColumnId) : true;
 };
@@ -162,9 +161,16 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
   );
 
   const fetchParams = chartSectionProps?.fetchParams;
+  const columnIds = useMemo(
+    () =>
+      fetchParams?.table?.columns.length
+        ? new Set(fetchParams.table.columns.map((c) => c.id))
+        : undefined,
+    [fetchParams?.table]
+  );
   const showChart = shouldRenderChangePointChart(
     row.flattened,
-    fetchParams?.table,
+    columnIds,
     context.typeColumnId,
     context.pvalueColumnId
   );
