@@ -24,7 +24,7 @@ import {
 } from '../../../../transforms/charts/metric/defaults';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
-import type { IdRemapping, NormalizedDatasource } from './common';
+import type { IdRemapping } from './common';
 import {
   DEFAULT_LAYER_ID,
   getCommonNormalizer,
