@@ -346,11 +346,47 @@ steps:
           filter:
             - exists:
                 field: hierarchy.parent_issue_ref
+          must_not:
+            - term:
+                hierarchy.parent_issue_ref: ''
 
   - name: link_issues_to_epics
     type: foreach
     foreach: '${{ steps.load_issues_with_parents.output.hits.hits | json }}'
     steps:
+      # Resolve the EPIC as the root of the parent chain. GitHub's issueGraph
+      # template only returns one level of `parent`, so the grandparent is not
+      # available at enrich time. Chains here are shallow (max 3 hops), so we
+      # look the parent up in ES and take ITS parent when present; the topmost
+      # ancestor we can see is the epic.
+      - name: lookup_parent_issue
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.issuesIndex }}'
+          size: 1
+          query:
+            bool:
+              filter:
+                - term:
+                    entity.url: '${{ foreach.item._source.hierarchy.parent_issue_ref }}'
+
+      - name: resolve_epic_url
+        type: data.set
+        with:
+          # grandparent when the parent itself has a parent, else the parent
+          epicUrl: '${{ steps.lookup_parent_issue.output.hits.hits[0]._source.hierarchy.parent_issue_ref | default: foreach.item._source.hierarchy.parent_issue_ref }}'
+
+      - name: stamp_hierarchy_epic
+        type: elasticsearch.request
+        if: '${{ variables.epicUrl != null and variables.epicUrl != "" }}'
+        with:
+          method: POST
+          path: '/{{ consts.issuesIndex }}/_update/{{ foreach.item._id }}'
+          body:
+            doc:
+              hierarchy:
+                epic: '${{ variables.epicUrl }}'
+
       - name: upsert_child_of_edge
         type: elasticsearch.index
         with:
