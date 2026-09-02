@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext, PublishesEsqlUsage } from '@kbn/presentation-publishing';
 import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import { map } from 'rxjs';
 import { APPROXIMATION_APPLIED_BADGE } from './constants';
 
 export type ApproximationAppliedBadgeApi = Pick<PublishesEsqlUsage, 'approximationApplied$'>;
@@ -23,9 +23,11 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   id: APPROXIMATION_APPLIED_BADGE,
   type: APPROXIMATION_APPLIED_BADGE,
   order: 10,
-  getIconType: () => 'approximate',
+  getIconType: () => 'bolt',
   getDisplayName: ({ embeddable }: EmbeddableApiContext) => {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    return '';
+  },
+  getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
     return i18n.translate('embeddableApi.badge.approximationApplied.displayName', {
       defaultMessage: 'Approximation applied',
     });
@@ -33,7 +35,18 @@ export const approximationAppliedBadge: ActionDefinition<EmbeddableApiContext> =
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return isApiCompatible(embeddable);
   },
+  couldBecomeCompatible: ({ embeddable }: EmbeddableApiContext) => {
+    return isApiCompatible(embeddable);
+  },
+  getCompatibilityChangesSubject: ({ embeddable }: EmbeddableApiContext) => {
+    return apiPublishesEsqlUsage(embeddable)
+      ? embeddable.approximationApplied$.pipe(map(() => undefined))
+      : undefined;
+  },
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     return;
+  },
+  extension: {
+    color: 'success',
   },
 };

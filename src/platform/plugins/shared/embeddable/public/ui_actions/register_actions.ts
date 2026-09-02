@@ -18,7 +18,11 @@ import {
   CPS_USAGE_OVERRIDES_BADGE,
 } from './customize_panel_action/constants';
 import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
-import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN, APPROXIMATION_APPLIED_BADGE } from './constants';
+import {
+  OPEN_FLYOUT_ADD_DRILLDOWN,
+  OPEN_FLYOUT_EDIT_DRILLDOWN,
+  APPROXIMATION_APPLIED_BADGE,
+} from './constants';
 
 export const registerActions = (uiActions: UiActionsSetup) => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
