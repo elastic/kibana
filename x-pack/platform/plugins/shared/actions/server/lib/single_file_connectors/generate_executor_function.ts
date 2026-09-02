@@ -11,8 +11,8 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
-  clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
+import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type { ActionContext, ClientTypeSpec, ConnectorNetworkSettings } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
