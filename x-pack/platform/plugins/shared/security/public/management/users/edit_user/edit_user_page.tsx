@@ -93,7 +93,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         <AppHeader title={username} back={back} spacing="bleed" />
         <EuiSpacer size="l" />
         <EuiPageSection alignment="center" color="subdued">
-          <SectionLoading>
+          <SectionLoading inline data-test-subj="sectionLoading">
             <FormattedMessage
               id="xpack.security.management.users.editUserPage.loadingUserDescription"
               defaultMessage="Loading…"

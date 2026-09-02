@@ -62,9 +62,18 @@ describe('UserForm', () => {
     unmount();
   });
 
-  it('does not render an avatar when creating a user', () => {
+  it('renders an avatar when creating a user', () => {
     const { unmount } = renderUserForm({ isNewUser: true });
-    expect(screen.queryByTestId('userFormAvatar')).not.toBeInTheDocument();
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
+
+  it('uses email for the avatar when the user has no full name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: false,
+      defaultValues: { ...userMock, email: 'alice@example.com' },
+    });
+    expect(screen.getByTestId('userFormAvatar')).toHaveTextContent('a');
     unmount();
   });
 

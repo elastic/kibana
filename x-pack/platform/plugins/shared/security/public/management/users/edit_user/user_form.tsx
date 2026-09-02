@@ -318,18 +318,19 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               </>
             ) : undefined}
           </EuiFlexItem>
-          {!isNewUser && (
-            <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
               <UserAvatar
                 user={{
                   username: form.values.username ?? '',
                   full_name: form.values.full_name,
+                  email: form.values.email,
                 }}
                 size="xl"
                 data-test-subj="userFormAvatar"
               />
-            </EuiFlexItem>
-          )}
+            </EuiFormRow>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiDescribedFormGroup>
       {isNewUser ? (
