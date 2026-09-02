@@ -45,6 +45,8 @@ export const generateConfig = async ({
         `--xpack.fleet.packages.0.version=latest`,
         // this will be removed in 8.7 when the file upload feature is released
         `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
+        // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         // set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
 

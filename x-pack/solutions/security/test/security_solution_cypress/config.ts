@@ -57,6 +57,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkEditAlertSuppressionEnabled',
         ])}`,
+        // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
       ],

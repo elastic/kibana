@@ -24476,7 +24476,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
     post:
-      description: '[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
+      description: 'Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.'
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
