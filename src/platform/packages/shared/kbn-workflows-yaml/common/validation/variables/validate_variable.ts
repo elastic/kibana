@@ -14,19 +14,10 @@ import type { VariableItem, YamlValidationResult } from '../types';
 import { getDetailedTypeDescription } from '../../zod/zod_type_description';
 import { parseVariablePath } from '../parse_variable_path';
 import { InvalidForeachParameterError } from '../context/errors';
-import type { StepContextResolver } from '../context/step_context_resolver';
 import {
   FOREACH_ITEM_SCHEMA_DESC,
   getForeachItemSchema,
 } from '../context/get_foreach_state_schema';
-
-export interface VariableValidationOptions {
-  /**
-   * Shared step-context memo. Pass the same resolver to every validator running
-   * over one document so each step context is built once.
-   */
-  stepContextResolver?: StepContextResolver;
-}
 
 export function validateVariable(
   variableItem: VariableItem,

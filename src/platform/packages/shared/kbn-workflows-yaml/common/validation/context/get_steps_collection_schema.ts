@@ -16,17 +16,9 @@ import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getOutputSchemaForStepType } from './get_output_schema_for_step_type';
 
 /**
- * One `steps.<id>` entry per graph node, shared by every step context that can
- * see that node.
- *
- * The entry depends only on the node, so building a fresh one per context made
- * the schema-object count grow with the square of the step count: at 300 steps
- * the old code allocated ~45,000 wrappers around subschemas that were already
- * shared by reference. Keyed by node identity, so entries die with the graph,
- * which lives for one request.
- *
- * Only the non-foreach branch is shareable — a foreach entry closes over the
- * context of the step being resolved.
+ * `steps.<id>` entries depend only on the node, so share one per node across all
+ * step contexts instead of allocating a fresh one per context (quadratic in step count).
+ * Foreach entries close over the resolving step's context and are not shareable.
  */
 const stepEntrySchemaCache = new WeakMap<GraphNodeUnion, z.ZodTypeAny>();
 
@@ -91,12 +83,7 @@ function addNodesToStepsSchema(
 
 export interface StepsCollectionSchema {
   schema: z.ZodObject;
-  /**
-   * Number of `steps.*` entries. Reported here so callers can test emptiness
-   * without reading `.shape`, which forces zod to materialise the shape
-   * dictionary — an O(visible steps) spread per step context, and quadratic over
-   * a whole document.
-   */
+  /** Entry count, so callers can test emptiness without forcing zod to materialise `.shape`. */
   size: number;
 }
 
@@ -149,7 +136,5 @@ export function getStepsCollectionSchema(
     stepsSchema = addNodesToStepsSchema(innerNodes, stepsSchema, seenStepIds, stepContextSchema);
   }
 
-  // Trigger nodes and repeated step ids are skipped before being recorded, so
-  // the set size is exactly the number of entries added.
   return { schema: stepsSchema, size: seenStepIds.size };
 }

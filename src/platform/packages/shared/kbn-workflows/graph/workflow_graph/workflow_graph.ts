@@ -199,12 +199,7 @@ export class WorkflowGraph {
     return undefined;
   }
 
-  /**
-   * Every node reachable backwards from `nodeId`, in topological order. Cached:
-   * the graph is built once and never mutated, and callers such as the context
-   * schema builder ask for the same node repeatedly. Treat the result as
-   * read-only — copy before sorting or reversing.
-   */
+  /** All transitive predecessors of `nodeId`. Cached; treat the result as read-only. */
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
     const cached = this.predecessorsCache.get(nodeId);
     if (cached) {
