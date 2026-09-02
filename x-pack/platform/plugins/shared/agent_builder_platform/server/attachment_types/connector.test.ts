@@ -172,7 +172,6 @@ describe('connector attachment type', () => {
             },
             internalAction: {
               isTool: false,
-              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
