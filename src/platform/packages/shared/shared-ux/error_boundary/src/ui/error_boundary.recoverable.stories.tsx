@@ -22,7 +22,7 @@ import mdx from '../../README.mdx';
 const storybookMock = new KibanaErrorBoundaryStorybookMock();
 
 export default {
-  title: 'Errors/Recoverable Errors',
+  title: 'Error Boundary/Recoverable Errors',
   description:
     'This is the Kibana Error Boundary.' +
     ' Use this to put a boundary around React components that may throw errors when rendering.' +

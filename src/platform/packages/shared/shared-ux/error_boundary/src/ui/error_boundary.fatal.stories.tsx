@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFormFieldset } from '@elastic/eui';
+import { EuiFormFieldset, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import type { Meta, StoryFn } from '@storybook/react';
 import { Template } from '../../mocks/src/storybook_template';
 import { BadComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
@@ -21,7 +21,7 @@ import { KibanaSectionErrorBoundary } from './section_error_boundary';
 const storybookMock = new KibanaErrorBoundaryStorybookMock();
 
 export default {
-  title: 'Errors/Fatal Errors',
+  title: 'Error Boundary/Fatal Errors',
   description:
     'This is the Kibana Error Boundary. Use this to put a boundary around React components that may throw errors when rendering. It will intercept the error and determine if it is fatal or recoverable.',
   parameters: {
@@ -40,6 +40,24 @@ export const ErrorInCallout: StoryFn = () => {
         <KibanaErrorBoundary>
           <BadComponent />
         </KibanaErrorBoundary>
+      </KibanaErrorBoundaryDepsProvider>
+    </Template>
+  );
+};
+
+export const ErrorInFlyout: StoryFn = () => {
+  const services = storybookMock.getServices();
+
+  return (
+    <Template>
+      <KibanaErrorBoundaryDepsProvider {...services}>
+        <EuiFlyout ownFocus={false} onClose={() => {}} size="s" aria-label="Error in flyout">
+          <KibanaErrorBoundary>
+            <EuiFlyoutBody>
+              <BadComponent />
+            </EuiFlyoutBody>
+          </KibanaErrorBoundary>
+        </EuiFlyout>
       </KibanaErrorBoundaryDepsProvider>
     </Template>
   );

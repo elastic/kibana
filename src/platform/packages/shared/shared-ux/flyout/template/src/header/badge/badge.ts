@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { FlyoutHeaderBadgeProps } from '../../types';
+import { badgePart } from './part';
+
+/** Declarative `FlyoutTemplate.Header.Badge`. */
+export const Badge = badgePart.createComponent<FlyoutHeaderBadgeProps>({
+  resolve: ({ children, color, iconType, iconSide, 'data-test-subj': dataTestSubj }) => ({
+    label: children,
+    color,
+    iconType,
+    iconSide,
+    'data-test-subj': dataTestSubj,
+  }),
+});
+
+Badge.displayName = 'FlyoutTemplate.Header.Badge';

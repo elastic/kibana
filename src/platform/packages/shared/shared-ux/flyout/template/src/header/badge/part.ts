@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { HeaderBadgeDescriptor } from './types';
+import { headerAssembly } from '../../assembly';
+
+/** Part name used for identifying `Header.Badge` children. */
+export const BADGE_PART_NAME = 'badge';
+
+/** Part factory for `FlyoutTemplate.Header.Badge`. Resolves to a `HeaderBadgeDescriptor`. */
+export const badgePart = headerAssembly.definePart<
+  Record<string, never>,
+  HeaderBadgeDescriptor,
+  void
+>({
+  name: BADGE_PART_NAME,
+});

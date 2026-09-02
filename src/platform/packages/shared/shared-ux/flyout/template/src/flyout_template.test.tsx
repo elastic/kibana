@@ -21,7 +21,9 @@ describe('FlyoutTemplate', () => {
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
         <FlyoutTemplate.Header title="Service inventory" />
         <FlyoutTemplate.Body>
-          <span>summary content</span>
+          <FlyoutTemplate.Body.Section title="Summary">
+            <span>summary content</span>
+          </FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
         <FlyoutTemplate.Footer>
           <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
@@ -68,20 +70,27 @@ describe('FlyoutTemplate', () => {
   it('accepts resizable/minWidth/onResize/ownFocus/onActive without altering zone rendering', () => {
     const onResize = jest.fn();
     const onActive = jest.fn();
+    const focusTrapProps = { shards: [] };
+    const closeButtonProps = { 'data-test-subj': 'myCloseBtn' } as const;
     renderTemplate(
       <FlyoutTemplate
         onClose={noop}
         session="never"
+        id="passthrough-flyout"
+        hasChildBackground
         resizable
         minWidth={400}
         onResize={onResize}
         ownFocus={false}
         onActive={onActive}
+        outsideClickCloses={false}
+        focusTrapProps={focusTrapProps}
+        closeButtonProps={closeButtonProps}
         data-test-subj="resizableFlyout"
       >
         <FlyoutTemplate.Header title="Resizable" />
         <FlyoutTemplate.Body>
-          <span>content</span>
+          <FlyoutTemplate.Body.Section title="Summary">content</FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
@@ -91,6 +100,14 @@ describe('FlyoutTemplate', () => {
     expect(screen.getByText('content')).toBeInTheDocument();
     expect(onResize).not.toHaveBeenCalled();
     expect(onActive).not.toHaveBeenCalled();
+    // The `@elastic/eui` Jest mock (`@elastic/eui/test-env`) renders a bare-bones
+    // `EuiFlyout` that doesn't forward `id` or spread `closeButtonProps` onto the DOM,
+    // so those can't be asserted directly here. Instead, confirm the root flyout
+    // element received its passthrough test subject and that the (default) close
+    // button still renders, which is enough to prove these props didn't break
+    // rendering without depending on unmocked `EuiFlyout` internals.
+    expect(screen.getByTestId('resizableFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
   });
 
   it('is valid without a header (body is the only required zone)', () => {
@@ -98,7 +115,7 @@ describe('FlyoutTemplate', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
-          <span>content</span>
+          <FlyoutTemplate.Body.Section title="Summary">content</FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
@@ -115,7 +132,7 @@ describe('FlyoutTemplate', () => {
         <FlyoutTemplate.Header title="First title" />
         <FlyoutTemplate.Header title="Second title" />
         <FlyoutTemplate.Body>
-          <span>content</span>
+          <FlyoutTemplate.Body.Section title="Summary">content</FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );

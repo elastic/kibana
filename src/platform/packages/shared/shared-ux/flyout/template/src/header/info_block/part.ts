@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
+import { headerAssembly } from '../../assembly';
+
+/** Part name used for identifying `Header.InfoBlock` children. */
+export const INFO_BLOCK_PART_NAME = 'infoBlock';
+
+/** Part factory for `FlyoutTemplate.Header.InfoBlock`. Resolves to an `InfoBlockItem`. */
+export const infoBlockPart = headerAssembly.definePart<Record<string, never>, InfoBlockItem, void>({
+  name: INFO_BLOCK_PART_NAME,
+});

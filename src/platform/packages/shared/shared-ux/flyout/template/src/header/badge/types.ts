@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { ReactNode } from 'react';
+import type { EuiBadgeProps } from '@elastic/eui';
+
+/** Descriptor produced by resolving a `Header.Badge` part. */
+export interface HeaderBadgeDescriptor {
+  label: ReactNode;
+  color?: EuiBadgeProps['color'];
+  iconType?: EuiBadgeProps['iconType'];
+  iconSide?: EuiBadgeProps['iconSide'];
+  'data-test-subj'?: string;
+}
