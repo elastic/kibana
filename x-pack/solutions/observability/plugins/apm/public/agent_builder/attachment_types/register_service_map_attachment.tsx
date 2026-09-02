@@ -41,7 +41,12 @@ export const registerServiceMapAttachment = (
             height: 500px;
           `}
         >
-          <LazyAgentContextualServiceMap data={attachment.data} deps={deps} isSidebar={isSidebar} />
+          <LazyAgentContextualServiceMap
+            data={attachment.data}
+            deps={deps}
+            isSidebar={isSidebar}
+            snapshotTime={attachment.versionData?.createdAt}
+          />
         </div>
       );
     },

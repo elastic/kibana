@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
 import { SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE } from '../../../common/agent_builder/attachments';
@@ -14,6 +15,7 @@ import { transformTopologyToServiceMap } from '../../../common/agent_builder/att
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../common/license_check';
+import { asAbsoluteDateTime } from '../../../common/utils/formatters';
 import { APM_EBT_ACTIONS } from '../../components/app/ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../../components/app/service_map/ebt_constants';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
@@ -27,10 +29,20 @@ import { getServiceMapUrl } from '../../embeddable/service_map/get_service_map_u
 import type { EmbeddableDeps } from '../../embeddable/types';
 import { AgentServiceMap } from './agent_service_map';
 
+const SNAPSHOT_TOOLTIP = i18n.translate(
+  'xpack.apm.agentBuilder.attachments.serviceMap.snapshotTimeTooltip',
+  {
+    defaultMessage:
+      'The topology was captured when this response was generated. Opening a service or dependency fetches current data for the time range above.',
+  }
+);
+
 export interface AgentContextualServiceMapProps {
   data: ServiceMapAttachmentData;
   deps: EmbeddableDeps;
   isSidebar?: boolean;
+  /** ISO timestamp of when the agent generated this attachment version. */
+  snapshotTime?: string;
 }
 
 function ContextualMapContent({
@@ -41,6 +53,7 @@ function ContextualMapContent({
   start,
   end,
   fullMapHref,
+  snapshotTime,
 }: {
   data: ServiceMapAttachmentData;
   serviceName: string;
@@ -49,6 +62,7 @@ function ContextualMapContent({
   start: string;
   end: string;
   fullMapHref: string;
+  snapshotTime?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const license = useLicenseContext();
@@ -59,9 +73,12 @@ function ContextualMapContent({
   const { nodes, edges } = useMemo(() => transformTopologyToServiceMap(data), [data]);
   const contextualState = useContextualServiceMapState({ serviceName });
 
-  // Hide every full-map entry point (header link AND the graph's toolbar
-  // button) when the full Service Map page would only show a license prompt
-  // (platinum feature) or is disabled in config.
+  // Safety net only: Agent Builder itself is Enterprise-gated
+  // (`minimumLicense: 'enterprise'` in the agent_builder feature), which is
+  // above Platinum, so in practice anyone who can see this attachment can
+  // also open the full Service Map. Still gated here so the link never leads
+  // to a license prompt if that ever changes, or if the map is disabled in
+  // the APM config.
   const showExploreLink = Boolean(
     license && isActivePlatinumLicense(license) && config?.serviceMapEnabled
   );
@@ -83,7 +100,8 @@ function ContextualMapContent({
       kuery=""
       start={start}
       end={end}
-      fullMapHref={showExploreLink ? fullMapHref : undefined}
+      // Intentionally omitted: the labeled header link is the attachment's
+      // only full-map entry point, so the graph's toolbar icon stays hidden.
       showFocusMap
       clearKueryOnPopoverNavigation
       alwaysNavigateOnPopoverFocus
@@ -91,7 +109,7 @@ function ContextualMapContent({
     />
   );
 
-  if (!showExploreLink) {
+  if (!showExploreLink && !snapshotTime) {
     return graph;
   }
 
@@ -99,22 +117,43 @@ function ContextualMapContent({
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false} css={{ height: '100%' }}>
       <EuiFlexItem
         grow={false}
-        css={{
-          alignSelf: 'flex-end',
-          padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
-        }}
+        css={{ padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}` }}
       >
-        <EuiLink
-          href={fullMapHref}
-          target="_blank"
-          data-test-subj="apmAgentServiceMapExploreInServiceMap"
-          {...getEbtProps({
-            action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
-            element: SERVICE_MAP_EBT_ELEMENTS.AGENT_ATTACHMENT_LINK,
-          })}
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="center"
+          justifyContent="flexEnd"
+          responsive={false}
+          // Wraps to a second line instead of overflowing in the narrow chat sidebar.
+          wrap
         >
-          {EXPLORE_IN_SERVICE_MAP_LABEL}
-        </EuiLink>
+          {snapshotTime && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="apmAgentServiceMapSnapshotTime">
+                {i18n.translate('xpack.apm.agentBuilder.attachments.serviceMap.snapshotTime', {
+                  defaultMessage: 'Topology as of {time}',
+                  values: { time: asAbsoluteDateTime(snapshotTime, 'minutes') },
+                })}{' '}
+                <EuiIconTip position="bottom" content={SNAPSHOT_TOOLTIP} type="info" />
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {showExploreLink && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={fullMapHref}
+                target="_blank"
+                data-test-subj="apmAgentServiceMapExploreInServiceMap"
+                {...getEbtProps({
+                  action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
+                  element: SERVICE_MAP_EBT_ELEMENTS.AGENT_ATTACHMENT_LINK,
+                })}
+              >
+                {EXPLORE_IN_SERVICE_MAP_LABEL}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow css={{ minHeight: 0 }}>
         {graph}
@@ -128,6 +167,7 @@ function ContextualMap({
   deps,
   serviceName,
   isSidebar,
+  snapshotTime,
 }: AgentContextualServiceMapProps & { serviceName: string }) {
   const environment: Environment = data.environment || ENVIRONMENT_ALL.value;
 
@@ -177,6 +217,7 @@ function ContextualMap({
         start={start}
         end={end}
         fullMapHref={fullMapHref}
+        snapshotTime={snapshotTime}
       />
     </ApmEmbeddableContext>
   );
