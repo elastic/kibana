@@ -64,7 +64,12 @@ export const alertsTool = (
   return {
     id: SECURITY_ALERTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Search and analyze security alerts in the current Kibana space using full-text or structured queries for finding, counting, aggregating, or summarizing alerts. Always searches the current space's security alerts alias (never a cross-space pattern). When the user asks for a count (e.g., "how many alerts", "count alerts", "total number of alerts"), set the isCount parameter to true to optimize the query for count results.`,
+    description:
+      'Do NOT use platform.core.generate_esql, platform.core.execute_esql, or platform.core.search for Security alert counts, lists, or summaries — those can cross Kibana spaces via patterns like .alerts-security.alerts-*. ' +
+      'This is THE tool for finding, counting, aggregating, or summarizing Security detection alerts in the current Kibana space ' +
+      '(e.g. "how many alerts", "high/critical alerts in last 24h", "summarize open alerts"). ' +
+      "Always searches the current space's exact alerts alias only. " +
+      'When the user asks for a count, set isCount to true.',
     schema: alertsSchema,
     availability: {
       cacheMode: 'space',

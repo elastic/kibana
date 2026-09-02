@@ -108,7 +108,9 @@ describe('alertsTool', () => {
     });
 
     it('describes space-scoped search behavior', () => {
-      expect(tool.description).toContain("current space's security alerts alias");
+      expect(tool.description).toContain("current space's exact alerts alias");
+      expect(tool.description).toMatch(/^Do NOT use platform\.core\.generate_esql/);
+      expect(tool.description).toContain('execute_esql');
     });
   });
 
