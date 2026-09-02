@@ -94,6 +94,8 @@ interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
   kibanaVersion: string;
+  /** Kibana server UUID, included in install-lock wait/error logs. */
+  serverUuid?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
   dataStreamAdapter: DataStreamAdapter;
@@ -436,6 +438,7 @@ export class AlertsService implements IAlertsService {
         lockManager: this.options.lockManager,
         lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:common`,
         logger: this.options.logger,
+        serverUuid: this.options.serverUuid,
         pluginStop$: this.options.pluginStop$,
         installFn: async () => {
           await Promise.all(
@@ -559,6 +562,7 @@ export class AlertsService implements IAlertsService {
       lockManager: this.options.lockManager,
       lockId: `${RESOURCE_INSTALL_LOCK_PREFIX}:${context}:${namespace}`,
       logger: this.options.logger,
+      serverUuid: this.options.serverUuid,
       pluginStop$: this.options.pluginStop$,
       installFn: async () => {
         for (const fn of initFns) {

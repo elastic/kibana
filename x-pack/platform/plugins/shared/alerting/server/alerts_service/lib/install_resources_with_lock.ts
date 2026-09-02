@@ -28,16 +28,30 @@ export interface InstallResourcesWithLockOpts {
   lockId: string;
   logger: Logger;
   installFn: () => Promise<void>;
+  /** Included in wait/error logs so multi-node raw logs can be attributed. */
+  serverUuid?: string;
   /** Stops lock acquisition and retry delays when the plugin shuts down. */
   pluginStop$?: Observable<void>;
-  /** Number of lock acquisition attempts before reporting initialization as failed. */
-  maxAttempts?: number;
-  /** Delay between acquisition attempts, in milliseconds. */
+  /**
+   * Override the delay between acquisition attempts, in milliseconds.
+   * Production uses exponential backoff (1s, 2s, 4s, 8s, 16s, 30s). Tests pass
+   * `0` to avoid waiting.
+   */
   retryDelayMs?: number;
 }
 
-const DEFAULT_MAX_ATTEMPTS = 10;
-const DEFAULT_RETRY_DELAY_MS = 5000;
+export const INSTALL_LOCK_INITIAL_RETRY_DELAY_MS = 1000;
+export const INSTALL_LOCK_MAX_RETRY_DELAY_MS = 30000;
+
+/**
+ * Delay after a failed acquisition: 1s, 2s, 4s, 8s, 16s, then 30s capped.
+ * `failedAttempt` is 1-based (the attempt that just lost the race).
+ */
+export const getInstallLockRetryDelayMs = (failedAttempt: number): number =>
+  Math.min(
+    INSTALL_LOCK_INITIAL_RETRY_DELAY_MS * 2 ** (failedAttempt - 1),
+    INSTALL_LOCK_MAX_RETRY_DELAY_MS
+  );
 
 const throwIfStopped = (stopped: boolean) => {
   if (stopped) {
@@ -46,6 +60,9 @@ const throwIfStopped = (stopped: boolean) => {
 };
 
 const delay = async (ms: number, stopPromise: Promise<void>): Promise<void> => {
+  if (ms <= 0) {
+    return;
+  }
   let timeoutId: NodeJS.Timeout | undefined;
   try {
     await Promise.race([
@@ -61,24 +78,29 @@ const delay = async (ms: number, stopPromise: Promise<void>): Promise<void> => {
   }
 };
 
+const nodeLabel = (serverUuid?: string): string =>
+  serverUuid ? `Kibana node ${serverUuid}` : 'Kibana node';
+
 /**
  * Runs alerts-as-data resource installation under a cluster-wide lock so that,
  * across multiple Kibana nodes, only one node installs a given resource set at a
  * time — reducing the burst of concurrent requests to Elasticsearch on startup.
  *
- * A node that loses the race retries acquisition and eventually runs the
- * idempotent installation under the lock. Contention never causes an unlocked
- * install; exhausting the retry budget reports initialization as failed and lets
- * the alerts service's existing retry flow try again later.
+ * A node that loses the race retries acquisition with exponential backoff until
+ * it holds the lock, or until plugin shutdown. Contention never causes an
+ * unlocked install: there is no attempt cap, so a large fleet is not truncated
+ * by a fixed retry budget. A hung holder keeps the lock via TTL extension; other
+ * nodes wait (and abort on `pluginStop$`). A crashed holder expires the lease
+ * and the next waiter acquires it.
  */
 export const installResourcesWithLock = async ({
   lockManager,
   lockId,
   logger,
   installFn,
+  serverUuid,
   pluginStop$,
-  maxAttempts = DEFAULT_MAX_ATTEMPTS,
-  retryDelayMs = DEFAULT_RETRY_DELAY_MS,
+  retryDelayMs,
 }: InstallResourcesWithLockOpts): Promise<void> => {
   let stopped = false;
   let stopSubscription: Subscription | undefined;
@@ -106,20 +128,24 @@ export const installResourcesWithLock = async ({
         });
         return;
       } catch (err) {
-        // A non-acquisition error means the install itself failed (or the lock
-        // manager errored); surface it to the caller's existing error handling.
         if (!isLockAcquisitionError(err)) {
+          // Install failure or lock-manager error — not "someone else holds it".
+          logger.error(
+            `Error while installing resources under lock "${lockId}" (${nodeLabel(serverUuid)}): ${
+              err.message
+            }`
+          );
           throw err;
         }
 
-        if (attempt >= maxAttempts) {
-          throw new Error(`Could not acquire install lock "${lockId}" after ${attempt} attempts`);
-        }
-
-        logger.debug(
-          `Install lock "${lockId}" is held by another node; retrying (attempt ${attempt} of ${maxAttempts})`
+        const waitMs = retryDelayMs ?? getInstallLockRetryDelayMs(attempt);
+        const waitSec = waitMs / 1000;
+        logger.info(
+          `${nodeLabel(
+            serverUuid
+          )} waiting for install lock "${lockId}" held by another node; retrying in ${waitSec}s (attempt ${attempt})`
         );
-        await delay(retryDelayMs, stopPromise);
+        await delay(waitMs, stopPromise);
         throwIfStopped(stopped);
       }
     }
