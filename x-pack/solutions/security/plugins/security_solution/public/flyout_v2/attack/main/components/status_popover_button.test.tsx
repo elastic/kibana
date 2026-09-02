@@ -68,10 +68,14 @@ describe('StatusPopoverButton (attack flyout v2)', () => {
       ({ onSuccess }: { onSuccess: () => void }) => ({
         items: [
           {
+            key: 'acknowledge-attack-status',
+            'data-test-subj': 'acknowledged-attack-status',
             name: 'Mark as acknowledged',
             onClick: () => onSuccess(),
           },
           {
+            key: 'close-alert-with-reason',
+            'data-test-subj': 'alert-close-context-menu-item',
             name: 'Mark as closed',
             onClick: () => onSuccess(),
           },
@@ -79,6 +83,25 @@ describe('StatusPopoverButton (attack flyout v2)', () => {
         panels: [],
       })
     );
+  });
+
+  test('decorates status items with coloured dot icons', async () => {
+    const user = userEvent.setup();
+    render(
+      <TestProviders>
+        <StatusPopoverButton hit={buildHit()} disabled={false} onAttackUpdated={onAttackUpdated} />
+      </TestProviders>
+    );
+
+    await user.click(screen.getByText('open'));
+    await waitForEuiPopoverOpen();
+
+    expect(
+      screen.getByTestId('acknowledged-attack-status').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('alert-close-context-menu-item').querySelector('[data-euiicon-type="dot"]')
+    ).toBeInTheDocument();
   });
 
   test('renders the current status value', () => {
