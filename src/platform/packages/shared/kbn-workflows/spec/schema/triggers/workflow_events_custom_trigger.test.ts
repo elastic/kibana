@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTriggerSchema } from '.';
-import { CONNECTOR_ID_MAX_LENGTH } from '../../../common/constants';
+import { getCustomTriggerZodSchema, getTriggerSchema, toCustomTriggerSchemaConfigs } from '.';
+import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../common/constants';
 
 describe('custom trigger on.workflowEvents', () => {
   const triggerSchema = getTriggerSchema(['cases.updated']);
@@ -98,6 +98,30 @@ describe('custom trigger requiresConnectorId', () => {
     ).toBe(false);
   });
 
+  it('rejects a connector-id with leading or trailing whitespace', () => {
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': ' webhook-1',
+      }).success
+    ).toBe(false);
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': 'webhook-1 ',
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects a max-length connector-id with trailing whitespace', () => {
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': `${'x'.repeat(CONNECTOR_ID_MAX_LENGTH)} `,
+      }).success
+    ).toBe(false);
+  });
+
   it('rejects a connector-id longer than CONNECTOR_ID_MAX_LENGTH', () => {
     expect(
       triggerSchema.safeParse({
@@ -120,5 +144,66 @@ describe('custom trigger requiresConnectorId', () => {
     expect(triggerSchema.safeParse({ type: 'scheduled', with: { every: '5m' } }).success).toBe(
       true
     );
+  });
+
+  it('rejects on.condition longer than IF_CONDITION_MAX_LENGTH', () => {
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': 'webhook-1',
+        on: { condition: 'a'.repeat(IF_CONDITION_MAX_LENGTH + 1) },
+      }).success
+    ).toBe(false);
+    expect(
+      triggerSchema.safeParse({
+        type: connectorEventTriggerId,
+        'connector-id': 'webhook-1',
+        on: { condition: 'a'.repeat(IF_CONDITION_MAX_LENGTH) },
+      }).success
+    ).toBe(true);
+  });
+});
+
+describe('toCustomTriggerSchemaConfigs', () => {
+  it('dedupes ids and keeps the last requiresConnectorId', () => {
+    expect(
+      toCustomTriggerSchemaConfigs([
+        { id: 'example.connector_event' },
+        { id: 'cases.updated' },
+        { id: 'example.connector_event', requiresConnectorId: true },
+      ])
+    ).toEqual([
+      { id: 'example.connector_event', requiresConnectorId: true },
+      { id: 'cases.updated', requiresConnectorId: undefined },
+    ]);
+  });
+});
+
+describe('getTriggerSchema id dedupe', () => {
+  it('keeps the last requiresConnectorId when the same id is passed twice', () => {
+    const triggerId = 'example.connector_event';
+    const triggerSchema = getTriggerSchema([
+      triggerId,
+      { id: triggerId, requiresConnectorId: true },
+    ]);
+
+    expect(triggerSchema.safeParse({ type: triggerId }).success).toBe(false);
+    expect(triggerSchema.safeParse({ type: triggerId, 'connector-id': 'webhook-1' }).success).toBe(
+      true
+    );
+  });
+});
+
+describe('getCustomTriggerZodSchema', () => {
+  it('requires connector-id when the flag is set', () => {
+    const schema = getCustomTriggerZodSchema({
+      id: 'example.connector_event',
+      requiresConnectorId: true,
+    });
+
+    expect(schema.safeParse({ type: 'example.connector_event' }).success).toBe(false);
+    expect(
+      schema.safeParse({ type: 'example.connector_event', 'connector-id': 'webhook-1' }).success
+    ).toBe(true);
   });
 });

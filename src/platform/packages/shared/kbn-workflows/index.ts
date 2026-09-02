@@ -87,6 +87,7 @@ export {
   SCHEDULED_INTERVAL_PATTERN,
   ManualTriggerSchema,
   TriggerSchema,
+  getCustomTriggerZodSchema,
   getTriggerSchema,
   toCustomTriggerSchemaConfigs,
   TriggerTypes,

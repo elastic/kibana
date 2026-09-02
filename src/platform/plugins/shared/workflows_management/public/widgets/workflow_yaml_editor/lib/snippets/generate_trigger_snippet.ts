@@ -121,7 +121,7 @@ export function generateTriggerSnippet(
   }
 
   if (requiresConnectorId && result.includes('connector-id:')) {
-    result = result.replace(/(\s*)(connector-id:)/, `$1# ${CONNECTOR_ID_COMMENT}\n$1$2`);
+    result = result.replace(/(^|\n)(\s*)(connector-id:)/, `$1$2# ${CONNECTOR_ID_COMMENT}\n$2$3`);
   }
 
   return result;

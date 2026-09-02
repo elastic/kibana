@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { AlertRuleTriggerSchema } from './alert_trigger_schema';
 import { ManualTriggerSchema } from './manual_trigger_schema';
 import { ScheduledTriggerSchema } from './scheduled_trigger_schema';
-import { CONNECTOR_ID_MAX_LENGTH } from '../../../common/constants';
+import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../../../common/constants';
 
 export { AlertRuleTriggerSchema } from './alert_trigger_schema';
 export { ManualTriggerSchema } from './manual_trigger_schema';
@@ -37,7 +37,7 @@ export const WorkflowEventsSchema = z.enum(WORKFLOW_EVENTS_VALUES);
 
 /** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
 const CustomTriggerOnObjectSchema = z.object({
-  condition: z.string().optional(),
+  condition: z.string().max(IF_CONDITION_MAX_LENGTH).optional(),
   /**
    * How this trigger responds when the event was emitted from a workflow-attributed chain:
    * `ignore` — do not schedule;
@@ -49,15 +49,25 @@ const CustomTriggerOnObjectSchema = z.object({
 const CustomTriggerOnSchema = CustomTriggerOnObjectSchema.optional();
 export type CustomTriggerOn = z.infer<typeof CustomTriggerOnObjectSchema>;
 
+const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
+
+const connectorIdSchema = z
+  .string()
+  .min(1, CONNECTOR_ID_REQUIRED_ERROR)
+  .max(CONNECTOR_ID_MAX_LENGTH)
+  .regex(/^\S(?:.*\S)?$/, CONNECTOR_ID_REQUIRED_ERROR);
+
+const CustomTriggerShapeSchema = z.object({
+  type: z.string(),
+  'connector-id': z.string().optional(),
+  on: CustomTriggerOnSchema,
+});
+
 /**
  * Runtime YAML shape for a registered (non-built-in) trigger.
  * `connector-id` is required in the Zod schema when `requiresConnectorId` is set.
  */
-export interface CustomTrigger {
-  type: string;
-  'connector-id'?: string;
-  on?: CustomTriggerOn;
-}
+export type CustomTrigger = z.infer<typeof CustomTriggerShapeSchema>;
 
 export interface CustomTriggerSchemaConfig {
   id: string;
@@ -66,29 +76,42 @@ export interface CustomTriggerSchemaConfig {
 
 export type CustomTriggerSchemaInput = string | CustomTriggerSchemaConfig;
 
-const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
-
 const toCustomTriggerSchemaConfig = (
   trigger: CustomTriggerSchemaInput
 ): CustomTriggerSchemaConfig => (typeof trigger === 'string' ? { id: trigger } : trigger);
 
+const dedupeCustomTriggerSchemaConfigs = (
+  configs: CustomTriggerSchemaConfig[]
+): CustomTriggerSchemaConfig[] => {
+  const byId = new Map<string, CustomTriggerSchemaConfig>();
+  for (const config of configs) {
+    byId.set(config.id, config);
+  }
+  return [...byId.values()];
+};
+
 /**
  * Maps registered trigger definitions to the YAML schema input shape.
+ * Duplicate ids keep the last `requiresConnectorId` value.
  */
 export const toCustomTriggerSchemaConfigs = (
   triggers: Array<{ id: string; requiresConnectorId?: boolean }>
 ): CustomTriggerSchemaConfig[] =>
-  triggers.map(({ id, requiresConnectorId }) => ({ id, requiresConnectorId }));
+  dedupeCustomTriggerSchemaConfigs(
+    triggers.map(({ id, requiresConnectorId }) => ({ id, requiresConnectorId }))
+  );
 
-const customTriggerSchema = ({ id, requiresConnectorId }: CustomTriggerSchemaConfig) => {
+/**
+ * YAML Zod schema for a registered (non-built-in) trigger.
+ */
+export const getCustomTriggerZodSchema = ({
+  id,
+  requiresConnectorId,
+}: CustomTriggerSchemaConfig) => {
   if (requiresConnectorId) {
     return z.object({
       type: z.literal(id),
-      'connector-id': z
-        .string()
-        .trim()
-        .min(1, CONNECTOR_ID_REQUIRED_ERROR)
-        .max(CONNECTOR_ID_MAX_LENGTH),
+      'connector-id': connectorIdSchema,
       on: CustomTriggerOnSchema,
     });
   }
@@ -110,9 +133,9 @@ export function getTriggerSchema(customTriggers: CustomTriggerSchemaInput[] = []
   if (customTriggers.length === 0) {
     return TriggerSchema;
   }
-  const customSchemas = customTriggers.map((trigger) =>
-    customTriggerSchema(toCustomTriggerSchemaConfig(trigger))
-  );
+  const customSchemas = dedupeCustomTriggerSchemaConfigs(
+    customTriggers.map(toCustomTriggerSchemaConfig)
+  ).map((trigger) => getCustomTriggerZodSchema(trigger));
   return z.discriminatedUnion('type', [
     AlertRuleTriggerSchema,
     ScheduledTriggerSchema,

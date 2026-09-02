@@ -52,6 +52,10 @@ describe('generateTriggerSnippet', () => {
       expect(snippet).toContain(`type: ${connectorEventTriggerId}`);
       expect(snippet).toContain('connector-id: ""');
       expect(snippet).toContain('Id of the connector instance this trigger is bound to');
+      expect(snippet).toMatch(
+        /# Id of the connector instance this trigger is bound to\n\s+connector-id:/
+      );
+      expect(snippet).not.toMatch(/# Id of the connector instance this trigger is bound to\n\n/);
       expect(snippet).toContain('condition:');
       const schema = getTriggerSchema([{ id: connectorEventTriggerId, requiresConnectorId: true }]);
       expect(schema.safeParse({ type: connectorEventTriggerId, 'connector-id': '' }).success).toBe(

@@ -17,7 +17,7 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
-import { CONNECTOR_ID_MAX_LENGTH } from '../common/constants';
+import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
@@ -60,11 +60,6 @@ export const WorkflowRetrySchema = z.object({
   jitter: z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
-// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
-// well inside the stack limit, and this bounds it. A longer expression can be hoisted
-// into a `data.set` step and compared here as a short flag.
-export const IF_CONDITION_MAX_LENGTH = 2000;
 
 const IfConditionSchema = z
   .string()

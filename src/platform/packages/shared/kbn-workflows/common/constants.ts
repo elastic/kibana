@@ -55,6 +55,13 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
 export const CONNECTOR_ID_MAX_LENGTH = 512;
 
 /**
+ * Upper bound on a KQL condition (step `if` and trigger `on.condition`).
+ * The parser recurses, so nesting depth has to stay well inside the stack limit.
+ * A longer expression can be hoisted into a `data.set` step and compared as a short flag.
+ */
+export const IF_CONDITION_MAX_LENGTH = 2000;
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:
