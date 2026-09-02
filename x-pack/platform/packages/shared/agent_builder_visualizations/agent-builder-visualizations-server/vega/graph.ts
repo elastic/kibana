@@ -161,6 +161,7 @@ export const createVegaGraph = async (
           ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
+            dropNullColumns: false,
             esClient: esClient.asCurrentUser,
           }));
         } catch (providedError) {
@@ -215,6 +216,7 @@ export const createVegaGraph = async (
           ({ columns } = await executeEsql({
             query,
             params: timeRangeParams,
+            dropNullColumns: false,
             esClient: esClient.asCurrentUser,
           }));
         }

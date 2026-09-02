@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
+import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -108,6 +109,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   // internal
   esqlQuery: Annotation<string>(),
+  columns: Annotation<EsqlEsqlColumnInfo[] | undefined>(),
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
@@ -129,12 +131,13 @@ export const createVisualizationGraph = async (
 ) => {
   const defaultModel = await modelProvider.getDefaultModel();
 
-  // Node: Generate ES|QL query
+  // Resolve the ES|QL query. generateVisualizationEsql already executes it
+  // (dropNullColumns: false), so result columns are available afterwards
+  // without a second execute.
   const generateESQLNode = async (state: VisualizationState) => {
-    logger.debug('Generating ES|QL query for visualization');
-
     let action: GenerateEsqlAction;
     try {
+      logger.debug('Generating ES|QL query for visualization');
       const generated = await generateVisualizationEsql({
         nlQuery: state.nlQuery,
         // On edit, seed generation with the existing per-layer queries so a
@@ -160,6 +163,7 @@ export const createVisualizationGraph = async (
           type: 'generate_esql',
           success: true,
           query: generated.query,
+          columns: generated.columns,
         };
       }
     } catch (error) {
@@ -173,6 +177,8 @@ export const createVisualizationGraph = async (
     }
 
     return {
+      esqlQuery: action.query ?? state.esqlQuery,
+      columns: action.columns,
       actions: [action],
     };
   };
@@ -190,6 +196,7 @@ export const createVisualizationGraph = async (
       .filter((action) => action.success && action.query)
       .pop();
     const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
+    const columns = lastGenerateEsqlAction?.columns ?? state.columns;
 
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
@@ -217,6 +224,7 @@ export const createVisualizationGraph = async (
     const prompt = createGenerateConfigPrompt({
       nlQuery: state.nlQuery,
       esqlQuery,
+      columns,
       chartType: state.chartType,
       schema: state.schema,
       existingConfig: state.existingConfig,
@@ -406,7 +414,6 @@ export const createVisualizationGraph = async (
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
     .addNode('finalize', finalizeNode)
-    // Add edges
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,

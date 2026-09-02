@@ -39,12 +39,20 @@ export const executeEsql = async ({
   params,
   limit,
   filter,
+  /**
+   * When true (default), Elasticsearch omits columns whose values are all null
+   * in this response. Pass false when the caller needs the query's full result
+   * schema — e.g. to bind visualization encodings — including columns that
+   * happen to be all-null in the sample.
+   */
+  dropNullColumns = true,
   esClient,
 }: {
   query: string;
   params?: Array<Record<string, FieldValue>>;
   limit?: number;
   filter?: QueryDslQueryContainer;
+  dropNullColumns?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
@@ -53,7 +61,7 @@ export const executeEsql = async ({
     const response = await esClient.esql.query(
       {
         query: effectiveQuery,
-        drop_null_columns: true,
+        drop_null_columns: dropNullColumns,
         allow_partial_results: true,
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
         ...(filter ? { filter } : {}),

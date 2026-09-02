@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { createGenerateConfigPrompt } from './prompts';
+
+const systemText = (columns?: Array<{ name: string; type: string }>): string => {
+  const [system] = createGenerateConfigPrompt({
+    nlQuery: 'count logs by status',
+    esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY status',
+    columns: columns as never,
+    chartType: SupportedChartType.Metric,
+    schema: {},
+  });
+  return String((system as [string, string])[1]);
+};
+
+describe('createGenerateConfigPrompt', () => {
+  it('lists executed ES|QL columns as the only bindable names', () => {
+    const text = systemText([
+      { name: 'count', type: 'long' },
+      { name: 'status', type: 'keyword' },
+    ]);
+
+    expect(text).toContain('<columns>');
+    expect(text).toContain('- "count" (long)');
+    expect(text).toContain('- "status" (keyword)');
+    expect(text).toContain('bind only the executed result columns');
+    expect(text).not.toContain('No column information is available');
+  });
+
+  it('falls back to query-text inference when no executed columns are available', () => {
+    expect(systemText()).toContain('No column information is available');
+  });
+});

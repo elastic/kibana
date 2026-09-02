@@ -20,8 +20,8 @@ export interface GeneratedVisualizationEsql {
   query?: string;
   /**
    * Result columns from the validation run, when `generateEsql` executed the
-   * query and returned rows. Callers that author around the result schema (Vega)
-   * can reuse these instead of executing the query again.
+   * query. Includes columns that were all-null in the sample (`dropNullColumns:
+   * false`) so Lens/Vega can bind encodings to the query's full result schema.
    */
   columns?: EsqlEsqlColumnInfo[];
   /** Populated when no usable query could be resolved. */
@@ -131,6 +131,8 @@ export const generateVisualizationEsql = async ({
     additionalInstructions: extraInstructions
       ? `${instructions}\n${extraInstructions}`
       : instructions,
+    // Keep all-null sample columns so config/spec authoring can bind them.
+    dropNullColumns: false,
     ...(timeRange ? { timeRange } : {}),
   };
 

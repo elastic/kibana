@@ -35,6 +35,11 @@ jest.mock('./chart_type_registry', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 
+const EXECUTED_COLUMNS = [
+  { name: 'count', type: 'long' as const },
+  { name: 'status', type: 'keyword' as const },
+];
+
 const createMockLogger = (): Logger =>
   ({
     debug: jest.fn(),
@@ -101,6 +106,37 @@ describe('createVisualizationGraph', () => {
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
     expect(finalState.esqlQuery).toBe(esqlQuery);
+  });
+
+  it('binds generateEsql result columns into the config prompt', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-* | STATS count = COUNT(*) BY status',
+      results: { columns: EXECUTED_COLUMNS, values: [] },
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient);
+
+    await graph.invoke({
+      nlQuery: 'Count logs by status',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: '',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    const prompt = JSON.stringify(
+      (await model.getDefaultModel()).chatModel.invoke.mock.calls[0][0]
+    );
+    expect(prompt).toContain('- \\"count\\" (long)');
+    expect(prompt).toContain('- \\"status\\" (keyword)');
+    expect(prompt).toContain('bind only the executed result columns');
   });
 
   it('returns the authoring note without storing it in the validated config', async () => {

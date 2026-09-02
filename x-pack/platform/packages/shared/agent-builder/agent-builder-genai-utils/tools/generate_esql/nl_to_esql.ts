@@ -118,6 +118,12 @@ export interface GenerateEsqlOptions {
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
+  /**
+   * Forwarded to {@link executeEsql} when `executeQuery` is true. Defaults to
+   * `true`. Pass `false` when callers need the query's full result schema,
+   * including columns that are all-null in the validation sample.
+   */
+  dropNullColumns?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -133,6 +139,7 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  dropNullColumns,
   model: inputModel,
   modelProvider,
   esClient,
@@ -227,6 +234,7 @@ export const generateEsql = async ({
             rowLimit,
             disableNamedParams,
             timeRange,
+            dropNullColumns,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },
