@@ -39,6 +39,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       headed: false,
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       serverConfigSet: 'default',
     });
@@ -56,6 +57,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'classic',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -72,6 +74,7 @@ describe('parseTestFlags', () => {
       arch: true,
       domain: 'classic',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -86,6 +89,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: true,
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -100,6 +104,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'classic',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -116,6 +121,7 @@ describe('parseTestFlags', () => {
       arch: 'bad_arch',
       domain: 'classic',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -132,6 +138,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'rainbow-barfing-unicorns',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -149,6 +156,7 @@ describe('parseTestFlags', () => {
       domain: 'observability_complete',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -160,6 +168,9 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -176,6 +187,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
@@ -188,6 +200,9 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -204,6 +219,7 @@ describe('parseTestFlags', () => {
       domain: 'security_ease',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
@@ -215,6 +231,9 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -231,6 +250,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
@@ -243,6 +263,9 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
@@ -259,6 +282,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       repeatEach: '5',
@@ -271,6 +295,9 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      ui: false,
+      uiHost: undefined,
+      uiPort: undefined,
       repeatEach: 5,
       installDir: undefined,
       logsDir: undefined,
@@ -280,6 +307,145 @@ describe('parseTestFlags', () => {
     });
   });
 
+  it(`should parse with --ui flag`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      ui: true,
+      uiHost: undefined,
+      uiPort: undefined,
+      repeatEach: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'default',
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--ui' is combined with '--headed'`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: true,
+      ui: true,
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--headed' cannot be combined with '--ui': UI mode manages its own browser`
+    );
+  });
+
+  it(`should throw an error when '--ui' is combined with '--repeatEach'`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      repeatEach: '5',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' cannot be combined with '--ui': UI mode is interactive, not a batch run`
+    );
+  });
+
+  it(`should parse with --ui, --uiHost and --uiPort flags`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      uiHost: '0.0.0.0',
+      uiPort: '8888',
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      ui: true,
+      uiHost: '0.0.0.0',
+      uiPort: 8888,
+      repeatEach: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'default',
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--uiHost' is used without '--ui'`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: false,
+      uiHost: '0.0.0.0',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--uiHost' and '--uiPort' can only be used together with '--ui'`
+    );
+  });
+
+  it(`should throw an error when '--uiPort' is out of range`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      ui: true,
+      uiPort: '70000',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--uiPort' must be an integer between 0 and 65535, got '70000'`
+    );
+  });
+
   it(`should throw an error when '--repeatEach' is not a number`, async () => {
     const flags = new FlagsReader({
       location: 'local',
@@ -287,6 +453,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       repeatEach: 'abc',
@@ -305,6 +472,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       repeatEach: '0',
@@ -323,6 +491,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      ui: false,
       preserveEsData: false,
       headed: false,
       repeatEach: '2.5',
@@ -357,6 +526,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
@@ -369,6 +539,9 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        ui: false,
+        uiHost: undefined,
+        uiPort: undefined,
         repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
@@ -399,6 +572,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFilesString,
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
@@ -411,6 +585,9 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        ui: false,
+        uiHost: undefined,
+        uiPort: undefined,
         repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
@@ -438,6 +615,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
@@ -466,6 +644,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
@@ -491,6 +670,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
@@ -506,6 +686,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         config: '/path/to/config',
         logToFile: false,
+        ui: false,
         preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
