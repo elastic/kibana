@@ -15,10 +15,11 @@
 
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCard, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCard, EuiButton, EuiButtonEmpty, EuiIllustration, EuiPanel } from '@elastic/eui';
+import { monitorGraphCogs } from '@elastic/eui-illustrations';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 interface Props {
   urlBasePath: string;
@@ -26,17 +27,26 @@ interface Props {
   onConfirm: () => void;
 }
 
-export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
-  const isDarkMode = useKibanaIsDarkMode();
-
-  const cardGraphicFile = !isDarkMode
-    ? 'illustration_integrations_lightmode.png'
-    : 'illustration_integrations_darkmode.png';
-  const cardGraphicURL = `${urlBasePath}/plugins/home/assets/common/${cardGraphicFile}`;
-
+export function SampleDataCard({ onDecline, onConfirm }: Props) {
   return (
     <EuiCard
-      image={cardGraphicURL}
+      image={
+        <EuiPanel paddingSize="m" color="transparent" hasShadow={false} hasBorder={false}>
+          <EuiIllustration
+            type={monitorGraphCogs}
+            fullWidth={false}
+            alt={i18n.translate('home.letsStartIllustrationAriaLabel', {
+              defaultMessage: 'Welcome to Elastic. Add integrations, or explore on your own.',
+            })}
+            style={{
+              display: 'block',
+              inlineSize: 200,
+              blockSize: 'auto',
+              marginInline: 'auto',
+            }}
+          />
+        </EuiPanel>
+      }
       textAlign="left"
       title={
         <FormattedMessage id="home.letsStartTitle" defaultMessage="Start by adding integrations" />
@@ -60,6 +70,7 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
     />
   );
 }
+
 const footerAction = ({ euiTheme }: UseEuiTheme) => {
   return css({
     marginRight: euiTheme.size.s,
