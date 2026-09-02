@@ -41,6 +41,7 @@ describe('isInboundOnlyConnectorSpec', () => {
         ping: {
           input: z.object({}),
           handler: async () => ({}),
+          scope: 'read',
         },
       },
       events: {

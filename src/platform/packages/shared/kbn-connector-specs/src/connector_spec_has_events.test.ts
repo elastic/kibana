@@ -42,6 +42,7 @@ describe('connectorSpecHasEvents', () => {
         ping: {
           input: z.object({}),
           handler: async () => ({}),
+          scope: 'read',
         },
       },
       events: {
