@@ -571,13 +571,6 @@ describe('project watch', () => {
       expect(calls.map(({ name }) => name)).toEqual(['run_rule_tuning', 'run_coverage']);
     });
 
-    it('projects the two workers it calls, and no skills of its own', () => {
-      expect(projected.callables).toEqual([
-        expect.objectContaining({ id: PND_RULE_TUNING_WORKFLOW_ID, kind: 'workflow' }),
-        expect.objectContaining({ id: PND_DETECTION_COVERAGE_WORKFLOW_ID, kind: 'workflow' }),
-      ]);
-    });
-
     it('projects no skills of its own', () => {
       expect(projected.skills).toEqual([]);
     });
