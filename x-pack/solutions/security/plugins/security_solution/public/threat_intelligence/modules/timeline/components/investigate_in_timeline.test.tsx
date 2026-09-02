@@ -51,9 +51,6 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
     expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
     expect(getAllByText('Investigate in Timeline')).toHaveLength(1);
-    expect(
-      getByTestId(TEST_ID).querySelector('[data-euiicon-type="timeline"]')
-    ).toBeInTheDocument();
   });
 
   it('should render empty component when Indicator data is incorrect', () => {

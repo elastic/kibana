@@ -6,14 +6,25 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
-import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
+import {
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { BlockListFlyout } from '../../../block_list/containers/flyout';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
-import { IndicatorAddToCaseContextMenuItem } from '../../../../../cases/attachments/indicator/components/add_to_case_context_menu_item';
+import { AddToNewCase } from '../../../../../cases/attachments/indicator/components/add_to_new_case';
+import { AddToExistingCase } from '../../../../../cases/attachments/indicator/components/add_to_existing_case';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
-import { ADD_TO_BLOCK_LIST_TEST_ID, ADD_TO_CASE_TEST_ID, MORE_ACTIONS_TEST_ID } from './test_ids';
+import {
+  ADD_TO_BLOCK_LIST_TEST_ID,
+  ADD_TO_EXISTING_TEST_ID,
+  ADD_TO_NEW_CASE_TEST_ID,
+  MORE_ACTIONS_TEST_ID,
+} from './test_ids';
 import { MORE_ACTIONS_BUTTON_LABEL } from './translations';
 
 export interface TakeActionProps {
@@ -41,11 +52,17 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
 
   const items = useMemo(
     () => [
-      <IndicatorAddToCaseContextMenuItem
-        key="attachmentsCase"
+      <AddToExistingCase
+        key={'attachmentsExistingCase'}
         indicator={indicator}
         onClick={closePopover}
-        data-test-subj={ADD_TO_CASE_TEST_ID}
+        data-test-subj={ADD_TO_EXISTING_TEST_ID}
+      />,
+      <AddToNewCase
+        key={'attachmentsNewCase'}
+        indicator={indicator}
+        onClick={closePopover}
+        data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
       />,
       <AddToBlockListContextMenu
         key={'addToBlocklist'}
@@ -85,7 +102,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         anchorPosition="downLeft"
         aria-label={MORE_ACTIONS_BUTTON_LABEL}
       >
-        <ExpandableContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

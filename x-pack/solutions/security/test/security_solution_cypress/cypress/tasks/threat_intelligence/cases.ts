@@ -6,9 +6,10 @@
  */
 
 import {
-  CREATE_NEW_CASE_FROM_MODAL_BUTTON,
-  FLYOUT_ADD_TO_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_CASE_ITEM,
+  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
+  FLYOUT_ADD_TO_NEW_CASE_ITEM,
+  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
+  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
   NEW_CASE_CREATE_BUTTON,
   NEW_CASE_DESCRIPTION_INPUT,
   NEW_CASE_NAME_INPUT,
@@ -19,33 +20,31 @@ import {
 } from '../../screens/threat_intelligence/cases';
 
 /**
- * Open the new case flyout from the unified case modal in the indicators table
+ * Open the add to new case flyout from the indicators table more actions menu
  */
 export const openAddToNewCaseFlyoutFromTable = () => {
-  cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).first().click();
-  cy.get(CREATE_NEW_CASE_FROM_MODAL_BUTTON).click();
+  cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).first().click();
 };
 
 /**
- * Open the case selector from the indicators table more actions menu
+ * Open the add to existing case flyout from the indicators table more actions menu
  */
 export const openAddToExistingCaseFlyoutFromTable = () => {
-  cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).first().click();
+  cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).first().click();
 };
 
 /**
- * Open the new case flyout from the unified case modal in the indicator flyout
+ * Open the new case flyout from the indicators flyout take action menu
  */
 export const openAddToNewCaseFromFlyout = () => {
-  cy.get(FLYOUT_ADD_TO_CASE_ITEM).first().click();
-  cy.get(CREATE_NEW_CASE_FROM_MODAL_BUTTON).click();
+  cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).first().click();
 };
 
 /**
- * Open the case selector from the indicator flyout take action menu
+ * Open the new existing flyout from the indicators flyout take action menu
  */
 export const openAddToExistingCaseFromFlyout = () => {
-  cy.get(FLYOUT_ADD_TO_CASE_ITEM).first().click();
+  cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).first().click();
 };
 
 /**

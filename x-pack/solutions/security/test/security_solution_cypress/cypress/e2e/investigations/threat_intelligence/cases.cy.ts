@@ -24,8 +24,10 @@ import {
 } from '../../../tasks/threat_intelligence/cases';
 import {
   CASE_COMMENT_EXTERNAL_REFERENCE,
-  FLYOUT_ADD_TO_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_CASE_ITEM,
+  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
+  FLYOUT_ADD_TO_NEW_CASE_ITEM,
+  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
+  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
 } from '../../../screens/threat_intelligence/cases';
 import { login } from '../../../tasks/login';
 
@@ -47,12 +49,14 @@ describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
-    cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
 
     openFlyout(documentsNumber - 1);
     openFlyoutTakeAction();
 
-    cy.get(FLYOUT_ADD_TO_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
   });
 });
 

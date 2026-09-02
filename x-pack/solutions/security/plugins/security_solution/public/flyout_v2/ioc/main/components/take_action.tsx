@@ -6,23 +6,23 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { BlockListFlyout } from '../../../../threat_intelligence/modules/block_list/containers/flyout';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../../threat_intelligence/modules/block_list/utils/can_add_to_block_list';
 import { AddToBlockListContextMenu } from '../../../../threat_intelligence/modules/block_list/components/add_to_block_list';
-import { IndicatorAddToCaseContextMenuItem } from '../../../../cases/attachments/indicator/components/add_to_case_context_menu_item';
+import { AddToNewCase } from '../../../../cases/attachments/indicator/components/add_to_new_case';
+import { AddToExistingCase } from '../../../../cases/attachments/indicator/components/add_to_existing_case';
 import { InvestigateInTimelineContextMenu } from '../../../../threat_intelligence/modules/timeline/components/investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
 export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
-export const ADD_TO_CASE_TEST_ID = 'tiIndicatorFlyoutAddToCaseContextMenu';
+export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseContextMenu';
+export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
 export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
-export const TAKE_ACTION_POPOVER_MIN_WIDTH = 240;
 
 export interface TakeActionProps {
   /**
@@ -58,11 +58,17 @@ export const TakeAction = memo(({ indicator }: TakeActionProps) => {
             />,
           ]
         : []),
-      <IndicatorAddToCaseContextMenuItem
-        key="attachmentsCase"
+      <AddToExistingCase
+        key={'attachmentsExistingCase'}
         indicator={indicator}
         onClick={closePopover}
-        data-test-subj={ADD_TO_CASE_TEST_ID}
+        data-test-subj={ADD_TO_EXISTING_CASE_TEST_ID}
+      />,
+      <AddToNewCase
+        key={'attachmentsNewCase'}
+        indicator={indicator}
+        onClick={closePopover}
+        data-test-subj={ADD_TO_NEW_CASE_TEST_ID}
       />,
       <AddToBlockListContextMenu
         key={'addToBlocklist'}
@@ -103,11 +109,10 @@ export const TakeAction = memo(({ indicator }: TakeActionProps) => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        panelStyle={{ minWidth: TAKE_ACTION_POPOVER_MIN_WIDTH }}
         anchorPosition="downLeft"
         data-test-subj={TAKE_ACTION_BUTTON_TEST_ID}
       >
-        <ExpandableContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

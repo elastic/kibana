@@ -5,50 +5,69 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { useCaseDisabled } from '../hooks/use_case_permission';
 import type { IndicatorAttachmentMetadata } from '..';
 import { generateIndicatorAttachmentsMetadata, generateIndicatorAttachmentsWithoutOwner } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useCaseDisabled } from '../hooks/use_case_permission';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
-interface IndicatorAddToCaseContextMenuItemProps {
+export interface AddToExistingCaseProps {
+  /**
+   * Indicator used to generate an attachment to an existing case
+   */
   indicator: Indicator;
+  /**
+   * Click event to close the popover in the parent component
+   */
   onClick: () => void;
+  /**
+   * Used for unit and e2e tests.
+   */
   ['data-test-subj']?: string;
 }
 
-export const IndicatorAddToCaseContextMenuItem = ({
+/**
+ * Leverages the cases plugin api to display a modal listing all the existing cases.
+ * Once a case is selected, an attachment is added to it and a confirmation snackbar
+ * presents a link to view the case.
+ *
+ * This component renders an {@link EuiContextMenu}.
+ *
+ * @returns add to existing case for a context menu
+ */
+export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   indicator,
   onClick,
   'data-test-subj': dataTestSubj,
-}: IndicatorAddToCaseContextMenuItemProps) => {
+}) => {
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
-  const id = indicator._id as string;
+
+  const id: string = indicator._id as string;
   const attachmentMetadata: IndicatorAttachmentMetadata =
     generateIndicatorAttachmentsMetadata(indicator);
   const attachments: CaseAttachmentsWithoutOwner = generateIndicatorAttachmentsWithoutOwner(
     id,
     attachmentMetadata
   );
-  const handleClick = useCallback(() => {
+  const menuItemClicked = useCallback(() => {
     onClick();
     selectCaseModal.open({ getAttachments: () => attachments });
   }, [attachments, onClick, selectCaseModal]);
-  const disabled = useCaseDisabled(attachmentMetadata.indicatorName);
+
+  const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
-    <EuiContextMenuItem
-      data-test-subj={dataTestSubj}
-      disabled={disabled}
-      icon="briefcase"
-      onClick={handleClick}
-    >
-      {ADD_TO_CASE}
+    <EuiContextMenuItem onClick={menuItemClicked} data-test-subj={dataTestSubj} disabled={disabled}>
+      <FormattedMessage
+        defaultMessage="Add to existing case"
+        id="xpack.securitySolution.threatIntelligence.addToExistingCase"
+      />
     </EuiContextMenuItem>
   );
 };
