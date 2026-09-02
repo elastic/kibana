@@ -6,7 +6,7 @@
  */
 
 import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
-import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { getSourcesForStream, getStreamSamplingSource } from '@kbn/streams-schema';
 import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
 
@@ -22,6 +22,7 @@ Each field key is \`name (types)\`. When a field is mapped as multiple incompati
 
   generate: async ({ stream, start, end, esClient, logger, signal }) => {
     const samplingSource = getStreamSamplingSource(stream);
+    const targetSources = getSourcesForStream(stream);
 
     const [analysis, mappingConflicts] = await Promise.all([
       describeDataset({
@@ -34,12 +35,12 @@ Each field key is \`name (types)\`. When a field is mapped as multiple incompati
       // Best-effort: a probe failure must not drop the whole analysis.
       getMappingConflicts({
         esClient,
-        index: samplingSource,
+        index: targetSources,
         signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
       }).catch((error) => {
         logger.debug(
           () =>
-            `Failed to probe mapping conflicts for [${samplingSource}]: ${
+            `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${
               error instanceof Error ? error.message : String(error)
             }`
         );

@@ -34,7 +34,7 @@ describe('datasetAnalysisGenerator', () => {
     formatDocumentAnalysisMock.mockReturnValue(formatted as never);
   });
 
-  it('passes source-wide conflicts (probed without time bounds) to the formatter keyed by field', async () => {
+  it('passes conflicts from the full stream hierarchy to the formatter keyed by field', async () => {
     getMappingConflictsMock.mockResolvedValueOnce([
       { field: 'exception.message', types: ['keyword', 'text'], suggestedCast: 'keyword' },
       { field: 'host.name', types: ['ip', 'keyword'] },
@@ -60,6 +60,7 @@ describe('datasetAnalysisGenerator', () => {
     );
 
     const conflictCall = getMappingConflictsMock.mock.calls[0][0];
+    expect(conflictCall.index).toEqual(['logs.test-default', 'logs.test-default.*']);
     expect(conflictCall).not.toHaveProperty('start');
     expect(conflictCall).not.toHaveProperty('end');
   });
