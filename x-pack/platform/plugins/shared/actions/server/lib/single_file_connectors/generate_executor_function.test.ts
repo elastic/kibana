@@ -1246,8 +1246,18 @@ describe('generateExecutorFunction', () => {
       const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
       const executor = generateExecutorFunction({
         actions: {
-          toolAction: { isTool: true, scope: 'read' as const, input: {} as never, handler: mockHandler },
-          hitlAction: { isTool: false, scope: 'read' as const, input: {} as never, handler: hitlHandler },
+          toolAction: {
+            isTool: true,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: mockHandler,
+          },
+          hitlAction: {
+            isTool: false,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: hitlHandler,
+          },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
@@ -1282,7 +1292,12 @@ describe('generateExecutorFunction', () => {
       const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
       const executor = generateExecutorFunction({
         actions: {
-          hitlAction: { isTool: false, scope: 'read' as const, input: {} as never, handler: hitlHandler },
+          hitlAction: {
+            isTool: false,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: hitlHandler,
+          },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
         getCredential: mockGetCredential,
@@ -1338,7 +1353,12 @@ describe('generateExecutorFunction', () => {
       const testHandler = jest.fn().mockResolvedValue({ connected: true });
       const executor = generateExecutorFunction({
         actions: {
-          testAction: { isTool: true, scope: 'read' as const, input: {} as never, handler: mockHandler },
+          testAction: {
+            isTool: true,
+            scope: 'read' as const,
+            input: {} as never,
+            handler: mockHandler,
+          },
           [TEST_CONNECTOR_SUB_ACTION]: {
             isTool: false,
             scope: 'read' as const,
