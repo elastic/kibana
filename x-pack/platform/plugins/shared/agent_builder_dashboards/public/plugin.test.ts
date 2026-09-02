@@ -76,7 +76,8 @@ describe('AgentBuilderDashboardsPlugin', () => {
       OPEN_DASHBOARD_CHAT_ACTION_ID,
       expect.any(Function)
     );
-    expect(registerActionAsync).toHaveBeenCalledWith(
+    // TODO: Temporarily disabled.
+    expect(registerActionAsync).not.toHaveBeenCalledWith(
       PRETTIFY_DASHBOARD_ACTION_ID,
       expect.any(Function)
     );
