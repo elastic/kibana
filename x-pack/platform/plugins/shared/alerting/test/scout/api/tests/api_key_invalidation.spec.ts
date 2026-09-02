@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
+import {
+  getRuleSavedObjectAttributes,
+  waitForQuietRuleSavedObject,
+} from '../lib/rule_saved_object';
 import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
 const INDEX_THRESHOLD_PARAMS = {
@@ -22,22 +26,12 @@ const INDEX_THRESHOLD_PARAMS = {
   timeField: '@timestamp',
 };
 
-const getAlertAttrs = async (
-  esClient: { get: (params: { index: string; id: string }) => Promise<{ _source?: unknown }> },
-  ruleId: string
-) => {
-  const { _source } = await esClient.get({
-    index: '.kibana_alerting_cases_1',
-    id: `alert:${ruleId}`,
-  });
-  expect(_source).toBeDefined();
-  return (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
-};
-
-// Failing: See https://github.com/elastic/kibana/issues/264184
-apiTest.describe.skip(
-  'API key invalidation on rule operations',
-  { tag: tags.serverless.observability.complete },
+apiTest.describe(
+  '[NON-MKI] API key invalidation on rule operations',
+  // Local-only (no `@cloud-*`): the assertions read the rule's encrypted attributes straight from
+  // the alerting saved-object index and clear pending invalidations, neither of which is available
+  // against a Cloud project.
+  { tag: ['@local-serverless-observability_complete'] },
   () => {
     const ruleIds: string[] = [];
 
@@ -76,7 +70,7 @@ apiTest.describe.skip(
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
 
-        const attrsBefore = await getAlertAttrs(esClient, ruleId);
+        const attrsBefore = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
@@ -96,7 +90,7 @@ apiTest.describe.skip(
         });
         expect(pendingInvalidations).toHaveLength(0);
 
-        const attrsAfter = await getAlertAttrs(esClient, ruleId);
+        const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
       }
@@ -113,10 +107,8 @@ apiTest.describe.skip(
             name: 'scout-update-rule-test',
             rule_type_id: '.index-threshold',
             consumer: 'stackAlerts',
-            // Use a long interval so only the first scheduled run lands
-            // inside the test window. We then wait for that first run to
-            // finish before rotating, so `_update_api_key` has no concurrent
-            // SO writer and `retryIfConflicts` doesn't trigger.
+            // A long interval keeps the scheduler out of the way: the rule runs once when it is
+            // created and not again inside the test window.
             schedule: { interval: '1h' },
             enabled: true,
             actions: [],
@@ -133,8 +125,9 @@ apiTest.describe.skip(
           ...COMMON_HEADERS,
           ...cookieHeader,
         });
+        await waitForQuietRuleSavedObject(esClient, ruleId);
 
-        const attrsBefore = await getAlertAttrs(esClient, ruleId);
+        const attrsBefore = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
@@ -153,7 +146,7 @@ apiTest.describe.skip(
         });
         expect(updateResponse).toHaveStatusCode(200);
 
-        const attrsAfter = await getAlertAttrs(esClient, ruleId);
+        const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
         expect(attrsAfter.apiKey).not.toBe(attrsBefore.apiKey);
@@ -179,10 +172,8 @@ apiTest.describe.skip(
             name: 'scout-update-api-key-test',
             rule_type_id: '.index-threshold',
             consumer: 'stackAlerts',
-            // Use a long interval so only the first scheduled run lands
-            // inside the test window. We then wait for that first run to
-            // finish before rotating, so `_update_api_key` has no concurrent
-            // SO writer and `retryIfConflicts` doesn't trigger.
+            // A long interval keeps the scheduler out of the way: the rule runs once when it is
+            // created and not again inside the test window.
             schedule: { interval: '1h' },
             enabled: true,
             actions: [],
@@ -199,8 +190,9 @@ apiTest.describe.skip(
           ...COMMON_HEADERS,
           ...cookieHeader,
         });
+        await waitForQuietRuleSavedObject(esClient, ruleId);
 
-        const attrsBefore = await getAlertAttrs(esClient, ruleId);
+        const attrsBefore = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
@@ -212,7 +204,7 @@ apiTest.describe.skip(
         );
         expect(updateApiKeyResponse).toHaveStatusCode(204);
 
-        const attrsAfter = await getAlertAttrs(esClient, ruleId);
+        const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
         expect(attrsAfter.apiKey).not.toBe(attrsBefore.apiKey);
@@ -250,7 +242,7 @@ apiTest.describe.skip(
         const ruleId = (createResponse.body as { id: string }).id;
         ruleIds.push(ruleId);
 
-        const attrsBefore = await getAlertAttrs(esClient, ruleId);
+        const attrsBefore = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsBefore.apiKey).toBeDefined();
         expect(attrsBefore.uiamApiKey).toBeDefined();
 
@@ -272,7 +264,7 @@ apiTest.describe.skip(
         });
         expect(pendingInvalidations).toHaveLength(0);
 
-        const attrsAfter = await getAlertAttrs(esClient, ruleId);
+        const attrsAfter = await getRuleSavedObjectAttributes(esClient, ruleId);
         expect(attrsAfter.apiKey).toBeDefined();
         expect(attrsAfter.uiamApiKey).toBeDefined();
       }

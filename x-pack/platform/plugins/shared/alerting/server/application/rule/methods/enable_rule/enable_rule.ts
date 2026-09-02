@@ -140,7 +140,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
+    await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
     const now = new Date();
@@ -187,33 +187,21 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       },
     });
 
-    try {
-      // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
-      // we call create with overwrite=true
-      if (migratedIds.includes(alert.id)) {
-        await context.unsecuredSavedObjectsClient.create<RawRule>(
-          RULE_SAVED_OBJECT_TYPE,
-          updateAttributes,
-          {
-            id,
-            overwrite: true,
-            version,
-            references: alert.references,
-          }
-        );
-      } else {
-        await context.unsecuredSavedObjectsClient.update(
-          RULE_SAVED_OBJECT_TYPE,
-          id,
-          updateAttributes,
-          {
-            version,
-          }
-        );
+    // Write the whole document instead of a partial update. A partial update merges attributes,
+    // so the API key attributes stripped above would keep their stored values rather than being
+    // removed, leaving a rule that runs on a new key while still holding the previous one. It
+    // also mitigates AAD issues, since `actions` is not used for encrypting the API key in a
+    // partial saved-object update.
+    await context.unsecuredSavedObjectsClient.create<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      updateAttributes,
+      {
+        id,
+        overwrite: true,
+        version,
+        references: alert.references,
       }
-    } catch (e) {
-      throw e;
-    }
+    );
   }
 
   let scheduledTaskIdToCreate: string | null = null;

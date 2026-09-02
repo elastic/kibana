@@ -14,6 +14,15 @@ import {
   PROVISION_UIAM_API_KEYS_FEATURE_FLAG,
 } from '../../application/rule/constants';
 
+/**
+ * Stale API key attributes to remove from a rule's stored attributes before spreading in a newly
+ * created key set. `getApiKeyRuleProperties` omits the UIAM attributes when no UIAM key was
+ * minted, so without this the old values would survive the spread.
+ *
+ * Callers must persist the result as a whole document (`create` with `overwrite: true`, or
+ * `bulkCreate`). In a partial saved-object update attributes are merged, so a stripped attribute
+ * is merely absent from the payload and keeps its stored value instead of being removed.
+ */
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
   'apiKeyOwner',
@@ -72,10 +81,9 @@ const getApiKeyRuleProperties = (
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
     // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
     // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
-    // rejects for external keys. Written whenever a UIAM key is written, not only when true:
-    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, where
-    // omitting the attribute leaves the previously stored value in place. A stale `true` would
-    // then withhold the shared secret from a freshly granted internal key.
+    // rejects for external keys. Written whenever a UIAM key is written, not only when true,
+    // so that it can never disagree with the key it describes: a stale `true` would withhold
+    // the shared secret from a freshly granted internal key.
     ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
   };
 };
