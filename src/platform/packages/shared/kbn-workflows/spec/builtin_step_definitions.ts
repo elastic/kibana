@@ -32,6 +32,13 @@ import {
 
 const EmptyObjectSchema = z.object({});
 
+/** Shared HITL audit fields on waitForInput / waitForApproval step output. */
+export const hitlAuditOutputFields = {
+  respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+  channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
+  respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
+};
+
 export type BuiltInStepDefinition = BaseStepDefinition;
 
 /**
@@ -286,9 +293,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     inputSchema: WaitForInputStepInputSchema,
     outputSchema: z.object({
       response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
-      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
-      channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
-      respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
+      ...hitlAuditOutputFields,
     }),
     documentation: {
       examples: [
@@ -322,9 +327,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     inputSchema: WaitForApprovalStepInputSchema,
     outputSchema: z.object({
       response: z.object({ approved: z.boolean() }),
-      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
-      channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
-      respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
+      ...hitlAuditOutputFields,
     }),
     documentation: {
       examples: [

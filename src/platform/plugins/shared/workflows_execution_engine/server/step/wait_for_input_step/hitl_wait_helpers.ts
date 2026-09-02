@@ -37,9 +37,9 @@ export function resumeHitlWaitStep({
   // engine resume context, which may store a profile UID from a different
   // getAuthenticatedUser helper.
   const hitl = stepExecutionRuntime.stepExecution?.hitl;
-  const resumedBy =
-    (typeof hitl?.respondedBy === 'string' && hitl.respondedBy) ||
-    (typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown');
+  const claimedBy =
+    typeof hitl?.respondedBy === 'string' && hitl.respondedBy !== '' ? hitl.respondedBy : undefined;
+  const resumedBy = claimedBy ?? (typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown');
   const executionId = execution.id;
 
   const stepOutput = transformResumeInput
@@ -126,13 +126,7 @@ function enrichHitlStepOutput(
   stepOutput: unknown,
   hitl: { channel?: string; respondedAt?: string } | undefined
 ): unknown {
-  if (
-    !hitl ||
-    stepOutput === null ||
-    stepOutput === undefined ||
-    typeof stepOutput !== 'object' ||
-    Array.isArray(stepOutput)
-  ) {
+  if (!hitl || stepOutput == null || typeof stepOutput !== 'object' || Array.isArray(stepOutput)) {
     return stepOutput;
   }
 

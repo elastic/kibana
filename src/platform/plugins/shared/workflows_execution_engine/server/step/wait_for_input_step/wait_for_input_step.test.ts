@@ -324,6 +324,29 @@ describe('WaitForInputStepImpl', () => {
       });
     });
 
+    it('falls back to engine resumedBy when hitl.respondedBy is empty', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: '',
+          channel: 'inbox',
+          respondedAt: '2026-08-25T15:06:54.847Z',
+        },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: { resumeInput, resumedBy: 'jane.doe' },
+      } as any);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'jane.doe',
+        channel: 'inbox',
+        respondedAt: '2026-08-25T15:06:54.847Z',
+      });
+    });
+
     it('should not call setInput on resume run', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();

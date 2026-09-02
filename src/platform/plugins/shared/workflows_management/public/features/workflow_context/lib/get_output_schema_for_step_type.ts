@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getBuiltInStepDefinition,
-  MAX_HITL_CHANNEL_LENGTH,
-  MAX_HITL_RESPONDED_AT_LENGTH,
-  MAX_HITL_RESPONDED_BY_LENGTH,
-} from '@kbn/workflows';
+import { getBuiltInStepDefinition, hitlAuditOutputFields } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -21,12 +16,6 @@ import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { stepSchemas } from '../../../../common/step_schemas';
 
 const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
-
-const hitlAuditOutputFields = {
-  respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
-  channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
-  respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
-};
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
   // Handle internal actions with pattern matching first
