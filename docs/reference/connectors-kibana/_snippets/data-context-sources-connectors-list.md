@@ -8,6 +8,7 @@
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 - [Azure Monitor](/reference/connectors-kibana/azure-monitor-action-type.md): List and triage alerts, query metrics and logs, and control alert rules in Azure Monitor.
 - [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
+- [Bitbucket](/reference/connectors-kibana/bitbucket-action-type.md): Open, review, comment on, and merge pull requests, create branches, report commit build statuses, and trigger pipelines in Bitbucket Cloud.
 - [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 - [Buildkite](/reference/connectors-kibana/buildkite-action-type.md): Trigger, observe, retry, and cancel builds, unblock deploy gates, and post annotations.

@@ -377,4 +377,9 @@ export const ConnectorIconsMap: Map<
     '.urlscan_io',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
+
+  [
+    '.bitbucket',
+    lazy(() => import(/* webpackChunkName: "connectorIconBitbucket" */ './specs/bitbucket/icon')),
+  ],
 ]);
