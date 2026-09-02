@@ -27,8 +27,11 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   for (const command of commandDefinitions) {
     commandsMetadata[command.name] = {
-      ...command,
-      license: command.license?.toLowerCase(),
+      type: 'command',
+      name: command.name,
+      ...(command.license && { license: command.license.toLowerCase() }),
+      ...(command.observabilityTier && { observability_tier: command.observabilityTier }),
+      ...(command.output && { output: command.output }),
     };
   }
 

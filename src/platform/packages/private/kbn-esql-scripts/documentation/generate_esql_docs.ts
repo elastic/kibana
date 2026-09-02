@@ -125,6 +125,9 @@ function writeFunctionDocs(docsMap: Map<string, DocsSectionContent>, pathToDocsF
   fs.writeFileSync(pathToDocsFile, newFileContents.code);
 }
 
+/**
+ * This function searches the AST for the functions list
+ */
 function findFunctionsList(ast: any): recast.types.namedTypes.ArrayExpression {
   let foundArray: recast.types.namedTypes.ArrayExpression | null = null;
 
