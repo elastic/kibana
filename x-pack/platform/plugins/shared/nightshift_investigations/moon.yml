@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/agent-builder-server'
   - '@kbn/i18n'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
