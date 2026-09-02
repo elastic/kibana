@@ -38,6 +38,8 @@ Work through these numbered checks **in order, one at a time**, before the gener
 
 The **Fires when the PR…** column only determines when to perform a check; it does not establish that the PR has a problem. Post a finding only after the condition in **Flag / ask** is positively verified. A failed or incomplete repository lookup is not evidence that an implementation, configuration, or reusable abstraction is absent.
 
+Scout config sets live in the base `@kbn/scout` package under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/`.
+
 | # | Critical check | Fires when the PR… | Flag / ask → see |
 |---|---|---|---|
 | 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
