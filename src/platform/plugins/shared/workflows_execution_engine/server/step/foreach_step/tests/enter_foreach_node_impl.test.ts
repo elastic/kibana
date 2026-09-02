@@ -161,14 +161,29 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should throw an error if expression evaluated to null', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
-        ).mockReturnValue(null);
-        await expect(underTest.run()).rejects.toThrow(
-          'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
-        );
-      });
+      it.each([
+        ['null', null],
+        ['undefined', undefined],
+      ])(
+        'should skip the loop instead of throwing when the expression resolves to %s',
+        async (_label, resolved) => {
+          (
+            stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+          ).mockReturnValue(resolved);
+
+          await expect(underTest.run()).resolves.toBeUndefined();
+
+          // A missing nested path is treated as an empty list: the loop body is
+          // skipped, the step finishes, and execution jumps to the exit node.
+          expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({ total: 0 });
+          expect(stepExecutionRuntime.finishStep).toHaveBeenCalledTimes(1);
+          expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(
+            node.exitNodeId
+          );
+          // No iteration scope may be entered for an empty list.
+          expect(workflowExecutionRuntimeManager.enterScope).not.toHaveBeenCalled();
+        }
+      );
 
       it('should throw an error if the expression evaluated to an object', async () => {
         (
