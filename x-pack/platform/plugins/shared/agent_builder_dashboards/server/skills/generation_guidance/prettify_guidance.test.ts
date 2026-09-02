@@ -20,11 +20,11 @@ describe('getDashboardPrettifyPromptContent', () => {
     expect(content).toContain('**Structure**');
     expect(content).not.toContain('never empty');
     expect(content).toContain('**All of them**');
-    expect(content).toContain('Do not write findings');
-    expect(content).toContain('issues belong only in the form option descriptions');
-    expect(content).toContain('ask_user_question` alone');
     expect(content).toContain('one short clause per issue');
     expect(content).toContain('Treat **All of them** as every non-empty category');
+    expect(content).toContain('edit_panels');
+    expect(content).toContain('update_panel_layouts');
+    expect(content).toContain('source: "config"');
     expect(content.indexOf('## Prettifying a Dashboard')).toBeLessThan(
       content.indexOf('## Dashboard Review')
     );

@@ -63,6 +63,7 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 - When using \`add_section\`, each section has its own coordinate space.
 - Panels nested under \`add_section.panels\` use that same section-relative coordinate space.
+- When moving panels into a section with \`update_panel_layouts\`, panel \`grid\` is section-relative (same as \`add_section.panels\`).
 - Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.

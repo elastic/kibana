@@ -16,8 +16,8 @@ describe('dashboard guidance', () => {
   it('flags a large or multi-topic dashboard with no topical sections', () => {
     const review = getDashboardReviewTopicsContent();
     expect(review).toContain('no topical sections is a critical issue');
-    expect(review).toContain('remove_panels');
-    expect(review).toContain('add_section');
+    expect(review).toContain('update_panel_layouts');
+    expect(review).toContain('newSections');
   });
 
   it('flags leftover grid gaps and panels in the wrong section', () => {
@@ -99,7 +99,7 @@ describe('dashboard guidance', () => {
       - Use sections when panels fall into distinct topics such as overview metrics, trends, breakdowns, or per-domain groupings.
       - Prefer sections for larger dashboards, especially when there are roughly 6 or more visualization panels or when the layout would otherwise feel long and hard to navigate.
       - Do not add sections only for decoration. Use them when they make the dashboard structure clearer.
-      - Put each panel in the section that matches its role: KPIs in Overview/Key Metrics, time series in Trends, rankings and distributions in Breakdowns. Overview/Key Metrics is KPI-only — do not invent a mixed section by parking a table or trend there. If placement is wrong, rethink where panels live: \`add_section\` with the panels that belong there and \`remove_panels\` the old copies — do not only tweak widths in place.
+      - Put each panel in the section that matches its role: KPIs in Overview/Key Metrics, time series in Trends, rankings and distributions in Breakdowns. Overview/Key Metrics is KPI-only — do not invent a mixed section by parking a table or trend there. If placement is wrong, rethink where panels live: \`update_panel_layouts\` with \`newSections\` / \`sectionId\` — do not only tweak widths in place.
       ## Panel Layout
 
       The dashboard uses a **48-column grid**. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
@@ -158,6 +158,7 @@ describe('dashboard guidance', () => {
 
       - When using \`add_section\`, each section has its own coordinate space.
       - Panels nested under \`add_section.panels\` use that same section-relative coordinate space.
+      - When moving panels into a section with \`update_panel_layouts\`, panel \`grid\` is section-relative (same as \`add_section.panels\`).
       - Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
       - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
       - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
@@ -203,8 +204,8 @@ describe('dashboard guidance', () => {
       ### composition
       Critical:
       - Sections used only for decoration, with no topical grouping, are a critical issue.
-      - A dashboard with about 6 or more visualization panels, or with distinct topics such as overview KPIs, trends, and breakdowns, that has no topical sections is a critical issue. Add named sections (\`add_section\`) with those panels, then \`remove_panels\` the old copies. A small single-topic dashboard that scans as one sequence is not this issue. If topical sections already group the panels, this is not an issue.
-      - A panel in the wrong topical section is a critical issue — for example a KPI at top-level or in Trends/Breakdowns when an Overview/Key Metrics section exists, or a time-series among KPIs. Put it in the right section with \`add_section\` panels and \`remove_panels\` the old copy.
+      - A dashboard with about 6 or more visualization panels, or with distinct topics such as overview KPIs, trends, and breakdowns, that has no topical sections is a critical issue. Wrap those panels in named sections with \`update_panel_layouts\` (\`newSections\` + \`newSectionKey\`). A small single-topic dashboard that scans as one sequence is not this issue. If topical sections already group the panels, this is not an issue.
+      - A panel in the wrong topical section is a critical issue — for example a KPI at top-level or in Trends/Breakdowns when an Overview/Key Metrics section exists, or a time-series among KPIs. Put it in the right section with \`update_panel_layouts\` (\`newSectionKey\` or \`sectionId\`).
       - Key Metrics / Overview must be KPI-only. A table or time series in that section is a critical issue — move it out. Do not invent a mixed-role section.
       - A piecemeal layout is a critical issue — resizing a couple of panels and leaving gaps or misplaced panels. Review grid positions and composition together; if anything violates, rethink where panels live.
       - A dashboard that has time-series XY panels but none with legend statistics (avg/min/max) is a critical issue. Add them on one primary overview trend (at most two). The edit query MUST include the exact phrase \\"show avg/min/max in the legend\\" (e.g. \\"log volume over time, show avg/min/max in the legend\\"). Skip categorical bars and queries whose measure is already AVG/MIN/MAX of a field. If at least one already has them, this is not an issue.
