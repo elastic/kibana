@@ -9,20 +9,21 @@ import { Buffer } from 'buffer';
 import {
   ESQL_RESULTS_MAX_BYTES_PER_EXECUTION,
   ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
+  type EsqlResultRow,
 } from '../../../common';
 
-export type EsqlResultRow = Record<string, string | null>;
+const SERIALIZED_ARRAY_OVERHEAD_BYTES = 2;
 
 interface EsqlResultHit {
   _source?: unknown;
 }
 
-export interface EsqlResultsBudget {
+interface EsqlResultsBudget {
   remainingRows: number;
   remainingBytes: number;
 }
 
-export interface BoundedEsqlResults {
+interface BoundedEsqlResults {
   results: EsqlResultRow[];
   totalCount: number;
   storedCount: number;
@@ -39,14 +40,14 @@ export const getBoundedEsqlResults = (
   hits: EsqlResultHit[],
   budget: EsqlResultsBudget
 ): BoundedEsqlResults => {
-  const rows = hits.flatMap(({ _source }) =>
-    _source && typeof _source === 'object' ? [_source as EsqlResultRow] : []
-  );
+  const rows = hits.flatMap(({ _source }) => (isEsqlResultRow(_source) ? [_source] : []));
   const results: EsqlResultRow[] = [];
-  let { remainingRows, remainingBytes } = budget;
+  let { remainingRows } = budget;
+  let remainingBytes = Math.max(budget.remainingBytes - SERIALIZED_ARRAY_OVERHEAD_BYTES, 0);
 
   for (const row of rows) {
-    const serializedBytes = Buffer.byteLength(JSON.stringify(row), 'utf8');
+    const serializedBytes =
+      Buffer.byteLength(JSON.stringify(row), 'utf8') + (results.length > 0 ? 1 : 0);
     if (remainingRows === 0 || serializedBytes > remainingBytes) {
       break;
     }
@@ -64,3 +65,9 @@ export const getBoundedEsqlResults = (
     remainingBudget: { remainingRows, remainingBytes },
   };
 };
+
+const isEsqlResultRow = (value: unknown): value is EsqlResultRow =>
+  value !== null &&
+  typeof value === 'object' &&
+  !Array.isArray(value) &&
+  Object.values(value).every((fieldValue) => fieldValue === null || typeof fieldValue === 'string');

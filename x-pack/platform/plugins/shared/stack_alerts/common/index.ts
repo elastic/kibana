@@ -7,7 +7,7 @@
 
 export { getComparatorScript, getHumanReadableComparator } from './comparator';
 
-export type { EsqlTable } from './es_query';
+export type { EsqlResultRow, EsqlTable } from './es_query';
 export {
   rowToDocument,
   transformToEsqlTable,

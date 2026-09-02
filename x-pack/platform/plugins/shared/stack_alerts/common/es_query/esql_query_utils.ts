@@ -21,12 +21,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
-type EsqlDocument = Record<string, string | null>;
+export type EsqlResultRow = Record<string, string | null>;
 
 interface EsqlHit {
   _id: string;
   _index: string;
-  _source: EsqlDocument;
+  _source: EsqlResultRow;
 }
 
 interface EsqlResultColumn {
@@ -36,21 +36,21 @@ interface EsqlResultColumn {
 
 interface EsqlQueryHits {
   results: ParseAggregationResultsOpts;
-  rows: EsqlDocument[];
+  rows: EsqlResultRow[];
   cols: Array<{ id: string; actions: boolean }>;
   // Track duplicate and long alertIds, so we can add a warning
   duplicateAlertIds?: Set<string>;
   longAlertIds?: Set<string>;
 }
 
-type EsqlResultRow = Array<string | null>;
+type EsqlResultValues = Array<string | null>;
 
 const ESQL_DOCUMENT_ID = 'esql_query_document';
 const CHUNK_SIZE = 100;
 
 export interface EsqlTable {
   columns: EsqlResultColumn[];
-  values: EsqlResultRow[];
+  values: EsqlResultValues[];
   is_partial?: boolean;
   _clusters?: {
     details?: {
@@ -67,8 +67,8 @@ export const ALERT_ID_SUGGESTED_MAX = 10;
 export const rowToDocument = (
   columns: EsqlQueryResponse['columns'],
   row: FieldValue[]
-): EsqlDocument => {
-  const doc: EsqlDocument = {};
+): EsqlResultRow => {
+  const doc: EsqlResultRow = {};
   for (let i = 0; i < columns.length; ++i) {
     doc[columns[i].name] = row[i]?.toString() || null;
   }
@@ -96,7 +96,7 @@ export const toEsqlQueryHits = async (
   chunkSize: number = CHUNK_SIZE
 ): Promise<EsqlQueryHits> => {
   const hits: EsqlHit[] = [];
-  const rows: EsqlDocument[] = [];
+  const rows: EsqlResultRow[] = [];
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
@@ -143,7 +143,7 @@ export const toGroupedEsqlQueryHits = async (
 ): Promise<EsqlQueryHits> => {
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
-  const rows: EsqlDocument[] = [];
+  const rows: EsqlResultRow[] = [];
   const mappedAlertIds: Record<string, string[]> = {};
   const mappedAlertIdFields: Record<string, string[]> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
@@ -228,9 +228,8 @@ export const toGroupedEsqlQueryHits = async (
 
 export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
   const columns: EsqlResultColumn[] = datatable.columns;
-  // Convert each value to string or null to match EsqlResultRow type
-  const values: EsqlResultRow[] = datatable.values.map(
-    (row) => row.map((v) => (v === null || typeof v === 'string' ? v : String(v))) as EsqlResultRow
+  const values: EsqlResultValues[] = datatable.values.map((row) =>
+    row.map((value) => (value === null || typeof value === 'string' ? value : String(value)))
   );
   return { columns, values };
 };

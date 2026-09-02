@@ -128,11 +128,9 @@ spaceTest.describe('ES|QL alert results in workflows', { tag: tags.stateful.clas
       const createdRuleId = rule.id;
       ruleId = createdRuleId;
 
+      await apiServices.alerting.rules.runSoon(createdRuleId, scoutSpace.id);
       const executions = await waitForConditionOrThrow({
-        action: async () => {
-          await apiServices.alerting.rules.runSoon(createdRuleId, scoutSpace.id);
-          return apiServices.workflowsApi.getExecutions(createdWorkflowId);
-        },
+        action: () => apiServices.workflowsApi.getExecutions(createdWorkflowId),
         condition: ({ total }) => total > 0,
         interval: 2_000,
         timeout: 60_000,
@@ -165,8 +163,12 @@ spaceTest.describe('ES|QL alert results in workflows', { tag: tags.stateful.clas
         ({ stepId }) => stepId === 'process_result'
       );
       expect(processedRows).toHaveLength(2);
-      expect(JSON.stringify(processedRows)).toContain('host=host-a,cpu_pct=0.5,threshold=20');
-      expect(JSON.stringify(processedRows)).toContain('host=host-b,cpu_pct=0.8,threshold=20');
+      expect(
+        processedRows?.map(({ input }) => (input as { message?: string } | undefined)?.message)
+      ).toStrictEqual([
+        'host=host-a,cpu_pct=0.5,threshold=20',
+        'host=host-b,cpu_pct=0.8,threshold=20',
+      ]);
     }
   );
 });

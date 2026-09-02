@@ -721,8 +721,11 @@ describe('es_query executor', () => {
 
       expect(mockReport).toHaveBeenCalledWith(
         expect.objectContaining({
-          payload: expect.not.objectContaining({
-            [ALERT_ESQL_QUERY_RESULTS]: expect.anything(),
+          payload: expect.objectContaining({
+            [ALERT_ESQL_QUERY_RESULTS]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: undefined,
+            [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: undefined,
           }),
         })
       );

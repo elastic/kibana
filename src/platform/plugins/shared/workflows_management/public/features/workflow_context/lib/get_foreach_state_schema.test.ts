@@ -78,7 +78,7 @@ describe('getForeachStateSchema', () => {
   it('should infer dynamic ES|QL result fields from an alert event collection', () => {
     const stepContext = DynamicStepContextSchema.extend({
       event: AlertEventSchema.optional(),
-    }) as typeof DynamicStepContextSchema;
+    });
     const collectionPath = 'event.alerts[0].kibana.alert.esql.results';
 
     const itemSchema = getForeachItemSchema(stepContext, collectionPath);
@@ -91,7 +91,7 @@ describe('getForeachStateSchema', () => {
   it('should preserve unknown typing for other alert fields', () => {
     const stepContext = DynamicStepContextSchema.extend({
       event: AlertEventSchema.optional(),
-    }) as typeof DynamicStepContextSchema;
+    });
 
     expect(
       getSchemaAtPath(stepContext, 'event.alerts[0].kibana.alert.rule.name').schema

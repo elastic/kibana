@@ -164,7 +164,7 @@ export function getForeachCollectionDiagnostic(
 }
 
 export function getForeachItemSchema(
-  stepContextSchema: typeof DynamicStepContextSchema,
+  stepContextSchema: z.ZodType,
   foreachParam: string
 ): z.ZodType {
   const parsedPath = parseVariablePath(foreachParam);

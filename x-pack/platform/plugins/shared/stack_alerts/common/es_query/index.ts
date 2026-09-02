@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { EsqlTable } from './esql_query_utils';
+export type { EsqlResultRow, EsqlTable } from './esql_query_utils';
 export {
   rowToDocument,
   transformToEsqlTable,

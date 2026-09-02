@@ -7,29 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
 import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import type { AlertRuleLinkInfo } from '../../../common/types/alert_types';
 import { useKibana } from '../use_kibana';
-
-export interface AlertRuleLinkInfo {
-  id: string;
-  name: string;
-  ruleUrl?: string;
-}
 
 export const useAlertRuleLink = (alertRule?: AlertRuleLinkInfo): string | undefined => {
   const { application } = useKibana().services;
 
-  return useMemo(() => {
-    if (!alertRule) {
-      return undefined;
-    }
+  if (!alertRule) {
+    return undefined;
+  }
 
-    return (
-      alertRule.ruleUrl ??
-      application.getUrlForApp('rules', {
-        path: getRulesAppDetailsRoute(alertRule.id),
-      })
-    );
-  }, [alertRule, application]);
+  return (
+    alertRule.ruleUrl ??
+    application.getUrlForApp('rules', {
+      path: getRulesAppDetailsRoute(alertRule.id),
+    })
+  );
 };

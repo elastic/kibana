@@ -350,10 +350,10 @@ export const EsqlQueryExpression: React.FC<
         helpText={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.includeEsqlResultsHelpText"
-            defaultMessage="Stores result data on each alert for actions and workflows. Results are limited to {maxRows} rows or {maxKilobytes} KB per rule execution and include truncation metadata when a limit is reached."
+            defaultMessage="Stores result data on each alert for workflows. Results are limited to {maxRows} rows or {maxKibibytes} KiB per rule execution and include truncation metadata when a limit is reached."
             values={{
               maxRows: ESQL_RESULTS_MAX_ROWS_PER_EXECUTION,
-              maxKilobytes: ESQL_RESULTS_MAX_BYTES_PER_EXECUTION / 1024,
+              maxKibibytes: ESQL_RESULTS_MAX_BYTES_PER_EXECUTION / 1024,
             }}
           />
         }

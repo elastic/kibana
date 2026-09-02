@@ -170,7 +170,7 @@ const EsQueryRuleParamsSchemaProperties = {
       {
         meta: {
           description:
-            'Indicates whether ES|QL result rows are stored in the alert document and made available to actions.',
+            'Indicates whether ES|QL result rows are stored in the alert document for workflows.',
         },
       }
     )

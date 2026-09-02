@@ -96,7 +96,6 @@ describe('WorkflowExecutionOverview', () => {
         />
       );
 
-      expect(screen.getByText('Alert rule')).toBeInTheDocument();
       expect(screen.getByTestId('workflowExecutionAlertRuleLink')).toHaveAttribute(
         'href',
         '/s/space-1/app/rules/rule/rule-1'

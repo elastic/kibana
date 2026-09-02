@@ -212,6 +212,15 @@ export async function executor(
         [ALERT_GROUPING]: groupingObject,
         ...ecsGroups,
         ...actionContext.sourceFields,
+        // Undefined flattened fields remove metadata left by an earlier opted-in execution.
+        ...(esqlQueryRule && !esqlResults
+          ? {
+              [ALERT_ESQL_QUERY_RESULTS]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_TOTAL_COUNT]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_STORED_COUNT]: undefined,
+              [ALERT_ESQL_QUERY_RESULTS_TRUNCATED]: undefined,
+            }
+          : {}),
         ...(esqlResults
           ? {
               [ALERT_ESQL_QUERY_RESULTS]: esqlResults.results,
