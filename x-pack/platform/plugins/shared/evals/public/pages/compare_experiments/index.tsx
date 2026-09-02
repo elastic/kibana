@@ -671,7 +671,8 @@ export const CompareExperimentsPage: React.FC = () => {
     ];
     const rows = sortedResults.map((r) => {
       const diff = computeCompareDiff(r.meanTarget, r.meanBaseline);
-      const significant = r.pValue !== null && r.pValue < SIGNIFICANCE_THRESHOLD;
+      const significant =
+        r.pValue !== null && Number.isFinite(r.pValue) && r.pValue < SIGNIFICANCE_THRESHOLD;
       let outcome = '';
       if (significant && r.direction !== 'neutral') {
         outcome = isImproved(diff, r.direction) ? 'Improvement' : 'Regression';
@@ -684,7 +685,7 @@ export const CompareExperimentsPage: React.FC = () => {
         r.meanTarget.toFixed(4),
         diff.toFixed(4),
         r.direction,
-        r.pValue?.toFixed(6) ?? '',
+        r.pValue !== null && Number.isFinite(r.pValue) ? r.pValue.toFixed(6) : '',
         significant ? 'Yes' : 'No',
         outcome,
       ];
