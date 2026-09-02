@@ -49601,8 +49601,6 @@
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonAriaLabel": "Mostrar {count} mais itens",
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription": "+ mais {count}",
     "xpack.securitySolution.threatIntelligence.addToBlockList": "Adicionar entrada à lista de bloqueio",
-    "xpack.securitySolution.threatIntelligence.addToExistingCase": "Adicionar ao caso existente",
-    "xpack.securitySolution.threatIntelligence.addToNewCase": "Adicionar a um novo caso",
     "xpack.securitySolution.threatIntelligence.blocklist.flyoutTitle": "Adicionar lista de bloqueio",
     "xpack.securitySolution.threatIntelligence.cases.displayName": "Indicadores",
     "xpack.securitySolution.threatIntelligence.cases.eventDescription": "adicionou um indicador de comprometimento",
