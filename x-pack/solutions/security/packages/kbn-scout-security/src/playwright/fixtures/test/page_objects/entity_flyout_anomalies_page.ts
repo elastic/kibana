@@ -190,7 +190,9 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clearMitreTacticFilter() {
-    await this.mitreTacticClearChip.click();
+    // dispatchEvent: same occlusion race as selectMitreTactic — the hover chip is
+    // briefly covered after scroll by the MitreTacticDotV3 overlay.
+    await this.mitreTacticClearChip.dispatchEvent('click');
   }
 
   async expandAnomalyRow() {
