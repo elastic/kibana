@@ -18,14 +18,23 @@ const config = createMockConfig();
 const logger = loggingSystemMock.createLogger();
 const savedObjectsClient = savedObjectsClientMock.create();
 
-// The message shape production actually records for UIAM's APIKEY_MISSING: the stringified
-// Elasticsearch security_exception, carrying the phrase the alerting plugin's
-// isMissingUiamApiKeyMessage matches on.
+// The message shapes production actually records: the stringified Elasticsearch security_exception,
+// carrying the phrases the alerting plugin's isUnusableUiamApiKeyMessage matches on.
 const UIAM_KEY_MISSING_ERROR = new Error(
   [
     'security_exception',
     '\tCaused by:',
     '\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]',
+  ].join('\n')
+);
+
+// UIAM's authorization refusal, which this call site swallowed on `b5fa1e0e` — the rule failed every
+// minute for a week with the reason recorded nowhere the healer could see it.
+const UIAM_KEY_UNAUTHORIZED_ERROR = new Error(
+  [
+    'security_exception',
+    '\tCaused by:',
+    '\t\tsecurity_exception: failed to authorize cloud API key for project [b5fa1e0e]',
   ].join('\n')
 );
 
@@ -98,6 +107,23 @@ describe('fetchRuleExecutionSettings()', () => {
     // UIAM API key repair can see it.
     expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
       `Error fetching rule execution settings: ${UIAM_KEY_MISSING_ERROR.message}`
+    );
+  });
+
+  test('records a run error when the fetch fails because UIAM refused to authorize the API key', async () => {
+    const { core, ruleResultService } = setup({ error: UIAM_KEY_UNAUTHORIZED_ERROR });
+
+    const settings = await fetchRuleExecutionSettings(
+      config,
+      logger,
+      core,
+      savedObjectsClient,
+      ruleResultService
+    );
+
+    expect(settings).toEqual(DEFAULT_SETTINGS);
+    expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
+      `Error fetching rule execution settings: ${UIAM_KEY_UNAUTHORIZED_ERROR.message}`
     );
   });
 

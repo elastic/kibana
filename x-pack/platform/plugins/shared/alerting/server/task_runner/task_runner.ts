@@ -84,8 +84,8 @@ import {
 // initialization order for every importer and closes an import cycle that leaves
 // `DEFAULT_APP_CATEGORIES` undefined in `alert_deletion_client`.
 import {
-  isMissingUiamApiKeyLastRunError,
-  isMissingUiamApiKeyRunError,
+  isUnusableUiamApiKeyLastRunError,
+  isUnusableUiamApiKeyRunError,
   repairUiamApiKey,
 } from './lib/repair_uiam_api_key';
 import {
@@ -926,11 +926,19 @@ export class TaskRunner<
     // Elasticsearch error on `runRuleResult`, while one that reports a failed run without throwing
     // never enters the catch above at all and only exposes the failure as a recorded run error.
     if (
-      (isErr(runRuleResult) && isMissingUiamApiKeyRunError(runRuleResult.error)) ||
-      isMissingUiamApiKeyLastRunError(this.ruleResult.getLastRunResults().errors)
+      (isErr(runRuleResult) && isUnusableUiamApiKeyRunError(runRuleResult.error)) ||
+      isUnusableUiamApiKeyLastRunError(this.ruleResult.getLastRunResults().errors)
     ) {
       await withAlertingSpan('alerting:repair-uiam-api-key', () =>
-        repairUiamApiKey({ context: this.context, logger: this.logger, ruleId, spaceId })
+        repairUiamApiKey({
+          context: this.context,
+          logger: this.logger,
+          ruleId,
+          spaceId,
+          // Runs before `processRunResults`, so a reason recorded here still reaches the rule's
+          // execution status: an operator reads why the key is refused, not just that it was.
+          ruleResultService: this.ruleResult.getLastRunSetters(),
+        })
       );
     }
 
