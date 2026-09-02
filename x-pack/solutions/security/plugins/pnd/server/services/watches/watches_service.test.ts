@@ -6,17 +6,12 @@
  */
 
 import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
-import { resetWatchStore } from '../watch_store/watch_store';
 import { WatchesService } from './watches_service';
 
 const FLOOR = SYSTEM_SECURITY_WATCH_FLOOR_ID;
 const SPACE = 'default';
 
 describe('WatchesService', () => {
-  beforeEach(() => {
-    resetWatchStore();
-  });
-
   describe('list', () => {
     it('projects catalog groupings without Watch settings or runtime data', async () => {
       const floor = (await new WatchesService().list(SPACE)).watches.find(({ id }) => id === FLOOR);
@@ -53,16 +48,6 @@ describe('WatchesService', () => {
 
     it('returns undefined for an unknown Watch', async () => {
       expect(await new WatchesService().get('nope', SPACE)).toBeUndefined();
-    });
-  });
-
-  describe('catalogs', () => {
-    it('exposes skills without routes reaching into the store', () => {
-      const service = new WatchesService();
-
-      expect(service.listSkills().length).toBeGreaterThan(0);
-      expect(service.setSkillEnabled('containment', false)?.enabled).toBe(false);
-      expect(service.setSkillEnabled('nope', false)).toBeUndefined();
     });
   });
 });

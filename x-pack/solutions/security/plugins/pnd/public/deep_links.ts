@@ -77,21 +77,5 @@ export const getPndDeepLinks = (): AppDeepLink[] => [
     title: i18n.NAV_WATCHES,
     path: '/watches',
     visibleIn: ['globalSearch', 'projectSideNav'],
-    // Registered but not rendered as nav children — see `pnd_navigation_tree.ts`.
-    deepLinks: [
-      ...watchDeepLinks(),
-      {
-        id: SecurityPageName.pndWatchesWorkers,
-        title: i18n.SUBNAV_WORKERS,
-        path: '/watches/workers',
-        visibleIn: ['globalSearch'],
-      },
-      {
-        id: SecurityPageName.pndWatchesSkills,
-        title: i18n.SUBNAV_SKILLS,
-        path: '/watches/skills',
-        visibleIn: ['globalSearch'],
-      },
-    ],
   },
 ];

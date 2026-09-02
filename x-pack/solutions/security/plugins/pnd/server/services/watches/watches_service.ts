@@ -15,9 +15,7 @@ import {
   createCatalogWatchPlaceholder,
   GetWatchResponse,
   ListWatchesResponse,
-  type WatchSkill,
 } from '@kbn/pnd-common';
-import { listSkills as listStoredSkills } from '../watch_store/watch_store';
 
 export class WatchesService {
   async list(_spaceId: string): Promise<ListWatchesResponse> {
@@ -32,21 +30,5 @@ export class WatchesService {
     return GetWatchResponse.parse({
       watch: createCatalogWatchPlaceholder(watchId as (typeof SYSTEM_SECURITY_WATCH_IDS)[number]),
     });
-  }
-
-  async listSkills(/* request: KibanaRequest, spaceId: string*/): Promise<WatchSkill[]> {
-    return listStoredSkills();
-    /* if (this.useMockData) {
-
-    }
-
-    await this.ensureAgent(spaceId);
-
-    if (this.skillsProjectionService) {
-      return await this.skillsProjectionService.list(request, spaceId);
-    }
-
-    return [];
-    */
   }
 }
