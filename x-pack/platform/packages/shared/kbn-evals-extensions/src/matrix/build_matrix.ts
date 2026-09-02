@@ -221,10 +221,18 @@ const buildCell = (
   mean: number | undefined,
   column: MatrixColumnConfig,
   config: MatrixConfig,
-  { selfJudged = false }: { selfJudged?: boolean } = {}
+  {
+    selfJudged = false,
+    excludedSelfJudged = 0,
+  }: { selfJudged?: boolean; excludedSelfJudged?: number } = {}
 ): MatrixCell => {
   if (mean === undefined) {
-    return { kind: 'missing' };
+    // A blank because the judge policy threw the scores away is a different
+    // fact from a blank because the model never ran, and conflating them
+    // reads as a coverage gap the sweep is expected to fill.
+    return excludedSelfJudged > 0
+      ? { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged }
+      : { kind: 'missing' };
   }
 
   const scale = column.scale ?? config.defaultScale;
@@ -538,6 +546,9 @@ export const buildMatrix = (
           selfJudged: modelScores.suites.some(
             (suite) => columnSuites.has(suite.suiteId) && suite.selfJudged === true
           ),
+          excludedSelfJudged: modelScores.suites
+            .filter((suite) => columnSuites.has(suite.suiteId))
+            .reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
         }
       );
     }

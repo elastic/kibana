@@ -462,6 +462,48 @@ describe('queryMatrixScores', () => {
     );
   });
 
+  it('reports a fully self-judged suite as withheld, not as never-run', async () => {
+    // Selection drops the self-judged experiment BEFORE scores are fetched,
+    // so `latest` is undefined and the model silently vanishes from the
+    // suite. A build_matrix unit test with a hand-made suite record cannot
+    // catch this: the real pipeline never produces that record. Drive the
+    // query layer end to end instead.
+    const selfJudged = experiment({
+      experiment_id: 'exp-self',
+      modelId: 'm1',
+      timestamp: '2026-06-10T00:00:00.000Z',
+    }) as EvaluationExperimentSummary & { evaluator_model?: { id: string } };
+    selfJudged.evaluator_model = { id: 'm1' };
+
+    const { client, getExperimentStats } = createClient({ m1: [selfJudged] });
+    getExperimentStats.mockResolvedValue({
+      stats: [
+        {
+          datasetId: 'd',
+          datasetName: 'd',
+          evaluatorName: 'Rubric',
+          stats: { mean: 0.7, median: 0.7, stdDev: 0, min: 0, max: 1, count: 4794 },
+        },
+      ],
+      taskModel: { id: 'm1' },
+      totalRepetitions: 1,
+    });
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+      scoring: { excludeSelfJudged: true },
+    });
+
+    const suite = result[0]?.suites.find((entry) => entry.suiteId === 'suite-a');
+    // The suite is present, carries no datasets, and states how much was
+    // withheld -- the three facts a cell needs to say 'excluded' not 'missing'.
+    expect(suite).toBeDefined();
+    expect(suite!.datasets).toHaveLength(0);
+    expect(suite!.excludedSelfJudged).toBe(4794);
+  });
+
   it('reads a suite from its branch override instead of the global branch', async () => {
     const { client, listExperiments } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
@@ -706,7 +748,11 @@ describe('queryMatrixScores with examplePrefixes', () => {
       prefixesBySuite: { 'suite-a': ['alert-analysis'] },
       scoring: { excludeSelfJudged: true },
     });
-    expect(strict[0]?.suites ?? []).toHaveLength(0);
+    // The suite is now RECORDED as withheld rather than vanishing, but it
+    // still yields no datasets, so no score can be published from it.
+    const strictSuite = strict[0]?.suites.find((entry) => entry.suiteId === 'suite-a');
+    expect(strictSuite?.datasets ?? []).toHaveLength(0);
+    expect(strictSuite?.excludedSelfJudged).toBeGreaterThan(0);
 
     // Same global policy, but this suite opted out -> the cell survives.
     const opted = await queryMatrixScores(build(), log, {

@@ -879,3 +879,67 @@ describe('buildMatrix self-judged disclosure', () => {
     ).toBeUndefined();
   });
 });
+
+describe('buildMatrix withheld-vs-never-ran', () => {
+  // gemini-3.1-pro self-judges the migrations suites with ~4,794 documents
+  // and shows a measurable self-preference gap there (2nd under its own
+  // judgement, 5th under the deterministic control), so those scores are
+  // correctly withheld. Rendering the withheld cell as {kind:'missing'}
+  // makes it identical to a model that never ran the suite at all, which
+  // reads as a coverage gap instead of a judge-policy decision.
+  const cfg: MatrixConfig = parseMatrixConfig({
+    minCoverage: 1,
+    columns: [{ id: 'migrations', label: 'Migrations', suites: ['suite-a'], weight: 1 }],
+    models: [
+      { id: 'model-a', label: 'A' },
+      { id: 'model-b', label: 'B' },
+    ],
+  });
+
+  it('distinguishes a withheld self-judged cell from one that never ran', () => {
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-a',
+          provider: 'p',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'e1',
+              // Every score was rejected as self-judged: no datasets survive,
+              // but the run exists and its size is known.
+              excludedSelfJudged: 4794,
+              datasets: [],
+            },
+          ],
+        },
+        // model-b never ran the suite at all.
+        { modelId: 'model-b', provider: 'p', suites: [] },
+      ],
+      cfg
+    );
+
+    const withheld = matrix.proprietary.find((r) => r.modelId === 'model-a')!.cells.migrations;
+    const neverRan = matrix.proprietary.find((r) => r.modelId === 'model-b')!.cells.migrations;
+
+    expect(withheld).toEqual({ kind: 'excluded', reason: 'self-judged', docs: 4794 });
+    expect(neverRan).toEqual({ kind: 'missing' });
+  });
+
+  it('does not claim exclusion when the suite simply produced no scores', () => {
+    // A run that exists but yielded nothing for other reasons must not be
+    // dressed up as a judge-policy exclusion.
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-a',
+          provider: 'p',
+          suites: [{ suiteId: 'suite-a', experimentId: 'e1', datasets: [] }],
+        },
+      ],
+      cfg
+    );
+
+    expect(matrix.proprietary[0].cells.migrations).toEqual({ kind: 'missing' });
+  });
+});

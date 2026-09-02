@@ -121,6 +121,13 @@ export interface AggregatedSuiteScores {
    * self-judged score can be disclosed per row rather than per column.
    */
   selfJudged?: boolean;
+  /**
+   * Number of experiments withheld because the grader was the graded model.
+   * Set only when the withholding emptied the suite, so a cell can say
+   * "withheld for self-judging" instead of rendering identically to a model
+   * that never ran the suite at all.
+   */
+  excludedSelfJudged?: number;
   datasets: AggregatedDatasetScores[];
 }
 
@@ -279,7 +286,19 @@ export const pickLatestExperimentPerModel = (
     lookbackDays,
     now = Date.now(),
     allowSelfJudged = false,
-  }: { lookbackDays?: number; now?: number; allowSelfJudged?: boolean } = {}
+    onSelfJudgedRejected,
+  }: {
+    lookbackDays?: number;
+    now?: number;
+    allowSelfJudged?: boolean;
+    /**
+     * Called for each experiment skipped because the grader was the graded
+     * model. Selection runs before scoring, so this is the ONLY place the
+     * fact is observable -- downstream the model simply has no experiment,
+     * indistinguishable from never having run.
+     */
+    onSelfJudgedRejected?: (experiment: EvaluationExperimentSummary) => void;
+  } = {}
 ): Map<string, EvaluationExperimentSummary> => {
   const cutoff = lookbackDays ? now - lookbackDays * 24 * 60 * 60 * 1000 : undefined;
   const latestByModel = new Map<string, { experiment: EvaluationExperimentSummary; at: number }>();
@@ -312,6 +331,7 @@ export const pickLatestExperimentPerModel = (
       !allowSelfJudged &&
       judges.some((judge) => judge?.id && describeJudge(judge.id, modelId).selfJudged)
     ) {
+      onSelfJudgedRejected?.(experiment);
       continue;
     }
 
@@ -423,6 +443,9 @@ export const queryMatrixScores = async (
           )
         )
       ).flat();
+      // Selection is where a self-judged run disappears, so record it here:
+      // downstream this model looks like it never ran the suite.
+      const selfJudgedRejected: EvaluationExperimentSummary[] = [];
       const [latest] = [
         ...pickLatestExperimentPerModel(experiments, {
           lookbackDays,
@@ -430,6 +453,9 @@ export const queryMatrixScores = async (
           // self-judged runs through selection, or the cell stays blank no
           // matter what the scoring policy allows.
           allowSelfJudged: suiteScoring?.excludeSelfJudged === false,
+          onSelfJudgedRejected: (rejected) => {
+            selfJudgedRejected.push(rejected);
+          },
         }).values(),
       ];
 
@@ -439,6 +465,47 @@ export const queryMatrixScores = async (
       );
 
       if (!latest) {
+        if (selfJudgedRejected.length > 0) {
+          // The run exists and was deliberately withheld. Emit a suite record
+          // with no datasets so the cell renders as "excluded", not "missing".
+          // The renderer reports a SCORE count, so fetch the withheld run's
+          // real size rather than passing an experiment tally that would
+          // render as "1 score(s) rejected" for thousands of documents.
+          const newest = selfJudgedRejected.reduce((a, b) =>
+            Date.parse(b.timestamp) > Date.parse(a.timestamp) ? b : a
+          );
+          let withheldScores = 0;
+          try {
+            const withheldStats = await evalsClient.getExperimentStats(newest.experiment_id, {
+              suiteId,
+              taskModelId: modelId,
+              executionId: newest.execution_id ?? newest.experiment_id,
+            });
+            // No total on the stats shape; sum the per-evaluator sample
+            // counts, which is what "score(s) rejected" means to a reader.
+            withheldScores = (withheldStats?.stats ?? []).reduce(
+              (total, entry) => total + (entry.stats?.count ?? 0),
+              0
+            );
+          } catch (error) {
+            log.debug(
+              `Could not size withheld self-judged run for ${modelId}/${suiteId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          }
+          let withheldModel = byModel.get(modelId);
+          if (!withheldModel) {
+            withheldModel = { modelId, suites: [] };
+            byModel.set(modelId, withheldModel);
+          }
+          withheldModel.suites.push({
+            suiteId,
+            experimentId: newest.experiment_id,
+            excludedSelfJudged: withheldScores,
+            datasets: [],
+          });
+        }
         continue;
       }
 
@@ -564,6 +631,13 @@ export const queryMatrixScores = async (
         selfJudged:
           latest.evaluator_model?.id && latest.task_model?.id
             ? describeJudge(latest.evaluator_model.id, latest.task_model.id).selfJudged
+            : undefined,
+        // A suite whose scores were ALL rejected for self-judging is not the
+        // same as a suite that never ran: the run exists and its size is
+        // known. Carry the count so the cell can say which it is.
+        excludedSelfJudged:
+          datasets.length === 0 && (excludedByModel.get(modelId)?.selfJudged ?? 0) > 0
+            ? excludedByModel.get(modelId)!.selfJudged
             : undefined,
         datasets,
       });
