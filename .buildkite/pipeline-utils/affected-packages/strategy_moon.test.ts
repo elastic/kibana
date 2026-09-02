@@ -10,15 +10,24 @@
 jest.mock('child_process');
 jest.mock('fs');
 jest.mock('../utils', () => ({ getKibanaDir: () => '/repo' }));
+jest.mock('./strategy_git', () => ({ listChangedFiles: jest.fn(() => ['from/git/strategy.ts']) }));
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
+import { listChangedFiles } from './strategy_git';
 import { getAffectedProjectsMoon } from './strategy_moon';
 
 const mockExecSync = execSync as jest.Mock;
 const mockExistsSync = existsSync as jest.Mock;
+const mockListChangedFiles = listChangedFiles as jest.Mock;
 
 const moonResponse = JSON.stringify({ projects: [{ id: '@kbn/foo' }] });
+
+beforeEach(() => {
+  mockExistsSync.mockReturnValue(true);
+  mockExecSync.mockReturnValue(moonResponse);
+  mockListChangedFiles.mockReturnValue(['from/git/strategy.ts']);
+});
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -26,52 +35,73 @@ afterEach(() => {
 
 describe('getAffectedProjectsMoon', () => {
   it('invokes the moon binary directly from node_modules/.bin (not via PATH)', () => {
-    mockExistsSync.mockReturnValue(true);
-    mockExecSync
-      .mockReturnValueOnce('resolved-sha\n') // git merge-base
-      .mockReturnValueOnce(moonResponse); // moon query
-
-    const result = getAffectedProjectsMoon('main', false);
+    const result = getAffectedProjectsMoon('main', false, ['some/file.ts']);
 
     expect(result).toEqual(new Set(['@kbn/foo']));
     expect(mockExecSync).toHaveBeenCalledWith(
       expect.stringContaining('/repo/node_modules/.bin/moon'),
-      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
-    );
-  });
-
-  it('recomputes the merge base locally instead of trusting the raw ref, mirroring the git strategy', () => {
-    mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockReturnValueOnce('resolved-sha\n').mockReturnValueOnce(moonResponse);
-
-    getAffectedProjectsMoon('some-possibly-stale-ref', false);
-
-    expect(mockExecSync).toHaveBeenNthCalledWith(
-      1,
-      'git merge-base some-possibly-stale-ref HEAD',
       expect.anything()
-    );
-    expect(mockExecSync).toHaveBeenNthCalledWith(
-      2,
-      expect.anything(),
-      expect.objectContaining({ env: expect.objectContaining({ MOON_BASE: 'resolved-sha' }) })
     );
   });
 
   it('falls back to `yarn which moon` when node_modules/.bin/moon is missing', () => {
     mockExistsSync.mockReturnValue(false);
-    mockExecSync
-      .mockReturnValueOnce('resolved-sha\n') // git merge-base
-      .mockReturnValueOnce('/resolved/moon\n') // yarn which moon
-      .mockReturnValueOnce(moonResponse); // moon query
+    mockExecSync.mockReturnValueOnce('/resolved/moon\n').mockReturnValueOnce(moonResponse);
 
-    getAffectedProjectsMoon('main', false);
+    getAffectedProjectsMoon('main', false, ['some/file.ts']);
 
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn --silent which moon', expect.anything());
+    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn --silent which moon', expect.anything());
     expect(mockExecSync).toHaveBeenNthCalledWith(
-      3,
+      2,
       expect.stringContaining('/resolved/moon'),
       expect.anything()
     );
+  });
+
+  it('requests deep dependents only when downstream traversal is asked for', () => {
+    getAffectedProjectsMoon('main', true, ['some/file.ts']);
+    expect(mockExecSync).toHaveBeenCalledWith(
+      expect.stringContaining('--downstream deep'),
+      expect.anything()
+    );
+
+    mockExecSync.mockClear();
+
+    getAffectedProjectsMoon('main', false, ['some/file.ts']);
+    expect(mockExecSync).toHaveBeenCalledWith(
+      expect.not.stringContaining('--downstream'),
+      expect.anything()
+    );
+  });
+
+  it('pipes the given changed files on stdin and never falls back to MOON_BASE', () => {
+    getAffectedProjectsMoon('main', true, ['a/one.ts', 'b/two.ts']);
+
+    const [, options] = mockExecSync.mock.calls[0];
+    expect(options.input).toEqual(JSON.stringify({ files: ['a/one.ts', 'b/two.ts'] }));
+    expect(options.env?.MOON_BASE).toBeUndefined();
+    expect(mockExecSync).not.toHaveBeenCalledWith(
+      expect.stringContaining('git merge-base'),
+      expect.anything()
+    );
+  });
+
+  it('sends an empty file list rather than letting moon scan local state', () => {
+    const result = getAffectedProjectsMoon('main', true, []);
+
+    const [, options] = mockExecSync.mock.calls[0];
+    expect(options.input).toEqual(JSON.stringify({ files: [] }));
+    expect(result).toEqual(new Set(['@kbn/foo']));
+  });
+
+  it('defaults to the git strategy changed-file list when none is given', () => {
+    getAffectedProjectsMoon('some-possibly-stale-ref', true);
+
+    expect(mockListChangedFiles).toHaveBeenCalledWith({
+      mergeBase: 'some-possibly-stale-ref',
+      commit: 'HEAD',
+    });
+    const [, options] = mockExecSync.mock.calls[0];
+    expect(options.input).toEqual(JSON.stringify({ files: ['from/git/strategy.ts'] }));
   });
 });
