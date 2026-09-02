@@ -6,105 +6,96 @@
  */
 
 import { AIMessage } from '@langchain/core/messages';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { createSearchToolGraph } from './graph';
-import { NO_TOOL_SELECTED_ERROR } from './inner_tools';
+import { NO_TOOL_SELECTED_ERROR, noMatchingResourceToolName } from './inner_tools';
+import { gatherResourceDescriptors } from '../index_explorer';
 
-jest.mock('../index_explorer', () => {
-  const actual = jest.requireActual('../index_explorer');
-  return {
-    ...actual,
-    gatherResourceDescriptors: jest.fn(async () => [
-      { type: 'index', name: 'logs-endpoint.events.library-default' },
-    ]),
-  };
-});
-
-jest.mock('../steps/list_search_sources', () => ({
-  listSearchSources: jest.fn(async () => ({
-    indices: [],
-    aliases: [],
-    data_streams: [],
-    datasets: [],
-  })),
+jest.mock('../index_explorer', () => ({
+  ...jest.requireActual('../index_explorer'),
+  gatherResourceDescriptors: jest.fn(),
 }));
 
-const createLogger = () =>
-  ({
-    warn: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    trace: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-    get: jest.fn(),
-    isLevelEnabled: jest.fn(() => true),
-  } as any);
+const gatherResourceDescriptorsMock = gatherResourceDescriptors as jest.Mock;
 
-/**
- * Builds a model provider whose chat model records how `bindTools` was called
- * and returns whatever message the test supplies.
- */
+interface BoundToolsOptions {
+  tool_choice?: unknown;
+}
+
 const createModelProvider = (response: AIMessage) => {
-  const bindTools = jest.fn(function (this: unknown, _tools: unknown, options?: unknown) {
-    return {
-      __bindToolsOptions: options,
-      withConfig: () => ({
-        invoke: jest.fn(async () => response),
-      }),
-    };
-  });
+  const bindTools = jest.fn((_tools: unknown, _options?: BoundToolsOptions) => ({
+    withConfig: () => ({ invoke: jest.fn(async () => response) }),
+  }));
 
-  const chatModel = { bindTools };
+  const modelProvider = {
+    getDefaultModel: jest.fn(async () => ({ chatModel: { bindTools } })),
+  } as unknown as ModelProvider;
 
-  return {
-    provider: {
-      getDefaultModel: jest.fn(async () => ({ chatModel })),
-    } as any,
-    bindTools,
-  };
+  return { modelProvider, bindTools };
 };
 
-describe('createSearchToolGraph tool choice', () => {
-  const baseArgs = () => ({
-    esClient: {} as any,
-    logger: createLogger(),
-    events: { reportProgress: jest.fn() } as any,
-  });
+describe('createSearchToolGraph', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let events: ToolEventEmitter;
 
-  it('does NOT force tool choice when dispatching the search tool', async () => {
-    // Regression guard: `tool_choice: 'any'`/'required' makes some providers
-    // (z.ai GLM 5.2) hang until the request is aborted ~120s later, stalling the
-    // whole agent run. The dispatcher must leave tool choice unforced.
-    const toolCallResponse = new AIMessage({
-      content: '',
-      tool_calls: [{ id: '1', name: 'natural_language_search', args: { query: 'q' } }],
+  const invokeGraph = async (response: AIMessage) => {
+    const { modelProvider, bindTools } = createModelProvider(response);
+    const graph = await createSearchToolGraph({
+      modelProvider,
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      logger,
+      events,
     });
-    const { provider, bindTools } = createModelProvider(toolCallResponse);
+    const state = await graph.invoke({ nlQuery: 'find log.dll side-loading' });
 
-    const graph = await createSearchToolGraph({ modelProvider: provider, ...baseArgs() });
-    await graph.invoke({ nlQuery: 'find log.dll side-loading' }).catch(() => undefined);
+    return { state, bindTools };
+  };
 
-    expect(bindTools).toHaveBeenCalled();
-    const [, options] = bindTools.mock.calls[0];
-    // Either no options at all, or options that do not force a tool call.
-    const forced =
-      options && typeof options === 'object' && 'tool_choice' in (options as object)
-        ? (options as { tool_choice?: unknown }).tool_choice
-        : undefined;
-    expect(forced).not.toBe('any');
-    expect(forced).not.toBe('required');
+  beforeEach(() => {
+    jest.clearAllMocks();
+    logger = loggingSystemMock.createLogger();
+    events = { reportProgress: jest.fn(), sendUiEvent: jest.fn() };
+    gatherResourceDescriptorsMock.mockResolvedValue([
+      { type: 'index', name: 'logs-endpoint.events.library-default' },
+    ]);
   });
 
-  it('ends with an error instead of throwing when the dispatcher selects no tool', async () => {
-    // With unforced tool choice a model may answer in prose. That must surface
-    // as a clean error rather than invoking ToolNode without a tool call.
-    const proseResponse = new AIMessage({ content: 'I cannot search that.' });
-    const { provider } = createModelProvider(proseResponse);
+  describe('tool choice', () => {
+    it('does not force tool choice when dispatching', async () => {
+      // Forcing tool choice makes some providers hang until the request is
+      // aborted, which stalls every run routed through the search tool.
+      const { state, bindTools } = await invokeGraph(
+        new AIMessage({
+          content: '',
+          tool_calls: [{ id: '1', name: noMatchingResourceToolName, args: {} }],
+        })
+      );
 
-    const graph = await createSearchToolGraph({ modelProvider: provider, ...baseArgs() });
-    const result = await graph.invoke({ nlQuery: 'find log.dll side-loading' });
+      expect(bindTools).toHaveBeenCalledTimes(1);
+      const [, options] = bindTools.mock.calls[0];
+      expect(options?.tool_choice).toBeUndefined();
+      expect(state.error).toBeUndefined();
+      expect(state.results).toHaveLength(1);
+    });
+  });
 
-    expect(result.error).toBe(NO_TOOL_SELECTED_ERROR);
+  describe('when the dispatcher selects no tool', () => {
+    const proseResponse = () => new AIMessage({ content: 'I cannot search that.' });
+
+    it('ends with an error instead of invoking the tool node', async () => {
+      const { state } = await invokeGraph(proseResponse());
+
+      expect(state.error).toBe(NO_TOOL_SELECTED_ERROR);
+      expect(state.results).toHaveLength(0);
+    });
+
+    it('logs a warning naming the query', async () => {
+      await invokeGraph(proseResponse());
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('find log.dll side-loading')
+      );
+    });
   });
 });

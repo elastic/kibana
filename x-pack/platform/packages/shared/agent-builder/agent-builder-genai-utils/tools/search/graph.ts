@@ -147,12 +147,9 @@ export const createSearchToolGraph = async ({
     }
 
     const tools = getTools(state);
-    // Tool choice is intentionally left unforced. `tool_choice: 'any'` hangs some
-    // providers indefinitely -- z.ai GLM 5.2 never responds and the request is
-    // aborted server-side after ~120s, stalling the run with no tool_result and
-    // no error -- while the same model returns the correct tool call in ~2s with
-    // 'auto'. The dispatcher prompt already asks for exactly one tool, and a
-    // tool-less reply is handled below.
+    // Tool choice is left unforced on purpose: `tool_choice: 'any'` makes some
+    // providers hang until the request is aborted, stalling the whole run. The
+    // dispatcher prompt already asks for exactly one tool.
     const searchModel = defaultModel.chatModel.bindTools(tools).withConfig({
       tags: ['agent-builder-search-tool'],
     });
@@ -165,9 +162,9 @@ export const createSearchToolGraph = async ({
       })
     );
 
-    // With 'auto' tool choice the dispatcher may answer in prose instead of
-    // picking a tool. Surface that as an error rather than falling through to
-    // `execute_tool`, which would invoke ToolNode without a tool call.
+    // With unforced tool choice the dispatcher may answer in prose instead of
+    // picking a tool. End with an error rather than routing to `execute_tool`,
+    // which would invoke ToolNode without a tool call.
     if (!isAIMessage(response) || !response.tool_calls?.length) {
       logger.warn(
         `Search dispatcher returned no tool call for query "${state.nlQuery}"; ending search.`
@@ -180,11 +177,6 @@ export const createSearchToolGraph = async ({
 
   const routeAfterDispatch = (state: StateType) => {
     if (state.error) {
-      return '__end__';
-    }
-    // Defence in depth: never hand ToolNode a message without a tool call.
-    const lastMessage = state.messages[state.messages.length - 1];
-    if (!lastMessage || !isAIMessage(lastMessage) || !lastMessage.tool_calls?.length) {
       return '__end__';
     }
     return 'execute_tool';
