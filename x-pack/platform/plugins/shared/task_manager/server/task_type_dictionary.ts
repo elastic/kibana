@@ -85,9 +85,10 @@ export interface TaskRegisterDefinition {
    */
   timeout?: string;
   /**
-   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
-   * so high priority tasks will always be claimed before normal priority, which will always be
-   * claimed before low priority
+   * An optional definition of task priority, describing what the task is for. Tasks are sorted
+   * by priority descending prior to claiming, so `UserInteractive` is claimed before `Standard`,
+   * which is claimed before `Deferrable`, which is claimed before `Maintenance`.
+   * Defaults to `TaskPriority.Standard` when omitted.
    */
   priority?: TaskPriority;
   /**

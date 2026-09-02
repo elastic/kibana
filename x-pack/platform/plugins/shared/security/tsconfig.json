@@ -35,6 +35,7 @@
     "@kbn/share-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",

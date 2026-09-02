@@ -16,6 +16,47 @@ import { screen } from '@testing-library/react';
 import { UnifiedDataTableContext } from '../table_context';
 
 describe('Data table view button ', () => {
+  it('is labeled "View details" when the current document is not expanded', () => {
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={dataTableContextMock}>
+        <ExpandButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />
+      </UnifiedDataTableContext.Provider>
+    );
+
+    expect(screen.getByLabelText('View details')).toBeInTheDocument();
+  });
+
+  it('is labeled "Close details" when the current document is expanded', () => {
+    const contextMock = {
+      ...dataTableContextMock,
+      expanded: dataTableContextMock.getRowByIndex(0),
+    };
+
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={contextMock}>
+        <ExpandButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />
+      </UnifiedDataTableContext.Provider>
+    );
+
+    expect(screen.getByLabelText('Close details')).toBeInTheDocument();
+  });
+
   it('when no document is expanded, setExpanded is called with current document', async () => {
     renderWithI18n(
       <UnifiedDataTableContext.Provider value={dataTableContextMock}>
