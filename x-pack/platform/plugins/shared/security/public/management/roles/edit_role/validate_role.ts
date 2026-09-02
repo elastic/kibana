@@ -7,8 +7,8 @@
 
 import type { BuildFlavor } from '@kbn/config';
 import { i18n } from '@kbn/i18n';
-
 import type { RoleDataSourcePrivilege } from '@kbn/security-plugin-types-common';
+
 import type {
   Role,
   RoleIndexPrivilege,
