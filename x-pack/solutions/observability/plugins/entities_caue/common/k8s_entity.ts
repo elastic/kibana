@@ -19,6 +19,7 @@ export interface K8sEntity {
   'entity.EngineMetadata.Type': string;
   // --- collected (multi-value) fields ---
   'k8s.namespace.name': string | string[] | null;
+  'kubernetes.namespace': string | string[] | null;
   'k8s.pod.uid': string | string[] | null;
   'k8s.replicaset.name': string | string[] | null;
   'k8s.deployment.name': string | string[] | null;

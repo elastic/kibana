@@ -279,7 +279,7 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
     },
     {
       label: i18n.translate('xpack.entitiesCaue.tabs.kubernetes', {
-        defaultMessage: 'Kubernetes',
+        defaultMessage: 'Kubernetes 2',
       }),
       isSelected: selectedTab === 'kubernetes',
       onClick: () => setSelectedTab('kubernetes'),

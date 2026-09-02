@@ -31,48 +31,84 @@ interface Props {
   isInstalled: boolean;
 }
 
+const PHASE_COLOR: Record<string, string> = {
+  running: 'success',
+  pending: 'warning',
+  terminated: 'default',
+  unknown: 'default',
+};
+
+const firstVal = (v: string | string[] | null | undefined): string | null =>
+  Array.isArray(v) ? v[0] ?? null : v ?? null;
+
+// EUI interprets dots in `field` as nested-path traversal, but our items use
+// literal dotted keys (e.g. `record['k8s.namespace.name']`). Use computed
+// columns (no `field`) so `render` receives the full record via bracket access.
 const columns: Array<EuiBasicTableColumn<K8sEntity>> = [
   {
-    field: 'entity.name',
     name: i18n.translate('xpack.entitiesCaue.k8s.columns.name', { defaultMessage: 'Name' }),
-    sortable: true,
+    sortable: (item: K8sEntity) => item['entity.name'] ?? '',
+    render: (item: K8sEntity) => item['entity.name'],
   },
   {
-    field: 'entity.EngineMetadata.Type',
     name: i18n.translate('xpack.entitiesCaue.k8s.columns.type', { defaultMessage: 'Type' }),
-    sortable: true,
-    width: '140px',
-    render: (value: string) => (
-      <EuiBadge color="hollow">{K8S_TYPE_LABELS[value] ?? value}</EuiBadge>
-    ),
+    sortable: (item: K8sEntity) => item['entity.EngineMetadata.Type'] ?? '',
+    width: '130px',
+    render: (item: K8sEntity) => {
+      const value = item['entity.EngineMetadata.Type'];
+      return <EuiBadge color="hollow">{K8S_TYPE_LABELS[value] ?? value}</EuiBadge>;
+    },
   },
   {
-    field: 'k8s.namespace.name',
     name: i18n.translate('xpack.entitiesCaue.k8s.columns.namespace', {
       defaultMessage: 'Namespace',
     }),
-    sortable: true,
-    width: '160px',
-    render: (value: string | string[] | null) =>
-      Array.isArray(value) ? value[0] ?? '—' : value ?? '—',
+    sortable: (item: K8sEntity) =>
+      firstVal(item['k8s.namespace.name']) ?? firstVal(item['kubernetes.namespace']) ?? '',
+    width: '150px',
+    render: (item: K8sEntity) =>
+      firstVal(item['k8s.namespace.name']) ?? firstVal(item['kubernetes.namespace']) ?? '—',
   },
   {
-    field: 'entity.lifecycle.first_seen',
-    name: i18n.translate('xpack.entitiesCaue.k8s.columns.firstSeen', {
-      defaultMessage: 'First seen',
+    name: i18n.translate('xpack.entitiesCaue.k8s.columns.cluster', { defaultMessage: 'Cluster' }),
+    sortable: (item: K8sEntity) => firstVal(item['fields.cluster']) ?? '',
+    width: '130px',
+    render: (item: K8sEntity) => firstVal(item['fields.cluster']) ?? '—',
+  },
+  {
+    name: i18n.translate('xpack.entitiesCaue.k8s.columns.phase', { defaultMessage: 'Phase' }),
+    sortable: (item: K8sEntity) => item['kubernetes.container.status.phase'] ?? '',
+    width: '110px',
+    render: (item: K8sEntity) => {
+      const phase = item['kubernetes.container.status.phase'];
+      return phase ? (
+        <EuiBadge color={PHASE_COLOR[phase.toLowerCase()] ?? 'default'}>{phase}</EuiBadge>
+      ) : (
+        '—'
+      );
+    },
+  },
+  {
+    name: i18n.translate('xpack.entitiesCaue.k8s.columns.restarts', {
+      defaultMessage: 'Restarts',
     }),
-    sortable: true,
-    width: '200px',
-    render: (value: string | null) => (value ? new Date(value).toLocaleString() : '—'),
+    sortable: (item: K8sEntity) => item['kubernetes.container.status.restarts'] ?? -1,
+    width: '90px',
+    render: (item: K8sEntity) => {
+      const r = item['kubernetes.container.status.restarts'];
+      return r != null ? String(r) : '—';
+    },
   },
   {
-    field: 'entity.lifecycle.last_seen',
     name: i18n.translate('xpack.entitiesCaue.k8s.columns.lastSeen', {
       defaultMessage: 'Last seen',
     }),
-    sortable: true,
-    width: '200px',
-    render: (value: string | null) => (value ? new Date(value).toLocaleString() : '—'),
+    sortable: (item: K8sEntity) => item['entity.lifecycle.last_seen'] ?? '',
+    width: '180px',
+    render: (item: K8sEntity) => {
+      const v = item['entity.lifecycle.last_seen'];
+      return v ? new Date(v).toLocaleString() : '—';
+    },
   },
 ];
 
