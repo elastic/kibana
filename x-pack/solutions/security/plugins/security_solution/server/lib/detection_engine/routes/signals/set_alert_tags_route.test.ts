@@ -11,6 +11,7 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertTagsRoute } from './set_alert_tags_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('setAlertTagsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -106,6 +107,46 @@ describe('setAlertTagsRoute', () => {
         message: 'Test error',
         status_code: 500,
       });
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertTagsChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertTagsChanged: jest.fn() };
+      setAlertTagsRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
+    });
+
+    test('emits alertTagsChanged after a successful update', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock(['tag-add'], ['tag-remove'], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1'],
+          tagsToAdd: ['tag-add'],
+          tagsToRemove: ['tag-remove'],
+          truncated: false,
+        })
+      );
+    });
+
+    test('does not emit when tag validation fails', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock(['dup'], ['dup'], ['alert-1']),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
     });
   });
 });

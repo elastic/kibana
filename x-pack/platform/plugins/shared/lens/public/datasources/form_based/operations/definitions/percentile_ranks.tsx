@@ -14,17 +14,16 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
 import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, getSafeName } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   isValidNumber,
   getFilter,
   hasOperationType,
   getNumberParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 

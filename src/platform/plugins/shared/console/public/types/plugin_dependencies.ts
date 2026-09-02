@@ -62,6 +62,11 @@ export interface ConsolePluginSetup {
    * Public locator for the console UI
    */
   locator?: LocatorPublic<ConsoleUILocatorParams>;
+  /**
+   * Replaces the sample requests Console starts with when the editor has no saved content,
+   * allowing a solution to seed Console with requests relevant to its own APIs.
+   */
+  setDefaultEditorContent?: (content: string) => void;
 }
 
 /**

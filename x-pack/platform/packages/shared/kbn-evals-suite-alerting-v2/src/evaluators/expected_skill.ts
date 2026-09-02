@@ -48,6 +48,7 @@ const skillIsPresent = (skillName: string, loadedNames: string[]): boolean => {
 export const createExpectedSkillEvaluator = (): Evaluator<RuleManagementExample, TaskOutput> => ({
   name: 'ExpectedSkill',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const { expectedSkills, notExpectedSkills } = expected ?? {};
     const requiredSkills = requireNonEmptyStringList(expectedSkills, 'expectedSkills', 'skills');

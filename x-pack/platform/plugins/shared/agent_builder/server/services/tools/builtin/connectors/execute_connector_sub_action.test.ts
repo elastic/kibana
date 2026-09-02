@@ -89,9 +89,19 @@ describe('createExecuteConnectorSubActionTool', () => {
         supportedFeatureIds: [],
       },
       actions: {
-        searchMessages: { isTool: true, input: {} as any, handler: jest.fn() },
-        listChannels: { isTool: true, input: {} as any, handler: jest.fn() },
-        sendMessage: { isTool: true, input: {} as any, handler: jest.fn() },
+        searchMessages: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        listChannels: {
+          isTool: true,
+          scope: 'read' as const,
+          input: {} as any,
+          handler: jest.fn(),
+        },
+        sendMessage: { isTool: true, scope: 'read' as const, input: {} as any, handler: jest.fn() },
       },
       test: { handler: jest.fn(), enabled: false },
     });
