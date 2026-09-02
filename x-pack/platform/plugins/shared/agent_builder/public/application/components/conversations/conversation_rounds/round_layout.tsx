@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type {
@@ -34,7 +34,6 @@ import { useAgentId, useConversationReadOnly } from '../../../hooks/use_conversa
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
-  scrollContainerHeight: number;
   rawRound: ConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
@@ -100,7 +99,6 @@ const parseAttachmentRefsKey = (attachmentRefsKey: string): AttachmentVersionRef
 
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
-  scrollContainerHeight,
   rawRound,
   conversationAttachments,
   conversationId,
@@ -108,8 +106,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   roundIndex,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
-  const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, PromptResponse>>({});
   const {
     steps,
@@ -173,37 +169,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     },
     [pendingPrompts, resumeRound]
   );
-
-  // Track if this round has ever been in a loading state during this session
-  useEffect(() => {
-    if (isCurrentRound && isResponseLoading) {
-      setHasBeenLoading(true);
-    }
-  }, [isCurrentRound, isResponseLoading]);
-
-  useEffect(() => {
-    // Keep min-height if:
-    // - Round is loading, errored, or awaiting prompt
-    // - Round has finished streaming but is still the current round (hasBeenLoading)
-    // Remove min-height when a new round starts (isCurrentRound becomes false)
-    const shouldHaveMinHeight =
-      isErrorCurrentRound ||
-      isAwaitingPrompt ||
-      (isCurrentRound && (isResponseLoading || hasBeenLoading));
-
-    setRoundContainerMinHeight(shouldHaveMinHeight ? scrollContainerHeight : 0);
-  }, [
-    isCurrentRound,
-    isResponseLoading,
-    hasBeenLoading,
-    scrollContainerHeight,
-    isErrorCurrentRound,
-    isAwaitingPrompt,
-  ]);
-
-  const roundContainerStyles = css`
-    ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
-  `;
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
@@ -316,12 +281,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   );
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      aria-label={labels.container}
-      css={roundContainerStyles}
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" aria-label={labels.container}>
       {/* Input Message */}
       <EuiFlexItem grow={false}>
         <RoundInput

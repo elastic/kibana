@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Query } from '@kbn/es-query';
 import moment from 'moment';
 import { stringify } from 'query-string';
@@ -22,6 +23,7 @@ import {
   logEntryRateJobType,
 } from '../../../../common/log_analysis';
 import type { TimeKey } from '../../../../common/time';
+import { INFRA_EBT_ACTIONS, INFRA_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   CategoryJobNoticesSection,
   JobStoppedCallout,
@@ -142,6 +144,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const {
     isLoadingLogEntryAnomalies,
+    hasFailedLoadingLogEntryAnomalies,
+    getLogEntryAnomalies,
     logEntryAnomalies,
     page,
     fetchNextPage,
@@ -152,6 +156,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     paginationOptions,
     datasets,
     isLoadingDatasets,
+    hasFailedLoadingDatasets,
+    getLogEntryAnomaliesDatasets,
   } = useLogEntryAnomaliesResults({
     logViewReference,
     idFormats,
@@ -212,8 +218,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         logEntryCategoriesSetupStatus.type === 'succeeded' ||
         (logEntryRateSetupStatus.type === 'skipped' && !!logEntryRateSetupStatus.newlyCreated) ||
         logEntryRateSetupStatus.type === 'succeeded') &&
-      !hasAnomalyResults,
-    [hasAnomalyResults, logEntryCategoriesSetupStatus, logEntryRateSetupStatus]
+      !hasAnomalyResults &&
+      !hasFailedLoadingLogEntryAnomalies,
+    [
+      hasAnomalyResults,
+      hasFailedLoadingLogEntryAnomalies,
+      logEntryCategoriesSetupStatus,
+      logEntryRateSetupStatus,
+    ]
   );
 
   const handleSelectedTimeRangeChange = useCallback(
@@ -232,7 +244,16 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
       hasData={logViewStatus?.index !== 'missing'}
       pageHeader={{
         pageTitle,
-        rightSideItems: [<ManageJobsButton onClick={showModuleList} size="s" />],
+        rightSideItems: [
+          <ManageJobsButton
+            onClick={showModuleList}
+            size="s"
+            {...getEbtProps({
+              action: INFRA_EBT_ACTIONS.MANAGE_ML_JOBS,
+              element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_PAGE_HEADER,
+            })}
+          />,
+        ],
       }}
     >
       <EuiFlexGroup direction="column">
@@ -242,6 +263,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
               <DatasetsSelector
                 availableDatasets={datasets}
                 isLoading={isLoadingDatasets}
+                hasFailedLoading={hasFailedLoadingDatasets}
+                onRetry={getLogEntryAnomaliesDatasets}
                 selectedDatasets={selectedDatasets}
                 onChangeDatasetSelection={setSelectedDatasets}
               />
@@ -284,6 +307,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
         <EuiFlexItem grow={false}>
           <AnomaliesResults
             isLoadingAnomaliesResults={isLoadingLogEntryAnomalies}
+            hasFailedLoadingAnomaliesResults={hasFailedLoadingLogEntryAnomalies}
+            onRetryAnomaliesResults={getLogEntryAnomalies}
             anomalies={logEntryAnomalies}
             timeRange={timeRange.value}
             page={page}
