@@ -90,6 +90,18 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
     return false;
   }
 
+  if (!isRecord(candidate.automatic_field_source_names)) {
+    return false;
+  }
+
+  if (
+    !Object.values(candidate.automatic_field_source_names).every(
+      (sourceName) => typeof sourceName === 'string'
+    )
+  ) {
+    return false;
+  }
+
   if (
     !isRecordOfStrings(candidate, ['name', 'description', 'data_source', 'resource'] as const)
   ) {
@@ -114,6 +126,8 @@ export const mergeWizardFormValues = (
   },
   settings_custom_json: draft.settings_custom_json ?? base.settings_custom_json,
   dynamic_fields_enabled: draft.dynamic_fields_enabled ?? base.dynamic_fields_enabled,
+  automatic_field_source_names:
+    draft.automatic_field_source_names ?? base.automatic_field_source_names,
 });
 
 export const loadWizardFormDraft = (storageKey: string): DatasetWizardFormValues | undefined => {

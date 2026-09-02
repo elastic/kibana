@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
@@ -17,6 +18,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3_9_6,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { SchemaMappingsStep } from './schema_mappings_step';
@@ -77,13 +79,15 @@ const TestHarness = ({
 
   return (
     <EuiProvider>
-      <SchemaMappingsStep
-        control={control}
-        dataSources={dataSources}
-        dataSource={dataSource}
-        dataSourceRegion={dataSourceRegion}
-        flowVariant={flowVariant}
-      />
+      <I18nProvider>
+        <SchemaMappingsStep
+          control={control}
+          dataSources={dataSources}
+          dataSource={dataSource}
+          dataSourceRegion={dataSourceRegion}
+          flowVariant={flowVariant}
+        />
+      </I18nProvider>
     </EuiProvider>
   );
 };
@@ -279,5 +283,70 @@ describe('SchemaMappingsStep flow 3', () => {
     expect(
       Number(getByTestId('datasetWizardInferredSchemaMappingsEditorFieldCount').textContent)
     ).toBeGreaterThan(0);
+  });
+});
+
+describe('SchemaMappingsStep flow 3 9.6', () => {
+  it('shows schema mapping settings under the step description', async () => {
+    const { getByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'parquet',
+          },
+        }}
+      />
+    );
+
+    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSchemaMappingSettings')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
+  });
+
+  it('shows schema mapping settings for csv', () => {
+    const { getByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'csv',
+          },
+        }}
+      />
+    );
+
+    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
+  });
+
+  it('shows schema mapping settings for ndjson', () => {
+    const { getByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'ndjson',
+          },
+        }}
+      />
+    );
+
+    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSettingsSchemaResolution')).toBeInTheDocument();
   });
 });

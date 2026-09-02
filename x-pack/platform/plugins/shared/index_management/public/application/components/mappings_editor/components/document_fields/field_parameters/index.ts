@@ -10,6 +10,10 @@ import { dynamicSerializer, dynamicDeserializer } from './dynamic_parameter';
 
 export * from './name_parameter';
 
+export * from './source_name_parameter';
+
+export * from './rename_field_parameter';
+
 export * from './index_parameter';
 
 export * from './store_parameter';

@@ -77,6 +77,16 @@ describe('automatic_field_types_utils', () => {
     ).toEqual([]);
   });
 
+  it('excludes inferred fields mapped by source name', () => {
+    expect(
+      getDynamicInferredFields(
+        [{ name: 'user_id', type: 'keyword' }, ...inferredFields],
+        { userId: 'keyword' },
+        { userId: 'user_id' }
+      )
+    ).toEqual(inferredFields);
+  });
+
   it('counts schema edits against the inferred baseline in flow 3', () => {
     const seeded = seedAutomaticFieldTypesFromInferred(inferredFields);
 

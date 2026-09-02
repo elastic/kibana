@@ -16,7 +16,7 @@ import { DATASET_WIZARD_FLOW_VARIANT_4 } from '../dataset_wizard_flow_variant';
 import { LogisticsStep } from './logistics_step';
 
 const TestHarness = ({ name = '' }: { name?: string }) => {
-  const { control, setValue } = useForm<DatasetWizardFormValues>({
+  const { control, getValues, setValue } = useForm<DatasetWizardFormValues>({
     defaultValues: { ...emptyDatasetWizardFormValues(), name },
   });
 
@@ -27,6 +27,7 @@ const TestHarness = ({ name = '' }: { name?: string }) => {
         dataSources={[]}
         onConnectNewDataSource={jest.fn()}
         validateName={() => true}
+        getValues={getValues}
         setValue={setValue}
         flowVariant={DATASET_WIZARD_FLOW_VARIANT_4}
         syncRegionFromResource={jest.fn()}

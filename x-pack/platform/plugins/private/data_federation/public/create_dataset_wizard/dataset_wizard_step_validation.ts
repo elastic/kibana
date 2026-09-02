@@ -27,6 +27,7 @@ import {
   hasDatasetWizardPreviewResultsStep,
   hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
   isDatasetWizardFlow4,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
@@ -64,6 +65,7 @@ const getLogisticsStepFields = (
     ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION
     : LOGISTICS_STEP_FIELDS),
   ...toSettingsFieldPaths(getResourceOwnedSettingsFieldIds(flowVariant)),
+  ...(isDatasetWizardFlow396(flowVariant) ? (['settings.format'] as const) : []),
 ];
 
 const GLUE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [

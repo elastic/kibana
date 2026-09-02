@@ -14,6 +14,7 @@ import { useForm } from 'react-hook-form';
 
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { inferFormatFromResource } from '../infer_format_from_resource';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
@@ -66,8 +67,18 @@ const TestHarness = ({
   autoDetectedRegion?: string;
 }) => {
   const syncedResourceRef = useRef<string | null>(null);
+  const inferredFormat = inferFormatFromResource(resource);
   const { control, getValues, setValue } = useForm<DatasetWizardFormValues>({
-    defaultValues: emptyDatasetWizardFormValues(),
+    defaultValues: {
+      ...emptyDatasetWizardFormValues(),
+      resource,
+      settings: {
+        ...emptyDatasetWizardFormValues().settings,
+        ...(flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 && inferredFormat
+          ? { format: inferredFormat }
+          : {}),
+      },
+    },
   });
 
   return (
@@ -470,7 +481,7 @@ describe('AdditionalSettingsStep', () => {
   });
 
   describe('flow 3 9.6', () => {
-    it('hides the region field', async () => {
+    it('hides the region and format fields', async () => {
       const { queryByTestId, getByTestId } = render(
         <TestHarness
           resource="s3://bucket/data.csv"
@@ -479,17 +490,24 @@ describe('AdditionalSettingsStep', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
       });
 
       expect(queryByTestId('datasetWizardRegion')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
     });
 
     it('leaves settings unset so the request can omit them', async () => {
       const Harness = () => {
         const syncedResourceRef = useRef<string | null>(null);
         const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
-          defaultValues: emptyDatasetWizardFormValues(),
+          defaultValues: {
+            ...emptyDatasetWizardFormValues(),
+            settings: {
+              ...emptyDatasetWizardFormValues().settings,
+              format: 'csv',
+            },
+          },
         });
         const settings = watch('settings');
 
@@ -741,6 +759,31 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsPartitionPath')).toBeNull();
     });
 
+    it('moves schema mapping settings to the schema mappings step in flow 3 9.6', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.parquet"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardSettingsSchemaResolution')).toBeNull();
+    });
+
+    it('keeps schema mapping settings on additional settings in flow 3', async () => {
+      const { getByTestId } = render(
+        <TestHarness resource="s3://bucket/data.ndjson" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
+      });
+    });
+
     it('keeps the partition settings the resource step collected', async () => {
       const Harness = () => {
         const syncedResourceRef = useRef<string | null>(null);
@@ -749,6 +792,7 @@ describe('AdditionalSettingsStep', () => {
             ...emptyDatasetWizardFormValues(),
             settings: {
               ...emptyDatasetWizardFormValues().settings,
+              format: 'parquet',
               partition_detection: 'hive',
               partition_path: 'year/month',
             },

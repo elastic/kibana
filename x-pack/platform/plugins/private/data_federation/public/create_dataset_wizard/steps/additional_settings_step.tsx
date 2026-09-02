@@ -6,57 +6,41 @@
  */
 
 import type { FunctionComponent, MutableRefObject } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCallOut,
   EuiForm,
-  EuiFormRow,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
 import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
-import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
-import { buildDefaultSettingsCustomJson } from '../../create_dataset_flyout/settings_custom_json_schema';
-import { EMPTY_SETTINGS_CUSTOM_JSON } from '../../create_dataset_flyout/settings_custom_json_utils';
-import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
 import type {
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
-import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
-import { createDatasetFlyoutStrings } from '../../create_dataset_flyout/create_dataset_flyout_i18n';
-import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
-  DATASET_WIZARD_FLOW_VARIANT_1,
   hasDatasetWizardRegionField,
   isDatasetWizardFlow3,
   isDatasetWizardFlow396,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
-import { inferFormatFromResource } from '../infer_format_from_resource';
+import { DatasetFormatField } from '../dataset_format_field';
 import {
   getResourceOwnedSettingsFieldIds,
-  keepResourceOwnedSettings,
 } from '../resource_settings_fields';
+import { SCHEMA_MAPPING_SETTINGS_FIELD_IDS } from '../schema_mapping_settings_fields';
+import { isKnownDatasetFormat, useDatasetFormatSelection } from '../use_dataset_format_selection';
 import { WizardRegionField } from '../wizard_region_field';
-
-const FORMAT_VALUES: DatasetFormatFormValue[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
-
-const isKnownFormat = (value: string): value is Exclude<DatasetFormatFormValue, ''> =>
-  FORMAT_VALUES.includes(value as Exclude<DatasetFormatFormValue, ''>);
-
-type FormatSelectionSource = 'none' | 'auto' | 'manual';
 
 export interface AdditionalSettingsStepProps {
   control: Control<DatasetWizardFormValues>;
@@ -81,209 +65,49 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   autoDetectedRegion = '',
   onRegionManualChange,
 }) => {
-  const [autoDetectedFormat, setAutoDetectedFormat] = useState<DatasetFormatFormValue | ''>('');
-  const [formatSelectionSource, setFormatSelectionSource] = useState<FormatSelectionSource>('none');
-
-  const { field: formatField } = useController({
-    name: 'settings.format',
-    control,
-  });
-
-  const format = formatField.value as DatasetFormatFormValue;
-  const hasFormatSelected = isKnownFormat(format);
-  const showDefaultsAsPlaceholders = isDatasetWizardFlow396(flowVariant);
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const showFormatField = !isFlow396;
+  const showDefaultsAsPlaceholders = isFlow396;
   const resourceSettingsFieldIds = useMemo(
     () => getResourceOwnedSettingsFieldIds(flowVariant),
     [flowVariant]
   );
+  const excludedSettingsFieldIds = useMemo(
+    () =>
+      isFlow396
+        ? [...resourceSettingsFieldIds, ...SCHEMA_MAPPING_SETTINGS_FIELD_IDS]
+        : resourceSettingsFieldIds,
+    [isFlow396, resourceSettingsFieldIds]
+  );
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
-  const previousErrorModeRef = useRef<DatasetErrorModeFormValue | undefined>(undefined);
-
-  const setDefaultCustomJson = useCallback(
-    (
-      nextFormat: Exclude<DatasetFormatFormValue, ''>,
-      nextErrorMode: DatasetErrorModeFormValue = ''
-    ) => {
-      setValue('settings_custom_json', buildDefaultSettingsCustomJson(nextFormat, nextErrorMode), {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    },
-    [setValue]
-  );
-
-  const applyFormatDefaultsToForm = useCallback(
-    (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
-      const currentSettings = getValues('settings');
-      const withDefaults = keepResourceOwnedSettings(
-        applySettingsForFormat(currentSettings, nextFormat, {
-          applyDefaults: !showDefaultsAsPlaceholders,
-        }),
-        currentSettings,
-        resourceSettingsFieldIds
-      );
-      setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
-
-      // Seeding the JSON with defaults would write them straight back into the
-      // fields the placeholders are meant to leave empty.
-      if (isDatasetWizardFlow3(flowVariant) && !showDefaultsAsPlaceholders) {
-        setDefaultCustomJson(nextFormat, withDefaults.error_mode);
-        previousErrorModeRef.current = withDefaults.error_mode;
-      }
-    },
-    [
-      flowVariant,
-      getValues,
-      resourceSettingsFieldIds,
-      setDefaultCustomJson,
-      setValue,
-      showDefaultsAsPlaceholders,
-    ]
-  );
-
-  const handleFormatSelection = useCallback(
-    (nextFormat: Exclude<DatasetFormatFormValue, ''>, source: FormatSelectionSource) => {
-      applyFormatDefaultsToForm(nextFormat);
-      setFormatSelectionSource(source);
-      if (source === 'auto') {
-        setAutoDetectedFormat(nextFormat);
-      } else if (nextFormat !== autoDetectedFormat) {
-        setAutoDetectedFormat('');
-      }
-    },
-    [applyFormatDefaultsToForm, autoDetectedFormat]
-  );
-
-  useEffect(() => {
-    if (!isDatasetWizardFlow3(flowVariant) || showDefaultsAsPlaceholders || !hasFormatSelected) {
-      previousErrorModeRef.current = errorMode;
-      return;
-    }
-
-    if (previousErrorModeRef.current === undefined) {
-      previousErrorModeRef.current = errorMode;
-      return;
-    }
-
-    if (previousErrorModeRef.current === errorMode) {
-      return;
-    }
-
-    previousErrorModeRef.current = errorMode;
-    setDefaultCustomJson(format, errorMode);
-  }, [
-    errorMode,
-    flowVariant,
+  const {
+    formatField,
+    formatFieldState,
     format,
     hasFormatSelected,
-    setDefaultCustomJson,
-    showDefaultsAsPlaceholders,
-  ]);
-
-  useEffect(() => {
-    const inferredFormat = inferFormatFromResource(resource);
-    const resourceChanged = syncedResourceRef.current !== resource;
-
-    if (!resourceChanged) {
-      if (!isKnownFormat(formatField.value)) {
-        return;
-      }
-
-      if (formatSelectionSource !== 'none') {
-        return;
-      }
-
-      if (inferredFormat && formatField.value === inferredFormat) {
-        setAutoDetectedFormat(inferredFormat);
-        setFormatSelectionSource('auto');
-      } else {
-        setFormatSelectionSource('manual');
-      }
-      return;
-    }
-
-    syncedResourceRef.current = resource;
-
-    if (inferredFormat) {
-      handleFormatSelection(inferredFormat, 'auto');
-      return;
-    }
-
-    if (isEditMode && isKnownFormat(formatField.value)) {
-      setFormatSelectionSource('manual');
-      return;
-    }
-
-    setValue(
-      'settings',
-      keepResourceOwnedSettings(
-        emptyCreateDatasetSettingsFormValues(),
-        getValues('settings'),
-        resourceSettingsFieldIds
-      ),
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      }
-    );
-    if (isDatasetWizardFlow3(flowVariant)) {
-      setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    }
-    setAutoDetectedFormat('');
-    setFormatSelectionSource('none');
-  }, [
-    flowVariant,
-    formatField.onChange,
-    formatField.value,
-    formatSelectionSource,
-    getValues,
+    formatSuperSelectOptions,
     handleFormatSelection,
-    isEditMode,
-    resource,
-    resourceSettingsFieldIds,
+    autoDetectedFormat,
+  } = useDatasetFormatSelection({
+    control,
+    getValues,
     setValue,
+    resource,
+    flowVariant,
+    isEditMode,
+    resourceSettingsFieldIds,
     syncedResourceRef,
-  ]);
-
-  const formatSuperSelectOptions = useMemo(() => {
-    const autoDetectedSuffix =
-      flowVariant === DATASET_WIZARD_FLOW_VARIANT_1
-        ? ` ${datasetWizardStrings.formatAutoDetectedSuffix()}`
-        : null;
-
-    return FORMAT_SUPER_SELECT_OPTIONS().map((option) => {
-      const isSelectedAutoDetected = option.value === format && option.value === autoDetectedFormat;
-
-      if (!isSelectedAutoDetected) {
-        return option;
-      }
-
-      return {
-        ...option,
-        inputDisplay: (
-          <>
-            {option.inputDisplay}{' '}
-            {flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
-              autoDetectedSuffix
-            ) : (
-              <AutoDetectedSuffix />
-            )}
-          </>
-        ),
-      };
-    });
-  }, [autoDetectedFormat, flowVariant, format]);
+    syncMode: 'resource-change',
+    enabled: showFormatField,
+  });
 
   const showDataSourceSetupWarning = useMemo(
     () =>
       isDatasetWizardFlow3(flowVariant) &&
-      !isDatasetWizardFlow396(flowVariant) &&
+      !isFlow396 &&
       !autoDetectedRegion &&
       !autoDetectedFormat,
-    [autoDetectedFormat, autoDetectedRegion, flowVariant]
+    [autoDetectedFormat, autoDetectedRegion, flowVariant, isFlow396]
   );
 
   const accordionTitles = useMemo(
@@ -296,6 +120,11 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     }),
     []
   );
+
+  const resolvedFormat = hasFormatSelected
+    ? format
+    : (getValues('settings.format') as DatasetFormatFormValue);
+  const hasResolvedFormat = isKnownDatasetFormat(resolvedFormat);
 
   return (
     <div data-test-subj="datasetWizardAdditionalSettingsStep">
@@ -335,26 +164,23 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
             />
           ) : null}
 
-          <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
-            <EuiSuperSelect
-              options={formatSuperSelectOptions}
-              data-test-subj="datasetWizardSettingsFormat"
-              fullWidth
-              aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
-              placeholder={createDatasetFlyoutStrings.settingsFormatPlaceholder()}
-              valueOfSelected={hasFormatSelected ? format : undefined}
-              onChange={(nextFormat) => {
+          {showFormatField ? (
+            <DatasetFormatField
+              formatField={formatField}
+              formatFieldState={formatFieldState}
+              format={format}
+              hasFormatSelected={hasFormatSelected}
+              formatSuperSelectOptions={formatSuperSelectOptions}
+              onFormatChange={(nextFormat) => {
                 handleFormatSelection(nextFormat, 'manual');
               }}
-              name={formatField.name}
-              buttonRef={formatField.ref}
             />
-          </EuiFormRow>
+          ) : null}
         </div>
 
-        {hasFormatSelected ? (
+        {hasResolvedFormat ? (
           <DatasetSettingDefaultHintsProvider
-            format={format}
+            format={resolvedFormat}
             isEnabled={showDefaultsAsPlaceholders}
           >
             {isDatasetWizardFlow3(flowVariant) ? (
@@ -362,24 +188,24 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
                 control={control}
                 getValues={getValues}
                 setValue={setValue}
-                format={format}
+                format={resolvedFormat}
                 commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
                 advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
                 testSubjPrefix="datasetWizard"
-                hasPanelBackground={!isDatasetWizardFlow396(flowVariant)}
-                excludeFieldIds={resourceSettingsFieldIds}
+                hasPanelBackground={!isFlow396}
+                excludeFieldIds={excludedSettingsFieldIds}
               />
             ) : (
               <>
                 <DatasetSettingsCommonPanel
                   control={control}
-                  format={format}
+                  format={resolvedFormat}
                   panelTitle={datasetWizardStrings.commonSettingsTitle()}
                   testSubjPrefix="datasetWizard"
                 />
                 <DatasetSettingsAccordions
                   control={control}
-                  format={format}
+                  format={resolvedFormat}
                   accordionTitles={accordionTitles}
                   testSubjPrefix="datasetWizard"
                 />

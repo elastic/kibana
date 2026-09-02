@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
   EuiIcon,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +21,7 @@ import type { NormalizedField, NormalizedFields, State } from '../../../types';
 
 import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE } from '../../../constants';
+import { useConfig } from '../../../config_context';
 
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
@@ -115,7 +117,12 @@ function FieldListItemComponent(
     path,
   } = field;
   const { euiTheme } = useEuiTheme();
+  const {
+    value: { showFieldRename, fieldSourceNames },
+  } = useConfig();
   const styles = getListItemStyle(euiTheme);
+  const sourceName = fieldSourceNames?.[source.name];
+  const showSourceName = showFieldRename && sourceName !== undefined && sourceName !== source.name;
 
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
@@ -319,7 +326,21 @@ function FieldListItemComponent(
                     data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
                     aria-label={i18nTexts.fieldListNameLabel}
                   >
-                    {source.name}
+                    {showSourceName ? (
+                      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>{source.name}</EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-sourceName`}>
+                            {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldListSourceName', {
+                              defaultMessage: 'Source: {sourceName}',
+                              values: { sourceName },
+                            })}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      source.name
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

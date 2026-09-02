@@ -29,11 +29,13 @@ import {
 export interface MaxFieldSizeFieldProps {
   control: Control<CreateDatasetFormValues>;
   testSubjPrefix: string;
+  isCompressed?: boolean;
 }
 
 export const MaxFieldSizeField: FunctionComponent<MaxFieldSizeFieldProps> = ({
   control,
   testSubjPrefix,
+  isCompressed = true,
 }) => {
   const { field, fieldState } = useController({
     name: 'settings.max_field_size',
@@ -95,7 +97,7 @@ export const MaxFieldSizeField: FunctionComponent<MaxFieldSizeFieldProps> = ({
       <EuiFieldNumber
         data-test-subj={`${testSubjPrefix}SettingsMaxFieldSize`}
         fullWidth
-        compressed
+        compressed={isCompressed}
         min={0}
         step="any"
         placeholder={fieldText.placeholder}

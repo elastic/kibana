@@ -7,10 +7,15 @@
 
 export const DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM = 'flow';
 
+/** Frozen flow — do not change wizard behavior without explicit approval. */
 export const DATASET_WIZARD_FLOW_VARIANT_1 = 'flow_1';
+/** Frozen flow — do not change wizard behavior without explicit approval. */
 export const DATASET_WIZARD_FLOW_VARIANT_2 = 'flow_2';
+/** Frozen flow — do not change wizard behavior without explicit approval. */
 export const DATASET_WIZARD_FLOW_VARIANT_3 = 'flow_3';
+/** Active development flow — new wizard work belongs here. */
 export const DATASET_WIZARD_FLOW_VARIANT_3_9_6 = 'flow_3_9_6';
+/** Frozen flow — do not change wizard behavior without explicit approval. */
 export const DATASET_WIZARD_FLOW_VARIANT_4 = 'flow_4';
 
 export type DatasetWizardFlowVariant =
@@ -36,6 +41,7 @@ export const isDatasetWizardFlow3 = (flowVariant: DatasetWizardFlowVariant): boo
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6 ||
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_4;
 
+/** True only for the active Flow 3 9.6 variant (`flow_3_9_6`), not classic Flow 3 or Flow 4. */
 export const isDatasetWizardFlow396 = (flowVariant: DatasetWizardFlowVariant): boolean =>
   flowVariant === DATASET_WIZARD_FLOW_VARIANT_3_9_6;
 

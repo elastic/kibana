@@ -45,6 +45,8 @@ export interface DatasetSettingsFieldsLayoutProps {
   columns?: number;
   rowSpacerSize?: EuiSpacerProps['size'];
   constrainWidth?: boolean;
+  variant?: 'settings' | 'step';
+  compressed?: boolean;
 }
 
 export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsFieldsLayoutProps> = ({
@@ -54,6 +56,8 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
   columns = 3,
   rowSpacerSize = 'l',
   constrainWidth = true,
+  variant = 'settings',
+  compressed,
 }) => {
   if (fields.length === 0) {
     return null;
@@ -66,7 +70,7 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
       {rows.map((rowFields, rowIndex) => (
         <React.Fragment key={rowFields.join('-') || `empty-row-${rowIndex}`}>
           {rowIndex > 0 ? <EuiSpacer size={rowSpacerSize} /> : null}
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="l">
             {Array.from({ length: columns }, (_, columnIndex) => {
               const fieldId = rowFields[columnIndex];
 
@@ -77,6 +81,8 @@ export const DatasetSettingsFieldsLayout: FunctionComponent<DatasetSettingsField
                       control={control}
                       fieldId={fieldId}
                       testSubjPrefix={testSubjPrefix}
+                      variant={variant}
+                      compressed={compressed}
                     />
                   ) : null}
                 </EuiFlexItem>

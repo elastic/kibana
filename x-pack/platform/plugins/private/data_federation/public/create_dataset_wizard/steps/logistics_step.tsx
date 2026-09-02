@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { Control, UseFormSetValue, Validate } from 'react-hook-form';
+import type { Control, UseFormGetValues, UseFormSetValue, Validate } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
-import { DatasetSettingsField } from '../../create_dataset_flyout/dataset_settings_field';
-import { datasetSettingsFieldsWidthCss } from '../../create_dataset_flyout/dataset_settings_fields_layout';
+import {
+  DatasetSettingsFieldsLayout,
+  datasetSettingsFieldsWidthCss,
+} from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import { DataSourceSuperSelect } from '../data_source_super_select';
+import { DatasetFormatField } from '../dataset_format_field';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   isDatasetWizardFlow3,
@@ -27,6 +30,7 @@ import {
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { getResourceOwnedSettingsFieldIds } from '../resource_settings_fields';
+import { useDatasetFormatSelection } from '../use_dataset_format_selection';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
 import { WizardRegionField } from '../wizard_region_field';
 import { FileStep } from './file_step';
@@ -41,23 +45,34 @@ export interface LogisticsStepProps {
   dataSources: DataSource[];
   onConnectNewDataSource: () => void;
   validateName: Validate<string, DatasetWizardFormValues>;
+  getValues: UseFormGetValues<DatasetWizardFormValues>;
   setValue: UseFormSetValue<DatasetWizardFormValues>;
   flowVariant: DatasetWizardFlowVariant;
   syncRegionFromResource: (resource: string, dataSourceName: string) => void;
   autoDetectedRegion?: string;
   onRegionManualChange?: (regionId: string) => void;
+  isEditMode?: boolean;
+  syncedResourceRef?: MutableRefObject<string | null>;
 }
 
-const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
+interface LogisticsStepFieldsContentProps extends LogisticsStepProps {
+  showFormatField: boolean;
+}
+
+const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentProps> = ({
   control,
   dataSources,
   onConnectNewDataSource,
   validateName,
+  getValues,
   setValue,
   flowVariant,
   syncRegionFromResource,
   autoDetectedRegion = '',
   onRegionManualChange,
+  isEditMode = false,
+  syncedResourceRef,
+  showFormatField,
 }) => {
   const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
@@ -100,17 +115,41 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
     () => getResourceOwnedSettingsFieldIds(flowVariant),
     [flowVariant]
   );
-
-  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
-  const resourceSettingsFields = resourceSettingsFieldIds.map((fieldId) => (
-    <DatasetSettingsField
-      key={fieldId}
-      control={control}
-      fieldId={fieldId}
-      testSubjPrefix="datasetWizard"
-      variant="step"
-    />
-  ));
+  const resource = useWatch({ control, name: 'resource' }) ?? '';
+  const watchedFormat = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+  const {
+    formatField,
+    formatFieldState,
+    format,
+    hasFormatSelected,
+    formatSuperSelectOptions,
+    handleFormatSelection,
+    syncFormatFromResource,
+  } = useDatasetFormatSelection({
+    control,
+    getValues,
+    setValue,
+    resource,
+    flowVariant,
+    isEditMode,
+    resourceSettingsFieldIds,
+    syncedResourceRef: syncedResourceRef ?? { current: null },
+    syncMode: showFormatField ? 'resource-blur' : 'resource-change',
+    requireFormat: showFormatField,
+    enabled: showFormatField,
+  });
+  const formatForHints = showFormatField ? format : watchedFormat;
+  const resourceSettingsFields =
+    resourceSettingsFieldIds.length > 0 ? (
+      <DatasetSettingsFieldsLayout
+        control={control}
+        fields={resourceSettingsFieldIds}
+        testSubjPrefix="datasetWizard"
+        columns={Math.min(resourceSettingsFieldIds.length, 2)}
+        constrainWidth={false}
+        variant="step"
+      />
+    ) : null;
 
   const onDataSourceChange = useCallback(
     (selectedValue: string) => {
@@ -122,6 +161,10 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
   const onResourceBlur = useCallback(() => {
     resourceField.onBlur();
 
+    if (showFormatField) {
+      syncFormatFromResource();
+    }
+
     const selectedDataSource = dataSources.find(
       (dataSource) => dataSource.name === dataSourceField.value
     );
@@ -130,7 +173,14 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
     }
 
     syncRegionFromResource(resourceField.value, dataSourceField.value);
-  }, [dataSourceField.value, resourceField, syncRegionFromResource]);
+  }, [
+    dataSourceField.value,
+    dataSources,
+    resourceField,
+    showFormatField,
+    syncFormatFromResource,
+    syncRegionFromResource,
+  ]);
 
   const resourceHelpText = useMemo(() => {
     const selected = dataSources.find((ds) => ds.name === dataSourceField.value);
@@ -229,9 +279,23 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
             />
           </EuiFormRow>
 
-          {/* Naming the defaults needs a format, which the resource decides. */}
-          {format !== '' ? (
-            <DatasetSettingDefaultHintsProvider format={format} isEnabled>
+          {showFormatField ? (
+            <DatasetFormatField
+              formatField={formatField}
+              formatFieldState={formatFieldState}
+              format={format}
+              hasFormatSelected={hasFormatSelected}
+              formatSuperSelectOptions={formatSuperSelectOptions}
+              onFormatChange={(nextFormat) => {
+                handleFormatSelection(nextFormat, 'manual');
+              }}
+            />
+          ) : null}
+
+          {showFormatField && resourceSettingsFieldIds.length > 0 ? <EuiSpacer size="m" /> : null}
+
+          {formatForHints !== '' ? (
+            <DatasetSettingDefaultHintsProvider format={formatForHints} isEnabled>
               {resourceSettingsFields}
             </DatasetSettingDefaultHintsProvider>
           ) : (
@@ -250,6 +314,13 @@ const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = ({
     </>
   );
 };
+
+const LogisticsStepFields: FunctionComponent<LogisticsStepProps> = (props) => (
+  <LogisticsStepFieldsContent
+    {...props}
+    showFormatField={isDatasetWizardFlow396(props.flowVariant)}
+  />
+);
 
 export const LogisticsStep: FunctionComponent<LogisticsStepProps> = (props) =>
   isDatasetWizardFlow4(props.flowVariant) ? (

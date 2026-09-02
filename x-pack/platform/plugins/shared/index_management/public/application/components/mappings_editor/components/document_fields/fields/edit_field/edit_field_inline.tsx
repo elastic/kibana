@@ -22,15 +22,17 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldDeserializer, fieldSerializer } from '../../../../lib';
 import { useDispatch } from '../../../../mappings_state_context';
+import { useConfig } from '../../../../config_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import type { Field, MainType, NormalizedField, NormalizedFields } from '../../../../types';
-import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
+import { NameParameter, RenameFieldParameter, SourceNameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { getRequiredParametersFormForType } from '../create_field/required_parameters_forms';
 import { FieldBetaBadge } from '../field_beta_badge';
 import type { SemanticTextInfo } from '../create_field/create_field';
 import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
+import { useFieldRenameForm } from '../../use_field_rename_form';
 import { useUpdateField } from './use_update_field';
 
 const formWrapper = (props: React.FormHTMLAttributes<HTMLFormElement>) => <form {...props} />;
@@ -67,12 +69,29 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
 }: Props) {
   const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
+  const {
+    value: { showFieldRename, fieldSourceNames },
+  } = useConfig();
   const { updateField, modal } = useUpdateField();
+  const {
+    prepareFieldDataForSubmit,
+    notifyFieldSourceNameChange,
+    stripSourceNameFromField,
+    hasRequiredFieldIdentity,
+  } = useFieldRenameForm();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
   const editFieldFormRef = useRef<HTMLDivElement>(null);
   const styles = useStyles();
 
-  const formDefaultValue = useMemo(() => ({ ...field.source }), [field.source]);
+  const formDefaultValue = useMemo(
+    () => ({
+      ...field.source,
+      ...(showFieldRename
+        ? { sourceName: fieldSourceNames?.[field.source.name] ?? field.source.name }
+        : {}),
+    }),
+    [field.source, fieldSourceNames, showFieldRename]
+  );
 
   const { form } = useForm<Field>({
     defaultValue: formDefaultValue,
@@ -115,10 +134,13 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
       e.preventDefault();
     }
 
+    const fieldIdentity = prepareFieldDataForSubmit(form);
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      updateField({ ...field, source: data });
+      const fieldData = stripSourceNameFromField(data);
+      updateField({ ...field, source: fieldData });
+      notifyFieldSourceNameChange(fieldIdentity, field.source.name);
 
       if (exitAfter) {
         exitEdit();
@@ -131,9 +153,7 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
   };
 
   const onClickOutside = () => {
-    const name = form.getFields().name.value as string;
-
-    if (name.trim() === '') {
+    if (!hasRequiredFieldIdentity(form)) {
       exitEdit();
     } else {
       submitForm(undefined, true, true);
@@ -168,9 +188,20 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
-        <NameParameter isSemanticText={isSemanticText} />
-      </EuiFlexItem>
+      {showFieldRename ? (
+        <>
+          <EuiFlexItem>
+            <SourceNameParameter />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RenameFieldParameter />
+          </EuiFlexItem>
+        </>
+      ) : (
+        <EuiFlexItem>
+          <NameParameter isSemanticText={isSemanticText} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 
@@ -205,7 +236,9 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
   };
 
   const renderFormActions = () => (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={exitEdit} data-test-subj="cancelButton">
           {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
@@ -228,6 +261,7 @@ export const EditFieldInline = React.memo(function EditFieldInlineComponent({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+    </>
   );
 
   return (

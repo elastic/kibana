@@ -8,19 +8,26 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
-import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
+import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
+import {
+  DatasetSettingsFieldsLayout,
+} from '../../create_dataset_flyout/dataset_settings_fields_layout';
 import type { DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow396,
 } from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { getSchemaMappingSettingsFieldIds } from '../schema_mapping_settings_fields';
 import { InferredSchemaPreviewTable } from '../inferred_schema_preview_table';
 import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
 import { AwsGlueTableSchemaMappingsEditor } from './aws_glue_table_schema_mappings_editor';
@@ -31,6 +38,11 @@ import {
 } from './schema_mappings_step_flow_1';
 
 export { isAwsGlueTableSchemaMappingSupported };
+
+const FORMAT_VALUES: Exclude<DatasetFormatFormValue, ''>[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
+
+const isKnownFormat = (value: string): value is Exclude<DatasetFormatFormValue, ''> =>
+  FORMAT_VALUES.includes(value as Exclude<DatasetFormatFormValue, ''>);
 
 const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<'automatic', () => string> = {
   automatic: datasetWizardStrings.schemaMappingAutomaticDescription,
@@ -56,6 +68,17 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
     name: 'schema_mapping_mode',
   });
   const hideAwsGlueTable = isDatasetWizardFlow3(flowVariant);
+  const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const format = useWatch({ control, name: 'settings.format' }) as DatasetFormatFormValue;
+  const errorMode = useWatch({ control, name: 'settings.error_mode' });
+  const hasFormatSelected = isKnownFormat(format);
+  const schemaMappingSettingsFields = useMemo(
+    () =>
+      hasFormatSelected
+        ? getSchemaMappingSettingsFieldIds(format, errorMode, { showForAllFormats: isFlow396 })
+        : [],
+    [errorMode, format, hasFormatSelected, isFlow396]
+  );
 
   const isAwsGlueTableSupported = useMemo(
     () => isAwsGlueTableSchemaMappingSupported(dataSources, dataSource),
@@ -122,6 +145,25 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
             : datasetWizardStrings.schemaMappingsDescription()}
         </p>
       </EuiText>
+      {isFlow396 && schemaMappingSettingsFields.length > 0 ? (
+        <>
+          <EuiSpacer size="l" />
+          <DatasetSettingDefaultHintsProvider format={format} isEnabled>
+            <div data-test-subj="datasetWizardSchemaMappingSettings">
+              <DatasetSettingsFieldsLayout
+                control={control}
+                fields={schemaMappingSettingsFields}
+                testSubjPrefix="datasetWizard"
+                columns={Math.min(schemaMappingSettingsFields.length, 2)}
+                constrainWidth={false}
+                variant="step"
+              />
+            </div>
+          </DatasetSettingDefaultHintsProvider>
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule />
+        </>
+      ) : null}
       <EuiSpacer size="l" />
 
       {hideAwsGlueTable ? (

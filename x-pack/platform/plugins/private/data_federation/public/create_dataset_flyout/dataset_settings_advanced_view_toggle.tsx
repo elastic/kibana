@@ -86,6 +86,7 @@ export interface DatasetSettingsAdvancedViewToggleProps {
   errorMode: DatasetErrorModeFormValue;
   testSubjPrefix: string;
   constrainWidth?: boolean;
+  compressed?: boolean;
   /** Settings another step asks for, so this one leaves them out. */
   excludeFieldIds?: readonly DatasetSettingsFieldId[];
 }
@@ -100,6 +101,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
   errorMode,
   testSubjPrefix,
   constrainWidth = true,
+  compressed,
   excludeFieldIds = [],
 }) => {
   const prevSettingsDigestRef = useRef<string | null>(null);
@@ -208,6 +210,7 @@ export const DatasetSettingsAdvancedViewToggle: FunctionComponent<
       columns={1}
       rowSpacerSize="m"
       constrainWidth={constrainWidth}
+      compressed={compressed}
     />
   );
 };

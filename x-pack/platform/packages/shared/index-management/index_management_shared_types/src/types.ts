@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
@@ -179,10 +180,23 @@ export interface IndexMappingProps {
   showAboutMappings?: boolean;
 }
 
+export interface FieldSourceNameChange {
+  displayName: string;
+  sourceName: string;
+  previousDisplayName?: string;
+}
+
 export interface MappedFieldsEditorProps {
   value?: Record<string, unknown>;
   compressed?: boolean;
   fieldEditDisplay?: 'flyout' | 'inline';
+  /** Optional description shown above the fields list instead of the default copy. */
+  fieldsDescription?: ReactNode;
+  /** When enabled, inline add/edit forms show separate source and display name fields. */
+  showFieldRename?: boolean;
+  /** Source names keyed by mapped (display) field name. */
+  fieldSourceNames?: Record<string, string>;
+  onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
   onChange: (update: {
     getData: () => Record<string, unknown> | undefined;
     validate: () => Promise<boolean>;

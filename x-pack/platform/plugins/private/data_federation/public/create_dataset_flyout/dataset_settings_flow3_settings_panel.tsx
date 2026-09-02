@@ -88,6 +88,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   const fieldsCss = hasPanelBackground
     ? undefined
     : getIndentedDatasetSettingsFieldsWidthCss([euiTheme.size.l, euiTheme.size.xs]);
+  const fieldsCompressed = hasPanelBackground;
 
   const commonFields = useMemo(
     () =>
@@ -106,11 +107,11 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
 
   return (
     <>
-      <EuiSpacer size="l" />
+      {hasPanelBackground ? <EuiSpacer size="l" /> : null}
       <EuiAccordion
         id={commonSettingsAccordionId}
         element="fieldset"
-        borders="horizontal"
+        borders={hasPanelBackground ? 'horizontal' : 'none'}
         buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
         buttonContent={
           <EuiTitle size="xs">
@@ -134,6 +135,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
               columns={1}
               rowSpacerSize="m"
               constrainWidth={hasPanelBackground}
+              compressed={fieldsCompressed}
             />
           </div>
         </EuiPanel>
@@ -166,6 +168,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
               errorMode={errorMode}
               testSubjPrefix={testSubjPrefix}
               constrainWidth={hasPanelBackground}
+              compressed={fieldsCompressed}
               excludeFieldIds={excludeFieldIds}
             />
           </div>

@@ -530,7 +530,7 @@ describe('DatasetWizard step navigation', () => {
 
   it('places region on additional settings in flow 3 and allows leaving logistics without it', async () => {
     const { getByRole, getByTestId } = renderWizard(
-      '/create',
+      '/create?flow=flow_3',
       emptyDatasetWizardFormValues(),
       DATASET_WIZARD_FLOW_VARIANT_3
     );
@@ -565,6 +565,42 @@ describe('DatasetWizard step navigation', () => {
     expect(region).toHaveTextContent('US East (N. Virginia)');
     expect(region).toHaveTextContent('(auto-detected)');
     expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('collects format on logistics in flow 3 9.6 and hides it on additional settings', async () => {
+    const { getByRole, getByTestId } = renderWizard(
+      '/create?flow=flow_3_9_6',
+      emptyDatasetWizardFormValues(),
+      DATASET_WIZARD_FLOW_VARIANT_3_9_6
+    );
+
+    expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://bucket/data.parquet' },
+    });
+    fireEvent.blur(getByTestId('datasetWizardResource'));
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+    });
+
+    expect(
+      within(getByTestId('datasetWizardAdditionalSettingsStep')).queryByTestId(
+        'datasetWizardSettingsFormat'
+      )
+    ).toBeNull();
+    expect(
+      within(getByTestId('datasetWizardAdditionalSettingsStep')).queryByTestId(
+        'datasetWizardRegion'
+      )
+    ).toBeNull();
   });
 
   it('marks flow 3 region as auto-detected when advancing from logistics without blurring resource', async () => {

@@ -9,6 +9,7 @@ import React, { createContext, useContext, useState } from 'react';
 
 import type { DocLinksStart } from './shared_imports';
 import type { IndexSettings } from './types';
+import type { FieldSourceNameChange } from '@kbn/index-management-shared-types';
 
 export type FieldEditDisplay = 'flyout' | 'inline';
 
@@ -16,6 +17,9 @@ interface ContextState {
   indexSettings: IndexSettings;
   docLinks?: DocLinksStart;
   fieldEditDisplay?: FieldEditDisplay;
+  showFieldRename?: boolean;
+  fieldSourceNames?: Record<string, string>;
+  onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
 }
 
 interface Context {

@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -22,7 +23,8 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
+import type { FieldSourceNameChange, MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
@@ -33,6 +35,7 @@ import {
   automaticFieldTypesToMappings,
   getDynamicInferredFields,
   mappingsToAutomaticFieldTypes,
+  pruneAutomaticFieldSourceNames,
 } from '../automatic_field_types_utils';
 import {
   isDatasetWizardFlow396,
@@ -123,6 +126,19 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   inferredFields,
 }) => {
   const isFlow396 = isDatasetWizardFlow396(flowVariant);
+  const fieldsDescription = useMemo(
+    () =>
+      isFlow396 ? (
+        <FormattedMessage
+          id="xpack.dataFederation.datasetWizard.schemaMappingsFieldsAdditionalDescription"
+          defaultMessage="Mapping your timestamp field and renaming it to {timestampField} is recommended."
+          values={{
+            timestampField: <EuiCode>@timestamp</EuiCode>,
+          }}
+        />
+      ) : undefined,
+    [isFlow396]
+  );
   const { euiTheme } = useEuiTheme();
   /** Holds the row still while the button gives way to the inline add form. */
   const mappedFieldsHeaderCss = css`
@@ -137,6 +153,10 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     control,
     name: 'automatic_field_types',
   });
+  const { field: sourceNamesField } = useController({
+    control,
+    name: 'automatic_field_source_names',
+  });
   const { field: dynamicFieldsEnabledField } = useController({
     control,
     name: 'dynamic_fields_enabled',
@@ -149,28 +169,40 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
   const [mappedFieldTypes, setMappedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
   );
+  const [mappedFieldSourceNames, setMappedFieldSourceNames] = useState<Record<string, string>>(
+    () => sourceNamesField.value ?? {}
+  );
   const [seedFieldTypes, setSeedFieldTypes] = useState<Record<string, string>>(
     () => field.value ?? {}
   );
   const latestFieldTypesRef = useRef<Record<string, string>>(field.value ?? {});
+  const latestFieldSourceNamesRef = useRef<Record<string, string>>(sourceNamesField.value ?? {});
+  const syncFieldTypesRef = useRef(field.onChange);
+  syncFieldTypesRef.current = field.onChange;
+  const syncSourceNamesRef = useRef(sourceNamesField.onChange);
+  syncSourceNamesRef.current = sourceNamesField.onChange;
 
   const mappings = useMemo(() => automaticFieldTypesToMappings(seedFieldTypes), [seedFieldTypes]);
   const dynamicItems = useMemo<DynamicFieldRow[]>(
     () =>
-      getDynamicInferredFields(inferredSnapshot, mappedFieldTypes).map((dynamicField) => ({
+      getDynamicInferredFields(
+        inferredSnapshot,
+        mappedFieldTypes,
+        isFlow396 ? mappedFieldSourceNames : {}
+      ).map((dynamicField) => ({
         id: dynamicField.name,
         name: dynamicField.name,
         type: dynamicField.type ?? 'keyword',
       })),
-    [inferredSnapshot, mappedFieldTypes]
+    [inferredSnapshot, isFlow396, mappedFieldSourceNames, mappedFieldTypes]
   );
 
   const debouncedSyncToForm = useMemo(
     () =>
       debounce((nextFieldTypes: Record<string, string>) => {
-        field.onChange(nextFieldTypes);
+        syncFieldTypesRef.current(nextFieldTypes);
       }, 250),
-    [field]
+    []
   );
 
   useEffect(
@@ -195,20 +227,46 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       latestFieldTypesRef.current = nextFieldTypes;
       setMappedFieldTypes(nextFieldTypes);
       debouncedSyncToForm(nextFieldTypes);
+
+      if (isFlow396) {
+        const nextSourceNames = pruneAutomaticFieldSourceNames(
+          nextFieldTypes,
+          latestFieldSourceNamesRef.current
+        );
+        latestFieldSourceNamesRef.current = nextSourceNames;
+        setMappedFieldSourceNames(nextSourceNames);
+        syncSourceNamesRef.current(nextSourceNames);
+      }
     },
-    [debouncedSyncToForm]
+    [debouncedSyncToForm, isFlow396]
+  );
+
+  const handleFieldSourceNameChange = useCallback(
+    ({ displayName, sourceName, previousDisplayName }: FieldSourceNameChange) => {
+      const currentSourceNames = latestFieldSourceNamesRef.current;
+      const nextSourceNames = { ...currentSourceNames, [displayName]: sourceName };
+
+      if (previousDisplayName && previousDisplayName !== displayName) {
+        delete nextSourceNames[previousDisplayName];
+      }
+
+      latestFieldSourceNamesRef.current = nextSourceNames;
+      setMappedFieldSourceNames(nextSourceNames);
+      syncSourceNamesRef.current(nextSourceNames);
+    },
+    []
   );
 
   const applyFieldTypes = useCallback(
     (nextFieldTypes: Record<string, string>) => {
       debouncedSyncToForm.cancel();
       latestFieldTypesRef.current = nextFieldTypes;
-      field.onChange(nextFieldTypes);
+      syncFieldTypesRef.current(nextFieldTypes);
       setMappedFieldTypes(nextFieldTypes);
       setSeedFieldTypes(nextFieldTypes);
       setSchemaEditorKey((currentKey) => currentKey + 1);
     },
-    [debouncedSyncToForm, field]
+    [debouncedSyncToForm]
   );
 
   const handleInferSchema = useCallback(() => {
@@ -217,12 +275,22 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
 
   const handleMapField = useCallback(
     (name: string, type: string) => {
+      if (isFlow396) {
+        const nextSourceNames = {
+          ...latestFieldSourceNamesRef.current,
+          [name]: name,
+        };
+        latestFieldSourceNamesRef.current = nextSourceNames;
+        setMappedFieldSourceNames(nextSourceNames);
+        syncSourceNamesRef.current(nextSourceNames);
+      }
+
       applyFieldTypes({
         ...latestFieldTypesRef.current,
         [name]: type,
       });
     },
-    [applyFieldTypes]
+    [applyFieldTypes, isFlow396]
   );
 
   const handleAddField = useCallback(() => {
@@ -325,6 +393,10 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
           value={mappings}
           compressed
           fieldEditDisplay="inline"
+          fieldsDescription={fieldsDescription}
+          showFieldRename={isFlow396}
+          fieldSourceNames={mappedFieldSourceNames}
+          onFieldSourceNameChange={isFlow396 ? handleFieldSourceNameChange : undefined}
           onChange={onMappingsChange}
         />
       </div>

@@ -164,6 +164,7 @@ describe('dataset_wizard_step_validation', () => {
       'resource',
       'settings.partition_detection',
       'settings.partition_path',
+      'settings.format',
     ]);
     expect(
       getWizardStepFields(ADDITIONAL_SETTINGS_STEP, values, DATASET_WIZARD_FLOW_VARIANT_3_9_6)

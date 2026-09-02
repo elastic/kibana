@@ -30,6 +30,11 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
    * when `dynamic_fields_enabled` is on.
    */
   automatic_field_types: Record<string, string>;
+  /**
+   * Prototype-only source names keyed by mapped (display) field name.
+   * Values are the raw field names from the source files.
+   */
+  automatic_field_source_names: Record<string, string>;
   /** Prototype-only. When off, only mapped fields are used (closed schema). */
   dynamic_fields_enabled: boolean;
   /** Prototype-only field; not persisted to the API yet. */
@@ -50,6 +55,7 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
   automatic_field_types: {},
+  automatic_field_source_names: {},
   dynamic_fields_enabled: true,
   glue_database: '',
   glue_table_name: '',
@@ -64,6 +70,7 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
   automatic_field_types: {},
+  automatic_field_source_names: {},
   dynamic_fields_enabled: true,
   glue_database: '',
   glue_table_name: '',

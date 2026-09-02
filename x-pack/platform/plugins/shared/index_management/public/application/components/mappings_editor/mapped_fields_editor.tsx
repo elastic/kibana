@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { DocLinksStart } from '@kbn/core/public';
+import type { FieldSourceNameChange } from '@kbn/index-management-shared-types';
 
 import { parseMappings } from '../../shared/parse_mappings';
 import { DocumentFields, MultipleMappingsWarning } from './components';
@@ -25,12 +26,27 @@ export interface MappedFieldsEditorProps {
   value?: { [key: string]: unknown };
   compressed?: boolean;
   fieldEditDisplay?: 'flyout' | 'inline';
+  fieldsDescription?: React.ReactNode;
+  showFieldRename?: boolean;
+  fieldSourceNames?: Record<string, string>;
+  onFieldSourceNameChange?: (change: FieldSourceNameChange) => void;
   indexSettings?: IndexSettings;
   docLinks: DocLinksStart;
 }
 
 export const MappedFieldsEditor = React.memo(
-  ({ onChange, value, compressed, fieldEditDisplay, indexSettings, docLinks }: MappedFieldsEditorProps) => {
+  ({
+    onChange,
+    value,
+    compressed,
+    fieldEditDisplay,
+    fieldsDescription,
+    showFieldRename,
+    fieldSourceNames,
+    onFieldSourceNameChange,
+    indexSettings,
+    docLinks,
+  }: MappedFieldsEditorProps) => {
     const { parsedDefaultValue, multipleMappingsDeclared } =
       useMemo<MappingsEditorParsedMetadata>(() => parseMappings(value), [value]);
 
@@ -39,6 +55,12 @@ export const MappedFieldsEditor = React.memo(
     const { update: updateConfig } = useConfig();
     const state = useMappingsState();
     const dispatch = useDispatch();
+    const onFieldSourceNameChangeRef = useRef(onFieldSourceNameChange);
+    onFieldSourceNameChangeRef.current = onFieldSourceNameChange;
+
+    const stableOnFieldSourceNameChange = useCallback((change: FieldSourceNameChange) => {
+      onFieldSourceNameChangeRef.current?.(change);
+    }, []);
 
     useEffect(() => {
       if (multipleMappingsDeclared) {
@@ -55,8 +77,19 @@ export const MappedFieldsEditor = React.memo(
         docLinks,
         indexSettings: indexSettings ?? {},
         fieldEditDisplay,
+        showFieldRename,
+        fieldSourceNames,
+        onFieldSourceNameChange: showFieldRename ? stableOnFieldSourceNameChange : undefined,
       });
-    }, [updateConfig, docLinks, indexSettings, fieldEditDisplay]);
+    }, [
+      updateConfig,
+      docLinks,
+      indexSettings,
+      fieldEditDisplay,
+      showFieldRename,
+      fieldSourceNames,
+      stableOnFieldSourceNameChange,
+    ]);
 
     const onSearchChange = useCallback(
       (searchValue: string) => {
@@ -78,6 +111,7 @@ export const MappedFieldsEditor = React.memo(
                 searchValue={state.search.term}
                 onSearchChange={onSearchChange}
                 compressed={compressed}
+                description={fieldsDescription}
               />
               <EuiSpacer size="m" />
             </>

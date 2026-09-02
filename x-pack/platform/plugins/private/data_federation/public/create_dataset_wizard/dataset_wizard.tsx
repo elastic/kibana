@@ -663,11 +663,14 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           dataSources={dataSources}
           onConnectNewDataSource={openCreateDataSourceFlyout}
           validateName={validateName}
+          getValues={getValues}
           setValue={setValue}
           flowVariant={flowVariant}
           syncRegionFromResource={syncRegionFromResource}
           autoDetectedRegion={autoDetectedRegion}
           onRegionManualChange={handleRegionManualChange}
+          isEditMode={isEditMode}
+          syncedResourceRef={additionalSettingsSyncedResourceRef}
         />
       </div>
       {isFlow4 ? (

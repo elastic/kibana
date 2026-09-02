@@ -48,6 +48,8 @@ export interface DatasetSettingsFieldProps {
    * their sizing, rather than the density of the settings panels.
    */
   variant?: 'settings' | 'step';
+  /** When false, fields use the same sizing as a step's own fields. */
+  compressed?: boolean;
 }
 
 export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> = ({
@@ -55,8 +57,10 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
   fieldId,
   testSubjPrefix,
   variant = 'settings',
+  compressed,
 }) => {
   const isStepField = variant === 'step';
+  const isCompressed = compressed ?? !isStepField;
 
   switch (fieldId) {
     case 'partition_detection':
@@ -73,7 +77,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
           options={PARTITION_DETECTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsPartitionDetection`}
-          isCompressed={!isStepField}
+          isCompressed={isCompressed}
         />
       );
     case 'partition_path':
@@ -94,21 +98,37 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
               validatePartitionPath(String(value ?? ''), formValues.settings.partition_detection),
           }}
           data-test-subj={`${testSubjPrefix}SettingsPartitionPath`}
-          isCompressed={!isStepField}
+          isCompressed={isCompressed}
         />
       );
     case 'schema_sample_size':
-      return <SchemaSampleSizeField control={control} testSubjPrefix={testSubjPrefix} />;
+      return (
+        <SchemaSampleSizeField
+          control={control}
+          testSubjPrefix={testSubjPrefix}
+          isCompressed={isCompressed}
+          label={
+            isStepField
+              ? createDatasetFlyoutStrings.settingsSchemaSampleSizeOptionalLabel()
+              : createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()
+          }
+        />
+      );
     case 'schema_resolution':
       return (
         <SettingsEnumField
           control={control}
           name="settings.schema_resolution"
-          label={createDatasetFlyoutStrings.settingsSchemaResolutionLabel()}
+          label={
+            isStepField
+              ? createDatasetFlyoutStrings.settingsSchemaResolutionOptionalLabel()
+              : createDatasetFlyoutStrings.settingsSchemaResolutionLabel()
+          }
           helpText={createDatasetFlyoutStrings.settingsSchemaResolutionHelp()}
           placeholder={createDatasetFlyoutStrings.settingsSchemaResolutionPlaceholder()}
           options={SCHEMA_RESOLUTION_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsSchemaResolution`}
+          isCompressed={isCompressed}
         />
       );
     case 'delimiter':
@@ -121,6 +141,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsDelimiterPlaceholder()}
           presets={DELIMITER_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsDelimiter`}
+          isCompressed={isCompressed}
         />
       );
     case 'mode':
@@ -133,6 +154,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsModePlaceholder()}
           options={MODE_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsMode`}
+          isCompressed={isCompressed}
         />
       );
     case 'quote':
@@ -144,6 +166,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsQuoteHelp()}
           placeholder={createDatasetFlyoutStrings.settingsQuotePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsQuote`}
+          isCompressed={isCompressed}
         />
       );
     case 'escape':
@@ -155,6 +178,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsEscapeHelp()}
           placeholder={createDatasetFlyoutStrings.settingsEscapePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsEscape`}
+          isCompressed={isCompressed}
         />
       );
     case 'comment':
@@ -166,6 +190,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsCommentHelp()}
           placeholder={createDatasetFlyoutStrings.settingsCommentPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsComment`}
+          isCompressed={isCompressed}
         />
       );
     case 'encoding':
@@ -178,6 +203,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsEncodingPlaceholder()}
           presets={ENCODING_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsEncoding`}
+          isCompressed={isCompressed}
         />
       );
     case 'header_row':
@@ -190,6 +216,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsHeaderRowPlaceholder()}
           options={HEADER_ROW_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsHeaderRow`}
+          isCompressed={isCompressed}
         />
       );
     case 'column_prefix':
@@ -201,6 +228,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsColumnPrefixHelp()}
           placeholder={createDatasetFlyoutStrings.settingsColumnPrefixPlaceholder()}
           testSubj={`${testSubjPrefix}SettingsColumnPrefix`}
+          isCompressed={isCompressed}
         />
       );
     case 'null_value':
@@ -213,6 +241,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsNullValuePlaceholder()}
           presets={NULL_VALUE_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsNullValue`}
+          isCompressed={isCompressed}
         />
       );
     case 'datetime_format':
@@ -225,6 +254,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsDatetimeFormatPlaceholder()}
           presets={DATETIME_FORMAT_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsDatetimeFormat`}
+          isCompressed={isCompressed}
         />
       );
     case 'multi_value_syntax':
@@ -237,6 +267,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsMultiValueSyntaxPlaceholder()}
           options={MULTI_VALUE_SYNTAX_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsMultiValueSyntax`}
+          isCompressed={isCompressed}
         />
       );
     case 'error_mode':
@@ -249,6 +280,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsErrorModePlaceholder()}
           options={ERROR_MODE_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsErrorMode`}
+          isCompressed={isCompressed}
         />
       );
     case 'max_errors':
@@ -262,6 +294,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           testSubj={`${testSubjPrefix}SettingsMaxErrors`}
           min={0}
           rules={{ validate: validateMaxErrors }}
+          isCompressed={isCompressed}
         />
       );
     case 'max_error_ratio':
@@ -277,10 +310,17 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           max={1}
           step={0.01}
           rules={{ validate: validateMaxErrorRatio }}
+          isCompressed={isCompressed}
         />
       );
     case 'max_field_size':
-      return <MaxFieldSizeField control={control} testSubjPrefix={testSubjPrefix} />;
+      return (
+        <MaxFieldSizeField
+          control={control}
+          testSubjPrefix={testSubjPrefix}
+          isCompressed={isCompressed}
+        />
+      );
     case 'segment_size':
       return (
         <TextSettingsField
@@ -290,6 +330,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           helpText={createDatasetFlyoutStrings.settingsSegmentSizeHelp()}
           placeholder={createDatasetFlyoutStrings.settingsSegmentSizePlaceholder()}
           testSubj={`${testSubjPrefix}SettingsSegmentSize`}
+          isCompressed={isCompressed}
         />
       );
     case 'optimized_reader':
@@ -302,6 +343,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsOptimizedReaderPlaceholder()}
           options={OPTIMIZED_READER_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsOptimizedReader`}
+          isCompressed={isCompressed}
         />
       );
     case 'late_materialization':
@@ -314,6 +356,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           placeholder={createDatasetFlyoutStrings.settingsLateMaterializationPlaceholder()}
           options={OPTIMIZED_READER_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsLateMaterialization`}
+          isCompressed={isCompressed}
         />
       );
     default:
@@ -324,14 +367,16 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
 const SchemaSampleSizeField: FunctionComponent<{
   control: Control<CreateDatasetFormValues>;
   testSubjPrefix: string;
-}> = ({ control, testSubjPrefix }) => {
+  isCompressed?: boolean;
+  label?: string;
+}> = ({ control, testSubjPrefix, isCompressed = true, label }) => {
   const { field, fieldState } = useController({
     name: 'settings.schema_sample_size',
     control,
     rules: { validate: validateSchemaSampleSize },
   });
   const fieldText = useSettingFieldText('settings.schema_sample_size', {
-    label: createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel(),
+    label: label ?? createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel(),
     helpText: createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp(),
     placeholder: createDatasetFlyoutStrings.settingsSchemaSampleSizePlaceholder(),
   });
@@ -347,7 +392,7 @@ const SchemaSampleSizeField: FunctionComponent<{
       <EuiFieldNumber
         data-test-subj={`${testSubjPrefix}SettingsSchemaSampleSize`}
         fullWidth
-        compressed
+        compressed={isCompressed}
         min={1}
         step={1}
         placeholder={fieldText.placeholder}
@@ -369,7 +414,8 @@ const TextSettingsField: FunctionComponent<{
   description?: string;
   placeholder?: string;
   testSubj: string;
-}> = ({ control, name, label, helpText, description, placeholder, testSubj }) => {
+  isCompressed?: boolean;
+}> = ({ control, name, label, helpText, description, placeholder, testSubj, isCompressed = true }) => {
   const { field } = useController({ name, control });
   const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
 
@@ -378,7 +424,7 @@ const TextSettingsField: FunctionComponent<{
       <EuiFieldText
         data-test-subj={testSubj}
         fullWidth
-        compressed
+        compressed={isCompressed}
         placeholder={fieldText.placeholder}
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
@@ -401,6 +447,7 @@ const NumberSettingsField: FunctionComponent<{
   max?: number;
   step?: number;
   rules?: { validate: (value: string) => true | string };
+  isCompressed?: boolean;
 }> = ({
   control,
   name,
@@ -413,6 +460,7 @@ const NumberSettingsField: FunctionComponent<{
   max,
   step,
   rules,
+  isCompressed = true,
 }) => {
   const { field, fieldState } = useController({ name, control, rules });
   const fieldText = useSettingFieldText(name, { label, description, helpText, placeholder });
@@ -428,7 +476,7 @@ const NumberSettingsField: FunctionComponent<{
       <EuiFieldNumber
         data-test-subj={testSubj}
         fullWidth
-        compressed
+        compressed={isCompressed}
         min={min}
         max={max}
         step={step}

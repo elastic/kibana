@@ -53,7 +53,18 @@ const createAppDependencies = (
 };
 
 export const MappedFieldsEditorWithContext = React.memo(
-  ({ core, dependencies, value, onChange, compressed, fieldEditDisplay }: MappedFieldsEditorWithContextProps) => {
+  ({
+    core,
+    dependencies,
+    value,
+    onChange,
+    compressed,
+    fieldEditDisplay,
+    fieldsDescription,
+    showFieldRename,
+    fieldSourceNames,
+    onFieldSourceNameChange,
+  }: MappedFieldsEditorWithContextProps) => {
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
 
@@ -110,6 +121,10 @@ export const MappedFieldsEditorWithContext = React.memo(
                   onChange={handleChange}
                   compressed={compressed}
                   fieldEditDisplay={fieldEditDisplay}
+                  fieldsDescription={fieldsDescription}
+                  showFieldRename={showFieldRename}
+                  fieldSourceNames={fieldSourceNames}
+                  onFieldSourceNameChange={onFieldSourceNameChange}
                   docLinks={core.docLinks}
                 />
               </GlobalFlyoutProvider>

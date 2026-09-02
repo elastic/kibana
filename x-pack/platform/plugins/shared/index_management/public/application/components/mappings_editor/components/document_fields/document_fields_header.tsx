@@ -17,34 +17,37 @@ interface Props {
   searchValue: string;
   onSearchChange(value: string): void;
   compressed?: boolean;
+  description?: React.ReactNode;
 }
 
 export const DocumentFieldsHeader = React.memo(
-  ({ searchValue, onSearchChange, compressed }: Props) => {
+  ({ searchValue, onSearchChange, compressed, description }: Props) => {
     return (
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
-              defaultMessage="Define the fields for your indexed documents. {docsLink}"
-              values={{
-                docsLink: (
-                  <EuiLink
-                    href={documentationService.getMappingTypesLink()}
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink',
-                      {
-                        defaultMessage: 'Learn more.',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
+            {description ?? (
+              <FormattedMessage
+                id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
+                defaultMessage="Define the fields for your indexed documents. {docsLink}"
+                values={{
+                  docsLink: (
+                    <EuiLink
+                      href={documentationService.getMappingTypesLink()}
+                      target="_blank"
+                      external
+                    >
+                      {i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink',
+                        {
+                          defaultMessage: 'Learn more.',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         <DocumentFieldsSearch

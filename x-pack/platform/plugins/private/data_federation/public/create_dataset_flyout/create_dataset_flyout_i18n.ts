@@ -226,6 +226,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Schema sample size',
     }),
 
+  settingsSchemaSampleSizeOptionalLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizeOptionalLabel', {
+      defaultMessage: 'Schema sample size (optional)',
+    }),
+
   settingsSchemaSampleSizePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaSampleSizePlaceholder', {
       defaultMessage: 'Enter a number of rows',
@@ -293,6 +298,11 @@ export const createDatasetFlyoutStrings = {
   settingsSchemaResolutionLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionLabel', {
       defaultMessage: 'Schema resolution',
+    }),
+
+  settingsSchemaResolutionOptionalLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionOptionalLabel', {
+      defaultMessage: 'Schema resolution (optional)',
     }),
 
   settingsSchemaResolutionHelp: () =>

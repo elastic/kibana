@@ -26,10 +26,11 @@ import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import type { Field, MainType, NormalizedFields } from '../../../../types';
-import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
+import { NameParameter, RenameFieldParameter, SourceNameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
+import { useFieldRenameForm } from '../../use_field_rename_form';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -92,6 +93,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
   const { fields, mappingViewFields } = useMappingsState();
+  const {
+    showFieldRename,
+    prepareFieldDataForSubmit,
+    notifyFieldSourceNameChange,
+    stripSourceNameFromField,
+    hasRequiredFieldIdentity,
+  } = useFieldRenameForm();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
   const styles = useStyles();
 
@@ -159,15 +167,20 @@ export const CreateField = React.memo(function CreateFieldComponent({
       e.preventDefault();
     }
 
+    const fieldIdentity = prepareFieldDataForSubmit(form);
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data) && !data.inference_id) {
-        const { inference_id: inferenceId, ...rest } = data;
+      const fieldData = stripSourceNameFromField(data);
+
+      if (isSemanticTextField(fieldData) && !fieldData.inference_id) {
+        const { inference_id: inferenceId, ...rest } = fieldData;
         dispatch({ type: 'field.add', value: rest });
       } else {
-        dispatch({ type: 'field.add', value: data });
+        dispatch({ type: 'field.add', value: fieldData });
       }
+
+      notifyFieldSourceNameChange(fieldIdentity);
 
       if (exitAfter) {
         cancel();
@@ -181,9 +194,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const onClickOutside = () => {
-    const name = form.getFields().name.value as string;
-
-    if (name.trim() === '') {
+    if (!hasRequiredFieldIdentity(form)) {
       if (isCancelable !== false) {
         cancel();
       }
@@ -223,9 +234,20 @@ export const CreateField = React.memo(function CreateFieldComponent({
       )}
 
       {/* Field name */}
-      <EuiFlexItem>
-        <NameParameter isSemanticText={isSemanticText} />
-      </EuiFlexItem>
+      {showFieldRename ? (
+        <>
+          <EuiFlexItem>
+            <SourceNameParameter />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <RenameFieldParameter />
+          </EuiFlexItem>
+        </>
+      ) : (
+        <EuiFlexItem>
+          <NameParameter isSemanticText={isSemanticText} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 
@@ -258,7 +280,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const renderFormActions = () => (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {(isCancelable !== false || isAddingFields) && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
@@ -287,6 +311,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+    </>
   );
 
   return (

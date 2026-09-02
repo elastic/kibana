@@ -38,9 +38,24 @@ export const mappingsToAutomaticFieldTypes = (
 
 export const getDynamicInferredFields = (
   inferredFields: readonly TestConfigurationPreviewField[],
-  mappedFieldTypes: Record<string, string>
-): TestConfigurationPreviewField[] =>
-  inferredFields.filter((field) => !(field.name in mappedFieldTypes));
+  mappedFieldTypes: Record<string, string>,
+  sourceNames: Record<string, string> = {}
+): TestConfigurationPreviewField[] => {
+  const mappedDisplayNames = new Set(Object.keys(mappedFieldTypes));
+  const mappedSourceNames = new Set(Object.values(sourceNames));
+
+  return inferredFields.filter(
+    (field) => !mappedDisplayNames.has(field.name) && !mappedSourceNames.has(field.name)
+  );
+};
+
+export const pruneAutomaticFieldSourceNames = (
+  fieldTypes: Record<string, string>,
+  sourceNames: Record<string, string>
+): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(sourceNames).filter(([displayName]) => displayName in fieldTypes)
+  );
 
 export const mergeMissingAutomaticFieldTypes = (
   currentFieldTypes: Record<string, string>,
