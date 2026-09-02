@@ -15,7 +15,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 
-spaceTest.describe('time zone'), { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('time zone', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await discoverScoutSpace.uiSettings.set({ 'dateFormat:tz': 'America/Phoenix' });

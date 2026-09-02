@@ -17,7 +17,7 @@ import { spaceTest } from '../../../common/ui/fixtures';
 
 const RESIZE_DISTANCE = 100;
 
-spaceTest.describe('resizable panels'), { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('resizable panels', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

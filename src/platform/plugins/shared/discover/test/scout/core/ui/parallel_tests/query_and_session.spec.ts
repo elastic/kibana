@@ -23,7 +23,7 @@ const EMPTY_RANGE = {
 
 const EXPECTED_CHART_TIMESPAN = `${testData.DEFAULT_TIME_RANGE_DISPLAY.from} - ${testData.DEFAULT_TIME_RANGE_DISPLAY.to} (interval: Auto - 3 hours)`;
 
-spaceTest.describe('query and session'), { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('query and session', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });

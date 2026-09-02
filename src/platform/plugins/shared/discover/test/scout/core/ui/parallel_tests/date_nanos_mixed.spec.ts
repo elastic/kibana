@@ -14,7 +14,7 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../../common/ui/fixtures';
 
-spaceTest.describe('date nanos mixed'), { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('date nanos mixed', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.savedObjects.load(testData.DATE_NANOS_MIXED_KBN_ARCHIVE);
     await discoverScoutSpace.uiSettings.setDefaultIndex(testData.DATE_NANOS_MIXED_DATA_VIEW);
