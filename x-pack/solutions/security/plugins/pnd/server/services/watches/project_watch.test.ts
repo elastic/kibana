@@ -774,30 +774,57 @@ describe('project watch', () => {
         expect(proposalSteps.some(({ name }) => name === 'refetch_rule')).toBe(true);
       });
 
-      it('runs both tuning previews inline to avoid child-resume races', () => {
-        expect(proposalSteps.filter(({ type }) => type === 'workflow.execute')).toEqual([]);
-        expect(proposalSteps.map(({ name }) => name)).toEqual(
-          expect.arrayContaining([
-            'preview_current_rule',
-            'count_current_preview_alerts',
-            'preview_proposed_rule',
-            'count_proposed_preview_alerts',
-          ])
+      // Both backtests run inside one preview worker execution: one synchronous
+      // child per wake-up cycle is safe, while two consecutive child calls share
+      // one immediate-resume slot and can strand the proposal in waiting_for_child.
+      it('backtests both queries through a single preview worker run', () => {
+        const children = proposalSteps.filter(({ type }) => type === 'workflow.execute');
+
+        expect(children.map(({ name }) => name)).toEqual(['run_previews']);
+        const [previews] = children;
+        expect(previews.with?.['workflow-id']).toBe(PND_RULE_PREVIEW_WORKFLOW_ID);
+
+        const previewInputs = previews.with?.inputs as Record<
+          string,
+          Record<string, string> | string
+        >;
+        expect((previewInputs.preview_body as Record<string, string>).query).toBe(
+          '{{ steps.fetch_rule.output.query }}'
+        );
+        expect((previewInputs.proposed_body as Record<string, string>).query).toBe(
+          '{{ steps.diagnose_rule.output.structured_output.proposed_query }}'
         );
       });
 
       it('requires both previews before applying a query change', () => {
         const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
         const condition = String(eligibility.with?.eligible);
-        const outcome = proposalSteps.find(({ name }) => name === 'record_preview_outcome')!;
-        const outcomeInput = JSON.stringify(outcome.with);
 
         expect(condition).toContain('current_succeeded == true');
         expect(condition).toContain('current_is_aborted == false');
         expect(condition).toContain('proposed_succeeded == true');
         expect(condition).toContain('proposed_is_aborted == false');
-        expect(outcomeInput).toContain('output.timed_out == false');
-        expect(outcomeInput).toContain('output._shards.failed == 0');
+      });
+
+      // A partial or timed-out alert count would understate a backtest, so the
+      // preview worker must fail its verdict instead of reporting a low number.
+      it('fails preview verdicts on partial counts', () => {
+        const preview = parse(getManagedYaml(PND_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
+        const emit = previewSteps.find(({ name }) => name === 'emit_result')!;
+        const emitInput = JSON.stringify(emit.with);
+
+        expect(counts).toHaveLength(2);
+        for (const count of counts) {
+          expect(count.with?.allow_partial_search_results).toBe(false);
+        }
+        for (const verdict of ['succeeded', 'proposed_succeeded']) {
+          expect(String((emit.with as Record<string, string>)[verdict])).toContain(
+            'timed_out == false'
+          );
+        }
+        expect(emitInput).toContain('_shards.failed == 0');
       });
 
       it('keeps query modes with omitted preview fields as manual handoffs', () => {

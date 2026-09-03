@@ -1,6 +1,9 @@
 version: "1"
 name: Detection rule preview
-description: Preview a detection rule and return its generated alert count.
+description: >
+  Preview a detection rule and return its generated alert count. Optionally previews a
+  second body (e.g. a proposed tuned query) in the same run, so a caller comparing two
+  queries needs only one child execution.
 enabled: true
 tags:
   - security
@@ -13,6 +16,10 @@ triggers:
           type: object
           additionalProperties: true
           description: Detection Engine rule preview request body.
+        proposed_body:
+          type: object
+          additionalProperties: true
+          description: Optional second preview body, compared against the first.
         space_id:
           type: string
           description: Space in which to run the preview.
@@ -30,6 +37,16 @@ outputs:
   - name: is_aborted
     type: boolean
   - name: error_text
+    type: string
+  - name: proposed_succeeded
+    type: boolean
+  - name: proposed_alert_count
+    type: number
+  - name: proposed_preview_id
+    type: string
+  - name: proposed_is_aborted
+    type: boolean
+  - name: proposed_error_text
     type: string
 steps:
   - name: preview_rule
@@ -52,6 +69,7 @@ steps:
       index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
       size: 0
       track_total_hits: true
+      allow_partial_search_results: false
       query:
         term:
           kibana.alert.rule.uuid: "{{ steps.preview_rule.output.previewId }}"
@@ -69,12 +87,69 @@ steps:
         {%- for err in log.errors -%}{{ err }}; {% endfor -%}
         {%- endfor -%}
 
+  # The second body runs inside this same execution on purpose: two consecutive
+  # synchronous child workflows in a caller share one immediate-resume slot, and a
+  # lost resume strands the caller in waiting_for_child.
+  - name: preview_proposed
+    type: kibana.request
+    if: "${{ inputs.proposed_body != null }}"
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body: "${{ inputs.proposed_body }}"
+    on-failure:
+      continue: true
+
+  - name: count_proposed_alerts
+    type: elasticsearch.search
+    if: "${{ steps.preview_proposed.error == null and steps.preview_proposed.output.previewId != null }}"
+    with:
+      index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
+      size: 0
+      track_total_hits: true
+      allow_partial_search_results: false
+      query:
+        term:
+          kibana.alert.rule.uuid: "{{ steps.preview_proposed.output.previewId }}"
+    on-failure:
+      continue: true
+
+  - name: collect_proposed_errors
+    type: data.set
+    with:
+      error_text: |-
+        {%- for log in steps.preview_proposed.output.logs -%}
+        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- endfor -%}
+
+  # A partial or timed-out count could report fewer alerts than the preview produced,
+  # so it fails the verdict rather than understating a backtest.
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      succeeded: "${{ steps.preview_rule.error == null and steps.count_preview_alerts.error == null and steps.collect_errors.output.error_text == '' }}"
+      succeeded: >-
+        ${{ steps.preview_rule.error == null
+          and steps.count_preview_alerts.error == null
+          and steps.count_preview_alerts.output.timed_out == false
+          and steps.count_preview_alerts.output._shards.failed == 0
+          and steps.collect_errors.output.error_text == '' }}
       alert_count: "${{ steps.count_preview_alerts.output.hits.total.value | default: -1 }}"
       preview_id: "{{ steps.preview_rule.output.previewId }}"
       is_aborted: "${{ steps.preview_rule.output.isAborted | default: false }}"
       error_text: "{{ steps.collect_errors.output.error_text }}"
+      proposed_succeeded: >-
+        ${{ inputs.proposed_body != null
+          and steps.preview_proposed.error == null
+          and steps.count_proposed_alerts.error == null
+          and steps.count_proposed_alerts.output.timed_out == false
+          and steps.count_proposed_alerts.output._shards.failed == 0
+          and steps.collect_proposed_errors.output.error_text == '' }}
+      proposed_alert_count: "${{ steps.count_proposed_alerts.output.hits.total.value | default: -1 }}"
+      proposed_preview_id: "{{ steps.preview_proposed.output.previewId }}"
+      proposed_is_aborted: "${{ steps.preview_proposed.output.isAborted | default: false }}"
+      proposed_error_text: "{{ steps.collect_proposed_errors.output.error_text }}"

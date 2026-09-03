@@ -184,157 +184,90 @@ steps:
           or steps.fetch_rule.output.timestamp_override != null
           or steps.fetch_rule.output.alert_suppression != null }}
 
-  # Keep both previews in this execution. Consecutive synchronous child workflows
-  # share one immediate-resume task and can strand the proposal in waiting_for_child.
+  # One preview worker run backtests both queries. A single synchronous child per
+  # wake-up cycle is safe; two consecutive child calls share one immediate-resume
+  # slot and a lost resume strands this run in waiting_for_child.
   # Both previews end at the last false positive so the rule's lookback covers the
   # events analysts judged; anchoring at now can miss those events.
-  - name: preview_current_rule
-    type: kibana.request
+  - name: run_previews
+    type: workflow.execute
     if: >-
       ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
         and steps.diagnose_rule.output.structured_output.proposed_query != ''
         and steps.fetch_rule.output.type == 'query'
         and steps.record_auto_apply_support.output.supported == true }}
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/preview"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        type: query
-        name: "{{ steps.fetch_rule.output.name }}"
-        description: "{{ steps.fetch_rule.output.description }}"
-        query: "{{ steps.fetch_rule.output.query }}"
-        language: "{{ steps.fetch_rule.output.language }}"
-        index: "${{ steps.fetch_rule.output.index }}"
-        filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
-        exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
-        severity: "{{ steps.fetch_rule.output.severity }}"
-        severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
-        risk_score: "${{ steps.fetch_rule.output.risk_score }}"
-        risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
-        max_signals: "${{ steps.fetch_rule.output.max_signals }}"
-        threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
-        tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
-        author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
-        false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
-        references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
-        interval: "{{ steps.fetch_rule.output.interval }}"
-        from: "{{ steps.fetch_rule.output.from }}"
-        to: "{{ steps.fetch_rule.output.to }}"
-        invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
-        timeframeEnd: "{{ inputs.last_fp_at }}"
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.fetch_rule.output.query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+          tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+          author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+          false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+          references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
+        proposed_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+          tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+          author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+          false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+          references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
     on-failure:
       continue: true
 
-  - name: count_current_preview_alerts
-    type: elasticsearch.search
-    if: "${{ steps.preview_current_rule.error == null and steps.preview_current_rule.output.previewId != null }}"
-    with:
-      index: ".preview.alerts-security.alerts-{{ workflow.spaceId }}"
-      size: 0
-      track_total_hits: true
-      allow_partial_search_results: false
-      query:
-        term:
-          kibana.alert.rule.uuid: "{{ steps.preview_current_rule.output.previewId }}"
-    on-failure:
-      continue: true
-
-  - name: collect_current_preview_errors
-    type: data.set
-    with:
-      error_text: |-
-        {%- for log in steps.preview_current_rule.output.logs -%}
-        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
-        {%- endfor -%}
-
-  - name: preview_proposed_rule
-    type: kibana.request
-    if: >-
-      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-        and steps.diagnose_rule.output.structured_output.proposed_query != ''
-        and steps.fetch_rule.output.type == 'query'
-        and steps.record_auto_apply_support.output.supported == true }}
-    with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/preview"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
-        type: query
-        name: "{{ steps.fetch_rule.output.name }}"
-        description: "{{ steps.fetch_rule.output.description }}"
-        query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-        language: "{{ steps.fetch_rule.output.language }}"
-        index: "${{ steps.fetch_rule.output.index }}"
-        filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
-        exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
-        severity: "{{ steps.fetch_rule.output.severity }}"
-        severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
-        risk_score: "${{ steps.fetch_rule.output.risk_score }}"
-        risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
-        max_signals: "${{ steps.fetch_rule.output.max_signals }}"
-        threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
-        tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
-        author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
-        false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
-        references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
-        interval: "{{ steps.fetch_rule.output.interval }}"
-        from: "{{ steps.fetch_rule.output.from }}"
-        to: "{{ steps.fetch_rule.output.to }}"
-        invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
-        timeframeEnd: "{{ inputs.last_fp_at }}"
-    on-failure:
-      continue: true
-
-  - name: count_proposed_preview_alerts
-    type: elasticsearch.search
-    if: "${{ steps.preview_proposed_rule.error == null and steps.preview_proposed_rule.output.previewId != null }}"
-    with:
-      index: ".preview.alerts-security.alerts-{{ workflow.spaceId }}"
-      size: 0
-      track_total_hits: true
-      allow_partial_search_results: false
-      query:
-        term:
-          kibana.alert.rule.uuid: "{{ steps.preview_proposed_rule.output.previewId }}"
-    on-failure:
-      continue: true
-
-  - name: collect_proposed_preview_errors
-    type: data.set
-    with:
-      error_text: |-
-        {%- for log in steps.preview_proposed_rule.output.logs -%}
-        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
-        {%- endfor -%}
-
+  # Preview verdicts come from the worker's outputs; a failed or skipped child
+  # leaves both verdicts false so decide_apply routes away from auto-apply.
   - name: record_preview_outcome
     type: data.set
     with:
       current_succeeded: >-
-        ${{ steps.preview_current_rule.error == null
-          and steps.count_current_preview_alerts.error == null
-          and steps.count_current_preview_alerts.output.timed_out == false
-          and steps.count_current_preview_alerts.output._shards.failed == 0
-          and steps.collect_current_preview_errors.output.error_text == '' }}
-      current_alert_count: "${{ steps.count_current_preview_alerts.output.hits.total.value | default: -1 }}"
-      current_is_aborted: "${{ steps.preview_current_rule.output.isAborted | default: false }}"
-      current_error_text: "{{ steps.collect_current_preview_errors.output.error_text }}"
+        ${{ steps.run_previews.error == null
+          and steps.run_previews.output.succeeded == true }}
+      current_alert_count: "${{ steps.run_previews.output.alert_count | default: -1 }}"
+      current_is_aborted: "${{ steps.run_previews.output.is_aborted | default: false }}"
+      current_error_text: "{{ steps.run_previews.output.error_text }}"
       proposed_succeeded: >-
-        ${{ steps.preview_proposed_rule.error == null
-          and steps.count_proposed_preview_alerts.error == null
-          and steps.count_proposed_preview_alerts.output.timed_out == false
-          and steps.count_proposed_preview_alerts.output._shards.failed == 0
-          and steps.collect_proposed_preview_errors.output.error_text == '' }}
-      proposed_alert_count: "${{ steps.count_proposed_preview_alerts.output.hits.total.value | default: -1 }}"
-      proposed_is_aborted: "${{ steps.preview_proposed_rule.output.isAborted | default: false }}"
-      proposed_error_text: "{{ steps.collect_proposed_preview_errors.output.error_text }}"
+        ${{ steps.run_previews.error == null
+          and steps.run_previews.output.proposed_succeeded == true }}
+      proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
+      proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
+      proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
 
   # A timeout fails this run before the tag steps, so the alerts stay unreviewed
   # and the next sweep proposes the rule again with a fresh diagnosis.
