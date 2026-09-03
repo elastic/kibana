@@ -119,7 +119,7 @@ apiTest.describe(
       expect(inv.created_at).toBe(times.iso({ day: 0, hour: 10 }));
       expect(inv.started_at).toBe(times.iso({ day: 0, hour: 10 }));
       expect(inv.completed_at).toBe(times.iso({ day: 0, hour: 11 }));
-      expect(inv.subject).toBeUndefined();
+      expect(inv.subject).toStrictEqual({ type: 'alert', id: 'alert-1' });
       expect(inv.trigger_type).toBeUndefined();
       expect(inv.summary).toBeUndefined();
       expect(inv.conclusion).toBeUndefined();

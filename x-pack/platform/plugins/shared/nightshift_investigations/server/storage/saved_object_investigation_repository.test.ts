@@ -187,6 +187,22 @@ describe('SavedObjectInvestigationRepository', () => {
       );
     });
 
+    it('forwards attribute fields so the result is a projection', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [savedObject],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ fields: ['status', 'created_at'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: ['status', 'created_at'] })
+      );
+    });
+
     it('omits the filter when none are given', async () => {
       const { repository, savedObjectsClient } = createRepository();
       savedObjectsClient.find.mockResolvedValue({

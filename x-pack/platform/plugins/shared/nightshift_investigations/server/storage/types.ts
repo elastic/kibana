@@ -33,6 +33,15 @@ export interface InvestigationRecord extends InvestigationAttributes {
   version?: string;
 }
 
+/** An investigation with only `Fields` loaded. `id` and `version` are always present. */
+export type ProjectedInvestigationRecord<Fields extends keyof InvestigationAttributes> = Pick<
+  InvestigationAttributes,
+  Fields
+> & {
+  id: string;
+  version?: string;
+};
+
 export interface InvestigationPatch extends InvestigationStructuredOutput {
   status?: InvestigationStatus;
   started_at?: string;
@@ -42,7 +51,9 @@ export interface InvestigationPatch extends InvestigationStructuredOutput {
   conversation_id?: string;
 }
 
-export interface FindInvestigationsQuery {
+export interface FindInvestigationsQuery<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> {
   statuses?: InvestigationStatus[];
   concurrencyKey?: string;
   createdAfter?: string;
@@ -55,13 +66,18 @@ export interface FindInvestigationsQuery {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   perPage?: number;
+  fields?: Fields[];
 }
 
-export type FindInvestigationsResult = PaginatedResponse<InvestigationRecord>;
+export type FindInvestigationsResult<
+  Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes
+> = PaginatedResponse<ProjectedInvestigationRecord<Fields>>;
 
 export interface InvestigationRepository {
   create(params: { id: string; attributes: InvestigationAttributes }): Promise<void>;
   get(id: string): Promise<InvestigationRecord | undefined>;
   update(params: { id: string; patch: InvestigationPatch; version?: string }): Promise<void>;
-  find(query: FindInvestigationsQuery): Promise<FindInvestigationsResult>;
+  find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsResult<Fields>>;
 }

@@ -169,6 +169,7 @@ export type ListInvestigationItem = Pick<
   | 'severity'
   | 'concurrency_key'
   | 'executed_by'
+  | 'subject'
 >;
 
 export interface PaginatedResponse<T> {

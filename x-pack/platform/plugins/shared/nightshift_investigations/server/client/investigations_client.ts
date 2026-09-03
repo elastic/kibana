@@ -39,6 +39,7 @@ import type {
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
+  ProjectedInvestigationRecord,
 } from '../storage';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from '../storage';
 import { buildInvestigationMessage } from './build_investigation_message';
@@ -108,7 +109,33 @@ const toSubject = ({
   return { type: subjectType, id: subjectId };
 };
 
-const toListInvestigationItem = (record: InvestigationRecord): ListInvestigationItem => ({
+/**
+ * Stored attributes each {@link ListInvestigationItem} property needs from `find`. A new list
+ * property is a compile error until it is mapped here; `investigation_id` is the SO id and needs
+ * none. Flattened values are what `list()` passes as `fields`.
+ */
+const LIST_INVESTIGATION_ITEM_FIELDS = {
+  investigation_id: [],
+  status: ['status'],
+  created_at: ['created_at'],
+  started_at: ['started_at'],
+  completed_at: ['completed_at'],
+  severity: ['severity'],
+  concurrency_key: ['concurrency_key'],
+  executed_by: ['executed_by'],
+  subject: ['subject_type', 'subject_id', 'subject_summary'],
+} as const satisfies Record<
+  keyof ListInvestigationItem,
+  readonly (keyof InvestigationAttributes)[]
+>;
+
+const LIST_INVESTIGATION_ATTRIBUTE_FIELDS = Object.values(LIST_INVESTIGATION_ITEM_FIELDS).flat();
+
+type ListInvestigationRecord = ProjectedInvestigationRecord<
+  (typeof LIST_INVESTIGATION_ITEM_FIELDS)[keyof ListInvestigationItem][number]
+>;
+
+const toListInvestigationItem = (record: ListInvestigationRecord): ListInvestigationItem => ({
   investigation_id: record.id,
   status: record.status,
   created_at: record.created_at,
@@ -117,15 +144,15 @@ const toListInvestigationItem = (record: InvestigationRecord): ListInvestigation
   severity: record.severity,
   concurrency_key: record.concurrency_key,
   executed_by: record.executed_by,
-});
-
-const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
-  ...toListInvestigationItem(record),
   subject: toSubject({
     subjectType: record.subject_type,
     subjectId: record.subject_id,
     subjectSummary: record.subject_summary,
   }),
+});
+
+const toInvestigationResponse = (record: InvestigationRecord): GetInvestigationResponse => ({
+  ...toListInvestigationItem(record),
   trigger_type: record.trigger_type,
   error: record.error,
   summary: record.summary,
@@ -627,6 +654,7 @@ export class NightshiftInvestigationsClient {
       sortOrder: sort_order,
       page,
       perPage: size,
+      fields: [...LIST_INVESTIGATION_ATTRIBUTE_FIELDS],
     });
 
     // Stored `running` is not reconciled with the engine — same edge cases as get().

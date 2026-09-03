@@ -305,8 +305,8 @@ describe('NightshiftInvestigationsClient.list()', () => {
       severity: undefined,
       concurrency_key: 'key-1',
       executed_by: 'test-user',
+      subject: { type: 'alert', id: 'alert-42' },
     });
-    expect(result.results[0]).not.toHaveProperty('subject');
     expect(result.results[0]).not.toHaveProperty('trigger_type');
     expect(result.results[0]).not.toHaveProperty('error');
     expect(result.results[0]).not.toHaveProperty('summary');
