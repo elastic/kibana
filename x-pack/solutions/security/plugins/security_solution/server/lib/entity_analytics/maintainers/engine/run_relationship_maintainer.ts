@@ -215,10 +215,14 @@ async function runIntegration(
     updated: 0,
     notFound: 0,
     errors: 0,
-    droppedTargets: 0,
+    targetIdsNotInStore: 0,
     relationshipTypeApplied: {},
   };
-  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0 };
+  let totalMetadataResult: WriteRelationshipMetadatasResult = {
+    docsAttempted: 0,
+    docsApplied: 0,
+    docsFailed: 0,
+  };
 
   try {
     do {
@@ -297,7 +301,7 @@ async function runIntegration(
           updated: totalWriteResult.updated + pageWrite.updated,
           notFound: totalWriteResult.notFound + pageWrite.notFound,
           errors: totalWriteResult.errors + pageWrite.errors,
-          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
+          targetIdsNotInStore: totalWriteResult.targetIdsNotInStore + pageWrite.targetIdsNotInStore,
           relationshipTypeApplied: mergeRelTypeApplied(
             totalWriteResult.relationshipTypeApplied,
             pageWrite.relationshipTypeApplied
@@ -339,6 +343,7 @@ async function runIntegration(
         totalMetadataResult = {
           docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
           docsApplied: totalMetadataResult.docsApplied + pageMetadata.docsApplied,
+          docsFailed: totalMetadataResult.docsFailed + pageMetadata.docsFailed,
         };
       }
 
@@ -443,8 +448,15 @@ export const runRelationshipMaintainer = async ({
   totalWriteErrors: number;
   /** Count of relationship metadata docs successfully appended to the metadata datastream. */
   totalMetadataDocsApplied: number;
+  /**
+   * Count of relationship metadata docs that failed to append. A non-zero value means writes
+   * are failing silently — the entity relationships are in the store but their history is
+   * incomplete. Surfaced here (rather than only logged) so the caller can react when the
+   * count is sustained.
+   */
+  totalMetadataDocsFailed: number;
   /** Count of target EUIDs pruned because they don't exist in the entity store. */
-  totalDroppedTargets: number;
+  totalTargetIdsNotInStore: number;
   /** Total composite-agg pagination passes across all integrations. */
   totalIterations: number;
   /** True if any integration hit MAX_ITERATIONS and stopped early. */
@@ -477,7 +489,8 @@ export const runRelationshipMaintainer = async ({
   let totalNotFound = 0;
   let totalWriteErrors = 0;
   let totalMetadataDocsApplied = 0;
-  let totalDroppedTargets = 0;
+  let totalMetadataDocsFailed = 0;
+  let totalTargetIdsNotInStore = 0;
   let totalIterations = 0;
   let truncated = false;
 
@@ -515,6 +528,7 @@ export const runRelationshipMaintainer = async ({
       `${logPrefix} Integration complete: ` +
         `outcome=${outcome} slices=${iterations} records=${recordsCount} ` +
         `written=${write.updated} notFound=${write.notFound} errors=${write.errors} ` +
+        `targetIdsNotInStore=${write.targetIdsNotInStore} ` +
         `truncated=${integrationTruncated} durationMs=${durationMs}`
     );
 
@@ -541,7 +555,8 @@ export const runRelationshipMaintainer = async ({
     totalNotFound += write.notFound;
     totalWriteErrors += write.errors;
     totalMetadataDocsApplied += metadata.docsApplied;
-    totalDroppedTargets += write.droppedTargets;
+    totalMetadataDocsFailed += metadata.docsFailed;
+    totalTargetIdsNotInStore += write.targetIdsNotInStore;
 
     if (telemetryCollector) {
       telemetryCollector.sources.push({
@@ -564,7 +579,8 @@ export const runRelationshipMaintainer = async ({
     totalNotFound,
     totalWriteErrors,
     totalMetadataDocsApplied,
-    totalDroppedTargets,
+    totalMetadataDocsFailed,
+    totalTargetIdsNotInStore,
     totalIterations,
     truncated,
     lastRunTimestamp: runStartTimestamp,

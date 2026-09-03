@@ -13,7 +13,7 @@ import type {
 } from '../../api_schemas/schedule_now_transforms';
 import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, getErrorBody } from '../../utils/error_utils';
 
 export async function scheduleNowTransforms(
   transformsInfo: ScheduleNowTransformsRequestSchema,
@@ -39,7 +39,7 @@ export async function scheduleNowTransforms(
           action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
         });
       }
-      results[transformId] = { success: false, error: e.meta.body.error };
+      results[transformId] = { success: false, error: getErrorBody(e) };
     }
   }
   return results;

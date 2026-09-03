@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -21,12 +22,18 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import { isInvestigationAvailable } from './is_investigation_available';
 import { ensureInvestigationAgentStepDefinition } from './step_definitions/ensure_investigation_agent';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
+import {
+  nightshiftInvestigationSavedObjectType,
+  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
+} from './saved_objects';
+import { SavedObjectInvestigationRepository } from './storage';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -48,6 +55,8 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private savedObjects?: CoreStart['savedObjects'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -61,21 +70,13 @@ export class NightshiftInvestigationsPlugin
     this.workflowsManagement = plugins.workflowsManagement;
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
 
+    core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
+
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
       createTriggerEmitter({
         workflowsExtensions: this.workflowsExtensionsStart,
         request,
         logger: this.logger,
-      });
-
-    const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>
-      new NightshiftInvestigationsClient({
-        request,
-        workflowsManagement: this.workflowsManagement,
-        spaces: this.spaces,
-        logger: this.logger,
-        spaceIdOverride: spaceId,
-        agentBuilder: this.agentBuilder,
       });
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
@@ -94,7 +95,7 @@ export class NightshiftInvestigationsPlugin
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
         plugins.workflowsExtensions.registerStepDefinition(
-          triggerInvestigationStepDefinition(getInvestigationsClient)
+          triggerInvestigationStepDefinition(this.getInvestigationsClient)
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
@@ -104,7 +105,10 @@ export class NightshiftInvestigationsPlugin
 
       registerRoutes({
         repository: nightshiftInvestigationsRouteRepository,
-        dependencies: { getInvestigationsClient, getTriggerEmitter },
+        dependencies: {
+          getInvestigationsClient: this.getInvestigationsClient,
+          getTriggerEmitter,
+        },
         core,
         logger: this.logger,
         runDevModeChecks: false,
@@ -117,12 +121,14 @@ export class NightshiftInvestigationsPlugin
   }
 
   start(
-    _core: CoreStart,
+    coreStart: CoreStart,
     plugins: NightshiftInvestigationsStartDeps
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is
@@ -145,16 +151,61 @@ export class NightshiftInvestigationsPlugin
     }
 
     return {
-      getInvestigationsClient: (request) =>
-        new NightshiftInvestigationsClient({
+      getInvestigationsClient: this.getInvestigationsClient,
+      isInvestigationAvailable: (request) =>
+        isInvestigationAvailable({
           request,
-          workflowsManagement: this.workflowsManagement,
-          spaces: this.spaces,
-          logger: this.logger,
           agentBuilder: this.agentBuilder,
+          logger: this.logger,
+          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
         }),
     };
   }
+
+  private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
+    const resolvedSpaceId =
+      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    return new NightshiftInvestigationsClient({
+      request,
+      workflowsManagement: this.workflowsManagement,
+      spaces: this.spaces,
+      logger: this.logger,
+      spaceIdOverride: spaceId,
+      agentBuilder: this.agentBuilder,
+      investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
+      isAvailable: () =>
+        isInvestigationAvailable({
+          request,
+          agentBuilder: this.agentBuilder,
+          logger: this.logger,
+          searchInferenceEndpoints: this.searchInferenceEndpoints,
+          spaceId: resolvedSpaceId,
+          spaces: this.spaces,
+          workflowsExtensions: this.workflowsExtensionsStart,
+          workflowsManagement: this.workflowsManagement,
+        }),
+    });
+  };
+
+  private createInvestigationRepository = (
+    request: KibanaRequest,
+    spaceId: string
+  ): SavedObjectInvestigationRepository => {
+    if (!this.savedObjects) {
+      throw new Error('savedObjects is not available — plugin start() has not been called');
+    }
+    const savedObjectsClient = this.savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
+      })
+      .asScopedToNamespace(spaceId);
+    return new SavedObjectInvestigationRepository({ savedObjectsClient });
+  };
 
   /**
    * Installs the static managed workflows this plugin owns and signals readiness so the
