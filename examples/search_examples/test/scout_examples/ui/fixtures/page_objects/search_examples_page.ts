@@ -130,22 +130,21 @@ export class SearchExamplesPage {
   /**
    * Picks `label` on a single-select combo. `setSelectedOptions` tries to
    * clear existing pills first; these demo combos render pills without a
-   * close button, so that helper hangs.
+   * close button, so that helper hangs. Typing the full label focuses the
+   * exact option (`geo.src` ahead of `geo.srcdest`); Enter commits it.
    */
   private async replaceSingleComboSelection(testSubj: string, label: string): Promise<void> {
     const combo = this.page.components.comboBox(testSubj);
-    const selected = await combo.getSelectedOptions();
-    if (selected.includes(label)) {
+    if ((await combo.getSelectedOptions()).includes(label)) {
       return;
     }
 
     const root = this.page.testSubj.locator(testSubj);
+    const searchInput = root.getByTestId('comboBoxSearchInput');
     await root.getByTestId('comboBoxInput').click();
-    await root.getByTestId('comboBoxSearchInput').fill(label);
-    // EUI wraps the typed match in <mark>, so the accessible name is not exact.
-    const option = this.page.getByRole('option', { name: label });
-    await option.waitFor({ state: 'visible' });
-    await option.click();
+    await searchInput.fill(label);
+    await this.page.getByRole('listbox').waitFor({ state: 'visible' });
+    await searchInput.press('Enter');
   }
 
   /**
