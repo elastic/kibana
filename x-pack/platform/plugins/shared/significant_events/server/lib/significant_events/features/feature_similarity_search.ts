@@ -119,8 +119,9 @@ export const buildFeatureSimilarityInferenceTools = ({
     callbacks: {
       search_similar_features: async (toolCall) => {
         const rawCandidates = (toolCall.function.arguments as { candidates?: unknown })?.candidates;
-        const candidates = (
-          Array.isArray(rawCandidates) ? rawCandidates : []
+        const candidates = (Array.isArray(rawCandidates) ? rawCandidates : []).slice(
+          0,
+          MAX_SEARCH_CANDIDATES
         ) as FeatureCandidate[];
         const groups = await searchFeaturesForCandidates({ kiClient, streamName, candidates });
         const results = groups.map((group) => ({ type: 'other', data: group }));
