@@ -51,7 +51,7 @@ export const alertSnapshotEvaluationSchema = z.object({
     .union([
       z.number(),
       z.string().max(500),
-      z.array(z.union([z.number(), z.string().max(500)])).max(MAX_EVALUATION_ENTRIES),
+      z.array(z.union([z.number(), z.string().max(500), z.null()])).max(MAX_EVALUATION_ENTRIES),
     ])
     .optional(),
   /**
@@ -81,13 +81,14 @@ export const alertSnapshotSchema = z.object({
   /** `kibana.alert.rule.category` — the rule type's display name, e.g. "Latency threshold". */
   rule_category: z.string().min(1).max(500),
   /** `kibana.alert.reason` — human-readable statement of why the alert fired. */
-  reason: z.string().min(1).max(5000),
+  reason: z.string().min(1).max(5000).optional(),
   /** `kibana.alert.status` */
   status: z.string().min(1).max(100),
   /** `kibana.alert.start` */
   start: z.string().max(100).datetime({ offset: true }),
+  timestamp: z.string().max(100).datetime({ offset: true }).optional(),
   /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
-  flapping: z.boolean(),
+  flapping: z.boolean().optional(),
   /**
    * `kibana.alert.url`. Optional: the framework does not write this — individual rule types do,
    * and many observability rule types never set it.
