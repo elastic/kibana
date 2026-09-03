@@ -229,7 +229,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -240,7 +240,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -251,7 +251,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -262,7 +262,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -273,7 +273,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -311,7 +311,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -322,7 +322,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -345,7 +345,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -356,7 +356,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -387,7 +387,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -438,7 +438,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -458,7 +458,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -481,7 +481,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -492,7 +492,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -515,7 +515,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -526,7 +526,7 @@ exports[`View policy flyout shows all phases 1`] = `
                 </strong>
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -549,7 +549,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -572,7 +572,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -607,7 +607,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -658,7 +658,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -678,7 +678,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -701,7 +701,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -724,7 +724,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -747,7 +747,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -782,7 +782,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -833,7 +833,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -853,7 +853,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -908,7 +908,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -928,7 +928,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
@@ -950,7 +950,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
             >
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
                   class="euiSpacer euiSpacer--s emotion-euiSpacer-s"

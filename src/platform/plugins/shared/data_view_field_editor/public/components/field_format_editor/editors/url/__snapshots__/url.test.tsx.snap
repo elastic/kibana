@@ -161,7 +161,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink emotion-euiLink-text"
           href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"
@@ -221,7 +221,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink emotion-euiLink-text"
           href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"

@@ -58,7 +58,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-1qodshd-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         Network events
                       </h6>
@@ -144,7 +144,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-1qodshd-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         DNS queries
                       </h6>
@@ -237,7 +237,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-1qodshd-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         Unique flow IDs
                       </h6>
@@ -323,7 +323,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-1qodshd-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         TLS handshakes
                       </h6>
@@ -411,7 +411,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h6
-                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                    class="euiTitle css-1qodshd-StyledTitle-euiTitle-xxxs ee8xehw0"
                   >
                     Unique private IPs
                   </h6>

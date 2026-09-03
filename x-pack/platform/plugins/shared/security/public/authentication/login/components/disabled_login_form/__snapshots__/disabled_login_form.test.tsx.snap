@@ -5,7 +5,7 @@ exports[`DisabledLoginForm renders as expected 1`] = `
   class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
 >
   <div
-    class="euiText emotion-euiText-m-euiTextColor-danger"
+    class="euiText emotion-euiText-s-euiTextColor-danger"
     style="text-align: center;"
   >
     <p>
@@ -13,7 +13,7 @@ exports[`DisabledLoginForm renders as expected 1`] = `
     </p>
   </div>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
     style="text-align: center;"
   >
     <p>

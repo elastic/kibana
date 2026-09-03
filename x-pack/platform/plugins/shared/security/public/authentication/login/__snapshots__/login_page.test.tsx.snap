@@ -40,7 +40,7 @@ exports[`LoginPage disabled form states renders CTA and browser settings warning
           style="max-width: 36em; margin: auto; text-align: center;"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiText emotion-euiText-s-euiTextColor-subdued"
           >
             <p>
               To view this content, open it in a new window or adjust your browser settings to allow third-party cookies.
@@ -112,7 +112,7 @@ exports[`LoginPage disabled form states renders CTA and cross-origin cookie warn
           style="max-width: 36em; margin: auto; text-align: center;"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-subdued"
+            class="euiText emotion-euiText-s-euiTextColor-subdued"
           >
             <p>
               To view this content, open it in a new window or ask your administrator to allow cross-origin cookies.
@@ -184,7 +184,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -192,7 +192,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -246,7 +246,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -254,7 +254,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -308,7 +308,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -316,7 +316,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -370,7 +370,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -378,7 +378,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -432,7 +432,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -440,7 +440,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -494,7 +494,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
         >
           <div
-            class="euiText emotion-euiText-m-euiTextColor-danger"
+            class="euiText emotion-euiText-s-euiTextColor-danger"
             style="text-align: center;"
           >
             <p>
@@ -502,7 +502,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
             </p>
           </div>
           <div
-            class="euiText emotion-euiText-m"
+            class="euiText emotion-euiText-s"
             style="text-align: center;"
           >
             <p>
@@ -1088,7 +1088,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
           class="euiText eui-textCenter emotion-euiText-xs"
         >
           <button
-            class="euiLink emotion-euiLink-primary"
+            class="euiLink emotion-euiLink-text"
             data-test-subj="loginHelpLink"
             type="button"
           >

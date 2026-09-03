@@ -173,7 +173,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                   class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
                 >
                   <div
-                    class="euiText emotion-euiText-m"
+                    class="euiText emotion-euiText-s"
                   >
                     Body size is 1MB.
                   </div>
@@ -181,11 +181,11 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
                   />
                   <div
-                    class="euiText emotion-euiText-m"
+                    class="euiText emotion-euiText-s"
                   >
                     Body not recorded. Read our 
                     <a
-                      class="euiLink emotion-euiLink-primary"
+                      class="euiLink emotion-euiLink-text"
                       data-test-subj="syntheticsDocLinkForBodyDocsLink"
                       href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
                       rel="noopener noreferrer"

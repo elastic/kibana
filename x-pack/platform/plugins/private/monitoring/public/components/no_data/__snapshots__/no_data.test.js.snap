@@ -56,7 +56,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
                 <p>
                   Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
                   <a
-                    class="euiLink emotion-euiLink-primary"
+                    class="euiLink emotion-euiLink-text"
                     data-test-subj="autoOpsPromotionCalloutDocsLink"
                     href="https://www.elastic.co/docs/deploy-manage/cloud-connect"
                     rel="noopener noreferrer"
@@ -156,10 +156,10 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="euiText emotion-euiText-m"
+                  class="euiText emotion-euiText-s"
                 >
                   <p>
                     Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
@@ -278,7 +278,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
                 <p>
                   Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
                   <a
-                    class="euiLink emotion-euiLink-primary"
+                    class="euiLink emotion-euiLink-text"
                     data-test-subj="autoOpsPromotionCalloutDocsLink"
                     href="https://www.elastic.co/docs/deploy-manage/cloud-connect"
                     rel="noopener noreferrer"
@@ -378,10 +378,10 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiText emotion-euiText-m-euiTextColor-subdued"
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
               >
                 <div
-                  class="euiText emotion-euiText-m"
+                  class="euiText emotion-euiText-s"
                 >
                   <p>
                     Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.

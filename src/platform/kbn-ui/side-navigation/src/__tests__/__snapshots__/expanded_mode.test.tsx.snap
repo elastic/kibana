@@ -56,7 +56,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Dashboards
               </div>
@@ -92,7 +92,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Discover
               </div>
@@ -136,7 +136,7 @@ exports[`Expanded mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
+                class="euiText emotion-euiText-s-euiTextAlign-center-truncatedStyles-textStyles-labelStyles"
               >
                 Apps
               </div>

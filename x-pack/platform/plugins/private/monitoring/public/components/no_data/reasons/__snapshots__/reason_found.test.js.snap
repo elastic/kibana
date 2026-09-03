@@ -11,7 +11,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 
@@ -78,7 +78,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         To run monitoring please perform the following steps
@@ -89,7 +89,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText eui-textLeft emotion-euiText-m"
+    class="euiText eui-textLeft emotion-euiText-s"
   >
     <p>
       We checked the 
@@ -142,12 +142,12 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Configure monitoring through 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink emotion-euiLink-text"
           href="https://cloud.elastic.co/deployments"
           rel="noopener noreferrer"
           target="_blank"
@@ -166,7 +166,7 @@ Array [
         </a>
          Go to 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink emotion-euiLink-text"
           href="https://cloud.elastic.co/deployments"
           rel="noopener noreferrer"
           target="_blank"
@@ -185,7 +185,7 @@ Array [
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink emotion-euiLink-text"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener noreferrer"
           target="_blank"
@@ -209,7 +209,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText eui-textLeft emotion-euiText-m"
+    class="euiText eui-textLeft emotion-euiText-s"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
@@ -229,7 +229,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         To run monitoring please perform the following steps
@@ -240,7 +240,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the node001foo settings and found that 

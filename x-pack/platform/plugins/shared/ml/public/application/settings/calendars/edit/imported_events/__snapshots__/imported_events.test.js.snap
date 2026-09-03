@@ -9,7 +9,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <h4>
         Events to import: 1

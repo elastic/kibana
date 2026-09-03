@@ -32,7 +32,7 @@ exports[`RevertToBasic component should display when license is about to expire 
               <span>
                 You'll revert to our free features and lose access to machine learning, advanced security, and other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -107,7 +107,7 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
               <span>
                 You'll revert to our free features and lose access to machine learning, advanced security, and other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"
@@ -182,7 +182,7 @@ exports[`RevertToBasic component should display when trial is active 1`] = `
               <span>
                 You'll revert to our free features and lose access to machine learning, advanced security, and other 
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink emotion-euiLink-text"
                   href="https://www.elastic.co/subscriptions"
                   rel="noopener noreferrer"
                   target="_blank"

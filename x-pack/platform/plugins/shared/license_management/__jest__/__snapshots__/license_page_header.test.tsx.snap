@@ -32,7 +32,7 @@ exports[`LicenseStatus component should display display warning is expired 1`] =
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiText emotion-euiText-constrainedWidth-m"
+            class="euiText emotion-euiText-constrainedWidth-s"
           >
             <p>
               <span
@@ -85,7 +85,7 @@ exports[`LicenseStatus component should display normally when license is active 
             class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiText emotion-euiText-constrainedWidth-m"
+            class="euiText emotion-euiText-constrainedWidth-s"
           >
             <p>
               <span

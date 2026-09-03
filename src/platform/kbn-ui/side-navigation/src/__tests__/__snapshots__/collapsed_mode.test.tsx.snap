@@ -60,7 +60,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                   />
                 </div>
                 <div
-                  class="euiText emotion-euiText-m-euiScreenReaderOnly"
+                  class="euiText emotion-euiText-s-euiScreenReaderOnly"
                 >
                   Dashboards
                 </div>
@@ -101,7 +101,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                   />
                 </div>
                 <div
-                  class="euiText emotion-euiText-m-euiScreenReaderOnly"
+                  class="euiText emotion-euiText-s-euiScreenReaderOnly"
                 >
                   Discover
                 </div>
@@ -146,7 +146,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 />
               </div>
               <div
-                class="euiText emotion-euiText-m-euiScreenReaderOnly"
+                class="euiText emotion-euiText-s-euiScreenReaderOnly"
               >
                 Apps
               </div>

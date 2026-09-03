@@ -27,7 +27,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
         class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
-        class="euiText emotion-euiText-m-euiTextColor-subdued"
+        class="euiText emotion-euiText-s-euiTextColor-subdued"
       >
         <p>
           To display map data, you must define SIEM indices (

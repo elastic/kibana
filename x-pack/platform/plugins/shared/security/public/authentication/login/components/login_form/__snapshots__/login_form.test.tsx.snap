@@ -6,7 +6,7 @@ exports[`LoginForm login selector properly switches to login form -> login help 
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>
@@ -23,7 +23,7 @@ exports[`LoginForm login selector properly switches to login help: Login Help 1`
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>
@@ -40,7 +40,7 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
   data-test-subj="loginHelp"
 >
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <strong>

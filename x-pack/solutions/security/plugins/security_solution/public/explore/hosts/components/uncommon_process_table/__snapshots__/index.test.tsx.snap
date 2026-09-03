@@ -433,7 +433,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                     >
                       <div>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="host-details-button"
                           href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
@@ -534,7 +534,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                     >
                       <div>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="host-details-button"
                           href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
@@ -554,7 +554,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                     >
                       <div>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="host-details-button"
                           href="/name/hello-world-2/events?identityFields=(host.name:hello-world-2)"
                           rel="noreferrer"
@@ -740,7 +740,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                     >
                       <div>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="host-details-button"
                           href="/name/hello-world/events?identityFields=(host.name:hello-world)"
                           rel="noreferrer"
@@ -760,7 +760,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
                     >
                       <div>
                         <a
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="host-details-button"
                           href="/name/hello-world-2/events?identityFields=(host.name:hello-world-2)"
                           rel="noreferrer"

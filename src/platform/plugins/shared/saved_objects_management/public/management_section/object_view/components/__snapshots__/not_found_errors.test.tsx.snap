@@ -36,7 +36,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
             If you know what this error means, you can use the 
             <a
               aria-label="Saved objects APIs"
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
               rel="noopener noreferrer"
               target="_blank"
@@ -98,7 +98,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
             If you know what this error means, you can use the 
             <a
               aria-label="Saved objects APIs"
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
               rel="noopener noreferrer"
               target="_blank"
@@ -160,7 +160,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
             If you know what this error means, you can use the 
             <a
               aria-label="Saved objects APIs"
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
               rel="noopener noreferrer"
               target="_blank"
@@ -220,7 +220,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
             If you know what this error means, you can use the 
             <a
               aria-label="Saved objects APIs"
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
               rel="noopener noreferrer"
               target="_blank"

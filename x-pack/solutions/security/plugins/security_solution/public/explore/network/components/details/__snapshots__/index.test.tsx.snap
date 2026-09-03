@@ -309,7 +309,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                               id="generated-id-wrapper"
                             >
                               <button
-                                class="euiLink emotion-euiLink-primary"
+                                class="euiLink emotion-euiLink-text"
                                 data-test-subj="securitySolutionFlyoutLink"
                                 type="button"
                               >
@@ -362,7 +362,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                         id="generated-id-wrapper"
                       >
                         <button
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="securitySolutionFlyoutLink"
                           type="button"
                         >
@@ -398,7 +398,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
             id="generated-id-wrapper"
           >
             <a
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               data-test-subj="externalLink"
               href="https://www.iana.org/whois?q=10.10.10.10"
               rel="noopener noreferrer"
@@ -722,7 +722,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                               id="generated-id-wrapper"
                             >
                               <button
-                                class="euiLink emotion-euiLink-primary"
+                                class="euiLink emotion-euiLink-text"
                                 data-test-subj="securitySolutionFlyoutLink"
                                 type="button"
                               >
@@ -775,7 +775,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                         id="generated-id-wrapper"
                       >
                         <button
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiLink emotion-euiLink-text"
                           data-test-subj="securitySolutionFlyoutLink"
                           type="button"
                         >
@@ -811,7 +811,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
             id="generated-id-wrapper"
           >
             <a
-              class="euiLink emotion-euiLink-primary"
+              class="euiLink emotion-euiLink-text"
               data-test-subj="externalLink"
               href="https://www.iana.org/whois?q=10.10.10.10"
               rel="noopener noreferrer"

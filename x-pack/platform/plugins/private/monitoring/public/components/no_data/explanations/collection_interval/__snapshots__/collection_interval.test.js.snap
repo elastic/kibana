@@ -11,7 +11,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
@@ -39,7 +39,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -50,7 +50,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 
@@ -113,7 +113,7 @@ Array [
     class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText emotion-euiText-s"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -124,7 +124,7 @@ Array [
     class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText emotion-euiText-s"
   >
     <p>
       We checked the cluster settings and found that 
