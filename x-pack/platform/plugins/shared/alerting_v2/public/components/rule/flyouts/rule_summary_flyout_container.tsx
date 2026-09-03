@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
@@ -24,12 +25,20 @@ import { RuleSummaryFlyout } from './rule_summary_flyout';
 
 interface Props {
   ruleId: string;
+  /** Defaults to `push`, which keeps the flyout beside the content it was opened from. */
+  type?: EuiFlyoutProps['type'];
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
 }
 
-export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }: Props) => {
+export const RuleSummaryFlyoutContainer = ({
+  ruleId,
+  type = 'push',
+  onClose,
+  onEdit,
+  onClone,
+}: Props) => {
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const canWrite = useService(UserCapabilities).canWrite('rules');
@@ -64,6 +73,7 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
       <RuleSummaryFlyout
         rule={rule}
         canWrite={canWrite}
+        type={type}
         hasAnimation={false}
         ownFocus={false}
         session="start"

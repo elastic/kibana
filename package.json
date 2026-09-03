@@ -1876,6 +1876,7 @@
     "@kbn/kbn-genai-cli": "link:x-pack/solutions/observability/packages/kbn-genai-cli",
     "@kbn/kibana-manifest-schema": "link:packages/kbn-kibana-manifest-schema",
     "@kbn/lazy-object": "link:src/platform/packages/shared/kbn-lazy-object",
+    "@kbn/lens-test-helpers": "link:src/platform/packages/shared/kbn-lens-test-helpers",
     "@kbn/lint-cli": "link:packages/kbn-lint-cli",
     "@kbn/lint-packages-cli": "link:packages/kbn-lint-packages-cli",
     "@kbn/lint-ts-projects-cli": "link:packages/kbn-lint-ts-projects-cli",
