@@ -289,6 +289,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_state_transition');
       expect(doc).toContain('set_dashboards');
+      expect(doc).toContain('set_runbook');
       expect(doc).toContain('validate');
     });
 
@@ -317,6 +318,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('Use `set_grouping`');
       expect(doc).toContain('Use `set_state_transition`');
       expect(doc).toContain('Use `set_dashboards`');
+      expect(doc).toContain('Use `set_runbook`');
       expect(doc).toContain('Use `validate`');
     });
   });

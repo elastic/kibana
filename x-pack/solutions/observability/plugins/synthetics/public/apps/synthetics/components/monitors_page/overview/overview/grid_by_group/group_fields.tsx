@@ -26,6 +26,9 @@ export const GroupFields = () => {
   const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
   const { allConfigs } = useSelector(selectOverviewStatus);
   const hasRemoteMonitors = allConfigs?.some((config) => Boolean(config.remote)) ?? false;
+  // Heartbeat / autodiscovery monitors otherwise hide inside the "Local monitors"
+  // bucket; only offer the source grouping when there are any to break out.
+  const hasHeartbeatMonitors = allConfigs?.some((config) => config.origin === 'heartbeat') ?? false;
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
   const [localStorageGroupBy, setLocalStorageGroupBy] =
@@ -159,6 +162,22 @@ export const GroupFields = () => {
           },
         ]
       : []),
+    ...(hasHeartbeatMonitors
+      ? [
+          {
+            label: MONITOR_SOURCE_LABEL,
+            value: 'origin',
+            checked: groupField === 'origin',
+            defaultSortOrder: 'asc',
+            onClick: () => {
+              handleChange({
+                field: 'origin' as const,
+                order: 'asc',
+              });
+            },
+          },
+        ]
+      : []),
   ];
 
   const { asc, desc, label } = getOrderContent(groupField);
@@ -250,6 +269,12 @@ const getOrderContent = (groupField: string) => {
         desc: SORT_ALPHABETICAL_DESC,
         label: getRemoteOriginFieldLabel(),
       };
+    case 'origin':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_SOURCE_LABEL,
+      };
 
     default:
       return {
@@ -313,3 +338,10 @@ const TAG_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.tag.lab
 const PROJECT_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.project.label', {
   defaultMessage: 'Project',
 });
+
+const MONITOR_SOURCE_LABEL = i18n.translate(
+  'xpack.synthetics.overview.groupPopover.monitorSource.label',
+  {
+    defaultMessage: 'Monitor source',
+  }
+);

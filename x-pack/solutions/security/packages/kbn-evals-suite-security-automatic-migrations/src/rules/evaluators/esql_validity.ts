@@ -12,6 +12,7 @@ import type { RuleMigrationResult } from '../migration_client';
 export const createEsqlValidityEvaluator = (): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'Translated ESQL Validity',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output }): Promise<EvaluationResult> => {
     const query = output?.rule?.elastic_rule?.query;
 

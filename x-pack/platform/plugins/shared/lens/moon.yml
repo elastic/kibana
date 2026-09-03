@@ -147,8 +147,6 @@ dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/field-formats-common'
-  - '@kbn/calculate-auto'
-  - '@kbn/esql-language'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/as-code-shared-transforms'
@@ -157,6 +155,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/app-header'
   - '@kbn/managed-content-badge'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -170,6 +169,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
