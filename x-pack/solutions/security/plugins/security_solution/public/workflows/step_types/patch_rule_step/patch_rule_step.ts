@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { updateRuleStepCommonDefinition } from '../../../../common/workflows/step_types/update_rule_step/update_rule_step_common';
+import { patchRuleStepCommonDefinition } from '../../../../common/workflows/step_types/patch_rule_step/patch_rule_step_common';
 
-export const updateRuleStepDefinition = createPublicStepDefinition({
-  ...updateRuleStepCommonDefinition,
+export const patchRuleStepDefinition = createPublicStepDefinition({
+  ...patchRuleStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
       default: icon,

@@ -8,24 +8,24 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import type { updateRuleOutputSchema } from '../../../../common/workflows/step_types/update_rule_step/update_rule_step_common';
-import { updateRuleStepCommonDefinition } from '../../../../common/workflows/step_types/update_rule_step/update_rule_step_common';
+import type { patchRuleOutputSchema } from '../../../../common/workflows/step_types/patch_rule_step/patch_rule_step_common';
+import { patchRuleStepCommonDefinition } from '../../../../common/workflows/step_types/patch_rule_step/patch_rule_step_common';
 import { toApiExecutionError } from '../../utils/to_api_execution_error';
 
-type UpdateRuleOutput = z.infer<typeof updateRuleOutputSchema>;
+type PatchRuleOutput = z.infer<typeof patchRuleOutputSchema>;
 
-export const updateRuleStepDefinition = createServerStepDefinition({
-  ...updateRuleStepCommonDefinition,
+export const patchRuleStepDefinition = createServerStepDefinition({
+  ...patchRuleStepCommonDefinition,
   handler: async (context) => {
     try {
-      const { body } = await context.contextManager.callKibanaApi<UpdateRuleOutput>({
+      const { body } = await context.contextManager.callKibanaApi<PatchRuleOutput>({
         method: 'PATCH',
         path: DETECTION_ENGINE_RULES_URL,
-        body: context.input.update,
+        body: context.input.patch,
       });
       return { output: body };
     } catch (error) {
-      throw toApiExecutionError(error, 'update detection rule');
+      throw toApiExecutionError(error, 'patch detection rule');
     }
   },
 });

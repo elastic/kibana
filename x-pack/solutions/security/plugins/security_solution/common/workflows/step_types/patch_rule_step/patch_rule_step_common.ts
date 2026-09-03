@@ -21,12 +21,12 @@ import {
   ThresholdRulePatchProps,
 } from '../../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 
-export const UpdateRuleStepId = 'security.updateRule' as const;
+export const PatchRuleStepId = 'security.patchRule' as const;
 
 // "type" property is optional, but if you provide it in the editor,
 // it'll narrow the editor completion and validation to that rule type's fields.
-export const updateRuleInputSchema = z.object({
-  update: z.union([
+export const patchRuleInputSchema = z.object({
+  patch: z.union([
     EqlRulePatchProps.extend({ type: z.literal('eql').optional() }),
     QueryRulePatchProps.extend({ type: z.literal('query').optional() }),
     SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }),
@@ -38,38 +38,38 @@ export const updateRuleInputSchema = z.object({
   ]),
 });
 
-export const updateRuleOutputSchema = RuleResponse;
+export const patchRuleOutputSchema = RuleResponse;
 
-export const updateRuleStepCommonDefinition: BaseStepDefinition<
-  typeof updateRuleInputSchema,
-  typeof updateRuleOutputSchema
+export const patchRuleStepCommonDefinition: BaseStepDefinition<
+  typeof patchRuleInputSchema,
+  typeof patchRuleOutputSchema
 > = {
-  id: UpdateRuleStepId,
-  label: i18n.translate('xpack.securitySolution.workflows.steps.updateRule.label', {
-    defaultMessage: 'Update Detection Rule',
+  id: PatchRuleStepId,
+  label: i18n.translate('xpack.securitySolution.workflows.steps.patchRule.label', {
+    defaultMessage: 'Patch Detection Rule',
   }),
-  description: i18n.translate('xpack.securitySolution.workflows.steps.updateRule.description', {
+  description: i18n.translate('xpack.securitySolution.workflows.steps.patchRule.description', {
     defaultMessage:
-      'Update fields of an existing detection rule identified by id or rule_id. Only the provided fields are changed. The rule type cannot be changed.',
+      'Patch fields of an existing detection rule identified by id or rule_id. Only the provided fields are changed. The rule type cannot be changed.',
   }),
   category: StepCategory.KibanaSecurity,
-  inputSchema: updateRuleInputSchema,
-  outputSchema: updateRuleOutputSchema,
+  inputSchema: patchRuleInputSchema,
+  outputSchema: patchRuleOutputSchema,
   documentation: {
     details: i18n.translate(
-      'xpack.securitySolution.workflows.steps.updateRule.documentation.details',
+      'xpack.securitySolution.workflows.steps.patchRule.documentation.details',
       {
         defaultMessage:
-          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The fields to update are passed under the "update" property and match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type.',
+          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The fields to patch are passed under the "patch" property and match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type.',
       }
     ),
     examples: [
       `## Tune a threshold rule's threshold and severity values
 \`\`\`yaml
-- name: update_rule
-  type: security.updateRule
+- name: patch_rule
+  type: security.patchRule
   with:
-    update:
+    patch:
       rule_id: my-threshold-rule
       type: threshold
       threshold:

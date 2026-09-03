@@ -8,21 +8,21 @@
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
-import { updateRuleStepDefinition } from './update_rule_step';
+import { patchRuleStepDefinition } from './patch_rule_step';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import type { updateRuleInputSchema } from '../../../../common/workflows/step_types/update_rule_step/update_rule_step_common';
+import type { patchRuleInputSchema } from '../../../../common/workflows/step_types/patch_rule_step/patch_rule_step_common';
 
-type Context = StepHandlerContext<typeof updateRuleInputSchema>;
-type InputRule = Context['input']['update'];
+type Context = StepHandlerContext<typeof patchRuleInputSchema>;
+type InputRule = Context['input']['patch'];
 
 const RULE_ID = '11111111-1111-4111-8111-111111111111';
 
-describe('updateRuleStepDefinition', () => {
+describe('patchRuleStepDefinition', () => {
   let mockContextManager: jest.Mocked<Context['contextManager']>;
 
   const buildContext = (rule: InputRule): Context =>
     ({
-      input: { update: rule },
+      input: { patch: rule },
       contextManager: mockContextManager,
     } as unknown as Context);
 
@@ -46,7 +46,7 @@ describe('updateRuleStepDefinition', () => {
       body: updatedRule,
     });
 
-    const result = await updateRuleStepDefinition.handler(buildContext(rule));
+    const result = await patchRuleStepDefinition.handler(buildContext(rule));
 
     expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
       method: 'PATCH',
@@ -66,7 +66,7 @@ describe('updateRuleStepDefinition', () => {
       })
     );
 
-    const error = await updateRuleStepDefinition
+    const error = await patchRuleStepDefinition
       .handler(buildContext({ type: 'query' } as InputRule))
       .then(() => undefined)
       .catch((e) => e);
@@ -74,7 +74,7 @@ describe('updateRuleStepDefinition', () => {
     expect(error).toBeInstanceOf(ExecutionError);
     expect(error).toMatchObject({
       type: 'ApiError',
-      message: 'Failed to update detection rule: HTTP 400: either "id" or "rule_id" must be set',
+      message: 'Failed to patch detection rule: HTTP 400: either "id" or "rule_id" must be set',
     });
   });
 });

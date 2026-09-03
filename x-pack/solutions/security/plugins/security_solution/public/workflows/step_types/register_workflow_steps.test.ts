@@ -25,7 +25,7 @@ import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
 import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 import { createRuleStepDefinition } from './create_rule_step/create_rule_step';
-import { updateRuleStepDefinition } from './update_rule_step/update_rule_step';
+import { patchRuleStepDefinition } from './patch_rule_step/patch_rule_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -84,6 +84,6 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader15()).resolves.toBe(getNotesStepDefinition);
     await expect(loader16()).resolves.toBe(updateNoteStepDefinition);
     await expect(loader17()).resolves.toBe(createRuleStepDefinition);
-    await expect(loader18()).resolves.toBe(updateRuleStepDefinition);
+    await expect(loader18()).resolves.toBe(patchRuleStepDefinition);
   });
 });

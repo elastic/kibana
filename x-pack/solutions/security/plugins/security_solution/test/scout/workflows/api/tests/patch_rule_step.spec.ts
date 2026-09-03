@@ -21,44 +21,44 @@ import {
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
 const DETECTION_ENGINE_BULK_ACTION_URL = '/api/detection_engine/rules/_bulk_action';
 const RULE_API_VERSION = '2023-10-31';
-const UPDATE_RULE_STEP_ID = 'update_rule';
+const PATCH_RULE_STEP_ID = 'patch_rule';
 
 // Randomized per run so leftover rules from a failed run can't cause a 409 in `beforeAll`.
-const RULE_SIGNATURE_ID = `scout-update-rule-step-test-${randomUUID()}`;
-const UPDATED_QUERY = 'host.name: * and not user.name: svc_backup';
+const RULE_SIGNATURE_ID = `scout-patch-rule-step-test-${randomUUID()}`;
+const PATCHED_QUERY = 'host.name: * and not user.name: svc_backup';
 
-const updateRuleWorkflowYaml = `
-name: security.updateRule step test - valid update
+const patchRuleWorkflowYaml = `
+name: security.patchRule step test - valid patch
 enabled: true
 triggers:
   - type: manual
 steps:
-  - name: ${UPDATE_RULE_STEP_ID}
-    type: security.updateRule
+  - name: ${PATCH_RULE_STEP_ID}
+    type: security.patchRule
     with:
-      update:
+      patch:
         rule_id: "${RULE_SIGNATURE_ID}"
-        query: "${UPDATED_QUERY}"
+        query: "${PATCHED_QUERY}"
         severity: medium
 `;
 
 const missingRuleWorkflowYaml = `
-name: security.updateRule step test - missing rule
+name: security.patchRule step test - missing rule
 enabled: true
 triggers:
   - type: manual
 steps:
-  - name: ${UPDATE_RULE_STEP_ID}
-    type: security.updateRule
+  - name: ${PATCH_RULE_STEP_ID}
+    type: security.patchRule
     with:
-      update:
+      patch:
         rule_id: does-not-exist
         severity: medium
 `;
 
-apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('security.patchRule workflow step', { tag: [...tags.stateful.classic] }, () => {
   let editorHeaders: Record<string, string>;
-  let updateWorkflowId: string;
+  let patchWorkflowId: string;
   let missingRuleWorkflowId: string;
   let createdRuleId: string;
 
@@ -74,7 +74,7 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
       body: {
         type: 'query',
         rule_id: RULE_SIGNATURE_ID,
-        name: 'Scout updateRule step test',
+        name: 'Scout patchRule step test',
         description: 'Created by a Scout API test',
         query: 'host.name: *',
         severity: 'low',
@@ -86,14 +86,14 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
     expect(createResponse).toHaveStatusCode(200);
     createdRuleId = (createResponse.body as { id: string }).id;
 
-    updateWorkflowId = await createWorkflow(apiClient, editorHeaders, updateRuleWorkflowYaml);
+    patchWorkflowId = await createWorkflow(apiClient, editorHeaders, patchRuleWorkflowYaml);
     missingRuleWorkflowId = await createWorkflow(apiClient, editorHeaders, missingRuleWorkflowYaml);
   });
 
   apiTest.afterAll(async ({ apiClient }) => {
     // Delete workflows
     await Promise.all([
-      deleteWorkflow(apiClient, editorHeaders, updateWorkflowId),
+      deleteWorkflow(apiClient, editorHeaders, patchWorkflowId),
       deleteWorkflow(apiClient, editorHeaders, missingRuleWorkflowId),
     ]);
 
@@ -108,24 +108,24 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
   });
 
   apiTest('patches only the provided fields of an existing rule', async ({ apiClient }) => {
-    const workflowExecutionId = await runWorkflow(apiClient, editorHeaders, updateWorkflowId);
+    const workflowExecutionId = await runWorkflow(apiClient, editorHeaders, patchWorkflowId);
     const execution = await waitForExecution(apiClient, editorHeaders, workflowExecutionId);
 
     expect(execution.status).toBe(ExecutionStatus.COMPLETED);
 
-    // Make sure that the `security.updateRule` step actually ran
-    const step = execution.stepExecutions.find((s) => s.stepId === UPDATE_RULE_STEP_ID);
+    // Make sure that the `security.patchRule` step actually ran
+    const step = execution.stepExecutions.find((s) => s.stepId === PATCH_RULE_STEP_ID);
     expect(step).toBeDefined();
 
-    // Check the rule in response after the update
+    // Check the rule in response after the patch
     const output = step?.output as
       | { id?: string; query?: string; severity?: string; name?: string }
       | undefined;
     expect(output?.id).toBe(createdRuleId);
-    expect(output?.query).toBe(UPDATED_QUERY);
+    expect(output?.query).toBe(PATCHED_QUERY);
     expect(output?.severity).toBe('medium');
     // Untouched fields are preserved by the partial update.
-    expect(output?.name).toBe('Scout updateRule step test');
+    expect(output?.name).toBe('Scout patchRule step test');
 
     const readResponse = await apiClient.get(
       `${DETECTION_ENGINE_RULES_URL}?rule_id=${RULE_SIGNATURE_ID}`,
@@ -137,7 +137,7 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
     // Check the rule after reading it
     expect(readResponse).toHaveStatusCode(200);
     const readRule = readResponse.body as { query: string; severity: string; enabled: boolean };
-    expect(readRule.query).toBe(UPDATED_QUERY);
+    expect(readRule.query).toBe(PATCHED_QUERY);
     expect(readRule.severity).toBe('medium');
     expect(readRule.enabled).toBe(false);
   });
@@ -148,8 +148,8 @@ apiTest.describe('security.updateRule workflow step', { tag: [...tags.stateful.c
 
     expect(execution.status).toBe(ExecutionStatus.FAILED);
 
-    const step = execution.stepExecutions.find((s) => s.stepId === UPDATE_RULE_STEP_ID);
+    const step = execution.stepExecutions.find((s) => s.stepId === PATCH_RULE_STEP_ID);
     expect(step).toBeDefined();
-    expect(step?.error?.message).toContain('Failed to update detection rule');
+    expect(step?.error?.message).toContain('Failed to patch detection rule');
   });
 });
