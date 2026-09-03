@@ -19,6 +19,10 @@ export interface GetRulesPageHeaderTabsParams {
   showV1Tab?: boolean;
   /** @default true */
   showV2Tab?: boolean;
+  /** Override the default v1 management href (absolute, already prepended). */
+  v1Href?: string;
+  /** Override the default v2 management href (absolute, already prepended). */
+  v2Href?: string;
 }
 
 /**
@@ -33,6 +37,8 @@ export const getRulesPageHeaderTabs = ({
   prepend,
   showV1Tab = true,
   showV2Tab = true,
+  v1Href,
+  v2Href,
 }: GetRulesPageHeaderTabsParams): AppHeaderTab[] => {
   const tabs: AppHeaderTab[] = [];
 
@@ -43,7 +49,7 @@ export const getRulesPageHeaderTabs = ({
         defaultMessage: 'V2 rules',
       }),
       isSelected: selectedTab === RULES_PAGE_TAB_IDS.v2,
-      href: prepend(ALERTING_V2_RULES_BASE_PATH),
+      href: v2Href ?? prepend(ALERTING_V2_RULES_BASE_PATH),
       badge: {
         iconType: 'sparkles',
         tooltip: i18n.translate('responseOpsRulesPageTabs.v2RulesTabNewBadgeTooltip', {
@@ -61,7 +67,7 @@ export const getRulesPageHeaderTabs = ({
         defaultMessage: 'V1 rules',
       }),
       isSelected: selectedTab === RULES_PAGE_TAB_IDS.v1,
-      href: prepend(triggersActionsRoute),
+      href: v1Href ?? prepend(triggersActionsRoute),
       'data-test-subj': 'v1RulesTab',
     });
   }

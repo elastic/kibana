@@ -7,7 +7,8 @@
 
 import React, { lazy } from 'react';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiPageSection } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -23,13 +24,13 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../../types';
-import { suspendedComponentWithProps } from '../lib/suspended_component_with_props';
-import { setDataViewsService } from '../../common/lib/data_apis';
-import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
-import { ConnectorProvider } from '../context/connector_context';
-import { queryClient } from '../query_client';
-import type { TriggersAndActionsUiServices } from '../rules_app';
+import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { setDataViewsService } from '../common/lib/data_apis';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
+import { ConnectorProvider } from './context/connector_context';
+import { queryClient } from './query_client';
+import type { TriggersAndActionsUiServices } from './rules_app';
 
 export interface ClassicRulesPageProps {
   coreStart: CoreStart;
@@ -49,10 +50,10 @@ export interface ClassicRulesPageInternalDeps {
 }
 
 const RuleDetailsRouteWrapper = lazy(
-  () => import('../sections/rule_details/components/rule_details_route_wrapper')
+  () => import('./sections/rule_details/components/rule_details_route_wrapper')
 );
-const RulesPage = lazy(() => import('../sections/rules_page/rules_page_container'));
-const RuleFormRoute = lazy(() => import('../sections/rule_form/rule_form_route'));
+const RulesPage = lazy(() => import('./sections/rules_page/rules_page_container'));
+const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 const AppWithoutRouter = () => {
   const {

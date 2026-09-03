@@ -17,6 +17,7 @@ import {
   canReadV1Rules,
   getRulesPageHeaderTabs,
 } from '@kbn/response-ops-rules-page-tabs';
+import { useTabHrefOverrides } from '../../application/tab_href_overrides_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
@@ -124,14 +125,18 @@ export const RulesListHeader = ({
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
 
+  const { v1Href, v2Href } = useTabHrefOverrides();
+
   const tabs = useMemo(
     () =>
       getRulesPageHeaderTabs({
         selectedTab: RULES_PAGE_TAB_IDS.v2,
         prepend: basePath.prepend,
         showV1Tab: canReadV1Rules(application.capabilities),
+        v1Href,
+        v2Href,
       }),
-    [basePath, application.capabilities]
+    [basePath, application.capabilities, v1Href, v2Href]
   );
 
   const headerMenu = useMemo(

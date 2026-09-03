@@ -13,6 +13,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+  OBSERVABILITY_ALERTING_BASE_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
@@ -51,6 +52,13 @@ export const ObservabilityAlertingApp = ({
     [triggersActionsUi]
   );
 
+  const v1Href = coreStart.http.basePath.prepend(
+    `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`
+  );
+  const v2Href = coreStart.http.basePath.prepend(
+    `${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`
+  );
+
   return (
     <Routes>
       <Route exact path="/">
@@ -63,7 +71,11 @@ export const ObservabilityAlertingApp = ({
         <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V2_PATH}>
-        <RulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+        <RulesPage
+          coreStart={coreStart}
+          setBreadcrumbs={setBreadcrumbs}
+          tabHrefOverrides={{ v1Href, v2Href }}
+        />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH}>
         <RuleLibraryPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
