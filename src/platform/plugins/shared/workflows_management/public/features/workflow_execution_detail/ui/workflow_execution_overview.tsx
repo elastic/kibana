@@ -254,7 +254,11 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                         </strong>
                       </EuiText>
                       {serviceAccount ? (
-                        <EuiText size="xs" color="subdued">
+                        <EuiText
+                          size="xs"
+                          color="subdued"
+                          data-test-subj="workflowExecutionEffectiveIdentityId"
+                        >
                           {serviceAccount.id}
                         </EuiText>
                       ) : null}
