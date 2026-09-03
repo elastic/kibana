@@ -75,11 +75,6 @@ export interface EpisodeRuleTagsCellProps extends CellRendererProps {
   isLoadingRules: boolean;
 }
 
-/**
- * Read-only tags of the rule the episode belongs to. As for other rule details that are currently
- * not available in the episode, the values come from the rules the list page already resolved for
- * the rule column.
- */
 export const EpisodeRuleTagsCell = ({
   row,
   rulesCache,

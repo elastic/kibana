@@ -16,10 +16,7 @@ export interface TagBadgesProps {
   tags?: string[];
   /** How many tags to show before collapsing the rest into a `+N` popover. Ignored when `showAll`. */
   size?: number;
-  /**
-   * When `true`, render every tag instead of collapsing the overflow into a `+N` popover. For
-   * running text, where the wrapping text handles the overflow on its own.
-   */
+  /** Render every tag instead of collapsing the overflow into a `+N` popover. */
   showAll?: boolean;
   'data-test-subj'?: string;
 }
@@ -39,10 +36,6 @@ const inlineTagsCss = css`
   }
 `;
 
-/**
- * Renders a list of tags as badges, collapsing anything past `size` into a `+N` popover. Shows an
- * em dash when empty.
- */
 export function TagBadges({
   tags = [],
   size = 3,
@@ -56,7 +49,6 @@ export function TagBadges({
   };
   const closePopover = () => setIsMoreTagsOpen(false);
 
-  // An empty cell would read as a rendering glitch next to the populated ones.
   if (tags.length === 0) {
     return <span data-test-subj={dataTestSubj}>{EMPTY_VALUE}</span>;
   }

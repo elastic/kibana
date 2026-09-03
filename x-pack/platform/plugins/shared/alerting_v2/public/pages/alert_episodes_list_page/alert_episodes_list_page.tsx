@@ -86,9 +86,8 @@ const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): 
   },
 });
 
-// Neither tag column can be sorted on: `ALLOWLISTED_SORT_FIELDS` in the episodes query doesn't
-// include them, so a sort on either one falls back to `@timestamp` and keeps only the direction.
-// That reorders the rows without sorting by tags, so hide the control rather than lie about it.
+// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
+// falls back to `@timestamp` and only looks like it works.
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,

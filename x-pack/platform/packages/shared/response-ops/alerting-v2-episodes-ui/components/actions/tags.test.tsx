@@ -64,7 +64,6 @@ describe('TagBadges', () => {
       </IntlProvider>
     );
 
-    // A flex row here would fall outside the cell's `-webkit-line-clamp` and get sliced mid-line.
     expect(container.firstChild?.nodeName).toBe('SPAN');
     expect(container.querySelector('.euiFlexGroup')).not.toBeInTheDocument();
     expect(screen.getByText('+2')).toBeInTheDocument();

@@ -302,8 +302,6 @@ describe('AlertEpisodesListPage', () => {
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
 
     expect(customize).toBeDefined();
-    // A sort on either tag column falls back to `@timestamp`, so the control would reorder the
-    // rows without sorting by tags.
     expect(customize!({ column: { id: columnId, isSortable: true }, headerRowHeight: 1 })).toEqual({
       id: columnId,
       displayAsText: label,
