@@ -130,6 +130,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         fullWidth
       >
         <EuiTextArea
+          data-test-subj="interactiveSetupEnrollmentTokenInput"
           name="token"
           value={form.values.token}
           isInvalid={form.touched.token && !!form.errors.token}
@@ -143,7 +144,12 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="gear" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="interactiveSetupConfigureManuallyButton"
+            flush="right"
+            iconType="gear"
+            onClick={onCancel}
+          >
             <FormattedMessage
               id="interactiveSetup.enrollmentTokenForm.cancelButton"
               defaultMessage="Configure manually"
@@ -152,6 +158,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="interactiveSetupSubmitEnrollmentTokenButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
