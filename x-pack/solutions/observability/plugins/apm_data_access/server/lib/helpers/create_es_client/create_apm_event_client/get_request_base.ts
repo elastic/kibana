@@ -11,7 +11,7 @@ import { uniq } from 'lodash';
 import { PROCESSOR_EVENT } from '@kbn/apm-types/es_fields';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getConfigForDocumentType, getProcessorEventForDocumentType } from '../document_type';
-import type { ApmDataSource } from '../../../../../common/data_source';
+import type { ApmDataSource } from '@kbn/apm-types';
 
 const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'transaction',
