@@ -25,6 +25,7 @@ import type { ConcreteTaskInstance } from './task';
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
@@ -34,6 +35,8 @@ import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
 import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import { ADJUST_THROUGHPUT_INTERVAL } from './lib/create_managed_configuration';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';
 
 const resetInFlightTasksMock = resetInFlightTasksOwnedByThisNode as jest.MockedFunction<
@@ -137,6 +140,9 @@ describe('TaskPollingLifecycle', () => {
       auto_calculate_default_ech_capacity: false,
       api_key_type: ApiKeyType.ES,
       grant_uiam_api_keys: false,
+      claim_nudge: {
+        enabled: true,
+      },
     },
     taskStore: mockTaskStore,
     executionControlService: taskExecutionControlServiceMock.create(),
@@ -792,6 +798,86 @@ describe('TaskPollingLifecycle', () => {
       expect(TaskManagerRunner).toHaveBeenCalledWith(
         expect.objectContaining({ enrichFakeRequest })
       );
+    });
+  });
+
+  describe('claim nudge error backoff', () => {
+    const claimResult = {
+      docs: [],
+      stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+    };
+
+    // Drain chained microtasks without advancing sinon's fake timers
+    const flushPromises = async (times: number = 10) => {
+      for (let i = 0; i < times; i++) {
+        await Promise.resolve();
+      }
+    };
+
+    const claimCalls = () =>
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mock.calls.length;
+
+    const startLifecycleWithNudge = async () => {
+      const errors$ = new Subject<Error>();
+      const claimNudgeSubject = new Subject<void>();
+      const taskStore = taskStoreMock.create({});
+      Object.assign(taskStore, { errors$ });
+      mockTaskClaiming.claimAvailableTasksIfCapacityIsAvailable.mockImplementation(() =>
+        Promise.resolve(asOk(claimResult))
+      );
+
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore,
+        elasticsearchAndSOAvailability$,
+        claimNudgeService: {
+          claimNudge$: claimNudgeSubject.asObservable(),
+        } as unknown as TaskManagerClaimNudgeService,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+      // let the startup reconciliation resolve and the initial poll cycle complete
+      await flushPromises();
+      // fire the deferred `setTimeout(() => subscribe(), 0)` that activates claimNudge$
+      clock.tick(0);
+      await flushPromises();
+
+      return { errors$, claimNudgeSubject };
+    };
+
+    test('a claim nudge triggers an immediate claim cycle when there is no error backoff', async () => {
+      const { claimNudgeSubject } = await startLifecycleWithNudge();
+      const baseline = claimCalls();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+
+      expect(claimCalls()).toBe(baseline + 1);
+    });
+
+    test('swallows claim nudges while the error backoff is active and resumes after a clean window', async () => {
+      const { errors$, claimNudgeSubject } = await startLifecycleWithNudge();
+      const baseline = claimCalls();
+
+      // a qualifying error, flushed into the next error-count window, activates the backoff
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      await flushPromises();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+      expect(claimCalls()).toBe(baseline);
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'Ignoring claim nudge because task manager is backing off after Elasticsearch errors; the next regular poll cycle will claim the task'
+      );
+
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      await flushPromises();
+
+      claimNudgeSubject.next();
+      await flushPromises();
+      expect(claimCalls()).toBe(baseline + 1);
     });
   });
 });
