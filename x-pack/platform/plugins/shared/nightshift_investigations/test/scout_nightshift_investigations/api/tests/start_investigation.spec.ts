@@ -140,12 +140,12 @@ apiTest.describe(
       'returns 400 when an alert snapshot is missing a required field',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
-        const { reason, ...withoutReason } = alertSnapshot;
+        const { status, ...withoutStatus } = alertSnapshot;
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
             subject: { type: 'alert', id: 'alert-uuid-1' },
-            context: { alerts: [withoutReason] },
+            context: { alerts: [withoutStatus] },
           },
           responseType: 'json',
         });

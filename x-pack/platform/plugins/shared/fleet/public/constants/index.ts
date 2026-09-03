@@ -36,6 +36,7 @@ export {
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
   CLOUD_CONNECTOR_API_ROUTES,
+  OBLT_DEFAULT_CATEGORIES,
 } from '../../common/constants';
 
 export * from './page_paths';

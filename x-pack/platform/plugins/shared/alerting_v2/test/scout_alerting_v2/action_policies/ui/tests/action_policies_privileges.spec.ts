@@ -17,7 +17,7 @@ import {
  * Covers the UI capability gating on the Action Policies page (PR #277390).
  * Read-only users can view action policies and open the details flyout, but
  * every write affordance (create, row edit/actions, snooze toggle, details
- * flyout edit + actions menu) is hidden and the `/edit/:id` route is gated by
+ * flyout Take action button) is hidden and the `/edit/:id` route is gated by
  * the required-privileges interstitial.
  *
  * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
@@ -47,16 +47,15 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await actionPoliciesList.goto();
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
-    await test.step('create button and row view-details are visible', async () => {
+    await test.step('create button and the row name link are visible', async () => {
       await expect(actionPoliciesList.createButton).toBeVisible();
-      await expect(actionPoliciesList.viewDetailsButton).toBeVisible();
+      await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
     });
 
-    await test.step('details flyout exposes edit and the actions menu', async () => {
-      await actionPoliciesList.openDetailsFlyout();
+    await test.step('details flyout exposes the Take action button', async () => {
+      await actionPoliciesList.openDetailsFlyout(policyName);
       await expect(actionPoliciesList.detailsFlyout).toBeVisible();
-      await expect(actionPoliciesList.detailsFlyoutEditButton).toBeVisible();
-      await expect(actionPoliciesList.detailsFlyoutActionsMenuButton).toBeVisible();
+      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toBeVisible();
     });
   });
 
@@ -66,19 +65,18 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await actionPoliciesList.goto();
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
-    await test.step('create button is hidden but view-details remains', async () => {
+    await test.step('create button is hidden but the row name link remains', async () => {
       await expect(actionPoliciesList.createButton).toHaveCount(0);
-      await expect(actionPoliciesList.viewDetailsButton).toBeVisible();
+      await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
     });
 
-    await test.step('details flyout opens but hides edit and the actions menu', async () => {
-      await actionPoliciesList.openDetailsFlyout();
+    await test.step('details flyout opens but hides the Take action button', async () => {
+      await actionPoliciesList.openDetailsFlyout(policyName);
       // Positive, privilege-independent anchor: confirm the flyout actually
       // rendered before asserting the write affordances are absent, otherwise
-      // the toHaveCount(0) checks would pass even if the flyout never opened.
+      // the toHaveCount(0) check would pass even if the flyout never opened.
       await expect(actionPoliciesList.detailsFlyout).toBeVisible();
-      await expect(actionPoliciesList.detailsFlyoutEditButton).toHaveCount(0);
-      await expect(actionPoliciesList.detailsFlyoutActionsMenuButton).toHaveCount(0);
+      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toHaveCount(0);
     });
   });
 

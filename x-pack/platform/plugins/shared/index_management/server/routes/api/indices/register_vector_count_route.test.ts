@@ -32,12 +32,19 @@ describe('[Index management API Routes] vector count', () => {
     hasPrivileges.mockResolvedValue({ has_all_requested: true });
   });
 
-  it('sums the dense and sparse vector counts across primaries', async () => {
+  it('sums the dense and sparse vector counts across shards', async () => {
     getIndicesStats.mockResolvedValue({
-      _all: {
-        primaries: {
-          dense_vector: { value_count: 100 },
-          sparse_vector: { value_count: 25 },
+      _shards: { total: 1, successful: 1, failed: 0 },
+      indices: {
+        my_index: {
+          shards: {
+            '0': [
+              {
+                dense_vector: { value_count: 100 },
+                sparse_vector: { value_count: 25 },
+              },
+            ],
+          },
         },
       },
     });
@@ -49,16 +56,58 @@ describe('[Index management API Routes] vector count', () => {
     expect(getIndicesStats).toHaveBeenCalledWith({
       expand_wildcards: 'none',
       index: 'my_index',
-      level: 'cluster',
+      level: 'shards',
       metric: ['dense_vector', 'sparse_vector'],
+      filter_path: [
+        '_shards',
+        'indices.*.shards.*.dense_vector.value_count',
+        'indices.*.shards.*.sparse_vector.value_count',
+      ],
+    });
+  });
+
+  it('counts each logical shard once when multiple copies report vectors', async () => {
+    getIndicesStats.mockResolvedValue({
+      _shards: { total: 2, successful: 2, failed: 0 },
+      indices: {
+        my_index: {
+          shards: {
+            // the indexing shard and a search shard of the same logical shard
+            '0': [{ dense_vector: { value_count: 100 } }, { dense_vector: { value_count: 90 } }],
+            // a cold shard where only a search copy remains
+            '1': [{ sparse_vector: { value_count: 10 } }],
+          },
+        },
+      },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: { vectorCount: 110 },
     });
   });
 
   it('treats missing vector stats as zero', async () => {
-    getIndicesStats.mockResolvedValue({ _all: { primaries: {} } });
+    getIndicesStats.mockResolvedValue({
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
 
     await expect(router.runRequest(mockRequest)).resolves.toEqual({
       body: { vectorCount: 0 },
+    });
+  });
+
+  it('reports the count as unavailable when not all shards responded', async () => {
+    getIndicesStats.mockResolvedValue({
+      _shards: { total: 3, successful: 2, failed: 0 },
+      indices: {
+        my_index: {
+          shards: { '0': [{ dense_vector: { value_count: 100 } }] },
+        },
+      },
+    });
+
+    await expect(router.runRequest(mockRequest)).resolves.toEqual({
+      body: { vectorCount: null },
     });
   });
 
