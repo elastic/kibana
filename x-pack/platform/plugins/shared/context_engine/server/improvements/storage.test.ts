@@ -84,6 +84,7 @@ describe('improvements storage', () => {
   it('indexes provenance so the UI can drill back to the signals behind a suggestion', () => {
     const provenance = props.provenance.properties;
     expect(provenance?.agent_run_id.type).toBe('keyword');
+    expect(provenance?.origin.type).toBe('keyword');
     expect(provenance?.signal_ids.type).toBe('keyword');
     expect(provenance?.signal_spaces.type).toBe('keyword');
     expect(provenance?.tags.type).toBe('keyword');

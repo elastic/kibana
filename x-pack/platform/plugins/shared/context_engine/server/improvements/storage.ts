@@ -62,6 +62,9 @@ export const improvementsSchema = {
     provenance: types.object({
       properties: {
         agent_run_id: types.keyword({}),
+        // Absent on everything written before a conversation could propose one, which were all
+        // analysis runs — so `analysis` is the value a missing field means, not a default nobody set.
+        origin: types.keyword({}),
         signal_ids: types.keyword({}),
         signal_spaces: types.keyword({}),
         signal_window: types.object({
