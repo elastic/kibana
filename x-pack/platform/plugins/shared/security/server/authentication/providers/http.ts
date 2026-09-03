@@ -105,7 +105,12 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       if (request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)) {
         return this.authenticateViaUiamOAuth(request, authorizationHeader);
       }
+      const authHeaders = this.options.uiam!.getAuthenticationHeaders(
+        authorizationHeader.credentials
+      );
 
+      const user = await this.getUser(request, authHeaders);
+      console.log(user);
       // Trusted loopback callers (e.g. workloads running as a service account) legitimately
       // present internal UIAM credentials on ordinary routes, and identify themselves with a
       // verifiable internal-caller attestation. Only warn when that attestation is absent or
