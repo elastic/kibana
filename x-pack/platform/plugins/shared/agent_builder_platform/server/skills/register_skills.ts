@@ -12,7 +12,6 @@ import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_tr
 import { graphCreationSkill } from './graph_creation_skill';
 import { skillManagementSkill } from './skill_management';
 import { connectorAuthoringSkill } from './connector_authoring';
-import { kiAutomationGenerationSkill } from './ki_automation_generation';
 import { kiRetrievalSkill } from './ki_retrieval';
 import { analyzeAndImproveSkill } from './analyze_and_improve';
 import { loadElasticSkills } from './elastic_skills';
@@ -26,7 +25,6 @@ export const registerSkills = (
   agentBuilder.skills.register(skillManagementSkill);
   agentBuilder.skills.register(agentBuilderTracesSkill);
   agentBuilder.skills.register(connectorAuthoringSkill({ getActionsStart }));
-  agentBuilder.skills.register(kiAutomationGenerationSkill);
   agentBuilder.skills.register(kiRetrievalSkill);
   agentBuilder.skills.register(analyzeAndImproveSkill);
 

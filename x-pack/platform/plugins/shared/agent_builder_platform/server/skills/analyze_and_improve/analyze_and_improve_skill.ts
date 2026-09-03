@@ -9,6 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import content from './analyze_and_improve.skill.md.text';
+import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
 export const analyzeAndImproveSkill = defineSkillType({
   id: 'analyze-and-improve',
@@ -16,15 +17,31 @@ export const analyzeAndImproveSkill = defineSkillType({
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
-    'Diagnose why a Context Engine AI index is not serving agents well and propose changes to its knowledge indicator pipeline. Load when analyzing Context Engine signals (query_error, empty_retrieval, coverage_gap) for an AI index, when handling an "Analyze & improve" hand-off, or when a user asks why an index\'s knowledge indicators are not being retrieved or why an agent keeps falling back to raw data. Read-only: it proposes changes, it never applies them.',
+    'Decide what a Context Engine AI index should contain and what workflow automation should produce it. Load when setting up the Context Engine for a user\'s Elasticsearch data or connector sources, when generating Knowledge Indicators (KIs), when drafting or editing a KI automation, when handling an "Analyze & improve" hand-off, or when diagnosing why an index\'s KIs are not being retrieved and agents keep falling back to raw data.',
   content,
-  referencedContent: [],
+  referencedContent: [
+    {
+      name: 'index-selection-reference-workflow',
+      relativePath: '.',
+      content: indexSelectionReferenceYaml,
+    },
+  ],
+  // The union of what setting an index up and diagnosing one both need. Skill tools are additive
+  // to the agent's own set, so binding the authoring tools here hands them to every agent that
+  // loads this skill — an unattended analysis run must withhold them in its own configuration
+  // rather than relying on the skill to stay read-only.
   getRegistryTools: () => [
+    platformCoreTools.generateWorkflow,
+    platformCoreTools.executeWorkflow,
+    platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
     platformCoreTools.listIndices,
-    `${internalNamespaces.workflows}.get_workflow`,
-    // Read-only despite the verb: it parses a candidate definition and reports what is wrong with
-    // it, saving a reviewer a proposal whose YAML was never going to load.
+    platformCoreTools.getIndexMapping,
+    platformCoreTools.getWorkflowExecutionStatus,
     `${internalNamespaces.workflows}.validate_workflow`,
+    `${internalNamespaces.workflows}.get_workflow`,
+    `${internalNamespaces.workflows}.get_step_definitions`,
+    `${internalNamespaces.workflows}.get_examples`,
+    `${internalNamespaces.workflows}.get_connectors`,
   ],
 });

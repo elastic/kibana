@@ -34,8 +34,18 @@ describe('analyzeAndImproveSkill', () => {
     expect(analyzeAndImproveSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('has no referencedContent', () => {
-    expect(analyzeAndImproveSkill.referencedContent).toHaveLength(0);
+  it('carries the index-selection reference workflow as its one referencedContent entry', () => {
+    expect(analyzeAndImproveSkill.referencedContent).toHaveLength(1);
+    const [reference] = analyzeAndImproveSkill.referencedContent!;
+    expect(reference.name).toBe('index-selection-reference-workflow');
+    expect(reference.relativePath).toBe('.');
+    expect(reference.content.length).toBeGreaterThan(0);
+  });
+
+  it('mentions every referencedContent entry by name in the skill content', () => {
+    for (const reference of analyzeAndImproveSkill.referencedContent ?? []) {
+      expect(analyzeAndImproveSkill.content).toContain(reference.name);
+    }
   });
 
   it('matches tags with MV_CONTAINS, never with a comparison operator', () => {
@@ -47,30 +57,81 @@ describe('analyzeAndImproveSkill', () => {
     expect(analyzeAndImproveSkill.content).toContain('MV_CONTAINS(tags,');
   });
 
-  it('binds only read-only registry tools', async () => {
+  it('binds the tools both diagnosing an index and authoring its automations need', async () => {
     const toolIds = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds).toEqual([
+      platformCoreTools.generateWorkflow,
+      platformCoreTools.executeWorkflow,
+      platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
       platformCoreTools.listIndices,
-      `${internalNamespaces.workflows}.get_workflow`,
+      platformCoreTools.getIndexMapping,
+      platformCoreTools.getWorkflowExecutionStatus,
       `${internalNamespaces.workflows}.validate_workflow`,
+      `${internalNamespaces.workflows}.get_workflow`,
+      `${internalNamespaces.workflows}.get_step_definitions`,
+      `${internalNamespaces.workflows}.get_examples`,
+      `${internalNamespaces.workflows}.get_connectors`,
     ]);
   });
 
-  it('binds no tool that could mutate an AI index', async () => {
+  it('binds no tool that writes a KI directly, since KIs come from automations', async () => {
     const toolIds = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).not.toContain(platformCoreTools.generateWorkflow);
-    expect(toolIds).not.toContain(platformCoreTools.executeWorkflow);
-    expect(toolIds.some((id) => /save|create|update|delete/i.test(id))).toBe(false);
+    expect(toolIds.some((id) => /createKi|updateKi|deleteKi/i.test(id))).toBe(false);
+  });
+
+  it('only instructs the agent to call tools that are actually bound', async () => {
+    const boundTools = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
+
+    // Every `platform.*` tool id the content tells the agent to call must be bound, so prose
+    // cannot drift into promising a capability the skill does not hand over.
+    const referencedToolIds = [
+      ...new Set(
+        [
+          ...analyzeAndImproveSkill.content.matchAll(
+            /platform\.(?:core|workflows|context_engine)\.[a-z_]+/g
+          ),
+        ].map(([match]) => match)
+      ),
+    ];
+
+    expect(referencedToolIds.length).toBeGreaterThan(0);
+    expect(referencedToolIds.filter((toolId) => !boundTools.includes(toolId))).toEqual([]);
   });
 
   describe('content', () => {
     const { content } = analyzeAndImproveSkill;
 
-    it('states that the analysis proposes rather than applies changes', () => {
-      expect(content).toContain('Propose, never apply');
+    it('leaves applying versus proposing to the run rather than deciding it in the skill', () => {
+      expect(content).toContain('Propose or apply — the run decides');
+    });
+
+    it('forbids hand-writing KIs, which would leave the producing automation unfixed', () => {
+      expect(content).toContain('Never write knowledge indicator documents directly');
+    });
+
+    it('covers the setup half: what a KI is, its shape, access patterns, and the strategies', () => {
+      expect(content).toContain('What a knowledge indicator is');
+      expect(content).toContain('KI document shape');
+      expect(content).toContain('Access patterns');
+      expect(content).toContain('Strategy catalog');
+    });
+
+    it('carries the corpus filter, which bounds generation and explains coverage gaps', () => {
+      expect(content).toContain('The corpus filter');
+    });
+
+    it('uses one calibrated confidence scale for both KIs and findings', () => {
+      expect(content).toContain('attributes.confidence');
+      expect(content).toMatch(/0\.9–1\.0/);
+      expect(content).toContain('Do not emit');
+    });
+
+    it('carries no human-in-the-loop choreography, which belongs to the invoking run', () => {
+      expect(content).not.toContain('ask_user_question');
+      expect(content).not.toContain('save_automation');
     });
 
     it('documents the signals index and the three classification tags', () => {
@@ -110,8 +171,8 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
     });
 
-    it('still forbids running a workflow, which validation must not be read as licence for', () => {
-      expect(content).toContain('Do not execute the workflow');
+    it('does not let validating a workflow be read as licence to run it', () => {
+      expect(content).toMatch(/Do not execute a workflow unless\s+the run has told you to/);
     });
   });
 });

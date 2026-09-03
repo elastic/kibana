@@ -12,7 +12,7 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
+import { ANALYZE_AND_IMPROVE_SKILL_ID } from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
@@ -25,8 +25,8 @@ const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
   {
     defaultMessage:
-      "Load [/{skillId}](skill://{skillId}) and follow its **When an ai_index attachment is present** section for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
-    values: { skillId: KI_AUTOMATION_GENERATION_SKILL_ID },
+      "Load [/{skillId}](skill://{skillId}) and suggest an automation for the attached AI index. Skip discovery and only use the attachment's destination, sources, and automations.",
+    values: { skillId: ANALYZE_AND_IMPROVE_SKILL_ID },
   }
 );
 

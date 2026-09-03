@@ -8,4 +8,4 @@
 export { graphCreationSkill } from './graph_creation_skill';
 export { skillManagementSkill } from './skill_management';
 export { registerSkills } from './register_skills';
-export { kiAutomationGenerationSkill } from './ki_automation_generation';
+export { analyzeAndImproveSkill } from './analyze_and_improve';

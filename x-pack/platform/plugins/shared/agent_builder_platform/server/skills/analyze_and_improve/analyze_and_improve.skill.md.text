@@ -1,38 +1,252 @@
 ## When to Use This Skill
 
-Load this skill when the task is to work out **why a Context Engine AI index is not serving agents
-well, and what to change about it**. Typical entry points are an "Analyze & improve" hand-off
-carrying a briefing about one AI index, or a user asking why an index's knowledge indicators are
-not being retrieved, why an agent keeps falling back to raw data, or why retrieval keeps failing.
+Load this skill for any task about **what a Context Engine AI index should contain, and what
+automation should produce it**. That covers both ends of the same question:
 
-This is the diagnostic counterpart to `ki-automation-generation`, which populates an AI index, and
-`ki-retrieval`, which queries one at answer time. Neither of those is what you want here: this
-skill reads evidence about how retrieval has been going and turns it into proposed changes.
+- **Nothing exists yet.** The user wants their Elasticsearch data or connector sources answerable
+  by an agent — pick a strategy, agree a corpus, and produce the workflows that generate knowledge
+  indicators.
+- **Something exists and is not working.** Retrieval keeps coming back empty, agents keep falling
+  back to raw data, or an "Analyze & improve" hand-off arrives with signals about one index —
+  work out what is wrong and what changes.
 
-## Propose, never apply
+These are the same job at different starting points. Setting an index up is the case where every
+question is an open gap and there is no evidence yet; improving one is the case where evidence
+tells you which gaps are real. Both end in the same deliverable: a named change to a workflow or a
+source, argued from what the data and the retrievals actually show.
 
-This analysis makes **no writes**. No knowledge indicator documents, no workflow updates, no source
-changes, no registry changes — not even a "harmless" one to test a theory. The result of the
-analysis is a set of proposals that a human, or the run that invoked you, decides on.
+`ki-retrieval` is the separate skill for *querying* an index at answer time. It is not what you
+want here.
 
-If you catch yourself reaching for a tool that would change the index, stop and describe the change
-you wanted to make instead. Describing it *is* the deliverable.
+## Propose or apply — the run decides, not you
+
+This skill tells you what *should* change. Whether you may act on it is a property of the run you
+are in, not of the analysis, and you find out from the tools you were given and from what the
+attachment or system prompt says:
+
+- **When the run says to apply**, author the change through `platform.core.generate_workflow` and
+  the save path the run gives you. How to sequence that with the user — what to ask, when to show
+  a diff, when to save — comes from the run, not from here.
+- **When nothing grants you that**, and always when the run is unattended, the proposal *is* the
+  deliverable. Describe the change precisely enough to act on and stop there.
+
+Never write knowledge indicator documents directly under any circumstances. KIs are produced by
+automations. A KI you write by hand is an artifact with no workflow behind it: the next scheduled
+run will not reproduce it, and the defect you were working around stays unfixed.
 
 ## The model
 
-An AI index has a pipeline: **sources** feed **automations** (workflows), which generate
-**knowledge indicators** (KIs) into the index's destination. Agents then retrieve those KIs at
-query time to answer questions.
+An AI index has a pipeline: **sources** feed **automations** (Kibana Workflows), which generate
+**knowledge indicators** (KIs) into the index's destination. Agents retrieve those KIs at query
+time instead of scanning raw data, which cuts token cost and makes answers consistent.
 
-A **signal** is one observation of that retrieval going well or badly — an ES|QL tool call an agent
+**The lever is the automation.** Every change worth proposing is a change to a workflow, or to the
+sources feeding one — never to an individual KI, which is an artifact of the automation that
+produced it and will be regenerated with the same defect. When evidence points at a KI, answer
+*which automation produced it, and what about that automation changes*.
+
+A **signal** is one observation of retrieval going well or badly — an ES|QL tool call an agent
 made, classified after the fact. Signals are the raw evidence. A **finding** is a claim about the
-pipeline that specific signals support. Your job is to get from the former to the latter, and only
-then to a proposed change.
+pipeline that specific signals support. Getting from the former to the latter, and only then to a
+proposed change, is the work.
 
-**The lever is the automation.** Every change you propose is a change to a workflow, or to the
-sources feeding one — never to an individual knowledge indicator, which is an artifact of the
-automation that produced it and will be regenerated with the same defect. When the evidence points
-at a KI, answer *which automation produced it, and what about that automation changes*.
+## What a knowledge indicator is
+
+A **KI** is a structured fact stored in a searchable AI index or datastream (backing stores match
+`ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise). Workflows write KIs through the
+`context-engine` steps using the AI index id — never by indexing into the backing store directly.
+
+Each KI does two things:
+
+1. **Orients** — describes a class of information: its purpose, when to use it, what it does and
+   does not contain, and how it joins to related data.
+2. **Provides access patterns** — parameterized queries the agent fills in at ask-time to reach
+   the live documents. ES|QL templates for Elasticsearch sources;
+   `execute_connector_sub_action` call descriptions for connector sources.
+
+A KI that only orients sends the agent somewhere with no way to get there. A KI that only carries
+a query is a snippet the retriever cannot route to. Both halves earn their place.
+
+## KI document shape
+
+The AI index schema has these base fields:
+
+| Field | Type | Purpose |
+|---|---|---|
+| `type` | keyword | The **KI kind** — the discriminator agents filter on: `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value. |
+| `title` | text + semantic | Short display name; the primary semantic surface. |
+| `description` | text + semantic | Routing heuristic — what the source does *not* contain, key fields, joins. When sibling KIs share a similar title, this **must** carry the differentiator (sub-category, product, time window). Title alone will not separate near-duplicates for the retriever. |
+| `content` | text + semantic | Free text for semantic retrieval: purpose, questions answered, access patterns. |
+| `tags` | keyword[] | Filter facets. |
+| `attributes` | flattened | Structured, keyword-queryable metadata, plus every quality and lifecycle field. |
+| `@timestamp` | date | When the KI was last profiled. Set by `context-engine.createKi` at write time — never supplied in the step input. |
+
+**Everything else lives inside `attributes`.** It is `flattened`, so arbitrary nested keys are
+keyword-queryable with no declared mapping and can never cause a mapping conflict on a long-lived
+index. The fields that matter when diagnosing an index:
+
+| Field | Purpose |
+|---|---|
+| `attributes.confidence` | **Correctness** — how sure we are the facts are right, on the calibration bands below. |
+| `attributes.coverage` | **Completeness** — how fully the access patterns cover the source's question classes. Optional; most meaningful on `index_metadata` KIs. |
+| `attributes.evidence` | Observed values justifying the KI; each string quotes a real distribution. |
+| `attributes.expires_at` | ISO date, ~30 days out. **Omitted entirely for durable immutable-fact KIs**, which never age out. |
+| `attributes.excluded` | Soft exclude: the KI exists but agents skip it. |
+| `attributes.esql` | **The canonical location for any ES\|QL the KI carries** — a detection's materialized query, an index profile's runnable examples. This is the field the verifiers read. |
+
+**Structured values belong in both `content` and `attributes`** — as prose in `content` so they are
+semantically searchable, and repeated in `attributes` so they are exact-match and filter queryable.
+A value in only one of the two is invisible to half the retrieval paths, and that asymmetry is a
+common and easily missed cause of empty retrievals.
+
+Because `attributes` is `flattened`, numbers and dates inside it index as keywords. In ES|QL, cast
+before comparing: `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))`,
+`TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))`.
+
+## Access patterns
+
+Access patterns live in the KI's `content`, and any ES|QL among them is mirrored into
+`attributes.esql`. Format by source type:
+
+**Elasticsearch — ES|QL template:**
+
+```
+Access patterns:
+  Q: Status of a specific support case
+  ESQL: FROM raw-cases-all | WHERE case_number == ?case_number | KEEP status, priority | LIMIT 1
+  params: case_number (keyword, e.g. "02115676")
+  returns: status, priority for one case
+```
+
+**Connector — `execute_connector_sub_action` call:**
+
+```
+Access patterns:
+  Q: Files in a specific Google Drive folder
+  Tool: execute_connector_sub_action
+  connector_id: <connector_id>
+  sub_action: listFiles
+  params: { folderId: "<folder_id>" }
+  returns: list of file metadata objects
+```
+
+Keep example queries cheap — end with a small `| LIMIT n`.
+
+Two query forms are both legitimate. **Parameterized templates** serve fill-in-the-blank question
+classes, where the agent supplies the value at ask time. **Complete runnable queries** serve named
+detection conditions, where the *condition* is the stable thing worth materializing. Detection KIs
+additionally allow `FROM <index> METADATA _id, _source` so a detection can point back at the
+documents that triggered it, and the full-text `field : "value"` match operator.
+
+## First principles
+
+1. **Choose the right granularity.** A KI can represent an index, a theme, an entity class, or a
+   single document. Prefer the coarsest granularity that still answers a whole class of questions.
+   A few high-leverage KIs beat many thin ones.
+
+2. **Precompute the path, not the value.** Cache stable things — themes, when-to-use, joins, query
+   templates. Materialize a literal answer only for **immutable** facts, such as a resolved case's
+   root cause. Never materialize volatile facts (status, priority, counts, dates): they rot and
+   produce confidently wrong answers. Immutability sets the durability tier — immutable-fact KIs
+   omit `expires_at`; anything that can drift gets a TTL and is refreshed on re-run.
+
+3. **Ground every access pattern.** Build queries from the index's real mapping and sample
+   documents, never invented field names, and justify every threshold from an observed
+   distribution.
+
+4. **The Context Engine is a cache, not a database.** Do not generate KIs for an entire corpus
+   eagerly. See the corpus filter below.
+
+5. **Keep a fallback.** A finite set of KIs cannot anticipate every question. When no KI fits, the
+   agent queries raw data directly. KIs accelerate retrieval; they do not replace it. This matters
+   when reading signals: a raw query is not automatically a defect.
+
+6. **Derive, don't ask.** Anything computable deterministically from the data or the query text,
+   compute it — do not ask a model for it. Derive a detection's `query_type` by parsing the ES|QL
+   for a `STATS` command rather than having the model classify it. The model's job is judgement,
+   not mechanical classification it will occasionally get wrong.
+
+## Strategy catalog
+
+| Strategy | Granularity | `type` | When to use |
+|---|---|---|---|
+| **Index/Table Metadata** | One KI per index | `index_metadata` | Always start here. Tells the agent which index to query, when, and how to reach it. |
+| **Bottom-Up** | One KI per document | `document` | Dense, bounded corpora: knowledge bases, case records, articles, product docs. |
+| **Selective / Outlier** | One KI per significant document | `event` | Log and event streams where most records are noise but outliers matter. |
+| **Atomic Facts** | Many KIs per document | `fact` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
+| **Cumulative / Wiki-style** | One KI per entity, enriched over runs | `entity` | Entities recurring across many documents: customers, products, hosts. |
+| **Detection / Feature** | One KI per named condition / per entity | `detection`, `feature` | Observability data needing runnable detection conditions and structured inventory. |
+
+Quick guide: logs and metrics → Index Metadata plus Selective/Outlier plus Detection/Feature;
+article corpus → Bottom-Up; dense documents → Atomic Facts; recurring entities → Cumulative;
+several indices → Metadata for all, then one deeper strategy for the most important; unsure →
+Index/Table Metadata, which is cheap, fast and always useful.
+
+Strategy is also a diagnosis. An index generating one thin KI per document when its questions are
+categorical is not under-covered — it is at the wrong granularity, and generating *more* of the
+same will not fix it.
+
+## The corpus filter
+
+Every automation runs over a filtered slice of its source, not the whole thing: a time window
+(last 90 days), a status condition (resolved cases only), or a numeric cap (at most 1,000 KIs).
+The filter is agreed before an automation is drafted, and running without one risks cost and index
+bloat.
+
+**Read the filter before diagnosing a coverage gap.** When agents keep reaching for data no
+indicator covers, the most common cause is not that the automation is generating badly — it is
+that the corpus filter excluded that data. Those are different fixes: widening a filter is cheap
+and reversible, redesigning a generation prompt is neither. A coverage-gap finding that does not
+say which it is has not finished the analysis.
+
+## What every automation must do
+
+Do not hand-write workflow YAML. Describe the workflow to `platform.core.generate_workflow` using
+the strategy shapes as the spec. Whatever the strategy, the generated workflow has to:
+
+- Read its source through `elasticsearch.esql.query` or a connector step, applying the agreed
+  corpus filter.
+- Ground the model on real data before asking it for anything — a sample of documents, and for
+  detections a distribution aggregation whose observed counts every threshold must quote.
+- Use `ai.prompt` rather than `ai.agent` unless tool use is genuinely required.
+- Write through the `context-engine` steps, never a raw `elasticsearch.index`, and gate every
+  write on `context-engine.verifyKi` so a KI whose ES|QL fails to parse is reported rather than
+  persisted.
+- Set a stable, normalized `ki_id` derived from the KI's own identifying data, so a re-run
+  replaces rather than duplicates.
+- Put every ES|QL the KI carries into `attributes.esql`, and mirror structured values into both
+  `content` and `attributes`.
+
+A complete worked example of the Index Metadata shape — grounding steps, prompt, verified sink —
+is in the `index-selection-reference-workflow` resource attached to this skill. Read it as the
+reference for what a finished automation looks like, whether you are drafting one or judging one.
+
+For the semantics of a step type, Liquid templating, trigger schemas or `on-failure` handling,
+load `workflow-authoring` rather than inferring them from the YAML. Misreading what a step *does*
+is the most expensive mistake available here: every downstream claim inherits it.
+
+## Confidence
+
+One calibration applies to everything this skill produces — the `attributes.confidence` an
+automation writes onto a KI, and how sure you say you are of a finding. Both are claims about
+evidence strength, so they use one scale:
+
+| Band | Meaning |
+|---|---|
+| 0.9–1.0 | Explicit, unambiguous evidence |
+| 0.7–0.89 | Strong pattern, several corroborating signals |
+| 0.5–0.69 | Clear indicators, some ambiguity |
+| 0.3–0.49 | Weak inference — must be tagged `inferred` |
+| < 0.3 | Do not emit |
+
+**Non-empty grounding gate.** Do not emit a KI, or state a finding, that you cannot back with a
+stable identifying property *and* concrete evidence. Ungrounded output with a confidence score
+attached is a hallucination wearing a number.
+
+**Evidence discipline.** Two to five short, specific evidence strings quoting real observed values
+in `field.path=value` notation — `service.name=checkout`,
+`error.type=timeout (312/1,204)`. When derived from specific documents, record the minimal
+covering set of source ids: enough to trace every claim, no more.
 
 ## Where the evidence lives
 
@@ -129,8 +343,8 @@ you read a trace:
   tool call and none of the conversation around it. When that happens the reasoning was not
   captured, which is not the same as the agent having had none — report the former and do not
   infer intent from an empty attribute.
-- **Its ES|QL helper resolves the *current* space's traces index.** Signals here span every space,
-  so for a signal from another space that helper points at the wrong index and the join comes back
+- **Its ES|QL helper resolves the *current* space's traces index.** Signals span every space, so
+  for a signal from another space that helper points at the wrong index and the join comes back
   empty rather than failing. Keep deriving the traces index from the signal's own `_index`, as
   above, and use the skill for the vocabulary rather than for the index name.
 
@@ -141,27 +355,23 @@ evidence there is: say so rather than reporting the conversation as unavailable.
 
 Before proposing a change to something, read it.
 
-- **Automations, first and in detail.** The briefing lists the AI index's linked workflow ids;
-  `platform.workflows.get_workflow` returns a workflow's definition. Your proposal has to name a
-  step, so read for one: what it samples and how much, what it asks the model for, how many
-  indicators it can emit, and what it writes into which fields. A pipeline's *shape* often bounds
-  what it could ever produce, however well its prompts are worded. A proposal that misquotes what a
-  workflow does will be rejected on sight. When a definition uses syntax you are unsure of — step
-  types, Liquid templating, trigger event schemas, `on-failure` handling — load `workflow-authoring`
-  rather than inferring the semantics from the YAML. Misreading what a step *does* is the most
-  expensive mistake available here: every downstream claim inherits it.
+- **Automations, first and in detail.** `platform.workflows.get_workflow` returns a workflow's
+  definition. Your proposal has to name a step, so read for one: what it samples and how much, what
+  it asks the model for, how many indicators it can emit, and what it writes into which fields. A
+  pipeline's *shape* often bounds what it could ever produce, however well its prompts are worded.
+  A proposal that misquotes what a workflow does will be rejected on sight.
 - **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` indices;
   `platform.core.execute_esql` samples them. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
-  content" or "content that exists under a name the agent did not guess". What is missing or
-  malformed in them is the output the workflow actually produced. With several linked workflows,
-  attribute a KI to one by reading the definitions and seeing which writes to that destination and
-  id pattern. If that does not settle it, say attribution was not established rather than guessing.
-- **Sources.** The briefing lists them. A coverage gap on data that is not in any source is a
-  source problem, and the fix is to the source rather than to any automation. Confirm it before
-  proposing: an `esql` source is a query you can run, so run it and see whether the data is
-  genuinely absent or merely filtered out. A `connector` source you cannot inspect — say so and
-  describe what you would need to check, rather than proposing a change to contents you never saw.
+  content" or "content that exists under a name the agent did not guess". With several linked
+  workflows, attribute a KI to one by reading the definitions and seeing which writes to that
+  destination and id pattern. If that does not settle it, say attribution was not established
+  rather than guessing.
+- **Sources, and the filter on them.** A coverage gap on data that is not in any source is a source
+  problem. Confirm it before proposing: an `esql` source is a query you can run, so run it and see
+  whether the data is genuinely absent or merely filtered out. A `connector` source you cannot
+  inspect — say so and describe what you would need to check, rather than proposing a change to
+  contents you never saw.
 
 ## Validate any workflow YAML before you propose it
 
@@ -184,29 +394,29 @@ and teaches them to distrust the next one.
 Validation establishes that the workflow parses, that its step types exist and that its references
 resolve. It does not establish that a query inside it returns anything. Where the change is to an
 ES|QL step, check the query itself with `platform.core.execute_esql`, which reads and writes
-nothing.
+nothing. Where a step's ES|QL is being repaired, `platform.core.generate_esql` will rewrite it
+given the failing query, the reason and the mapping.
 
-That is as far as you go. **Do not execute the workflow or any step of it.** *Propose, never apply*
-is not suspended by a desire to be sure, and a step with side effects would prompt for a
-confirmation that, in an unattended run, has nobody to answer it.
+Running a workflow is a separate authority from validating one. Do not execute a workflow unless
+the run has told you to.
 
 ## Prefer the signals you were given
 
-When the run hands you a pre-selected, grouped set of signals, **work from that set**. It has
-already been scoped to the AI index, the time window, and the tags the run cares about, and it is
-what the run's output will be reconciled against. Reading `context-engine-signals-*` directly in
-that case risks basing a finding on evidence that has nothing to do with this index.
+When a run hands you a pre-selected, grouped set of signals, **work from that set**. It has already
+been scoped to the AI index, the time window, and the tags the run cares about, and it is what the
+run's output will be reconciled against. Reading `context-engine-signals-*` directly in that case
+risks basing a finding on evidence that has nothing to do with this index.
 
-Query `context-engine-signals-*` yourself only when no signals came with the run. Inspect the AI
-index and its linked workflows either way.
+Query the signals indices yourself only when no signals came with the run. Inspect the AI index and
+its linked workflows either way.
 
 ## What makes a finding worth proposing
 
 A finding is worth proposing when all of the following hold.
 
-1. **It recurs.** Do not propose a change from a single signal. A pattern across several signals — ideally
-   several distinct conversations, not one conversation where the agent retried five times — is
-   evidence. `data.conversation_id` and `trace_ids` are how you tell those apart, and
+1. **It recurs.** Do not propose a change from a single signal. A pattern across several signals —
+   ideally several distinct conversations, not one conversation where the agent retried five times
+   — is evidence. `data.conversation_id` and `trace_ids` are how you tell those apart, and
    `data.looped` warns you when you are looking at the latter.
 
 2. **You can name the signals behind it.** A finding you cannot trace back to specific signals is a
@@ -236,7 +446,8 @@ A finding is worth proposing when all of the following hold.
 - **Many `empty_retrieval` on one `target_index`, semantically similar queries.** Content the
   agents need is not reaching the index. Read the KIs before concluding it is absent: if related
   content exists but under vocabulary the queries never use, the automation is generating the right
-  material and describing it badly, which is a different change from generating more of it.
+  material and describing it badly, which is a different change from generating more of it. Check
+  `description` in particular — near-duplicate titles with no differentiator are exactly this.
 - **`empty_retrieval` where the queries filter on a `type` or `tags` value the index does not
   have.** The retrieval skill requires the agent to aggregate the available values before filtering.
   Inspect the trace: if the agent skipped or ignored that discovery step, this is an agent-side
@@ -244,22 +455,24 @@ A finding is worth proposing when all of the following hold.
   independent evidence shows that the workflow failed to emit an intended taxonomy value.
 - **`query_error` from malformed ES|QL.** Query the trace by `trace_id` and inspect the ordered tool
   calls when trace details are available. Determine whether the agent composed the query or followed
-  an ES|QL access pattern from a previously retrieved KI. If the KI contains the malformed query,
-  inspect its producing workflow and propose correcting the generation step. If trace details are
-  unavailable, check whether the same query appears in a KI; otherwise do not attribute the error
-  to an automation.
+  an access pattern from a previously retrieved KI. If the KI contains the malformed query, inspect
+  its producing workflow and propose correcting the generation step — and note that a query in
+  `attributes.esql` passed `verifyKi`, which only parses, so a query can be syntactically valid and
+  still fail on unknown fields at execution time.
 - **Repeated `coverage_gap` on the same raw index, especially with `fell_back_to_raw`.** Agents
   keep reaching for data no indicator covers, and the raw queries tell you what an automation
-  should be producing. Confirm the gap first: a KI whose access pattern hands the agent a query to
-  run against live data is working as designed, and the agent running it is recorded as raw access
-  in the same round as the KI retrieval — the same signature as an agent that found nothing and
-  went to the data itself. If an indicator already covers the topic, there is nothing to fix.
+  should be producing. Check the corpus filter first — the data may be excluded rather than
+  missed. Then confirm the gap is real: a KI whose access pattern hands the agent a query to run
+  against live data is working as designed, and the agent running it is recorded as raw access in
+  the same round as the KI retrieval — the same signature as an agent that found nothing and went
+  to the data itself. If an indicator already covers the topic, there is nothing to fix.
 - **`coverage_gap` with no fallback and no errors.** The agent went straight to raw data and it
   worked. Weaker evidence: it may simply be a question indicators were never meant to answer.
 - **The index holds indicators, but the fields retrieval matches on are empty or malformed.**
   Looks identical to missing coverage; entirely different fix. The automation is writing documents
-  but a step is not populating what it should. Check how the writing step maps its inputs before
-  proposing anything about coverage or granularity.
+  but a step is not populating what it should. Check how the writing step maps its inputs, and
+  check whether structured values reached `attributes` as well as `content`, before proposing
+  anything about coverage or granularity.
 
 ### When to propose nothing
 
@@ -301,8 +514,21 @@ For each finding, make these legible:
   and what about that step changes. For a source: which source, and what data or configuration is
   added or altered.
 - **Why it should help** — the link from the evidence to the change.
-- **How confident you are, and what would raise it.**
+- **How confident you are, on the bands above, and what would raise it.**
 
-Report findings in whatever form the run asks for. Do not invent an output mechanism, and do not
-assume one: how a proposal is recorded, reviewed, or applied is a property of the run that invoked
-you, not of this analysis.
+Report in whatever form the run asks for. Do not invent an output mechanism, and do not assume one:
+how a proposal is recorded, reviewed, or applied is a property of the run that invoked you.
+
+## Handling edge cases
+
+**No indices or connectors.** Say so and offer to help set up a connector, rather than proposing
+against data you cannot see.
+
+**No signals, and nothing built yet.** This is the setup case. There is no evidence to reason from,
+so the analysis is of the data itself: what it contains, what questions it could answer, and which
+strategy fits. Start at Index/Table Metadata and say that the proposal rests on the shape of the
+data rather than on observed retrieval.
+
+**Corpus larger than 10,000 documents.** ES|QL caps at 10,000 rows per query. An automation over a
+larger corpus needs offset-based pagination, or a parent workflow dispatching per-item children
+with `workflow.executeAsync`. Note the cap rather than proposing a workflow that silently truncates.

@@ -205,7 +205,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
   'analyze-and-improve',
 
