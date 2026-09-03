@@ -15,6 +15,7 @@ export const createMockCodeboxClient = (): MockedCodeboxClient => {
     health: jest.fn().mockResolvedValue({ status: 'ok' }),
     listRepos: jest.fn().mockResolvedValue([]),
     grep: jest.fn().mockResolvedValue([]),
+    grepCount: jest.fn().mockResolvedValue(0),
     show: jest.fn().mockResolvedValue(''),
     tree: jest.fn().mockResolvedValue([]),
     languages: jest.fn().mockResolvedValue({}),

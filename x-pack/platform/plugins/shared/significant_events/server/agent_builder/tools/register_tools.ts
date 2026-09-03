@@ -20,10 +20,6 @@ import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createEventsWriteTool } from './event_write/tool';
 import { createValidateLoggingQueriesTool } from './validate_logging_queries/tool';
-import {
-  createInvestigationProgressReportTool,
-  SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
-} from '../../memory_and_investigation/tools/investigation_progress_report/tool';
 export {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID,
@@ -42,12 +38,14 @@ export function registerAgentBuilderTools({
   server,
   logger,
   telemetry,
+  featureFlags,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  featureFlags: import('@kbn/core/server').FeatureFlagsStart;
 }): void {
   if (!agentBuilder) {
     return;
@@ -107,14 +105,11 @@ export function registerAgentBuilderTools({
       logger: logger.get('events_write_tool'),
       telemetry,
     }),
-    createInvestigationProgressReportTool({
-      server,
-      logger: logger.get('investigation_progress_report_tool'),
-    }),
     createValidateLoggingQueriesTool({
       getScopedClients,
       server,
       logger: logger.get('logging_queries_validate_tool'),
+      featureFlags,
     }),
   ];
 

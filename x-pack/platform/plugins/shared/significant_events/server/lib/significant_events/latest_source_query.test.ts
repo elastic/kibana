@@ -5,7 +5,31 @@
  * 2.0.
  */
 
-import { resolveTimeBound } from './latest_source_query';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { executeAndDecodeSource, resolveTimeBound } from './latest_source_query';
+
+describe('executeAndDecodeSource', () => {
+  it('decodes a projected revision id alongside source without mutating source', async () => {
+    const esql = jest.fn().mockResolvedValue({
+      columns: [
+        { name: '_source', type: 'source' },
+        { name: '_revision_id', type: 'keyword' },
+      ],
+      values: [[{ id: 'query-1', kibana: { space_ids: ['default'] } }, 'document-id-1']],
+    });
+    const query = {
+      print: jest.fn().mockReturnValue('FROM index | KEEP _source, _revision_id'),
+    };
+
+    await expect(
+      executeAndDecodeSource(
+        { esql: { query: esql } } as unknown as ElasticsearchClient,
+        query as never,
+        { revisionIdColumn: '_revision_id' }
+      )
+    ).resolves.toEqual({ hits: [{ id: 'query-1', _revision_id: 'document-id-1' }] });
+  });
+});
 
 describe('resolveTimeBound', () => {
   it('resolves date-math expressions to ISO', () => {

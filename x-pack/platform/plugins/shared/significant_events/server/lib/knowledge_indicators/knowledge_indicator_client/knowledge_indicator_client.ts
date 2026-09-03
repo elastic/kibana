@@ -93,6 +93,13 @@ export class KnowledgeIndicatorClient {
     return this.writer.deleteIndicators(stream);
   }
 
+  deleteUnscopedLegacyIndicators(
+    stream: string,
+    identities: Array<{ type: KnowledgeIndicatorType; id: string }>
+  ): Promise<{ applied: number }> {
+    return this.writer.deleteUnscopedLegacyIndicators(stream, identities);
+  }
+
   getFeatures(
     streams: string | string[],
     options?: {
@@ -169,6 +176,28 @@ export class KnowledgeIndicatorClient {
 
   getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
     return this.reader.getStreamNamesWithKnowledgeIndicators();
+  }
+
+  getScopedIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    return this.reader.getScopedIndicators(streamNames);
+  }
+
+  getScopedStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getScopedStreamNamesWithKnowledgeIndicators();
+  }
+
+  getUnscopedLegacyIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    return this.reader.getUnscopedLegacyIndicators(streamNames);
+  }
+
+  getUnscopedLegacyStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getUnscopedLegacyStreamNamesWithKnowledgeIndicators();
   }
 
   /**

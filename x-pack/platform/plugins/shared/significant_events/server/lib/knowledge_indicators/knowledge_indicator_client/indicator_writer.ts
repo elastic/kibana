@@ -21,7 +21,7 @@ import {
   IS_NOT_DELETED,
   olderThan,
 } from '../esql_helpers';
-import { ID, STREAM_NAME } from '../fields';
+import { ID, STREAM_NAME, type KnowledgeIndicatorType } from '../fields';
 import {
   computeExpiresAt,
   fromStoredFeature,
@@ -204,7 +204,10 @@ export class IndicatorWriter {
     stream: string,
     operations: KIBulkOperation[]
   ): Promise<{
-    deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+    deletableOps: Array<{
+      operation: Extract<KIBulkOperation, { delete: unknown }>;
+      revision: StoredKnowledgeIndicator;
+    }>;
     skipped: number;
   }> {
     const deleteOps = operations.filter(
@@ -219,12 +222,18 @@ export class IndicatorWriter {
       combineWhere(inPredicate(STREAM_NAME, [stream]), inPredicate(ID, [...deleteIds])),
       IS_NOT_DELETED
     );
-    const presentByTypeId = new Set(deleteLatest.map((doc) => `${doc.type}:${doc.id}`));
-    const deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>> = [];
+    const presentByTypeId = new Map(
+      deleteLatest.map((doc) => [`${doc.type}:${doc.id}`, doc] as const)
+    );
+    const deletableOps: Array<{
+      operation: Extract<KIBulkOperation, { delete: unknown }>;
+      revision: StoredKnowledgeIndicator;
+    }> = [];
     let skipped = 0;
     for (const op of deleteOps) {
-      if (presentByTypeId.has(`${op.delete.type}:${op.delete.id}`)) {
-        deletableOps.push(op);
+      const revision = presentByTypeId.get(`${op.delete.type}:${op.delete.id}`);
+      if (revision) {
+        deletableOps.push({ operation: op, revision });
       } else {
         skipped += 1;
       }
@@ -250,7 +259,10 @@ export class IndicatorWriter {
     }: {
       excludableLatest: StoredFeatureKnowledgeIndicator[];
       restorableLatest: StoredFeatureKnowledgeIndicator[];
-      deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>>;
+      deletableOps: Array<{
+        operation: Extract<KIBulkOperation, { delete: unknown }>;
+        revision: StoredKnowledgeIndicator;
+      }>;
       includeEmbedding: boolean;
       now: string;
     }
@@ -264,7 +276,13 @@ export class IndicatorWriter {
           );
         } else {
           docs.push(
-            toStoredQuery(stream, op.index.query, includeEmbedding, op.index.query.expires_at)
+            toStoredQuery(
+              stream,
+              op.index.query,
+              includeEmbedding,
+              op.index.query.expires_at,
+              op.index.sourceId
+            )
           );
         }
       }
@@ -283,8 +301,15 @@ export class IndicatorWriter {
         toStoredFeature(stream, { ...feature, excluded: undefined }, includeEmbedding, expiresAt)
       );
     }
-    for (const op of deletableOps) {
-      docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
+    for (const { operation, revision } of deletableOps) {
+      docs.push(
+        toTombstone(stream, {
+          id: operation.delete.id,
+          type: operation.delete.type,
+          'source.id': revision['source.id'],
+          'source.ids': revision['source.ids'],
+        })
+      );
     }
     return docs;
   }
@@ -328,7 +353,8 @@ export class IndicatorWriter {
               stream,
               { ...link.query, rule_backed: link.rule_backed, rule_id: link.rule_id },
               includeEmbedding,
-              rollExpiresAt(doc.expires_at)
+              rollExpiresAt(doc.expires_at),
+              link.source_id ?? stream
             )
           );
         }
@@ -341,6 +367,31 @@ export class IndicatorWriter {
     });
 
     return { refreshed: latest.length };
+  }
+
+  /** Tombstones unscoped legacy revisions only when the reader is in the default space. */
+  async deleteUnscopedLegacyIndicators(
+    stream: string,
+    identities: Array<{ type: KnowledgeIndicatorType; id: string }>
+  ): Promise<{ applied: number }> {
+    if (identities.length === 0) return { applied: 0 };
+    const requested = new Set(identities.map(({ type, id }) => `${type}:${id}`));
+    const latest = await this.revisionReader.fetchLatestUnscopedLegacyRevisions(
+      inPredicate(STREAM_NAME, [stream]),
+      IS_NOT_DELETED
+    );
+    const tombstones = latest
+      .filter((doc) => requested.has(`${doc.type}:${doc.id}`))
+      .map((doc) => toTombstone(stream, doc));
+    if (tombstones.length === 0) return { applied: 0 };
+    const response = await this.dataStreamClient.create({
+      refresh: 'wait_for',
+      documents: tombstones as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
+    });
+    if (response.errors) {
+      throw new Error(`Failed to delete ${tombstones.length} unscoped legacy indicators`);
+    }
+    return { applied: tombstones.length };
   }
 
   async deleteIndicators(stream: string): Promise<void> {

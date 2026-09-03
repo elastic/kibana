@@ -23,6 +23,8 @@ export {
 export {
   identifyCodeFeaturesForService,
   getCodeFeatureStreamPrefix,
+  getCodePredictiveSourceId,
+  getCodePredictiveSourceIds,
   getRepositoryFeatureStreamName,
   getServiceFeatureStreamName,
   type IdentifyCodeForServiceOptions,
@@ -102,6 +104,7 @@ export {
 } from './identify_code_queries';
 export {
   reconcileCodeAndLogQueries,
+  reconcileCodeAndLogQueriesAcrossOwners,
   buildQueryReconcilePlan,
   toReconcileOperations,
   computeClusters,

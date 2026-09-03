@@ -30,10 +30,11 @@ const makeQuery = (
 });
 
 const makeLink = (
-  overrides: Partial<StreamQuery> & { id?: string; ruleBacked?: boolean } = {}
+  overrides: Partial<StreamQuery> & { id?: string; ruleBacked?: boolean; sourceId?: string } = {}
 ): QueryLink => ({
   query: makeQuery(overrides),
   stream_name: STREAM,
+  source_id: overrides.sourceId,
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id ?? 'q1'}`,
 });
@@ -148,6 +149,20 @@ describe('QueryRuleOrchestrator', () => {
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(false);
       expect(bulkOps[0].index.query.id).toBe('keep-before-where');
+    });
+
+    it('preserves source ownership while syncing an existing query', async () => {
+      const existing = makeLink({
+        id: 'source-owned',
+        ruleBacked: false,
+        sourceId: 'source-distinct-from-stream',
+      });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.syncQueries(definition, [existing.query], { currentLinks: [existing] });
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.sourceId).toBe('source-distinct-from-stream');
     });
 
     it('demotes a previously backed query that becomes unsupported MATCH', async () => {

@@ -356,10 +356,8 @@ export interface DetectLoggingProfileDriftOptions {
  * the grep's result is marked `failed`, `refresh` stays false, and the error is
  * recorded so the caller can surface it without invalidating the profile.
  *
- * The recount uses the same parameterised `?regex` binding as `codeGrep` and the
- * validate tool — never string interpolation. Each grep is one ES|QL `STATS`
- * query returning only the hit count (no evidence check needed: the grep was
- * already validated against its evidence at persistence time).
+ * Each recount uses Codebox count-only grep, returning only the hit count (no
+ * evidence check needed: the grep was already validated at persistence time).
  */
 export async function detectLoggingProfileDrift({
   codebox,
@@ -423,14 +421,12 @@ async function recountOneGrep({
     if (!stripped) {
       return classifyDrift(stored.regex, expected, expected, false, null, driftRatio);
     }
-    const erePattern = stripped;
-    const hits = await codebox.grep({
+    const actual = await codebox.grepCount({
       org,
       repo,
       ref,
-      pattern: erePattern,
+      pattern: stripped,
     });
-    const actual = hits.length;
     return classifyDrift(stored.regex, expected, actual, false, null, driftRatio);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -49,6 +49,9 @@ export interface CodeboxGrepOptions {
   maxCount?: number;
 }
 
+/** Options for {@link CodeboxClient.grepCount}. */
+export type CodeboxGrepCountOptions = Omit<CodeboxGrepOptions, 'contextLines' | 'maxCount'>;
+
 /** Options for {@link CodeboxClient.show}. */
 export interface CodeboxShowOptions {
   org: string;
@@ -146,21 +149,41 @@ export class CodeboxClient {
    * body as a string, which this method parses into typed objects.
    */
   async grep(options: CodeboxGrepOptions): Promise<CodeboxGrepHit[]> {
-    const { org, repo, pattern, ref, path, ignoreCase, contextLines, maxCount } = options;
-    const query = new URLSearchParams({ pattern, extendedRegex: 'true' });
-    if (ref) query.set('ref', ref);
-    if (path) query.set('path', path);
-    if (ignoreCase) query.set('ignoreCase', 'true');
+    const { org, repo, pattern, contextLines, maxCount } = options;
+    if (isMatchAllPattern(pattern)) {
+      throw new Error('Codebox normal grep rejects match-all patterns; use grepCount instead');
+    }
+
+    const query = buildGrepQuery(options);
     if (contextLines !== undefined) query.set('contextLines', String(contextLines));
     // Always cap maxCount to prevent unbounded responses from degenerate
     // patterns. Callers may pass a lower value; the cap is a safety net.
-    query.set('maxCount', String(maxCount ?? MAX_GREP_HITS));
+    query.set('maxCount', String(Math.min(maxCount ?? MAX_GREP_HITS, MAX_GREP_HITS)));
 
     const data = await this.request('GET', `/repos/${org}/${repo}/grep?${query}`);
     if (typeof data === 'string') {
       return parseGrepOutput(data);
     }
     return [];
+  }
+
+  /** Count grep matches without returning line payloads. */
+  async grepCount(options: CodeboxGrepCountOptions): Promise<number> {
+    const { org, repo } = options;
+    const query = buildGrepQuery(options);
+    query.set('countOnly', 'true');
+    const data = await this.request('GET', `/repos/${org}/${repo}/grep?${query}`);
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      !('count' in data) ||
+      typeof data.count !== 'number' ||
+      !Number.isSafeInteger(data.count) ||
+      data.count < 0
+    ) {
+      throw new Error(`Codebox returned an invalid grep count for ${org}/${repo}`);
+    }
+    return data.count;
   }
 
   /**
@@ -355,6 +378,20 @@ export const getCodeboxClient = async ({
     logger,
   });
 };
+
+function buildGrepQuery(options: CodeboxGrepCountOptions): URLSearchParams {
+  const { pattern, ref, path, ignoreCase } = options;
+  const query = new URLSearchParams({ pattern, extendedRegex: 'true' });
+  if (ref) query.set('ref', ref);
+  if (path) query.set('path', path);
+  if (ignoreCase) query.set('ignoreCase', 'true');
+  return query;
+}
+
+function isMatchAllPattern(pattern: string): boolean {
+  const normalized = pattern.trim();
+  return normalized === '.' || normalized === '.*' || normalized === '.+' || normalized === '^.*$';
+}
 
 /**
  * Parses Codebox grep plain-text output into typed hits.

@@ -10,7 +10,7 @@ import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { FeatureFlagsStart, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -18,6 +18,7 @@ import { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { validateLoggingQueriesHandler, type ValidateLoggingQueriesOutput } from './handler';
 import { getCodeboxClient } from '../../../lib/knowledge_indicators/code_intelligence/codebox_client';
+import { assertCodeIntelligenceEnabled } from '../../../routes/internal/knowledge_indicators/code_features/assert_code_intelligence_enabled';
 
 export { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids';
 
@@ -81,10 +82,12 @@ export function createValidateLoggingQueriesTool({
   getScopedClients,
   server,
   logger,
+  featureFlags,
 }: {
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  featureFlags: FeatureFlagsStart;
 }): StaticToolRegistration<typeof validateLoggingQueriesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof validateLoggingQueriesSchema> = {
     id: SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID,
@@ -114,6 +117,13 @@ export function createValidateLoggingQueriesTool({
       every grep reports \`pass: true\`, or return an empty list when the repository has
       no house wrapper (a correct and common answer).
     `,
+    annotations: {
+      title: 'Validate logging queries',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: validateLoggingQueriesSchema,
     tags: ['streams', 'significant-events', 'code-intelligence'],
     availability: {
@@ -124,6 +134,7 @@ export function createValidateLoggingQueriesTool({
             server,
             licensing: server.licensing,
           });
+          await assertCodeIntelligenceEnabled(featureFlags);
           return { status: 'available' };
         } catch (error) {
           if (error instanceof Error) {
@@ -150,8 +161,10 @@ export function createValidateLoggingQueriesTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCodeIntelligenceEnabled(featureFlags);
 
         const codebox = await getCodeboxClient({ actions: server.actions, request, logger });
+        await assertCodeIntelligenceEnabled(featureFlags);
         const output: ValidateLoggingQueriesOutput = await validateLoggingQueriesHandler({
           codebox,
           repository: toolParams.repository,

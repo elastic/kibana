@@ -112,6 +112,9 @@ export interface QueriesOccurrencesGetResponse {
 
 export interface QueryLink {
   query: StreamQuery;
+  /** First-class Significant Events source that owns this query. */
+  source_id?: string;
+  /** @deprecated Legacy Streams partition key. */
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;

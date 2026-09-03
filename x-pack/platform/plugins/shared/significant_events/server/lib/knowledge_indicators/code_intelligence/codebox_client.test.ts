@@ -9,6 +9,59 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CodeboxClient, type ConnectorExecutor } from './codebox_client';
 
 describe('CodeboxClient', () => {
+  it('returns large count-only grep results without requesting line payloads', async () => {
+    const execute = jest.fn().mockResolvedValue({
+      status: 'ok',
+      data: { status: 200, data: { count: 1_234_567 } },
+    });
+    const client = new CodeboxClient({
+      executor: { execute } as ConnectorExecutor,
+      logger: loggerMock.create(),
+    });
+
+    await expect(
+      client.grepCount({ org: 'elastic', repo: 'kibana', ref: 'abc123', pattern: '.' })
+    ).resolves.toBe(1_234_567);
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ path: expect.stringContaining('countOnly=true') }),
+      })
+    );
+  });
+
+  it.each([{ count: -1 }, { count: 1.5 }, { count: '2' }, {}, null])(
+    'rejects invalid count-only grep response %#',
+    async (data) => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok', data: { status: 200, data } });
+      const client = new CodeboxClient({
+        executor: { execute } as ConnectorExecutor,
+        logger: loggerMock.create(),
+      });
+
+      await expect(
+        client.grepCount({ org: 'elastic', repo: 'kibana', pattern: 'error' })
+      ).rejects.toThrow('invalid grep count');
+    }
+  );
+
+  it('caps normal grep and rejects match-all patterns', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok', data: { status: 200, data: '' } });
+    const client = new CodeboxClient({
+      executor: { execute } as ConnectorExecutor,
+      logger: loggerMock.create(),
+    });
+
+    await expect(
+      client.grep({ org: 'elastic', repo: 'kibana', pattern: '.', maxCount: 1_000_000 })
+    ).rejects.toThrow('rejects match-all patterns');
+    await client.grep({ org: 'elastic', repo: 'kibana', pattern: 'error', maxCount: 1_000_000 });
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ path: expect.stringContaining('maxCount=50000') }),
+      })
+    );
+  });
+
   it('pages recursive path listings to keep connector responses bounded', async () => {
     const firstPage = Array.from({ length: 2000 }, (_, index) => `src/file-${index}.ts`);
     const secondPage = ['src/final.ts'];

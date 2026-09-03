@@ -86,11 +86,12 @@ export interface ValidateLoggingQueriesOptions {
 const rlikeToEre = (rlike: string): string =>
   rlike.replace(/^\.\*/, '').replace(/\.\*$/, '') || rlike;
 
+const EVIDENCE_GREP_LIMIT = 1_000;
+const SAMPLE_GREP_LIMIT = 3;
+
 /**
- * Validates one or more candidate regex greps against the repository via Codebox.
- * For each grep, one Codebox grep call returns both the hit count and whether the
- * grep matched its own evidence line (checked client-side), so `covers_evidence`
- * costs no extra round trip. `sample` is the first 3 `path:line` hits.
+ * Validates candidate greps with count-only requests. Bounded normal greps are
+ * used only to verify the cited file/line and collect up to 3 global samples.
  */
 export async function validateLoggingQueriesHandler({
   codebox,
@@ -103,7 +104,7 @@ export async function validateLoggingQueriesHandler({
   const { org, repo } = splitRepository(repository);
   const ref = gitCommit;
 
-  const repoTotalLines = await countRepoLines(codebox, org, repo, ref, logger);
+  const repoTotalLines = await countRepoLines(codebox, org, repo, ref);
 
   const results: GrepValidationResult[] = [];
   for (const candidate of greps) {
@@ -124,37 +125,14 @@ export async function validateLoggingQueriesHandler({
   return { repo_total_lines: repoTotalLines, results };
 }
 
-/**
- * Counts total lines in the repository at the given ref by grepping for a
- * universal pattern. This is an approximation — Codebox grep returns matched
- * lines, not total lines, so we grep for `.*` which matches every non-empty line.
- */
+/** Counts non-empty repository lines without transferring their contents. */
 async function countRepoLines(
   codebox: CodeboxClient,
   org: string,
   repo: string,
-  ref: string,
-  logger: Logger
+  ref: string
 ): Promise<number> {
-  try {
-    // Use a very high maxCount to approximate total lines; Codebox streams so
-    // this is bounded by the repo size rather than memory.
-    const hits = await codebox.grep({
-      org,
-      repo,
-      ref,
-      pattern: '.',
-      maxCount: 1_000_000,
-    });
-    return hits.length;
-  } catch (error) {
-    logger.debug(
-      `validate_logging_queries: repo total lines query failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-    return 0;
-  }
+  return codebox.grepCount({ org, repo, ref, pattern: '.' });
 }
 
 async function validateOneGrep({
@@ -179,26 +157,26 @@ async function validateOneGrep({
   const { regex, evidence } = candidate;
 
   try {
-    const hits = await codebox.grep({
+    const pattern = rlikeToEre(regex);
+    const hitCount = await codebox.grepCount({ org, repo, ref, pattern });
+    const evidenceHits = await codebox.grep({
       org,
       repo,
       ref,
-      pattern: rlikeToEre(regex),
+      path: evidence.path,
+      pattern,
+      maxCount: EVIDENCE_GREP_LIMIT,
     });
-
-    const hitCount = hits.length;
-    const coversEvidence = hits.some(
-      (hit) => hit.path === evidence.path && hit.lineNumber === evidence.line
-    );
+    const coversEvidence = evidenceHits.some((hit) => hit.lineNumber === evidence.line);
     const hitRatio = repoTotalLines > 0 ? hitCount / repoTotalLines : 0;
 
     const status = classifyStatus(hitCount, coversEvidence, hitRatio, ceiling);
     const pass = coversEvidence && hitRatio < ceiling;
-
-    const sample =
+    const sampleHits =
       status === 'ok' || status === 'evidence_missed'
-        ? hits.slice(0, 3).map((hit) => `${hit.path}:${hit.lineNumber}`)
+        ? await codebox.grep({ org, repo, ref, pattern, maxCount: SAMPLE_GREP_LIMIT })
         : [];
+    const sample = sampleHits.map((hit) => `${hit.path}:${hit.lineNumber}`);
 
     return {
       grep: regex,

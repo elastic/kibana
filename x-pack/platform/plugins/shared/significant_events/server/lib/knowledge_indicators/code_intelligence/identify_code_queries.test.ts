@@ -16,6 +16,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { CODE_FEATURE_SUBTYPE_SERVICE_NAME } from './constants';
+import { getCodePredictiveSourceId } from './identify_code_features';
 import { identifyCodeQueries } from './identify_code_queries';
 import type { StreamSamplingSource } from './link_ingesting_streams';
 
@@ -23,6 +24,8 @@ import type { StreamSamplingSource } from './link_ingesting_streams';
 const SERVICE_KEY = 'checkoutservice';
 const INGEST_STREAM = 'logs.checkout';
 const REPO = 'acme/checkout';
+const SPACE_ID = 'default';
+const LOG_SOURCE_ID = getCodePredictiveSourceId(SPACE_ID, 'logs');
 const streams: StreamSamplingSource[] = [
   { name: INGEST_STREAM, index: INGEST_STREAM, convention: 'ecs' },
 ];
@@ -68,7 +71,10 @@ const createKiClient = (features: Feature[], existingLinks: QueryLink[] = []) =>
     getFeatures: jest.fn(async () => ({ hits: features })),
     getStreamToQueryLinksMap: jest.fn(async (streamNames: string[]) =>
       Object.fromEntries(
-        streamNames.map((streamName) => [streamName, streamName === 'logs' ? existingLinks : []])
+        streamNames.map((streamName) => [
+          streamName,
+          streamName === LOG_SOURCE_ID ? existingLinks : [],
+        ])
       )
     ),
     bulk,
@@ -83,11 +89,13 @@ describe('identifyCodeQueries', () => {
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [{ content: 'logger.error("boom")' }],
       esClient: createEsClient(true),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.status).toBe('generated');
   });
@@ -99,11 +107,13 @@ describe('identifyCodeQueries', () => {
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [{ content: 'logger.error("boom")' }],
       esClient: createEsClient(true),
       logger,
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
       hasOtel: true,
     });
     expect(gated.status).toBe('otel_gated');
@@ -113,11 +123,13 @@ describe('identifyCodeQueries', () => {
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [{ content: 'logger.error("boom")' }],
       esClient: createEsClient(true),
       logger,
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
       hasOtel: true,
       otelGateBypassed: true,
     });
@@ -131,25 +143,27 @@ describe('identifyCodeQueries', () => {
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [{ content: 'const x = 1;' }],
       esClient: createEsClient(true),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.status).toBe('no_signatures');
     expect(bulk).not.toHaveBeenCalled();
   });
 
-  it('falls back to the logs* pattern on the root logs stream when no log-bearing stream exists', async () => {
+  it('uses the stable logs predictive source when no log-bearing stream exists', async () => {
     // Chicken-vs-egg: source indexed before any logs ship. Predictive queries
-    // must still be written, targeting `logs*` / `message` on the root `logs`
-    // stream so they match automatically once log data arrives.
+    // remain owned and visible through their space-scoped compatibility source.
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [
@@ -157,27 +171,29 @@ describe('identifyCodeQueries', () => {
       ],
       esClient: createEsClient(false),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.status).toBe('generated');
     expect(result.generatedCount).toBe(1);
-    expect(result.streams).toEqual(['logs']);
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
 
     expect(bulk).toHaveBeenCalledTimes(1);
-    // Attached to the root `logs` stream, not the service key or a real stream.
-    expect(bulk.mock.calls[0][0]).toBe('logs');
+    // Attached to the predictive source, not the service key, root logs, or a real stream.
+    expect(bulk.mock.calls[0][0]).toBe(LOG_SOURCE_ID);
     const { query } = bulk.mock.calls[0][1][0].index;
-    // Targets the broad logs* pattern and MATCH_PHRASE on `message` (text).
-    expect(query.esql.query).toContain('FROM logs*');
+    // Targets the broad logs-* pattern and MATCH_PHRASE on `message` (text).
+    expect(query.esql.query).toContain('FROM logs-*');
     expect(query.esql.query).toContain('MATCH_PHRASE(message, "Payment failed for order")');
     expect(query.esql.query).not.toContain('service.name');
   });
 
-  it('always writes predictive queries to the root logs stream (code-first)', async () => {
+  it('always writes predictive log queries to the logs predictive source', async () => {
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [
@@ -185,31 +201,33 @@ describe('identifyCodeQueries', () => {
       ],
       esClient: createEsClient(true),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
 
     expect(result.status).toBe('generated');
     expect(result.serviceName).toBe(SERVICE_KEY);
     expect(result.generatedCount).toBe(1);
-    expect(result.streams).toEqual(['logs']);
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
 
     expect(bulk).toHaveBeenCalledTimes(1);
-    expect(bulk.mock.calls[0][0]).toBe('logs');
+    expect(bulk.mock.calls[0][0]).toBe(LOG_SOURCE_ID);
     const operations = bulk.mock.calls[0][1];
     expect(operations).toHaveLength(1);
     const { query } = operations[0].index;
     expect(operations[0].index.query.rule_backed).toBe(false);
     expect(query.expires_at).toBeUndefined();
-    expect(query.esql.query).toContain('FROM logs*');
+    expect(query.esql.query).toContain('FROM logs-*');
     expect(query.esql.query).toContain('MATCH_PHRASE(message, "Payment failed for order")');
     expect(query.esql.query).not.toContain('service.name');
   });
 
-  it('targets root logs stream regardless of telemetry metadata', async () => {
+  it('keeps real stream metadata from changing predictive ownership', async () => {
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams: mixedConventionStreams,
       metadata: { loggingPattern: 'otel' },
       kiClient,
@@ -218,17 +236,18 @@ describe('identifyCodeQueries', () => {
       ],
       esClient: createEsClient(true),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
 
-    expect(result.streams).toEqual(['logs']);
-    expect(bulk).toHaveBeenCalledWith('logs', expect.any(Array));
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
+    expect(bulk).toHaveBeenCalledWith(LOG_SOURCE_ID, expect.any(Array));
   });
 
   it('de-duplicates against queries that already exist on the logs stream', async () => {
     const existingEsql =
-      'FROM logs* METADATA _id, _source | WHERE MATCH_PHRASE(message, "Payment failed for order")';
+      'FROM logs-* METADATA _id, _source | WHERE MATCH_PHRASE(message, "Payment failed for order")';
     const existingLink = {
-      stream_name: 'logs',
+      stream_name: LOG_SOURCE_ID,
       rule_backed: false,
       rule_id: 'r1',
       query: {
@@ -244,6 +263,7 @@ describe('identifyCodeQueries', () => {
       serviceName: SERVICE_KEY,
       repository: REPO,
       gitSha: 'sha1',
+      spaceId: SPACE_ID,
       streams,
       kiClient,
       loggingChunks: [
@@ -251,6 +271,7 @@ describe('identifyCodeQueries', () => {
       ],
       esClient: createEsClient(true),
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
 
     expect(result.status).toBe('generated');

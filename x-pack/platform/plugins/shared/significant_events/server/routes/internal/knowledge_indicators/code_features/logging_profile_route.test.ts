@@ -62,7 +62,7 @@ const baseParams = (overrides: Record<string, unknown> = {}) =>
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
     }),
     getSpaceId: jest.fn().mockResolvedValue('default'),
-    server: {},
+    server: { core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } } },
     logger: { get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn() }) },
     maintenanceService: { isPaused: jest.fn().mockResolvedValue(false) },
   } as unknown as PersistHandlerParams);

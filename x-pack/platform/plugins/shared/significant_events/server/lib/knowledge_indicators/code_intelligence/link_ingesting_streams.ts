@@ -14,8 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { reconcileCodeFeatures } from './reconcile_code_features';
-import { formatCitations } from './identify_code_features';
-import { FALLBACK_LOG_STREAM } from './constants';
+import { formatCitations, getCodePredictiveSourceId } from './identify_code_features';
 import type { CodeEvidenceCitation } from './types';
 
 /** A real stream and the index/pattern its data lives in. */
@@ -383,15 +382,11 @@ const matchesService = (feature: Feature, serviceName: string): boolean => {
 };
 
 /**
- * Represents a code-derived service as an `entity`/`service` KI on the real
- * stream(s) that ingest it — the same taxonomy the log pipeline uses. When a
- * matching log-derived entity already exists on a stream, the code evidence is
- * merged onto it (reusing its slug) so the two become a single KI with
- * `source: both`; otherwise a predictive entity is created (slug = service name)
- * ready to merge once logs arrive.
+ * Represents a code-derived service as an `entity`/`service` KI on the active
+ * space's predictive logs source. Repository and service remain provenance;
+ * real Streams are optional enrichment and never control ownership.
  *
- * Runs in the per-service stage — always, regardless of whether the code
- * changed — so it tracks log entities that appear after the code was analyzed.
+ * Runs in the per-service stage even when the repository fingerprint is unchanged.
  */
 export async function linkServiceEntities({
   serviceName,
@@ -399,11 +394,11 @@ export async function linkServiceEntities({
   fingerprint,
   citations,
   metadata,
-  streams,
-  esClient,
+  spaceId,
   kiClient,
   runId,
   logger,
+  beforeWrite,
 }: {
   serviceName: string;
   repository: string;
@@ -412,11 +407,12 @@ export async function linkServiceEntities({
   citations?: CodeEvidenceCitation[];
   /** Additional code-derived facts about the service (version, env vars, etc.). */
   metadata?: ServiceCodeMetadata;
-  streams: StreamSamplingSource[];
-  esClient: ElasticsearchClient;
+  /** Active Kibana space that owns the predictive service entity. */
+  spaceId: string;
   kiClient: KnowledgeIndicatorClient;
   runId: string;
   logger: Logger;
+  beforeWrite: () => Promise<void>;
 }): Promise<{ streams: string[] }> {
   const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
   const evidence = formatCitations(citations, ref) ?? [
@@ -424,11 +420,8 @@ export async function linkServiceEntities({
   ];
   const metadataProperties = serviceMetadataToProperties(metadata);
 
-  // Code-first: always write the service entity to the root `logs` stream.
-  // Stream-to-service correlation is a future concern; for now all
-  // code-discovered services land on the same default and activate when log
-  // data arrives.
-  const targetStream = FALLBACK_LOG_STREAM;
+  // Code-first ownership is independent from real Streams and data presence.
+  const targetStream = getCodePredictiveSourceId(spaceId, 'logs');
 
   // Check if a log-derived entity already exists on the target stream.
   const { hits: existingEntities } = await kiClient.getFeatures(targetStream, {
@@ -443,6 +436,7 @@ export async function linkServiceEntities({
   const incoming: FeatureUpsert = {
     id: match?.id ?? serviceName,
     stream_name: targetStream,
+    source_ids: [targetStream],
     type: ENTITY_FEATURE_TYPE,
     subtype: SERVICE_ENTITY_SUBTYPE,
     title: match?.title ?? serviceName,
@@ -459,6 +453,7 @@ export async function linkServiceEntities({
     existing: existingEntities,
     runId,
   });
+  await beforeWrite();
   await kiClient.bulk(
     targetStream,
     reconciled.map((feature) => ({ index: { feature } }))

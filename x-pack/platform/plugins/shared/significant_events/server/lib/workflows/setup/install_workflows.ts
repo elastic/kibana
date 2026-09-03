@@ -26,7 +26,7 @@ interface WorkflowInstall {
 
 // Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
 // These are all non-templated workflows, so they install without template `values`.
-const BASE_WORKFLOWS_TO_INSTALL: WorkflowInstall[] = [
+export const BASE_WORKFLOWS_TO_INSTALL: readonly WorkflowInstall[] = [
   ...GLOBAL_CORE_WORKFLOW_IDS.map((workflowId) => ({
     workflowId,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -75,6 +75,16 @@ export const installWorkflows = async ({
       id: workflowId,
       run: client.install(workflowId, { spaceId }),
     })),
+    ...(!includeCodeExtraction
+      ? [
+          {
+            id: `${SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID} uninstall`,
+            run: client.uninstall(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID, {
+              spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+            }),
+          },
+        ]
+      : []),
     { id: 'memory workflows', run: installMemoryWorkflows({ client }) },
   ];
 

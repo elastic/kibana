@@ -24,13 +24,13 @@ import { KI_TYPE_QUERY } from '../fields';
 const IS_NOT_EXPIRED_FRAGMENT = 'expires_at IS NULL OR expires_at >= NOW()';
 const STREAM = 'logs-app';
 
-function makeReader(): {
+function makeReader(space = 'default'): {
   reader: IndicatorReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
-  const revisionReader = new RevisionReader({} as ElasticsearchClient, logger);
+  const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, space);
   const reader = new IndicatorReader(revisionReader);
   return { reader, runEsql };
 }
@@ -64,6 +64,95 @@ function capturedQueryString(runEsql: jest.Mock): string {
 
 beforeEach(() => {
   (executeAndDecodeSource as jest.Mock).mockReset();
+});
+
+describe('IndicatorReader space compatibility', () => {
+  beforeEach(() => {
+    (executeAndDecodeSource as jest.Mock).mockReset();
+  });
+
+  it('includes unscoped legacy revisions in normal default-space reads', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValue({ hits: [createQueryDoc()] });
+
+    await expect(reader.getQueryLinks([STREAM], { ruleUnbacked: 'include' })).resolves.toHaveLength(
+      1
+    );
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('kibana.space_ids` == "default"');
+    expect(query).toContain('kibana.space_ids` IS NULL');
+  });
+
+  it('chooses scoped identity before timestamp and tombstone filtering', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValue({ hits: [] });
+
+    await reader.getQueryLinks([STREAM], { ruleUnbacked: 'include' });
+    const query = capturedQueryString(runEsql);
+    const priorityIndex = query.indexOf('MAX(__space_priority)');
+    const timestampIndex = query.indexOf('MAX(@timestamp)');
+    const deletedIndex = query.indexOf('deleted IS NULL');
+    expect(query).toContain('EVAL _revision_id = _id');
+    expect(query).toContain('KEEP _source, _revision_id');
+    expect(query).not.toContain('JSON_SET');
+    expect(priorityIndex).toBeGreaterThan(-1);
+    expect(timestampIndex).toBeGreaterThan(priorityIndex);
+    expect(deletedIndex).toBeGreaterThan(timestampIndex);
+  });
+
+  it('scoped tombstones suppress active legacy collisions through scoped precedence', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValue({ hits: [] });
+
+    await reader.getQueryLinks([STREAM], { ruleUnbacked: 'include' });
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('__space_priority = CASE');
+    expect(query).toContain('__space_priority == __max_space_priority');
+    expect(query.indexOf('__space_priority == __max_space_priority')).toBeLessThan(
+      query.indexOf('deleted IS NULL')
+    );
+  });
+
+  it('unscoped tombstones cannot suppress active scoped collisions', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValue({ hits: [createQueryDoc()] });
+
+    await expect(reader.getQueryLinks([STREAM], { ruleUnbacked: 'include' })).resolves.toHaveLength(
+      1
+    );
+    expect(capturedQueryString(runEsql)).toContain('MAX(__space_priority)');
+  });
+
+  it('allows the default-space cleanup path to isolate unscoped legacy revisions', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValue({ hits: [createQueryDoc()] });
+
+    await expect(reader.getUnscopedLegacyIndicators([STREAM])).resolves.toEqual({
+      features: [],
+      queries: [expect.objectContaining({ stream_name: STREAM })],
+    });
+    expect(capturedQueryString(runEsql)).toContain('kibana.space_ids` IS NULL');
+  });
+
+  it('keeps normal non-default reads exact-match only', async () => {
+    const { reader, runEsql } = makeReader('other');
+    runEsql.mockResolvedValue({ hits: [] });
+
+    await reader.getQueryLinks([STREAM], { ruleUnbacked: 'include' });
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('kibana.space_ids` == "other"');
+    expect(query).not.toContain('kibana.space_ids` IS NULL');
+  });
+
+  it('does not expose cleanup-only unscoped reads to non-default spaces', async () => {
+    const { reader, runEsql } = makeReader('other');
+
+    await expect(reader.getUnscopedLegacyIndicators([STREAM])).resolves.toEqual({
+      features: [],
+      queries: [],
+    });
+    expect(runEsql).not.toHaveBeenCalled();
+  });
 });
 
 describe('IndicatorReader.getQueryLinks', () => {

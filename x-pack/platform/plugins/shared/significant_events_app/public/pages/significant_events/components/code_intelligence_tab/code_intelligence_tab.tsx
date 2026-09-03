@@ -922,7 +922,7 @@ const TRUNCATED_RESULTS_DESCRIPTION = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.truncatedResultsDescription',
   {
     defaultMessage:
-      'The bounded feature or query scan reached its limit, so these results may be incomplete. Delete code features is unavailable until the source result is smaller.',
+      'The bounded feature or query scan reached its limit, so these results may be incomplete. Delete Code Intelligence data is unavailable until the source result is smaller.',
   }
 );
 const RUN_STATUS_ERROR_TITLE = i18n.translate(
@@ -981,25 +981,25 @@ const RECONCILE_LABEL = i18n.translate('xpack.significantEventsApp.codeIntellige
   defaultMessage: 'Reconcile KIs',
 });
 const RESET_LABEL = i18n.translate('xpack.significantEventsApp.codeIntelligence.reset', {
-  defaultMessage: 'Delete code features',
+  defaultMessage: 'Delete Code Intelligence data',
 });
 const RESET_MODAL_TITLE = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetModalTitle',
   {
-    defaultMessage: 'Delete all code features?',
+    defaultMessage: 'Delete all Code Intelligence features and queries?',
   }
 );
 const RESET_MODAL_BODY = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetModalBody',
   {
     defaultMessage:
-      'This removes every code-derived feature across all streams so the next run re-derives them from scratch. Log-derived knowledge indicators and queries are not affected.',
+      'This removes every purely code-derived feature and query so the next run re-derives them from scratch. Mixed and log-derived knowledge indicators are preserved.',
   }
 );
 const RESET_MODAL_CONFIRM = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetModalConfirm',
   {
-    defaultMessage: 'Delete code features',
+    defaultMessage: 'Delete features and queries',
   }
 );
 const RESET_MODAL_CANCEL = i18n.translate(

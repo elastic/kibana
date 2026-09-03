@@ -38,7 +38,10 @@ export const INFERRED_FEATURE_TYPES = [
 // TODO: it would be nice to rename id->slug and uuid->id for consistency with queries
 export const baseFeatureSchema = z.object({
   id: z.string().max(MAX_ID_LENGTH),
+  /** @deprecated Legacy Streams partition key. */
   stream_name: z.string().max(MAX_ID_LENGTH),
+  /** First-class Significant Events source ids that own this feature. */
+  source_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(100).optional(),
   type: z.string().max(MAX_ID_LENGTH),
   subtype: z.string().max(MAX_ID_LENGTH).optional(),
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
@@ -75,7 +78,7 @@ export const ignoredFeatureSchema = z.object({
 
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
-// Creation/write payload. `uuid` is derived from (id, stream_name) at the
+// Creation/write payload. `uuid` is derived from (id, source_ids/stream_name) at the
 // storage boundary (see `computeFeatureUuid` / `toStoredFeature`), so it is not
 // part of the input — callers never supply it.
 export const featureUpsertSchema = baseFeatureSchema.and(
@@ -198,6 +201,7 @@ export function toBaseFeature(feature: Feature): BaseFeature {
   return {
     id: feature.id,
     stream_name: feature.stream_name,
+    source_ids: feature.source_ids,
     type: feature.type,
     subtype: feature.subtype,
     title: feature.title,
@@ -250,6 +254,7 @@ export function mergeFeature(existing: BaseFeature, incoming: BaseFeature): Base
   return {
     id: existing.id,
     stream_name: existing.stream_name,
+    source_ids: boundedUnion(existing.source_ids, incoming.source_ids),
     type: existing.type,
     subtype: existing.subtype,
     title: incoming.title,

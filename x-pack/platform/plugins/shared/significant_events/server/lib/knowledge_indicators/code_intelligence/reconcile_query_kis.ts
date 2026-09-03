@@ -237,6 +237,7 @@ export function toReconcileOperations(plan: QueryReconcilePlan): KIBulkOperation
   for (const merge of plan.merges) {
     operations.push({
       index: {
+        sourceId: merge.canonical.source_id ?? merge.canonical.stream_name,
         query: {
           ...queryFromLink(merge.canonical),
           evidence: merge.mergedEvidence,
@@ -259,6 +260,100 @@ export interface ReconcileQueriesResult {
   corroborated: number;
 }
 
+const queryIdentity = (link: QueryLink): string => `${link.stream_name}\u0000${link.query.id}`;
+
+/** Reconciles a bounded authoritative query set across its actual owners. */
+export async function reconcileCodeAndLogQueriesAcrossOwners({
+  links,
+  kiClient,
+  logger,
+  beforeWrite,
+}: {
+  links: QueryLink[];
+  kiClient: KnowledgeIndicatorClient;
+  logger: Logger;
+  beforeWrite: () => Promise<void>;
+}): Promise<ReconcileQueriesResult> {
+  const now = Date.now();
+  const activeLinks = links.filter(
+    ({ expires_at: expiresAt }) => !expiresAt || new Date(expiresAt).getTime() > now
+  );
+  if (activeLinks.length < 2) {
+    return { clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 };
+  }
+  const byIdentity = new Map(activeLinks.map((link) => [queryIdentity(link), link]));
+  const byNormalizedEsql = new Map<string, string[]>();
+  for (const [identity, link] of byIdentity) {
+    const normalized = normalizeEsqlSafe(link.query.esql.query);
+    const identities = byNormalizedEsql.get(normalized) ?? [];
+    identities.push(identity);
+    byNormalizedEsql.set(normalized, identities);
+  }
+  const adjacency = new Map<string, Set<string>>();
+  for (const identities of byNormalizedEsql.values()) {
+    if (identities.length < 2) continue;
+    for (const identity of identities) {
+      adjacency.set(identity, new Set(identities.filter((candidate) => candidate !== identity)));
+    }
+  }
+
+  let clustersMerged = 0;
+  let queriesTombstoned = 0;
+  let corroborated = 0;
+  for (const identities of computeClusters([...byIdentity.keys()], adjacency)) {
+    if (identities.length < 2) continue;
+    const cluster = identities.map((identity) => byIdentity.get(identity)!);
+    const mergedEvidence = uniq(cluster.flatMap(({ query }) => query.evidence ?? []));
+    const mergedSeverity = cluster.reduce<number | undefined>((max, { query }) => {
+      const score = query.severity_score;
+      return score === undefined ? max : max === undefined ? score : Math.max(max, score);
+    }, undefined);
+    const byOwner = new Map<string, QueryLink[]>();
+    for (const link of cluster) {
+      const ownerLinks = byOwner.get(link.stream_name) ?? [];
+      ownerLinks.push(link);
+      byOwner.set(link.stream_name, ownerLinks);
+    }
+    let clusterChanged = false;
+    for (const [owner, ownerLinks] of byOwner) {
+      if (ownerLinks.filter(({ rule_backed: ruleBacked }) => ruleBacked).length > 1) continue;
+      const canonical = pickCanonical(ownerLinks);
+      const duplicates = ownerLinks.filter(
+        (link) => queryIdentity(link) !== queryIdentity(canonical)
+      );
+      if (duplicates.some(({ rule_backed: ruleBacked }) => ruleBacked)) continue;
+      await beforeWrite();
+      await kiClient.bulk(owner, [
+        {
+          index: {
+            sourceId: canonical.source_id ?? owner,
+            query: {
+              ...queryFromLink(canonical),
+              evidence: mergedEvidence,
+              severity_score: mergedSeverity,
+              rule_backed: canonical.rule_backed,
+              rule_id: canonical.rule_id,
+            },
+          },
+        },
+        ...duplicates.map(({ query }) => ({
+          delete: { type: KI_TYPE_QUERY, id: query.id },
+        })),
+      ]);
+      clusterChanged = true;
+      queriesTombstoned += duplicates.length;
+    }
+    if (clusterChanged) clustersMerged += 1;
+    if (clusterChanged && hasCodeEvidence(mergedEvidence) && hasLogEvidence(mergedEvidence)) {
+      corroborated += 1;
+    }
+  }
+  logger.debug(
+    `reconcile_queries: cross-owner corroborated ${clustersMerged} cluster(s), tombstoned ${queriesTombstoned} same-owner duplicate(s)`
+  );
+  return { clustersMerged, queriesTombstoned, corroborated };
+}
+
 /**
  * Standalone cross-source reconciler for Query KIs. Finds semantically
  * equivalent queries (regardless of source or ES|QL phrasing) via the KI
@@ -270,10 +365,12 @@ export async function reconcileCodeAndLogQueries({
   streamName,
   kiClient,
   logger,
+  beforeWrite = async () => {},
 }: {
   streamName: string;
   kiClient: KnowledgeIndicatorClient;
   logger: Logger;
+  beforeWrite?: () => Promise<void>;
 }): Promise<ReconcileQueriesResult> {
   const { [streamName]: links } = await kiClient.getStreamToQueryLinksMap([streamName]);
   if (links.length < 2) {
@@ -370,6 +467,7 @@ export async function reconcileCodeAndLogQueries({
   }
 
   const operations = toReconcileOperations(plan);
+  await beforeWrite();
   await kiClient.bulk(streamName, operations);
 
   const queriesTombstoned = plan.merges.reduce((sum, merge) => sum + merge.duplicateIds.length, 0);

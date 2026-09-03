@@ -16,16 +16,20 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import { MEMORY_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
+import { BASE_WORKFLOWS_TO_INSTALL } from './install_workflows';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
-// 9 base workflows include the optional code-extraction workflow and upstream's
-// investigation-completed workflow. Memory adds 4 more installs.
-const BASE_WORKFLOW_COUNT = 9;
-const CODE_EXTRACTION_WORKFLOW_COUNT = 1;
-const MEMORY_WORKFLOW_COUNT = 4;
-const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
-const TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION =
-  TOTAL_WORKFLOW_COUNT - CODE_EXTRACTION_WORKFLOW_COUNT;
+const ALWAYS_INSTALLED_WORKFLOW_IDS = [
+  ...BASE_WORKFLOWS_TO_INSTALL.map(({ workflowId }) => workflowId),
+  ...MEMORY_WORKFLOW_IDS,
+];
+const ENABLED_WORKFLOW_IDS = [
+  ...ALWAYS_INSTALLED_WORKFLOW_IDS,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+];
+const TOTAL_WORKFLOW_COUNT = ENABLED_WORKFLOW_IDS.length;
+const TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION = ALWAYS_INSTALLED_WORKFLOW_IDS.length;
 
 const createClientMock = () => {
   const client = {
@@ -87,6 +91,8 @@ describe('createManagedWorkflowsInstaller', () => {
 
     await installer.install();
 
+    expect(installedIds(client)).toEqual(expect.arrayContaining(ENABLED_WORKFLOW_IDS));
+    expect(new Set(installedIds(client))).toEqual(new Set(ENABLED_WORKFLOW_IDS));
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(client.ready).toHaveBeenCalledTimes(1);
@@ -143,10 +149,33 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
 
     expect(installedIds(client)).not.toContain(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID);
+    expect(client.uninstall).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+      {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      }
+    );
+    expect(new Set(installedIds(client))).toEqual(new Set(ALWAYS_INSTALLED_WORKFLOW_IDS));
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION);
     // The rest of the set still installs and reconciliation still closes.
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
     expect(client.ready).toHaveBeenCalledTimes(1);
+  });
+
+  it('reacts to false→true and true→false flag changes without restart', async () => {
+    const isCodeExtractionAvailable = jest
+      .fn()
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false);
+    const { client, installer } = createInstaller({ isCodeExtractionAvailable });
+
+    await installer.install();
+    expect(client.uninstall).toHaveBeenCalledTimes(1);
+    await installer.install();
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID);
+    await installer.install();
+    expect(client.uninstall).toHaveBeenCalledTimes(2);
   });
 
   it('re-installs on later calls but reconciles (ready) only once', async () => {

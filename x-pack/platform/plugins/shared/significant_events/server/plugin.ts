@@ -81,7 +81,10 @@ import {
 } from './agent_builder/agents/logging_wrappers';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
+import {
+  SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+} from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import { isCodeKiExtractionEnabled } from './lib/knowledge_indicators/code_intelligence/is_code_ki_extraction_enabled';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
@@ -278,7 +281,7 @@ export class SignificantEventsPlugin
       registerSignificantEventsLoggingWrappersAgentTypes({ agentBuilder: plugins.agentBuilder });
       void core
         .getStartServices()
-        .then(async () => {
+        .then(async ([coreStart]) => {
           const { getScopedClients, server } = this;
           if (!getScopedClients || !server) return;
           await registerStreamsAgentBuilder({
@@ -287,6 +290,7 @@ export class SignificantEventsPlugin
             server,
             logger: this.logger,
             telemetry: telemetryClient,
+            featureFlags: coreStart.featureFlags,
           });
         })
         .catch((err) => {
@@ -400,6 +404,10 @@ export class SignificantEventsPlugin
       core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
       plugins.licensing.license$,
     ]).pipe(switchMap(isAvailable), distinctUntilChanged());
+    const codeExtractionEnabled$ = core.featureFlags.getBooleanValue$(
+      SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG,
+      false
+    );
 
     // The availability observable emits its current value on subscribe. `skip(1)` drops that
     // initial emission so the stream represents *changes* only; the initial install/registration is
@@ -444,7 +452,17 @@ export class SignificantEventsPlugin
         void this.ensureSignificantEventsInstalled(core, isAvailable).catch((error: unknown) => {
           this.logManagedResourceError('availability flag change', error);
         });
-      })
+      }),
+      combineLatest([available$, codeExtractionEnabled$])
+        .pipe(
+          skip(1),
+          filter(([available]) => available)
+        )
+        .subscribe(() => {
+          void this.managedWorkflowsInstaller?.install().catch((error: unknown) => {
+            this.logManagedResourceError('code extraction flag change', error);
+          });
+        })
     );
 
     // Editable discovery agents: installed via agents.ensure when significant events is

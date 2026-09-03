@@ -7,6 +7,7 @@
 
 import { esql, type ComposerSortShorthand } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   KNOWLEDGE_INDICATORS_DATA_STREAM,
   isStoredFeatureKnowledgeIndicator,
@@ -18,7 +19,6 @@ import {
   esqlToObjects,
   executeAndDecodeSource,
   pickLatestPerGroup,
-  fromIndexForSpace,
   withSort,
   withWhere,
   type LatestSourceWhereCondition,
@@ -35,21 +35,44 @@ export class RevisionReader {
     private readonly space: string
   ) {}
 
+  private fromScopedKnowledgeIndicators(columns: string[]) {
+    return esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], columns).where`${esql.col(
+      'kibana.space_ids'
+    )} == ${this.space}`;
+  }
+
+  /** Default keeps pre-space KI behavior; named spaces remain exact-match only. */
+  private fromKnowledgeIndicators(columns: string[]) {
+    if (this.space !== DEFAULT_SPACE_ID) {
+      return this.fromScopedKnowledgeIndicators(columns);
+    }
+    return esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], columns).where`${esql.col(
+      'kibana.space_ids'
+    )} == ${this.space} OR ${esql.col('kibana.space_ids')} IS NULL`
+      .pipe`EVAL __space_priority = CASE(${esql.col('kibana.space_ids')} == ${this.space}, 1, 0)`;
+  }
+
+  /** Scoped identity always wins over a colliding unscoped legacy identity. */
+  private applyDefaultSpacePrecedence(query: ReturnType<typeof esql.from>) {
+    if (this.space !== DEFAULT_SPACE_ID) return query;
+    return query.pipe`INLINE STATS __max_space_priority = MAX(__space_priority) BY ${esql.col(
+      STREAM_NAME
+    )}, ${esql.col(TYPE)}, ${esql.col(ID)}`.where`__space_priority == __max_space_priority`;
+  }
+
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition,
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = fromIndexForSpace({
-      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
-      space: this.space,
-      columns: ['_id', '_source'],
-    });
+    let query = this.fromKnowledgeIndicators(['_id', '_source']);
     query = withWhere(query, where);
+    query = this.applyDefaultSpacePrecedence(query);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
     query = withSort(query, sort);
+    query = query.pipe`EVAL _revision_id = _id`;
     // Cap at REVISION_SIZE_LIMIT regardless of the requested limit so a large
     // caller-supplied value can't fetch an unbounded result set.
     if (limit > REVISION_SIZE_LIMIT) {
@@ -57,28 +80,114 @@ export class RevisionReader {
         `Requested revision limit ${limit} exceeds REVISION_SIZE_LIMIT ${REVISION_SIZE_LIMIT}; capping at ${REVISION_SIZE_LIMIT}.`
       );
     }
-    query = query.keep('_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
+    query = query.keep('_source', '_revision_id').limit(Math.min(limit, REVISION_SIZE_LIMIT));
 
-    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query, {
+      revisionIdColumn: '_revision_id',
+    });
     return hits;
   }
 
-  /**
-   * Returns the distinct stream names whose latest KI revision satisfies
-   * `postGroupingWhere`. Aggregates on `stream.name` in ES|QL so the
-   * `REVISION_SIZE_LIMIT` cap bounds distinct streams rather than distinct KIs;
-   * warns if the cap is hit so partial coverage isn't silent.
-   */
+  /** Reads only current scoped revisions for mutation decisions. */
+  async fetchLatestScopedRevisions(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    limit: number = REVISION_SIZE_LIMIT
+  ): Promise<StoredKnowledgeIndicator[]> {
+    let query = this.fromScopedKnowledgeIndicators(['_id', '_source']);
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = withWhere(query, postGroupingWhere);
+    query = query.pipe`EVAL _revision_id = _id`
+      .keep('_source', '_revision_id')
+      .limit(Math.min(limit, REVISION_SIZE_LIMIT));
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query, {
+      revisionIdColumn: '_revision_id',
+    });
+    return hits;
+  }
+
+  /** Reads unscoped revisions solely for default-space legacy cleanup. */
+  async fetchLatestUnscopedLegacyRevisions(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    limit: number = REVISION_SIZE_LIMIT
+  ): Promise<StoredKnowledgeIndicator[]> {
+    if (this.space !== DEFAULT_SPACE_ID) {
+      return [];
+    }
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${esql.col(
+      'kibana.space_ids'
+    )} IS NULL`;
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = withWhere(query, postGroupingWhere);
+    query = query.pipe`EVAL _revision_id = _id`
+      .keep('_source', '_revision_id')
+      .limit(Math.min(limit, REVISION_SIZE_LIMIT));
+
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query, {
+      revisionIdColumn: '_revision_id',
+    });
+    return hits;
+  }
+
+  /** Default-space-only enumeration used by Code Intelligence legacy reset. */
+  async fetchDistinctUnscopedLegacyStreamNames(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition
+  ): Promise<string[]> {
+    if (this.space !== DEFAULT_SPACE_ID) {
+      return [];
+    }
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${esql.col(
+      'kibana.space_ids'
+    )} IS NULL`;
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
+    query = withWhere(query, postGroupingWhere);
+    query = query.pipe`STATS __count = COUNT(*) BY streamName = ${esql.col(STREAM_NAME)}`
+      .keep('streamName')
+      .limit(REVISION_SIZE_LIMIT);
+
+    const response = await runEsqlQuery(this.esClient, query.print('basic'));
+    if (!response) return [];
+    return esqlToObjects<{ streamName?: unknown }>(response)
+      .map((row) => row.streamName)
+      .filter((name): name is string => typeof name === 'string');
+  }
+
+  async fetchDistinctScopedStreamNames(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition
+  ): Promise<string[]> {
+    return this.fetchDistinctStreamNamesFromQuery(
+      this.fromScopedKnowledgeIndicators(['_id']),
+      where,
+      postGroupingWhere
+    );
+  }
+
   async fetchDistinctStreamNames(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {
-    let query = fromIndexForSpace({
-      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
-      space: this.space,
-      columns: ['_id'],
-    });
-    query = withWhere(query, where);
+    return this.fetchDistinctStreamNamesFromQuery(
+      this.fromKnowledgeIndicators(['_id']),
+      where,
+      postGroupingWhere,
+      true
+    );
+  }
+
+  private async fetchDistinctStreamNamesFromQuery(
+    initialQuery: ReturnType<typeof esql.from>,
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition,
+    applyPrecedence = false
+  ): Promise<string[]> {
+    let query = withWhere(initialQuery, where);
+    if (applyPrecedence) query = this.applyDefaultSpacePrecedence(query);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
     query = query.pipe`STATS __count = COUNT(*) BY streamName = ${esql.col(STREAM_NAME)}`

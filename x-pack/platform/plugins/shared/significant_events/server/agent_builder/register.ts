@@ -6,7 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, FeatureFlagsStart, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -62,13 +62,22 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
+  featureFlags,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  featureFlags: FeatureFlagsStart;
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    featureFlags,
+  });
 };

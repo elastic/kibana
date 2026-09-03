@@ -14,6 +14,7 @@ import {
   esqlStructuralSignature,
   pickCanonical,
   reconcileCodeAndLogQueries,
+  reconcileCodeAndLogQueriesAcrossOwners,
   RECONCILE_MIN_SCORE,
   toReconcileOperations,
 } from './reconcile_query_kis';
@@ -26,8 +27,9 @@ const link = (overrides: {
   title?: string;
   updatedAt?: string;
   esql?: string;
+  owner?: string;
 }): QueryLink => ({
-  stream_name: 'logs.checkout',
+  stream_name: overrides.owner ?? 'logs.checkout',
   rule_backed: overrides.ruleBacked ?? false,
   rule_id: `rule-${overrides.id}`,
   updated_at: overrides.updatedAt,
@@ -185,6 +187,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.clustersMerged).toBe(0);
     expect(bulk).not.toHaveBeenCalled();
@@ -212,6 +215,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
 
     expect(result).toEqual({ clustersMerged: 1, queriesTombstoned: 1, corroborated: 1 });
@@ -241,6 +245,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.clustersMerged).toBe(0);
     expect(bulk).not.toHaveBeenCalled();
@@ -255,6 +260,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.clustersMerged).toBe(0);
     expect(bulk).not.toHaveBeenCalled();
@@ -281,6 +287,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(result.clustersMerged).toBe(0);
     expect(bulk).not.toHaveBeenCalled();
@@ -294,6 +301,7 @@ describe('reconcileCodeAndLogQueries', () => {
       streamName: 'logs.checkout',
       kiClient,
       logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
     });
     expect(kiClient.findQueries).toHaveBeenCalledWith(
       'logs.checkout',
@@ -312,5 +320,242 @@ describe('reconcileCodeAndLogQueries', () => {
     const audit = logger.info.mock.calls.map((c) => String(c[0])).join('\n');
     expect(audit).toContain('merging into "Payment failed" (keep)');
     expect(audit).toContain('drop "Payment failure"');
+  });
+});
+
+describe('reconcileCodeAndLogQueriesAcrossOwners', () => {
+  it('cheaply no-ops thousands of code-only and structurally isolated links', async () => {
+    const links = Array.from({ length: 2000 }, (_, index) =>
+      link({
+        id: `code-${index}`,
+        owner: `owner-${index % 20}`,
+        evidence: ['code: repo@sha:file.ts:1'],
+        esql: `FROM logs-* | WHERE field_${index} == "value"`,
+      })
+    );
+    const findQueries = jest.fn();
+    const bulk = jest.fn();
+
+    await expect(
+      reconcileCodeAndLogQueriesAcrossOwners({
+        links,
+        kiClient: { findQueries, bulk } as unknown as KnowledgeIndicatorClient,
+        logger: loggerMock.create(),
+        beforeWrite: jest.fn().mockResolvedValue(undefined),
+      })
+    ).resolves.toEqual({ clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 });
+    expect(findQueries).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('no-ops more than 100 structurally similar queries with different literals', async () => {
+    const links = Array.from({ length: 150 }, (_, index) =>
+      link({
+        id: `candidate-${index}`,
+        owner: `owner-${index % 2}`,
+        evidence: [index % 2 === 0 ? 'code: repo@sha:file.ts:1' : 'observed in logs'],
+        esql: `FROM logs-* | WHERE message LIKE "*value-${index}*"`,
+      })
+    );
+    const bulk = jest.fn();
+    await expect(
+      reconcileCodeAndLogQueriesAcrossOwners({
+        links,
+        kiClient: { bulk } as unknown as KnowledgeIndicatorClient,
+        logger: loggerMock.create(),
+        beforeWrite: jest.fn().mockResolvedValue(undefined),
+      })
+    ).resolves.toEqual({ clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 });
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not merge predicate literals that differ', async () => {
+    const payment = link({
+      id: 'payment',
+      owner: 'code:predictive:logs',
+      evidence: ['code: repo@sha:payment.ts:1'],
+      esql: 'FROM logs-* | WHERE message LIKE "*payment failed*"',
+    });
+    const inventory = link({
+      id: 'inventory',
+      owner: 'logs.otel',
+      evidence: ['observed in logs'],
+      esql: 'FROM logs-* | WHERE message LIKE "*inventory failed*"',
+    });
+    const bulk = jest.fn();
+    const kiClient = { bulk } as unknown as KnowledgeIndicatorClient;
+
+    await expect(
+      reconcileCodeAndLogQueriesAcrossOwners({
+        links: [payment, inventory],
+        kiClient,
+        logger: loggerMock.create(),
+        beforeWrite: jest.fn().mockResolvedValue(undefined),
+      })
+    ).resolves.toEqual({ clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 });
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('merges exact duplicates without embeddings even when text is dissimilar', async () => {
+    const code = link({
+      id: 'code-query',
+      owner: 'code:compat:logs',
+      evidence: ['code: repo@sha:file.ts:1'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+      severity: 70,
+      title: 'Payment subsystem fatal condition',
+    });
+    code.source_id = 'code:source:logs';
+    const observed = link({
+      id: 'log-query',
+      owner: 'logs.otel',
+      evidence: ['observed in logs'],
+      esql: ' FROM logs-*   | WHERE message LIKE "*failed*" ',
+      severity: 40,
+      title: 'Unrelated inventory wording',
+    });
+    observed.source_id = 'observed:source:logs';
+    const bulk = jest.fn().mockResolvedValue({ applied: 1 });
+    const kiClient = { bulk } as unknown as KnowledgeIndicatorClient;
+
+    const result = await reconcileCodeAndLogQueriesAcrossOwners({
+      links: [code, observed],
+      kiClient,
+      logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(result).toEqual({ clustersMerged: 1, queriesTombstoned: 0, corroborated: 1 });
+    expect(bulk).toHaveBeenCalledWith(
+      'code:compat:logs',
+      expect.arrayContaining([
+        expect.objectContaining({
+          index: expect.objectContaining({
+            sourceId: 'code:source:logs',
+            query: expect.objectContaining({
+              id: 'code-query',
+              severity_score: 70,
+              evidence: expect.arrayContaining(['code: repo@sha:file.ts:1', 'observed in logs']),
+            }),
+          }),
+        }),
+      ])
+    );
+    expect(bulk).toHaveBeenCalledWith(
+      'logs.otel',
+      expect.arrayContaining([
+        expect.objectContaining({
+          index: expect.objectContaining({
+            sourceId: 'observed:source:logs',
+            query: expect.objectContaining({
+              id: 'log-query',
+              severity_score: 70,
+              evidence: expect.arrayContaining(['code: repo@sha:file.ts:1', 'observed in logs']),
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+
+  it('never lets an expired high-severity duplicate replace an active query', async () => {
+    const expired = {
+      ...link({
+        id: 'expired',
+        owner: 'code:predictive:logs',
+        evidence: ['code: repo@sha:file.ts:1'],
+        esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+        severity: 99,
+      }),
+      expires_at: '2000-01-01T00:00:00.000Z',
+    };
+    const active = link({
+      id: 'active',
+      owner: 'logs.otel',
+      evidence: ['observed in logs'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+      severity: 10,
+    });
+    const bulk = jest.fn();
+
+    await expect(
+      reconcileCodeAndLogQueriesAcrossOwners({
+        links: [expired, active],
+        kiClient: { bulk } as unknown as KnowledgeIndicatorClient,
+        logger: loggerMock.create(),
+        beforeWrite: jest.fn().mockResolvedValue(undefined),
+      })
+    ).resolves.toEqual({ clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 });
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('tombstones only same-owner duplicates while retaining the owner canonical', async () => {
+    const first = link({
+      id: 'first',
+      owner: 'logs.otel',
+      evidence: ['code: repo@sha:file.ts:1'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+      severity: 70,
+    });
+    const duplicate = link({
+      id: 'duplicate',
+      owner: 'logs.otel',
+      evidence: ['observed in logs'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+      severity: 40,
+    });
+    const bulk = jest.fn().mockResolvedValue({ applied: 2 });
+
+    const result = await reconcileCodeAndLogQueriesAcrossOwners({
+      links: [first, duplicate],
+      kiClient: { bulk } as unknown as KnowledgeIndicatorClient,
+      logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(result).toEqual({ clustersMerged: 1, queriesTombstoned: 1, corroborated: 1 });
+    expect(bulk).toHaveBeenCalledWith(
+      'logs.otel',
+      expect.arrayContaining([
+        expect.objectContaining({ index: expect.anything() }),
+        { delete: { type: 'query', id: 'duplicate' } },
+      ])
+    );
+  });
+
+  it('keeps colliding logical IDs distinct and active under each owner', async () => {
+    const code = link({
+      id: 'same-id',
+      owner: 'code:predictive:logs',
+      evidence: ['code: repo@sha:file.ts:1'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+    });
+    const observed = link({
+      id: 'same-id',
+      owner: 'logs.otel',
+      evidence: ['observed in logs'],
+      esql: 'FROM logs-* | WHERE message LIKE "*failed*"',
+    });
+    const bulk = jest.fn().mockResolvedValue({ applied: 1 });
+    const kiClient = { bulk } as unknown as KnowledgeIndicatorClient;
+
+    await reconcileCodeAndLogQueriesAcrossOwners({
+      links: [code, observed],
+      kiClient,
+      logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(bulk).toHaveBeenCalledWith(
+      'code:predictive:logs',
+      expect.arrayContaining([expect.objectContaining({ index: expect.anything() })])
+    );
+    expect(bulk).toHaveBeenCalledWith(
+      'logs.otel',
+      expect.arrayContaining([expect.objectContaining({ index: expect.anything() })])
+    );
+    expect(bulk.mock.calls.flatMap(([, operations]) => operations)).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ delete: expect.anything() })])
+    );
   });
 });

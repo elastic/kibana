@@ -310,4 +310,50 @@ export class IndicatorReader {
     const where = inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]);
     return this.revisionReader.fetchDistinctStreamNames(where, IS_NOT_DELETED);
   }
+
+  /** Default-space-only legacy read for Code Intelligence reset. */
+  async getScopedIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    if (streamNames.length === 0) return { features: [], queries: [] };
+    const docs = await this.revisionReader.fetchLatestScopedRevisions(
+      inPredicate(STREAM_NAME, streamNames),
+      IS_NOT_DELETED
+    );
+    return {
+      features: docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature),
+      queries: docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery),
+    };
+  }
+
+  async getScopedStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.revisionReader.fetchDistinctScopedStreamNames(
+      inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]),
+      IS_NOT_DELETED
+    );
+  }
+
+  async getUnscopedLegacyIndicators(streamNames: string[]): Promise<{
+    features: Feature[];
+    queries: QueryLink[];
+  }> {
+    if (streamNames.length === 0) return { features: [], queries: [] };
+    const docs = await this.revisionReader.fetchLatestUnscopedLegacyRevisions(
+      inPredicate(STREAM_NAME, streamNames),
+      IS_NOT_DELETED
+    );
+    return {
+      features: docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature),
+      queries: docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery),
+    };
+  }
+
+  /** Default-space-only legacy owner enumeration for Code Intelligence reset. */
+  getUnscopedLegacyStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
+    return this.revisionReader.fetchDistinctUnscopedLegacyStreamNames(
+      inPredicate(TYPE, [KI_TYPE_FEATURE, KI_TYPE_QUERY]),
+      IS_NOT_DELETED
+    );
+  }
 }

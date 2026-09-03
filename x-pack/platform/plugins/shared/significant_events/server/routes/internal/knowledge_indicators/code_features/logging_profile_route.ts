@@ -22,6 +22,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { StatusError } from '../../../../lib/errors/status_error';
+import { assertCodeIntelligenceEnabled } from './assert_code_intelligence_enabled';
 
 const codeIntelligenceInput = z.string().min(1).max(256);
 // `gitRefKey` uses the empty string as its snapshot-mode sentinel (incremental
@@ -87,6 +88,7 @@ const checkLoggingProfileRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'logging_profile');
     const spaceId = await getSpaceId(request);
@@ -107,6 +109,7 @@ const checkLoggingProfileRoute = createServerRoute({
       return { has_profile: false, needs_refresh: true, reason: 'no_profile' };
     }
 
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const drift = await detectLoggingProfileDrift({
       codebox,
       repository: params.body.repository,
@@ -197,6 +200,7 @@ const persistLoggingProfileRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'logging_profile');
     const spaceId = await getSpaceId(request);
@@ -215,6 +219,7 @@ const persistLoggingProfileRoute = createServerRoute({
       evidence: { path: g.evidence.path, line: g.evidence.line },
     }));
 
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const validation = await validateLoggingQueriesHandler({
       codebox,
       repository: params.body.repository,
@@ -252,6 +257,7 @@ const persistLoggingProfileRoute = createServerRoute({
       );
     }
 
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     await writeLoggingProfile({
       kiClient,
       spaceId,

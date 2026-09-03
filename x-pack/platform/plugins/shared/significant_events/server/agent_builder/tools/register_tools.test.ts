@@ -42,6 +42,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } as never,
     });
 
     const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
@@ -63,6 +64,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } as never,
     });
 
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
@@ -82,6 +84,7 @@ describe('registerAgentBuilderTools', () => {
       server: createMockServer() as StreamsServer,
       logger: loggerMock.create(),
       telemetry,
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } as never,
     });
 
     expect(agentBuilder.tools.register).not.toHaveBeenCalled();

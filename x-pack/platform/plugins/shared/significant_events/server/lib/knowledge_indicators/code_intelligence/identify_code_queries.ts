@@ -9,12 +9,9 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
-import {
-  FALLBACK_LOG_INDEX_PATTERN,
-  FALLBACK_LOG_MESSAGE_FIELD,
-  FALLBACK_LOG_STREAM,
-} from './constants';
+import { FALLBACK_LOG_INDEX_PATTERN, FALLBACK_LOG_MESSAGE_FIELD } from './constants';
 import { extractLogSignatures } from './extract_log_signatures';
+import { getCodePredictiveSourceId } from './identify_code_features';
 import { generatePredictiveQueries } from './generate_predictive_queries';
 import type {
   LogStreamBinding,
@@ -48,8 +45,10 @@ export interface IdentifyCodeQueriesOptions {
   gitSha: string;
   /** Real streams (name + index) to resolve the service's ingesting stream from. */
   streams: StreamSamplingSource[];
-  /** Code-derived service metadata used to safely narrow predictive fan-out. */
+  /** Code-derived service metadata used only as optional enrichment. */
   metadata?: ServiceCodeMetadata;
+  /** Active Kibana space used to derive the stable predictive source owner. */
+  spaceId: string;
   kiClient: KnowledgeIndicatorClient;
   loggingChunks: LoggingChunk[];
   esClient: ElasticsearchClient;
@@ -63,6 +62,8 @@ export interface IdentifyCodeQueriesOptions {
    * is in this set, so a caller cannot write KIs to a stream it cannot access.
    */
   authorizedStreamNames?: Set<string>;
+  /** Rechecks pause and live feature state immediately before each mutation. */
+  beforeWrite: () => Promise<void>;
 }
 
 /**
@@ -83,6 +84,7 @@ export async function identifyCodeQueries({
   gitSha,
   streams,
   metadata,
+  spaceId,
   kiClient,
   loggingChunks,
   esClient,
@@ -90,6 +92,7 @@ export async function identifyCodeQueries({
   hasOtel = false,
   otelGateBypassed = false,
   authorizedStreamNames,
+  beforeWrite,
 }: IdentifyCodeQueriesOptions): Promise<IdentifyCodeQueriesResult> {
   // The KI key is the service name; the service identity itself is represented as
   // an entity/service KI on the ingesting stream (not a code_analysis feature).
@@ -117,7 +120,7 @@ export async function identifyCodeQueries({
   // for now, all code-derived queries target the same default.
   const bindings: LogStreamBinding[] = [
     {
-      stream: FALLBACK_LOG_STREAM,
+      stream: getCodePredictiveSourceId(spaceId, 'logs'),
       index: FALLBACK_LOG_INDEX_PATTERN,
       convention: 'ecs',
       messageField: FALLBACK_LOG_MESSAGE_FIELD,
@@ -158,8 +161,12 @@ export async function identifyCodeQueries({
     }
 
     const operations: KIBulkOperation[] = newQueries.map((query) => ({
-      index: { query: { ...query, rule_backed: false } },
+      index: {
+        query: { ...query, rule_backed: false },
+        sourceId: binding.stream,
+      },
     }));
+    await beforeWrite();
     await kiClient.bulk(binding.stream, operations);
     generatedCount += newQueries.length;
     writtenStreams.push(binding.stream);

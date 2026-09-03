@@ -9,7 +9,11 @@ import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/logging';
 import { CODE_ANALYSIS_FEATURE_TYPE, type FeatureUpsert } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
-import { CODE_FEATURE_SUBTYPE_LANGUAGE, CODE_FEATURE_SUBTYPE_REPO_TYPE } from './constants';
+import {
+  CODE_FEATURE_SUBTYPE_LANGUAGE,
+  CODE_FEATURE_SUBTYPE_REPO_TYPE,
+  CODE_INTELLIGENCE_PREDICTIVE_SOURCE_SUFFIXES,
+} from './constants';
 import { classifyRepository } from './classify_repository';
 import { buildCodeChangeMeta, isUnchanged, readCodeChangeState } from './code_change_state';
 import { reconcileCodeFeatures } from './reconcile_code_features';
@@ -171,6 +175,23 @@ const virtualKey = (value: string): string =>
 
 export const getCodeFeatureStreamPrefix = (spaceId: string): string =>
   `code:${virtualKey(spaceId)}`;
+
+/**
+ * First-class predictive source id and temporary stream-era compatibility owner.
+ * The hash keeps the active space out of the visible id while preventing cross-space collisions.
+ */
+export const getCodePredictiveSourceId = (
+  spaceId: string,
+  family: keyof typeof CODE_INTELLIGENCE_PREDICTIVE_SOURCE_SUFFIXES
+): string =>
+  `${getCodeFeatureStreamPrefix(spaceId)}:${CODE_INTELLIGENCE_PREDICTIVE_SOURCE_SUFFIXES[family]}`;
+
+export const getCodePredictiveSourceIds = (spaceId: string): string[] =>
+  (
+    Object.keys(CODE_INTELLIGENCE_PREDICTIVE_SOURCE_SUFFIXES) as Array<
+      keyof typeof CODE_INTELLIGENCE_PREDICTIVE_SOURCE_SUFFIXES
+    >
+  ).map((family) => getCodePredictiveSourceId(spaceId, family));
 
 export const getRepositoryFeatureStreamName = (spaceId: string, repository: string): string =>
   `${getCodeFeatureStreamPrefix(spaceId)}:repository:${virtualKey(repository)}`;

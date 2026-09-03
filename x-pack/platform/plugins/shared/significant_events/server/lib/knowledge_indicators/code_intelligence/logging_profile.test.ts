@@ -17,7 +17,6 @@ import {
 } from './logging_profile';
 import type { LoggingProfile, LoggingProfileGrep } from './types';
 import { createMockCodeboxClient } from './__mocks__/codebox_client';
-import type { CodeboxGrepHit } from './codebox_client';
 
 const grep = (
   regex: string,
@@ -31,15 +30,6 @@ const grep = (
 });
 
 const REPO_TOTAL_LINES = 108873;
-
-/** Creates N fake grep hits for test purposes. */
-const fakeHits = (count: number): CodeboxGrepHit[] =>
-  Array.from({ length: count }, (_, i) => ({
-    ref: 'abc',
-    path: `file${i}.ex`,
-    lineNumber: i + 1,
-    content: `log_error("msg ${i}")`,
-  }));
 
 describe('writeLoggingProfile — persistence invariants', () => {
   const logger = loggingSystemMock.createLogger();
@@ -189,7 +179,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('steady count does NOT request refresh', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockResolvedValue(fakeHits(179));
+    codebox.grepCount.mockResolvedValue(179);
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -201,6 +191,10 @@ describe('detectLoggingProfileDrift', () => {
 
     expect(result.refresh).toBe(false);
     expect(result.greps).toHaveLength(1);
+    expect(codebox.grepCount).toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: 'log_error[(]' })
+    );
+    expect(codebox.grep).not.toHaveBeenCalled();
     expect(result.greps[0]).toMatchObject({
       regex: '.*log_error[(].*',
       expected: 179,
@@ -213,7 +207,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('drop to zero requests refresh (reason: zero)', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockResolvedValue([]);
+    codebox.grepCount.mockResolvedValue(0);
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -234,7 +228,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('large ratio drop requests refresh (reason: ratio_drop)', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockResolvedValue(fakeHits(50));
+    codebox.grepCount.mockResolvedValue(50);
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -255,7 +249,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('a small drop within the ratio does NOT request refresh', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockResolvedValue(fakeHits(100));
+    codebox.grepCount.mockResolvedValue(100);
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -271,7 +265,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('a failed count query does NOT request refresh (INV-002)', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockRejectedValue(new Error('transport error'));
+    codebox.grepCount.mockRejectedValue(new Error('transport error'));
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -294,7 +288,7 @@ describe('detectLoggingProfileDrift', () => {
 
   it('honours a custom driftRatio', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockResolvedValue(fakeHits(160));
+    codebox.grepCount.mockResolvedValue(160);
 
     const result = await detectLoggingProfileDrift({
       codebox,
@@ -317,7 +311,7 @@ describe('detectLoggingProfileDrift', () => {
       generated_at: '2026-08-13T00:00:00.000Z',
       greps: [grep('.*log_error[(].*', 179), grep('.*maybe_log_error[(].*', 12)],
     };
-    codebox.grep.mockResolvedValueOnce(fakeHits(179)).mockResolvedValueOnce([]);
+    codebox.grepCount.mockResolvedValueOnce(179).mockResolvedValueOnce(0);
 
     const result = await detectLoggingProfileDrift({
       codebox,

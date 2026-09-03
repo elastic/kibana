@@ -51,14 +51,16 @@ import {
   identifyCodeFeaturesForService,
   identifyCodeQueries,
   getCodeFeatureStreamPrefix,
+  getCodePredictiveSourceId,
+  getCodePredictiveSourceIds,
   reconcileCodeAndLogQueries,
+  reconcileCodeAndLogQueriesAcrossOwners,
   linkServiceEntities,
   discoverLoggingSites,
   classifyLoggingSites,
   extractOtelSignalsResult,
   generateOtelQueries,
   classifyOtelSignals,
-  resolveSignalStreams,
   listIndexedRepos,
   discoverCandidateRoots,
   buildLanguageHistogram,
@@ -74,6 +76,8 @@ import {
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
 import { getCodeboxClient } from '../../../../lib/knowledge_indicators/code_intelligence/codebox_client';
+import { isCodeKiExtractionEnabled } from '../../../../lib/knowledge_indicators/code_intelligence/is_code_ki_extraction_enabled';
+import { assertCodeIntelligenceEnabled } from './assert_code_intelligence_enabled';
 
 /** Whether a KI carries code evidence (code-derived or corroborated by code). */
 const hasCodeSource = (
@@ -116,19 +120,19 @@ const removeStaleTemplateQueries = async ({
   kiClient,
   serviceName,
   repository,
-  authorizedStreamNames,
+  predictiveLogsOwner,
 }: {
   streams: StreamSamplingSource[];
   kiClient: Pick<KnowledgeIndicatorClient, 'getStreamToQueryLinksMap' | 'bulk'>;
   serviceName: string;
   repository: string;
-  authorizedStreamNames: Set<string>;
+  predictiveLogsOwner: string;
 }): Promise<void> => {
-  // Only clean the root `logs` fallback owner when the caller can access it.
-  const fallbackOwners = authorizedStreamNames.has(FALLBACK_LOG_STREAM)
-    ? [FALLBACK_LOG_STREAM]
-    : [];
-  const streamNames = [...new Set([...fallbackOwners, ...streams.map(({ name }) => name)])];
+  // Current bridge owner first; root logs and concrete owners are legacy-only
+  // cleanup targets. The evidence predicate below prevents non-code deletion.
+  const streamNames = [
+    ...new Set([predictiveLogsOwner, FALLBACK_LOG_STREAM, ...streams.map(({ name }) => name)]),
+  ];
   for (const streamName of streamNames) {
     // The revision reader caps a combined request. Fetch 1 owner at a time so
     // large deployments cannot silently leave an old template behind.
@@ -146,6 +150,7 @@ const CODE_KNOWLEDGE_INDICATORS_LIMIT = REVISION_SIZE_LIMIT;
 // Keep each synchronous destructive batch aligned with the existing bounded
 // cross-stream reconciliation endpoint.
 const CODE_INTELLIGENCE_OPERATION_BATCH_SIZE = 10;
+const CODE_INTELLIGENCE_RECONCILE_OWNER_LIMIT = 100;
 const CODE_INTELLIGENCE_BULK_OPERATION_BATCH_SIZE = 1000;
 const CODE_INTELLIGENCE_MAX_ARRAY_SIZE = 1_000;
 const CODE_INTELLIGENCE_MAX_COUNT = Number.MAX_SAFE_INTEGER;
@@ -190,33 +195,6 @@ const listAccessibleStreamNames = async (streamsClient: {
 }): Promise<string[]> => (await streamsClient.listStreams()).map(({ name }) => name);
 
 /** Returns a stable, bounded stream batch and the cursor needed to resume it. */
-/**
- * Code-analysis features have space-scoped virtual streams. They are safe to
- * combine with the request's real streams because the prefix is assigned at
- * write time from the execution space, not supplied by the caller.
- */
-const listAuthorizedCodeKnowledgeIndicatorStreams = async ({
-  kiClient,
-  streamsClient,
-  spaceId,
-}: {
-  kiClient: { getStreamNamesWithKnowledgeIndicators: () => Promise<string[]> };
-  streamsClient: { listStreams: () => Promise<Array<{ name: string }>> };
-  spaceId: string;
-}): Promise<{ streamNames: string[]; isTruncated: boolean }> => {
-  const [realStreams, allKiStreams] = await Promise.all([
-    listAccessibleStreamNames(streamsClient),
-    kiClient.getStreamNamesWithKnowledgeIndicators(),
-  ]);
-  const prefix = getCodeFeatureStreamPrefix(spaceId);
-  return {
-    streamNames: [
-      ...new Set([...realStreams, ...allKiStreams.filter((name) => name.startsWith(prefix))]),
-    ],
-    isTruncated: allKiStreams.length === REVISION_SIZE_LIMIT,
-  };
-};
-
 const getStreamBatch = (streamNames: string[], cursor: string | undefined) => {
   const sortedStreamNames = [...streamNames].sort();
   const remaining = sortedStreamNames.filter((streamName) => !cursor || streamName > cursor);
@@ -307,6 +285,7 @@ const reconcileCodeQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const { streamName } = params.path;
 
@@ -325,11 +304,16 @@ const reconcileCodeQueriesRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     return reconcileCodeAndLogQueries({
       streamName,
       kiClient,
       logger: logger.get('reconcile_queries', streamName),
+      beforeWrite: async () => {
+        await assertNotPaused({ maintenanceService, request });
+        await assertCodeIntelligenceEnabled(server.core.featureFlags);
+      },
     });
   },
 });
@@ -361,6 +345,9 @@ const codeIntelligenceAvailabilityRoute = createServerRoute({
   }): Promise<{ available: boolean; message?: string }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    if (!(await isCodeKiExtractionEnabled(server.core.featureFlags))) {
+      return { available: false, message: 'Code Intelligence extraction is disabled.' };
+    }
 
     const readiness = await getCodeIntelligenceReadiness({
       request,
@@ -392,16 +379,23 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
+    getSpaceId,
     server,
   }): Promise<{ features: Feature[]; queries: QueryLink[]; isTruncated: boolean }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
-    const streamEnumerationTruncated = streamNames.length === REVISION_SIZE_LIMIT;
+    const allOwnerIds = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const prefix = getCodeFeatureStreamPrefix(await getSpaceId(request));
+    const predictiveSourceIds = new Set(getCodePredictiveSourceIds(await getSpaceId(request)));
+    const streamNames = allOwnerIds.filter(
+      (ownerId) => ownerId.startsWith(prefix) || predictiveSourceIds.has(ownerId)
+    );
+    const streamEnumerationTruncated = allOwnerIds.length === REVISION_SIZE_LIMIT;
     if (streamNames.length === 0) {
       return { features: [], queries: [], isTruncated: streamEnumerationTruncated };
     }
@@ -469,14 +463,15 @@ const serviceDistributionRoute = createServerRoute({
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
-    const streamNames = await listAccessibleStreamNames(scopedClients.streamsClient);
-    if (streamNames.length === 0) {
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const ownerIds = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    if (ownerIds.length === 0) {
       return { codeOnly: 0, both: 0, logsOnly: 0, codeOnlyServices: [], isTruncated: false };
     }
 
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const { hits } = await kiClient.getFeatures(streamNames, {
+    const { hits } = await kiClient.getFeatures(ownerIds, {
       type: ['entity'],
       includeExpired: true,
       limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
@@ -531,20 +526,17 @@ const serviceDistributionRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Reset: delete every code-derived Feature KI across streams the request can access.
+// Reset: delete purely code-derived Feature and Query KIs.
 //
-// Removes all `code_analysis` features (including excluded ones), which also
-// clears the stored change fingerprint — so a subsequent run re-derives features
-// from scratch instead of no-opping. Intended for iterating on the extraction
-// workflow: wipe, re-run, inspect what the agent returns. Log-derived KIs and
-// Query KIs are left untouched.
+// Mixed and log-derived KIs remain intact. Clearing code features also removes
+// change fingerprints so a subsequent extraction re-derives them from scratch.
 // ---------------------------------------------------------------------------
 
 const resetCodeFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_reset',
   options: {
     access: 'internal',
-    summary: 'Delete all code-derived Feature KIs across accessible streams',
+    summary: 'Delete purely code-derived Feature and Query KIs',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -573,11 +565,18 @@ const resetCodeFeaturesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'reset');
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const authorizedStreamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
-    const streamEnumerationTruncated = authorizedStreamNames.length === REVISION_SIZE_LIMIT;
+    const [currentOwnerIds, legacyOwnerIds] = await Promise.all([
+      kiClient.getScopedStreamNamesWithKnowledgeIndicators(),
+      kiClient.getUnscopedLegacyStreamNamesWithKnowledgeIndicators(),
+    ]);
+    const authorizedStreamNames = [...new Set([...currentOwnerIds, ...legacyOwnerIds])];
+    const streamEnumerationTruncated =
+      currentOwnerIds.length === REVISION_SIZE_LIMIT ||
+      legacyOwnerIds.length === REVISION_SIZE_LIMIT;
     if (streamEnumerationTruncated) {
       throw new StatusError(
         'Code Intelligence reset is unavailable because the stream result reached its maximum size.',
@@ -589,14 +588,21 @@ const resetCodeFeaturesRoute = createServerRoute({
       return { deleted: 0, streamsAffected: 0, failedStreams: [] };
     }
 
-    // Reset only code-derived Features. Query KIs are retained because a code
-    // extraction run can create no replacement for a previously useful query.
-    const { hits: allFeatures } = await kiClient.getFeatures(streamNames, {
-      includeExcluded: true,
-      includeExpired: true,
-      limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
-    });
-    if (allFeatures.length === CODE_KNOWLEDGE_INDICATORS_LIMIT) {
+    // Reset current bridge records plus purely code-derived legacy predictions.
+    // The current-space KI client makes this scan space-isolated; filtering by
+    // evidence prevents root/concrete owners from losing non-code KIs.
+    const [currentIndicators, legacyIndicators] = await Promise.all([
+      kiClient.getScopedIndicators(streamNames),
+      kiClient.getUnscopedLegacyIndicators(streamNames),
+    ]);
+    const currentFeatures = currentIndicators.features;
+    const currentQueries = currentIndicators.queries;
+    const currentIndicatorCount = currentFeatures.length + currentQueries.length;
+    const legacyIndicatorCount = legacyIndicators.features.length + legacyIndicators.queries.length;
+    if (
+      currentIndicatorCount >= CODE_KNOWLEDGE_INDICATORS_LIMIT ||
+      legacyIndicatorCount >= CODE_KNOWLEDGE_INDICATORS_LIMIT
+    ) {
       throw new StatusError(
         'Code Intelligence reset is unavailable because the feature result reached its maximum size. Narrow the source data before retrying.',
         409
@@ -604,23 +610,71 @@ const resetCodeFeaturesRoute = createServerRoute({
     }
 
     const opsByStream = new Map<string, KIBulkOperation[]>();
+    const legacyOpsByStream = new Map<
+      string,
+      Array<{ type: typeof KI_TYPE_FEATURE | typeof KI_TYPE_QUERY; id: string }>
+    >();
     const addOp = (stream: string, op: KIBulkOperation) => {
       const ops = opsByStream.get(stream) ?? [];
       ops.push(op);
       opsByStream.set(stream, ops);
     };
+    const addLegacyOp = (
+      stream: string,
+      identity: { type: typeof KI_TYPE_FEATURE | typeof KI_TYPE_QUERY; id: string }
+    ) => {
+      const ops = legacyOpsByStream.get(stream) ?? [];
+      ops.push(identity);
+      legacyOpsByStream.set(stream, ops);
+    };
 
-    // Only delete purely code-derived Features. Merged features (`both`) also
-    // carry log evidence, so deleting them would destroy the log side too.
-    for (const feature of allFeatures) {
+    // Keep current and legacy revisions on separate writer paths. IDs can be
+    // deterministic and collide across scopes, so ID-only provenance is unsafe.
+    for (const feature of currentFeatures) {
       if (isPurelyCodeSource(feature.evidence, feature.source)) {
-        addOp(feature.stream_name, { delete: { type: KI_TYPE_FEATURE, id: feature.uuid } });
+        addOp(feature.stream_name, {
+          delete: { type: KI_TYPE_FEATURE, id: feature.uuid },
+        });
+      }
+    }
+    for (const link of currentQueries) {
+      if (isPurelyCodeSource(link.query.evidence, link.query.source)) {
+        addOp(link.stream_name, {
+          delete: { type: KI_TYPE_QUERY, id: link.query.id },
+        });
+      }
+    }
+    for (const feature of legacyIndicators.features) {
+      if (isPurelyCodeSource(feature.evidence, feature.source)) {
+        addLegacyOp(feature.stream_name, { type: KI_TYPE_FEATURE, id: feature.uuid });
+      }
+    }
+    for (const link of legacyIndicators.queries) {
+      if (isPurelyCodeSource(link.query.evidence, link.query.source)) {
+        addLegacyOp(link.stream_name, { type: KI_TYPE_QUERY, id: link.query.id });
       }
     }
 
     let deleted = 0;
     const affected = new Set<string>();
     const failedStreams: string[] = [];
+    for (const [streamName, identities] of legacyOpsByStream) {
+      try {
+        await assertNotPaused({ maintenanceService, request });
+        await assertCodeIntelligenceEnabled(server.core.featureFlags);
+        const { applied } = await kiClient.deleteUnscopedLegacyIndicators(streamName, identities);
+        deleted += applied;
+        if (applied > 0) affected.add(streamName);
+      } catch (error) {
+        if (error instanceof SignificantEventsPausedError) throw error;
+        failedStreams.push(streamName);
+        routeLogger.warn(
+          `code_intelligence: legacy reset failed for stream "${streamName}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
     for (const [streamName, ops] of opsByStream) {
       try {
         let appliedForStream = 0;
@@ -632,6 +686,7 @@ const resetCodeFeaturesRoute = createServerRoute({
           // Pause cancellation is best effort. Recheck each bounded write batch
           // so an operation admitted before pause cannot keep deleting afterwards.
           await assertNotPaused({ maintenanceService, request });
+          await assertCodeIntelligenceEnabled(server.core.featureFlags);
           const { applied } = await kiClient.bulk(
             streamName,
             ops.slice(start, start + CODE_INTELLIGENCE_BULK_OPERATION_BATCH_SIZE)
@@ -813,6 +868,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     const { streamDataEsClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
     const codebox = await getCodeboxClient({
@@ -822,14 +878,14 @@ const identifyOtelSignalsRoute = createServerRoute({
     });
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
-    const authorizedStreamNames = new Set(
-      await listAccessibleStreamNames(scopedClients.streamsClient)
-    );
+    const spaceId = await getSpaceId(request);
+    const predictiveLogsOwner = getCodePredictiveSourceId(spaceId, 'logs');
+    const authorizedStreamNames = new Set([predictiveLogsOwner]);
 
     const runTemplateFallback = async () => {
       const profileGreps = await readProfileGreps({
         kiClient,
-        spaceId: await getSpaceId(request),
+        spaceId,
         repository,
         gitSha,
         logger: routeLogger,
@@ -856,10 +912,12 @@ const identifyOtelSignalsRoute = createServerRoute({
         logger: routeLogger,
       });
       await assertNotPaused({ maintenanceService, request });
+      await assertCodeIntelligenceEnabled(server.core.featureFlags);
       return identifyCodeQueries({
         serviceName: name,
         repository,
         gitSha,
+        spaceId,
         streams,
         kiClient,
         loggingChunks,
@@ -868,6 +926,10 @@ const identifyOtelSignalsRoute = createServerRoute({
         hasOtel: true,
         otelGateBypassed: true,
         authorizedStreamNames,
+        beforeWrite: async () => {
+          await assertNotPaused({ maintenanceService, request });
+          await assertCodeIntelligenceEnabled(server.core.featureFlags);
+        },
       });
     };
 
@@ -877,6 +939,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     // coverage at all fails the iteration so the workflow retries visibly.
     const runTemplateFallbackOrThrow = async (reason: string) => {
       await assertNotPaused({ maintenanceService, request });
+      await assertCodeIntelligenceEnabled(server.core.featureFlags);
       const fallback = await runTemplateFallback();
       if ((fallback.generatedCount ?? 0) === 0 && (fallback.streams?.length ?? 0) === 0) {
         throw new Error(`OTel service "${name}" ${reason} and produced no query coverage.`);
@@ -900,37 +963,18 @@ const identifyOtelSignalsRoute = createServerRoute({
         otelSignalsFound: 0,
       };
     }
-    const resolved = await resolveSignalStreams({
-      streams,
-      esClient: streamDataEsClient,
-      logger: routeLogger,
-    });
-    const hasTypedStreamCoverage =
-      resolved.traceStreams.length > 0 ||
-      resolved.metricStreams.length > 0 ||
-      resolved.logStreams.length > 0;
-    const predictiveFallback = !hasTypedStreamCoverage
-      ? {
-          traceStreams: [FALLBACK_TRACE_INDEX_PATTERN],
-          metricStreams: [FALLBACK_METRIC_INDEX_PATTERN],
-          logStreams: [FALLBACK_LOG_INDEX_PATTERN],
-          traceStreamNames: [FALLBACK_LOG_STREAM],
-          metricStreamNames: [FALLBACK_LOG_STREAM],
-          logStreamNames: [FALLBACK_LOG_STREAM],
-        }
-      : resolved;
-    if (!hasTypedStreamCoverage && predictiveFallback !== resolved) {
-      routeLogger.info(
-        `No typed streams exist for OTel service "${name}"; generating predictive typed queries on root "${FALLBACK_LOG_STREAM}"`
-      );
-    }
     const generated = generateOtelQueries({
       serviceName: name,
       repository,
       gitSha,
       signals: extraction.signals,
       signalCounts,
-      ...predictiveFallback,
+      traceStreams: [FALLBACK_TRACE_INDEX_PATTERN],
+      metricStreams: [FALLBACK_METRIC_INDEX_PATTERN],
+      logStreams: [FALLBACK_LOG_INDEX_PATTERN],
+      traceStreamNames: [getCodePredictiveSourceId(spaceId, 'traces')],
+      metricStreamNames: [getCodePredictiveSourceId(spaceId, 'metrics')],
+      logStreamNames: [getCodePredictiveSourceId(spaceId, 'logs')],
     });
 
     // Template queries are valid only when no typed signal tier can target a
@@ -984,12 +1028,19 @@ const identifyOtelSignalsRoute = createServerRoute({
       );
       if (fresh.length === 0) continue;
       await assertNotPaused({ maintenanceService, request });
+      await assertCodeIntelligenceEnabled(server.core.featureFlags);
       await kiClient.bulk(
         streamName,
-        fresh.map(({ query }) => ({ index: { query: { ...query, rule_backed: false } } }))
+        fresh.map(({ query }) => ({
+          index: {
+            query: { ...query, rule_backed: false },
+            sourceId: streamName,
+          },
+        }))
       );
       queriesGenerated += fresh.length;
       await assertNotPaused({ maintenanceService, request });
+      await assertCodeIntelligenceEnabled(server.core.featureFlags);
       // Typed OTel KIs have deterministic IDs and are exact-ES|QL deduplicated
       // above. They must not enter the destructive semantic reconciler.
     }
@@ -1002,7 +1053,7 @@ const identifyOtelSignalsRoute = createServerRoute({
         kiClient,
         serviceName: name,
         repository,
-        authorizedStreamNames,
+        predictiveLogsOwner,
       });
     }
     return {
@@ -1105,6 +1156,7 @@ const identifyServiceRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const {
       repository,
@@ -1177,6 +1229,7 @@ const identifyServiceRoute = createServerRoute({
 
     // Stage 1: derive code Feature KIs (repo type, language, predicted service name).
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const featureResult = await identifyCodeFeaturesForService({
       repository,
       gitSha,
@@ -1189,7 +1242,10 @@ const identifyServiceRoute = createServerRoute({
       kiClient,
       logger: routeLogger,
       runId,
-      beforeWrite: () => assertNotPaused({ maintenanceService, request }),
+      beforeWrite: async () => {
+        await assertNotPaused({ maintenanceService, request });
+        await assertCodeIntelligenceEnabled(server.core.featureFlags);
+      },
     });
 
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
@@ -1200,10 +1256,12 @@ const identifyServiceRoute = createServerRoute({
     // Stage 2: generate predictive Query KIs from the service's logger call
     // sites, written to the real stream(s) that ingest the service.
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const queryResult = await identifyCodeQueries({
       serviceName: featureResult.streamName,
       repository,
       gitSha,
+      spaceId,
       streams,
       metadata,
       kiClient,
@@ -1212,6 +1270,10 @@ const identifyServiceRoute = createServerRoute({
       logger: routeLogger,
       hasOtel,
       authorizedStreamNames,
+      beforeWrite: async () => {
+        await assertNotPaused({ maintenanceService, request });
+        await assertCodeIntelligenceEnabled(server.core.featureFlags);
+      },
     });
 
     // Semantic cross-source reconciliation is intentionally not part of this
@@ -1219,11 +1281,11 @@ const identifyServiceRoute = createServerRoute({
     // stream operation separately; rescanning every query on root `logs` for
     // every service makes extraction cost grow quadratically.
 
-    // Represent the service as an entity/service KI on the ingesting stream(s),
-    // merging with any matching log-derived entity. Runs every time (even on a
-    // code no-op) so it tracks log entities that appear after the code was
-    // analyzed.
+    // Represent the service as an entity/service KI on its space-scoped Code
+    // Intelligence owner. Real stream linkage is optional enrichment and never
+    // controls ownership or persistence.
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     try {
       await linkServiceEntities({
         serviceName: featureResult.streamName,
@@ -1231,11 +1293,14 @@ const identifyServiceRoute = createServerRoute({
         fingerprint: featureResult.fingerprint,
         citations: service.evidence ?? undefined,
         metadata,
-        streams,
-        esClient: streamDataEsClient,
+        spaceId,
         kiClient,
         runId,
         logger: routeLogger,
+        beforeWrite: async () => {
+          await assertNotPaused({ maintenanceService, request });
+          await assertCodeIntelligenceEnabled(server.core.featureFlags);
+        },
       });
     } catch (error) {
       routeLogger.debug(
@@ -1296,6 +1361,7 @@ const listReposRoute = createServerRoute({
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'list_repos');
     const codebox = await getCodeboxClient({
@@ -1339,6 +1405,7 @@ const discoverServicesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'discover_services');
     const codebox = await getCodeboxClient({
@@ -1417,6 +1484,7 @@ const discoverServicesRoute = createServerRoute({
     });
 
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const services = await classifyServices({
       inferenceClient,
       connectorId,
@@ -1471,6 +1539,7 @@ const runCodeIntelligenceRoute = createServerRoute({
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const codeExtractionClient = workflowClients.codeExtractionClient;
     const readiness = await getCodeIntelligenceReadiness({
@@ -1504,13 +1573,11 @@ const runCodeIntelligenceRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Reconcile KIs across streams the request can access on demand.
+// Reconcile KIs across one bounded, authoritative current-space owner set.
 //
-// Runs the cross-source Query KI reconciler (semantic dedup of code- vs
-// log-derived queries) for every stream that has KIs, and refreshes each code
-// service's ingesting-stream linkage. Deterministic and LLM-free (semantic
-// matching over stored embeddings), so it runs synchronously and returns
-// aggregate counts. Backs the discovery tab "Reconcile KIs" button.
+// Cross-owner duplicate detection must compare every accepted owner in one run;
+// pagination would silently miss duplicates split across pages. Estates above
+// the explicit caps receive 409 before any write.
 // ---------------------------------------------------------------------------
 
 const reconcileKnowledgeIndicatorsRoute = createServerRoute({
@@ -1525,11 +1592,8 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({ cursor: codeIntelligenceInput.optional() }).optional(),
-  }),
+  params: z.object({ body: z.object({}).optional() }),
   handler: async ({
-    params,
     request,
     getScopedClients,
     server,
@@ -1540,19 +1604,27 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     clustersMerged: number;
     queriesTombstoned: number;
     failedStreams: string[];
-    nextCursor?: string;
   }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
 
     const routeLogger = logger.get('code_intelligence', 'reconcile');
-    const { streamNames, nextCursor } = getStreamBatch(
-      await listAccessibleStreamNames(scopedClients.streamsClient),
-      params?.body?.cursor
-    );
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const allOwnerIds = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    if (allOwnerIds.length >= REVISION_SIZE_LIMIT) {
+      throw new StatusError('Reconciliation owner enumeration reached the storage limit.', 409);
+    }
+    if (allOwnerIds.length > CODE_INTELLIGENCE_RECONCILE_OWNER_LIMIT) {
+      throw new StatusError(
+        `Cross-owner reconciliation supports at most ${CODE_INTELLIGENCE_RECONCILE_OWNER_LIMIT} owners.`,
+        409
+      );
+    }
+    const streamNames = [...new Set(allOwnerIds)].sort();
     if (streamNames.length === 0) {
       return {
         streamsReconciled: 0,
@@ -1562,46 +1634,46 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       };
     }
 
-    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     let streamsReconciled = 0;
     let clustersMerged = 0;
     let queriesTombstoned = 0;
     const failedStreams: string[] = [];
 
-    for (const streamName of streamNames) {
-      try {
-        await assertNotPaused({ maintenanceService, request });
-        const links = await kiClient.getQueryLinks([streamName], {
-          ruleUnbacked: 'include',
-          includeExpired: true,
-          limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
-        });
-        if (links.length === CODE_KNOWLEDGE_INDICATORS_LIMIT) {
-          throw new StatusError(
-            `Reconciliation is unavailable for stream "${streamName}" because its query result reached the maximum size.`,
-            409
-          );
-        }
-        await assertNotPaused({ maintenanceService, request });
-        const result = await reconcileCodeAndLogQueries({
-          streamName,
-          kiClient,
-          logger: routeLogger,
-        });
-        streamsReconciled += 1;
-        clustersMerged += result.clustersMerged;
-        queriesTombstoned += result.queriesTombstoned;
-      } catch (error) {
-        if (error instanceof SignificantEventsPausedError) {
-          throw error;
-        }
-        failedStreams.push(streamName);
-        routeLogger.warn(
-          `code_intelligence: reconcile failed for stream "${streamName}": ${
-            error instanceof Error ? error.message : String(error)
-          }`
+    try {
+      await assertNotPaused({ maintenanceService, request });
+      await assertCodeIntelligenceEnabled(server.core.featureFlags);
+      const links = await kiClient.getQueryLinks(streamNames, {
+        ruleUnbacked: 'include',
+        limit: CODE_KNOWLEDGE_INDICATORS_LIMIT,
+      });
+      if (links.length >= CODE_KNOWLEDGE_INDICATORS_LIMIT) {
+        throw new StatusError(
+          'Cross-owner reconciliation query result reached the maximum size.',
+          409
         );
       }
+      const result = await reconcileCodeAndLogQueriesAcrossOwners({
+        links,
+        kiClient,
+        logger: routeLogger,
+        beforeWrite: async () => {
+          await assertNotPaused({ maintenanceService, request });
+          await assertCodeIntelligenceEnabled(server.core.featureFlags);
+        },
+      });
+      streamsReconciled = streamNames.length;
+      clustersMerged = result.clustersMerged;
+      queriesTombstoned = result.queriesTombstoned;
+    } catch (error) {
+      if (error instanceof SignificantEventsPausedError || error instanceof StatusError) {
+        throw error;
+      }
+      failedStreams.push(...streamNames);
+      routeLogger.warn(
+        `code_intelligence: cross-owner reconcile failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
 
     return {
@@ -1609,7 +1681,6 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       clustersMerged,
       queriesTombstoned,
       failedStreams,
-      ...(nextCursor ? { nextCursor } : {}),
     };
   },
 });
@@ -1649,6 +1720,7 @@ const codeIntelligenceRunStatusRoute = createServerRoute({
     getSpaceId,
     server,
   }): Promise<SignificantEventsWorkflowStatusResult> => {
+    await assertCodeIntelligenceEnabled(server.core.featureFlags);
     const { codeExtractionClient } = workflowClients;
     if (!codeExtractionClient) {
       return { status: SignificantEventsWorkflowStatus.NotStarted, executionId: null };

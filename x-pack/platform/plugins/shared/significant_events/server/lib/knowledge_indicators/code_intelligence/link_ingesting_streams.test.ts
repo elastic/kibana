@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Feature } from '@kbn/significant-events-schema';
 import type { KIBulkOperation, KnowledgeIndicatorClient } from '../knowledge_indicator_client';
+import { getCodePredictiveSourceId } from './identify_code_features';
 import {
   linkServiceEntities,
   resolveSignalStreams,
@@ -17,20 +18,13 @@ import {
   type StreamSamplingSource,
 } from './link_ingesting_streams';
 
+const SPACE_ID = 'default';
+const LOG_SOURCE_ID = getCodePredictiveSourceId(SPACE_ID, 'logs');
+
 const STREAMS: StreamSamplingSource[] = [
   { name: 'logs.otel', index: 'logs.otel', convention: 'otel' },
   { name: 'logs.ecs', index: 'logs.ecs', convention: 'ecs' },
 ];
-
-const createEsClient = (): ElasticsearchClient =>
-  ({
-    fieldCaps: jest.fn(async () => ({
-      fields: {
-        message: { keyword: { type: 'keyword', aggregatable: true, searchable: true } },
-      },
-    })),
-    count: jest.fn(async () => ({ count: 1 })),
-  } as unknown as ElasticsearchClient);
 
 const createKiClient = (featuresByStream: Record<string, Feature[]> = {}) => {
   const bulk = jest.fn<Promise<{ applied: number }>, [string, KIBulkOperation[]]>(async () => ({
@@ -54,11 +48,11 @@ const link = async (
     repository: 'acme/checkout',
     fingerprint: 'abc123',
     metadata,
-    streams,
-    esClient: createEsClient(),
+    spaceId: SPACE_ID,
     kiClient,
     runId: 'run-1',
     logger: loggerMock.create(),
+    beforeWrite: jest.fn().mockResolvedValue(undefined),
   });
   return { result, bulk };
 };
@@ -151,28 +145,34 @@ describe('linkServiceEntities', () => {
     });
   });
 
-  it('always targets the root logs stream (code-first)', async () => {
-    const { result } = await link({ loggingPattern: 'otel' });
-    expect(result.streams).toEqual(['logs']);
+  it('always targets the space-scoped predictive logs source', async () => {
+    const { result, bulk } = await link({ loggingPattern: 'otel' });
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
+    expect(bulk).toHaveBeenCalledWith(
+      LOG_SOURCE_ID,
+      expect.arrayContaining([
+        expect.objectContaining({
+          index: expect.objectContaining({
+            feature: expect.objectContaining({ source_ids: [LOG_SOURCE_ID] }),
+          }),
+        }),
+      ])
+    );
   });
 
-  it('targets the root logs stream when telemetry metadata is unknown', async () => {
-    const { result } = await link(undefined);
-    expect(result.streams).toEqual(['logs']);
-  });
-
-  it('targets the root logs stream regardless of available bindings', async () => {
+  it('keeps telemetry metadata and real bindings from changing ownership', async () => {
     const { result } = await link({ loggingPattern: 'otel' }, {}, [
       { name: 'logs.ecs', index: 'logs.ecs', convention: 'ecs' },
     ]);
-    expect(result.streams).toEqual(['logs']);
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
   });
 
-  it('merges with a matching log entity on the root logs stream', async () => {
+  it('merges with a matching entity on the predictive owner', async () => {
     const matchingLogEntity = {
       id: 'checkout',
       uuid: 'checkout-uuid',
-      stream_name: 'logs',
+      stream_name: LOG_SOURCE_ID,
+      source_ids: [LOG_SOURCE_ID],
       type: 'entity',
       subtype: 'service',
       title: 'checkout',
@@ -181,7 +181,10 @@ describe('linkServiceEntities', () => {
       confidence: 80,
       evidence: ['logs: checkout observed'],
     } satisfies Feature;
-    const { result } = await link({ loggingPattern: 'otel' }, { logs: [matchingLogEntity] });
-    expect(result.streams).toEqual(['logs']);
+    const { result } = await link(
+      { loggingPattern: 'otel' },
+      { [LOG_SOURCE_ID]: [matchingLogEntity] }
+    );
+    expect(result.streams).toEqual([LOG_SOURCE_ID]);
   });
 });

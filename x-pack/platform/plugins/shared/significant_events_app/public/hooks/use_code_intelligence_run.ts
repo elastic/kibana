@@ -79,36 +79,17 @@ export function useCodeIntelligenceRun({
   });
 
   const reconcileMutation = useMutation({
-    mutationFn: async () => {
-      let cursor: string | undefined;
-      const result = {
-        streamsReconciled: 0,
-        clustersMerged: 0,
-        queriesTombstoned: 0,
-        failedStreams: [] as string[],
-      };
-      do {
-        const batch = await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/code_intelligence/_reconcile',
-          {
-            params: { body: { cursor } },
-            signal,
-          }
-        );
-        result.streamsReconciled += batch.streamsReconciled;
-        result.clustersMerged += batch.clustersMerged;
-        result.queriesTombstoned += batch.queriesTombstoned;
-        result.failedStreams.push(...batch.failedStreams);
-        cursor = batch.nextCursor;
-      } while (cursor);
-      return result;
-    },
+    mutationFn: () =>
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/streams/code_intelligence/_reconcile',
+        { signal }
+      ),
     onSuccess: (result) => {
       const text = i18n.translate(
         'xpack.significantEventsApp.codeIntelligence.reconcileSuccessText',
         {
           defaultMessage:
-            'Reconciled {streamsReconciled} stream{streamsReconciled, plural, one {} other {s}}: {clustersMerged} merged, {queriesTombstoned} removed.',
+            'Reconciled {streamsReconciled} owner{streamsReconciled, plural, one {} other {s}}: {clustersMerged} corroborated, {queriesTombstoned} same-owner duplicates removed.',
           values: {
             streamsReconciled: result.streamsReconciled,
             clustersMerged: result.clustersMerged,
@@ -219,12 +200,12 @@ const RECONCILE_FAILURE_TITLE = i18n.translate(
 
 const RESET_SUCCESS_TITLE = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetSuccessTitle',
-  { defaultMessage: 'Code features deleted' }
+  { defaultMessage: 'Code Intelligence features and queries deleted' }
 );
 
 const RESET_PARTIAL_TITLE = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetPartialTitle',
-  { defaultMessage: 'Code features deleted with failures' }
+  { defaultMessage: 'Code Intelligence features and queries deleted with failures' }
 );
 const RESET_SUCCESS_TEXT = ({
   deleted,
@@ -235,7 +216,7 @@ const RESET_SUCCESS_TEXT = ({
 }) =>
   i18n.translate('xpack.significantEventsApp.codeIntelligence.resetSuccessText', {
     defaultMessage:
-      'Deleted {deleted} code knowledge indicator{deleted, plural, one {} other {s}} across {streamsAffected} stream{streamsAffected, plural, one {} other {s}}.',
+      'Deleted {deleted} purely code-derived feature or query knowledge indicator{deleted, plural, one {} other {s}} across {streamsAffected} owner{streamsAffected, plural, one {} other {s}}. Mixed and log-derived knowledge indicators were preserved.',
     values: { deleted, streamsAffected },
   });
 const RESET_PARTIAL_TEXT = (failedStreams: string[]) =>
@@ -246,5 +227,5 @@ const RESET_PARTIAL_TEXT = (failedStreams: string[]) =>
   });
 const RESET_FAILURE_TITLE = i18n.translate(
   'xpack.significantEventsApp.codeIntelligence.resetFailureTitle',
-  { defaultMessage: 'Failed to delete code features' }
+  { defaultMessage: 'Failed to delete Code Intelligence features and queries' }
 );

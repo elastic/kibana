@@ -68,13 +68,29 @@ const hitsWithEvidence = (
 describe('validateLoggingQueriesHandler', () => {
   beforeEach(() => jest.clearAllMocks());
 
+  it('fails safely when the repository count response is invalid', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grepCount.mockRejectedValue(new Error('invalid grep count'));
+
+    await expect(
+      validateLoggingQueriesHandler({
+        codebox,
+        repository: 'supabase/realtime',
+        gitCommit: 'f5abfb19445404',
+        greps: [candidate('.*log_error[(].*')],
+        logger,
+      })
+    ).rejects.toThrow('invalid grep count');
+    expect(codebox.grep).not.toHaveBeenCalled();
+  });
+
   it('reports pass when grep covers evidence and is under ceiling', async () => {
     const codebox = createMockCodeboxClient();
     // Total lines: 108873 so 179/108873 = 0.16% < 1% ceiling
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      return hitsWithEvidence(179, 'lib/realtime/logs.ex', 21);
-    });
+    codebox.grepCount.mockResolvedValueOnce(108873).mockResolvedValueOnce(179);
+    codebox.grep
+      .mockResolvedValueOnce(hitsWithEvidence(1, 'lib/realtime/logs.ex', 21))
+      .mockResolvedValueOnce(fakeHits(3));
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -95,15 +111,19 @@ describe('validateLoggingQueriesHandler', () => {
       status: 'ok' as GrepValidationStatus,
     });
     expect(output.results[0].sample).toHaveLength(3);
+    expect(codebox.grep).toHaveBeenCalledWith(
+      expect.objectContaining({ path: 'lib/realtime/logs.ex', maxCount: 1_000 })
+    );
+    expect(codebox.grep).toHaveBeenCalledWith(expect.objectContaining({ maxCount: 3 }));
+    expect(codebox.grep).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: '.', maxCount: 1_000_000 })
+    );
   });
 
   it('reports evidence_missed when grep hits but misses the evidence line', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      // Hits that do NOT include the evidence path:line
-      return fakeHits(50);
-    });
+    codebox.grepCount.mockResolvedValueOnce(108873).mockResolvedValueOnce(50);
+    codebox.grep.mockResolvedValueOnce(fakeHits(1)).mockResolvedValueOnce(fakeHits(3));
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -122,10 +142,8 @@ describe('validateLoggingQueriesHandler', () => {
 
   it('reports zero_hits when grep matches nothing', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      return [];
-    });
+    codebox.grepCount.mockResolvedValueOnce(108873).mockResolvedValueOnce(0);
+    codebox.grep.mockResolvedValueOnce([]);
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -145,11 +163,8 @@ describe('validateLoggingQueriesHandler', () => {
 
   it('reports over_capture when hit_ratio >= ceiling', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(10000);
-      // 200 hits / 10000 total = 2%, above 1% ceiling
-      return hitsWithEvidence(200, 'lib/realtime/logs.ex', 21);
-    });
+    codebox.grepCount.mockResolvedValueOnce(10000).mockResolvedValueOnce(200);
+    codebox.grep.mockResolvedValueOnce(hitsWithEvidence(1, 'lib/realtime/logs.ex', 21));
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -169,10 +184,11 @@ describe('validateLoggingQueriesHandler', () => {
 
   it('reports invalid_syntax on a bad regex (HTTP 400)', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      throw new Error('Codebox GET /repos/.../grep failed: HTTP 400 — invalid regex');
-    });
+    codebox.grepCount
+      .mockResolvedValueOnce(108873)
+      .mockRejectedValueOnce(
+        new Error('Codebox GET /repos/.../grep failed: HTTP 400 — invalid regex')
+      );
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -191,10 +207,9 @@ describe('validateLoggingQueriesHandler', () => {
 
   it('reports query_failed on a transport error', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      throw new Error('ECONNREFUSED');
-    });
+    codebox.grepCount
+      .mockResolvedValueOnce(108873)
+      .mockRejectedValueOnce(new Error('ECONNREFUSED'));
 
     const output = await validateLoggingQueriesHandler({
       codebox,
@@ -213,14 +228,14 @@ describe('validateLoggingQueriesHandler', () => {
 
   it('validates multiple greps independently', async () => {
     const codebox = createMockCodeboxClient();
-    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
-      if (pattern === '.') return fakeHits(108873);
-      // After rlikeToEre, '.*log_error[(].*' becomes 'log_error[(]'
-      if (pattern.includes('log_error')) return hitsWithEvidence(179, 'lib/realtime/logs.ex', 21);
-      // '.*nonexistent.*' becomes 'nonexistent'
-      if (pattern.includes('nonexistent')) return [];
-      return [];
-    });
+    codebox.grepCount
+      .mockResolvedValueOnce(108873)
+      .mockResolvedValueOnce(179)
+      .mockResolvedValueOnce(0);
+    codebox.grep
+      .mockResolvedValueOnce(hitsWithEvidence(1, 'lib/realtime/logs.ex', 21))
+      .mockResolvedValueOnce(fakeHits(3))
+      .mockResolvedValueOnce([]);
 
     const output = await validateLoggingQueriesHandler({
       codebox,

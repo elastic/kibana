@@ -506,7 +506,8 @@ export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): 
  */
 export const executeAndDecodeSource = async <T>(
   esClient: ElasticsearchClient,
-  query: ComposerQuery
+  query: ComposerQuery,
+  { revisionIdColumn }: { revisionIdColumn?: string } = {}
 ): Promise<{ hits: T[] }> => {
   const response = await runEsqlQuery(esClient, query.print('basic'));
   if (!response) {
@@ -517,12 +518,19 @@ export const executeAndDecodeSource = async <T>(
   if (sourceIdx === -1) {
     return { hits: [] };
   }
+  const revisionIdIdx = revisionIdColumn
+    ? response.columns.findIndex((column) => column.name === revisionIdColumn)
+    : -1;
 
   return {
     hits: response.values.map((row) => {
       const source = (row[sourceIdx] ?? {}) as Record<string, unknown>;
       const { kibana: _kibana, ...rest } = source;
-      return rest as T;
+      const revisionId = revisionIdIdx >= 0 ? row[revisionIdIdx] : undefined;
+      return {
+        ...rest,
+        ...(typeof revisionId === 'string' ? { _revision_id: revisionId } : {}),
+      } as T;
     }),
   };
 };
