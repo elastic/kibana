@@ -11,13 +11,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } fr
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { SourceNode as SourceNodeType } from '../types';
 import { SOURCE_NODE_WIDTH } from '../canvas_constants';
+import { CanvasNodeHighlight } from './canvas_node_highlight';
 import { getNodeCardStyles } from './node_card_styles';
 
-export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeType>) {
+export function SourceNode({ id, data, selected, dragging }: NodeProps<SourceNodeType>) {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <>
+    <CanvasNodeHighlight nodeId={id}>
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -61,6 +62,6 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
         </EuiFlexGroup>
       </EuiPanel>
       <Handle type="source" position={Position.Right} isConnectable={false} />
-    </>
+    </CanvasNodeHighlight>
   );
 }

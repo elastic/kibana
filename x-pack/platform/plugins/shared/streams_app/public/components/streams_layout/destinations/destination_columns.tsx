@@ -33,6 +33,7 @@ import { IngestionColumn } from '../../stream_list_view/ingestion_column';
 import { RetentionColumn } from '../../stream_list_view/retention_column';
 import { StorageColumn } from '../../stream_list_view/storage_column';
 import type { SortableField } from './build_destination_rows';
+import { ShowOnCanvasButton } from './show_on_canvas_button';
 import {
   ACTIONS_COLUMN_HEADER,
   DATA_QUALITY_COLUMN_HEADER,
@@ -293,11 +294,17 @@ export const createDestinationCellRenderer = ({
     }
   };
 
-export const createDestinationActionsColumn = (
-  rows: DestinationRow[]
-): EuiDataGridControlColumn => ({
+export const createDestinationActionsColumn = ({
+  rows,
+  canvasDestinationNames,
+  onShowOnCanvas,
+}: {
+  rows: DestinationRow[];
+  canvasDestinationNames: Set<string>;
+  onShowOnCanvas: (destinationName: string) => void;
+}): EuiDataGridControlColumn => ({
   id: 'destinationActions',
-  width: 60,
+  width: 96,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
       <span>{ACTIONS_COLUMN_HEADER}</span>
@@ -311,11 +318,18 @@ export const createDestinationActionsColumn = (
     }
 
     return (
-      <DiscoverBadgeButton
-        hasDataStream={row.hasDataStream}
-        indexMode={row.indexMode}
-        stream={row.streamDefinition}
-      />
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <ShowOnCanvasButton
+          destinationName={row.name}
+          isOnCanvas={canvasDestinationNames.has(row.name)}
+          onClick={onShowOnCanvas}
+        />
+        <DiscoverBadgeButton
+          hasDataStream={row.hasDataStream}
+          indexMode={row.indexMode}
+          stream={row.streamDefinition}
+        />
+      </EuiFlexGroup>
     );
   },
 });

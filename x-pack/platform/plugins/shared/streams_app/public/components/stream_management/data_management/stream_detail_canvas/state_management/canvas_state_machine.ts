@@ -20,12 +20,14 @@ import {
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type { CanvasStateServiceDeps, CanvasUrlInput, CanvasUrlEvent, CanvasState } from './types';
-
-const defaultUrlState = {
-  flyoutName: null,
-  flyoutTab: null,
-};
+import {
+  defaultCanvasUrlState,
+  toCanvasUrlInput,
+  type CanvasState,
+  type CanvasStateServiceDeps,
+  type CanvasUrlEvent,
+  type CanvasUrlInput,
+} from './types';
 
 export const canvasStateMachine = setup({
   types: {
@@ -42,6 +44,7 @@ export const canvasStateMachine = setup({
       urlState: params.urlState,
     })),
     syncUrlState: getPlaceholderFor(createUrlSyncAction),
+    syncUrlStateReplace: getPlaceholderFor(createUrlSyncReplaceAction),
   },
 }).createMachine({
   id: 'canvasMachine',
@@ -112,11 +115,25 @@ export const canvasStateMachine = setup({
             raise({ type: 'url.sync' }),
           ],
         },
+        'focus.clear': {
+          actions: [
+            {
+              type: 'storeUrlState',
+              params: ({ context }) => ({
+                urlState: {
+                  ...context.urlState,
+                  focusNodeId: null,
+                },
+              }),
+            },
+            { type: 'syncUrlStateReplace' },
+          ],
+        },
       },
     },
   },
   context: {
-    urlState: defaultUrlState,
+    urlState: defaultCanvasUrlState,
   },
 });
 
@@ -130,6 +147,7 @@ export function createCanvasMachineImplementations({
     },
     actions: {
       syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
+      syncUrlStateReplace: createUrlSyncReplaceAction({ urlStateStorageContainer }),
     },
   };
 }
@@ -137,11 +155,24 @@ export function createCanvasMachineImplementations({
 function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
+  return createUrlSync({ urlStateStorageContainer, replace: false });
+}
+
+function createUrlSyncReplaceAction({
+  urlStateStorageContainer,
+}: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
+  return createUrlSync({ urlStateStorageContainer, replace: true });
+}
+
+function createUrlSync({
+  urlStateStorageContainer,
+  replace,
+}: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'> & { replace: boolean }) {
   return ({
     context,
   }: ActionArgs<{ urlState: CanvasUrlInput }, CanvasUrlEvent, CanvasUrlEvent>) => {
     urlStateStorageContainer.set(CANVAS_URL_STATE_KEY, context.urlState, {
-      replace: false,
+      replace,
     });
   };
 }
@@ -156,18 +187,23 @@ function createUrlInitializerActor({
     if (!urlStateValues) {
       return sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
 
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      urlState.data.flyoutTab =
-        urlState.data.flyoutName && !urlState.data.flyoutTab ? 'overview' : urlState.data.flyoutTab;
+      const nextUrlState = toCanvasUrlInput(urlState.data);
       sendBack({
         type: 'url.init',
-        urlState: urlState.data,
+        urlState: {
+          ...nextUrlState,
+          flyoutTab:
+            nextUrlState.flyoutName && !nextUrlState.flyoutTab
+              ? 'overview'
+              : nextUrlState.flyoutTab,
+        },
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -175,7 +211,7 @@ function createUrlInitializerActor({
       );
       sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
   });

@@ -6,8 +6,13 @@
  */
 
 import { createClassicStreamDefinition } from '../shared/mocks/stream_definitions';
+import { getDestinationNodeId } from './build_destination';
 import { BULK_SOURCE_SUBTITLE } from './build_source';
-import { buildClassicStreamsGraph } from './build_graph';
+import {
+  buildClassicStreamElements,
+  buildClassicStreamsGraph,
+  getCanvasDestinationNames,
+} from './build_graph';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 
 describe('buildClassicStreamsGraph', () => {
@@ -86,5 +91,33 @@ describe('buildClassicStreamsGraph', () => {
     expect(byId.get('destination-logs-with-processing')?.ariaLabel).toBe(
       'Destination: logs-with-processing, with processing'
     );
+  });
+});
+
+describe('getCanvasDestinationNames', () => {
+  it('matches destination nodes produced by the element builder', () => {
+    const streams = [
+      createClassicStreamDefinition('logs-a'),
+      createClassicStreamDefinition('logs-b'),
+    ];
+    const { nodes } = buildClassicStreamElements(streams);
+    const fromNodes = new Set(
+      nodes
+        .filter((node) => node.type === DESTINATION_NODE_TYPE)
+        .map((node) => node.data.streamName)
+    );
+
+    expect(getCanvasDestinationNames(streams)).toEqual(fromNodes);
+    expect(getCanvasDestinationNames(streams)).toEqual(new Set(['logs-a', 'logs-b']));
+  });
+
+  it('returns an empty set when there are no streams', () => {
+    expect(getCanvasDestinationNames([])).toEqual(new Set());
+  });
+});
+
+describe('getDestinationNodeId', () => {
+  it('keys destination nodes by stream name', () => {
+    expect(getDestinationNodeId('logs-nginx-default')).toBe('destination-logs-nginx-default');
   });
 });

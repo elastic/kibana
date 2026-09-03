@@ -122,3 +122,13 @@ export const FAILURE_STORE_PERMISSIONS_ERROR = i18n.translate(
       'Some information may be incomplete because you lack permission to read the failure store.',
   }
 );
+
+export const SHOW_ON_CANVAS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.destinationsTable.showOnCanvasButtonLabel',
+  { defaultMessage: 'Show on canvas' }
+);
+
+export const SHOW_ON_CANVAS_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.streams.destinationsTable.showOnCanvasDisabledTooltip',
+  { defaultMessage: 'This destination is not shown on the canvas' }
+);

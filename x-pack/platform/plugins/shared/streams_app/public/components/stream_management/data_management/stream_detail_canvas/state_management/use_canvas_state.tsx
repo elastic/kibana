@@ -50,6 +50,9 @@ export const useCanvasEvents = () => {
       selectTab: (flyoutTab: string) => {
         service.send({ type: 'flyout.tab', flyoutTab });
       },
+      clearFocus: () => {
+        service.send({ type: 'focus.clear' });
+      },
     }),
     [service]
   );
