@@ -166,30 +166,34 @@ export async function startAgentStack({
     });
     await runCleanup('target server', () => stopTargetServer(target.server));
     if (enrolledAgentId) {
-      await runCleanup('enrolled agent', () => apiServices.fleet.agent.delete(enrolledAgentId));
+      const agentId = enrolledAgentId;
+      await runCleanup('enrolled agent', () => apiServices.fleet.agent.delete(agentId));
     }
     if (privateLocationId) {
+      const locationId = privateLocationId;
       await runCleanup('private location', () =>
-        apiServices.syntheticsPrivateLocations.deletePrivateLocation(privateLocationId)
+        apiServices.syntheticsPrivateLocations.deletePrivateLocation(locationId)
       );
     }
     if (syntheticsPolicyId) {
+      const policyId = syntheticsPolicyId;
       await runCleanup('synthetics policy', () =>
-        apiServices.fleet.agent_policies.delete(syntheticsPolicyId, true)
+        apiServices.fleet.agent_policies.delete(policyId, true)
       );
     }
     if (fleetServerPolicyId) {
+      const policyId = fleetServerPolicyId;
       await runCleanup('fleet server policy', () =>
-        apiServices.fleet.agent_policies.delete(fleetServerPolicyId, true)
+        apiServices.fleet.agent_policies.delete(policyId, true)
       );
     }
     if (dockerFleetHostId) {
-      await runCleanup('fleet host', () =>
-        apiServices.fleet.server_hosts.delete(dockerFleetHostId)
-      );
+      const hostId = dockerFleetHostId;
+      await runCleanup('fleet host', () => apiServices.fleet.server_hosts.delete(hostId));
     }
     if (dockerOutputId) {
-      await runCleanup('es output', () => apiServices.fleet.outputs.delete(dockerOutputId));
+      const outputId = dockerOutputId;
+      await runCleanup('es output', () => apiServices.fleet.outputs.delete(outputId));
     }
   };
 
