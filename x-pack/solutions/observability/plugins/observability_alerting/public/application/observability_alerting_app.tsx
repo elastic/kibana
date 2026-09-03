@@ -43,13 +43,8 @@ export const ObservabilityAlertingApp = ({
   triggersActionsUi,
   setBreadcrumbs,
 }: ObservabilityAlertingAppProps) => {
-  const {
-    RulesPage,
-    RuleLibraryPage,
-    EpisodesPage,
-    ActionPoliciesPage,
-    ExecutionHistoryPage,
-  } = alertingVTwo;
+  const { RulesPage, RuleLibraryPage, EpisodesPage, ActionPoliciesPage, ExecutionHistoryPage } =
+    alertingVTwo;
 
   const ClassicRulesPage = useMemo(
     () => triggersActionsUi.getClassicRulesPage(),

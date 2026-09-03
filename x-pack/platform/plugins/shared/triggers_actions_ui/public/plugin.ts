@@ -669,7 +669,10 @@ export class Plugin
           }))
         );
 
-        return (props: { coreStart: CoreStart; setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void }) => {
+        return (props: {
+          coreStart: CoreStart;
+          setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+        }) => {
           const internalDeps = {
             actions: actions as any,
             security: plugins.security,

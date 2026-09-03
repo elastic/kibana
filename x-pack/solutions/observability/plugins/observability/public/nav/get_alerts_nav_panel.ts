@@ -15,8 +15,7 @@ const ALERTS_LINK = 'observability-overview:alerts' as const;
 const ALERTS_ICON = 'warning';
 
 const OBS_ALERTING_APP = 'observabilityAlerting';
-const obsAlertingLink = (deepLinkId: string) =>
-  `${OBS_ALERTING_APP}:${deepLinkId}` as const;
+const obsAlertingLink = (deepLinkId: string) => `${OBS_ALERTING_APP}:${deepLinkId}` as const;
 
 const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
   pathNameSerialized,

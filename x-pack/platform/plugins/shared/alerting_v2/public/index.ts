@@ -61,7 +61,9 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
 
 const lazyPageWithContainer = (
   loader: () => Promise<{
-    default: React.ComponentType<AlertingV2PageProps & { container: import('inversify').Container }>;
+    default: React.ComponentType<
+      AlertingV2PageProps & { container: import('inversify').Container }
+    >;
   }>
 ): React.ComponentType<AlertingV2PageProps> => {
   const LazyComponent = React.lazy(loader);
