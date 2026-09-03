@@ -42,6 +42,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
     if ('attributes' in state && state.attributes) {
       return {
         ...state,
+        drilldowns: state.drilldowns ?? [],
         attributes: transformMapAttributesOut(state.attributes, (targetName: string) => {
           const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
           if (panelRef) return panelRef;
