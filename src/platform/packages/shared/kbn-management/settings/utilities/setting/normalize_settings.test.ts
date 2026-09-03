@@ -88,6 +88,7 @@ describe('normalizeSettings', () => {
   });
 
   it('skips incompatible object values and keeps the rest', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const settings = {
       foo: { name: 'foo', value: { bar: 'baz' } },
       bar: { name: 'bar', value: 'ok' },
@@ -96,6 +97,8 @@ describe('normalizeSettings', () => {
     expect(normalizeSettings(settings)).toEqual({
       bar: { name: 'bar', value: 'ok', type: 'string' },
     });
+    expect(warnSpy).toHaveBeenCalledWith("Ignoring incompatible UiSetting 'foo'.");
+    warnSpy.mockRestore();
   });
 
   it('does nothing if the type and value are already set', () => {
