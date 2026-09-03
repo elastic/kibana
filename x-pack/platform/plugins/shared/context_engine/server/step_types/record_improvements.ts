@@ -51,6 +51,7 @@ export const getRecordImprovementsStepDefinition = ({
         agent_run_id: agentRunId,
         signal_window: signalWindow,
         signal_spaces: signalSpaces,
+        conversation_id: conversationId,
         improvements,
       } = context.input;
 
@@ -72,6 +73,22 @@ export const getRecordImprovementsStepDefinition = ({
           proposals: improvements,
           improvementsService: getImprovementsService(esClient),
         });
+
+        // The run is over once its proposals are stored, whether or not it had any: leaving the
+        // marker behind would show an analysis as running long after it stopped.
+        if (conversationId) {
+          const outcome = await getAiIndexService().finishFeedbackRun(aiIndexId, {
+            conversationId,
+            recorded: result.recorded.length,
+          });
+
+          if (outcome === 'superseded') {
+            logger.debug(
+              () =>
+                `Analysis run '${agentRunId}' on AI index '${aiIndexId}' finished after a newer run started; leaving the newer run marked as in flight`
+            );
+          }
+        }
 
         auditLogger?.log(improvementAuditEvent({ aiIndexId, recorded: result.recorded.length }));
         logger.debug(

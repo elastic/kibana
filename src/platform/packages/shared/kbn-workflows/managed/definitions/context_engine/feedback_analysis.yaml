@@ -67,6 +67,9 @@ steps:
         public-conversation: true
         timeout: '30m'
         with:
+          # Minted by the context step rather than left to the agent, so the AI index can point at
+          # the conversation while the run is still going instead of only once it has finished.
+          conversation_id: '{{ steps.fetch_context.output.conversation_id }}'
           message: '{{ steps.fetch_context.output.briefing }}'
           # Setting a schema forces the final inference to be structured, which is what stops the
           # run from trying to apply anything. The schema is narrowed server-side to the actions
@@ -83,6 +86,8 @@ steps:
           # signals were actually read from.
           signal_window: '${{ steps.fetch_context.output.signal_window }}'
           signal_spaces: '${{ steps.fetch_context.output.signal_spaces }}'
+          # Marks the run finished, but only if it is still the run in flight.
+          conversation_id: '{{ steps.fetch_context.output.conversation_id }}'
           improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
 
   - name: output_result

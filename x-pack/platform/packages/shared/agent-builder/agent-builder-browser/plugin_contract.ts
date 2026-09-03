@@ -143,6 +143,14 @@ export interface PublicEmbeddableConversationInputProps {
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
+  /**
+   * Conversation to reopen, for a host that keeps its own record of one it started. Takes the
+   * place of `sessionTag` restoration, which can only remember one conversation per tag in the
+   * browser it was started in.
+   *
+   * Ignored when `newConversation` is set, since that asks for a fresh conversation instead.
+   */
+  conversationId?: string;
 }
 
 /**

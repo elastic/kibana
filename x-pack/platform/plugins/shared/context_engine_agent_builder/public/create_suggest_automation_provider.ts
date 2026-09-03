@@ -88,6 +88,12 @@ const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
   return result.data.aiIndexId;
 };
 
+/**
+ * Keys the conversation Agent Builder restores when the sidebar reopens. One per AI index, so work
+ * on one index does not resume into a thread about another.
+ */
+const aiIndexSessionTag = (aiIndexId: string) => `context-engine-ai-index-${aiIndexId}`;
+
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
@@ -100,11 +106,16 @@ export const createSuggestAutomationProvider = ({
       return;
     }
 
+    // No `newConversation`, so the session tag resumes the thread already going about this index
+    // rather than starting a fresh one each time the button is pressed. Setting up an index and
+    // then automating it is one piece of work, and the agent keeps what it learned in between.
+    // `initialMessage` only applies to the first visit, which is when the skills need loading.
     agentBuilder.openChat({
-      newConversation: true,
       autoSendInitialMessage: false,
       initialMessage,
-      sessionTag: `context-engine-ai-index-${aiIndex.id}`,
+      sessionTag: aiIndexSessionTag(aiIndex.id),
+      // Re-sent on every open so a resumed conversation sees the index as it is now, not as it was
+      // when the thread started. Attachments are consumed by the next message, not accumulated.
       attachments: [toAiIndexAttachment(aiIndex)],
     });
   };

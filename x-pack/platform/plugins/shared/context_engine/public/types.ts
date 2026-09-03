@@ -34,6 +34,12 @@ export interface AnalyzeAndImproveContext {
    * the same evidence the reviewer is looking at.
    */
   improvement?: Improvement;
+  /**
+   * A conversation to reopen instead of starting or resuming one, used to watch or read back a
+   * scheduled analysis run. Nothing is briefed or attached in that case: the run wrote the
+   * conversation, and the point is to see what it did rather than to talk to it about something.
+   */
+  conversationId?: string;
 }
 
 /** Opens Agent Builder to analyze the given signals. */
@@ -43,10 +49,10 @@ export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<v
 export interface AnalyzeChatOptions {
   /** Feedback agent to open. */
   agentId?: string;
-  /** When true, start a new conversation. */
-  newConversation: boolean;
   /** Session tag for this AI index's conversation. */
   sessionTag: string;
+  /** An existing conversation to reopen, in place of resuming whatever the session tag last used. */
+  conversationId?: string;
   /** Attachments passed to Agent Builder. */
   attachments: AttachmentInput[];
   /**

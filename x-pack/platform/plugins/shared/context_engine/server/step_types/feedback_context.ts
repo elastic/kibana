@@ -7,6 +7,7 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
+import { v4 as uuidv4 } from 'uuid';
 import { feedbackContextStepCommonDefinition } from '../../common/step_types/feedback_context';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { buildFeedbackContext } from '../feedback_analysis/context';
@@ -56,12 +57,23 @@ export const getFeedbackContextStepDefinition = ({
             `Feedback context for AI index '${aiIndexId}': ${run.signal_count} signal(s) from ${run.signal_spaces.length} space(s), analyzable=${hasSignals}`
         );
 
+        // Minted unconditionally to keep the output shape fixed, but only recorded when the agent
+        // will actually run: a window with nothing to analyze is not a run anyone can watch.
+        const conversationId = uuidv4();
+        if (hasSignals) {
+          await getAiIndexService().startFeedbackRun(aiIndexId, {
+            conversationId,
+            startedAt: new Date().toISOString(),
+          });
+        }
+
         return {
           output: {
             agent_id: agentId,
             briefing,
             output_schema: outputSchema,
             has_signals: hasSignals,
+            conversation_id: conversationId,
             signal_window: run.signal_window,
             signal_spaces: run.signal_spaces,
             signal_count: run.signal_count,

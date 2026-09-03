@@ -100,7 +100,6 @@ describe('createSuggestAutomationProvider', () => {
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        newConversation: true,
         autoSendInitialMessage: false,
         initialMessage: expect.stringMatching(
           new RegExp(
@@ -133,7 +132,6 @@ describe('createSuggestAutomationProvider', () => {
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        newConversation: true,
         autoSendInitialMessage: false,
         initialMessage: expect.stringMatching(
           new RegExp(
@@ -147,6 +145,18 @@ describe('createSuggestAutomationProvider', () => {
         ],
       })
     );
+  });
+
+  it('resumes the thread already going about this index rather than starting a new one', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+
+    for (const [options] of openChat.mock.calls) {
+      expect(options.newConversation).toBeUndefined();
+      expect(options.sessionTag).toBe('context-engine-ai-index-my-ai-index');
+    }
   });
 
   it.each([

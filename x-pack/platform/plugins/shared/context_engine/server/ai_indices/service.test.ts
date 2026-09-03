@@ -619,6 +619,133 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('feedback run marker', () => {
+    const run = { conversation_id: 'conv-1', started_at: '2026-01-02T00:00:00.000Z' };
+
+    const mockStored = (document: AiIndexDocument) => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: document,
+      });
+    };
+
+    const writtenDocument = () => storageClient.index.mock.calls[0][0].document;
+
+    it('records the conversation the run is writing into', async () => {
+      mockStored(aiIndexDocument);
+
+      await service.startFeedbackRun('customer_support', {
+        conversationId: 'conv-1',
+        startedAt: run.started_at,
+      });
+
+      expect(writtenDocument()?.feedback_run).toEqual(run);
+    });
+
+    it('leaves the rest of the entry, including its config, untouched', async () => {
+      mockStored({ ...aiIndexDocument, feedback_analysis: { enabled: true, agent_id: 'agent-1' } });
+
+      await service.startFeedbackRun('customer_support', {
+        conversationId: 'conv-1',
+        startedAt: run.started_at,
+      });
+
+      expect(writtenDocument()).toEqual(
+        expect.objectContaining({
+          feedback_analysis: { enabled: true, agent_id: 'agent-1' },
+          sources: aiIndexDocument.sources,
+          automations: aiIndexDocument.automations,
+        })
+      );
+    });
+
+    it('does not report the entry as edited, since no one edited it', async () => {
+      mockStored(aiIndexDocument);
+
+      await service.startFeedbackRun('customer_support', {
+        conversationId: 'conv-1',
+        startedAt: run.started_at,
+      });
+
+      expect(writtenDocument()?.date_modified).toBe(aiIndexDocument.date_modified);
+    });
+
+    it('replaces a marker left behind by a run that never finished', async () => {
+      mockStored({
+        ...aiIndexDocument,
+        feedback_run: { conversation_id: 'abandoned', started_at: '2026-01-01T00:00:00.000Z' },
+      });
+
+      await service.startFeedbackRun('customer_support', {
+        conversationId: 'conv-1',
+        startedAt: run.started_at,
+      });
+
+      expect(writtenDocument()?.feedback_run).toEqual(run);
+    });
+
+    it('marks the run finished, with how much it proposed', async () => {
+      mockStored({ ...aiIndexDocument, feedback_run: run });
+
+      await expect(
+        service.finishFeedbackRun('customer_support', { conversationId: 'conv-1', recorded: 3 })
+      ).resolves.toBe('finished');
+
+      expect(writtenDocument()?.feedback_run).toEqual({
+        ...run,
+        finished_at: expect.any(String),
+        recorded: 3,
+      });
+    });
+
+    it('leaves a newer run alone when an older one finishes late', async () => {
+      mockStored({
+        ...aiIndexDocument,
+        feedback_run: { conversation_id: 'conv-2', started_at: '2026-01-03T00:00:00.000Z' },
+      });
+
+      await expect(
+        service.finishFeedbackRun('customer_support', { conversationId: 'conv-1', recorded: 3 })
+      ).resolves.toBe('superseded');
+
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('writes nothing when there is no run to finish', async () => {
+      mockStored(aiIndexDocument);
+
+      await expect(
+        service.finishFeedbackRun('customer_support', { conversationId: 'conv-1', recorded: 0 })
+      ).resolves.toBe('superseded');
+
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('retries when a concurrent write wins the first attempt', async () => {
+      mockStored(aiIndexDocument);
+      storageClient.index.mockRejectedValueOnce(createConflictError());
+
+      await service.startFeedbackRun('customer_support', {
+        conversationId: 'conv-1',
+        startedAt: run.started_at,
+      });
+
+      expect(storageClient.index).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(
+        service.startFeedbackRun('missing', { conversationId: 'conv-1', startedAt: run.started_at })
+      ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+    });
+  });
+
   describe('get', () => {
     it('returns the AI index with its id', async () => {
       storageClient.get.mockResolvedValue({

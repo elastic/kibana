@@ -30,7 +30,8 @@ const CONTEXT = {
   },
 };
 
-const aiIndexService = {} as AiIndexService;
+const startFeedbackRun = jest.fn();
+const aiIndexService = { startFeedbackRun } as unknown as AiIndexService;
 const improvementsService = {} as ImprovementsServiceApi;
 
 const buildStep = ({
@@ -64,11 +65,32 @@ describe('getFeedbackContextStepDefinition', () => {
         briefing: CONTEXT.briefing,
         output_schema: CONTEXT.output_schema,
         has_signals: true,
+        conversation_id: expect.any(String),
         signal_window: CONTEXT.run.signal_window,
         signal_spaces: ['default', 'marketing'],
         signal_count: 12,
       },
     });
+  });
+
+  it('records the run against the conversation the agent will be given', async () => {
+    const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} });
+
+    const result = await buildStep().handler(context);
+
+    expect(startFeedbackRun).toHaveBeenCalledWith('orders', {
+      conversationId: result.output?.conversation_id,
+      startedAt: expect.any(String),
+    });
+  });
+
+  it('gives each run its own conversation', async () => {
+    const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} });
+
+    const first = await buildStep().handler(context);
+    const second = await buildStep().handler(context);
+
+    expect(first.output?.conversation_id).not.toBe(second.output?.conversation_id);
   });
 
   it('reads and writes as the workflow owner, not as Kibana', async () => {
@@ -90,6 +112,15 @@ describe('getFeedbackContextStepDefinition', () => {
     const result = await buildStep().handler(context);
 
     expect(result.output?.has_signals).toBe(false);
+  });
+
+  it('records nothing when the agent will not run, since there is no run to watch', async () => {
+    buildFeedbackContextMock.mockResolvedValue({ ...CONTEXT, has_signals: false });
+    const context = createMockStepContext({ input: { ai_index_id: 'orders' }, esClient: {} });
+
+    await buildStep().handler(context);
+
+    expect(startFeedbackRun).not.toHaveBeenCalled();
   });
 
   it('fails the step when the AI index no longer exists', async () => {

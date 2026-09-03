@@ -12,6 +12,7 @@ import type {
   AiIndexAutomation,
   AiIndexDest,
   AiIndexFeedbackAnalysis,
+  AiIndexFeedbackRun,
   AiIndexSource,
 } from '../../common/http_api/ai_indices';
 
@@ -51,6 +52,14 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
+      feedback_run: types.object({
+        properties: {
+          conversation_id: types.keyword({}),
+          started_at: types.date({}),
+          finished_at: types.date({}),
+          recorded: types.long({}),
+        },
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -58,6 +67,7 @@ const storageSettings = {
 export interface AiIndexDocument {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  feedback_run?: AiIndexFeedbackRun;
   // Optional for backward compatibility with entries written before managed
   // indices existed; absence is treated as unmanaged (`false`) on read.
   managed?: boolean;

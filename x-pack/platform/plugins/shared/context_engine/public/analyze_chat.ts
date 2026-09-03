@@ -72,10 +72,30 @@ const buildImprovementBriefing = (improvement: Improvement): string => {
 export const buildAnalyzeChat = ({
   aiIndex,
   improvement,
+  conversationId,
+}: AnalyzeAndImproveContext): AnalyzeChatOptions =>
+  conversationId
+    ? {
+        agentId: aiIndex.feedback_analysis?.agent_id,
+        conversationId,
+        // Its own tag, so reopening a run does not overwrite which conversation the interactive
+        // hand-off resumes.
+        sessionTag: `context-engine-run:${aiIndex.id}`,
+        attachments: [],
+      }
+    : buildInteractiveChat({ aiIndex, improvement });
+
+const buildInteractiveChat = ({
+  aiIndex,
+  improvement,
 }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
   agentId: aiIndex.feedback_analysis?.agent_id,
-  newConversation: true,
-  sessionTag: `context-engine-feedback:${aiIndex.id}`,
+  // No `newConversation`: reopening resumes the thread this tag last used, so returning to a
+  // half-finished discussion continues it. Each improvement gets a tag of its own — deciding on
+  // one suggestion is a separate conversation from deciding on another, even about one index.
+  sessionTag: improvement
+    ? `context-engine-feedback:${aiIndex.id}:${improvement.improvement_id}`
+    : `context-engine-feedback:${aiIndex.id}`,
   attachments: [
     {
       id: `context-engine-ai-index:${aiIndex.id}`,

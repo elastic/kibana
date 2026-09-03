@@ -25,6 +25,7 @@ import { useImprovements } from '../../hooks/use_improvements';
 import { useKibana } from '../../hooks/use_kibana';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { FeedbackAnalysisConfig } from './feedback_analysis_config';
+import { FeedbackRunStatus } from './feedback_run_status';
 import { ImprovementRow } from './improvement_row';
 import { SignalGroupFlyout } from './signal_group_flyout';
 
@@ -75,6 +76,12 @@ export const ImprovementsPanel = ({ isLoading, aiIndex }: ImprovementsPanelProps
     }
   };
 
+  const handleOpenRunConversation = (conversationId: string) => {
+    if (aiIndex) {
+      analyzeAndImprove(getChatOpener, { aiIndex, conversationId });
+    }
+  };
+
   // The signals view is grouped by tag, so provenance drills to the tag that drove the suggestion.
   const handleViewProvenance = (improvement: Improvement) => {
     const [tag] = improvement.provenance.tags ?? [];
@@ -112,6 +119,11 @@ export const ImprovementsPanel = ({ isLoading, aiIndex }: ImprovementsPanelProps
         <>
           <EuiSpacer size="m" />
           <FeedbackAnalysisConfig aiIndex={aiIndex} showAgentSelector={Boolean(chatOpener)} />
+          <EuiSpacer size="s" />
+          <FeedbackRunStatus
+            run={aiIndex.feedback_run}
+            onOpenConversation={chatOpener ? handleOpenRunConversation : undefined}
+          />
         </>
       )}
 

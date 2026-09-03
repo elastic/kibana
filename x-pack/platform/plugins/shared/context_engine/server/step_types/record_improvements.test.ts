@@ -49,8 +49,9 @@ const buildStep = ({
   canWrite?: boolean;
 } = {}) => {
   const get = jest.fn().mockResolvedValue(aiIndex);
+  const finishFeedbackRun = jest.fn().mockResolvedValue('finished');
   const definition = getRecordImprovementsStepDefinition({
-    getAiIndexService: () => ({ get } as unknown as AiIndexService),
+    getAiIndexService: () => ({ get, finishFeedbackRun } as unknown as AiIndexService),
     getImprovementsService: () => improvementsService,
     getAuditLogger: async () => auditLogger,
     isContextEngineEnabled: async () => contextEngineEnabled,
@@ -58,7 +59,7 @@ const buildStep = ({
     checkWritePrivilege: async () => canWrite,
     ...mockKiStepTelemetry(),
   });
-  return { ...definition, get };
+  return { ...definition, get, finishFeedbackRun };
 };
 
 beforeEach(() => {
@@ -71,6 +72,59 @@ describe('getRecordImprovementsStepDefinition', () => {
     const context = createMockStepContext({ input: INPUT, esClient: {} });
 
     expect(await buildStep().handler(context)).toEqual({ output: RESULT });
+  });
+
+  describe('the run marker', () => {
+    it('marks the run finished, with how much it proposed', async () => {
+      const context = createMockStepContext({
+        input: { ...INPUT, conversation_id: 'conv-1' },
+        esClient: {},
+      });
+      const step = buildStep();
+
+      await step.handler(context);
+
+      expect(step.finishFeedbackRun).toHaveBeenCalledWith('orders', {
+        conversationId: 'conv-1',
+        recorded: 1,
+      });
+    });
+
+    it('marks a run that proposed nothing finished too, rather than leaving it running', async () => {
+      recordImprovementsMock.mockResolvedValue({ recorded: [], skipped: [] });
+      const context = createMockStepContext({
+        input: { ...INPUT, conversation_id: 'conv-1' },
+        esClient: {},
+      });
+      const step = buildStep();
+
+      await step.handler(context);
+
+      expect(step.finishFeedbackRun).toHaveBeenCalledWith('orders', {
+        conversationId: 'conv-1',
+        recorded: 0,
+      });
+    });
+
+    it('still records the improvements when the marker says a newer run has taken over', async () => {
+      const context = createMockStepContext({
+        input: { ...INPUT, conversation_id: 'conv-1' },
+        esClient: {},
+      });
+      const step = buildStep();
+      step.finishFeedbackRun.mockResolvedValue('superseded');
+
+      expect(await step.handler(context)).toEqual({ output: RESULT });
+    });
+
+    it('leaves the marker alone when the run did not say which conversation it was', async () => {
+      const context = createMockStepContext({ input: INPUT, esClient: {} });
+      const step = buildStep();
+
+      await step.handler(context);
+
+      expect(step.finishFeedbackRun).not.toHaveBeenCalled();
+    });
   });
 
   it('reads the action policy off the index rather than trusting the run', async () => {

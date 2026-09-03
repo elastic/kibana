@@ -35,6 +35,14 @@ export const recordImprovementsInputSchema = z.object({
     .max(1000)
     .default([])
     .describe('The spaces the signals came from, echoed from the context step'),
+  conversation_id: z
+    .string()
+    .min(1)
+    .max(1024)
+    .optional()
+    .describe(
+      "The conversation the run analyzed in, echoed from the context step. Marks the run finished on the AI index. Omit it and the run stays marked as in flight until it ages out, so pass it whenever the context step's value is available."
+    ),
   // Validated per item against the agent output contract by the handler, which reports a reason
   // per proposal. Bounded here only so the step input cannot grow without limit.
   improvements: z

@@ -36,6 +36,11 @@ export const feedbackContextOutputSchema = z.object({
     .describe(
       'Whether any selected signal was classified as a problem. False means there is nothing to analyze and the agent should not be run.'
     ),
+  conversation_id: z
+    .string()
+    .describe(
+      'The conversation the analysis agent should write into. Minted here rather than taken from the agent, so the run can be opened while it is still going. Pass it to the agent step as conversation_id, and back to the record step so it can mark the run finished.'
+    ),
   signal_window: z
     .object({ from: z.string(), to: z.string() })
     .describe('The resolved window the signals were read from.'),
