@@ -123,7 +123,7 @@ function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] | undefined {
 }
 
 function ToolDefinitionsSection({ toolDefinitions }: Pick<GenAiFields, 'toolDefinitions'>) {
-  if (toolDefinitions == null || toolDefinitions === '') return null;
+  if (!toolDefinitions) return null;
 
   const parsedToolDefinitions = parseToolDefinitions(toolDefinitions);
   if (parsedToolDefinitions?.length === 0) return null;
