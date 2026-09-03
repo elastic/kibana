@@ -7,11 +7,30 @@
 
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { view, text } from '@kbn/adaptive-ui/builders';
+import { view, text, xyChart } from '@kbn/adaptive-ui/builders';
 import { sampleInvestigation } from '@kbn/adaptive-ui-adapters';
 import { ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE } from '../../common/constants';
 import type { KibanaPublicUrlHttp } from '../kibana_public_url';
 import { createSlackSurfaceProjector } from './slack_projector';
+
+const mockRenderNodePng = jest.fn<Promise<Buffer>, [unknown]>();
+
+// The real rasterizer pulls in satori and native resvg; the projector's contract is which
+// bytes it ships, not how they were drawn.
+jest.mock('../slack/render_png', () => ({
+  renderNodePng: (node: unknown) => mockRenderNodePng(node),
+}));
+
+/** Placeholder refs on the `image` blocks in a projection. */
+const imageRefs = (blocks: unknown[] | undefined): string[] =>
+  (blocks ?? []).flatMap((block) => {
+    const ref = (block as { type?: string; slack_file?: { ref?: string } })?.slack_file?.ref;
+    return (block as { type?: string }).type === 'image' && ref ? [ref] : [];
+  });
+
+beforeEach(() => {
+  mockRenderNodePng.mockReset();
+});
 
 const http: KibanaPublicUrlHttp = {
   basePath: {
@@ -76,13 +95,65 @@ describe('createSlackSurfaceProjector', () => {
     expect(JSON.stringify(projection?.blocks)).not.toContain('"url":"/app/');
   });
 
-  it('emits no image blocks, since the Relay Slack app cannot upload them', async () => {
-    const projection = await project('<render_attachment id="inv-1" />', [
-      attachment('inv-1', 'nightshift.investigation', sampleInvestigation),
-    ]);
+  describe('charts', () => {
+    const chartView = view({
+      body: [
+        xyChart({
+          label: 'Activity',
+          series: [{ label: 'calls', values: [{ x: '16:00', y: 7 }] }],
+        }),
+      ],
+    });
 
-    // A collected asset is a placeholder ref that needs a `files:write` upload to resolve.
-    expect(JSON.stringify(projection?.blocks)).not.toContain('slack_file');
+    const projectChart = () =>
+      project('<render_attachment id="c1" />', [
+        attachment('c1', ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE, chartView),
+      ]);
+
+    it('rasterizes charts and ships the PNGs alongside their image blocks', async () => {
+      mockRenderNodePng.mockResolvedValue(Buffer.from('png-bytes'));
+
+      const projection = await projectChart();
+      const refs = imageRefs(projection?.blocks);
+
+      // Slack has no chart block, so the image block's ref is only postable once the
+      // host uploads the matching PNG.
+      expect(refs).toHaveLength(1);
+      expect(projection?.assets).toEqual([
+        { ref: refs[0], png: Buffer.from('png-bytes'), altText: expect.any(String) },
+      ]);
+    });
+
+    it('degrades charts to text when rasterizing fails', async () => {
+      mockRenderNodePng.mockRejectedValue(new Error('resvg unavailable'));
+
+      const projection = await projectChart();
+
+      // A ref the host cannot resolve fails the whole Slack message, so the reply is
+      // re-rendered without asset collection rather than shipped half-resolved.
+      expect(JSON.stringify(projection?.blocks)).not.toContain('slack_file');
+      expect(projection?.assets).toBeUndefined();
+      // The chart survives as its text form rather than vanishing with the failed PNG.
+      expect(JSON.stringify(projection?.blocks)).toContain('calls');
+    });
+
+    it('degrades charts to text when the PNGs exceed the payload budget', async () => {
+      mockRenderNodePng.mockResolvedValue(Buffer.alloc(3 * 1024 * 1024));
+
+      const projection = await projectChart();
+
+      expect(JSON.stringify(projection?.blocks)).not.toContain('slack_file');
+      expect(projection?.assets).toBeUndefined();
+    });
+
+    it('sends no assets for a reply with no chart', async () => {
+      const projection = await project('<render_attachment id="inv-1" />', [
+        attachment('inv-1', 'nightshift.investigation', sampleInvestigation),
+      ]);
+
+      expect(projection?.assets).toBeUndefined();
+      expect(mockRenderNodePng).not.toHaveBeenCalled();
+    });
   });
 
   it('still projects markdown for a reply with no tags', async () => {
