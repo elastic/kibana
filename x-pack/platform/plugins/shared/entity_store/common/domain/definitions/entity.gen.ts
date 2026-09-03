@@ -107,6 +107,10 @@ export const EntityField = lazySchema(() =>
        * URL associated with the entity.
        */
       url: z.string().optional().describe('URL associated with the entity.'),
+      /**
+       * Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
+       */
+      created_by: z.string().optional(),
       EngineMetadata: EngineMetadata.optional(),
       /**
        * Boolean flags describing characteristics of the entity.

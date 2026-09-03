@@ -36,6 +36,8 @@ Important: Do not post GitHub comments unless explicitly stated.
 
 Work through these numbered checks **in order, one at a time**, before the general checklist — don't batch or skip. They're the highest-priority findings: a genuine hit almost always means the PR must change before merge. Each row links to the canonical public guidance — **read the linked section before flagging**, and cite it in the comment.
 
+The **Fires when the PR…** column only determines when to perform a check; it does not establish that the PR has a problem. Post a finding only after the condition in **Flag / ask** is positively verified. A failed or incomplete repository lookup is not evidence that an implementation, configuration, or reusable abstraction is absent.
+
 | # | Critical check | Fires when the PR… | Flag / ask → see |
 |---|---|---|---|
 | 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
@@ -99,6 +101,8 @@ Flag **only major** changes or drops — coverage that genuinely weakens. Skip b
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:
+  - **Establish the baseline before asserting any delta.** A parity finding needs the old suite as evidence, not the list of deleted paths. For every removed file you cite: read its body; read the `index.ts` / `loadTestFile()` and FTR config(s) that referenced it, to establish which deployments actually ran it; then quote the old `describe` / `it` titles you claim were lost. If you cannot quote them, you have no parity finding.
+  - **Never infer coverage from a path.** A file under `test/serverless/**` proves only that some serverless suite existed, not that it covered the flow you're flagging. A `// Serverless test (remove during Scout migration): <path>` marker names the counterpart of the one file it sits in — it says nothing about sibling files in the same directory.
   - Treat parity gaps as `blocker` unless explicitly de-scoped.
   - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
   - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).

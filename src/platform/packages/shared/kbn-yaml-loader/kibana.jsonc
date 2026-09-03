@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/yaml-loader",
-  "owner": ["@elastic/fleet"],
+  "owner": ["@elastic/streams-ui"],
   "group": "platform",
   "visibility": "shared",
   "description": "Async loader for the yaml package to enable code-splitting and reduce initial bundle size"

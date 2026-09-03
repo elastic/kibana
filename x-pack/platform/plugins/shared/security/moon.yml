@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/security
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/cloud-plugin'
   - '@kbn/cps'
   - '@kbn/cps-utils'
@@ -118,7 +119,6 @@ dependsOn:
   - '@kbn/core-chrome-browser-components'
   - '@kbn/core-logging-server'
   - '@kbn/projects-solutions-groups'
-  - '@kbn/app-header'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/ui-callout'
 tags:

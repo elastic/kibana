@@ -116,7 +116,7 @@ describe('createCatalogWatchPlaceholder', () => {
         enabled: false,
         mandate: '',
         description: '',
-        callables: [],
+        skills: [],
         coverage: [],
         recentRuns: [],
         metrics: { lastRun: null },
