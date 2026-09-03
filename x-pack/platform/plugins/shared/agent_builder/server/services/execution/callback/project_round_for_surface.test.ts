@@ -70,6 +70,11 @@ const deliveredEvents = (service: jest.Mocked<CallbackDeliveryService>): ChatEve
     ([{ payload }]) => (payload as { event: ChatEvent }).event
   );
 
+const deliveredPayloads = (
+  service: jest.Mocked<CallbackDeliveryService>
+): Array<Record<string, unknown>> =>
+  service.makeCallbackRequest.mock.calls.map(([{ payload }]) => payload as never);
+
 describe('getSurfaceProjector', () => {
   const surfaceProjection = { getProjector: jest.fn().mockReturnValue(upperCaseProjector) };
 
@@ -105,7 +110,7 @@ describe('getSurfaceProjector', () => {
 describe('projectRoundForSurface', () => {
   it('does not mutate the source event', async () => {
     const event = createRoundCompleteEvent('original');
-    const projected = await projectRoundForSurface({
+    const { event: projected } = await projectRoundForSurface({
       execution: createExecution({ slackOrigin: true }),
       event,
       projector: upperCaseProjector,
@@ -130,7 +135,48 @@ describe('projectRoundForSurface', () => {
       logger: loggerMock.create(),
     });
 
-    expect(projected).toBe(event);
+    expect(projected.event).toBe(event);
+    expect(projected.projection).toBeUndefined();
+  });
+
+  it('carries the projected text under the surface key', async () => {
+    const { projection } = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
+      event: createRoundCompleteEvent('original'),
+      projector: upperCaseProjector,
+      logger: loggerMock.create(),
+    });
+
+    expect(projection?.[ConversationOriginType.Slack]).toEqual({
+      text: 'ORIGINAL',
+      final: true,
+    });
+  });
+
+  it('carries Block Kit blocks when the projector renders them', async () => {
+    const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hi' } }];
+    const { projection } = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
+      event: createRoundCompleteEvent('original'),
+      projector: {
+        surface: ConversationOriginType.Slack,
+        project: async ({ message }) => ({ message, blocks }),
+      },
+      logger: loggerMock.create(),
+    });
+
+    expect(projection?.[ConversationOriginType.Slack]?.blocks).toEqual(blocks);
+  });
+
+  it('omits blocks entirely when the projector renders none', async () => {
+    const { projection } = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
+      event: createRoundCompleteEvent('original'),
+      projector: upperCaseProjector,
+      logger: loggerMock.create(),
+    });
+
+    expect(projection?.[ConversationOriginType.Slack]).not.toHaveProperty('blocks');
   });
 });
 
@@ -163,5 +209,37 @@ describe('deliverCallbackEvents surface projection', () => {
 
     const [event] = deliveredEvents(service) as RoundCompleteEvent[];
     expect(event.data.round.response.message).toBe('hello');
+  });
+
+  it('puts the projection on the payload alongside the event', async () => {
+    const service = createServiceMock();
+
+    await deliverCallbackEvents({
+      execution: createExecution({ slackOrigin: true }),
+      events$: of(createRoundCompleteEvent('hello') as ChatEvent),
+      callbackDeliveryService: service,
+      surfaceProjection: { getProjector: () => upperCaseProjector },
+      logger: loggerMock.create(),
+    });
+
+    const [payload] = deliveredPayloads(service);
+    expect(payload.projection).toEqual({
+      [ConversationOriginType.Slack]: { text: 'HELLO', final: true },
+    });
+  });
+
+  it('sends no projection field for a Kibana-UI execution', async () => {
+    const service = createServiceMock();
+
+    await deliverCallbackEvents({
+      execution: createExecution({ slackOrigin: false }),
+      events$: of(createRoundCompleteEvent('hello') as ChatEvent),
+      callbackDeliveryService: service,
+      surfaceProjection: { getProjector: () => upperCaseProjector },
+      logger: loggerMock.create(),
+    });
+
+    const [payload] = deliveredPayloads(service);
+    expect(payload).not.toHaveProperty('projection');
   });
 });
