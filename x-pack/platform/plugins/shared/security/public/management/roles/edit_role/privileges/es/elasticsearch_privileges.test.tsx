@@ -100,11 +100,7 @@ test('addDataSourcePrivilege preserves other global entries when global is an ar
   };
 
   const wrapper = shallowWithIntl(
-    <ElasticsearchPrivileges
-      {...props}
-      role={roleWithArrayGlobal as any}
-      isDataFederationEnabled
-    />
+    <ElasticsearchPrivileges {...props} role={roleWithArrayGlobal as any} isDataFederationEnabled />
   );
 
   // Invoke the handler wired to the child component
