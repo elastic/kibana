@@ -42,12 +42,21 @@ function transformConnectorForExport(
     isMissingSecrets = true;
   }
 
+  const {
+    apiKey: _apiKey,
+    uiamApiKey: _uiamApiKey,
+    uiamApiKeyExternal: _uiamApiKeyExternal,
+    ...exportAttributes
+  } = connector.attributes;
+
   return {
     ...connector,
     attributes: {
-      ...connector.attributes,
+      ...exportAttributes,
       secrets: {},
       isMissingSecrets,
+      apiKey: null,
+      uiamApiKey: null,
     },
   };
 }
