@@ -11,7 +11,7 @@ import type { BaseTriggerDefinition } from '@kbn/workflows';
 import {
   builtInTriggerDefinitions,
   EventTimestampSchema,
-  WorkflowEventsSchema,
+  getCustomTriggerZodSchema,
 } from '@kbn/workflows';
 import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
@@ -70,18 +70,6 @@ function compactLargeEnums(node: unknown): unknown {
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;
-}
-
-function getCustomTriggerYamlSchema(triggerId: string): z.ZodType {
-  return z.object({
-    type: z.literal(triggerId),
-    on: z
-      .object({
-        condition: z.string().optional(),
-        workflowEvents: WorkflowEventsSchema.optional(),
-      })
-      .optional(),
-  });
 }
 
 function humanizeTriggerId(triggerId: string): string {
@@ -150,7 +138,9 @@ function formatRegisteredTrigger(
     description:
       def.description ??
       `Event-driven trigger (${def.id}). Use on.condition with KQL on event.* fields to filter when the workflow runs.`,
-    jsonSchema: zodToJsonSchemaSafe(getCustomTriggerYamlSchema(def.id)),
+    jsonSchema: zodToJsonSchemaSafe(
+      getCustomTriggerZodSchema({ id: def.id, requiresConnectorId: def.requiresConnectorId })
+    ),
     eventContextSchema: getEventContextSchema(def.id, registeredTriggersById),
     eventContextNote: EVENT_CONTEXT_NOTE,
   };

@@ -39,8 +39,8 @@ export default function uiCapabilitiesTests({ getService, getPageObjects }: FtrP
       expect(objects).to.eql([]);
     });
 
-    it('clicking on newsfeed icon should close opened newsfeed', async () => {
-      await globalNav.clickNewsfeed();
+    it('closes the opened newsfeed', async () => {
+      await PageObjects.newsfeed.closeNewsfeedPanel();
       const isOpen = await PageObjects.newsfeed.isNewsfeedPanelOpen();
       expect(isOpen).to.be(false);
     });

@@ -9,9 +9,13 @@
 
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
-import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
+import type { LayoutDirection, MetricStyle } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { MetricDensity, TrendlineResult } from './expression_functions';
+import type {
+  MetricDensity,
+  SecondaryNameVisibility,
+  TrendlineResult,
+} from './expression_functions';
 
 export const visType = 'metric';
 
@@ -24,6 +28,7 @@ export interface DimensionsVisParam {
 
 export interface MetricVisParam {
   subtitle?: string;
+  /* Runtime fallback for a legacy custom secondary label */
   secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrend: {
@@ -46,7 +51,7 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
-  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
+  secondaryNameVisibility: SecondaryNameVisibility;
   /**
    * Determines where the metric color should be applied.
    * Only applies when the background chart is a panel.
