@@ -60,6 +60,16 @@ const attachmentViewSpecAdapters: Record<string, (data: never) => ViewSpec> = {
 };
 
 /**
+ * Attachment types this module can render without a browser.
+ *
+ * Kept at parity with `adapterGallery` by `attachment_view_specs.test.ts`, since the two
+ * lists are separate shapes — the gallery pairs a type with a rendered sample spec, this
+ * one pairs it with the adapter function — and a type added to only one silently degrades
+ * on every headless surface.
+ */
+export const viewSpecAdapterTypes: readonly string[] = Object.keys(attachmentViewSpecAdapters);
+
+/**
  * Resolves an attachment's stored data to a `ViewSpec`, or `undefined` when the type has
  * no adapter — callers degrade rather than fail.
  */
