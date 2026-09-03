@@ -22,7 +22,7 @@
     > button {
       @include size($euiSizeXL);
       margin: $euiColorBorderBaseFloating;
-      border: $euiBorderWidthThin solid $euiColorBorderBaseFloating;
+      // border: $euiBorderWidthThin solid $euiColorBorderBaseFloating;
       border-radius: inherit;
 
       &:not(:last-child) {
