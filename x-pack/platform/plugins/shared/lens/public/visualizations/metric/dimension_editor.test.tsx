@@ -17,7 +17,7 @@ import {
 } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 // Static EUI token values for assertions
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
@@ -860,7 +860,7 @@ describe('dimension editor', () => {
 
     afterEach(() => mockSetState.mockClear());
 
-    function renderBreakdownEditor(overrides = {}, user = userEvent) {
+    function renderBreakdownEditor(overrides = {}, user: UserEvent = userEvent.setup()) {
       const rtlRender = render(
         <DimensionEditor
           {...props}
