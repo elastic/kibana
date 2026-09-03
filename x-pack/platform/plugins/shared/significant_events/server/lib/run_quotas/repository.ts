@@ -7,17 +7,11 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  DEFAULT_RUN_LIMITS,
-  type RunBudgetGroupId,
-  type RunLimit,
-} from '../../../common/run_quotas';
+import { DEFAULT_RUN_QUOTA_SETTINGS, type RunQuotaGroup } from '../../../common/run_quotas';
 import {
   RUN_QUOTA_LEDGER_SO_TYPE,
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
-  RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS,
-  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
   type RunQuotaLedgerAttributes,
   type RunQuotaSettingsAttributes,
 } from './saved_objects';
@@ -38,27 +32,14 @@ export const createRunQuotaInternalRepository = (
     RUN_QUOTA_LEDGER_SO_TYPE,
   ]);
 
-export interface RunQuotaSettingsPatch extends Record<string, unknown> {
-  limits?: Record<string, RunLimit>;
-  enforcementEnabled?: boolean;
-  enabledBy?: string;
-  enabledAt?: string;
-  updatedBy?: string;
-  updatedAt?: string;
+export interface RunQuotaSettingsPatch {
+  enabled?: boolean;
+  limits?: Partial<Record<RunQuotaGroup, number>>;
 }
 
-export type RunQuotaSettingsMutation = (
-  current: RunQuotaSettingsAttributes
-) => RunQuotaSettingsPatch;
-
-const cloneDefaultLimits = (): Record<string, RunLimit> =>
-  Object.fromEntries(
-    Object.entries(DEFAULT_RUN_LIMITS).map(([group, limit]) => [group, { ...limit }])
-  );
-
 export const createDefaultRunQuotaSettingsAttributes = (): RunQuotaSettingsAttributes => ({
-  limits: cloneDefaultLimits(),
-  enforcementEnabled: false,
+  enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 });
 
 const mergeSettingsPatch = (
@@ -72,7 +53,7 @@ const mergeSettingsPatch = (
     ...topLevelPatch,
     limits: {
       ...current.limits,
-      ...limits,
+      ...(limits ?? {}),
     },
   };
 };
@@ -94,9 +75,9 @@ export const readRunQuotaSettings = async (
   }
 };
 
-export const mutateRunQuotaSettings = async (
+export const patchRunQuotaSettings = async (
   internalRepository: RunQuotaSavedObjectsRepository,
-  mutation: RunQuotaSettingsMutation
+  patch: RunQuotaSettingsPatch
 ): Promise<RunQuotaSettingsAttributes> => {
   for (let attempt = 0; attempt < MAX_OCC_ATTEMPTS; attempt++) {
     let currentSavedObject: Awaited<ReturnType<RunQuotaSavedObjectsRepository['get']>> | undefined;
@@ -118,14 +99,17 @@ export const mutateRunQuotaSettings = async (
           currentSavedObject.attributes as RunQuotaSettingsAttributes
         )
       : createDefaultRunQuotaSettingsAttributes();
-    const next = mergeSettingsPatch(current, mutation(current));
+    const next = mergeSettingsPatch(current, patch);
 
     try {
       const savedObject = currentSavedObject
         ? await internalRepository.update<RunQuotaSettingsAttributes>(
             RUN_QUOTA_SETTINGS_SO_TYPE,
             RUN_QUOTA_SETTINGS_SO_ID,
-            next,
+            {
+              ...patch,
+              limits: next.limits,
+            },
             { version: currentSavedObject.version }
           )
         : await internalRepository.create<RunQuotaSettingsAttributes>(
@@ -144,37 +128,47 @@ export const mutateRunQuotaSettings = async (
   throw new Error('Run quota settings could not be updated after repeated conflicts');
 };
 
-export const getRunQuotaLedgerId = (date: string, group: string): string => `${date}-${group}`;
+export const getRunQuotaLedgerId = (date: string, group: RunQuotaGroup): string =>
+  `${date}-${group}`;
 
 export const createEmptyRunQuotaLedger = (
   date: string,
-  group: RunBudgetGroupId
+  group: RunQuotaGroup
 ): RunQuotaLedgerAttributes => ({
   date,
   group,
   count: 0,
-  criticalOverrideCount: 0,
-  allowedGrantKeys: [],
-  allowedInvestigationKeys: [],
 });
 
-export type RunQuotaLedgerMutation = (
-  current: RunQuotaLedgerAttributes
-) => Partial<RunQuotaLedgerAttributes> | undefined;
-
-const assertLedgerInvariant = (ledger: RunQuotaLedgerAttributes): void => {
-  if (ledger.allowedGrantKeys.length > RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS) {
-    throw new Error('Run quota ledger has too many allowed worker grant keys');
-  }
-  if (ledger.allowedInvestigationKeys.length > RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS) {
-    throw new Error('Run quota ledger has too many allowed investigation keys');
-  }
-  if (ledger.criticalOverrideCount > ledger.count) {
-    throw new Error('Investigation critical override count exceeds the total grant count');
+export const readRunQuotaLedger = async (
+  internalRepository: RunQuotaSavedObjectsRepository,
+  date: string,
+  group: RunQuotaGroup
+): Promise<RunQuotaLedgerAttributes> => {
+  try {
+    const savedObject = await internalRepository.get<RunQuotaLedgerAttributes>(
+      RUN_QUOTA_LEDGER_SO_TYPE,
+      getRunQuotaLedgerId(date, group)
+    );
+    return savedObject.attributes;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+      return createEmptyRunQuotaLedger(date, group);
+    }
+    throw error;
   }
 };
 
-export const mutateRunQuotaLedger = async ({
+export interface RunQuotaLedgerMutationResult<Result> {
+  attributes?: Partial<RunQuotaLedgerAttributes>;
+  result: Result;
+}
+
+export type RunQuotaLedgerMutation<Result> = (
+  current: RunQuotaLedgerAttributes
+) => RunQuotaLedgerMutationResult<Result>;
+
+export const mutateRunQuotaLedger = async <Result>({
   internalRepository,
   date,
   group,
@@ -182,9 +176,9 @@ export const mutateRunQuotaLedger = async ({
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
   date: string;
-  group: RunBudgetGroupId;
-  mutation: RunQuotaLedgerMutation;
-}): Promise<RunQuotaLedgerAttributes> => {
+  group: RunQuotaGroup;
+  mutation: RunQuotaLedgerMutation<Result>;
+}): Promise<Result> => {
   const id = getRunQuotaLedgerId(date, group);
 
   for (let attempt = 0; attempt < MAX_OCC_ATTEMPTS; attempt++) {
@@ -204,32 +198,32 @@ export const mutateRunQuotaLedger = async ({
     const current = currentSavedObject
       ? (currentSavedObject.attributes as RunQuotaLedgerAttributes)
       : createEmptyRunQuotaLedger(date, group);
-    const patch = mutation(current);
-    if (!patch) {
-      return current;
+    const { attributes, result } = mutation(current);
+    if (!attributes) {
+      return result;
     }
     const next = {
       ...current,
-      ...patch,
+      ...attributes,
       date,
       group,
     };
-    assertLedgerInvariant(next);
 
     try {
-      const savedObject = currentSavedObject
-        ? await internalRepository.update<RunQuotaLedgerAttributes>(
-            RUN_QUOTA_LEDGER_SO_TYPE,
-            id,
-            next,
-            { version: currentSavedObject.version }
-          )
-        : await internalRepository.create<RunQuotaLedgerAttributes>(
-            RUN_QUOTA_LEDGER_SO_TYPE,
-            next,
-            { id, overwrite: false }
-          );
-      return { ...next, ...savedObject.attributes };
+      if (currentSavedObject) {
+        await internalRepository.update<RunQuotaLedgerAttributes>(
+          RUN_QUOTA_LEDGER_SO_TYPE,
+          id,
+          next,
+          { version: currentSavedObject.version }
+        );
+      } else {
+        await internalRepository.create<RunQuotaLedgerAttributes>(RUN_QUOTA_LEDGER_SO_TYPE, next, {
+          id,
+          overwrite: false,
+        });
+      }
+      return result;
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isConflictError(error as Error)) {
         throw error;

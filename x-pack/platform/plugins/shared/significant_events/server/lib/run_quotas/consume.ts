@@ -5,63 +5,35 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { RunQuotaConsumeResponse, WorkerRunBudgetGroupId } from '../../../common/run_quotas';
+import type { RunQuotaConsumeRequest, RunQuotaConsumeResponse } from '../../../common/run_quotas';
 import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
-import type { RunQuotaExecutionReader } from './provenance';
-import { validateWorkerProvenance } from './provenance';
 import { dayKey, resolveDailyWindow } from './window';
 import type { RunQuotaSavedObjectsRepository } from './repository';
 
 export const consumeRunQuota = async ({
   internalRepository,
-  executionReader,
-  request,
-  executionId,
-  group,
-  spaceId,
+  ...request
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
-  executionReader: RunQuotaExecutionReader;
-  request: KibanaRequest;
-  executionId: string;
-  group: WorkerRunBudgetGroupId;
-  spaceId: string;
-}): Promise<RunQuotaConsumeResponse> => {
-  const { grantKey, taskRunAt } = await validateWorkerProvenance({
-    request,
-    executionId,
-    group,
-    spaceId,
-    executionReader,
-  });
+} & RunQuotaConsumeRequest): Promise<RunQuotaConsumeResponse> => {
+  const date = dayKey(resolveDailyWindow());
   const settings = await readRunQuotaSettings(internalRepository);
-  const limit = settings.limits[group];
-  if (!settings.enforcementEnabled || !limit?.enabled) {
-    return { allowed: true };
-  }
+  const limit = settings.limits[request.group];
+  const isCriticalInvestigation = request.group === 'investigation' && request.critical;
 
-  let allowed = false;
-  await mutateRunQuotaLedger({
+  return mutateRunQuotaLedger<RunQuotaConsumeResponse>({
     internalRepository,
-    date: dayKey(resolveDailyWindow(new Date(taskRunAt))),
-    group,
+    date,
+    group: request.group,
     mutation: (ledger) => {
-      if (ledger.allowedGrantKeys.includes(grantKey)) {
-        allowed = true;
-        return undefined;
+      if (settings.enabled && limit > 0 && ledger.count >= limit && !isCriticalInvestigation) {
+        return { result: { allowed: false } };
       }
-      if (ledger.count >= limit.max) {
-        allowed = false;
-        return undefined;
-      }
-      allowed = true;
+
       return {
-        count: ledger.count + 1,
-        allowedGrantKeys: [...ledger.allowedGrantKeys, grantKey],
+        attributes: { count: ledger.count + 1 },
+        result: { allowed: true },
       };
     },
   });
-
-  return { allowed };
 };

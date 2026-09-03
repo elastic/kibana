@@ -85,18 +85,11 @@ export {
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
 export type {
-  ControlledRunBudgetGroupId,
-  RunBudgetGroupId,
-  RunBudgetGroupUsage,
-  RunLimit,
+  RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,
-  RunQuotaEnforcementUpdate,
-  RunQuotaLimitsUpdate,
-  RunQuotaReserveReason,
-  RunQuotaReserveResponse,
+  RunQuotaGroup,
   RunQuotaSettings,
-  RunQuotaStatusResponse,
+  RunQuotaSettingsUpdate,
   RunQuotaWindow,
   RunQuotasResponse,
-  WorkerRunBudgetGroupId,
 } from './run_quotas';

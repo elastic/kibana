@@ -6,97 +6,60 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { schema, type ObjectType } from '@kbn/config-schema';
-import type { RunLimit } from '../../../common/run_quotas';
+import { schema } from '@kbn/config-schema';
+import {
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  type RunQuotaGroup,
+  type RunQuotaSettings,
+} from '../../../common/run_quotas';
 
 export const RUN_QUOTA_SETTINGS_SO_TYPE = 'significant-events-run-quota-settings';
 export const RUN_QUOTA_SETTINGS_SO_ID = RUN_QUOTA_SETTINGS_SO_TYPE;
 export const RUN_QUOTA_LEDGER_SO_TYPE = 'significant-events-run-quota-ledger';
 
-export const RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS = 10_000;
-export const RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS = 10_000;
+const RUN_QUOTA_DATE_MAX_LENGTH = 10;
+const RUN_QUOTA_GROUP_MAX_LENGTH = 64;
+const validateInteger = (value: number): string | undefined =>
+  Number.isInteger(value) ? undefined : 'Value must be an integer.';
 
-const MAX_DATE_LENGTH = 64;
-const MAX_GROUP_LENGTH = 64;
-const MAX_ID_LENGTH = 1024;
-const MAX_ACTOR_LENGTH = 1024;
-
-export interface RunQuotaSettingsAttributes extends Record<string, unknown> {
-  limits: Record<string, RunLimit>;
-  enforcementEnabled?: boolean;
-  enabledBy?: string;
-  enabledAt?: string;
-  updatedBy?: string;
-  updatedAt?: string;
-}
-
-export interface RunQuotaAllowedInvestigationKey {
-  eventUuid: string;
-  eventId: string;
+export interface RunQuotaSettingsAttributes
+  extends Omit<RunQuotaSettings, 'limits'>,
+    Record<string, unknown> {
+  limits: Record<RunQuotaGroup, number> & Record<string, number>;
 }
 
 export interface RunQuotaLedgerAttributes extends Record<string, unknown> {
   date: string;
-  group: string;
+  group: RunQuotaGroup;
   count: number;
-  criticalOverrideCount: number;
-  allowedGrantKeys: string[];
-  allowedInvestigationKeys: RunQuotaAllowedInvestigationKey[];
 }
 
-const runLimitSchemaV1 = schema.oneOf([
-  schema.object({
-    enabled: schema.literal(false),
-    max: schema.literal(0),
-  }),
-  schema.object({
-    enabled: schema.literal(true),
-    max: schema.number({ min: 1, max: 10_000 }),
-  }),
-]);
-
 const runQuotaSettingsAttributesV1 = schema.object({
-  limits: schema.recordOf(schema.string({ maxLength: MAX_GROUP_LENGTH }), runLimitSchemaV1),
-  enforcementEnabled: schema.maybe(schema.boolean()),
-  enabledBy: schema.maybe(schema.string({ maxLength: MAX_ACTOR_LENGTH })),
-  enabledAt: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
-  updatedBy: schema.maybe(schema.string({ maxLength: MAX_ACTOR_LENGTH })),
-  updatedAt: schema.maybe(schema.string({ maxLength: MAX_DATE_LENGTH })),
-});
-
-const allowedInvestigationKeySchemaV1 = schema.object({
-  eventUuid: schema.string({ maxLength: MAX_ID_LENGTH }),
-  eventId: schema.string({ maxLength: MAX_ID_LENGTH }),
+  enabled: schema.boolean(),
+  limits: schema.recordOf(
+    schema.string({ maxLength: RUN_QUOTA_GROUP_MAX_LENGTH }),
+    schema.number({ min: MIN_RUN_LIMIT, max: MAX_RUN_LIMIT, validate: validateInteger })
+  ),
 });
 
 const runQuotaLedgerAttributesV1 = schema.object({
-  date: schema.string({ maxLength: MAX_DATE_LENGTH }),
-  group: schema.string({ maxLength: MAX_GROUP_LENGTH }),
-  count: schema.number({ min: 0 }),
-  criticalOverrideCount: schema.number({ min: 0 }),
-  allowedGrantKeys: schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
-    maxSize: RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS,
-  }),
-  allowedInvestigationKeys: schema.arrayOf(allowedInvestigationKeySchemaV1, {
-    maxSize: RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
-  }),
+  date: schema.string({ maxLength: RUN_QUOTA_DATE_MAX_LENGTH }),
+  group: schema.oneOf([
+    schema.literal('detection'),
+    schema.literal('investigation'),
+    schema.literal('ki_extraction'),
+  ]),
+  count: schema.number({ min: 0, validate: validateInteger }),
 });
 
-const createSavedObjectType = ({
-  name,
-  attributesSchema,
-  properties,
-}: {
-  name: string;
-  attributesSchema: ObjectType;
-  properties: SavedObjectsType['mappings']['properties'];
-}): SavedObjectsType => ({
-  name,
+export const runQuotaSettingsSavedObjectType: SavedObjectsType = {
+  name: RUN_QUOTA_SETTINGS_SO_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
-    properties,
+    properties: {},
   },
   management: {
     importableAndExportable: false,
@@ -105,25 +68,31 @@ const createSavedObjectType = ({
     '1': {
       changes: [],
       schemas: {
-        forwardCompatibility: attributesSchema.extends({}, { unknowns: 'ignore' }),
-        create: attributesSchema.extends({}, { unknowns: 'allow' }),
+        forwardCompatibility: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaSettingsAttributesV1.extends({}, { unknowns: 'allow' }),
       },
     },
   },
-});
+};
 
-export const getRunQuotaSavedObjectTypes = (): SavedObjectsType[] => [
-  createSavedObjectType({
-    name: RUN_QUOTA_SETTINGS_SO_TYPE,
-    attributesSchema: runQuotaSettingsAttributesV1,
+export const runQuotaLedgerSavedObjectType: SavedObjectsType = {
+  name: RUN_QUOTA_LEDGER_SO_TYPE,
+  hidden: true,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false,
     properties: {},
-  }),
-  createSavedObjectType({
-    name: RUN_QUOTA_LEDGER_SO_TYPE,
-    attributesSchema: runQuotaLedgerAttributesV1,
-    properties: {
-      date: { type: 'keyword', ignore_above: 64 },
-      group: { type: 'keyword', ignore_above: 64 },
+  },
+  management: {
+    importableAndExportable: false,
+  },
+  modelVersions: {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: runQuotaLedgerAttributesV1.extends({}, { unknowns: 'ignore' }),
+        create: runQuotaLedgerAttributesV1.extends({}, { unknowns: 'allow' }),
+      },
     },
-  }),
-];
+  },
+};

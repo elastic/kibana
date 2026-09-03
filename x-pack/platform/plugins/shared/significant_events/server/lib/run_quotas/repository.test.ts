@@ -6,22 +6,19 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { RunQuotaLedgerAttributes, RunQuotaSettingsAttributes } from './saved_objects';
+import type { RunQuotaSettingsAttributes } from './saved_objects';
 import {
-  getRunQuotaLedgerId,
-  mutateRunQuotaLedger,
-  mutateRunQuotaSettings,
+  patchRunQuotaSettings,
+  readRunQuotaSettings,
   type RunQuotaSavedObjectsRepository,
 } from './repository';
 
 const makeSavedObject = <T extends Record<string, unknown>>(
-  type: string,
-  id: string,
   attributes: T,
   version = 'WzEsMV0='
 ) => ({
-  type,
-  id,
+  type: 'settings',
+  id: 'settings',
   attributes,
   references: [],
   version,
@@ -34,112 +31,66 @@ const makeRepository = (): jest.Mocked<RunQuotaSavedObjectsRepository> =>
     update: jest.fn(),
   } as unknown as jest.Mocked<RunQuotaSavedObjectsRepository>);
 
-describe('run quota OCC repository', () => {
-  it('preserves unknown settings fields and budget groups across conflict retries', async () => {
+describe('run quota settings repository', () => {
+  it('returns disabled enforcement and the default limits when settings do not exist', async () => {
+    const repository = makeRepository();
+    repository.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('settings', 'settings')
+    );
+
+    await expect(readRunQuotaSettings(repository)).resolves.toEqual({
+      enabled: false,
+      limits: {
+        detection: 100,
+        investigation: 30,
+        ki_extraction: 20,
+      },
+    });
+  });
+
+  it('preserves unrelated fields and groups when a settings patch conflicts', async () => {
     const repository = makeRepository();
     const first: RunQuotaSettingsAttributes = {
-      enforcementEnabled: false,
+      enabled: false,
       limits: {
-        detection: { enabled: true, max: 100 },
-        future_group: { enabled: true, max: 9 },
+        detection: 100,
+        investigation: 30,
+        ki_extraction: 20,
+        future_group: 9,
       },
       futureTopLevel: { retained: 'first' },
     };
     const winner: RunQuotaSettingsAttributes = {
       ...first,
+      enabled: true,
       limits: {
         ...first.limits,
-        investigation: { enabled: true, max: 40 },
+        investigation: 40,
       },
       futureTopLevel: { retained: 'winner' },
     };
     repository.get
-      .mockResolvedValueOnce(makeSavedObject('settings', 'settings', first))
-      .mockResolvedValueOnce(makeSavedObject('settings', 'settings', winner, 'WzIsMV0='));
+      .mockResolvedValueOnce(makeSavedObject(first))
+      .mockResolvedValueOnce(makeSavedObject(winner, 'WzIsMV0='));
     repository.update
       .mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError('settings', 'settings'))
       .mockImplementation(async (_type, _id, attributes) =>
-        makeSavedObject('settings', 'settings', attributes, 'WzMsMV0=')
+        makeSavedObject(attributes as RunQuotaSettingsAttributes, 'WzMsMV0=')
       );
 
-    const result = await mutateRunQuotaSettings(repository, () => ({
-      limits: { detection: { enabled: true, max: 120 } },
-    }));
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        futureTopLevel: { retained: 'winner' },
-        limits: {
-          detection: { enabled: true, max: 120 },
-          investigation: { enabled: true, max: 40 },
-          ki_extraction: { enabled: true, max: 20 },
-          memory: { enabled: false, max: 0 },
-          future_group: { enabled: true, max: 9 },
-        },
-      })
-    );
-  });
-
-  it('preserves unknown ledger fields during an OCC mutation', async () => {
-    const repository = makeRepository();
-    const current: RunQuotaLedgerAttributes = {
-      date: '2026-08-31',
-      group: 'detection',
-      count: 1,
-      criticalOverrideCount: 0,
-      allowedGrantKeys: ['grant-1'],
-      allowedInvestigationKeys: [],
-      futureTopLevel: { retained: true },
-    };
-    repository.get.mockResolvedValue(
-      makeSavedObject('ledger', getRunQuotaLedgerId('2026-08-31', 'detection'), current)
-    );
-    repository.update.mockImplementation(async (_type, id, attributes) =>
-      makeSavedObject('ledger', id, attributes)
-    );
-
-    const result = await mutateRunQuotaLedger({
-      internalRepository: repository,
-      date: '2026-08-31',
-      group: 'detection',
-      mutation: (ledger) => ({
-        count: ledger.count + 1,
-        allowedGrantKeys: [...ledger.allowedGrantKeys, 'grant-2'],
-      }),
-    });
-
-    expect(result.futureTopLevel).toEqual({ retained: true });
-    expect(result.count).toBe(2);
-    expect(result.allowedGrantKeys).toEqual(['grant-1', 'grant-2']);
-  });
-
-  it('does not rewrite a ledger for a no-op mutation', async () => {
-    const repository = makeRepository();
-    const current: RunQuotaLedgerAttributes = {
-      date: '2026-08-31',
-      group: 'detection',
-      count: 1,
-      criticalOverrideCount: 0,
-      allowedGrantKeys: ['grant-1'],
-      allowedInvestigationKeys: [],
-    };
-    repository.get.mockResolvedValue(
-      makeSavedObject('ledger', getRunQuotaLedgerId('2026-08-31', 'detection'), current)
-    );
-
     await expect(
-      mutateRunQuotaLedger({
-        internalRepository: repository,
-        date: '2026-08-31',
-        group: 'detection',
-        mutation: () => undefined,
+      patchRunQuotaSettings(repository, {
+        limits: { detection: 120 },
       })
-    ).resolves.toEqual(current);
-    expect(repository.create).not.toHaveBeenCalled();
-    expect(repository.update).not.toHaveBeenCalled();
-  });
-
-  it('uses deterministic ledger ids', () => {
-    expect(getRunQuotaLedgerId('2026-08-31', 'detection')).toBe('2026-08-31-detection');
+    ).resolves.toEqual({
+      enabled: true,
+      futureTopLevel: { retained: 'winner' },
+      limits: {
+        detection: 120,
+        investigation: 40,
+        ki_extraction: 20,
+        future_group: 9,
+      },
+    });
   });
 });

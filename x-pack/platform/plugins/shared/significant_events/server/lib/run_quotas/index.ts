@@ -7,43 +7,18 @@
 
 export { consumeRunQuota } from './consume';
 export {
-  createRunQuotaExecutionReader,
-  validateInvestigationProvenance,
-  validateWorkerProvenance,
-} from './provenance';
-export type {
-  RunQuotaExecutionReader,
-  RunQuotaWorkflowExecution,
-  ValidatedWorkerProvenance,
-} from './provenance';
-export { reserveInvestigationRunQuota } from './reserve';
-export type { RunQuotaEventResolver } from './reserve';
-export {
   createRunQuotaInternalRepository,
-  createDefaultRunQuotaSettingsAttributes,
-  createEmptyRunQuotaLedger,
-  getRunQuotaLedgerId,
-  mutateRunQuotaLedger,
-  mutateRunQuotaSettings,
+  patchRunQuotaSettings,
+  readRunQuotaLedger,
   readRunQuotaSettings,
 } from './repository';
-export type {
-  RunQuotaLedgerMutation,
-  RunQuotaSavedObjectsRepository,
-  RunQuotaSettingsMutation,
-  RunQuotaSettingsPatch,
-} from './repository';
+export type { RunQuotaSavedObjectsRepository, RunQuotaSettingsPatch } from './repository';
 export {
-  getRunQuotaSavedObjectTypes,
+  runQuotaLedgerSavedObjectType,
+  runQuotaSettingsSavedObjectType,
   RUN_QUOTA_LEDGER_SO_TYPE,
-  RUN_QUOTA_MAX_ALLOWED_GRANT_KEYS,
-  RUN_QUOTA_MAX_ALLOWED_INVESTIGATION_KEYS,
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
 } from './saved_objects';
-export type {
-  RunQuotaAllowedInvestigationKey,
-  RunQuotaLedgerAttributes,
-  RunQuotaSettingsAttributes,
-} from './saved_objects';
+export type { RunQuotaLedgerAttributes, RunQuotaSettingsAttributes } from './saved_objects';
 export { dayKey, resolveDailyWindow } from './window';

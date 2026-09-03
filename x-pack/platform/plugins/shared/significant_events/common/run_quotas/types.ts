@@ -5,45 +5,27 @@
  * 2.0.
  */
 
-export const RUN_BUDGET_GROUP_IDS = [
-  'detection',
-  'investigation',
-  'ki_extraction',
-  'memory',
-] as const;
+export const RUN_QUOTA_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
 
-export type RunBudgetGroupId = (typeof RUN_BUDGET_GROUP_IDS)[number];
+export type RunQuotaGroup = (typeof RUN_QUOTA_GROUPS)[number];
 
-export const CONTROLLED_RUN_BUDGET_GROUP_IDS = [
-  'detection',
-  'investigation',
-  'ki_extraction',
-] as const;
-
-export type ControlledRunBudgetGroupId = (typeof CONTROLLED_RUN_BUDGET_GROUP_IDS)[number];
-
-export const WORKER_RUN_BUDGET_GROUP_IDS = ['detection', 'ki_extraction'] as const;
-
-export type WorkerRunBudgetGroupId = (typeof WORKER_RUN_BUDGET_GROUP_IDS)[number];
-
-export const MIN_RUN_LIMIT = 1;
+export const MIN_RUN_LIMIT = 0;
 export const MAX_RUN_LIMIT = 10_000;
 export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
-export type RunLimit = { enabled: false; max: 0 } | { enabled: true; max: number };
-
-export const DEFAULT_RUN_LIMITS: Readonly<Record<RunBudgetGroupId, RunLimit>> = {
-  detection: { enabled: true, max: 100 },
-  investigation: { enabled: true, max: 30 },
-  ki_extraction: { enabled: true, max: 20 },
-  memory: { enabled: false, max: 0 },
+export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
+  detection: 100,
+  investigation: 30,
+  ki_extraction: 20,
 };
 
 export interface RunQuotaSettings {
-  limits: Record<RunBudgetGroupId, RunLimit>;
+  enabled: boolean;
+  limits: Record<RunQuotaGroup, number>;
 }
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
+  enabled: false,
   limits: DEFAULT_RUN_LIMITS,
 };
 
@@ -53,44 +35,24 @@ export interface RunQuotaWindow {
   timezone: typeof DEFAULT_RUN_QUOTA_TIME_ZONE;
 }
 
-export interface RunBudgetGroupUsage {
-  group: RunBudgetGroupId;
-  limit: RunLimit;
-  used: number;
-  counted: number;
-  remaining: number | null;
-  criticalOverrideCount: number;
-}
-
 export interface RunQuotasResponse {
-  settings: RunQuotaSettings;
+  enabled: boolean;
+  limits: Record<RunQuotaGroup, number>;
+  counts: Record<RunQuotaGroup, number>;
   window: RunQuotaWindow;
-  groups: RunBudgetGroupUsage[];
+  canManage: boolean;
 }
 
-export interface RunQuotaStatusResponse {
-  enabled: boolean;
-  enabledAt?: string;
-  enabledBy?: string;
-  canManageLimits: boolean;
+export interface RunQuotaSettingsUpdate {
+  enabled?: boolean;
+  limits?: Partial<Record<RunQuotaGroup, number>>;
 }
 
-export interface RunQuotaLimitsUpdate {
-  limits: Partial<Record<ControlledRunBudgetGroupId, RunLimit>>;
-}
-
-export interface RunQuotaEnforcementUpdate {
-  enabled: boolean;
-  limits?: Partial<Record<ControlledRunBudgetGroupId, RunLimit>>;
-}
+export type RunQuotaConsumeRequest =
+  | { group: 'detection' }
+  | { group: 'ki_extraction' }
+  | { group: 'investigation'; critical: boolean };
 
 export interface RunQuotaConsumeResponse {
   allowed: boolean;
-}
-
-export type RunQuotaReserveReason = 'ineligible' | 'limit';
-
-export interface RunQuotaReserveResponse {
-  granted: boolean;
-  reason?: RunQuotaReserveReason;
 }
