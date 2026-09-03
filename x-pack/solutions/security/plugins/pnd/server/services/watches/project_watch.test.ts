@@ -698,9 +698,8 @@ describe('project watch', () => {
         expect(reviewedTag).toEqual(expect.any(String));
         expect(harvestQuery).toContain('MV_CONTAINS(`kibana.alert.workflow_tags`');
         expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
-        expect(harvestQuery).toContain(
-          'INLINE STATS reviewed_watermark = MAX(reviewed_ts) BY `kibana.alert.rule.uuid`'
-        );
+        expect(harvestQuery).toContain('INLINE STATS reviewed_watermark = MAX(@timestamp)');
+        expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`');
         expect(harvestQuery).toContain(
           '(reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)'
         );
@@ -727,14 +726,18 @@ describe('project watch', () => {
           'queued',
         ];
 
-        expect(path).toContain(`/api/workflows/workflow/${PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID}/executions?`);
+        expect(path).toContain(
+          `/api/workflows/workflow/${PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID}/executions?`
+        );
         for (const status of nonTerminal) {
           expect(path).toContain(`statuses=${status}`);
         }
         expect(lookup['on-failure']).toEqual({ continue: true });
 
         const resolve = tuningSteps.find(({ name }) => name === 'resolve_active_rules')!;
-        expect(String(resolve.if)).toContain('parsed_count == steps.collect_active_rules.output.expected');
+        expect(String(resolve.if)).toContain(
+          'parsed_count == steps.collect_active_rules.output.expected'
+        );
 
         const filter = JSON.stringify(harvest.with?.filter);
         expect(filter).toContain('must_not');
@@ -751,8 +754,15 @@ describe('project watch', () => {
         expect(groupClause).not.toContain('kibana.alert.rule.name');
       });
 
-      it('excludes hidden building-block alerts from the FP-rate denominator', () => {
-        expect(harvestQuery).toContain('`kibana.alert.building_block_type` IS NULL');
+      // The per-document exclusions live in the DSL filter so Lucene drops the rows
+      // before ES|QL sees them.
+      it('excludes hidden building-block alerts and bounds the window in the filter', () => {
+        const filter = JSON.stringify(harvest.with?.filter);
+
+        expect(filter).toContain('"exists":{"field":"kibana.alert.building_block_type"}');
+        expect(filter).toContain(
+          '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
+        );
       });
 
       // The tag API writes to the alerts index of the space it runs in, so anything the
@@ -975,7 +985,7 @@ describe('project watch', () => {
         );
         expect(harvestQuery).toContain('recent_keys = TOP(fp_recency_key');
         expect(harvestQuery).toContain('MV_EXPAND recent_keys');
-        expect(harvestQuery).toContain('alert_id = MV_LAST(SPLIT(recent_keys, "|"))');
+        expect(harvestQuery).toContain('alert_id = SUBSTRING(recent_keys, 19)');
         expect(harvestQuery).toContain('alert_ids = VALUES(alert_id)');
       });
 

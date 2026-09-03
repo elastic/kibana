@@ -123,31 +123,37 @@ steps:
   # measured FP rate; `fp_count` and `alert_ids` include only work still to review.
   # `alert_ids` holds only the newest 100 unreviewed FPs: TOP sorts by the collected
   # value itself, so recency needs sortable `timestamp|id` keys, expanded back to
-  # plain ids afterwards. Tagging those 100 places the reviewed watermark at the
-  # newest FP, which retires the older untagged ones too.
-  # The DSL filter excludes in-flight rules before STATS/LIMIT, so a skipped rule
-  # frees its sweep slot for the next-noisiest one. An empty array matches nothing,
-  # which makes `must_not` a no-op: the fail-open path when the lookup errored,
-  # the parse was inconsistent, or no proposal is pending.
+  # plain ids by stripping the fixed 18-char prefix (17-digit timestamp plus the
+  # separator, hence SUBSTRING from 19). Tagging those 100 places the reviewed
+  # watermark at the newest FP, which retires the older untagged ones too.
+  # The DSL filter carries every per-document exclusion (window, building blocks,
+  # in-flight rules), pushed down to Lucene before ES|QL sees a row. Skipping an
+  # in-flight rule here, before STATS/LIMIT, frees its sweep slot for the
+  # next-noisiest one; the empty-array `terms` matches nothing, which makes that
+  # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
+  # inconsistent, or no proposal is pending.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
       allow_partial_results: false
       filter:
         bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
           must_not:
+            - exists:
+                field: kibana.alert.building_block_type
             - terms:
                 kibana.alert.rule.rule_id: "${{ steps.resolve_active_rules.output.rule_ids | default: consts.no_rows }}"
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
-        | WHERE @timestamp >= NOW() - {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days
-          AND `kibana.alert.building_block_type` IS NULL
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
-        | EVAL reviewed_ts = CASE(
-            COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"), false),
-            @timestamp, NULL)
-        | INLINE STATS reviewed_watermark = MAX(reviewed_ts) BY `kibana.alert.rule.uuid`
+        | INLINE STATS reviewed_watermark = MAX(@timestamp)
+            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+          BY `kibana.alert.rule.uuid`
         | EVAL is_unreviewed_fp = is_fp
             AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
         | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)
@@ -162,7 +168,7 @@ steps:
         | SORT fp_count DESC
         | LIMIT {{ consts.max_rules_per_sweep }}
         | MV_EXPAND recent_keys
-        | EVAL alert_id = MV_LAST(SPLIT(recent_keys, "|"))
+        | EVAL alert_id = SUBSTRING(recent_keys, 19)
         | STATS fp_count = MAX(fp_count),
             last_fp_at = MAX(last_fp_at),
             alert_ids = VALUES(alert_id)
