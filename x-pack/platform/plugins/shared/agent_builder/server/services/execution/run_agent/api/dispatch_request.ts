@@ -10,7 +10,6 @@ import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import { toSelfFetchQuery } from './query_params';
-import { isRecord } from './types';
 import type { ApiRequest } from './types';
 
 export interface DispatchApiRequestParams {
@@ -33,9 +32,6 @@ const isAlertingRuleCreate = (method: string, path: string): boolean =>
 // would kill every rule from the conversation about an hour after the task completes. This header
 // tells alerting to mint the rule its own framework-managed key instead.
 const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
-
-const toNdjsonBody = (lines: readonly unknown[]): string =>
-  lines.map((line) => `${typeof line === 'string' ? line : JSON.stringify(line)}\n`).join('');
 
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
@@ -73,8 +69,8 @@ export const dispatchApiRequest = async ({
     transportParams.querystring = querystring;
   }
   if (Array.isArray(bulkBody)) {
-    transportParams.bulkBody = toNdjsonBody(bulkBody);
-  } else if (isRecord(body)) {
+    transportParams.bulkBody = bulkBody;
+  } else if (body != null) {
     transportParams.body = body;
   }
 

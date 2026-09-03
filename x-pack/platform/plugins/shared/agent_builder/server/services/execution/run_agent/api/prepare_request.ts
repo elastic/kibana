@@ -62,11 +62,7 @@ export interface PrepareApiRequestParams {
 }
 
 /**
- * Transforms an API identifier + flat params map into an HTTP request.
- *
- * Validates the params against the API's schema, routes them into the path, query string, and
- * body, and refuses everything that cannot be called: unresolved path parameters, query values a
- * query string cannot carry, and cross-space Kibana paths.
+ * Validates a flat params map against its API's schema and transforms it into an HTTP request.
  *
  * @param params - The target, API identifier, caller-supplied params, and current space.
  * @returns The request to dispatch along with whether the API is destructive, or the reason no

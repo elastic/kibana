@@ -21,6 +21,11 @@ interface ApiInput {
   input: Record<string, unknown>;
 }
 
+interface LoadedApiDefinition {
+  id: string;
+  definition: ApiRegistryDefinition;
+}
+
 interface ParamRouting {
   name: string;
   foundIn?: string;
@@ -28,35 +33,35 @@ interface ParamRouting {
   type?: string;
 }
 
+const loadApiDefinitions = async (target: ApiTarget): Promise<LoadedApiDefinition[]> => {
+  const registries = await getRegistries();
+  const registry = registries[target];
+  const definitions: LoadedApiDefinition[] = [];
+
+  for (const meta of registry.manifest) {
+    const { definition } = await registry.loadApi(meta.id);
+    definitions.push({ id: meta.id, definition });
+  }
+
+  return definitions;
+};
+
 const loadApiInputs = async (target: ApiTarget): Promise<ApiInput[]> => {
-  const registries = await getRegistries();
-  const registry = registries[target];
   const inputs: ApiInput[] = [];
 
-  for (const meta of registry.manifest) {
-    const { definition } = await registry.loadApi(meta.id);
+  for (const { id, definition } of await loadApiDefinitions(target)) {
     if (definition.input) {
-      inputs.push({ id: meta.id, input: definition.input });
+      inputs.push({ id, input: definition.input });
     }
   }
 
   return inputs;
 };
 
-const loadNdjsonApis = async (target: ApiTarget): Promise<ApiInput[]> => {
-  const registries = await getRegistries();
-  const registry = registries[target];
-  const inputs: ApiInput[] = [];
-
-  for (const meta of registry.manifest) {
-    const { definition } = await registry.loadApi(meta.id);
-    if (definition.bodyFormat === 'ndjson') {
-      inputs.push({ id: meta.id, input: definition.input ?? {} });
-    }
-  }
-
-  return inputs;
-};
+const loadNdjsonApis = async (target: ApiTarget): Promise<ApiInput[]> =>
+  (await loadApiDefinitions(target))
+    .filter(({ definition }) => definition.bodyFormat === 'ndjson')
+    .map(({ id, definition }) => ({ id, input: definition.input ?? {} }));
 
 const isLocalRef = (ref: string): boolean => ref === '#' || ref.startsWith('#/$defs/');
 
@@ -388,28 +393,26 @@ describe('@elastic/schemas registries', () => {
     it.each<ApiTarget>(['elasticsearch', 'kibana'])(
       'gives every %s API at most one body-root parameter, alone in the body',
       async (target) => {
-        const registries = await getRegistries();
-        const registry = registries[target];
         const problems: string[] = [];
 
-        for (const meta of registry.manifest) {
-          const { definition } = await registry.loadApi(meta.id);
+        for (const { id, definition } of await loadApiDefinitions(target)) {
           const params = paramRoutings(definition.input);
           const bodyRoots = params.filter(({ isBodyRoot }) => isBodyRoot);
           if (bodyRoots.length === 0) {
             continue;
           }
 
-          if (bodyRoots.length > 1) {
-            problems.push(`${meta.id}: ${bodyRoots.map(({ name }) => name).join(', ')}`);
+          const rootNames = bodyRoots.map(({ name }) => name);
+          if (rootNames.length > 1) {
+            problems.push(`${id}: ${rootNames.join(', ')}`);
           }
 
           const alongside = params.filter(
-            ({ name, foundIn }) => foundIn === 'body' && name !== bodyRoots[0].name
+            ({ name, foundIn }) => foundIn === 'body' && !rootNames.includes(name)
           );
           if (alongside.length > 0) {
             problems.push(
-              `${meta.id}: "${bodyRoots[0].name}" shares the body with ${alongside
+              `${id}: "${rootNames.join(', ')}" shares the body with ${alongside
                 .map(({ name }) => name)
                 .join(', ')}`
             );
@@ -434,8 +437,8 @@ describe('@elastic/schemas registries', () => {
     });
 
     it('models every Elasticsearch NDJSON payload as a single body-root array', async () => {
-      // `dispatchApiRequest` serializes that array into newline-delimited lines, so any other
-      // shape would leave the payload out of the request.
+      // `dispatchApiRequest` forwards that array as the client's `bulkBody`, which serializes it
+      // into newline-delimited lines, so any other shape would leave the payload out of the request.
       const apis = await loadNdjsonApis('elasticsearch');
       const problems = apis
         .filter(({ input }) => {
@@ -448,7 +451,7 @@ describe('@elastic/schemas registries', () => {
       expect(apis.length).toBeGreaterThan(0);
     });
 
-    it('ships no NDJSON API on Kibana, whose dispatch never serializes one', async () => {
+    it('ships no NDJSON API on Kibana, whose dispatch never sends one', async () => {
       const apis = await loadNdjsonApis('kibana');
 
       expect(apis.map(({ id }) => id)).toEqual([]);
