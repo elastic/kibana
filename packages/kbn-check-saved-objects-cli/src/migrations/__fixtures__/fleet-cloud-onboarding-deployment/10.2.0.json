@@ -1,0 +1,22 @@
+{
+  "10.1.0": [
+    {
+      "provider": "aws",
+      "connectorId": "test-connector-id",
+      "mechanisms": ["cloud_forwarder"],
+      "services": ["cloudtrail"],
+      "status": "pending",
+      "attemptCount": 1
+    }
+  ],
+  "10.2.0": [
+    {
+      "provider": "aws",
+      "connectorId": "test-connector-id",
+      "mechanisms": ["cloud_forwarder"],
+      "services": ["cloudtrail"],
+      "status": "pending",
+      "attemptCount": 1
+    }
+  ]
+}
