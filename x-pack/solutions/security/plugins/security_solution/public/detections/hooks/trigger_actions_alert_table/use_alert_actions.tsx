@@ -9,6 +9,7 @@ import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
@@ -21,7 +22,10 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 
-interface UseBulkAlertActionItemsArgs {
+// ES-only types not accepted by the server's runtime_fields schema.
+const UNSUPPORTED_RUNTIME_FIELD_TYPES = new Set(['composite', 'lookup']);
+
+export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
   /* start time being passed to the Events Table */
@@ -33,6 +37,8 @@ interface UseBulkAlertActionItemsArgs {
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
+  /* Runtime mappings from the active data view, forwarded to bulk-close so unmapped fields can be resolved */
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export const useBulkAlertActionItems = ({
@@ -41,9 +47,18 @@ export const useBulkAlertActionItems = ({
   from,
   to,
   refetch: refetchProp,
+  runtimeMappings,
 }: UseBulkAlertActionItemsArgs) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
+
+  const runtimeFields = useMemo(() => {
+    if (!runtimeMappings) return undefined;
+    const entries = Object.entries(runtimeMappings)
+      .filter(([, field]) => !UNSUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
+      .map(([name, field]) => [name, field.type] as [string, string]);
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }, [runtimeMappings]);
 
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -120,6 +135,7 @@ export const useBulkAlertActionItems = ({
             status,
             query,
             signalIds: ids,
+            runtimeFields,
           });
 
           setAlertLoading(false);
@@ -151,6 +167,7 @@ export const useBulkAlertActionItems = ({
       from,
       to,
       refetchProp,
+      runtimeFields,
     ]
   );
 

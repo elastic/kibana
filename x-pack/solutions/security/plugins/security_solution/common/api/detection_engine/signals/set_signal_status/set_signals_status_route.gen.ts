@@ -33,6 +33,7 @@ export const SetAlertsStatusByQuery = z.object({
   query: z.object({}).catchall(z.unknown()),
   status: AlertStatus,
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+  runtime_fields: z.record(z.string()).optional(),
 });
 
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;
