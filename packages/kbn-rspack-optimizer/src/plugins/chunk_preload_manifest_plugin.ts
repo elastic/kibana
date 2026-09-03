@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { rspack, type Compiler, type Chunk } from '@rspack/core';
+import type { Compiler, Chunk } from '@rspack/core';
+import { rspack } from '../rspack_runtime';
 import { CHUNK_MANIFEST_FILENAME } from '../paths';
 
 /**

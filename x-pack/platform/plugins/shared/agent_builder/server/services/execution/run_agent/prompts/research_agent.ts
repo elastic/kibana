@@ -37,6 +37,7 @@ export const getResearchAgentPrompt = async (
     conversationTimestamp,
     relevantSkillsEnabled,
     relevantSkills,
+    imageResolver,
   } = params;
 
   // Generate messages from the conversation's rounds, optionally
@@ -64,6 +65,7 @@ export const getResearchAgentPrompt = async (
       cycleLimit,
       resultTransformer,
       toolManager,
+      imageResolver,
     })),
   ];
 };
@@ -109,7 +111,7 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndices },
+  configuration: { instructions: customInstructions, aiIndexCatalog },
   outputSchema,
   skills,
   spaceId,
@@ -196,7 +198,11 @@ ${
 
 ${conversationMetadataSection}
 
-${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
+${getAiIndicesInstructions({
+  enabled: experimentalFeatures.aiIndices,
+  catalog: aiIndexCatalog ?? [],
+  spaceId,
+})}
 
 ## INSTRUCTIONS
 

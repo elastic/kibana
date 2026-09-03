@@ -32,7 +32,7 @@ import {
   buildSpaceOwnerIdTag,
   setArtifactOwnerSpaceId,
 } from '../../../../common/endpoint/service/artifacts/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type {
@@ -160,7 +160,11 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
   it('should validate policy ids for by policy artifacts', async () => {
     const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
-    getActiveSpaceMock.mockResolvedValue({ id: 'default', name: 'default', disabledFeatures: [] });
+    getActiveSpaceMock.mockResolvedValue({
+      id: asSpaceId('default'),
+      name: 'default',
+      disabledFeatures: [],
+    });
     packagePolicyService.getByIDs.mockResolvedValue([
       {
         id: '123',
@@ -173,7 +177,11 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
   it('should throw if policy ids for by policy artifacts are not valid', async () => {
     const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
-    getActiveSpaceMock.mockResolvedValue({ id: 'default', name: 'default', disabledFeatures: [] });
+    getActiveSpaceMock.mockResolvedValue({
+      id: asSpaceId('default'),
+      name: 'default',
+      disabledFeatures: [],
+    });
     packagePolicyService.getByIDs.mockResolvedValue([]);
 
     await expect(initValidator()._validateByPolicyItem(exceptionLikeItem)).rejects.toBeInstanceOf(
@@ -487,7 +495,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+        ).rejects.toThrow(itemNotFoundInSpaceErrorMessage);
       });
 
       it('should allow read if per-policy item has at least one policy that is visible in active space', async () => {
@@ -504,7 +512,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+        ).rejects.toThrow(itemNotFoundInSpaceErrorMessage);
       });
     });
 

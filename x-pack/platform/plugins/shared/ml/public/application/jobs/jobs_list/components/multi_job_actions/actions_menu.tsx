@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
+import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
@@ -63,6 +64,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
     },
   } = useMlKibana();
   const mlApi = useMlApi();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
 
   const [
     canUpdateDatafeed,
@@ -80,7 +82,8 @@ export const MultiJobActionsMenu: FC<Props> = ({
 
   const canStartStopDatafeed = canStartStopDatafeedCap && mlNodesAvailable();
   const canCloseJob = canCloseJobCap && mlNodesAvailable();
-  const canUpdateProjectRouting = cps?.cpsManager && canUpdateDatafeed && canStartStopDatafeed;
+  const canUpdateProjectRouting =
+    isMlCpsEnabled && cps?.cpsManager && canUpdateDatafeed && canStartStopDatafeed;
 
   const onButtonClick = useCallback(() => {
     setIsOpen((prev) => !prev);
