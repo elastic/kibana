@@ -513,10 +513,12 @@ describe('createPackRoute', () => {
       packagePolicyUpdate,
       packagePolicyCreate,
       agentPolicyNames = [{ id: 'agent-policy-b', name: 'policy-b' }],
+      getByIds,
     }: {
       packagePolicyUpdate: jest.Mock;
       packagePolicyCreate: jest.Mock;
       agentPolicyNames?: Array<{ id: string; name: string }>;
+      getByIds?: jest.Mock;
     }) => {
       const packagePolicies = [
         osqueryPackagePolicy({
@@ -546,7 +548,9 @@ describe('createPackRoute', () => {
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
           getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds: jest.fn().mockResolvedValue(agentPolicyNames),
+            getByIds:
+              getByIds ??
+              jest.fn().mockResolvedValue(agentPolicyNames),
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
@@ -677,6 +681,39 @@ describe('createPackRoute', () => {
       // not over-reach and the shared policy is still written.
       expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
       expect(packagePolicyUpdate.mock.calls[0][2]).toBe('shared-pp-ab');
+      expect(
+        (mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning
+      ).toBeUndefined();
+    });
+
+    it('still succeeds when targeting warning name lookup fails (best-effort)', async () => {
+      // Pack SO + Fleet write are already committed; a failed warning must not
+      // turn a successful create into an error response.
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicyCreate = jest.fn();
+      const getByIds = jest
+        .fn()
+        // First call: resolve targeted agent policies for SO references.
+        .mockResolvedValueOnce([{ id: 'agent-policy-a', name: 'Agent Policy A' }])
+        // Second call: buildTargetingWarning name lookup — fail.
+        .mockRejectedValueOnce(new Error('agent policy lookup failed'));
+
+      setupOverBroadRoute({ packagePolicyUpdate, packagePolicyCreate, getByIds });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: true,
+          policy_ids: ['agent-policy-a'],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
       expect(
         (mockResponse.ok.mock.calls[0][0]?.body as any).data.targeting_warning
       ).toBeUndefined();

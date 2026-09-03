@@ -11,9 +11,10 @@ import type { PackQueryInput } from './utils';
 
 /** Warning emitted when a targeted pack's integration is shared with agent
  * policies that are outside the pack's target set. Additive and optional —
- * absent when targeting is fully enforced. */
+ * absent when every resolved package policy covers only targeted agent policies
+ * (or when the pack is global / disabled). Delivery itself is not narrowed. */
 export interface TargetingWarning {
-  /** Human-readable names of the agent policies that would receive the pack
+  /** Human-readable names of the agent policies that also receive the pack
    * despite not being in the pack's target set. */
   untargeted_agent_policy_names: string[];
 }
@@ -40,7 +41,7 @@ export interface PackResponseData {
   interval?: number;
   /** Pack-level RRULE schedule — present only when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
-  /** Present only when targeting cannot be fully enforced. */
+  /** Present when a shared integration delivers the pack beyond the target set. */
   targeting_warning?: TargetingWarning;
 }
 

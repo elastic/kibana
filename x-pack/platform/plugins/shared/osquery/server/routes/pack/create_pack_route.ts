@@ -91,6 +91,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
           : DEFAULT_SPACE_ID;
 
+        const logger = osqueryContext.logFactory.get('pack');
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -99,7 +100,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const currentUser = await getUserInfo({
           request,
           security: (startPlugins as StartPlugins).security,
-          logger: osqueryContext.logFactory.get('pack'),
+          logger,
         });
         const username = currentUser?.username ?? undefined;
         const profileUid = currentUser?.profile_uid ?? undefined;
@@ -236,21 +237,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const isGlobalPack = Boolean(shards?.['*']);
 
-        // Always group write targets so both the write path and warning detector
-        // operate on the same resolved topology.
+        // Group + classify write targets once so the Fleet write path and the
+        // targeting warning operate on the same resolved topology.
         const packagePolicyWriteTargets = policiesList.length
           ? groupAgentPolicyIdsByPackagePolicy(policiesList, packagePolicies)
           : new Map<string, { packagePolicy: PackagePolicy; agentPolicyIds: string[] }>();
-
-        // Detect over-broad package policies (targeting warning). Only meaningful
-        // when the pack is actually written below — a disabled pack reaches no
-        // agent policy at all, so warning about over-reach would be misleading
-        // (and would cost a needless agent-policy lookup).
         const scopeResults = resolvePackTargetScope(packagePolicyWriteTargets, isGlobalPack);
-        const targetingWarning: TargetingWarning | undefined =
-          enabled && policiesList.length
-            ? await buildTargetingWarning(scopeResults, agentPolicyService, spaceScopedClient)
-            : undefined;
 
         if (enabled && policiesList.length) {
           const packKey = makePackKey(packSO.attributes.name, spaceId);
@@ -278,7 +270,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           // declares `multiple: false`, so Fleet permits only ONE osquery
           // package policy per agent policy and a dedicated "targeted" policy
           // can never be created for an agent policy that already has one.
-          // Delivery therefore stays over-broad; `targeting_warning` above tells
+          // Delivery therefore stays over-broad; `targeting_warning` below tells
           // the user which agent policies also receive the pack, and how to
           // separate them. See #285994.
           await Promise.all(
@@ -304,6 +296,27 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               )
             )
           );
+        }
+
+        // Detect over-broad package policies (targeting warning). Only meaningful
+        // when the pack was actually written above — a disabled pack reaches no
+        // agent policy at all, so warning about over-reach would be misleading.
+        // Advisory only: the pack SO and Fleet writes are already committed, so a
+        // failed name lookup must not turn a successful create into an error
+        // (same best-effort contract as update_pack_route).
+        let targetingWarning: TargetingWarning | undefined;
+        if (enabled && policiesList.length) {
+          try {
+            targetingWarning = await buildTargetingWarning(
+              scopeResults,
+              agentPolicyService,
+              spaceScopedClient
+            );
+          } catch (err) {
+            logger.warn(
+              `Failed to build targeting warning for pack ${packSO.id}: ${(err as Error).message}`
+            );
+          }
         }
 
         set(packSO, 'attributes.queries', queries);
