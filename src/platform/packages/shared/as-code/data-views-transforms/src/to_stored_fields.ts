@@ -33,7 +33,7 @@ import {
   type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
 import { camelCase } from 'lodash';
-import { isDurationFormat, isHistogramFormat, camelCaseKeys } from './utils';
+import { isDurationFormat, isHistogramFormat, camelCaseKeys, isColorFormat } from './utils';
 
 export function isRuntimeField(
   field: AsCodeFieldSettings | AsCodeSavedFieldSettings
@@ -139,6 +139,22 @@ export function toStoredFieldFormatParams(
       params: {
         pattern: format.params.pattern,
       },
+    };
+  }
+
+  if (isColorFormat(format)) {
+    const params = camelCaseKeys(format.params);
+
+    if (format.params.field_type !== 'boolean') {
+      return params;
+    }
+
+    return {
+      ...params,
+      colors: format.params.colors.map((color) => ({
+        ...color,
+        boolean: color.boolean.toString(),
+      })),
     };
   }
 

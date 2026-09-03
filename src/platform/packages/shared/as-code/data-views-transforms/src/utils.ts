@@ -11,8 +11,13 @@ import type {
   AsCodeDurationFormat,
   AsCodeFieldFormat,
   AsCodeHistogramFormat,
+  AsCodeColorFormat,
 } from '@kbn/as-code-data-views-schema';
 import { camelCase, isPlainObject, snakeCase } from 'lodash';
+
+export function isColorFormat(format: AsCodeFieldFormat): format is AsCodeColorFormat {
+  return format.type === 'color';
+}
 
 export function isDurationFormat(format: AsCodeFieldFormat): format is AsCodeDurationFormat {
   return format.type === 'duration';

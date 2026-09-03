@@ -58,7 +58,6 @@ describe('toStoredRuntimeFields', () => {
       describe.each([
         { fieldType: 'string', extraData: { regex: '.*' } },
         { fieldType: 'number', extraData: { range: '1:10' } },
-        { fieldType: 'boolean', extraData: { boolean: true } },
       ])('when the field type is $fieldType', ({ fieldType, extraData }) => {
         it('returns the params', () => {
           const result = toStoredFieldFormatParams({
@@ -71,6 +70,22 @@ describe('toStoredRuntimeFields', () => {
           expect(result).toEqual({
             fieldType,
             colors: [{ text: '#FFFFFF', background: '#000000', ...extraData }],
+          });
+        });
+      });
+
+      describe.each([true, false])('when the field type is boolean and value is %s', (boolean) => {
+        it('converts the boolean to a string', () => {
+          const result = toStoredFieldFormatParams({
+            type: 'color',
+            params: {
+              field_type: 'boolean',
+              colors: [{ text: '#FFFFFF', background: '#000000', boolean }],
+            },
+          });
+          expect(result).toEqual({
+            fieldType: 'boolean',
+            colors: [{ text: '#FFFFFF', background: '#000000', boolean: boolean.toString() }],
           });
         });
       });

@@ -27,6 +27,7 @@ export type {
   AsCodeFieldFormat,
   AsCodeDurationFormat,
   AsCodeHistogramFormat,
+  AsCodeColorFormat,
   AsCodeDataView,
   AsCodeDataViewReference,
   AsCodeDataViewSpec,
