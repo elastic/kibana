@@ -29,7 +29,7 @@ export const incidentTemplate: ConversationTemplate = {
     assignees: {
       input_type: 'TEXT_ARRAY',
       required: false,
-      description: "List of user's ids that are assigned to the incident.",
+      description: 'List of user ids that are assigned to the incident.',
     },
     verdict: {
       input_type: 'TEXT',
@@ -50,13 +50,13 @@ export const incidentTemplate: ConversationTemplate = {
     },
     close_reason: {
       input_type: 'SELECT',
-      description: 'Whether affected recipients have been notified.',
+      description: 'Reason the incident was closed.',
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
     },
     investigation_ids: {
       input_type: 'TEXT_ARRAY',
-      description: "A list of incident's ids that should be linked to the incident",
+      description: 'A list of investigation ids that should be linked to the incident',
     },
   },
 };

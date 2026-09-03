@@ -29,7 +29,7 @@ export const investigationTemplate: ConversationTemplate = {
     assignees: {
       input_type: 'TEXT_ARRAY',
       required: false,
-      description: "List of user's ids that are assigned to the investigation.",
+      description: 'List of user ids that are assigned to the investigation.',
     },
     verdict: {
       input_type: 'TEXT',
@@ -50,7 +50,7 @@ export const investigationTemplate: ConversationTemplate = {
     },
     close_reason: {
       input_type: 'SELECT',
-      description: 'Whether affected recipients have been notified.',
+      description: 'Reason the investigation was closed.',
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
     },
