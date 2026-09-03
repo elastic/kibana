@@ -18,6 +18,7 @@ import { Settings, TooltipType, Heatmap, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -695,7 +696,7 @@ describe('HeatmapComponent', function () {
       timestampMeta: Datatable['columns'][number]['meta'] = { type: 'date' }
     ): Datatable => ({
       type: 'datatable',
-      meta: { type: 'esql' },
+      meta: { type: ESQL_TABLE_TYPE },
       columns: [
         { id: 'timestamp', name: 'timestamp', meta: timestampMeta },
         { id: 'category', name: 'category', meta: { type: 'string' } },
