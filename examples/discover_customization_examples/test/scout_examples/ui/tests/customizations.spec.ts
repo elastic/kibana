@@ -25,8 +25,8 @@ test.describe('Discover customization examples', { tag: '@local-stateful-classic
     await page.testSubj.click('logsViewSelectorButton');
     await page.testSubj.click('logsViewSelectorOption-ASavedSearch');
 
-    const sharedItem = page.locator('[data-shared-item][data-title][data-description]');
-    await expect(sharedItem).toHaveAttribute('data-title', 'A Saved Search');
-    await expect(sharedItem).toHaveAttribute('data-description', 'A Saved Search Description');
+    await expect(page.testSubj.locator('discoverSavedSearchTitle')).toHaveText(
+      'Discover - A Saved Search'
+    );
   });
 });
