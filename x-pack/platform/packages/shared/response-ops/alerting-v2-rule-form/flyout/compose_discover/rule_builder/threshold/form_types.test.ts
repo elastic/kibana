@@ -12,6 +12,7 @@ import {
   Comparator,
   compareSeverity,
   getSeverityValidationError,
+  normalizeSeverityOrder,
   nextSeverityLevel,
   isMultiSeveritySupported,
   isSeveritySupported,
@@ -227,6 +228,29 @@ describe('severity helpers', () => {
       expect(compareSeverity('low', 'high')).toBeLessThan(0);
       expect(compareSeverity('critical', 'info')).toBeGreaterThan(0);
       expect(compareSeverity('medium', 'medium')).toBe(0);
+    });
+  });
+
+  describe('normalizeSeverityOrder', () => {
+    it('sorts multi levels least-to-most severe (keeps each level threshold)', () => {
+      const result = normalizeSeverityOrder({
+        mode: 'multi',
+        singleLevelSeverity: 'high',
+        levels: [
+          { id: 'a', severity: 'critical', threshold: 0.95 },
+          { id: 'b', severity: 'medium', threshold: 0.9 },
+        ],
+      });
+      expect(result?.levels.map((l) => [l.severity, l.threshold])).toEqual([
+        ['medium', 0.9],
+        ['critical', 0.95],
+      ]);
+    });
+
+    it('leaves single mode and undefined untouched', () => {
+      const single: SeverityConfig = { mode: 'single', singleLevelSeverity: 'high', levels: [] };
+      expect(normalizeSeverityOrder(single)).toBe(single);
+      expect(normalizeSeverityOrder(undefined)).toBeUndefined();
     });
   });
 

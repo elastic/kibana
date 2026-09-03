@@ -338,6 +338,23 @@ export const syncConditionToSeverityThreshold = (
 export const compareSeverity = (a: AlertEventSeverity, b: AlertEventSeverity): number =>
   SEVERITY_LEVELS.indexOf(a) - SEVERITY_LEVELS.indexOf(b);
 
+/**
+ * Sort multi-severity levels least-to-most severe so `levels[0]` is always the
+ * least-severe (fallback) level. ES|QL generation, threshold coupling and the
+ * round-trip parser all rely on this ordering, but the level dropdowns let the
+ * user pick any level per row — normalize on every mutation so the stored order
+ * can never drift from severity order.
+ */
+export const normalizeSeverityOrder = (
+  severity: SeverityConfig | undefined
+): SeverityConfig | undefined => {
+  if (!severity || severity.mode !== 'multi') return severity;
+  return {
+    ...severity,
+    levels: [...severity.levels].sort((a, b) => compareSeverity(a.severity, b.severity)),
+  };
+};
+
 export type SeverityValidationError =
   | 'invalid_threshold'
   | 'duplicate_level'

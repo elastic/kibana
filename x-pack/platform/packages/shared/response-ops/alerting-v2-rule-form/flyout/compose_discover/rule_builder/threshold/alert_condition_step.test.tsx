@@ -1175,5 +1175,36 @@ describe('RuleBuilderAlertConditionStep', () => {
       expect(next.severity?.levels[0].threshold).toBe(120);
       expect(next.alertConditions[0].threshold).toEqual([120]);
     });
+
+    it('re-normalizes level order when a row is set to an out-of-order severity', () => {
+      const onBuilderStateChange = jest.fn();
+      const builderState = makeBuilderState({
+        severity: {
+          mode: 'multi',
+          singleLevelSeverity: 'high',
+          levels: [
+            { id: 'l1', severity: 'low', threshold: 5 },
+            { id: 'l2', severity: 'medium', threshold: 10 },
+          ],
+        },
+      });
+      render(
+        <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+          <RuleBuilderAlertConditionStep
+            state={createState()}
+            dispatch={dispatch}
+            services={createMockServices()}
+          />
+        </Wrapper>
+      );
+
+      // Change row 0 (low) to critical — the stored array is kept least-to-most severe,
+      // so critical moves to the end and levels[0] stays the least-severe fallback.
+      fireEvent.change(screen.getByTestId('ruleBuilderSeverityLevel-0'), {
+        target: { value: 'critical' },
+      });
+      const next = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+      expect(next.severity?.levels.map((l) => l.severity)).toEqual(['medium', 'critical']);
+    });
   });
 });

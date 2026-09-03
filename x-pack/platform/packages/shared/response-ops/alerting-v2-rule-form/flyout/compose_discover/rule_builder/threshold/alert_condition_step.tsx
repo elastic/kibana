@@ -60,6 +60,7 @@ import {
   generateId,
   getAvailableMetricLabels,
   reconcileSeverity,
+  normalizeSeverityOrder,
   syncSeverityToConditionThreshold,
   syncConditionToSeverityThreshold,
 } from './form_types';
@@ -446,12 +447,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const updateSeverity = useCallback(
     (severity: ThresholdFormValues['severity']) => {
+      // Keep levels in severity order (levels[0] = least severe) so ES|QL generation and
+      // the threshold coupling below never depend on the row order the user happened to edit in.
+      const normalized = normalizeSeverityOrder(severity);
       // Keep the (single) condition threshold in sync with the lowest multi-severity level.
       const alertConditions = syncConditionToSeverityThreshold(
         thresholdValues.alertConditions,
-        severity
+        normalized
       );
-      onThresholdValuesChange({ ...thresholdValues, alertConditions, severity });
+      onThresholdValuesChange({ ...thresholdValues, alertConditions, severity: normalized });
     },
     [thresholdValues, onThresholdValuesChange]
   );
