@@ -551,52 +551,38 @@ const rejectEmitNoDataStrategy = {
  * Shared create-rule cross-field refinements. Applied to both the single-create
  * body and each bulk-create item so the two write paths cannot drift.
  */
-interface CreateRuleRefineInput {
-  kind?: string;
-  state_transition?: unknown;
-  query?: { format?: string; recovery?: unknown } & QueryWithOptionalNoData;
-  recovery_strategy?: RecoveryStrategy | null;
-  no_data_strategy?: NoDataStrategy | null;
-}
-
-const asCreateRuleRefineInput = (data: unknown): CreateRuleRefineInput =>
-  data as CreateRuleRefineInput;
-
 const applyCreateRuleRefinements = <T extends z.ZodObject<z.ZodRawShape>>(schema: T) =>
   schema
-    .refine((data) => isStateTransitionAllowed(asCreateRuleRefineInput(data)), {
+    .refine(isStateTransitionAllowed, {
       message: 'state_transition is only allowed when kind is "alert".',
       path: ['state_transition'],
     })
-    .refine((data) => isSignalUsingStandaloneFormat(asCreateRuleRefineInput(data)), {
+    .refine(isSignalUsingStandaloneFormat, {
       message: 'kind "signal" requires query.format "standalone".',
       path: ['query', 'format'],
     })
-    .refine((data) => isSignalQueryBreachOnly(asCreateRuleRefineInput(data)), {
+    .refine(isSignalQueryBreachOnly, {
       message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
       path: ['recovery_strategy'],
     })
-    .refine((data) => isRecoveryQueryConsistentWithStrategy(asCreateRuleRefineInput(data)), {
+    .refine(isRecoveryQueryConsistentWithStrategy, {
       message: 'query.recovery is only allowed when recovery_strategy is "query".',
       path: ['query', 'recovery'],
     })
-    .refine((data) => isRecoveryQueryProvidedForStrategy(asCreateRuleRefineInput(data)), {
+    .refine(isRecoveryQueryProvidedForStrategy, {
       message: 'query.recovery is required when recovery_strategy is "query".',
       path: ['query', 'recovery'],
     })
-    .refine((data) => isNoDataQueryConsistentWithStrategy(asCreateRuleRefineInput(data)), {
+    .refine(isNoDataQueryConsistentWithStrategy, {
       message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
       path: ['query', 'no_data'],
     })
-    .refine((data) => isNoDataQueryProvidedForStrategy(asCreateRuleRefineInput(data)), {
+    .refine(isNoDataQueryProvidedForStrategy, {
       message:
         'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
       path: ['query', 'no_data'],
     })
-    .refine(
-      (data) => isNoDataStrategyNotEmit(asCreateRuleRefineInput(data)),
-      rejectEmitNoDataStrategy
-    );
+    .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export const createRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
   id: 'alerting_new_rule',
