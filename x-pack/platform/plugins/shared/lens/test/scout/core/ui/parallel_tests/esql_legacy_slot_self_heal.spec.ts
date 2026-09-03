@@ -7,7 +7,7 @@
 
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { applyLensInlineEditorAndWaitClosed, test, testData } from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const DASHBOARD_ID = 'esql-legacy-slot-self-heal-dashboard';
 const PANEL_INDEX = 'esql-legacy-slot-panel';
@@ -112,104 +112,113 @@ const getDashboardAttributes = () => ({
   ]),
 });
 
-test.describe(
+spaceTest.describe(
   'Lens legacy dual-written ES|QL slot self-heal (by-value inline editing)',
   { tag: '@local-stateful-classic' },
   () => {
-    test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH);
+    spaceTest.beforeAll(async ({ kbnClient, scoutSpace }) => {
       await kbnClient.savedObjects.create({
         type: 'dashboard',
         id: DASHBOARD_ID,
+        space: scoutSpace.id,
         overwrite: true,
         attributes: getDashboardAttributes(),
       });
-      await uiSettings.set({
+      await scoutSpace.uiSettings.set({
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
-      await kbnClient.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    test('renders the layer query, self-heals the stale slot on save, and survives re-open', async ({
-      pageObjects,
-      page,
-      kbnClient,
-    }) => {
-      const { dashboard, lens } = pageObjects;
-      const codeEditor = new KibanaCodeEditorWrapper(page);
+    spaceTest(
+      'renders the layer query, self-heals the stale slot on save, and survives re-open',
+      async ({ pageObjects, page, kbnClient, scoutSpace }) => {
+        const { dashboard, lens } = pageObjects;
+        const codeEditor = new KibanaCodeEditorWrapper(page);
 
-      await test.step('open the dashboard: legacy by-value panel renders', async () => {
-        await dashboard.openDashboardWithIdInEditMode(DASHBOARD_ID);
-        await dashboard.waitForRenderComplete();
-      });
-
-      await test.step('inline flyout seeds from the layer query, not the stale slot', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(LAYER_QUERY);
-      });
-
-      await test.step('edit the query, apply, and save the dashboard', async () => {
-        await codeEditor.setCodeEditorValue(UPDATED_QUERY);
-        const runButton = page.testSubj.locator('ESQLEditor-run-query-button');
-        await expect(runButton).toBeEnabled();
-        await runButton.click();
-        await dashboard.waitForRenderComplete();
-        await applyLensInlineEditorAndWaitClosed({ lens });
-        // the applied edit reaches the dashboard's unsaved-changes state
-        // asynchronously; quick-saving earlier snapshots the pre-edit panel.
-        // In edit mode the dirty marker is the save button's notification dot.
-        const unsavedDot = page.testSubj.locator('split-button-notification-indicator');
-        await expect(unsavedDot).toBeVisible();
-        await dashboard.clickQuickSave();
-        await expect(unsavedDot).toBeHidden();
-      });
-
-      await test.step('full page reload: flyout seeds from the saved layer query', async () => {
-        // the dashboard backup service restores unsaved panel state from
-        // sessionStorage on reload — clear it (and localStorage) so the
-        // flyout content can only come from the persisted saved object
-        await page.evaluate(() => {
-          window.sessionStorage.clear();
-          window.localStorage.clear();
+        await spaceTest.step('open the dashboard: legacy by-value panel renders', async () => {
+          await dashboard.openDashboardWithIdInEditMode(DASHBOARD_ID);
+          await dashboard.waitForRenderComplete();
         });
-        await page.reload();
-        await dashboard.waitForRenderComplete();
-        // clearing storage also dropped the view-mode backup — the dashboard
-        // reloads in view mode, so re-enter edit mode for the panel action
-        await dashboard.ensureEditMode();
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(UPDATED_QUERY);
-      });
 
-      await test.step('persisted panel: stale slot copy did not survive the save', async () => {
-        const { attributes } = await kbnClient.savedObjects.get<{ panelsJSON: string }>({
-          type: 'dashboard',
-          id: DASHBOARD_ID,
+        await spaceTest.step(
+          'inline flyout seeds from the layer query, not the stale slot',
+          async () => {
+            await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+            await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(LAYER_QUERY);
+          }
+        );
+
+        await spaceTest.step('edit the query, apply, and save the dashboard', async () => {
+          await codeEditor.setCodeEditorValue(UPDATED_QUERY);
+          const runButton = page.testSubj.locator('ESQLEditor-run-query-button');
+          await expect(runButton).toBeEnabled();
+          await runButton.click();
+          await dashboard.waitForRenderComplete();
+          await applyLensInlineEditorAndWaitClosed({ lens });
+          // the applied edit reaches the dashboard's unsaved-changes state
+          // asynchronously; quick-saving earlier snapshots the pre-edit panel.
+          // In edit mode the dirty marker is the save button's notification dot.
+          const unsavedDot = page.testSubj.locator('split-button-notification-indicator');
+          await expect(unsavedDot).toBeVisible();
+          await dashboard.clickQuickSave();
+          await expect(unsavedDot).toBeHidden();
         });
-        // the stale aggregate copy must never survive a save
-        expect(attributes.panelsJSON).not.toContain(STALE_SLOT_QUERY);
 
-        // two-outcome contract for the persisted slot: absent (slot removed,
-        // or panel stored in API format without a slot) or a refreshed mirror
-        // of the authoritative layer query (mixed-version compat write, see
-        // `withLegacyAggregateQuerySlot`) — never anything else
-        const [panel] = JSON.parse(attributes.panelsJSON) as Array<{
-          embeddableConfig?: { attributes?: { state?: { query?: { esql?: unknown } } } };
-        }>;
-        const slotEsql = panel?.embeddableConfig?.attributes?.state?.query?.esql;
-        expect([undefined, UPDATED_QUERY]).toContain(slotEsql);
-      });
-    });
+        await spaceTest.step(
+          'full page reload: flyout seeds from the saved layer query',
+          async () => {
+            // the dashboard backup service restores unsaved panel state from
+            // sessionStorage on reload — clear it (and localStorage) so the
+            // flyout content can only come from the persisted saved object
+            await page.evaluate(() => {
+              window.sessionStorage.clear();
+              window.localStorage.clear();
+            });
+            await page.reload();
+            await dashboard.waitForRenderComplete();
+            // clearing storage also dropped the view-mode backup — the dashboard
+            // reloads in view mode, so re-enter edit mode for the panel action
+            await dashboard.ensureEditMode();
+            await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+            await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+            await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(UPDATED_QUERY);
+          }
+        );
+
+        await spaceTest.step(
+          'persisted panel: stale slot copy did not survive the save',
+          async () => {
+            const { attributes } = await kbnClient.savedObjects.get<{ panelsJSON: string }>({
+              type: 'dashboard',
+              id: DASHBOARD_ID,
+              space: scoutSpace.id,
+            });
+            // the stale aggregate copy must never survive a save
+            expect(attributes.panelsJSON).not.toContain(STALE_SLOT_QUERY);
+
+            // two-outcome contract for the persisted slot: absent (slot removed,
+            // or panel stored in API format without a slot) or a refreshed mirror
+            // of the authoritative layer query (mixed-version compat write, see
+            // `withLegacyAggregateQuerySlot`) — never anything else
+            const [panel] = JSON.parse(attributes.panelsJSON) as Array<{
+              embeddableConfig?: { attributes?: { state?: { query?: { esql?: unknown } } } };
+            }>;
+            const slotEsql = panel?.embeddableConfig?.attributes?.state?.query?.esql;
+            expect([undefined, UPDATED_QUERY]).toContain(slotEsql);
+          }
+        );
+      }
+    );
   }
 );

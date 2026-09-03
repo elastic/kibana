@@ -58,7 +58,7 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          'lens.apiFormat': false,
+          'lens.apiFormat': null,
         },
       });
       await uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
