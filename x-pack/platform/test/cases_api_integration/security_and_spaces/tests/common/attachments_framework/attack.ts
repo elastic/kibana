@@ -11,6 +11,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
   AttachmentRequestV2,
@@ -205,6 +206,14 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       /**
+       * `security.alert` attachments are persisted as plain `alert` attachments, so a list read
+       * back from the case reports them under the V1 type while a bulk-create response echoes the
+       * V2 type. Accept either so the helpers below work on both.
+       */
+      const isAlertAttachment = ({ type }: Attachment): boolean =>
+        type === SECURITY_ALERT_ATTACHMENT_TYPE || type === AttachmentType.alert;
+
+      /**
        * The rule the removal prompt applies, restated here so the assertions below are driven by
        * it rather than by hand-picked ids: an alert attachment goes with the attack only when
        * every alert it references is currently in that attack *and* is not claimed by another
@@ -223,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         return attachments
-          .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+          .filter(isAlertAttachment)
           .filter(({ attachmentId, alertId }) => {
             const ids = toIds(alertId ?? attachmentId);
             return (
@@ -329,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // Attack A is gone, so the shared alert is no longer claimed by anyone but B.
         const afterFirstRemoval = await readAttachments(caseId);
         const remainingAlertAttachmentIds = afterFirstRemoval
-          .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+          .filter(isAlertAttachment)
           .map(({ id }) => id);
 
         await bulkDeleteAttachments({
