@@ -9,9 +9,13 @@ import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { OptionalToolTip } from './optional_tooltip';
+
+export const reservedBadgeLabel = i18n.translate('xpack.security.management.reservedBadge', {
+  defaultMessage: 'Reserved',
+});
 
 interface Props {
   'data-test-subj'?: string;
@@ -22,7 +26,7 @@ export const ReservedBadge = (props: Props) => {
   return (
     <OptionalToolTip tooltipContent={props.tooltipContent}>
       <EuiBadge data-test-subj={props['data-test-subj']} color="primary">
-        <FormattedMessage id="xpack.security.management.reservedBadge" defaultMessage="Reserved" />
+        {reservedBadgeLabel}
       </EuiBadge>
     </OptionalToolTip>
   );

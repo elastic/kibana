@@ -1448,6 +1448,7 @@ x-pack/solutions/security/plugins/elastic_assistant @elastic/security-threat-hun
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
+x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/pnd @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution

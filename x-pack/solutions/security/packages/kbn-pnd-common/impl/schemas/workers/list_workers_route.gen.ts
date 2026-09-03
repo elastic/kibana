@@ -16,11 +16,11 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { WatchWorker } from '../components/watch_settings.gen';
+import { Worker } from '../components/watch_settings.gen';
 
 export const ListWorkersResponse = lazySchema(() =>
   z.object({
-    workers: z.array(WatchWorker),
+    workers: z.array(Worker),
   })
 );
 export type ListWorkersResponse = z.infer<typeof ListWorkersResponse>;
