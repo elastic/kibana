@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/274792
+issues:
+- https://github.com/elastic/kibana/issues/265849
+type: breaking-change
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Alerting and reporting
+- Dashboards and visualizations
+title: Change Dashboards and Visualizations APIs to use short-hand duration units
+description: Changes expected types for `to` and `from` used for Lens visualization API configuration. Change is behind the `asCode.useGASchemas` feature flag which will be enabled by default and disabled for existing API users.

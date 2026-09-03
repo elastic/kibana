@@ -16,12 +16,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { useShouldRenderInfraMlCpsUi } from '../../../hooks/use_infra_ml_cps';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import type { TimeRange } from '../../../../common/time/time_range';
 import {
   CategoryJobNoticesSection,
   JobStoppedCallout,
 } from '../../../components/logging/log_analysis_job_status';
+import { JobProjectScopes } from '../../../components/logging/log_analysis_project_scope';
 import { AnalyzeInMlButton } from '../../../components/logging/log_analysis_results';
 import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
@@ -215,6 +217,8 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
     },
   });
 
+  const shouldRenderCpsUi = useShouldRenderInfraMlCpsUi();
+
   return (
     <ViewLogInContextProvider
       logViewReference={{ type: 'log-view-reference', logViewId }}
@@ -239,14 +243,21 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <DatasetsSelector
-                  availableDatasets={logEntryCategoryDatasets}
-                  isLoading={isLoadingLogEntryCategoryDatasets}
-                  onChangeDatasetSelection={setCategoryQueryDatasets}
-                  selectedDatasets={categoryQueryDatasets}
-                />
-              </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+                {shouldRenderCpsUi !== false && (
+                  <EuiFlexItem grow={false}>
+                    <JobProjectScopes jobs={[{ projectRouting }]} />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <DatasetsSelector
+                    availableDatasets={logEntryCategoryDatasets}
+                    isLoading={isLoadingLogEntryCategoryDatasets}
+                    onChangeDatasetSelection={setCategoryQueryDatasets}
+                    selectedDatasets={categoryQueryDatasets}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
                   start={selectedTimeRange.startTime}
