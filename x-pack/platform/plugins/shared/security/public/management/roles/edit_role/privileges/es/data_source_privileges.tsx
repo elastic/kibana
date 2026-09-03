@@ -59,6 +59,30 @@ const ensureGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege => {
   );
 };
 
+const updateGlobalWithDataSourcePrivileges = (
+  currentGlobal: Role['elasticsearch']['global'],
+  nextDataSourcePrivileges: RoleDataSourcePrivilege[],
+  fallbackGlobal: estypes.SecurityGlobalPrivilege
+): Role['elasticsearch']['global'] => {
+  if (!currentGlobal) {
+    return { ...fallbackGlobal, data_source: nextDataSourcePrivileges };
+  }
+
+  if (!Array.isArray(currentGlobal)) {
+    return { ...currentGlobal, data_source: nextDataSourcePrivileges };
+  }
+
+  const existingIndex = currentGlobal.findIndex((entry) => entry.data_source != null);
+  const writeIndex = existingIndex >= 0 ? existingIndex : 0;
+
+  return currentGlobal.map((entry, index) => {
+    if (index !== writeIndex) {
+      return entry;
+    }
+    return { ...entry, data_source: nextDataSourcePrivileges };
+  });
+};
+
 export const DataSourcePrivileges = ({
   role,
   indexPatterns,
@@ -82,17 +106,11 @@ export const DataSourcePrivileges = ({
         const next = [...current];
         next[privilegeIndex] = updatedPrivilege;
 
-        const global = ensureGlobalPrivilege(role);
-        const currentGlobal = role.elasticsearch.global;
-        const nextGlobal = Array.isArray(currentGlobal)
-          ? currentGlobal.map((entry, index) => {
-              if (index !== 0 && entry.data_source == null) {
-                return entry;
-              }
-              const shouldWrite = entry.data_source != null || index === 0;
-              return shouldWrite ? { ...entry, data_source: next } : entry;
-            })
-          : { ...global, data_source: next };
+        const nextGlobal = updateGlobalWithDataSourcePrivileges(
+          role.elasticsearch.global,
+          next,
+          ensureGlobalPrivilege(role)
+        );
 
         onChange({
           ...role,
@@ -113,17 +131,11 @@ export const DataSourcePrivileges = ({
         const next = [...current];
         next.splice(privilegeIndex, 1);
 
-        const global = ensureGlobalPrivilege(role);
-        const currentGlobal = role.elasticsearch.global;
-        const nextGlobal = Array.isArray(currentGlobal)
-          ? currentGlobal.map((entry, index) => {
-              if (index !== 0 && entry.data_source == null) {
-                return entry;
-              }
-              const shouldWrite = entry.data_source != null || index === 0;
-              return shouldWrite ? { ...entry, data_source: next } : entry;
-            })
-          : { ...global, data_source: next };
+        const nextGlobal = updateGlobalWithDataSourcePrivileges(
+          role.elasticsearch.global,
+          next,
+          ensureGlobalPrivilege(role)
+        );
 
         onChange({
           ...role,

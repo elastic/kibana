@@ -79,6 +79,55 @@ test('it renders data source privileges section when `isDataFederationEnabled` i
   expect(wrapper.find('DataSourcePrivileges')).toHaveLength(1);
 });
 
+test('addDataSourcePrivilege preserves other global entries when global is an array', () => {
+  const props = getProps();
+  const roleWithArrayGlobal = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: [
+        {
+          application: { manage: { applications: ['kibana-*'] } },
+          profile: {},
+          role: {},
+        },
+        {
+          application: { manage: { applications: [] } },
+          data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+        },
+      ],
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges
+      {...props}
+      role={roleWithArrayGlobal as any}
+      isDataFederationEnabled
+    />
+  );
+
+  // Invoke the handler wired to the child component
+  wrapper.find('DataSourcePrivileges').prop('onAdd')();
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithArrayGlobal,
+    elasticsearch: {
+      ...roleWithArrayGlobal.elasticsearch,
+      global: [
+        (roleWithArrayGlobal.elasticsearch.global as any)[0],
+        {
+          ...(roleWithArrayGlobal.elasticsearch.global as any)[1],
+          data_source: [
+            { names: ['acme_*'], privileges: ['read'] },
+            { names: [], privileges: [] },
+          ],
+        },
+      ],
+    },
+  });
+});
+
 test('it does not render remote index privileges section by default', () => {
   const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
   expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
