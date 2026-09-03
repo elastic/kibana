@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { SpaceId } from '@kbn/core-spaces-common';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
@@ -58,7 +59,7 @@ export interface IEventLogService {
 
 export interface IEventLogClientService {
   getClient(request: KibanaRequest): IEventLogClient;
-  getClientWithRequestInSpace(request: KibanaRequest, spaceId: string): IEventLogClient;
+  getClientWithRequestInSpace(request: KibanaRequest, spaceId: SpaceId): IEventLogClient;
 }
 
 export interface IEventLogClient {

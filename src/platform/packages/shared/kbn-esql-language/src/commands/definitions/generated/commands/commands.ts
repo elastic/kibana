@@ -9,7 +9,9 @@
 
 // This file is auto-generated. Do not edit it manually.
 
-export const commandsMetadata: Record<string, unknown> = {
+import type { ElasticsearchCommandDefinition } from '../../../../..';
+
+export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {
   change_point: {
     type: 'command',
     name: 'change_point',
@@ -55,10 +57,6 @@ export const commandsMetadata: Record<string, unknown> = {
   inline_stats: {
     type: 'command',
     name: 'inline_stats',
-  },
-  insist: {
-    type: 'command',
-    name: 'insist',
   },
   ip_location: {
     type: 'command',
@@ -773,7 +771,6 @@ export enum EsqlCommandNames {
   GROK = 'grok',
   HIGHLIGHT = 'highlight',
   INLINE_STATS = 'inline_stats',
-  INSIST = 'insist',
   IP_LOCATION = 'ip_location',
   KEEP = 'keep',
   LIMIT = 'limit',

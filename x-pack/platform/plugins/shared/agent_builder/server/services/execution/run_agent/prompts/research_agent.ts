@@ -111,7 +111,7 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions, aiIndices },
+  configuration: { instructions: customInstructions, aiIndexCatalog },
   outputSchema,
   skills,
   spaceId,
@@ -198,7 +198,11 @@ ${
 
 ${conversationMetadataSection}
 
-${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
+${getAiIndicesInstructions({
+  enabled: experimentalFeatures.aiIndices,
+  catalog: aiIndexCatalog ?? [],
+  spaceId,
+})}
 
 ## INSTRUCTIONS
 
