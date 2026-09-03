@@ -1170,5 +1170,32 @@ describe('When the add exception modal is opened', () => {
 
       expect(screen.getByTestId('addExceptionConfirmButton')).not.toBeDisabled();
     });
+
+    it('does not render the reason select until a close option is checked', async () => {
+      renderFlyout();
+      await fillRequiredFields();
+
+      expect(screen.queryByTestId('exceptionFlyoutCloseReasonSelect')).not.toBeInTheDocument();
+    });
+
+    it('renders the reason select once the single alert close option is checked', async () => {
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('closeAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('exceptionFlyoutCloseReasonSelect')).toBeInTheDocument();
+    });
+
+    it('keeps the selected reason while a close option stays checked', async () => {
+      renderFlyout();
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByTestId('closeAlertOnAddExceptionCheckbox'));
+      fireEvent.click(screen.getByTestId('exceptionFlyoutCloseReasonSelect'));
+      fireEvent.click(await screen.findByRole('option', { name: 'Duplicate' }));
+
+      expect(screen.getByTestId('exceptionFlyoutCloseReasonSelect')).toHaveTextContent('Duplicate');
+    });
   });
 });

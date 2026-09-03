@@ -836,6 +836,28 @@ describe('When the edit exception modal is opened', () => {
 
       expect(screen.getByTestId('editExceptionConfirmButton')).not.toBeDisabled();
     });
+
+    it('does not render the closing reason select until bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: alertsIndexStub, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      await renderFlyoutAndSetItems();
+
+      expect(screen.queryByTestId('exceptionFlyoutCloseReasonSelect')).not.toBeInTheDocument();
+    });
+
+    it('renders the closing reason select once bulk close is checked', async () => {
+      mockUseFetchIndex.mockImplementation(() => [
+        false,
+        { indexPatterns: alertsIndexStub, dataView: { id: 'stub-alerts-data-view' } },
+      ]);
+      await renderFlyoutAndSetItems();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(screen.getByTestId('exceptionFlyoutCloseReasonSelect')).toBeInTheDocument();
+    });
   });
 
   describe('when user does not have alerts privileges', () => {

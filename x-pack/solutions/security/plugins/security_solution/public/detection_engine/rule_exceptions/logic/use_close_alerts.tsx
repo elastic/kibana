@@ -14,6 +14,7 @@ import {
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../utils/get_es_query_filter';
 import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
+import type { AlertClosingReason } from '../../../../common/types';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
@@ -34,15 +35,18 @@ import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actio
  *   for any fields referenced by the exception that aren't natively mapped on
  *   the alerts index (e.g. runtime fields on the rule's source index). The
  *   server synthesizes `_source`-reading runtime mappings from this map.
+ * @param reason - optional structured reason recorded on every alert closed by
+ *   this call. When omitted, alerts are closed without a reason.
  *
  */
-export type AddOrUpdateExceptionItemsFunc = (
-  ruleStaticIds: string[],
-  exceptionItems: ExceptionListItemSchema[],
-  alertIdToClose?: string,
-  bulkCloseIndex?: IndexPatternArray,
-  runtimeFields?: Record<string, RuntimeFieldType>
-) => Promise<void>;
+export type AddOrUpdateExceptionItemsFunc = (params: {
+  ruleStaticIds: string[];
+  exceptionItems: ExceptionListItemSchema[];
+  alertIdToClose?: string;
+  bulkCloseIndex?: IndexPatternArray;
+  runtimeFields?: Record<string, RuntimeFieldType>;
+  reason?: AlertClosingReason;
+}) => Promise<void>;
 
 export type ReturnUseCloseAlertsFromExceptions = [boolean, AddOrUpdateExceptionItemsFunc | null];
 
@@ -59,13 +63,14 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async (
+    const onUpdateAlerts: AddOrUpdateExceptionItemsFunc = async ({
       ruleStaticIds,
       exceptionItems,
       alertIdToClose,
       bulkCloseIndex,
-      runtimeFields
-    ) => {
+      runtimeFields,
+      reason,
+    }) => {
       try {
         setIsLoading(true);
         let alertIdUpdated = 0;
@@ -76,6 +81,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             signalIds: [alertIdToClose],
             status: 'closed',
             signal: abortCtrl.signal,
+            reason,
           });
           alertIdUpdated = alertIdResponse.updated;
         }
@@ -103,6 +109,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             status: 'closed',
             signal: abortCtrl.signal,
             runtimeFields,
+            reason,
           });
           bulkUpdated = bulkResponse.updated;
           bulkConflicts = bulkResponse.version_conflicts ?? 0;
