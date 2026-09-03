@@ -32,7 +32,9 @@ const {
 describe(
   'Blocklist',
   {
-    tags: ['@ess', '@serverless', '@serverlessQA'],
+    // ESS coverage is in Scout. This spec stays on serverless + serverlessQA
+    // until Scout is part of the Kibana QA quality gate.
+    tags: ['@serverless', '@serverlessQA'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
