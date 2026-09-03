@@ -47,6 +47,18 @@ triggers:
           description: >-
             Document ids of the harvested false positives. The agent retrieves these by
             id to ground the diagnosis; they are tagged once the gate resolves.
+        recent_alert_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 640
+          description: >-
+            Newest-first `timestamp|id` sort keys for the most recent harvested false
+            positives. The diagnosis prompt strips the timestamp prefix so the agent
+            examines the latest evidence. Optional: without it the prompt falls back
+            to the first 100 of alert_ids in their arbitrary harvest order.
         analysis_window_days:
           type: integer
           minimum: 1
@@ -129,8 +141,12 @@ steps:
 
         {{ inputs.fp_count }} alerts from this rule were closed as false positives
         during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
-        {%- if inputs.alert_ids.size > 100 %} (first 100 of {{ inputs.alert_ids.size }}){%- endif %}:
+        {%- if inputs.alert_ids.size > 100 %} ({% if inputs.recent_alert_ids %}newest{% else %}first{% endif %} 100 of {{ inputs.alert_ids.size }}){%- endif %}:
+        {%- if inputs.recent_alert_ids %}
+        [{% for key in inputs.recent_alert_ids %}"{{ key | split: '|' | last }}"{% unless forloop.last %}, {% endunless %}{% endfor %}]
+        {%- else %}
         ["{{ inputs.alert_ids | slice: 0, 100 | join: '", "' }}"]
+        {%- endif %}
 
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
@@ -283,8 +299,8 @@ steps:
         {{ inputs.fp_count }} alerts were closed as false positives in the last
         {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
         {% if inputs.alert_ids.size > 100 %}
-        The diagnosis examined 100 of the {{ inputs.alert_ids.size }} harvested alert
-        documents. This decision tags all {{ inputs.alert_ids.size }} harvested alerts.
+        The diagnosis examined the {% if inputs.recent_alert_ids %}newest{% else %}first{% endif %} 100 of the {{ inputs.alert_ids.size }} harvested
+        alert documents. This decision tags all {{ inputs.alert_ids.size }} harvested alerts.
         {% endif %}
 
         {{ steps.diagnose_rule.output.structured_output.summary }}

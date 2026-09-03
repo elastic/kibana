@@ -918,9 +918,28 @@ describe('project watch', () => {
 
         expect(columns).toContain('alert_ids');
         expect(launchInputs.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
+        expect(columns).toContain('recent_alert_ids');
+        expect(launchInputs.recent_alert_ids).toContain(
+          `foreach.item.${columns.indexOf('recent_alert_ids')}`
+        );
         for (const step of tagSteps) {
           expect(step.with?.alert_ids).toBe('${{ inputs.alert_ids }}');
         }
+      });
+
+      // TOP sorts by the collected value, so plain _id collection has no meaningful
+      // order. The diagnosis must see the newest evidence: the harvest collects
+      // sortable `timestamp|id` keys and the prompt strips the prefix.
+      it('hands the diagnosis the newest false positives, ids only', () => {
+        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const message = String(diagnose.with?.message);
+
+        expect(harvestQuery).toContain(
+          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)'
+        );
+        expect(harvestQuery).toContain('recent_alert_ids = TOP(fp_recency_key');
+        expect(message).toContain('inputs.recent_alert_ids');
+        expect(message).toContain("split: '|' | last");
       });
 
       // The gates live in the proposal children (one execution = one resume slot),
