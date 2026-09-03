@@ -42,6 +42,18 @@ positive, and the reason `public/**` is excluded rather than merely deprioritize
 re-exports. A PR touching only these needs no new tests. Treating a sample-data edit as
 an enforcing change is the most common false positive; check the path before commenting.
 
+## Reading the pull request
+
+Read files **from the pull request diff**, not from the branch you are checked out on.
+This workflow runs on `pull_request_target`, which checks out the *base* branch — every
+file the pull request adds is therefore absent from disk. A `File not found` for a path
+listed as `added` in the pull request means the file exists only in the diff; read it
+there and continue. Do not treat it as a missing file, and do not conclude the change is
+untested because you could not open its test.
+
+Only consult the checked-out tree for files the pull request does **not** touch — the
+fingerprint guard table and sibling step types you are comparing against.
+
 ## Critical checks (do these first)
 
 ### 1. YAML behavior change without a fingerprint guard
@@ -132,6 +144,78 @@ Do not demand an eval suite for a typo fix.
    the finding when the honest answer is no.
 4. Prefer one specific finding with the exact missing assertion over a list of general
    coverage advice.
+
+## Every comment must tell the author what to do next
+
+A finding that names a gap without naming the fix is a complaint. Each comment carries
+three things: the untested behavior, the concrete remedy, and what "done" looks like.
+Point at the existing example in the repository rather than describing code in prose —
+authors trust a working file more than a reviewer's snippet.
+
+Use the remedy that matches the finding.
+
+**Finding 1 — YAML behavior change with no fingerprint row.** The guard's fingerprint
+table is in `managed_workflow_definitions.test.ts` (the `it.each` block titled *requires
+bumping … together with the imported YAML fingerprint*). The fix is two edits in one
+change: bump `version` in the workflow's module under `definitions/pnd/`, and add or
+update that workflow's `'<version>:<hash>'` row in the table. Copy the shape of the
+existing `PND_WATCH_*` rows. Done means: revert only the YAML edit locally and the guard
+test goes red.
+
+This one has a consequence worth stating every time, because it is not obvious and it is
+not cosmetic — **without the version bump, already-installed spaces keep running the old
+workflow.** The edit ships to new installs only. Say that; do not just ask for a bump.
+
+**Finding 2 — thin or absent test delta.** Do not ask for "more tests". Name the single
+behavior you believe is unbitten and the assertion that would bite it. For a new watch,
+the highest-value first test is usually the one asserting the gate refuses, not the one
+asserting the happy path succeeds. Done means: invert that one branch and a named test
+fails.
+
+**Finding 3 — gate or guard with no failing-side test.** Ask for one table-driven test
+enumerating every rejection reason, not five near-duplicate cases. Point at the sibling
+step's test file as the pattern. Done means: each rejection reason has a distinct
+assertion, so deleting any single reason turns exactly one case red.
+
+**Finding 4 — fail-closed claim not traced.** Ask for the *absent* case specifically:
+a test where the intermediate segment is missing entirely, not merely false. Done means:
+the test fails if the evaluator ever starts returning true for a missing path.
+
+**Finding 5 — cluster-writing step without full payload assertions.** Ask for assertions
+on the fields the step removes or defaults, and on space scoping. `create_rule_step`'s
+unit test is the reference for payload shape. Done means: changing a defaulted field in
+the handler turns a test red.
+
+**Finding 6 — worker or LLM behavior change.** A unit test cannot judge whether a worker
+behaves correctly, and asking for one wastes the author's time. Say plainly whether an
+eval suite covers this worker today. If none exists, that is a gap to record — link the
+tracking issue rather than blocking the PR on building a suite from scratch.
+
+## When an eval is the right answer, and when it is not
+
+Reviewers get this wrong in both directions, so be explicit in the comment about which
+one you are asking for.
+
+**A unit or integration test is right** when the behavior is deterministic: a gate that
+refuses, a payload field that is dropped, a version that must move with a YAML edit, a
+rejection reason. Anything you can invert and watch go red belongs here. Most findings
+this skill produces are in this category — ask for the test, not an eval.
+
+**An eval is right** when the behavior is model-mediated and has no single correct output:
+what a worker decides to do, which skill it selects, whether a prompt change degrades
+judgement, whether a tuning proposal is sound. These cannot be pinned by assertion, only
+measured across a set of examples.
+
+What an eval must cover to be worth adding, in this order: the decision the worker is
+actually trusted to make; at least one example where the correct behavior is to *refuse
+or escalate* rather than act; and a baseline recorded before the change so a later
+regression is visible as a movement, not just a number. An eval with only happy-path
+examples measures nothing useful — it will stay green through exactly the failures that
+matter.
+
+Say plainly when no suite exists. "No eval covers this worker's tuning decision today"
+is a more useful review comment than a vague request for coverage, and it is the sentence
+that gets a gap tracked instead of forgotten.
 
 ## What not to say
 

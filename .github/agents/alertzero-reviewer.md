@@ -88,6 +88,10 @@ must use a collapsible section to keep the PR readable. Structure:
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp which behavior is unprotected and whether to act on it without expanding.
 - **Details:** everything else — the specific uncovered branch, the mutation that would ship green, the suggested assertion. Always end the details block with the `#alertzero` feedback line shown above.
 - Name the concrete missing assertion. "Add more tests" is not a finding.
+- **Every comment ends with the fix, not just the gap.** State the untested behavior, the concrete remedy, and what "done" looks like — the mutation that should turn a test red once the author is finished. A developer should be able to act on the comment without asking a follow-up question. The skill's remediation section gives the exact remedy for each finding type; use it rather than improvising advice.
+- **Point at a working example in the repository** — the guard table's existing `PND_WATCH_*` rows, a sibling step's test file — instead of writing a code snippet in prose.
+- **Be explicit about test versus eval.** Ask for a unit or integration test when the behavior is deterministic and can be inverted. Ask for an eval only when the behavior is model-mediated and has no single correct output. Saying which one you mean, and why, is part of the finding.
+- When a change alters a shipping workflow's YAML, always state the consequence: without the paired `version` bump, already-installed spaces keep running the old workflow. Do not merely request the bump.
 - When a gap is demonstrable by mutation, say so explicitly: *deleting this branch leaves the suite green.* That is the strongest form of this feedback and the reason the review exists.
 
 If the finding genuinely fits in one line (e.g. a workflow missing from the fingerprint
