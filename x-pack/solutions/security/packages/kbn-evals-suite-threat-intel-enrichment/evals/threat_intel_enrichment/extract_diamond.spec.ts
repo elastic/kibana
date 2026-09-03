@@ -11,18 +11,27 @@ import { extractDiamondDataset } from '../../src/datasets/extract_diamond_datase
 import {
   createDiamondNoIocLeakEvaluator,
   createSignalCountEvaluator,
+  withMajorityVote,
 } from '../../src/evaluators/extract_diamond_evaluators';
 
 /**
  * LLM-judge criteria for Diamond prose quality and the vertex-separation
  * constraints the prompt enforces. Complements the deterministic CODE checks
  * (signal count, literal-IOC leak).
+ *
+ * Each criterion is atomic and, where it concerns literal indicators or named
+ * organisations, explicitly scopes the judgment to the *summary text only* and
+ * states that the source article is expected to contain those. The judge
+ * otherwise conflates the article containing an IOC with the summary containing
+ * it and fails a summary that is actually generic (its own reason then
+ * contradicts its verdict). Judged over several samples by majority vote.
  */
 const DIAMOND_CRITERIA = [
-  'The infrastructure vertex summary characterises infrastructure by behaviour and pattern. It does not name a specific literal IP address, domain, URL, or email address.',
-  'Every vertex marked HIGH or PARTIAL has a non-empty summary grounded in facts stated in the article; vertices with no support are marked NONE.',
-  'The adversary vertex describes actor or operator behaviour and does not describe victim system characteristics.',
-  'The victim vertex characterises the compromised systems or organisations generically and does not name a specific victim organisation.',
+  'Judging only the text of the infrastructure vertex summary, not the source article: the summary does not contain a literal IP address, domain name, URL, or email address. The source article is expected to contain such indicators; a generic behavioural description (for example "a Russian-geolocated IP address" or "two distinct source hosts") satisfies this criterion.',
+  'Every vertex whose signal is HIGH or PARTIAL has a non-empty summary, and any vertex the article does not support is marked NONE with an empty summary.',
+  'Each statement in every non-empty vertex summary is grounded in facts stated in the source article.',
+  'The adversary vertex summary describes attacker or operator behaviour and does not describe the victim system or organisation characteristics.',
+  'Judging only the text of the victim vertex summary, not the source article: it characterises the compromised systems or organisation generically and does not contain a specific named victim organisation. The source article is expected to name the victim; generic role or environment descriptions satisfy this criterion.',
 ];
 
 evaluate.describe(
@@ -50,7 +59,7 @@ evaluate.describe(
           [
             createSignalCountEvaluator(),
             createDiamondNoIocLeakEvaluator(),
-            evaluators.criteria(DIAMOND_CRITERIA),
+            withMajorityVote(evaluators.criteria(DIAMOND_CRITERIA), 3),
           ]
         );
       }

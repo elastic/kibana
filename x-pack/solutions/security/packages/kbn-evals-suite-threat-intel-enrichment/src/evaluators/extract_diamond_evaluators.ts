@@ -67,3 +67,84 @@ export const createDiamondNoIocLeakEvaluator = (): Evaluator<
     };
   },
 });
+
+interface CriterionVerdict {
+  id: string;
+  result: 'PASS' | 'FAIL' | 'N/A';
+  reason?: string | null;
+  weight?: number;
+}
+
+const isPassing = (result: CriterionVerdict['result']): boolean =>
+  // N/A counts toward the score in the base criteria evaluator (a criterion that
+  // does not apply is not a failure), so mirror that here when voting.
+  result === 'PASS' || result === 'N/A';
+
+/**
+ * Wrap the base LLM `criteria` evaluator so each criterion is judged over several
+ * independent judge samples and decided by majority vote, then recompute the
+ * aggregate score from the voted verdicts.
+ *
+ * The judge is noisy on conjunctive/ambiguous criteria: a single pass can flip a
+ * verdict even when its own stated reason agrees the criterion holds. Voting
+ * across `samples` passes damps that per-run flip without re-running the task
+ * (the model under test is called once; only the judge repeats).
+ */
+export const withMajorityVote = (base: Evaluator, samples = 3): Evaluator => ({
+  name: base.name,
+  kind: base.kind,
+  direction: base.direction,
+  evaluate: async (args) => {
+    const runs = [];
+    for (let i = 0; i < samples; i++) {
+      runs.push(await base.evaluate(args));
+    }
+
+    // Collect each criterion's verdicts across all samples, keyed by criterion id.
+    const byId = new Map<
+      string,
+      { weight: number; results: CriterionVerdict['result'][]; reason?: string | null }
+    >();
+    for (const run of runs) {
+      const criteria = (run.metadata?.criteria ?? []) as CriterionVerdict[];
+      for (const c of criteria) {
+        const entry = byId.get(c.id) ?? { weight: c.weight ?? 1, results: [], reason: c.reason };
+        entry.results.push(c.result);
+        if (c.result === 'FAIL' && c.reason) entry.reason = c.reason;
+        byId.set(c.id, entry);
+      }
+    }
+
+    if (byId.size === 0) {
+      // Nothing to vote on (e.g. no criteria configured); fall back to the last run.
+      return runs[runs.length - 1];
+    }
+
+    let earned = 0;
+    let total = 0;
+    const votedCriteria = Array.from(byId.entries()).map(([id, { weight, results, reason }]) => {
+      const passes = results.filter(isPassing).length;
+      const majorityPass = passes * 2 >= results.length; // ties resolve to PASS
+      total += weight;
+      if (majorityPass) earned += weight;
+      const result: CriterionVerdict['result'] = majorityPass ? 'PASS' : 'FAIL';
+      return {
+        id,
+        result,
+        weight,
+        votes: `${passes}/${results.length} pass`,
+        reason: reason ?? null,
+      };
+    });
+
+    const score = total === 0 ? 0 : earned / total;
+    return {
+      score,
+      label: `majority_${samples}x`,
+      explanation: votedCriteria
+        .map((c) => `"${c.id}" ${c.result} (${c.votes})${c.reason ? `: ${c.reason}` : ''}`)
+        .join('\n'),
+      metadata: { samples, criteria: votedCriteria },
+    };
+  },
+});
