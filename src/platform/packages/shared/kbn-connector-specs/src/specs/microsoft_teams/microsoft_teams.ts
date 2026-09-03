@@ -491,6 +491,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-get
     getUser: {
       isTool: true,
+      scope: 'read',
       description:
         "Retrieve a Microsoft Teams / Azure AD user by their user ID (GUID) or user principal name (UPN, e.g. alice@contoso.com). Returns the user's id, displayName, mail, and userPrincipalName. Use the returned id with createChat or listChats (userId parameter). Works with all auth types.",
       input: GetUserInputSchema,
