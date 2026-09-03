@@ -71,7 +71,10 @@ const lazyPageWithContainer = (
     React.createElement(
       React.Suspense,
       { fallback: null },
-      React.createElement(LazyComponent, { ...props, container: _alertingV2Container! })
+      React.createElement(LazyComponent, {
+        ...props,
+        container: props.coreStart.injection.getContainer(),
+      })
     );
 };
 
@@ -82,8 +85,6 @@ export type {
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
-
-let _alertingV2Container: import('inversify').Container | undefined;
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -122,7 +123,6 @@ const pluginModule = new ContainerModule(({ bind }) => {
     ),
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
-    _alertingV2Container = container;
     const getStartServices = container.get(CoreSetup('getStartServices'));
     const workflowsExtensionsSetup = container.get(
       PluginSetup('workflowsExtensions')

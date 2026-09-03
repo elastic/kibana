@@ -12,11 +12,8 @@ import { Context } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MemoryRouter } from 'react-router-dom';
-import { EuiPageSection } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -59,11 +56,7 @@ const StandardProviders = ({
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
         <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <I18nProvider>
-            <MemoryRouter>
-              <EuiPageSection paddingSize="m">{children}</EuiPageSection>
-            </MemoryRouter>
-          </I18nProvider>
+          <I18nProvider>{children}</I18nProvider>
         </BreadcrumbProvider>
       </QueryClientProvider>
     </Context.Provider>
@@ -131,13 +124,7 @@ export const AlertingV2EpisodesPage = ({
         <QueryClientProvider client={queryClient}>
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
-              <MemoryRouter>
-                <EuiPageSection paddingSize="m">
-                  <RedirectAppLinks coreStart={coreStart}>
-                    <EpisodesApp />
-                  </RedirectAppLinks>
-                </EuiPageSection>
-              </MemoryRouter>
+              <EpisodesApp />
             </I18nProvider>
           </BreadcrumbProvider>
         </QueryClientProvider>
