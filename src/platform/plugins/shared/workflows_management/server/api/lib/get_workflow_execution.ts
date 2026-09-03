@@ -77,7 +77,7 @@ export const getWorkflowExecution = async ({
           throw error;
         }
         logger.warn(
-          `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
+          `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process`
         );
       }
     }

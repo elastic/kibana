@@ -140,7 +140,9 @@ describe('getExecutionStepExecutions', () => {
 
     expect(result.results).toEqual([]);
     expect(result.total).toBe(2);
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Failed to get workflow execution exec-1 with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=1, size=100)'
+    );
   });
 
   it('falls back to search when stepExecutionIds are missing', async () => {
@@ -183,7 +185,9 @@ describe('getExecutionStepExecutions', () => {
     });
 
     expect(result).toEqual({ results: [], total: 0, page: 1, size: 100 });
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Failed to get workflow execution exec-1 with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=1, size=100)'
+    );
   });
 
   it('returns an empty page when the execution is missing or in another space', async () => {

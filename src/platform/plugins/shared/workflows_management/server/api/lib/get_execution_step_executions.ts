@@ -20,9 +20,8 @@ import { searchStepExecutions } from './search_step_executions';
 
 const PARENT_SOURCE_INCLUDES: Array<keyof EsWorkflowExecution> = ['spaceId', 'stepExecutionIds'];
 
-const STEP_METADATA_SOURCE_EXCLUDES: NonNullable<
-  GetStepExecutionsByIdsOptions['sourceExcludes']
-> = ['input', 'output'];
+const STEP_METADATA_SOURCE_EXCLUDES: NonNullable<GetStepExecutionsByIdsOptions['sourceExcludes']> =
+  ['input', 'output'];
 
 export interface GetExecutionStepExecutionsParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -85,7 +84,7 @@ export const getExecutionStepExecutions = async ({
         throw error;
       }
       logger.warn(
-        `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
+        `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=${page}, size=${size})`
       );
       return emptyPage(page, size, total);
     }
@@ -106,7 +105,7 @@ export const getExecutionStepExecutions = async ({
       throw error;
     }
     logger.warn(
-      `Failed to get workflow execution with steps: Elasticsearch response exceeded the maximum size Kibana can process`
+      `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process (page=${page}, size=${size})`
     );
     return emptyPage(page, size);
   }
