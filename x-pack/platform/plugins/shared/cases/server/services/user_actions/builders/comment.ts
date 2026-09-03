@@ -7,8 +7,10 @@
 
 import { uniqBy } from 'lodash';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
+import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { toLegacyAttachmentRequest } from '../../../common/attachments';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { buildUnifiedAttachmentSORefs, getAttachmentSOExtractor } from '../../so_references';
@@ -17,22 +19,29 @@ import { getPastTenseVerb } from './audit_logger_utils';
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): UserActionEvent {
     const savedObjectType = args.savedObjectType ?? CASE_COMMENT_SAVED_OBJECT;
-    const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
-    const { transformedFields, references: refsWithExternalRefId } =
-      soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
-        data: args.payload.attachment,
-      });
-
     const action = args.action ?? UserActionActions.update;
+
+    // User actions persist the legacy shape (audit trail predates unified).
+    // Project first so hybrid types extract the legacy reference name.
+    const legacyPayload = toLegacyAttachmentRequest(
+      args.payload.attachment as unknown as AttachmentRequestV2
+    );
+
+    const soExtractor = getAttachmentSOExtractor(legacyPayload);
+    const { transformedFields: legacyValue, references: refsWithExternalRefId } =
+      soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
+        data: legacyPayload,
+      });
 
     const commentUserAction = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'comment',
-      value: transformedFields,
+      value: legacyValue,
       type: UserActionTypes.comment,
     });
-    const unifiedReferences = buildUnifiedAttachmentSORefs(args.payload.attachment);
+    // No-op for hybrid types; only unified-only attachments need this.
+    const unifiedReferences = buildUnifiedAttachmentSORefs(legacyPayload);
 
     const parameters = {
       ...commentUserAction,

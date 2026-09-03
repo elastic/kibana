@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('mixed legacy + unified events on the same case', () => {
-      it('reads a legacy `event` through the v2 read path (legacy type preserved in legacy mode)', async () => {
+      it('reads a legacy `event` through the v2 read path (public GET rebuilds the v1 wire shape)', async () => {
         await seedEvents(['legacy-event-1'], LEGACY_EVENTS_INDEX);
         const postedCase = await createCase(supertest, postCaseReq);
         const legacyCase = await createComment({
@@ -291,8 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
           commentId: legacyId,
         });
 
-        // The legacy `/comments/{id}` route reads with mode=legacy, which preserves
-        // the legacy `event` type; unified projection only happens on mode=unified reads.
+        // Public GET /comments rebuilds the v1 `event` wire shape at the route.
         expect(fetched.type).to.be('event');
       });
 

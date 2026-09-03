@@ -14,6 +14,10 @@ describe('getCaseRoute', () => {
   const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
   const sub = { unsubscribe: jest.fn() };
 
+  beforeEach(() => {
+    casesClientMock.attachments.addFile.mockResolvedValue({ comments: [] } as never);
+  });
+
   afterEach(() => jest.clearAllMocks());
 
   it('extracts the file metadata from hapi as expected', async () => {

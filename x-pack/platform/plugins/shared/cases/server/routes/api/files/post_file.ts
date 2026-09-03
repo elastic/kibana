@@ -21,6 +21,7 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyCaseResponse } from '../../../common/attachments';
 
 export const postFileRoute = createCasesRoute({
   method: 'post',
@@ -65,13 +66,15 @@ export const postFileRoute = createCasesRoute({
         mimeType = mime.lookup(parsedFilename.ext.toLowerCase()) || undefined;
       }
 
-      const res: caseDomainV1.Case = await casesClient.attachments.addFile({
-        file,
-        filename: filename ?? '',
-        mimeType,
-        caseId: request.params.case_id,
-        $abort,
-      });
+      const res: caseDomainV1.Case = toLegacyCaseResponse(
+        await casesClient.attachments.addFile({
+          file,
+          filename: filename ?? '',
+          mimeType,
+          caseId: request.params.case_id,
+          $abort,
+        })
+      );
 
       return response.ok({
         body: res,

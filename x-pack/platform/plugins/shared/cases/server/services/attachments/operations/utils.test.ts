@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { assertLegacyWriteableAttachmentType, transformAttributesForMode } from './utils';
+import { assertLegacyWriteableAttachmentType, toUnifiedAttributes } from './utils';
 import { isUnifiedOnlyAttachment } from '../../type_guards';
 import { createUserAttachment } from '../test_utils';
 import {
   AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
-  LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
@@ -20,7 +19,6 @@ import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../../../common/constants';
-import { AttachmentType } from '../../../../common/types/domain';
 
 const basicAttributes = {
   created_at: '2026-05-29T00:00:00.000Z',
@@ -37,7 +35,7 @@ const createByValueLens = () =>
     owner: 'cases',
     data: { state: { visualization: {} } },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
 // A saved-object reference lens carries `metadata.soType` and, optionally, a
 // snapshot of the referenced SO under `data.attributes`. It has no by-value
@@ -50,7 +48,7 @@ const createByReferenceLens = (withSnapshot = false) =>
     metadata: { title: 'My lens', soType: LENS_SO_TYPE },
     ...(withSnapshot ? { data: { attributes: { title: 'My lens' } } } : {}),
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
 // A unified file attachment is SO-backed (`metadata.soType`) but, unlike Lens-by-ref,
 // maps cleanly onto a legacy externalReference, so it must stay legacy-writeable.
@@ -66,7 +64,7 @@ const createUnifiedFile = () =>
       ],
     },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
 // Every unified type that maps onto a legacy externalReference. These are SO-backed
 // (`metadata.soType`) yet always have a legacy form, so they are never unified-only.
@@ -84,7 +82,7 @@ const createExternalReference = (type: string) =>
     attachmentId: `${type}-1`,
     metadata: { soType: type },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
 // Every persistable-state subtype. Their legacy form is by-value, so a by-value
 // instance is legacy-writeable (only a by-reference instance would be unified-only).
@@ -100,12 +98,12 @@ const createByValuePersistableState = (type: string) =>
     owner: 'cases',
     data: { state: {} },
     ...basicAttributes,
-  } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes']);
+  } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
-describe('transformAttributesForMode', () => {
-  it('maps legacy user comments to unified schema when mode is unified', () => {
+describe('toUnifiedAttributes', () => {
+  it('maps legacy user comments to unified schema', () => {
     const attrs = createUserAttachment().attributes;
-    const out = transformAttributesForMode({ attributes: attrs, mode: 'unified' });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('comment');
@@ -113,19 +111,7 @@ describe('transformAttributesForMode', () => {
     }
   });
 
-  it('keeps legacy shape when mode is legacy', () => {
-    const attrs = createUserAttachment().attributes;
-    const out = transformAttributesForMode({ attributes: attrs, mode: 'legacy' });
-    expect(out.isUnified).toBe(false);
-    if (!out.isUnified) {
-      expect(out.attributes.type).toBe('user');
-      expect(out.attributes.comment).toBe(attrs.comment);
-    }
-  });
-
-  // Net-new unified types (no v1 equivalent) must stay in the unified branch even when
-  // the caller asks for legacy mode, otherwise the legacy decoder rejects them.
-  it('keeps unified-only types (security.timeline) on the unified branch in legacy mode', () => {
+  it('keeps unified-only types (security.timeline) on the unified branch', () => {
     const attrs = {
       type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
       attachmentId: 'timeline-1',
@@ -137,9 +123,9 @@ describe('transformAttributesForMode', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
-    } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
+    } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
 
-    const out = transformAttributesForMode({ attributes: attrs, mode: 'legacy' });
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes).toMatchObject({
@@ -151,10 +137,7 @@ describe('transformAttributesForMode', () => {
     }
   });
 
-  // Unified-only types (dashboard, map, discoverSession) have no v1 equivalent,
-  // so transformAttributesForMode must surface them as unified even when called
-  // with mode=legacy — otherwise the legacy decoder rejects them.
-  it('keeps a unified-only reference payload (dashboard) on the unified branch in legacy mode', () => {
+  it('keeps a unified-only reference payload (dashboard) on the unified branch', () => {
     const attrs = {
       type: 'dashboard',
       owner: 'cases',
@@ -166,15 +149,15 @@ describe('transformAttributesForMode', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
-    } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
-    const out = transformAttributesForMode({ attributes: attrs, mode: 'legacy' });
+    } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('dashboard');
     }
   });
 
-  it('keeps a unified-only reference payload (discoverSession) on the unified branch in legacy mode', () => {
+  it('keeps a unified-only reference payload (discoverSession) on the unified branch', () => {
     const attrs = {
       type: 'discoverSession',
       owner: 'cases',
@@ -186,45 +169,37 @@ describe('transformAttributesForMode', () => {
       pushed_by: null,
       updated_at: null,
       updated_by: null,
-    } as unknown as Parameters<typeof transformAttributesForMode>[0]['attributes'];
-    const out = transformAttributesForMode({ attributes: attrs, mode: 'legacy' });
+    } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes'];
+    const out = toUnifiedAttributes({ attributes: attrs, attachmentsEnabled: true });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
       expect(out.attributes.type).toBe('discoverSession');
     }
   });
 
-  // By-value lens keeps a legacy `persistableState` representation, so mode=legacy
-  // must still downgrade it (this is the pre-existing hybrid behavior).
-  it('downgrades by-value lens to legacy persistableState in legacy mode', () => {
-    const out = transformAttributesForMode({ attributes: createByValueLens(), mode: 'legacy' });
-    expect(out.isUnified).toBe(false);
-    if (!out.isUnified) {
-      expect(out.attributes.type).toBe(AttachmentType.persistableState);
-      expect(out.attributes.persistableStateAttachmentTypeId).toBe(LEGACY_LENS_ATTACHMENT_TYPE);
+  it('maps by-value lens to unified schema', () => {
+    const out = toUnifiedAttributes({ attributes: createByValueLens(), attachmentsEnabled: true });
+    expect(out.isUnified).toBe(true);
+    if (out.isUnified) {
+      expect(out.attributes.type).toBe(LENS_ATTACHMENT_TYPE);
     }
   });
 
-  // Files are SO-backed but have a legacy externalReference form, so mode=legacy
-  // must downgrade them rather than keep them unified.
-  it('downgrades a unified file to legacy externalReference in legacy mode', () => {
-    const out = transformAttributesForMode({ attributes: createUnifiedFile(), mode: 'legacy' });
-    expect(out.isUnified).toBe(false);
-    if (!out.isUnified) {
-      expect(out.attributes.type).toBe(AttachmentType.externalReference);
+  it('maps a unified file to unified schema', () => {
+    const out = toUnifiedAttributes({ attributes: createUnifiedFile(), attachmentsEnabled: true });
+    expect(out.isUnified).toBe(true);
+    if (out.isUnified) {
+      expect(out.attributes.type).toBe(FILE_ATTACHMENT_TYPE);
     }
   });
 
-  // A Lens-by-reference instance has no by-value legacy form, so it must stay on
-  // the unified branch even for mode=legacy — otherwise toLegacySchema would
-  // fabricate a bogus persistableState from the snapshot and drop attachmentId.
   it.each([
     ['without a data snapshot', false],
     ['with a data snapshot', true],
-  ])('keeps a Lens-by-reference attachment unified in legacy mode (%s)', (_desc, withSnapshot) => {
-    const out = transformAttributesForMode({
+  ])('keeps a Lens-by-reference attachment unified (%s)', (_desc, withSnapshot) => {
+    const out = toUnifiedAttributes({
       attributes: createByReferenceLens(withSnapshot as boolean),
-      mode: 'legacy',
+      attachmentsEnabled: true,
     });
     expect(out.isUnified).toBe(true);
     if (out.isUnified) {
@@ -234,6 +209,46 @@ describe('transformAttributesForMode', () => {
         metadata: { soType: LENS_SO_TYPE },
       });
     }
+  });
+
+  // `actionsAttachmentTransformer` is asymmetric (see its module docstring): once
+  // folded to `security.endpoint` it never re-emits `actions`. Folding on read
+  // must therefore mirror the write-time FF gate, or byte-clean/FF-off
+  // deployments would silently lose the round trip.
+  describe('legacy `actions` (asymmetric fold, FF-gated)', () => {
+    const createLegacyActions = () =>
+      ({
+        type: 'actions',
+        owner: 'securitySolutionFixture',
+        comment: 'a comment',
+        actions: {
+          type: 'isolate',
+          targets: [{ hostname: 'host-1', endpointId: 'endpoint-1' }],
+        },
+        ...basicAttributes,
+      } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
+
+    it('stays legacy `actions` byte-clean when attachmentsEnabled is false', () => {
+      const out = toUnifiedAttributes({
+        attributes: createLegacyActions(),
+        attachmentsEnabled: false,
+      });
+      expect(out.isUnified).toBe(false);
+      if (!out.isUnified) {
+        expect(out.attributes).toMatchObject({ type: 'actions' });
+      }
+    });
+
+    it('folds to `security.endpoint` when attachmentsEnabled is true', () => {
+      const out = toUnifiedAttributes({
+        attributes: createLegacyActions(),
+        attachmentsEnabled: true,
+      });
+      expect(out.isUnified).toBe(true);
+      if (out.isUnified) {
+        expect(out.attributes.type).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+      }
+    });
   });
 });
 

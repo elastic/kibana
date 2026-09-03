@@ -26,7 +26,6 @@ import {
   UNIFIED_ALERT_TYPES_ARRAY,
   isAlertAttachmentType,
 } from '../../../common/utils/attachments';
-import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
@@ -39,8 +38,9 @@ import {
   LEGACY_FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import {
+  FILE_ATTACHMENT_TYPE,
   PERSISTABLE_ATTACHMENT_TYPES,
-  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
 import {
   getAttachmentSavedObjectType,
@@ -89,7 +89,7 @@ import { isSOError } from '../../common/error';
 import {
   assertLegacyWriteableAttachmentType,
   getTransformerForPatchAttributes,
-  transformAttributesForMode,
+  toUnifiedAttributes,
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
@@ -316,9 +316,8 @@ export class AttachmentService {
    * - Legacy: `persistableState` and `externalReference` rows in
    *   `cases-comments`, EXCLUDING `.files` (file attachments are limited
    *   separately).
-   * - Unified (when the flag is on): persistable-state subtypes plus
-   *   `security.endpoint`, EXCLUDING `file` (matched via the `type` field on
-   *   `cases-attachments`).
+   * - Unified: persistable-state subtypes plus every
+   *   {@link UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP} type except `file`.
    *
    * Files are intentionally excluded on both sides; the request-side
    * `PersistableStateAndExternalReferencesLimiter.countOfItemsInRequest`
@@ -360,10 +359,10 @@ export class AttachmentService {
 
       const unifiedTypesToCount = [
         ...PERSISTABLE_ATTACHMENT_TYPES_ARRAY,
-        SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        // Custom externalReference/persistableState subtypes with no unified
-        // mapping (e.g. FTR `.test` types) are still written to
-        // `cases-attachments` but keep their legacy `type`, so count those too.
+        ...Object.keys(UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP).filter(
+          (type) => type !== FILE_ATTACHMENT_TYPE
+        ),
+        // Unmapped custom subtypes (e.g. FTR `.test`) keep the legacy type name.
         AttachmentType.persistableState,
         AttachmentType.externalReference,
       ];
@@ -1077,10 +1076,8 @@ export class AttachmentService {
 
   public async find({
     options,
-    mode,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
-    mode: AttachmentMode;
   }): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
@@ -1092,14 +1089,16 @@ export class AttachmentService {
       });
 
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentAttributesV2>> = [];
+      const attachmentsEnabled =
+        getAttachmentSavedObjectType(this.context.config) === CASE_ATTACHMENT_SAVED_OBJECT;
 
       for (const so of res.saved_objects) {
         const injectedSo = injectAttachmentSOAttributesFromRefs(
           so as unknown as SavedObject<AttachmentPersistedAttributes>
         ) as unknown as SavedObjectsFindResult<AttachmentAttributesV2>;
-        const transformed = transformAttributesForMode({
+        const transformed = toUnifiedAttributes({
           attributes: injectedSo.attributes,
-          mode,
+          attachmentsEnabled,
         });
         if (transformed.isUnified) {
           const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(

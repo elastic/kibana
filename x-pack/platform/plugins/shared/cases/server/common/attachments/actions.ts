@@ -176,7 +176,7 @@ export const actionsAttachmentTransformer: AttachmentTypeTransformer<
     return isLegacyActionsShape(attachment);
   },
 
-  isUnifiedPayload(_attachment: AttachmentRequestV2): boolean {
+  isUnifiedPayload(_attachment: AttachmentRequestV2): _attachment is UnifiedAttachmentPayload {
     return false;
   },
 
