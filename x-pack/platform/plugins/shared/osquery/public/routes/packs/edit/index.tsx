@@ -59,6 +59,7 @@ const EditPackPageComponent = () => {
   useBreadcrumbs('pack_edit', {
     packId: data?.id ?? '',
     packName: data?.name ?? '',
+    isReadOnly,
   });
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
@@ -232,14 +233,25 @@ const EditPackPageComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiText>
             <h1>
-              <FormattedMessage
-                id="xpack.osquery.editPack.pageTitle"
-                defaultMessage="Edit {queryName}"
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{
-                  queryName: data?.name,
-                }}
-              />
+              {isReadOnly ? (
+                <FormattedMessage
+                  id="xpack.osquery.viewPack.pageTitle"
+                  defaultMessage="View {queryName}"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queryName: data?.name,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.osquery.editPack.pageTitle"
+                  defaultMessage="Edit {queryName}"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queryName: data?.name,
+                  }}
+                />
+              )}
             </h1>
           </EuiText>
         </EuiFlexItem>

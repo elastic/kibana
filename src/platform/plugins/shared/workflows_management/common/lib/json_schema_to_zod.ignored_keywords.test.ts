@@ -26,25 +26,9 @@ import {
  *   yarn test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
  */
 describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
-  // ─── additionalProperties: {schema} ─────────────────────────────────────────
-  // additionalProperties: false IS enforced (see build_fields_zod_validator.test.ts).
-  // The schema-value form requires superRefine to validate extra keys — tracked here.
-  // Same recursive-traversal limitation applies for deeply nested cases.
-  describe('additionalProperties: schema', () => {
-    it('does not validate extra properties against the additionalProperties schema', () => {
-      const schema = convertJsonSchemaToZod({
-        type: 'object',
-        properties: { name: { type: 'string' } },
-        additionalProperties: { type: 'number' },
-      } as JSONSchema7);
-      const result = schema.safeParse({ name: 'Alice', extra: 'not a number' });
-      expect(result.success).toBe(true); // Should be false when implemented
-    });
-  });
-
   // ─── uniqueItems ─────────────────────────────────────────────────────────────
-  // Same limitation as additionalProperties — shallow enrichment only; requires
-  // recursive traversal to handle uniqueItems nested inside object properties.
+  // Shallow enrichment only; requires recursive traversal to handle uniqueItems
+  // nested inside object properties.
   describe('uniqueItems', () => {
     it('does not reject duplicate array items', () => {
       const schema = convertJsonSchemaToZod({
