@@ -204,11 +204,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
 
       if (isInboundIngressConnector(createdConnector)) {
-        const rotated = await rotateIngress(createdConnector.id);
-        setCreatedInboundConnector({
-          ...createdConnector,
-          secrets: { ingestToken: rotated.ingestToken },
-        } as ActionConnector);
+        try {
+          const rotated = await rotateIngress(createdConnector.id);
+          setCreatedInboundConnector({
+            ...createdConnector,
+            secrets: { ingestToken: rotated.ingestToken },
+          } as ActionConnector);
+        } catch {
+          // Danger toast is shown by the rotate hook. Stay on the create form.
+        }
         return;
       }
 
