@@ -29,7 +29,7 @@ export function getUpdatedFrameWithDatasourceState(
     state: newDatasourceState,
     layerId,
     indexPatterns: framePublicAPI.dataViews.indexPatterns,
-    activeData: framePublicAPI.activeData?.[layerId],
+    activeDataTable: framePublicAPI.activeData?.[layerId],
   });
   return {
     ...framePublicAPI,
@@ -59,7 +59,7 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
           state: datasourceState,
           layerId: layer,
           indexPatterns,
-          activeData: activeData?.[layer],
+          activeDataTable: activeData?.[layer],
         });
       });
     });
