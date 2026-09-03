@@ -28,6 +28,10 @@ const backToSelectionLinkText = i18n.translate(
   }
 );
 
+const selectionLinkText = i18n.translate('home.tutorial.directory.selectionLinkText', {
+  defaultMessage: 'Selection',
+});
+
 export function readReturnParamsFromHash(
   hash: string
 ): { returnAppId: string; returnPath: string } | undefined {
@@ -83,6 +87,23 @@ export function getTutorialDirectoryFirstCrumb({
       returned.returnAppId === 'observabilityOnboarding' ? addDataLinkText : previousPageLinkText,
     href: returned.href,
   };
+}
+
+export function getTutorialDirectoryAppHeaderBack({
+  hash,
+  addBasePath,
+  getUrlForApp,
+}: {
+  hash: string;
+  addBasePath: (path: string) => string;
+  getUrlForApp: (appId: string, options: { path: string }) => string;
+}): { href: string; label: string } {
+  const crumb = getTutorialDirectoryFirstCrumb({ hash, addBasePath, getUrlForApp });
+  const returned = getReturnHref({ hash, getUrlForApp });
+  if (returned?.returnAppId === 'observabilityOnboarding') {
+    return { href: crumb.href, label: selectionLinkText };
+  }
+  return { href: crumb.href, label: crumb.text };
 }
 
 export function getTutorialIntroductionBackLink({
