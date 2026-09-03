@@ -98,6 +98,7 @@ export {
 } from './generate_predictive_queries';
 export {
   identifyCodeQueries,
+  shouldPersistCodeIntelligenceQuery,
   type IdentifyCodeQueriesOptions,
   type IdentifyCodeQueriesResult,
   type IdentifyCodeQueriesStatus,

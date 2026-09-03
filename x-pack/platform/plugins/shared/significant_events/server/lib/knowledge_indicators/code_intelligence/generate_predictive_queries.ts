@@ -7,7 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Parser, Walker } from '@elastic/esql';
-import { QUERY_TYPE_MATCH, type StreamQuery } from '@kbn/significant-events-schema';
+import {
+  HIGH_SEVERITY_THRESHOLD,
+  QUERY_TYPE_MATCH,
+  type StreamQuery,
+} from '@kbn/significant-events-schema';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import { CODE_FEATURE_SUBTYPE_SERVICE_NAME } from './constants';
 import type { LogSignature } from './types';
@@ -117,7 +121,14 @@ export function generatePredictiveQueries({
   const seenEsql = new Set<string>();
   const queries: StreamQuery[] = [];
 
+  // Filter signatures before ES|QL generation and batch deduplication. Otherwise
+  // a low/medium log call can claim an ES|QL key and suppress an equivalent
+  // high/critical call encountered later in source order.
   for (const signature of signatures) {
+    if (signature.severity < HIGH_SEVERITY_THRESHOLD) {
+      continue;
+    }
+
     const esql = buildPredictiveEsql({
       samplingSource,
       staticPrefix: signature.staticPrefix,

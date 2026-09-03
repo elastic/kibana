@@ -17,7 +17,7 @@ import {
 import type { KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import { CODE_FEATURE_SUBTYPE_SERVICE_NAME } from './constants';
 import { getCodePredictiveSourceId } from './identify_code_features';
-import { identifyCodeQueries } from './identify_code_queries';
+import { identifyCodeQueries, shouldPersistCodeIntelligenceQuery } from './identify_code_queries';
 import type { StreamSamplingSource } from './link_ingesting_streams';
 
 // The code KI key is the service name; logs land in a separate real stream.
@@ -241,6 +241,35 @@ describe('identifyCodeQueries', () => {
 
     expect(result.streams).toEqual([LOG_SOURCE_ID]);
     expect(bulk).toHaveBeenCalledWith(LOG_SOURCE_ID, expect.any(Array));
+  });
+
+  it.each([
+    ['match', 59, false],
+    ['match', 60, true],
+    ['stats', 79, true],
+    ['stats', 80, true],
+    ['match', undefined, false],
+  ] as const)('retains %s queries only at or above the threshold (%s)', (_type, severity, kept) => {
+    expect(shouldPersistCodeIntelligenceQuery({ severity_score: severity })).toBe(kept);
+  });
+
+  it('does not bulk persist low-severity deterministic logging predictions', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeQueries({
+      serviceName: SERVICE_KEY,
+      repository: REPO,
+      gitSha: 'sha1',
+      spaceId: SPACE_ID,
+      streams,
+      kiClient,
+      loggingChunks: [{ content: 'logger.warn("Payment failed")' }],
+      esClient: createEsClient(true),
+      logger: loggerMock.create(),
+      beforeWrite: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(result.generatedCount).toBe(0);
+    expect(bulk).not.toHaveBeenCalled();
   });
 
   it('de-duplicates against queries that already exist on the logs stream', async () => {

@@ -50,6 +50,7 @@ import { SignificantEventsPausedError } from '../../../../lib/errors/significant
 import {
   identifyCodeFeaturesForService,
   identifyCodeQueries,
+  shouldPersistCodeIntelligenceQuery,
   getCodeFeatureStreamPrefix,
   getCodePredictiveSourceId,
   getCodePredictiveSourceIds,
@@ -1011,9 +1012,12 @@ const identifyOtelSignalsRoute = createServerRoute({
       );
     }
 
+    // Retain only high/critical predictions after classifier scores are final,
+    // before stream deduplication and persistence.
+    const retained = classified.filter(({ query }) => shouldPersistCodeIntelligenceQuery(query));
     let queriesGenerated = 0;
-    const byStream = new Map<string, typeof classified>();
-    for (const candidate of classified) {
+    const byStream = new Map<string, typeof retained>();
+    for (const candidate of retained) {
       const entries = byStream.get(candidate.stream) ?? [];
       entries.push(candidate);
       byStream.set(candidate.stream, entries);
@@ -1047,7 +1051,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     // A prior no-stream run can have persisted message templates. Remove them
     // only after all typed writes succeed, so a transient typed failure retains
     // the fallback coverage for retry.
-    if (classified.length > 0) {
+    if (retained.length > 0) {
       await removeStaleTemplateQueries({
         streams,
         kiClient,

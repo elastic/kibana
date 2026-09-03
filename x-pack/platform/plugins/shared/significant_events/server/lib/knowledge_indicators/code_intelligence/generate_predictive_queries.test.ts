@@ -106,6 +106,21 @@ describe('generatePredictiveQueries', () => {
     expect(query.id).toBeDefined();
   });
 
+  it('retains a high-severity signature when an equivalent warning comes first', () => {
+    const queries = generatePredictiveQueries({
+      serviceName: 'checkoutservice',
+      samplingSource: 'logs.checkout',
+      signatures: [
+        signature({ level: 'warn', severity: 50, message: 'Payment failed for order {}' }),
+        signature({ message: 'Payment failed for order {}' }),
+      ],
+      repository: 'acme/checkout',
+    });
+
+    expect(queries).toHaveLength(1);
+    expect(queries[0]).toMatchObject({ severity_score: 70 });
+  });
+
   it('de-duplicates queries that normalize to the same ES|QL', () => {
     const queries = generatePredictiveQueries({
       serviceName: 'checkoutservice',

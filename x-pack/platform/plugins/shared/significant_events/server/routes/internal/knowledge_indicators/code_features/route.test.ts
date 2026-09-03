@@ -686,7 +686,12 @@ describe('Code Intelligence routes', () => {
   it('does not fall back to message-string queries after a typed write fails', async () => {
     const typedCandidate = {
       stream: defaultTraceSource,
-      query: { id: 'typed-query', esql: { query: 'FROM traces-* | STATS c = COUNT(*)' } },
+      query: {
+        id: 'typed-query',
+        type: 'stats',
+        severity_score: 60,
+        esql: { query: 'FROM traces-* | STATS c = COUNT(*)' },
+      },
     };
     mockExtractOtelSignalsResult.mockResolvedValue({ signals: [], failed: false });
     mockGenerateOtelQueries.mockReturnValue({ gateBypassed: false, queries: [typedCandidate] });
@@ -740,7 +745,12 @@ describe('Code Intelligence routes', () => {
   it('generates predictive typed OTel queries when no typed streams exist yet', async () => {
     const typedCandidate = {
       stream: defaultTraceSource,
-      query: { id: 'typed-query', esql: { query: 'FROM traces-* | STATS c = COUNT(*)' } },
+      query: {
+        id: 'typed-query',
+        type: 'stats',
+        severity_score: 60,
+        esql: { query: 'FROM traces-* | STATS c = COUNT(*)' },
+      },
     };
     mockExtractOtelSignalsResult.mockResolvedValue({
       signals: [{ kind: 'span_name', value: 'checkout', file: 'src/app.ts', line: 1 }],
@@ -808,6 +818,71 @@ describe('Code Intelligence routes', () => {
     expect(mockDiscoverLoggingSites).not.toHaveBeenCalled();
     expect(bulk).toHaveBeenCalledWith(defaultTraceSource, expect.any(Array));
   });
+
+  it.each([59, undefined])(
+    'does not bulk persist OTel classifier output below the threshold (%s)',
+    async (severityScore) => {
+      const typedCandidate = {
+        stream: defaultTraceSource,
+        query: {
+          id: 'typed-query',
+          type: 'stats',
+          severity_score: severityScore,
+          esql: { query: 'FROM traces-* | STATS c = COUNT(*)' },
+        },
+      };
+      mockExtractOtelSignalsResult.mockResolvedValue({
+        signals: [{ kind: 'span_name', value: 'checkout', file: 'src/app.ts', line: 1 }],
+        failed: false,
+      });
+      mockGenerateOtelQueries.mockReturnValue({ gateBypassed: false, queries: [typedCandidate] });
+      mockClassifyOtelSignals.mockResolvedValue([typedCandidate]);
+      mockResolveConnectorForFeature.mockResolvedValue('connector');
+      const bulk = jest.fn().mockResolvedValue(undefined);
+
+      await expect(
+        identifyOtelSignalsRoute.handler({
+          params: {
+            body: {
+              repository: 'repository',
+              gitSha: 'sha',
+              serviceRoot: 'service',
+              name: 'service',
+              language: 'typescript',
+              hasOtel: true,
+              signalCounts: {
+                instrumentation_grpc: 0,
+                instrumentation_http: 0,
+                instrumentation_other: 0,
+                start_span: 1,
+                set_attribute: 0,
+                add_event: 0,
+                record_exception: 0,
+                set_status_error: 0,
+                create_metric: 0,
+              },
+            },
+          },
+          request: {},
+          getSpaceId: jest.fn().mockResolvedValue('default'),
+          getScopedClients: jest.fn().mockResolvedValue({
+            licensing: {},
+            inferenceClient: {},
+            streamDataEsClient: {},
+            streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
+            getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ bulk }),
+          }),
+          server: { core: { featureFlags: enabledFeatureFlags } },
+          logger: {
+            get: jest.fn().mockReturnValue({ info: jest.fn(), warn: jest.fn(), debug: jest.fn() }),
+          },
+          maintenanceService: createMaintenanceService(),
+        } as unknown as IdentifyOtelHandlerParams)
+      ).resolves.toEqual({ status: 'generated', queriesGenerated: 0, otelSignalsFound: 1 });
+
+      expect(bulk).not.toHaveBeenCalled();
+    }
+  );
 
   it('returns a successful no-op when an instrumented service has no actionable OTel signals', async () => {
     mockExtractOtelSignalsResult.mockResolvedValue({ signals: [], failed: false });

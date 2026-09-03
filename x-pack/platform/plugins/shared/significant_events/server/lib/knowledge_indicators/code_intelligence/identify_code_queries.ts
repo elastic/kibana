@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { HIGH_SEVERITY_THRESHOLD, type StreamQuery } from '@kbn/significant-events-schema';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
 import { FALLBACK_LOG_INDEX_PATTERN, FALLBACK_LOG_MESSAGE_FIELD } from './constants';
@@ -35,6 +36,11 @@ export interface IdentifyCodeQueriesResult {
   /** Real ingesting stream(s) the predictive queries were written to. */
   streams?: string[];
 }
+
+/** Keeps only high and critical Code Intelligence query KIs. */
+export const shouldPersistCodeIntelligenceQuery = (
+  query: Pick<StreamQuery, 'severity_score'>
+): boolean => query.severity_score !== undefined && query.severity_score >= HIGH_SEVERITY_THRESHOLD;
 
 export interface IdentifyCodeQueriesOptions {
   /** The code KI key (service name) whose Stage 1 features drive query generation. */
@@ -142,6 +148,10 @@ export async function identifyCodeQueries({
       messageIsText: binding.messageIsText,
     });
 
+    // Retain only high/critical predictions after their final deterministic
+    // classification, before deduplication and persistence.
+    const retainedCandidates = candidates.filter(shouldPersistCodeIntelligenceQuery);
+
     // De-duplicate against queries already on this stream (any source).
     const { [binding.stream]: existingLinks } = await kiClient.getStreamToQueryLinksMap([
       binding.stream,
@@ -149,7 +159,7 @@ export async function identifyCodeQueries({
     const existingEsql = new Set(
       existingLinks.map((link) => normalizeEsqlSafe(link.query.esql.query))
     );
-    const newQueries = candidates.filter(
+    const newQueries = retainedCandidates.filter(
       (query) => !existingEsql.has(normalizeEsqlSafe(query.esql.query))
     );
 
