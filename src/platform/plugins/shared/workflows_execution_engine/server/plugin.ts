@@ -61,6 +61,7 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -102,7 +103,6 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { createIndexes } from '../common';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -147,9 +147,23 @@ export class WorkflowsExecutionEnginePlugin
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
-  private initializePromise?: Promise<void>;
+
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+
+  private dataClientBundle!: DataClientBundle;
+
+  private createScopedRepositories(): {
+    workflowExecutionRepository: WorkflowExecutionRepository;
+    stepExecutionRepository: StepExecutionRepository;
+  } {
+    const workflowExecutionsDataClient = this.dataClientBundle.createWorkflowDataClient();
+    const stepExecutionsDataClient = this.dataClientBundle.createStepDataClient();
+    return {
+      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataClient),
+      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataClient),
+    };
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -172,6 +186,12 @@ export class WorkflowsExecutionEnginePlugin
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
+
+    this.dataClientBundle = createDataClientBundle({
+      source: 'system_index',
+      logger: this.logger,
+    });
+    void this.dataClientBundle.initSetup(core);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -232,7 +252,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -242,9 +261,8 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
-              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createScopedRepositories();
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -284,6 +302,8 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 const runResult = await runWorkflow({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   signal: taskAbortController.signal,
@@ -435,7 +455,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -445,9 +464,8 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
-              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createScopedRepositories();
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -487,6 +505,8 @@ export class WorkflowsExecutionEnginePlugin
 
               try {
                 const { idleTimeoutResumeAt } = await resumeWorkflow({
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   signal: taskAbortController.signal,
@@ -642,7 +662,6 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -654,8 +673,8 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
-              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createScopedRepositories();
 
               let workflowExecutionId: string | undefined;
               try {
@@ -675,6 +694,22 @@ export class WorkflowsExecutionEnginePlugin
                   return {
                     state: taskInstance.state,
                     shouldDeleteTask: true,
+                  };
+                }
+                // Document `enabled` is the source of truth. Skip this tick instead of
+                // shouldDeleteTask: TM delete is unversioned and uses the same deterministic
+                // task id as re-enable, so deleting here can remove a just-rescheduled task.
+                if (!workflow.enabled) {
+                  logger.warn(
+                    `Workflow ${workflowId} is disabled in space ${spaceId}; skipping leftover scheduled run`
+                  );
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_id: workflowId,
+                    space_id: spaceId,
+                    outcome: 'skipped',
+                  });
+                  return {
+                    state: taskInstance.state,
                   };
                 }
                 logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
@@ -846,6 +881,8 @@ export class WorkflowsExecutionEnginePlugin
                     workflowsExecutionEngine,
                     meteringService: this.meteringService,
                     internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                    workflowExecutionRepository,
+                    stepExecutionRepository,
                   });
                 } catch (error) {
                   await markScheduledExecutionFailedAfterTaskError({
@@ -936,12 +973,15 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    void this.dataClientBundle.initStart(coreStart);
+
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
+    const { workflowExecutionRepository, stepExecutionRepository } =
+      this.createScopedRepositories();
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
@@ -1006,8 +1046,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      await this.initialize(coreStart);
-
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
 
       const authenticatedUser = await getAuthenticatedUser(
@@ -1147,6 +1185,8 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
+          workflowExecutionRepository,
+          stepExecutionRepository,
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
           signal: new AbortController().signal, // TODO: We need to think how to pass this properly from outer task
@@ -1232,7 +1272,6 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1414,7 +1453,6 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
 
-      await this.initialize(coreStart);
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
       const spaceId = workflow.spaceId || 'default';
@@ -1475,7 +1513,6 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       await cancelWorkflow({
         workflowExecutionId,
@@ -1491,9 +1528,9 @@ export class WorkflowsExecutionEnginePlugin
       spaceId,
       workflowId,
       schedulingRequest,
+      onCancelled,
     }) => {
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
 
       let searchAfter: estypes.SortResults | undefined;
 
@@ -1514,14 +1551,16 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         outcomes.forEach((outcome, index) => {
-          if (outcome.status === 'rejected') {
-            const executionId = page.results[index];
-            const message =
-              outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
-            this.logger.warn(
-              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
-            );
+          const executionId = page.results[index];
+          if (outcome.status === 'fulfilled') {
+            onCancelled?.(executionId);
+            return;
           }
+          const message =
+            outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+          this.logger.warn(
+            `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+          );
         });
 
         searchAfter = page.nextSearchAfter;
@@ -1537,7 +1576,6 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
 
-      await this.initialize(coreStart);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         executionId,
         spaceId
@@ -1640,6 +1678,7 @@ export class WorkflowsExecutionEnginePlugin
     const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
 
     const triggerEventHandler = new TriggerEventHandler({
+      workflowExecutionRepository,
       coreStart,
       workflowRepository,
       workflowsExtensions: plugins.workflowsExtensions,
@@ -1671,29 +1710,15 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      __internalStorage: {
+        workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),
+        stepExecutionsDataClient: this.dataClientBundle.createStepDataClient(),
+      },
     };
   }
 
-  public stop() {}
-
-  private async initialize(coreStart: CoreStart): Promise<void> {
-    if (!this.initializePromise) {
-      // Clear the cached promise on rejection so a transient failure (e.g. an ES
-      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
-      // callers still share the same attempt; only the *next* call after rejection
-      // gets a fresh `createIndexes` invocation.
-      const attempt = createIndexes({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
-      this.initializePromise = attempt;
-      attempt.catch(() => {
-        if (this.initializePromise === attempt) {
-          this.initializePromise = undefined;
-        }
-      });
-    }
-    await this.initializePromise;
+  public stop() {
+    void this.dataClientBundle.stop();
   }
 
   /**

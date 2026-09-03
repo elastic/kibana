@@ -374,13 +374,10 @@ describe('connectorSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin gates connector reads on saved-object read access for the `action`
-      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
-      // so a regression to a non-existent privilege name fails loudly.
+    it('returns the ai_index:connector/read action', () => {
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        kibana: { privileges: { name: ['ai_index:connector/read'] } },
       });
     });
   });

@@ -50,13 +50,17 @@ describe('generateLeadsTool', () => {
 
   const mockGetStartServices = jest.fn();
   const mockCreateCRUDClient = jest.fn().mockReturnValue({});
+  const mockCreateRelationshipsClient = jest.fn().mockReturnValue({});
   const mockActionsGetAll = jest.fn();
   const mockGetActionsClientWithRequest = jest
     .fn()
     .mockResolvedValue({ getAll: mockActionsGetAll });
 
   const mockStartPlugins = {
-    entityStore: { createCRUDClient: mockCreateCRUDClient },
+    entityStore: {
+      createCRUDClient: mockCreateCRUDClient,
+      createRelationshipsClient: mockCreateRelationshipsClient,
+    },
     inference: {},
     actions: { getActionsClientWithRequest: mockGetActionsClientWithRequest },
   };

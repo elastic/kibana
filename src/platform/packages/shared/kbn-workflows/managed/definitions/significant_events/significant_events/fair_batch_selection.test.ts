@@ -68,7 +68,10 @@ describe('significant events fair batch selection', () => {
     expect(query).toContain('recent_detection_count < ?2');
     expect(query).toContain('suppressed_age_minutes >= ?3');
     expect(query).toContain('severity_score >= ?4');
-    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count');
+    expect(query).toContain(
+      'EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3'
+    );
+    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe');
 
     const queryLines = query?.split('\n') ?? [];
     const suppressionLineIdx = queryLines.findIndex((l: string) =>

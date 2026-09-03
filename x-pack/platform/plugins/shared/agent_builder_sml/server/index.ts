@@ -30,7 +30,7 @@ export type {
   SmlIndexAction,
 } from './services/sml/types';
 
-export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';
+export { kibanaPermissions } from './services/sml/permissions/kibana';
 
 export {
   smlAiIndexDescription,

@@ -17,8 +17,10 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/plugins/shared/nightshift_investigations
 dependsOn:
+  - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/core-http-server'
+  - '@kbn/core-plugins-server'
   - '@kbn/core-spaces-common'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
@@ -28,6 +30,15 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
   - '@kbn/scout'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-common'
+  - '@kbn/logging-mocks'
+  - '@kbn/significant-events-schema'
+  - '@kbn/agent-builder-server'
+  - '@kbn/i18n'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/es-query'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod

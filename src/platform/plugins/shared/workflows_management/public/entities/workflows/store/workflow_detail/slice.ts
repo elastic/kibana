@@ -8,6 +8,7 @@
  */
 
 import { createSlice } from 'redux-toolkit-v1';
+import type { Action } from 'redux-toolkit-v1';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
@@ -39,8 +40,9 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
+  connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,
@@ -124,6 +126,7 @@ const workflowDetailSlice = createSlice({
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+      state.connectorsLoadState = { status: 'ready' };
     },
     setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
       state.workflows = action.payload;
@@ -188,6 +191,28 @@ const workflowDetailSlice = createSlice({
   },
   extraReducers: (builder) => {
     addLoadingStateReducers(builder);
+    builder.addMatcher(
+      (action: Action): action is Action => action.type === 'detail/loadConnectorsThunk/pending',
+      (state) => {
+        state.connectorsLoadState = { status: 'loading' };
+      }
+    );
+    builder.addMatcher(
+      (action: Action): action is Action => action.type === 'detail/loadConnectorsThunk/fulfilled',
+      (state) => {
+        state.connectorsLoadState = { status: 'ready' };
+      }
+    );
+    builder.addMatcher(
+      (action: Action): action is Action & { payload?: unknown } =>
+        action.type === 'detail/loadConnectorsThunk/rejected',
+      (state, action) => {
+        state.connectorsLoadState = {
+          status: 'failed',
+          error: typeof action.payload === 'string' ? action.payload : 'Failed to load connectors',
+        };
+      }
+    );
   },
 });
 

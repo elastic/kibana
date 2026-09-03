@@ -53,14 +53,23 @@ const smlStorageSchemaProperties = {
   user_id: types.keyword({}),
   created_at: types.date({}),
   updated_at: types.date({}),
-  spaces: types.keyword({}),
   permissions: types.object({
     properties: {
       kibana: types.object({
         properties: {
-          privileges: types.object({
+          /**
+           * One element per space, each listing the actions that space requires plus a count of
+           * them.
+           *
+           * Caveat: ES|QL cannot read `nested` leaves (its index resolution filters them out), so
+           * the read path authorizes via a `nested` Query DSL filter pushed into the `_query`
+           * `filter` parameter rather than a WHERE clause or a projected column.
+           */
+          privileges: types.nested({
             properties: {
               name: types.keyword({}),
+              space: types.keyword({}),
+              count: types.long({}),
             },
           }),
         },
