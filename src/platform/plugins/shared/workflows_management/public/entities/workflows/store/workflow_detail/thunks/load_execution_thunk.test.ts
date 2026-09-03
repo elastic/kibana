@@ -12,7 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import { WORKFLOW_EXECUTION_STEPS_POLL_PAGE_SIZE } from './load_execution_step_pages';
 import { loadExecutionThunk } from './load_execution_thunk';
-import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../../../common';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setExecution } from '../slice';
@@ -63,7 +63,7 @@ const mockStepsPage = {
   results: mockExecution.stepExecutions,
   total: 0,
   page: 1,
-  size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+  size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
 };
 
 describe('loadExecutionThunk', () => {
@@ -90,7 +90,7 @@ describe('loadExecutionThunk', () => {
     });
     expect(mockGetExecutionSteps).toHaveBeenCalledWith('exec-1', {
       page: 1,
-      size: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+      size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
     });
     expect(result.type).toBe('detail/loadExecutionThunk/fulfilled');
     expect(result.payload).toEqual(mockExecution);

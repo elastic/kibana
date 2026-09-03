@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadExecutionStepPages } from './load_execution_step_pages';
-import { WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE } from '../../../../../../common';
+import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
@@ -51,7 +51,7 @@ export const loadExecutionThunk = createAsyncThunk<
           fetchPage: (page, size) => api.getExecutionSteps(id, { page, size }),
           cachedSteps,
           cachedTotal,
-          maxSteps: WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE,
+          maxSteps: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
         }),
       ]);
       const response: WorkflowExecutionDto = {
