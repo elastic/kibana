@@ -68,10 +68,7 @@ export const alertsTool = (
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async (
-      { query: nlQuery, isCount, time_window_hours: timeWindowHours },
-      { esClient, modelProvider, spaceId, events }
-    ) => {
+    handler: async ({ query: nlQuery, isCount }, { esClient, modelProvider, spaceId, events }) => {
       // Always use the current space's exact alerts alias. Cross-space patterns such as
       // `.alerts-security.alerts-*` (and prefix wildcards like `-<space>*`) are not accepted
       // because they can return alerts from other spaces.
@@ -107,14 +104,11 @@ export const alertsTool = (
       logger.debug(
         `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${
           isCount ?? false
-        }, timeWindowHours: ${timeWindowHours ?? 'default'}`
+        }`
       );
       const results = await runSearchTool({
         nlQuery: enhancedQuery,
         index: searchIndex,
-        ...(timeWindowHours !== undefined
-          ? { timeRange: { from: `now-${timeWindowHours}h`, to: 'now' } }
-          : {}),
         esClient: esClient.asCurrentUser,
         modelProvider,
         events,
