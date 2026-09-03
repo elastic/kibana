@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+
 export interface ConnectorEventEmitParams {
   eventId: string;
   payload: Record<string, unknown>;
@@ -12,6 +14,8 @@ export interface ConnectorEventEmitParams {
   connectorId: string;
   connectorTypeId: string;
   correlationKey?: string;
+  /** Last-saver identity. Required for emit; never a space-only request. */
+  request: KibanaRequest;
 }
 
 /**

@@ -10,6 +10,8 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 
+import type { RawAction } from '../../types';
+import { hasConnectorEventIdentity, identityFromRawAction } from './encode_api_key';
 import type { ConnectorEventIdentity } from './types';
 
 export const buildEventScheduleRequest = (
@@ -34,4 +36,15 @@ export const buildEventScheduleRequest = (
   }
 
   return fakeRequest;
+};
+
+export const resolveConnectorEventScheduleRequest = (
+  attributes: RawAction,
+  spaceId: string
+): KibanaRequest | undefined => {
+  const identity = identityFromRawAction(attributes);
+  if (!hasConnectorEventIdentity(identity)) {
+    return undefined;
+  }
+  return buildEventScheduleRequest(identity, spaceId);
 };

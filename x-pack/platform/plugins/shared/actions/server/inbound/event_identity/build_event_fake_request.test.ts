@@ -7,7 +7,10 @@
 
 import { isExternalUiamCredential } from '@kbn/core-security-server';
 
-import { buildEventScheduleRequest } from './build_event_fake_request';
+import {
+  buildEventScheduleRequest,
+  resolveConnectorEventScheduleRequest,
+} from './build_event_fake_request';
 import { encodeApiKey } from './encode_api_key';
 
 describe('buildEventScheduleRequest', () => {
@@ -34,5 +37,39 @@ describe('buildEventScheduleRequest', () => {
 
     expect(request.headers.authorization).toBe('ApiKey essu_user_created_key');
     expect(isExternalUiamCredential(request)).toBe(true);
+  });
+});
+
+describe('resolveConnectorEventScheduleRequest', () => {
+  test('returns undefined when the connector has no identity', () => {
+    expect(
+      resolveConnectorEventScheduleRequest(
+        {
+          actionTypeId: '.inboundWebhook',
+          name: 'ingress',
+          isMissingSecrets: false,
+          config: {},
+          secrets: {},
+        },
+        'default'
+      )
+    ).toBeUndefined();
+  });
+
+  test('builds a request from the stored apiKey', () => {
+    const apiKey = encodeApiKey('es-id', 'es-secret')!;
+    const request = resolveConnectorEventScheduleRequest(
+      {
+        actionTypeId: '.inboundWebhook',
+        name: 'ingress',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+        apiKey,
+      },
+      'default'
+    );
+
+    expect(request?.headers.authorization).toBe(`ApiKey ${apiKey}`);
   });
 });

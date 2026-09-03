@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import type { ConnectorEventEmitter } from './types';
 
@@ -16,6 +18,9 @@ describe('dispatchConnectorEvents', () => {
     connectorId: 'c1',
     connectorTypeId: '.myConnector',
     correlationKey: 'corr-1',
+    request: httpServerMock.createKibanaRequest({
+      headers: { authorization: 'ApiKey encoded-key' },
+    }),
   };
 
   it('returns ok:false when no emitter is registered', async () => {
