@@ -1614,4 +1614,5 @@ overrides:
   'vega-util': '2.1.0'
   'vscode-languageserver-types': '3.17.5'
 minimumReleaseAgeExclude:
-  - '@elastic/eui-test-helpers@1.5.0'
+  # First-party packages are trusted publishes; don't delay consuming fresh @elastic releases.
+  - '@elastic/*'
