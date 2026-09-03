@@ -19,17 +19,9 @@ jest.mock('../hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: () => mockGetFieldDefinitions(),
 }));
 
-jest.mock('../hooks/use_create_field_definition', () => ({
-  useCreateFieldDefinition: () => ({ mutate: jest.fn(), isLoading: false }),
-}));
-
-jest.mock('../hooks/use_update_field_definition', () => ({
-  useUpdateFieldDefinition: () => ({ mutate: jest.fn(), isLoading: false }),
-}));
-
-jest.mock('../hooks/use_delete_field_definition', () => ({
-  useDeleteFieldDefinition: () => ({ mutate: jest.fn() }),
-}));
+// Keep the production mutation hooks connected to their reporter dependencies. The API mock
+// prevents a page test from making a request if it starts a mutation.
+jest.mock('../api/api');
 
 const mockReorderState = { isLoading: false, isError: false };
 
@@ -112,6 +104,7 @@ describe('AllFieldDefinitionsPage', () => {
       expect.objectContaining({ fieldDefinitionId: 'second', displayOrder: 0 }),
       expect.objectContaining({ fieldDefinitionId: 'first', displayOrder: 1 }),
     ]);
+    expect(mockReportUpdated).not.toHaveBeenCalled();
   });
 
   it('rolls the optimistic order back to the server order when the reorder write fails', async () => {
@@ -302,8 +295,10 @@ describe('AllFieldDefinitionsPage', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('does not report any field library analytics event on page load', () => {
+  it('does not report any field library analytics event on page load', async () => {
     renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    await screen.findByTestId('fieldDefinitionsList');
 
     expect(mockReportCreated).not.toHaveBeenCalled();
     expect(mockReportUpdated).not.toHaveBeenCalled();
