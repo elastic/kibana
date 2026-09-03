@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -34,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('reportingManagement');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('reportingPageHeader', { timeout: 2000 });
+      await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.title, { timeout: 2000 });
     });
   };
 
