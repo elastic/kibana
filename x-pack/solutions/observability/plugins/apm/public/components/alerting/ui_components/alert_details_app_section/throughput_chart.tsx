@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import type { Theme } from '@elastic/charts';
 import type { BoolQuery } from '@kbn/es-query';
-import type { RecursivePartial } from '@elastic/eui';
+import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TopAlert } from '@kbn/observability-plugin/public';
@@ -59,6 +59,7 @@ export function ThroughputChart({
   showAlertAnnotations,
   showChartActions = true,
   chartId = 'throughput',
+  panelPaddingSize,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -92,6 +93,8 @@ export function ThroughputChart({
    * tooltip portals by id (e.g. the service flyout) need a distinct value.
    */
   chartId?: string;
+  /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
+  panelPaddingSize?: EuiPanelProps['paddingSize'];
 }) {
   const {
     services: { uiSettings },
@@ -182,7 +185,7 @@ export function ThroughputChart({
 
   return (
     <EuiFlexItem>
-      <AnomalyChartPanel anomalyScore={anomaly?.score}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">

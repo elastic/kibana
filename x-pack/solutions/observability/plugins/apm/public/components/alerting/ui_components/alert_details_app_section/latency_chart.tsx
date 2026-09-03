@@ -6,7 +6,7 @@
  */
 
 import type { Theme } from '@elastic/charts';
-import type { RecursivePartial } from '@elastic/eui';
+import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
@@ -68,6 +68,7 @@ export function LatencyChart({
   latencySelectEbt,
   showChartActions = true,
   chartId = 'latencyChart',
+  panelPaddingSize,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -106,6 +107,8 @@ export function LatencyChart({
    * tooltip portals by id (e.g. the service flyout) need a distinct value.
    */
   chartId?: string;
+  /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
+  panelPaddingSize?: EuiPanelProps['paddingSize'];
 }) {
   const {
     services: { uiSettings },
@@ -197,11 +200,13 @@ export function LatencyChart({
 
   return (
     <EuiFlexItem>
-      <AnomalyChartPanel anomalyScore={anomaly?.score}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h2>
+              {/* nowrap keeps the short title on one line in narrow hosts instead
+                  of letting the flex row shrink it below its own width */}
+              <h2 css={{ whiteSpace: 'nowrap' }}>
                 {i18n.translate('xpack.apm.dependencyLatencyChart.chartTitle', {
                   defaultMessage: 'Latency',
                 })}

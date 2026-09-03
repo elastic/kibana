@@ -129,6 +129,7 @@ describe('ServiceFlyoutApmCharts', () => {
           offset: '',
           showAlertAnnotations: false,
           showChartActions: false,
+          panelPaddingSize: 's',
         })
       );
       const props = chart.mock.calls[0][0] as { alert?: unknown; start: string; end: string };

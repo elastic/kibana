@@ -81,6 +81,9 @@ export function ServiceFlyoutApmCharts({
     timeZone,
     showAlertAnnotations: false,
     showChartActions: false,
+    // Narrow flyout columns: the default panel padding would squeeze the chart
+    // titles onto two lines.
+    panelPaddingSize: 's' as const,
   };
 
   return (
