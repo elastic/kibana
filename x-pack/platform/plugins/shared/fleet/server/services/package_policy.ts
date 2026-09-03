@@ -1890,6 +1890,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const bumpPromise = shouldBumpAgentPolicies
       ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
           user: options?.user,
+          asyncDeploy: options?.asyncDeploy,
           removeProtectionFn: (policyId) => {
             const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
 
