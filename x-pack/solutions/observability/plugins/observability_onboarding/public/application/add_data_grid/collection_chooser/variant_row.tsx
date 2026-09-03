@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiTextColor } from '@elastic/eui';
+import { EuiCard, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { CollectionVariant } from '../types';
 
-// Two lines, unlike the grid tiles: variants in one collection are often the same
-// registry title with a different suffix, which one line truncates to one string.
+// Two lines: collection variants often share a prefix that one line truncates to the same string.
 const TITLE_LINES = 2;
 const DESCRIPTION_LINES = 2;
 
@@ -24,33 +23,55 @@ const clampStyle = (lines: number) => css`
 
 const cardOverrideStyle = css`
   padding: 12px;
-
-  .euiCard__title {
-    ${clampStyle(TITLE_LINES)}
-  }
 `;
 
 export interface VariantRowProps {
   variant: CollectionVariant;
 }
 
-/** One collection method inside the chooser. */
-export const VariantRow = ({ variant }: VariantRowProps) => (
-  <EuiCard
-    css={cardOverrideStyle}
-    layout="horizontal"
-    titleSize="xs"
-    hasBorder
-    paddingSize="none"
-    icon={variant.icon}
-    title={variant.title}
-    description={
-      <EuiTextColor color="subdued" css={clampStyle(DESCRIPTION_LINES)}>
-        {variant.description}
-      </EuiTextColor>
-    }
-    href={variant.href}
-    onClick={variant.onClick}
-    data-test-subj={variant['data-test-subj']}
-  />
-);
+export const VariantRow = ({ variant }: VariantRowProps) => {
+  const { euiTheme } = useEuiTheme();
+  // Clamp the title on its own span so a long name cannot eat the badge.
+  const titleRowStyle = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+    inline-size: 100%;
+    min-inline-size: 0;
+  `;
+  const titleTextStyle = css`
+    ${clampStyle(TITLE_LINES)}
+    min-inline-size: 0;
+    flex: 1 1 auto;
+  `;
+  const badgeStyle = css`
+    flex-shrink: 0;
+  `;
+
+  return (
+    <EuiCard
+      css={cardOverrideStyle}
+      layout="horizontal"
+      titleSize="xs"
+      hasBorder
+      paddingSize="none"
+      icon={variant.icon}
+      title={
+        <span css={titleRowStyle}>
+          <span css={titleTextStyle} data-test-subj="collectionVariantTitle">
+            {variant.title}
+          </span>
+          {variant.badge ? <span css={badgeStyle}>{variant.badge}</span> : null}
+        </span>
+      }
+      description={
+        <EuiTextColor color="subdued" css={clampStyle(DESCRIPTION_LINES)}>
+          {variant.description}
+        </EuiTextColor>
+      }
+      href={variant.href}
+      onClick={variant.onClick}
+      data-test-subj={variant['data-test-subj']}
+    />
+  );
+};

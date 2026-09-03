@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/266410
+type: breaking-change
+products:
+- product: cloud-serverless
+- product: kibana
+title: Remove Entity Store v1 APIs, clients, and server-side components
