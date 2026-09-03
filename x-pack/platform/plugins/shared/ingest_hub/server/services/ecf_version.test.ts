@@ -30,14 +30,14 @@ const mockFetchOk = (body: string) =>
     ok: true,
     status: 200,
     text: jest.fn().mockResolvedValue(body),
-  }) as any;
+  } as any);
 
 const mockFetchError = (status: number) =>
   ({
     ok: false,
     status,
     text: jest.fn().mockResolvedValue(''),
-  }) as any;
+  } as any);
 
 beforeEach(() => {
   loggerMock.clear(mockLogger);
@@ -82,9 +82,7 @@ describe('getLatestEcfVersion()', () => {
 
     it('never throws regardless of the error type', async () => {
       mockedFetch.mockRejectedValue(new TypeError('fetch is not a function'));
-      await expect(
-        getLatestEcfVersion(mockLogger, { ignoreCache: true })
-      ).resolves.not.toThrow();
+      await expect(getLatestEcfVersion(mockLogger, { ignoreCache: true })).resolves.not.toThrow();
     });
   });
 

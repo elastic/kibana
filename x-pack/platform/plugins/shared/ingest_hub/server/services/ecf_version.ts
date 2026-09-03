@@ -83,7 +83,9 @@ export const getLatestEcfVersion = async (
     return { version: parsed, source: 'remote' };
   } catch (err: unknown) {
     logger.debug(
-      `ECF S3 fetch failed: ${err instanceof Error ? err.message : String(err)}; falling back to ${ECF_FALLBACK_TEMPLATE_VERSION}`
+      `ECF S3 fetch failed: ${
+        err instanceof Error ? err.message : String(err)
+      }; falling back to ${ECF_FALLBACK_TEMPLATE_VERSION}`
     );
     return { version: ECF_FALLBACK_TEMPLATE_VERSION, source: 'fallback' };
   }
