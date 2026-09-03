@@ -74,6 +74,7 @@ function createMockCore(uiamConvert: jest.Mock): {
   // `create_provisioning_run_context.ts`).
   const unsafeSavedObjectsClient = savedObjectsClientMock.create();
   const savedObjectsClient = savedObjectsRepositoryMock.create();
+  savedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
   const plugins = {
@@ -673,7 +674,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         expect.arrayContaining([
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-1',
+            id: 'rule:rule-1',
             attributes: expect.objectContaining({
               entityId: 'rule-1',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -682,7 +683,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           }),
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-2',
+            id: 'rule:rule-2',
             attributes: expect.objectContaining({
               entityId: 'rule-2',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -691,7 +692,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           }),
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-3',
+            id: 'rule:rule-3',
             attributes: expect.objectContaining({
               entityId: 'rule-3',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -704,6 +705,15 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 3 total (0 skipped, 0 failed conversions, 3 completed, 0 failed updates).',
         { tags: TAGS }
+      );
+      // Legacy pre-namespacing docs live under the bare rule id and are cleaned up after the write.
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'uiam_api_keys_provisioning_status', id: 'rule-1' },
+        { type: 'uiam_api_keys_provisioning_status', id: 'rule-2' },
+        { type: 'uiam_api_keys_provisioning_status', id: 'rule-3' },
+      ]);
+      expect(savedObjectsClient.bulkCreate.mock.invocationCallOrder[0]).toBeLessThan(
+        savedObjectsClient.bulkDelete.mock.invocationCallOrder[0]
       );
     });
 
@@ -788,7 +798,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         expect.arrayContaining([
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-2',
+            id: 'rule:rule-2',
             attributes: expect.objectContaining({
               entityId: 'rule-2',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -797,7 +807,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           }),
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-3',
+            id: 'rule:rule-3',
             attributes: expect.objectContaining({
               entityId: 'rule-3',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -807,7 +817,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           }),
           expect.objectContaining({
             type: 'uiam_api_keys_provisioning_status',
-            id: 'rule-4',
+            id: 'rule:rule-4',
             attributes: expect.objectContaining({
               entityId: 'rule-4',
               entityType: UiamApiKeyProvisioningEntityType.RULE,
@@ -951,8 +961,9 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            id: 'rule-no-key',
+            id: 'rule:rule-no-key',
             attributes: expect.objectContaining({
+              entityId: 'rule-no-key',
               status: UiamApiKeyProvisioningStatus.SKIPPED,
               message: 'The rule has no API key',
             }),
@@ -997,8 +1008,9 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            id: 'rule-user-key',
+            id: 'rule:rule-user-key',
             attributes: expect.objectContaining({
+              entityId: 'rule-user-key',
               status: UiamApiKeyProvisioningStatus.SKIPPED,
               message: 'The API key was created by the user',
             }),
@@ -1052,8 +1064,9 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            id: 'rule-has-uiam',
+            id: 'rule:rule-has-uiam',
             attributes: expect.objectContaining({
+              entityId: 'rule-has-uiam',
               status: UiamApiKeyProvisioningStatus.SKIPPED,
               message: 'The rule already has a UIAM API key',
             }),
@@ -1492,9 +1505,15 @@ describe('UiamApiKeyProvisioningTask', () => {
         attributes: { status: string; errorCode?: string };
       }>;
       const statuses = bulkCreateCalls.map((c) => ({ id: c.id, status: c.attributes.status }));
-      expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
-      expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
-      expect(bulkCreateCalls.find((c) => c.id === 'r2')?.attributes.errorCode).toBe('400');
+      expect(statuses).toContainEqual({
+        id: 'rule:r1',
+        status: UiamApiKeyProvisioningStatus.COMPLETED,
+      });
+      expect(statuses).toContainEqual({
+        id: 'rule:r2',
+        status: UiamApiKeyProvisioningStatus.FAILED,
+      });
+      expect(bulkCreateCalls.find((c) => c.id === 'rule:r2')?.attributes.errorCode).toBe('400');
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
@@ -1553,14 +1572,14 @@ describe('UiamApiKeyProvisioningTask', () => {
       savedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
-            id: 'r1',
+            id: 'rule:r1',
             type: 'uiam_api_keys_provisioning_status',
             attributes: {},
             references: [],
             error: { error: 'Bad Request', message: 'boom', statusCode: 400 },
           },
           {
-            id: 'r2',
+            id: 'rule:r2',
             type: 'uiam_api_keys_provisioning_status',
             attributes: {},
             references: [],

@@ -8,12 +8,16 @@
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
+  buildUiamApiKeyProvisioningStatusId,
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 import { TAGS } from '../constants';
 import { getErrorMessage } from './error_utils';
+
+const buildTaskStatusId = (taskId: string): string =>
+  buildUiamApiKeyProvisioningStatusId(UiamApiKeyProvisioningEntityType.TASK, taskId);
 
 export interface TaskUiamProvisioningStatusDoc {
   type: typeof UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE;
@@ -36,7 +40,7 @@ export const createSkippedTaskProvisioningStatus = (
   message: string
 ): TaskUiamProvisioningStatusDoc => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: taskId,
+  id: buildTaskStatusId(taskId),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: taskId,
@@ -52,7 +56,7 @@ export const createFailedConversionTaskProvisioningStatus = (
   errorCode?: string
 ): TaskUiamProvisioningStatusDoc => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: taskId,
+  id: buildTaskStatusId(taskId),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: taskId,
@@ -68,7 +72,7 @@ export const createTaskProvisioningStatusFromBulkUpdateResult = (so: {
   error?: { message?: string };
 }): TaskUiamProvisioningStatusDoc => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  id: so.id,
+  id: buildTaskStatusId(so.id),
   attributes: {
     '@timestamp': new Date().toISOString(),
     entityId: so.id,
@@ -129,6 +133,43 @@ export const prepareTaskProvisioningStatusWrite = (
 };
 
 /**
+ * Deletes the status docs written under the pre-namespacing bare entity id (`<taskId>` rather than
+ * `task:<taskId>`) for the tasks we just wrote a namespaced doc for. Mirrors
+ * `deleteLegacyProvisioningStatusDocs` in `alerting/server/provisioning/lib/provisioning_status.ts`.
+ * Best effort: a legacy doc is missing for every task first provisioned after this change, and any
+ * other failure is retried the next time the task is written.
+ */
+export const deleteLegacyTaskProvisioningStatusDocs = async (
+  savedObjectsClient: ISavedObjectsRepository,
+  logger: Logger,
+  docs: TaskUiamProvisioningStatusDoc[]
+): Promise<void> => {
+  const legacyIds = Array.from(new Set(docs.map(({ attributes }) => attributes.entityId)));
+  if (legacyIds.length === 0) {
+    return;
+  }
+  try {
+    const { statuses } = await savedObjectsClient.bulkDelete(
+      legacyIds.map((id) => ({ type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE, id }))
+    );
+    // 404 means there is nothing to migrate for that task, which is the steady state.
+    const unexpectedErrors = statuses.filter(
+      ({ success, error }) => !success && error?.statusCode !== 404
+    );
+    if (unexpectedErrors.length > 0) {
+      logger.warn(
+        `Failed to delete ${unexpectedErrors.length} legacy UIAM provisioning status doc(s): ${unexpectedErrors[0].error?.message}`,
+        { tags: TAGS }
+      );
+    }
+  } catch (e) {
+    logger.warn(`Error deleting legacy UIAM provisioning status docs: ${getErrorMessage(e)}`, {
+      tags: TAGS,
+    });
+  }
+};
+
+/**
  * Persists provisioning status docs for monitoring only. Swallows errors so execution is unchanged.
  */
 export const writeTaskUiamProvisioningObservabilityStatus = async (
@@ -154,6 +195,8 @@ export const writeTaskUiamProvisioningObservabilityStatus = async (
       `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
       { tags: TAGS }
     );
+    // Only after the namespaced docs are persisted, so a failure here never loses the status.
+    await deleteLegacyTaskProvisioningStatusDocs(savedObjectsClient, logger, docs);
   } catch (e) {
     logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
       error: {

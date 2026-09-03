@@ -28,6 +28,7 @@ import {
   getExcludeRulesFilter,
   buildRuleUpdatesForUiam,
   mapConvertResponseToResult,
+  deleteLegacyProvisioningStatusDocs,
   prepareProvisioningStatusWrite,
   statusDocsAndOrphanedKeysFromBulkUpdate,
   type ProvisioningStatusWritePayload,
@@ -404,7 +405,7 @@ export class UiamApiKeyProvisioningTask {
           // We surface it as a warn so operators can spot systematically broken docs instead
           // of the failure being silently swallowed inside the bulk response.
           this.logger.warn(
-            `Failed to persist UIAM provisioning status for rule ${so.id}: ${so.error.message}`,
+            `Failed to persist UIAM provisioning status ${so.id}: ${so.error.message}`,
             { tags: TAGS }
           );
         }
@@ -413,6 +414,8 @@ export class UiamApiKeyProvisioningTask {
         `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
         { tags: TAGS }
       );
+      // Only after the namespaced docs are persisted, so a failure here never loses the status.
+      await deleteLegacyProvisioningStatusDocs(context.savedObjectsClient, this.logger, docs);
     } catch (e) {
       // Whole-call failure is tagged so log pipelines can alert on 'status-write-failed'
       // without parsing the message. The error is swallowed: status writes are best-effort

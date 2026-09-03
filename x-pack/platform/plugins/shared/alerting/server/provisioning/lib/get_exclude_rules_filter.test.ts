@@ -13,6 +13,7 @@ import {
 } from '@kbn/uiam-api-keys-provisioning-status';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
+  buildUiamApiKeyProvisioningStatusId,
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
@@ -25,7 +26,7 @@ function createStatusSavedObject(
   errorCode?: string
 ) {
   return {
-    id: entityId,
+    id: buildUiamApiKeyProvisioningStatusId(UiamApiKeyProvisioningEntityType.RULE, entityId),
     type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     attributes: {
       entityId,

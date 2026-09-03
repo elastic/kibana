@@ -8,6 +8,7 @@
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE,
+  buildUiamApiKeyProvisioningStatusId,
   NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE,
   PERMANENT_UIAM_CONVERSION_ERROR_CODES,
   UiamApiKeyProvisioningEntityType,
@@ -24,7 +25,7 @@ function createStatusSavedObject(
   errorCode?: string
 ) {
   return {
-    id: entityId,
+    id: buildUiamApiKeyProvisioningStatusId(UiamApiKeyProvisioningEntityType.TASK, entityId),
     type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     attributes: {
       entityId,
