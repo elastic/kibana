@@ -91,7 +91,8 @@ const UnGroupedCardView = ({
   const trendData = useSelector(selectOverviewTrends);
   const pageState = useSelector(selectOverviewPageState);
   const perPage = pageState.perPage ?? 20;
-  const { total, allConfigs, loading, lastRequest, refreshThrough } = useOverviewStatusState();
+  const { total, allConfigs, loading, lastRequest, refreshThrough, fillThrough } =
+    useOverviewStatusState();
   const [rowCount, setRowCount] = useState(5);
   const [sliceToFetch, setSliceToFetch] = useState<{
     startIndex: number;
@@ -135,6 +136,7 @@ const UnGroupedCardView = ({
     pageState,
     lastRequest,
     refreshThrough,
+    fillThrough,
   });
   loadMoreRef.current = {
     hasMore,
@@ -144,11 +146,12 @@ const UnGroupedCardView = ({
     pageState,
     lastRequest,
     refreshThrough,
+    fillThrough,
   };
 
   const loadMoreMonitors = useCallback(() => {
     const s = loadMoreRef.current;
-    if (!s.hasMore || s.loading || s.refreshThrough) {
+    if (!s.hasMore || s.loading || s.refreshThrough || s.fillThrough) {
       return;
     }
     // Only whole pages are appended, so a non-multiple means the last (partial)

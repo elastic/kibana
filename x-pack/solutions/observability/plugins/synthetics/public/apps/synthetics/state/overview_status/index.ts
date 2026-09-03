@@ -62,6 +62,11 @@ export interface OverviewStatusStateReducer {
   // Target loaded-window size for a clamped card-view refresh. Set while
   // remainder pages are still in flight so the timer and infinite scroll wait.
   refreshThrough?: number;
+  // Target size for a grouped full-set fill (`incoming.total`). Remainder
+  // pages are appended (not clipped) until this is covered.
+  fillThrough?: number;
+  fillAllInFlight?: boolean;
+  pendingFillAppend?: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -221,6 +226,34 @@ const completeWindowRefreshIfCovered = (
   }
 };
 
+const completeFillIfCovered = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (state.fillThrough == null) {
+    return;
+  }
+  if (incoming.total != null && incoming.total < state.fillThrough) {
+    state.fillThrough = incoming.total;
+  }
+  if (!getNextWindowRefreshPage(incoming.page, incoming.perPage, state.fillThrough)) {
+    state.fillThrough = undefined;
+  }
+};
+
+const armFillFromIncoming = (
+  state: OverviewStatusStateReducer,
+  incoming: PaginatedOverviewStatus
+) => {
+  if (!state.fillAllInFlight) {
+    return;
+  }
+  state.fillAllInFlight = false;
+  if (incoming.total != null) {
+    state.fillThrough = incoming.total;
+  }
+};
+
 const applyMergedPaginated = (
   state: OverviewStatusStateReducer,
   incoming: PaginatedOverviewStatus
@@ -252,6 +285,8 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.loading = true;
       state.silentReplaceInFlight = false;
       state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = Boolean(action.payload.fillAll);
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -264,7 +299,14 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.loading = true;
       }
       state.silentReplaceInFlight = Boolean(action.payload.silent);
-      state.refreshThrough = action.payload.refreshThrough;
+      const fillAll = Boolean(action.payload.fillAll);
+      state.fillAllInFlight = fillAll;
+      if (fillAll) {
+        state.refreshThrough = undefined;
+      } else {
+        state.refreshThrough = action.payload.refreshThrough;
+        state.fillThrough = undefined;
+      }
       state.lastRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -290,7 +332,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
 
       if (preserveAccumulatedWindow) {
         applyMergedPaginated(state, incoming);
+        armFillFromIncoming(state, incoming);
         completeWindowRefreshIfCovered(state, incoming);
+        completeFillIfCovered(state, incoming);
         return;
       }
 
@@ -307,13 +351,17 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       // refresh (which just replaced `status`) doesn't flicker them back to
       // `pending` until the supplementary lookup re-resolves.
       applyStaleBeforeWindow(state);
+      armFillFromIncoming(state, incoming);
       completeWindowRefreshIfCovered(state, incoming);
+      completeFillIfCovered(state, incoming);
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
       state.settled = true;
       state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = false;
     })
     .addCase(appendOverviewStatusAction.get, (state, action) => {
       if (!action.payload.silent) {
@@ -321,7 +369,10 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.loading = true;
         // User-driven infinite scroll cancels an in-flight window remainder.
         state.refreshThrough = undefined;
+        state.fillThrough = undefined;
+        state.fillAllInFlight = false;
       }
+      state.pendingFillAppend = Boolean(action.payload.fillAll);
       state.pendingAppendRequest = {
         scopeStatusByLocation: action.payload.scopeStatusByLocation,
         statusFilter: action.payload.statusFilter,
@@ -329,10 +380,16 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     })
     .addCase(appendOverviewStatusAction.success, (state, action) => {
       const pending = state.pendingAppendRequest;
+      const wasFill = state.pendingFillAppend;
       state.pendingAppendRequest = undefined;
+      state.pendingFillAppend = undefined;
       // Drop a page that was requested under a previous filter/scope so it
       // cannot land on top of a newer replace (e.g. status-filter change).
       if (pending && !requestContextEquals(pending, state.lastRequest)) {
+        return;
+      }
+      // Drop a grouped fill page if grouping was cancelled before page 1 landed.
+      if (wasFill && (state.fillAllInFlight || state.fillThrough == null)) {
         return;
       }
       const existingConfigs = state.status?.configs;
@@ -342,13 +399,17 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
           : action.payload;
       applyMergedPaginated(state, incoming);
       completeWindowRefreshIfCovered(state, action.payload);
+      completeFillIfCovered(state, action.payload);
     })
     .addCase(appendOverviewStatusAction.fail, (state, action) => {
       state.pendingAppendRequest = undefined;
+      state.pendingFillAppend = undefined;
       state.error = action.payload;
       state.loading = false;
       state.settled = true;
       state.refreshThrough = undefined;
+      state.fillThrough = undefined;
+      state.fillAllInFlight = false;
     })
     .addCase(fetchStaleStatusAction.success, (state, action) => {
       // Store the latest prior-run facts and promote the genuinely stale

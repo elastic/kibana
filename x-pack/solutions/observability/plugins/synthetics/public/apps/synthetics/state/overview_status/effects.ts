@@ -96,8 +96,9 @@ export function* augmentStaleStatusEffect() {
 }
 
 /**
- * After a clamped card-window refresh, fetch the remaining loaded pages one at
- * a time (the route `perPage` max cannot cover a long infinite-scroll session).
+ * After a clamped card-window refresh or a grouped full-set fill, fetch the
+ * remaining pages one at a time (the route `perPage` max cannot cover the
+ * whole result in one request).
  */
 export function* refreshRemainingCardWindowWorker(
   action:
@@ -107,12 +108,12 @@ export function* refreshRemainingCardWindowWorker(
   const overviewStatus: ReturnType<typeof selectOverviewStatusReducer> = yield select(
     selectOverviewStatusReducer
   );
-  const refreshThrough = overviewStatus.refreshThrough;
-  if (refreshThrough == null) {
+  const target = overviewStatus.refreshThrough ?? overviewStatus.fillThrough;
+  if (target == null || overviewStatus.fillAllInFlight) {
     return;
   }
   const incoming = action.payload;
-  const next = getNextWindowRefreshPage(incoming.page, incoming.perPage, refreshThrough);
+  const next = getNextWindowRefreshPage(incoming.page, incoming.perPage, target);
   if (!next) {
     return;
   }
@@ -123,6 +124,7 @@ export function* refreshRemainingCardWindowWorker(
       scopeStatusByLocation: overviewStatus.lastRequest?.scopeStatusByLocation,
       statusFilter: overviewStatus.lastRequest?.statusFilter,
       silent: true,
+      ...(overviewStatus.fillThrough != null ? { fillAll: true } : {}),
     })
   );
 }

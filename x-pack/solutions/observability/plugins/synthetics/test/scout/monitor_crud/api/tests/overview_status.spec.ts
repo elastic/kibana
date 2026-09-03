@@ -174,15 +174,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ kbnClient, esClient }) => {
       await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      await esClient
-        .deleteByQuery({
-          index: `${HTTP_DATA_STREAM}*`,
-          query: { term: { tags: heartbeatTag } },
-          conflicts: 'proceed',
-          refresh: true,
-          ignore_unavailable: true,
-        })
-        .catch(() => {});
+      await esClient.deleteByQuery({
+        index: `${HTTP_DATA_STREAM}*`,
+        query: { term: { tags: heartbeatTag } },
+        conflicts: 'proceed',
+        refresh: true,
+        ignore_unavailable: true,
+      });
     });
 
     apiTest('omits page fields when page and perPage are not both sent', async ({ apiClient }) => {

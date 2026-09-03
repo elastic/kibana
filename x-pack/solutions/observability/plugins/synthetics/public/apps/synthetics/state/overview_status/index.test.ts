@@ -735,6 +735,80 @@ describe('overviewStatusReducer', () => {
       expect(state.refreshThrough).toBeUndefined();
       expect(state.loading).toBe(true);
     });
+
+    it('fills remaining grouped pages without clipping newly loaded keys', () => {
+      const page1 = [makeMeta({ configId: 'mon1' }), makeMeta({ configId: 'mon2' })];
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.get({
+          pageState: { page: 1, perPage: 2 } as any,
+          fillAll: true,
+        })
+      );
+      expect(state.fillAllInFlight).toBe(true);
+
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(makePaginated(page1, { page: 1, perPage: 2, total: 3 }))
+      );
+      expect(state.fillThrough).toBe(3);
+      expect(state.fillAllInFlight).toBe(false);
+
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({
+          pageState: { page: 2, perPage: 2 } as any,
+          silent: true,
+          fillAll: true,
+        })
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon3' })], { page: 2, perPage: 2, total: 3 })
+        )
+      );
+
+      expect(state.fillThrough).toBeUndefined();
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(['mon1', 'mon2', 'mon3']);
+    });
+
+    it('drops a late grouped fill page after grouping is cancelled', () => {
+      let state = overviewStatusReducer(
+        undefined,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'mon1' })], { page: 1, perPage: 1, total: 3 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.get({
+          pageState: { page: 2, perPage: 1 } as any,
+          silent: true,
+          fillAll: true,
+        })
+      );
+      state = overviewStatusReducer(
+        state,
+        quietFetchOverviewStatusAction.get({
+          pageState: { page: 1, perPage: 20 } as any,
+        })
+      );
+      state = overviewStatusReducer(
+        state,
+        fetchOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'only-page' })], { page: 1, perPage: 20, total: 3 })
+        )
+      );
+      state = overviewStatusReducer(
+        state,
+        appendOverviewStatusAction.success(
+          makePaginated([makeMeta({ configId: 'late-fill' })], { page: 2, perPage: 1, total: 3 })
+        )
+      );
+
+      expect(state.allConfigs?.map((config) => config.configId)).toEqual(['only-page']);
+    });
   });
 
   describe('multi-location promotion', () => {

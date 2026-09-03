@@ -12,6 +12,18 @@ import type {
   PaginatedOverviewStatus,
 } from '../../../../../common/runtime_types';
 
+/** Group-by grids have no page control; they need the full result set. */
+export function isOverviewGrouped(groupField?: string): boolean {
+  return Boolean(groupField) && groupField !== 'none' && groupField !== 'monitor';
+}
+
+/** Page-1 fetch for a grouped view, clamped to the route max. Remainder pages fill after. */
+export function getGroupedFillPageState<T extends { page?: number; perPage?: number }>(
+  pageState: T
+): T {
+  return { ...pageState, page: 1, perPage: OVERVIEW_STATUS_MAX_PER_PAGE };
+}
+
 /**
  * First request of a card-view window refresh. `perPage` is the loaded window
  * size, capped at the route max so a long infinite-scroll session cannot 400.

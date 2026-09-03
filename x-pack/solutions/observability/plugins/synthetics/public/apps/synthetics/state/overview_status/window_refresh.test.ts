@@ -9,7 +9,9 @@ import { OVERVIEW_STATUS_MAX_PER_PAGE } from '../../../../../common/constants/mo
 import type { OverviewStatusMetaData } from '../../../../../common/runtime_types';
 import {
   getCardWindowRefreshPayload,
+  getGroupedFillPageState,
   getNextWindowRefreshPage,
+  isOverviewGrouped,
   restrictOverviewPageToExistingKeys,
 } from './window_refresh';
 
@@ -26,6 +28,23 @@ const meta = (configId: string, name = configId): OverviewStatusMetaData =>
     overallStatus: 'up',
     locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
   } as OverviewStatusMetaData);
+
+describe('isOverviewGrouped / getGroupedFillPageState', () => {
+  it('treats none and monitor as ungrouped', () => {
+    expect(isOverviewGrouped('none')).toBe(false);
+    expect(isOverviewGrouped('monitor')).toBe(false);
+    expect(isOverviewGrouped(undefined)).toBe(false);
+    expect(isOverviewGrouped('locationId')).toBe(true);
+  });
+
+  it('requests page 1 at the route max so grouped fills do not 400', () => {
+    expect(getGroupedFillPageState({ page: 3, perPage: 20, query: 'foo' })).toEqual({
+      page: 1,
+      perPage: OVERVIEW_STATUS_MAX_PER_PAGE,
+      query: 'foo',
+    });
+  });
+});
 
 describe('getCardWindowRefreshPayload', () => {
   const pageState = { page: 3, perPage: 20, query: 'foo' };

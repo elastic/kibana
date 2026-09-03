@@ -128,4 +128,30 @@ describe('refreshRemainingCardWindowWorker', () => {
     expect(gen.next().value).toEqual(select(selectOverviewStatusReducer));
     expect(gen.next({ refreshThrough: undefined } as any).done).toBe(true);
   });
+
+  it('dispatches a silent fill append while a grouped fill is not covered', () => {
+    const gen = refreshRemainingCardWindowWorker(
+      fetchOverviewStatusAction.success({ page: 1, perPage: 500, total: 800 } as any)
+    );
+
+    expect(gen.next().value).toEqual(select(selectOverviewStatusReducer));
+    expect(
+      gen.next({
+        fillThrough: 800,
+        lastRequest: { scopeStatusByLocation: true },
+      } as any).value
+    ).toEqual(select(selectOverviewPageState));
+    expect(gen.next(pageState as any).value).toEqual(
+      put(
+        appendOverviewStatusAction.get({
+          pageState: { ...pageState, page: 2, perPage: 500 } as any,
+          scopeStatusByLocation: true,
+          statusFilter: undefined,
+          silent: true,
+          fillAll: true,
+        })
+      )
+    );
+    expect(gen.next().done).toBe(true);
+  });
 });

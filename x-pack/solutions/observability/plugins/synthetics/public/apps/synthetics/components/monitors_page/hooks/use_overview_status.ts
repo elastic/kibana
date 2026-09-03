@@ -8,7 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import { selectOverviewPageState, selectOverviewView } from '../../../state';
+import { selectOverviewGroupBy, selectOverviewPageState, selectOverviewView } from '../../../state';
 import { setOverviewPageStateAction } from '../../../state/overview';
 import {
   fetchOverviewStatusAction,
@@ -16,7 +16,11 @@ import {
   selectOverviewStatus,
   selectOverviewStatusSettled,
 } from '../../../state/overview_status';
-import { getCardWindowRefreshPayload } from '../../../state/overview_status/window_refresh';
+import {
+  getCardWindowRefreshPayload,
+  getGroupedFillPageState,
+  isOverviewGrouped,
+} from '../../../state/overview_status/window_refresh';
 import { useGetUrlParams } from '../../../hooks';
 
 /**
@@ -25,8 +29,17 @@ import { useGetUrlParams } from '../../../hooks';
  * The fetch is triggered once by `useOverviewStatus` in the page-level component.
  */
 export function useOverviewStatusState() {
-  const { status, error, loaded, loading, allConfigs, total, lastRequest, refreshThrough } =
-    useSelector(selectOverviewStatus);
+  const {
+    status,
+    error,
+    loaded,
+    loading,
+    allConfigs,
+    total,
+    lastRequest,
+    refreshThrough,
+    fillThrough,
+  } = useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   return {
     status,
@@ -38,6 +51,7 @@ export function useOverviewStatusState() {
     total,
     lastRequest,
     refreshThrough,
+    fillThrough,
   };
 }
 
@@ -48,7 +62,7 @@ export function useOverviewStatusState() {
  */
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
-  const { status, error, loaded, loading, allConfigs, total, refreshThrough } =
+  const { status, error, loaded, loading, allConfigs, total, refreshThrough, fillThrough } =
     useSelector(selectOverviewStatus);
   const settled = useSelector(selectOverviewStatusSettled);
   const isInitialMount = useRef(true);
@@ -61,6 +75,8 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
 
   const dispatch = useDispatch();
   const view = useSelector(selectOverviewView);
+  const { field: groupField } = useSelector(selectOverviewGroupBy);
+  const grouped = isOverviewGrouped(groupField);
 
   const paramsRef = useRef({
     pageState,
@@ -69,8 +85,10 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     loading,
     statusFilter,
     view,
+    grouped,
     loadedCount: allConfigs?.length ?? 0,
     refreshThrough,
+    fillThrough,
   });
   paramsRef.current = {
     pageState,
@@ -79,8 +97,10 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     loading,
     statusFilter,
     view,
+    grouped,
     loadedCount: allConfigs?.length ?? 0,
     refreshThrough,
+    fillThrough,
   };
 
   // Tracks the last status filter the fetch effect reconciled, so it can detect
@@ -100,14 +120,28 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
         scopeStatusByLocation: scope,
         statusFilter: sf,
         view: currentView,
+        grouped: isGrouped,
         loadedCount,
         loading: isLoading,
         refreshThrough: inFlightWindowRefresh,
+        fillThrough: inFlightFill,
       } = paramsRef.current;
       // Don't start a replace-refresh while an append, remainder page, or other
       // fetch is in flight — a page-1 refresh completing after the append would
       // wipe it, and overlapping window refreshes would race.
-      if (isLoading || inFlightWindowRefresh) {
+      if (isLoading || inFlightWindowRefresh || inFlightFill) {
+        return;
+      }
+      if (isGrouped) {
+        dispatch(
+          quietFetchOverviewStatusAction.get({
+            pageState: getGroupedFillPageState(ps),
+            scopeStatusByLocation: scope,
+            statusFilter: sf,
+            silent: true,
+            fillAll: true,
+          })
+        );
         return;
       }
       // The card view accumulates pages via infinite scroll. Refresh from page 1
@@ -150,24 +184,27 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     }
 
     const { loaded: isLoaded } = paramsRef.current;
+    const requestPageState = grouped ? getGroupedFillPageState(pageState) : pageState;
     if (isLoaded) {
       dispatch(
         quietFetchOverviewStatusAction.get({
-          pageState,
+          pageState: requestPageState,
           scopeStatusByLocation,
           statusFilter,
+          ...(grouped ? { fillAll: true } : {}),
         })
       );
     } else {
       dispatch(
         fetchOverviewStatusAction.get({
-          pageState,
+          pageState: requestPageState,
           scopeStatusByLocation,
           statusFilter,
+          ...(grouped ? { fillAll: true } : {}),
         })
       );
     }
-  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery, statusFilter]);
+  }, [dispatch, pageState, scopeStatusByLocation, hasUnsyncedUrlQuery, statusFilter, grouped]);
 
   return {
     status,

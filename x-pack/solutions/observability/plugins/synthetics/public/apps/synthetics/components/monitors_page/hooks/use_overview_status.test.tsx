@@ -313,5 +313,36 @@ describe('useOverviewStatus', () => {
         })
       );
     });
+
+    it('requests a max-page fill when group-by is active', () => {
+      renderHook(() => useOverviewStatus({ scopeStatusByLocation: true }), {
+        wrapper: ({ children }) =>
+          React.createElement(
+            WrappedHelper,
+            {
+              state: {
+                overview: {
+                  ...mockState.overview,
+                  groupBy: { field: 'locationId', order: 'asc' },
+                },
+              },
+            },
+            children
+          ),
+      });
+
+      expect(dispatchMockFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: fetchOverviewStatusAction.get.type,
+          payload: expect.objectContaining({
+            fillAll: true,
+            pageState: expect.objectContaining({
+              page: 1,
+              perPage: OVERVIEW_STATUS_MAX_PER_PAGE,
+            }),
+          }),
+        })
+      );
+    });
   });
 });

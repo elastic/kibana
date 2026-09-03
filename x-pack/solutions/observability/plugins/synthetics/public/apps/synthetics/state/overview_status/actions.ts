@@ -14,7 +14,13 @@ import type {
 } from '../../../../../common/runtime_types';
 
 export const fetchOverviewStatusAction = createAsyncAction<
-  { pageState: MonitorOverviewPageState; scopeStatusByLocation?: boolean; statusFilter?: string },
+  {
+    pageState: MonitorOverviewPageState;
+    scopeStatusByLocation?: boolean;
+    statusFilter?: string;
+    // Grouped views have no pager; remainder pages are filled until `total`.
+    fillAll?: boolean;
+  },
   PaginatedOverviewStatus
 >('fetchOverviewStatusAction');
 
@@ -29,6 +35,9 @@ export const quietFetchOverviewStatusAction = createAsyncAction<
     // `perPage` max. Remainder pages are requested until this many configs are
     // covered. See `refreshRemainingCardWindowEffect`.
     refreshThrough?: number;
+    // Grouped views have no pager; remainder pages are filled until `total`
+    // (appended, not clipped to already-loaded keys).
+    fillAll?: boolean;
   },
   PaginatedOverviewStatus
 >('quietFetchOverviewStatusAction');
@@ -47,6 +56,8 @@ export const appendOverviewStatusAction = createAsyncAction<
     // Remainder pages of a clamped card-window refresh. Skips the loading
     // flag and does not cancel that refresh (unlike user-driven infinite scroll).
     silent?: boolean;
+    // Remainder pages of a grouped full-set fill. Dropped if grouping is cancelled.
+    fillAll?: boolean;
   },
   PaginatedOverviewStatus
 >('appendOverviewStatusAction');
