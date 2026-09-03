@@ -22,6 +22,7 @@ import { InfoBlocks } from '@kbn/flyout-info-blocks';
 - `maxColumns` can be `2`, `3`, `4`, or `'auto'`. `'auto'` picks the widest column count (3 or 4) that leaves at most one empty cell in the last row, based on how many items there are.
 - Plain text values truncate to a single line in the middle via `EuiTextTruncate`, so both ends stay readable. Node values (badges, links, images) manage their own layout.
 - Each `InfoBlockItem` accepts an optional `size` (EUI font-scale key, e.g. `'xl'`) to enlarge a single value, and an optional `color` (EUI text color token, e.g. `'danger'`) to tint it.
+- An item's optional `id` becomes its React key. Supply it for lists that reorder or shrink, so React does not reuse the wrong cell; without it the array position is the key.
 
 ## Test subjects
 

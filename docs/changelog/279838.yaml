@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/279838
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-07-28
-- product: kibana
-title: Fix SentinelOne and Microsoft Defender response action failures for large responses
-description: SentinelOne and Microsoft Defender for Endpoint response actions no longer fail when API responses exceed default HTTP size limits. SentinelOne run script actions can now require a passcode to open returned zip files.

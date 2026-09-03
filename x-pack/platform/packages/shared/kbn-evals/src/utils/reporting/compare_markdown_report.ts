@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { PairedTTestResult } from '@kbn/evals-common';
+import { isImproved } from '@kbn/evals-common';
+import type { Direction, PairedTTestResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
@@ -26,6 +27,17 @@ function formatSig(pValue: number | null, threshold: number): string {
 
 function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
+}
+
+function formatOutcome(
+  delta: number,
+  direction: Direction,
+  pValue: number | null,
+  threshold: number
+): string {
+  if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
+  if (direction === 'neutral') return '-';
+  return isImproved(delta, direction) ? 'Improvement' : 'Regression';
 }
 
 function formatDifference(value: number): string {
@@ -54,8 +66,8 @@ function relativeAge(days: number): string {
 }
 
 export function formatMarkdownCompareReport({
-  experimentIdA,
-  experimentIdB,
+  targetExperimentId,
+  baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
   comparePageUrl,
@@ -66,8 +78,8 @@ export function formatMarkdownCompareReport({
   skippedNullScores = 0,
   baselineBranch = 'main',
 }: {
-  experimentIdA: string;
-  experimentIdB: string;
+  targetExperimentId: string;
+  baselineExperimentId: string;
   results: PairedTTestResult[];
   significanceThreshold?: number;
   comparePageUrl?: string;
@@ -92,7 +104,9 @@ export function formatMarkdownCompareReport({
 
   const lines: string[] = [];
 
-  lines.push(`**PR run**: ${experimentIdA} | **Baseline (${baselineBranch})**: ${experimentIdB}`);
+  lines.push(
+    `**PR run**: ${targetExperimentId} | **Baseline (${baselineBranch})**: ${baselineExperimentId}`
+  );
 
   if (baselineTimestamp) {
     const diffDays = daysSince(baselineTimestamp);
@@ -163,20 +177,21 @@ export function formatMarkdownCompareReport({
   const renderTable = (rows: PairedTTestResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
-      const delta = r.meanA - r.meanB;
+      const delta = r.meanTarget - r.meanBaseline;
       const cols = [
         escapeTableCell(r.datasetName),
         escapeTableCell(r.evaluatorName),
         String(r.sampleSize),
-        formatNumber(r.meanA),
-        formatNumber(r.meanB),
+        formatNumber(r.meanTarget),
+        formatNumber(r.meanBaseline),
         formatDifference(delta),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
+        formatOutcome(delta, r.direction, r.pValue, significanceThreshold),
       ];
       tableLines.push(`| ${cols.join(' | ')} |`);
     });
