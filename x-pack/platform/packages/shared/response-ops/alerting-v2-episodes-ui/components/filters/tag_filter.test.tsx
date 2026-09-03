@@ -46,7 +46,7 @@ describe('TagFilter', () => {
   describe('rendering', () => {
     it('renders the filter button with correct label', () => {
       render(<AlertEpisodesTagFilter {...defaultProps} />);
-      expect(screen.getByText('Tags')).toBeInTheDocument();
+      expect(screen.getByText('Alert tags')).toBeInTheDocument();
     });
 
     it('shows hasActiveFilters when tags are selected', () => {

@@ -157,7 +157,7 @@ export function registryInputAllowsDynamicSignalTypes(input: RegistryInput): boo
  *   - Composable integration packages (nested `inputs[]` entries)
  */
 export const hasDynamicSignalTypes = (
-  packageInfo: PackageInfo | undefined,
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
   scope?: { policyTemplateName?: string; inputType?: string }
 ): boolean =>
   (packageInfo?.policy_templates ?? []).some((template) => {

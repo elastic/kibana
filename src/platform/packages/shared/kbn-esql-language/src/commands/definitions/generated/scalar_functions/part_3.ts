@@ -497,10 +497,10 @@ const toTimedurationDefinition: FunctionDefinition = {
           name: 'field',
           type: 'keyword',
           optional: false,
-          description: 'Input value. The input is a valid constant time duration expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant time duration expression.',
         },
       ],
       returnType: 'time_duration',
@@ -511,10 +511,10 @@ const toTimedurationDefinition: FunctionDefinition = {
           name: 'field',
           type: 'text',
           optional: false,
-          description: 'Input value. The input is a valid constant time duration expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant time duration expression.',
         },
       ],
       returnType: 'time_duration',
@@ -525,10 +525,10 @@ const toTimedurationDefinition: FunctionDefinition = {
           name: 'field',
           type: 'time_duration',
           optional: false,
-          description: 'Input value. The input is a valid constant time duration expression.',
           hint: {
             kind: 'constant',
           },
+          description: 'Input value. The input is a valid constant time duration expression.',
         },
       ],
       returnType: 'time_duration',
@@ -828,11 +828,11 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description:
-            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
         },
       ],
       returnType: 'keyword',
@@ -850,18 +850,18 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description:
-            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
         },
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}, {name='analyzer', values=[english], description='Name of the analyzer to use for scoring and highlighting. When omitted, defaults to the standard\nanalyzer. The name must match a registered analyzer (prebuilt or plugin-contributed), such as\n`standard`, `whitespace`, `simple`, `keyword`, `english`, `french`, `german`, `spanish`, etc.\n', type=[keyword]}",
-          optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
         },
@@ -881,11 +881,11 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description:
-            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
         },
       ],
       returnType: 'keyword',
@@ -903,18 +903,18 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'query',
           type: 'keyword',
           optional: false,
-          description:
-            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
         },
         {
           name: 'options',
           type: 'function_named_parameters',
+          optional: true,
           mapParams:
             "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}, {name='analyzer', values=[english], description='Name of the analyzer to use for scoring and highlighting. When omitted, defaults to the standard\nanalyzer. The name must match a registered analyzer (prebuilt or plugin-contributed), such as\n`standard`, `whitespace`, `simple`, `keyword`, `english`, `french`, `german`, `spanish`, etc.\n', type=[keyword]}",
-          optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
         },
@@ -964,21 +964,21 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'date',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
         {
           name: 'end_time',
           type: 'date',
           optional: true,
-          description:
-            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
         },
       ],
       returnType: 'boolean',
@@ -989,21 +989,21 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'date_nanos',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
         {
           name: 'end_time',
           type: 'date_nanos',
           optional: true,
-          description:
-            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
         },
       ],
       returnType: 'boolean',
@@ -1014,11 +1014,11 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'date_period',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
       ],
       returnType: 'boolean',
@@ -1029,21 +1029,21 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'keyword',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
         {
           name: 'end_time',
           type: 'keyword',
           optional: true,
-          description:
-            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
         },
       ],
       returnType: 'boolean',
@@ -1054,21 +1054,21 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'long',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
         {
           name: 'end_time',
           type: 'long',
           optional: true,
-          description:
-            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
           hint: {
             kind: 'constant',
           },
+          description:
+            'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
         },
       ],
       returnType: 'boolean',
@@ -1079,11 +1079,11 @@ const trangeDefinition: FunctionDefinition = {
           name: 'start_time_or_offset',
           type: 'time_duration',
           optional: false,
-          description:
-            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
           hint: {
             kind: 'constant',
           },
+          description:
+            ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
         },
       ],
       returnType: 'boolean',
