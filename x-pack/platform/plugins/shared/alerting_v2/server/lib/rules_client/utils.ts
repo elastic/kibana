@@ -187,6 +187,9 @@ export function buildUpdateRuleAttributes(
       ...existingAttrs.metadata,
       ...updateData.metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
+      // `null` clears all tags. The SO schema is `maybe(...)` without
+      // `nullable()`, so the cleared value must be stored as `undefined`.
+      tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
