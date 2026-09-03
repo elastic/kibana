@@ -94,8 +94,8 @@ describe('registerMemoryWorkflowSteps', () => {
     ]);
     const result = await recallStep.handler(
       createContext({
-        query: 'preferences',
-        category: 'preferences',
+        query: 'recovery procedures',
+        category: 'procedures',
         tags: ['project:phoenix', 'source:workflow'],
         limit: 4,
       })
@@ -111,8 +111,8 @@ describe('registerMemoryWorkflowSteps', () => {
       storage,
       logger,
       params: {
-        query: 'preferences',
-        category: 'preferences',
+        query: 'recovery procedures',
+        category: 'procedures',
         tags: ['project:phoenix', 'source:workflow'],
         limit: 4,
         space_id: 'space-1',
@@ -193,7 +193,7 @@ describe('registerMemoryWorkflowSteps', () => {
     const { recallStep, rememberStepLoader, forgetStep } = registerSteps();
     const rememberStep = await rememberStepLoader();
 
-    await expect(recallStep.handler(createContext({ query: 'preferences' }))).resolves.toEqual({
+    await expect(recallStep.handler(createContext({ query: 'recovery procedures' }))).resolves.toEqual({
       output: { memories: [] },
     });
     await expect(

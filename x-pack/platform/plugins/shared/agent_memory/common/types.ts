@@ -7,7 +7,7 @@
 
 /** Legacy persisted metadata; new writes classify memories with MemoryCategory. */
 export type MemoryType = 'episodic' | 'semantic' | 'procedural';
-export type MemoryCategory = 'profile' | 'preferences' | 'events' | 'trajectories' | 'procedures';
+export type MemoryCategory = 'events' | 'trajectories' | 'procedures';
 export type AuthorKind = 'profile_uid' | 'username';
 export type CallSource = 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown';
 export type MemoryScopeKind = 'user' | 'space';

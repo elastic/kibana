@@ -41,7 +41,7 @@ Returns a ranked list of memories (title, description, category, created date).
 The result is a snapshot of what has been remembered; it does NOT reflect real-time data.
 
 Use this tool to:
-- Recall user preferences, profile information, or prior context
+- Recall prior events, decisions, plans, and verified procedures
 - Retrieve relevant facts from past conversations
 - Ground the response in remembered context without issuing additional searches
 

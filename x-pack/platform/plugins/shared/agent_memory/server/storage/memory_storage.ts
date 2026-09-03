@@ -102,6 +102,8 @@ export const agentMemoryMappingsComponentProperties = {
           author_kind: types.keyword({}),
           /** 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown' — write-call origin. */
           call_source: types.keyword({}),
+          /** IDs of recalled memories that informed this write (attribution chain). */
+          used_memory_ids: types.keyword({}),
         },
       }),
     },

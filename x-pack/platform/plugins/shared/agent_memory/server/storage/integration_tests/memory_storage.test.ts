@@ -94,7 +94,7 @@ describe('Agent Memory AI Index integration', () => {
       params: {
         title,
         description,
-        category: 'preferences',
+        category: 'procedures',
         tags: ['incident-response'],
         call_source: 'user',
         space_id: spaceId,

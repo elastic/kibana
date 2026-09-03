@@ -125,9 +125,6 @@ describe('AgentMemoryPlugin', () => {
       /one coherent memory per subject or occurrence.+exact.+exactly one category/i
     );
     expect(normalizedSkillContent).toMatch(
-      /profile and preferences.+recall.+skip equivalents.+replacement.+forget.+outdated.+conflict.+unclear.+ask.+keep both.+do not guess or delete/i
-    );
-    expect(normalizedSkillContent).toMatch(
       /events and trajectories.+preserve.+history.+duplicates.+explicit corrections/i
     );
     expect(normalizedSkillContent).toMatch(
@@ -149,9 +146,11 @@ describe('AgentMemoryPlugin', () => {
     expect(normalizedSkillContent).toMatch(
       /ordinary.+non-hidden.+index.+read access.+use the tools.+per-user.+per-space.+tombstone.+expiry/i
     );
-    expect(normalizedSkillContent).toMatch(/profile.+current.+name.+role.+expertise.+background/i);
     expect(normalizedSkillContent).toMatch(
-      /preferences.+current.+styles.+formats.+tools.+workflows/i
+      /do not remember.+personal profile.+name.+role.+background.+expertise/i
+    );
+    expect(normalizedSkillContent).toMatch(
+      /do not remember.+preferences.+styles.+formats.+tools.+workflows/i
     );
     expect(normalizedSkillContent).toMatch(/events.+completed.+decisions.+outcomes.+dates/i);
     expect(normalizedSkillContent).toMatch(

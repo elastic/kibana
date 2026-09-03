@@ -118,6 +118,7 @@ export const writeMemory = async ({
   const hash = contentHash(description);
   const id = deterministicDocumentId({ spaceId: space_id, scopeKind, scopeId, hash });
   const now = new Date().toISOString();
+  const defaultExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
   const client = storage.getClient();
 
   const writer = new OccWriter<MemoryDocument>({
@@ -165,7 +166,7 @@ export const writeMemory = async ({
     content: `${title}\n\n${description}`,
     tags,
     deleted: false,
-    expires_at,
+    expires_at: expires_at ?? defaultExpiry,
     '@timestamp': now,
     created_at: now,
     space_id,

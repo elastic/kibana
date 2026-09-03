@@ -110,6 +110,7 @@ describe('memoryStorageSettings', () => {
               author: keywordMapping,
               author_kind: keywordMapping,
               call_source: keywordMapping,
+              used_memory_ids: keywordMapping,
             },
             type: 'object',
           },

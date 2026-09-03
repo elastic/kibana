@@ -69,7 +69,7 @@ describe('Agent Memory ES|QL recall builders', () => {
       },
     };
 
-    expect(buildTestFilter('preferences', ['project:phoenix', 'source:workflow'])).toEqual({
+    expect(buildTestFilter('procedures', ['project:phoenix', 'source:workflow'])).toEqual({
       bool: {
         filter: [
           { term: { space_id: 'space-1' } },
@@ -77,7 +77,7 @@ describe('Agent Memory ES|QL recall builders', () => {
           scopeOrClause,
           { term: { deleted: false } },
           expiryFilter,
-          { term: { 'memory.category': 'preferences' } },
+          { term: { 'memory.category': 'procedures' } },
           { term: { tags: 'project:phoenix' } },
           { term: { tags: 'source:workflow' } },
         ],

@@ -59,8 +59,8 @@ const lexicalResponse = {
 };
 
 const recallParams = {
-  query: 'editor preference',
-  category: 'preferences' as const,
+  query: 'editor fix',
+  category: 'procedures' as const,
   space_id: 'default',
   identity: {
     author: 'user-1',

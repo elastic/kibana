@@ -62,17 +62,18 @@ describe('createRememberTool', () => {
     expect(tool.confirmation?.askUser).toBe('always');
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        title: 'Preferred editor',
-        description: 'The user prefers Vim.',
-        category: 'preferences',
+        title: 'Vim keybindings caused issue in ES|QL editor',
+        description: 'Opening the ES|QL editor while Vim mode is enabled causes a focus loop.',
+        category: 'events',
         scope: 'user',
       },
       context: mockContext,
     });
 
     expect(confirmation).toEqual({
-      title: 'Remember "Preferred editor"',
-      message: 'Save this memory for future conversations?\n\nThe user prefers Vim.',
+      title: 'Remember "Vim keybindings caused issue in ES|QL editor"',
+      message:
+        'Save this memory for future conversations?\n\nOpening the ES|QL editor while Vim mode is enabled causes a focus loop.',
       confirm_text: 'Remember',
       color: 'primary',
     });
@@ -97,9 +98,9 @@ describe('createRememberTool', () => {
 
     const result = await tool.handler(
       {
-        title: "User's name is Susah",
-        description: "The user's name is Susah.",
-        category: 'profile',
+        title: 'Deployed payments-demo index on 2026-09-03',
+        description: 'The payments-demo index was deployed to production on 2026-09-03.',
+        category: 'events',
         scope: 'user',
       },
       mockContext
@@ -115,7 +116,7 @@ describe('createRememberTool', () => {
       expect.objectContaining({
         storage: mockStorage,
         esClient: asCurrentUser,
-        params: expect.objectContaining({ category: 'profile' }),
+        params: expect.objectContaining({ category: 'events' }),
       })
     );
     expect(result).toEqual({
@@ -135,9 +136,9 @@ describe('createRememberTool', () => {
     await expect(
       tool.handler(
         {
-          title: "User's name is Susah",
-          description: "The user's name is Susah.",
-          category: 'profile',
+          title: 'Deployed payments-demo index on 2026-09-03',
+          description: 'The payments-demo index was deployed to production on 2026-09-03.',
+          category: 'events',
           scope: 'user',
         },
         mockContext

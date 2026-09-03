@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { recallInputSchema } from './schemas';
+import { recallInputSchema, rememberInputSchema } from './schemas';
 
 describe('Agent Memory schemas', () => {
   it('accepts bounded tags for explicit recall', () => {
@@ -28,5 +28,17 @@ describe('Agent Memory schemas', () => {
         tags: Array.from({ length: 21 }, (_, index) => `tag-${index}`),
       }).success
     ).toBe(false);
+  });
+
+  it('rejects removed categories profile and preferences on remember', () => {
+    const base = {
+      title: 'Test memory',
+      description: 'Some content.',
+    };
+    expect(rememberInputSchema.safeParse({ ...base, category: 'profile' }).success).toBe(false);
+    expect(rememberInputSchema.safeParse({ ...base, category: 'preferences' }).success).toBe(false);
+    expect(rememberInputSchema.safeParse({ ...base, category: 'events' }).success).toBe(true);
+    expect(rememberInputSchema.safeParse({ ...base, category: 'trajectories' }).success).toBe(true);
+    expect(rememberInputSchema.safeParse({ ...base, category: 'procedures' }).success).toBe(true);
   });
 });
