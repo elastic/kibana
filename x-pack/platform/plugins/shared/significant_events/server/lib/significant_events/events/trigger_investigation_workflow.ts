@@ -31,15 +31,25 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
-  const { title, summary, stream_names, event_uuid, event_id, status, severity, confidence } =
-    event;
+  const {
+    title,
+    summary,
+    stream_names,
+    event_uuid,
+    event_id,
+    status,
+    severity,
+    confidence,
+    causal_features,
+    blast_radius,
+  } = event;
 
   const client = nightshiftInvestigations.getInvestigationsClient(request);
 
   let investigationId: string;
   try {
     const response = await client.start({
-      subject: { type: 'significant_event', id: event_uuid },
+      subject: { type: 'significant_event', id: event_id, summary },
       trigger_type: 'manual',
       message: `${title}\n\n${summary}`,
       stream_names: stream_names ?? [],
@@ -49,8 +59,9 @@ export const triggerInvestigationWorkflow = async ({
         event_id,
         status,
         severity,
-        summary,
         confidence,
+        causal_features: causal_features ?? [],
+        blast_radius: blast_radius ?? [],
       },
     });
     investigationId = response.investigation_id;

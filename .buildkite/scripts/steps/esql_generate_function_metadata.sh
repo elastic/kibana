@@ -11,13 +11,6 @@ report_main_step () {
 }
 
 main () {
-  cd "$PARENT_DIR"
-
-  report_main_step "Cloning Elasticsearch repository"
-
-  rm -rf elasticsearch
-  git clone https://github.com/elastic/elasticsearch --depth 1
-
   report_main_step "Bootstrapping Kibana"
 
   cd "$KIBANA_DIR"
@@ -28,11 +21,11 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  yarn make:defs
 
   report_main_step "Generate inline function docs"
 
-  yarn make:docs $PARENT_DIR/elasticsearch
+  yarn make:docs
 
   report_main_step "Run i18n check"
 

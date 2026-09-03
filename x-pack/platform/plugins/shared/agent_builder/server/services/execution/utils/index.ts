@@ -13,6 +13,8 @@ export {
   getConversation,
   updateConversation$,
   createConversation$,
+  persistRoundInput,
+  appendRoundTerminated$,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,

@@ -1261,9 +1261,7 @@ export const pieLegacyESQLState = {
         allowHidden: false,
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| STATS count = COUNT(*) by category',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
   },
   references: [],
@@ -1357,9 +1355,7 @@ export const treemapLegacyESQLState = {
         allowHidden: false,
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| STATS count = COUNT(*) by category ',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
   },
   references: [],
@@ -1453,9 +1449,7 @@ export const mosaicLegacyESQLState = {
         allowHidden: false,
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| STATS count = COUNT(*) by category ',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
   },
   references: [],
@@ -1548,9 +1542,7 @@ export const waffleLegacyESQLState = {
         allowHidden: false,
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| STATS count = COUNT(*) by category ',
-    },
+    query: { language: 'kuery', query: '' },
     filters: [],
   },
   references: [],
