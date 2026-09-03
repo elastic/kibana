@@ -106,10 +106,10 @@ const SavedQueryRowActionsComponent: React.FC<SavedQueryRowActionsProps> = ({ it
       deleteLabel={deleteLabel}
       deleteModalConfig={DELETE_MODAL_CONFIG}
       canWrite={!!permissions.writeSavedQueries}
-      isReadOnly={!!item.prebuilt}
+      isDeletable={!item.prebuilt}
       // Mirrors `viewMode` in routes/saved_queries/edit: a prebuilt query opens as a
       // details page even for a writer, so the kebab must not promise an edit.
-      isViewOnly={!!item.prebuilt}
+      opensReadOnlyPage={!!item.prebuilt}
       onEdit={handleEdit}
       onDuplicate={handleDuplicate}
       onDelete={handleDelete}

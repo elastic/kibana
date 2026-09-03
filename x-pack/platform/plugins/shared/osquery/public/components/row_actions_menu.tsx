@@ -34,20 +34,21 @@ interface RowActionsMenuProps {
   editLabel: string;
   /**
    * Label shown in place of `editLabel` when the destination page is read-only
-   * for this user (see `isViewOnly`). Falls back to `editLabel` when omitted.
+   * for this user (see `opensReadOnlyPage`).
    */
-  viewLabel?: string;
+  viewLabel: string;
   duplicateLabel: string;
   deleteLabel: string;
   deleteModalConfig: DeleteModalConfig;
   canWrite: boolean;
-  isReadOnly: boolean;
+  /** Item is Elastic-managed and therefore cannot be deleted. */
+  isDeletable: boolean;
   /**
    * Whether the page the open action navigates to renders as read-only. Decided by
    * the caller because it differs per resource: a prebuilt pack is still editable by
    * a writer (agent policies/shards), whereas a prebuilt saved query is not.
    */
-  isViewOnly?: boolean;
+  opensReadOnlyPage?: boolean;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => Promise<unknown>;
@@ -69,8 +70,8 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
   deleteLabel,
   deleteModalConfig,
   canWrite,
-  isReadOnly,
-  isViewOnly,
+  isDeletable,
+  opensReadOnlyPage,
   onEdit,
   onDuplicate,
   onDelete,
@@ -115,7 +116,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
   const menuItems = useMemo(() => {
     // The open action navigates to the same route either way; only the affordance
     // changes, so a viewer isn't promised an edit the destination page won't allow.
-    const showViewLabel = (!canWrite || !!isViewOnly) && !!viewLabel;
+    const showViewLabel = !canWrite || !!opensReadOnlyPage;
     const items = [
       <EuiContextMenuItem
         key="edit"
@@ -133,7 +134,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
         </EuiContextMenuItem>
       );
 
-      if (!isReadOnly) {
+      if (isDeletable) {
         items.push(
           <EuiContextMenuItem key="delete" icon="trash" color="danger" onClick={handleDeleteClick}>
             {deleteLabel}
@@ -148,8 +149,8 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
     handleDuplicateClick,
     handleDeleteClick,
     canWrite,
-    isReadOnly,
-    isViewOnly,
+    isDeletable,
+    opensReadOnlyPage,
     editLabel,
     viewLabel,
     duplicateLabel,

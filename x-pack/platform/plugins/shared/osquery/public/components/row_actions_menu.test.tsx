@@ -25,11 +25,12 @@ const defaultProps = {
   itemName: 'test-item',
   actionsAriaLabel: 'Actions for test-item',
   editLabel: 'Edit',
+  viewLabel: 'View',
   duplicateLabel: 'Duplicate',
   deleteLabel: 'Delete',
   deleteModalConfig: DELETE_MODAL_CONFIG,
   canWrite: true,
-  isReadOnly: false,
+  isDeletable: true,
   onEdit: jest.fn(),
   onDuplicate: jest.fn(),
   onDelete: jest.fn().mockResolvedValue(undefined),
@@ -57,19 +58,17 @@ describe('RowActionsMenu', () => {
     expect(screen.getByText('Delete')).toBeInTheDocument();
   });
 
-  it('shows only edit when canWrite is false', () => {
+  it('shows only the open action when canWrite is false', () => {
     renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
-    expect(screen.getByText('Edit')).toBeInTheDocument();
+    expect(screen.getByText('View')).toBeInTheDocument();
     expect(screen.queryByText('Duplicate')).not.toBeInTheDocument();
     expect(screen.queryByText('Delete')).not.toBeInTheDocument();
   });
 
-  it('shows viewLabel instead of editLabel when canWrite is false and viewLabel is provided', () => {
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false, viewLabel: 'View' })
-    );
+  it('shows viewLabel instead of editLabel when canWrite is false', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('View')).toBeInTheDocument();
@@ -79,29 +78,19 @@ describe('RowActionsMenu', () => {
   });
 
   it('shows editLabel (not viewLabel) when canWrite is true', () => {
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, viewLabel: 'View' })
-    );
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit')).toBeInTheDocument();
     expect(screen.queryByText('View')).not.toBeInTheDocument();
   });
 
-  it('falls back to editLabel when canWrite is false and viewLabel is omitted', () => {
-    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false }));
-    fireEvent.click(screen.getByLabelText('Actions for test-item'));
-
-    expect(screen.getByText('Edit')).toBeInTheDocument();
-  });
-
-  it('shows viewLabel when isViewOnly is true even though canWrite is true', () => {
+  it('shows viewLabel when opensReadOnlyPage is true even though canWrite is true', () => {
     renderWithIntl(
       React.createElement(RowActionsMenu, {
         ...defaultProps,
         canWrite: true,
-        isViewOnly: true,
-        viewLabel: 'View',
+        opensReadOnlyPage: true,
       })
     );
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
@@ -112,34 +101,23 @@ describe('RowActionsMenu', () => {
     expect(screen.getByText('Duplicate')).toBeInTheDocument();
   });
 
-  it('falls back to editLabel when isViewOnly is true but viewLabel is omitted', () => {
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, isViewOnly: true })
-    );
-    fireEvent.click(screen.getByLabelText('Actions for test-item'));
-
-    expect(screen.getByText('Edit')).toBeInTheDocument();
-  });
-
   it('uses the eye icon when showing viewLabel and the pencil icon otherwise', () => {
     const { unmount } = renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false, viewLabel: 'View' })
+      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: false })
     );
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('View').closest('button')).toContainHTML('data-euiicon-type="eye"');
     unmount();
 
-    renderWithIntl(
-      React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true, viewLabel: 'View' })
-    );
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, canWrite: true }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit').closest('button')).toContainHTML('data-euiicon-type="pencil"');
   });
 
-  it('hides delete but shows duplicate when isReadOnly is true', () => {
-    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isReadOnly: true }));
+  it('hides delete but shows duplicate when isDeletable is false', () => {
+    renderWithIntl(React.createElement(RowActionsMenu, { ...defaultProps, isDeletable: false }));
     fireEvent.click(screen.getByLabelText('Actions for test-item'));
 
     expect(screen.getByText('Edit')).toBeInTheDocument();

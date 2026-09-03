@@ -99,7 +99,7 @@ const PackRowActionsComponent: React.FC<PackRowActionsProps> = ({ item }) => {
       deleteLabel={deleteLabel}
       deleteModalConfig={DELETE_MODAL_CONFIG}
       canWrite={!!permissions.writePacks}
-      isReadOnly={!!item.read_only}
+      isDeletable={!item.read_only}
       onEdit={handleEdit}
       onDuplicate={handleDuplicate}
       onDelete={handleDelete}
