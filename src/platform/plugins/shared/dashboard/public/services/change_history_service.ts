@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ChangeHistoryHttpClient } from '@kbn/change-history-ui';
 import type { DashboardState } from '../../server';
 import { coreServices } from './kibana_services';
 

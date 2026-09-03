@@ -76,7 +76,7 @@ export function registerChangeHistoryRoute(
         username: user.username,
         spaceId,
       });
-      // const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id);
+      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id);
       // console.log({ total, items });
       return res.ok();
     }
