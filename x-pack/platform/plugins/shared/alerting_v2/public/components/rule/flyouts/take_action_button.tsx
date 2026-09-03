@@ -21,6 +21,9 @@ export const TakeActionButton = ({ onClick }: TakeActionButtonProps) => (
     onClick={onClick}
     data-test-subj="ruleSummaryFlyoutTakeActionButton"
   >
-    <FormattedMessage id="xpack.alertingV2.ruleSummaryFlyout.takeAction" defaultMessage="Take action" />
+    <FormattedMessage
+      id="xpack.alertingV2.ruleSummaryFlyout.takeAction"
+      defaultMessage="Take action"
+    />
   </EuiButton>
 );

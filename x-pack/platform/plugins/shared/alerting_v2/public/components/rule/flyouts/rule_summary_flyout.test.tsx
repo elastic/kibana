@@ -184,17 +184,15 @@ describe('RuleSummaryFlyout', () => {
         'updateRuleApiKey-rule-1',
         'deleteRule-rule-1',
       ];
-      const items = expectedOrder.map((testId) => screen.getByTestId(testId));
+      const panel = screen.getByTestId('viewRuleDetails-rule-1').closest('.euiContextMenuPanel');
 
       // Items appear in the expected document order.
-      for (let i = 1; i < items.length; i++) {
-        expect(
-          items[i - 1].compareDocumentPosition(items[i]) & Node.DOCUMENT_POSITION_FOLLOWING
-        ).toBeTruthy();
-      }
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => expectedOrder.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(expectedOrder);
 
       // Three dividers separate the four groups (read / edit-clone / run-disable-apiKey / delete).
-      const panel = items[0].closest('.euiContextMenuPanel');
       expect(panel?.querySelectorAll('hr')).toHaveLength(3);
     });
 
