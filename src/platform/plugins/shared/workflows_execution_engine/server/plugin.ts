@@ -41,6 +41,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { executeWorkflowSync } from './execution_functions/execute_workflow_sync';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
@@ -62,6 +63,7 @@ import {
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
+import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -89,6 +91,7 @@ import {
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+import { SyncLogDrain } from './workflow_event_logger/sync_log_drain';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -150,6 +153,9 @@ export class WorkflowsExecutionEnginePlugin
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+  /** Long-lived drain that buffers sync-execution event-log writes and flushes them
+   *  to Elasticsearch out-of-band, keeping the sync hot path free of ES round-trips. */
+  private syncLogDrain?: SyncLogDrain;
 
   private dataClientBundle!: DataClientBundle;
 
@@ -966,7 +972,10 @@ export class WorkflowsExecutionEnginePlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+  public start(
+    coreStart: CoreStart,
+    plugins: WorkflowsExecutionEnginePluginStartDeps
+  ): WorkflowsExecutionEnginePluginStart {
     this.logger.debug('workflows-execution-engine: Start');
 
     if (!this.setupDependencies) {
@@ -977,6 +986,17 @@ export class WorkflowsExecutionEnginePlugin
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
+    // Construct the sync-execution log drain when the plugin is enabled.
+    // The drain buffers event-log writes from sync executions and flushes them
+    // to ES out-of-band so the synchronous call path has no inline ES writes.
+    if (this.config.syncExecution.enabled && this.config.syncLogDrain.enabled) {
+      this.syncLogDrain = new SyncLogDrain(
+        new LogsRepository(coreStart.dataStreams, this.logger),
+        this.logger.get('sync_log_drain'),
+        this.config.syncLogDrain
+      );
+    }
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
@@ -1018,6 +1038,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      executionId?: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
@@ -1041,7 +1062,11 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: {
+        refresh: boolean | 'wait_for';
+        executionId?: string;
+        metadata?: Record<string, string>;
+      } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -1054,14 +1079,17 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
+      const executionContext = options.metadata
+        ? { ...context, metadata: options.metadata }
+        : context;
       const workflowExecution = await buildExecutionDocument({
         workflow,
-        context,
+        executionId: options.executionId,
+        context: executionContext,
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
       });
-
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
         workflowExecutionRepository,
@@ -1104,8 +1132,38 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request, options = {}) => {
       await checkLicense(plugins.licensing);
+
+      if (
+        options.executionMode !== 'sync' &&
+        (options.capabilities !== undefined || options.abortSignal !== undefined)
+      ) {
+        throw new Error('Request-local capabilities and abort signals require sync execution');
+      }
+
+      if (options.executionMode === 'sync' && this.config.syncExecution.enabled) {
+        if (!request) {
+          throw new Error('Synchronous workflows cannot be executed without the user context');
+        }
+        if (!this.coreSetup) {
+          throw new Error('Core setup not available');
+        }
+        const coreSetup = this.coreSetup;
+        return executeWorkflowSync({
+          workflow,
+          context,
+          request,
+          options,
+          logger: this.logger,
+          dependencies,
+          syncLogDrain: this.syncLogDrain,
+          getWorkflowsExecutionEngine: async () => {
+            const [, , workflowsExecutionEngine] = await coreSetup.getStartServices();
+            return workflowsExecutionEngine;
+          },
+        });
+      }
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
@@ -1138,7 +1196,10 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'manual',
         request,
-        { refresh: true }
+        {
+          refresh: true,
+          executionId: options.executionId,
+        }
       );
 
       const inputsValid = await validateWorkflowInputs(
@@ -1698,6 +1759,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     return {
+      supportsSynchronousExecution: true,
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
@@ -1714,8 +1776,9 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     void this.dataClientBundle.stop();
+    await this.syncLogDrain?.shutdown();
   }
 
   /**
