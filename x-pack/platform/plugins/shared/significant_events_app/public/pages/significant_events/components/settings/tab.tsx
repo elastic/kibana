@@ -833,7 +833,10 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
+      {/* Slack connect/disconnect and channel bind only hit SE manage routes,
+          not Advanced Settings. Gate on canManage so an SE admin can reconnect
+          a stale key without advancedSettings.save. */}
+      {isAppsEnabled && <AppsSection canEdit={canManage} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
