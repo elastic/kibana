@@ -182,6 +182,46 @@ export const artifactListPageLabels = Object.freeze({
   ),
 
   // ------------------------------
+  // TABLE labels
+  // ------------------------------
+  tableColumnNameLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnNameLabel',
+    {
+      defaultMessage: 'Name',
+    }
+  ),
+  tableColumnOperatingSystemsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnOperatingSystemsLabel',
+    {
+      defaultMessage: 'Operating systems',
+    }
+  ),
+  tableColumnUpdatedByLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnUpdatedByLabel',
+    {
+      defaultMessage: 'Updated by',
+    }
+  ),
+  tableColumnLastUpdatedLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnLastUpdatedLabel',
+    {
+      defaultMessage: 'Last updated',
+    }
+  ),
+  tableColumnActionsLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnActionsLabel',
+    {
+      defaultMessage: 'Actions',
+    }
+  ),
+  tableNoItemsMessage: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.noItemsMessage',
+    {
+      defaultMessage: 'No items found',
+    }
+  ),
+
+  // ------------------------------
   // ARTIFACT FLYOUT
   // ------------------------------
   ...ARTIFACT_FLYOUT_LABELS,
