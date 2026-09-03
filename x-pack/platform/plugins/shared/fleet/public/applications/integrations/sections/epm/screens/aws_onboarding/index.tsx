@@ -13,6 +13,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiCheckableCard,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -24,6 +26,7 @@ import {
   EuiLink,
   EuiNotificationBadge,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiSuperSelect,
@@ -113,20 +116,20 @@ const ServiceCard: React.FunctionComponent<{
   service: AwsServiceEntry;
   checked: boolean;
   onToggle: (id: string) => void;
-}> = ({ service, checked, onToggle }) => {
+  isOutdated?: boolean;
+}> = ({ service, checked, onToggle, isOutdated }) => {
   const { euiTheme } = useEuiTheme();
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
   return (
     <EuiCheckableCard
       id={`awsService-${service.id}`}
       checkableType="checkbox"
       checked={checked}
-      onChange={() => onToggle(service.id)}
+      onChange={() => !isOutdated && onToggle(service.id)}
+      disabled={isOutdated}
       color="plain"
       css={{
         borderColor: euiTheme.colors.borderBaseProminent,
-        // Override EuiCheckableCard's built-in "subdued" tint on the
-        // checkbox cell so it reads as part of the same white card,
-        // not a separate grey patch.
         '.euiPanel--subdued': { backgroundColor: euiTheme.colors.emptyShade },
       }}
       label={
@@ -138,7 +141,7 @@ const ServiceCard: React.FunctionComponent<{
             <EuiText
               size="s"
               className="eui-textTruncate"
-              style={{ fontWeight: checked ? euiTheme.font.weight.medium : undefined }}
+              style={{ fontWeight: checked && !isOutdated ? euiTheme.font.weight.medium : undefined }}
             >
               {service.name}
             </EuiText>
@@ -148,6 +151,48 @@ const ServiceCard: React.FunctionComponent<{
               <EuiBadge color="hollow">{dt}</EuiBadge>
             </EuiFlexItem>
           ))}
+          {isOutdated && (
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                isOpen={isWarningOpen}
+                closePopover={() => setIsWarningOpen(false)}
+                panelPaddingSize="m"
+                anchorPosition="downCenter"
+                button={
+                  <EuiButtonIcon
+                    iconType="warning"
+                    color="warning"
+                    size="xs"
+                    aria-label={`${service.name} has breaking changes`}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setIsWarningOpen((o) => !o);
+                    }}
+                  />
+                }
+              >
+                <div style={{ maxWidth: 320 }}>
+                  <EuiText size="s">
+                    <p>New version available, action required due to breaking changes</p>
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton size="s" fill onClick={() => setIsWarningOpen(false)}>
+                        Review breaking changes
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty size="s" onClick={() => setIsWarningOpen(false)}>
+                        View changelog
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              </EuiPopover>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
     />
@@ -200,7 +245,8 @@ const CategoryServicesPanel: React.FunctionComponent<{
   selected: Set<string>;
   onToggle: (id: string) => void;
   onSelectAll: (ids: string[]) => void;
-}> = ({ category, services, selected, onToggle, onSelectAll }) => {
+  outdatedServiceIds?: Set<string>;
+}> = ({ category, services, selected, onToggle, onSelectAll, outdatedServiceIds }) => {
   return (
     <EuiPanel color="subdued" paddingSize="l" hasShadow={false}>
       <EuiFlexGroup alignItems="center" responsive={false}>
@@ -221,6 +267,7 @@ const CategoryServicesPanel: React.FunctionComponent<{
               service={service}
               checked={selected.has(service.id)}
               onToggle={onToggle}
+              isOutdated={outdatedServiceIds?.has(service.id)}
             />
           </EuiFlexItem>
         ))}
@@ -229,7 +276,10 @@ const CategoryServicesPanel: React.FunctionComponent<{
   );
 };
 
-export const AwsOnboardingPage: React.FunctionComponent = () => {
+// Re-exported via version_switcher.tsx as AwsOnboardingPage — import from there.
+export const AwsOnboardingProtoPage: React.FunctionComponent<{
+  outdatedServiceIds?: Set<string>;
+}> = ({ outdatedServiceIds }) => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
 
@@ -253,10 +303,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
   const [deployIdentityName, setDeployIdentityName] = useState('');
-  // Fixed, not user-editable — taken from the Global region chosen in
-  // Service Settings (step 2). Kept as a value here (rather than inlined)
-  // since Detect & Review's summary still needs to display it.
-  const deployRegion = 'us-east';
+  const [globalRegion, setGlobalRegion] = useState('us-east-1');
   const [isDeployed, setIsDeployed] = useState(false);
   const [receivedCount, setReceivedCount] = useState(0);
   const deployTimers = useRef<number[]>([]);
@@ -507,6 +554,18 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </>
           )}
 
+          {outdatedServiceIds && outdatedServiceIds.size > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                size="s"
+                color="warning"
+                iconType="warning"
+                title="Some services need to be upgraded and cannot be selected"
+              />
+            </>
+          )}
+
           <EuiSpacer size="l" />
           <EuiFlexGroup gutterSize="l" alignItems="flexStart">
             <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
@@ -545,6 +604,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                       selected={selected}
                       onToggle={onToggle}
                       onSelectAll={onSelectAll}
+                      outdatedServiceIds={outdatedServiceIds}
                     />
                   </React.Fragment>
                 ))
@@ -561,6 +621,8 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onTriggerSourceChange={(id, value) =>
             setTriggerSources((prev) => ({ ...prev, [id]: value }))
           }
+          globalRegion={globalRegion}
+          onGlobalRegionChange={setGlobalRegion}
         />
       )}
 
@@ -591,7 +653,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           services={selectedServices}
           schema={schema}
           triggerSources={triggerSources}
-          region={deployRegion}
+          region={globalRegion}
           identityName={deployIdentityName}
           stackName={stackName}
           receivedCount={receivedCount}

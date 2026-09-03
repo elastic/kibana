@@ -16,7 +16,7 @@ import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } fr
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
-import { AwsOnboardingPage } from './screens/aws_onboarding';
+import { AwsOnboardingPage } from './screens/aws_onboarding/version_switcher';
 import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
