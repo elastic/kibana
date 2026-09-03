@@ -18,14 +18,10 @@ import {
   getPackagePolicyForMonitor,
   indexFakeFleetAgent,
   deleteFleetAgents,
-  triggerPrivateLocationsSync,
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
-import {
-  agentIdFromCondition,
-  UNASSIGNED_CONDITION,
-} from '../../../../../server/synthetics_service/private_location/assign_by_condition';
+import { agentIdFromCondition } from '../../../../../server/synthetics_service/private_location/assign_by_condition';
 
 const TEST_TIMEOUT = 4 * 60 * 1000;
 const MONITOR_COUNT = 10;
@@ -48,9 +44,10 @@ const MONITOR_COUNT = 10;
  * then waiting, as an earlier version of this spec did, only ever exercises
  * capacity-blind create-time rendezvous and Phase 1's retention -- the split
  * stays at whatever rendezvous picked and never self-corrects. Starting with
- * zero agents forces every monitor through the sentinel `UNASSIGNED_CONDITION`
- * first, so the *first* real placement both agents ever receive goes through
- * Phase 2's capacity-weighted LPT.
+ * zero agents leaves every monitor's `condition` unset at create time (see
+ * `generateNewPolicy` in `synthetics_private_location.ts`), so the *first*
+ * real placement both agents ever receive goes through Phase 2's
+ * capacity-weighted LPT.
  *
  * Runs under the default Scout config set: the plugin registers and starts
  * `RebalancePrivateLocationShardsTask` unconditionally, and its kill-switch
@@ -108,16 +105,15 @@ apiTest.describe('ScalablePrivateLocationPlacement', { tag: ['@local-stateful-cl
         monitorIds.push((res.body as { id: string }).id);
       }
 
-      // A monitor has no package policy at all -- not even the sentinel
-      // UNASSIGNED_CONDITION one -- until SyncPrivateLocationMonitorsTask has
-      // run at least once; its natural schedule is 5 minutes
-      // (MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL), far outside the poll window
-      // below, so force it to run now instead of waiting it out.
-      await triggerPrivateLocationsSync(apiClient, editorHeaders);
-
       // Confirm they start unplaced (no agents enrolled yet) before adding
       // agents -- otherwise a false pass here wouldn't prove anything about
-      // which placement phase actually ran.
+      // which placement phase actually ran. `generateNewPolicy` (see
+      // `synthetics_private_location.ts`) *omits* `condition` entirely when
+      // zero agents are enrolled at create time -- it never stamps the
+      // `UNASSIGNED_CONDITION` sentinel itself, that's only ever written by a
+      // later create/edit/rebalance pass once agents exist to be unassigned
+      // *from*. So "unassigned" here means using the same helper the second
+      // half of this test uses, not a literal-string comparison.
       await tryForTime(30_000, async () => {
         for (const monitorId of monitorIds) {
           const policy = await getPackagePolicyForMonitor(
@@ -126,7 +122,11 @@ apiTest.describe('ScalablePrivateLocationPlacement', { tag: ['@local-stateful-cl
             monitorId,
             privateLocation.id
           );
-          expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+          expect(policy, `package policy should exist for monitor ${monitorId}`).toBeDefined();
+          expect(
+            agentIdFromCondition(policy?.condition),
+            `monitor ${monitorId} should start unassigned`
+          ).toBeUndefined();
         }
       });
 
