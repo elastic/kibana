@@ -168,7 +168,12 @@ export const SEVERITY_VALIDATION_ERRORS: Record<SeverityValidationError, string>
 
 export const THRESHOLD_STEP_TITLE = i18n.translate(
   'xpack.alertingV2.ruleBuilder.threshold.stepTitle',
-  { defaultMessage: 'Alert Condition' }
+  { defaultMessage: 'Condition' }
+);
+
+export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleBuilder.threshold.createFlyoutTitle',
+  { defaultMessage: 'Create Threshold rule' }
 );
 
 export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(

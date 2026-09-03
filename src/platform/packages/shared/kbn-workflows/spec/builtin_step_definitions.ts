@@ -23,9 +23,21 @@ import {
   WorkflowExecuteStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
-import { MAX_HITL_RESPONDED_BY_LENGTH, MAX_HITL_RESPONSE_FIELD_KEY_LENGTH } from '../common/hitl';
+import {
+  MAX_HITL_CHANNEL_LENGTH,
+  MAX_HITL_RESPONDED_AT_LENGTH,
+  MAX_HITL_RESPONDED_BY_LENGTH,
+  MAX_HITL_RESPONSE_FIELD_KEY_LENGTH,
+} from '../common/hitl';
 
 const EmptyObjectSchema = z.object({});
+
+/** Shared HITL audit fields on waitForInput / waitForApproval step output. */
+export const hitlAuditOutputFields = {
+  respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+  channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
+  respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
+};
 
 export type BuiltInStepDefinition = BaseStepDefinition;
 
@@ -281,7 +293,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     inputSchema: WaitForInputStepInputSchema,
     outputSchema: z.object({
       response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
-      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+      ...hitlAuditOutputFields,
     }),
     documentation: {
       examples: [
@@ -303,6 +315,14 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
           default: medium
       required:
         - reason`,
+        `- name: ask_in_slack
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      slack_api:
+        connector-id: my-slack-api-connector
+        channels: ['C0123456789', '#alerts']`,
       ],
     },
   },
@@ -315,7 +335,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     inputSchema: WaitForApprovalStepInputSchema,
     outputSchema: z.object({
       response: z.object({ approved: z.boolean() }),
-      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+      ...hitlAuditOutputFields,
     }),
     documentation: {
       examples: [
@@ -331,7 +351,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-slack-webhook-connector
       slack_api:
         connector-id: my-slack-api-connector
-        channels: ['C0123456789']`,
+        channels: ['C0123456789', '#alerts']`,
       ],
     },
   },

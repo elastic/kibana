@@ -46,9 +46,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
-   * Release: 9.6
+   * Release: 9.6, backported to 9.5.x
    */
-  responseActionsEndpointMemoryDumpRaw: false,
+  responseActionsEndpointMemoryDumpRaw: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -340,6 +340,13 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
 
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
