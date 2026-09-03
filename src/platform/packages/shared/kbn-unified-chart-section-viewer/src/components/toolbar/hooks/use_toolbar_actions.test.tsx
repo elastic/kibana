@@ -108,7 +108,12 @@ describe('useToolbarActions', () => {
       }),
     });
 
-    expect(findEditGridButton(result.current.rightSideActions)).toBeDefined();
+    expect(findEditGridButton(result.current.rightSideActions)).toEqual(
+      expect.objectContaining({
+        'data-ebt-action': 'editGridSettings',
+        'data-ebt-element': 'chartsToolbar',
+      })
+    );
   });
 
   it('hides the Edit grid of metrics button when the feature flag resolves to false', () => {
