@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-} from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import {
   MAX_INFERENCE_DOCUMENT_BYTES,
@@ -115,11 +111,10 @@ const makeInferredHandlerParams = ({
   const routeLogger = makeRouteLogger();
   const stream = { name: 'logs.test' };
   const kiClient = {};
-  const boundInferenceClient = {};
-  const bindTo = jest.fn().mockReturnValue(boundInferenceClient);
+  const agentBuilder = {};
   const server = {
     searchInferenceEndpoints: {},
-    agentBuilder: undefined,
+    agentBuilder,
   };
   const licensing = {};
   const maintenanceService = makeMaintenanceService();
@@ -151,7 +146,6 @@ const makeInferredHandlerParams = ({
       scopedClusterClient: { asCurrentUser: {} },
       streamDataEsClient: {},
       streamsClient: { getStream: jest.fn().mockResolvedValue(stream) },
-      inferenceClient: { bindTo },
       soClient: {},
       tuningConfig: {},
       licensing,
@@ -170,8 +164,7 @@ const makeInferredHandlerParams = ({
     routeLogger,
     stream,
     kiClient,
-    boundInferenceClient,
-    bindTo,
+    agentBuilder,
     server,
     licensing,
     maintenanceService,
@@ -331,14 +324,12 @@ describe('inferred feature identification route', () => {
   });
 
   it('rejects _identify/inferred with 409 while paused before touching inference', async () => {
-    const bindTo = jest.fn();
     const getKnowledgeIndicatorClient = jest.fn();
     const handlerParams = {
       params: { path: { streamName: 'logs.test' }, body: null },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        inferenceClient: { bindTo },
         getKnowledgeIndicatorClient,
       }),
       server: {},
@@ -348,7 +339,7 @@ describe('inferred feature identification route', () => {
     await expect(inferredRoute.handler(handlerParams)).rejects.toMatchObject({
       output: { statusCode: 409 },
     });
-    expect(bindTo).not.toHaveBeenCalled();
+    expect(mockIdentifyInferredFeatures).not.toHaveBeenCalled();
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
   });
 
@@ -358,8 +349,7 @@ describe('inferred feature identification route', () => {
       request,
       stream,
       kiClient,
-      boundInferenceClient,
-      bindTo,
+      agentBuilder,
       server,
       licensing,
       maintenanceService,
@@ -375,18 +365,10 @@ describe('inferred feature identification route', () => {
 
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
     expect(maintenanceService.getState).toHaveBeenCalledWith({ request });
-    expect(bindTo).toHaveBeenCalledWith({
-      connectorId: 'connector-1',
-      metadata: {
-        connectorTelemetry: {
-          pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-        },
-      },
-    });
     expect(mockIdentifyInferredFeatures).toHaveBeenCalledWith(
       expect.objectContaining({
-        inferenceClient: boundInferenceClient,
+        agentBuilder,
+        request,
         kiClient,
         streamName: 'logs.test',
         streamType: 'logs',
