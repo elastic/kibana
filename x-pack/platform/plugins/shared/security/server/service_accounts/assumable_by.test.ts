@@ -36,6 +36,8 @@ describe('buildAssumableBy', () => {
         projectType,
       });
 
+      expect(entry.type).toBe('project-service-account');
+      if (entry.type !== 'project-service-account') return;
       expect(entry.project_type).toBe(projectType);
     }
   );

@@ -50,14 +50,22 @@ const serviceAccountSchema = z.object({
   role_assignments: z.record(z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH), z.unknown()),
   assumable_by: z
     .array(
-      z.object({
-        type: z.literal('project-service-account'),
-        organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-        project_type: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-        project_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
-      })
+      z.discriminatedUnion('type', [
+        z.object({
+          type: z.literal('project-service-account'),
+          organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+          project_type: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+          project_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+        }),
+        z.object({
+          type: z.literal('platform-service-account'),
+          service_account_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+        }),
+      ])
     )
-    .max(1),
+    // Raised from 1 to accommodate caller-supplied `assumable_by` (POC). The default
+    // `buildAssumableBy` still produces exactly one entry; this cap prevents runaway input.
+    .max(10),
 });
 
 const serviceAccountCreatorSchema = z.discriminatedUnion('type', [
@@ -151,11 +159,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       const result = await this.uiam.createServiceAccount(accessToken, {
         name: params.name,
         role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
-        assumable_by: buildAssumableBy({
-          organizationId: this.organizationId,
-          projectId: this.projectId,
-          projectType: this.projectType,
-        }),
+        // POC: use the caller's `assumable_by` when provided; otherwise default to the current
+        // Kibana project. This lets an out-of-process assumer (e.g. the Nightshift Relay) be
+        // named by the caller. See CreateServiceAccountParams.assumable_by for the full caveat.
+        assumable_by:
+          params.assumable_by ??
+          buildAssumableBy({
+            organizationId: this.organizationId,
+            projectId: this.projectId,
+            projectType: this.projectType,
+          }),
       });
 
       const parsed = serviceAccountSchema.safeParse(result);
@@ -242,11 +255,13 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   }
 
   /**
-   * Exchanges the service account ID for an ephemeral access token under Kibana's own system
-   * credential. Deliberately private: the raw credential never leaves this backend — consumers
-   * get a fake request bound to it instead.
+   * POC ONLY. Exchanges the service account ID for an ephemeral access token under Kibana's own
+   * system credential. Made public so the token can be handed to an out-of-process consumer (e.g.
+   * the Nightshift Relay). See {@link CoreServiceAccountsService.exchangeToken} for the full
+   * rationale and the caveats that apply before this can ship. In-process consumers should use
+   * `createFakeRequest` instead, which manages the token lifecycle transparently.
    */
-  private async exchangeToken(serviceAccountId: string): Promise<{ token: string }> {
+  async exchangeToken(serviceAccountId: string): Promise<{ token: string }> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'

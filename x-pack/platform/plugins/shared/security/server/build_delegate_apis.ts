@@ -109,6 +109,14 @@ export const buildSecurityApi = ({
         }
         return serviceAccounts.create(request, params);
       },
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: async (serviceAccountId) => {
+        const serviceAccounts = getServiceAccounts();
+        if (!serviceAccounts) {
+          throw new Error('Service accounts are not enabled');
+        }
+        return serviceAccounts.exchangeToken(serviceAccountId);
+      },
       attachWorkload: async (operationType, request, params) =>
         getWorkloads().attach(operationType, request, params),
       detachWorkload: async (operationType, request, params) =>

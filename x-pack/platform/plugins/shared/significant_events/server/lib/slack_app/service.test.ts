@@ -14,7 +14,7 @@ import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
-const request = {} as unknown as KibanaRequest;
+const request = { headers: {} } as unknown as KibanaRequest;
 
 // Shared across tests via `createHarness`'s injected `relayClient`, reset in `beforeEach`.
 const startInstall = jest.fn();
@@ -26,9 +26,18 @@ interface HarnessOptions {
   featureFlagEnabled?: boolean;
   /** Whether `server.relayClient` (provided by the Actions plugin) exists. */
   hasRelayClient?: boolean;
+  /**
+   * Whether `core.security.serviceAccounts.isEnabled()` returns `true`. Defaults to `false`
+   * so existing M1-path tests are unaffected; set to `true` to exercise the UIAM path.
+   */
+  serviceAccountsEnabled?: boolean;
 }
 
-function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: HarnessOptions = {}) {
+function createHarness({
+  featureFlagEnabled = true,
+  hasRelayClient = true,
+  serviceAccountsEnabled = false,
+}: HarnessOptions = {}) {
   const soClient = {
     get: jest
       .fn()
@@ -41,6 +50,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   const grantAsInternalUser = jest.fn();
   const invalidateAsInternalUser = jest.fn().mockResolvedValue({});
   const getBooleanValue = jest.fn().mockResolvedValue(featureFlagEnabled);
+  const createServiceAccount = jest.fn();
   const logger = {
     warn: jest.fn(),
     error: jest.fn(),
@@ -62,6 +72,12 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
+      security: {
+        serviceAccounts: {
+          isEnabled: jest.fn().mockReturnValue(serviceAccountsEnabled),
+          create: createServiceAccount,
+        },
+      },
     },
     licensing: { getLicense },
     security: {
@@ -72,7 +88,14 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     },
   } as unknown as StreamsServer;
 
-  return { server, soClient, grantAsInternalUser, invalidateAsInternalUser, getBooleanValue };
+  return {
+    server,
+    soClient,
+    grantAsInternalUser,
+    invalidateAsInternalUser,
+    getBooleanValue,
+    createServiceAccount,
+  };
 }
 
 describe('SlackAppService', () => {
@@ -195,6 +218,95 @@ describe('SlackAppService', () => {
         expect.objectContaining({ apiKeyId: 'new-key', claimId: 'claim-2' }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
+    });
+
+    describe('UIAM service-account (M2) path', () => {
+      it('creates a service account, forwards its id to the relay, and stores it in the SO', async () => {
+        const { server, soClient, grantAsInternalUser, createServiceAccount } = createHarness({
+          serviceAccountsEnabled: true,
+        });
+        createServiceAccount.mockResolvedValue({ id: 'sa-1', type: 'project' });
+        startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c-1' });
+
+        const result = await new SlackAppService(server).connect(request);
+
+        expect(createServiceAccount).toHaveBeenCalledWith(request, {
+          name: 'nightshift-relay-agent-builder',
+        });
+        expect(grantAsInternalUser).not.toHaveBeenCalled();
+        // The relay receives the SA id (not an API key).
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ uiam_service_account_id: 'sa-1' }),
+          undefined // no bearer on the bare `request = {} as KibanaRequest`
+        );
+        // The SO records the SA id (apiKeyId is null — no long-lived key).
+        expect(soClient.create).toHaveBeenCalledWith(
+          RELAY_APP_CONNECTION_SO_TYPE,
+          expect.objectContaining({
+            status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+            serviceAccountId: 'sa-1',
+            apiKeyId: null,
+            claimId: 'c-1',
+          }),
+          { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+        );
+        expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+      });
+
+      it('reuses a stored serviceAccountId on reconnect without creating a new account', async () => {
+        const { server, soClient, createServiceAccount } = createHarness({
+          serviceAccountsEnabled: true,
+        });
+        soClient.get.mockResolvedValue({
+          attributes: {
+            status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+            apiKeyId: null,
+            serviceAccountId: 'sa-existing',
+            claimId: 'old-claim',
+            tenantKey: null,
+            surface: 'slack',
+          },
+        });
+        startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c-2' });
+
+        await new SlackAppService(server).connect(request);
+
+        expect(createServiceAccount).not.toHaveBeenCalled();
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ uiam_service_account_id: 'sa-existing' }),
+          undefined
+        );
+      });
+
+      it('hard-fails when service account creation fails — does not fall back to M1', async () => {
+        const { server, soClient, grantAsInternalUser, createServiceAccount } = createHarness({
+          serviceAccountsEnabled: true,
+        });
+        createServiceAccount.mockRejectedValue(new Error('no manage_security'));
+
+        await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+          'no manage_security'
+        );
+        expect(startInstall).not.toHaveBeenCalled();
+        expect(grantAsInternalUser).not.toHaveBeenCalled();
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('forwards the bearer token from the request to startInstall', async () => {
+        const { server, createServiceAccount } = createHarness({ serviceAccountsEnabled: true });
+        createServiceAccount.mockResolvedValue({ id: 'sa-1', type: 'project' });
+        startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c-1' });
+
+        const reqWithBearer = {
+          headers: { authorization: 'Bearer essu_testtoken' },
+        } as unknown as KibanaRequest;
+        await new SlackAppService(server).connect(reqWithBearer);
+
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ uiam_service_account_id: 'sa-1' }),
+          'essu_testtoken'
+        );
+      });
     });
 
     // Regression: invalidating the old key up front (before startInstall) would

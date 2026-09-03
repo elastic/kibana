@@ -45,6 +45,8 @@ describe('convertSecurityApi', () => {
       serviceAccounts: {
         isEnabled: jest.fn(),
         create: jest.fn(),
+        // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+        exchangeToken: jest.fn(),
         attachWorkload: jest.fn(),
         detachWorkload: jest.fn(),
         getWorkloadBinding: jest.fn(),
@@ -68,6 +70,8 @@ describe('convertSecurityApi', () => {
 
       expect(output.serviceAccounts.isEnabled).toBe(source.serviceAccounts.isEnabled);
       expect(output.serviceAccounts.create).toBe(source.serviceAccounts.create);
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      expect(output.serviceAccounts.exchangeToken).toBe(source.serviceAccounts.exchangeToken);
     });
 
     // The workload methods take an operation type as an argument, so exposing them on the start
@@ -76,7 +80,11 @@ describe('convertSecurityApi', () => {
     it('does not leak the operation-keyed workload methods', () => {
       const output = convertSecurityApi(source);
 
-      expect(Object.keys(output.serviceAccounts).sort()).toEqual(['create', 'isEnabled']);
+      expect(Object.keys(output.serviceAccounts).sort()).toEqual([
+        'create',
+        'exchangeToken',
+        'isEnabled',
+      ]);
     });
   });
 

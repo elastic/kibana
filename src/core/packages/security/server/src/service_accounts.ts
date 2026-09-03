@@ -29,4 +29,17 @@ export interface CoreServiceAccountsService {
    * @param params The name and role assignments for the new service account.
    */
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
+
+  /**
+   * POC ONLY. Exchanges a service account id for a short-lived access token.
+   *
+   * Deliberately unauthorized: it performs no privilege check, so any plugin holding the start
+   * contract can mint a live credential for any account id it can name. The security plugin kept
+   * the equivalent method private for exactly this reason — the sanctioned in-process path is
+   * `createFakeRequest`, which never surfaces the raw token. This exists only so a token can be
+   * handed to an out-of-process consumer (e.g. the Nightshift Relay); it needs a
+   * `manage_security` gate (or an operation-handle capability, like workload bindings have)
+   * before shipping.
+   */
+  exchangeToken(serviceAccountId: string): Promise<{ token: string }>;
 }

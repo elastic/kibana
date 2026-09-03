@@ -8,17 +8,38 @@
  */
 
 /**
- * Identifies a principal that is allowed to exchange a service account's
- * credentials for an access token.
+ * A project-scoped principal that may exchange a service account's credentials for an access
+ * token. Scopes exchange to a specific Kibana project within an organization.
  *
  * @public
  */
-export interface ServiceAccountAssumableBy {
+export interface ProjectServiceAccountAssumableBy {
   type: 'project-service-account';
   organization_id: string;
   project_type: string;
   project_id: string;
 }
+
+/**
+ * A platform-level service account that may exchange a service account's credentials for an
+ * access token. Allows the given platform service account to assume this service account.
+ *
+ * @public
+ */
+export interface PlatformServiceAccountAssumableBy {
+  type: 'platform-service-account';
+  service_account_id: string;
+}
+
+/**
+ * Identifies a principal that is allowed to exchange a service account's
+ * credentials for an access token.
+ *
+ * @public
+ */
+export type ServiceAccountAssumableBy =
+  | ProjectServiceAccountAssumableBy
+  | PlatformServiceAccountAssumableBy;
 
 /**
  * Roles granted to a service account, as resolved by UIAM and reported on a
@@ -41,6 +62,15 @@ export type ServiceAccountRoleAssignments = Record<string, unknown>;
  */
 export interface CreateServiceAccountParams {
   name: string;
+  /**
+   * POC ONLY. Principals allowed to exchange this account's credentials for an access token.
+   *
+   * When omitted, the security plugin scopes the account to the current Kibana project via
+   * `buildAssumableBy` — that is the only shippable behaviour today. Overriding it lets a caller
+   * name an out-of-process assumer (e.g. the Nightshift Relay); doing so needs a real
+   * authorization story before it can ship beyond this POC.
+   */
+  assumable_by?: ServiceAccountAssumableBy[];
 }
 
 /**

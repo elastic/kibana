@@ -73,6 +73,8 @@ describe('ServiceAccountWorkloadBindings', () => {
       create: jest.fn(),
       list: jest.fn(),
       get: jest.fn(),
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
       releaseFakeRequest: jest.fn(),

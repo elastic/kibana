@@ -29,6 +29,8 @@ export const serviceAccountsServiceMock = {
       assumable_by: [],
       creator: { type: 'user' as const, id: 'mock-user-id', first_name: 'Mock', last_name: 'User' },
     }),
+    // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+    exchangeToken: jest.fn().mockResolvedValue({ token: 'essu_mock-service-account-token' }),
     createFakeRequest: jest.fn().mockImplementation(async () =>
       httpServerMock.createFakeKibanaRequest({
         headers: { authorization: 'Bearer essu_mock-service-account-token' },

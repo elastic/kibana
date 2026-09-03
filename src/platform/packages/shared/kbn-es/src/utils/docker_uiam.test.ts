@@ -220,6 +220,8 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.cosmos.container.apikey=api-keys",
             "--env",
+            "uiam.cosmos.organization_service_account.enabled=true",
+            "--env",
             "uiam.cosmos.container.oauth_authorization_code=oauth-authorization-codes",
             "--env",
             "uiam.cosmos.container.oauth_client=oauth-clients",

@@ -246,6 +246,32 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+  describe('serviceAccounts.exchangeToken', () => {
+    it('properly delegates to the service', async () => {
+      await api.serviceAccounts.exchangeToken('service-account-id');
+
+      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledTimes(1);
+      expect(serviceAccounts!.exchangeToken).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('returns the result from the service', async () => {
+      serviceAccounts!.exchangeToken.mockResolvedValue({ token: 'essu_new_token' });
+
+      await expect(api.serviceAccounts.exchangeToken('service-account-id')).resolves.toEqual({
+        token: 'essu_new_token',
+      });
+    });
+
+    it('throws when service accounts are not enabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.exchangeToken('service-account-id')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are not enabled"`);
+    });
+  });
+
   describe('workload bindings', () => {
     const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
 

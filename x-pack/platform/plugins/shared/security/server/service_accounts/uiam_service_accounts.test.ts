@@ -199,6 +199,80 @@ describe('UiamServiceAccounts', () => {
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
       ).rejects.toThrowError('upstream exploded');
     });
+
+    // POC ONLY — see CreateServiceAccountParams.assumable_by for the full rationale.
+    it('forwards a caller-supplied `assumable_by` verbatim instead of building the default', async () => {
+      const customAssumableBy = [
+        {
+          type: 'project-service-account' as const,
+          organization_id: 'organization-id',
+          project_type: 'external_relay',
+          project_id: 'relay-project-id',
+        },
+      ];
+      mockUiam.createServiceAccount.mockResolvedValue({
+        ...validResponse,
+        assumable_by: customAssumableBy,
+      });
+
+      await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
+        ...createParams,
+        assumable_by: customAssumableBy,
+      });
+
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        'essu_my_token',
+        expect.objectContaining({ assumable_by: customAssumableBy })
+      );
+      // `buildAssumableBy` produces the current-project entry; the caller's list must be used instead.
+      expect(mockUiam.createServiceAccount).not.toHaveBeenCalledWith(
+        'essu_my_token',
+        expect.objectContaining({
+          assumable_by: [
+            expect.objectContaining({ project_id: 'project-id', project_type: 'security' }),
+          ],
+        })
+      );
+    });
+  });
+
+  // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+  describe('#exchangeToken', () => {
+    it('resolves with the token returned by UIAM', async () => {
+      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: 'essu_new_token' });
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).resolves.toEqual({
+        token: 'essu_new_token',
+      });
+
+      expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('does not perform any privilege check', async () => {
+      mockUiam.exchangeServiceAccountToken.mockResolvedValue({ token: 'essu_new_token' });
+
+      await serviceAccounts.exchangeToken('service-account-id');
+
+      expect(mockCheckPrivilegesWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the license is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+    });
+
+    it('rethrows upstream failures', async () => {
+      mockUiam.exchangeServiceAccountToken.mockRejectedValue(new Error('upstream exploded'));
+
+      await expect(serviceAccounts.exchangeToken('service-account-id')).rejects.toThrowError(
+        'upstream exploded'
+      );
+    });
   });
 
   describe('#list', () => {

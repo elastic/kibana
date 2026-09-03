@@ -61,6 +61,8 @@ const createStartMock = (): SecurityStartMock => {
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: jest.fn(),
     }),
   });
 
@@ -103,6 +105,8 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     serviceAccounts: lazyObject({
       isEnabled: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: jest.fn(),
     }),
   });
 

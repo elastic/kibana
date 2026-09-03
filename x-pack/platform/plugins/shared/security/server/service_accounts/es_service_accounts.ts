@@ -41,6 +41,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     );
   }
 
+  // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+  async exchangeToken(): Promise<never> {
+    throw Boom.notImplemented(
+      'Exchanging Elasticsearch service account tokens is not yet implemented'
+    );
+  }
+
   // This backend never mints service-account-bound requests, so there is nothing to refresh;
   // `null` (rather than an error) keeps the ES-client unauthorized-error handler on its
   // not-handled path for unrelated fake requests.

@@ -63,6 +63,12 @@ export interface ServiceAccountsBackend {
   create(request: KibanaRequest, params: CreateServiceAccountParams): Promise<ServiceAccount>;
 
   /**
+   * POC ONLY. See {@link CoreServiceAccountsService.exchangeToken} for the full rationale and
+   * the caveats that apply before this can ship.
+   */
+  exchangeToken(serviceAccountId: string): Promise<{ token: string }>;
+
+  /**
    * Lists service accounts assumable by this Kibana. Not part of Core's consumer contract — Core
    * stays create-only; this exists so the security plugin can expose a directory over HTTP.
    *

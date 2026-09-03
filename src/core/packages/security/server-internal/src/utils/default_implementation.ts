@@ -46,6 +46,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     serviceAccounts: {
       isEnabled: () => false,
       create: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       attachWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       detachWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,

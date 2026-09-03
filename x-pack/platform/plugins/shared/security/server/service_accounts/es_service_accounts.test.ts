@@ -35,6 +35,16 @@ describe('EsServiceAccounts', () => {
     });
   });
 
+  // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+  describe('#exchangeToken', () => {
+    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
+      await expect(new EsServiceAccounts().exchangeToken()).rejects.toMatchObject({
+        message: 'Exchanging Elasticsearch service account tokens is not yet implemented',
+        output: { statusCode: 501 },
+      });
+    });
+  });
+
   describe('#createFakeRequest', () => {
     it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
       await expect(new EsServiceAccounts().createFakeRequest()).rejects.toMatchObject({

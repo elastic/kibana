@@ -25,6 +25,8 @@ export const convertSecurityApi = (
     serviceAccounts: {
       isEnabled: privateApi.serviceAccounts.isEnabled,
       create: privateApi.serviceAccounts.create,
+      // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+      exchangeToken: privateApi.serviceAccounts.exchangeToken,
     },
   };
 };

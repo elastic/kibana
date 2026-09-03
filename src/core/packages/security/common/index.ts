@@ -17,6 +17,8 @@ export { isUserAnonymous, canUserHaveProfile } from './src/authentication';
 export type {
   ServiceAccount,
   ServiceAccountAssumableBy,
+  ProjectServiceAccountAssumableBy,
+  PlatformServiceAccountAssumableBy,
   ServiceAccountRoleAssignments,
   CreateServiceAccountParams,
   ServiceAccountWorkloadAttacher,

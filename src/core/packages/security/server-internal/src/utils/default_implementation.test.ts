@@ -69,6 +69,13 @@ describe('getDefaultSecurityImplementation', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
 
+    // POC ONLY — see CoreServiceAccountsService.exchangeToken for the full rationale.
+    it('exchangeToken rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.exchangeToken('some-id')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+
     // Handles are handed out at setup regardless of whether a delegate ever registers, so every
     // workload method has to fail closed rather than run unauthenticated.
     it.each([
