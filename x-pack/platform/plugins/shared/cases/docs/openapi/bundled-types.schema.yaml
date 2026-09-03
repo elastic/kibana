@@ -1446,6 +1446,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_delete_case_comments_request'
+            examples:
+              bulkDeleteCaseCommentsRequest:
+                $ref: '#/components/examples/bulk_delete_case_comments_request'
       responses:
         '204':
           description: Indicates a successful call.
@@ -5403,6 +5406,12 @@ components:
           type: .none
           fields: null
         external_service: null
+    bulk_delete_case_comments_request:
+      summary: Deletes multiple attachments from a case.
+      value:
+        ids:
+          - 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+          - 8af6ac20-74f6-11ea-b83a-553aecdb28b6
     find_case_comments_response:
       summary: Paginated list of user comments for a case
       value:

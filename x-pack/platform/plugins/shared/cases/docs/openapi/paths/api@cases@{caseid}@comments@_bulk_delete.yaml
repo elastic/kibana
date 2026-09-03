@@ -22,6 +22,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/bulk_delete_case_comments_request.yaml'
+        examples:
+          bulkDeleteCaseCommentsRequest:
+            $ref: '../components/examples/bulk_delete_case_comments_request.yaml'
   responses:
     '204':
       description: Indicates a successful call.
