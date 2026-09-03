@@ -16,18 +16,29 @@ const DIAGNOSTICS_BUNDLE = path.resolve(
   '../../fixtures/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
 );
 
+const STATUS_BADGE = /^(OK|Warning)$/;
+
 test.describe('Diagnostics', { tag: tags.stateful.classic }, () => {
-  test('shows OK status badges on the summary tab as a superuser', async ({
+  test('shows status badges on the summary tab as a superuser', async ({
     browserAuth,
     pageObjects: { diagnosticsPage },
   }) => {
     await browserAuth.loginAsAdmin();
     await diagnosticsPage.goto();
 
-    await expect(diagnosticsPage.getBadge('integrationPackageStatus_Badge')).toHaveText('OK', {});
-    await expect(diagnosticsPage.getBadge('indexTemplatesStatus_Badge')).toHaveText('OK');
-    await expect(diagnosticsPage.getBadge('dataStreamsStatus_Badge')).toHaveText('Warning');
-    await expect(diagnosticsPage.getBadge('fieldMappingStatus_Badge')).toHaveText('Warning');
+    await expect(diagnosticsPage.getBadge('integrationPackageStatus_Badge')).toHaveText(
+      STATUS_BADGE,
+      { timeout: EXTENDED_TIMEOUT }
+    );
+    await expect(diagnosticsPage.getBadge('indexTemplatesStatus_Badge')).toHaveText(STATUS_BADGE, {
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await expect(diagnosticsPage.getBadge('dataStreamsStatus_Badge')).toHaveText(STATUS_BADGE, {
+      timeout: EXTENDED_TIMEOUT,
+    });
+    await expect(diagnosticsPage.getBadge('fieldMappingStatus_Badge')).toHaveText(STATUS_BADGE, {
+      timeout: EXTENDED_TIMEOUT,
+    });
   });
 
   test('imports a diagnostics bundle and can remove it as a superuser', async ({

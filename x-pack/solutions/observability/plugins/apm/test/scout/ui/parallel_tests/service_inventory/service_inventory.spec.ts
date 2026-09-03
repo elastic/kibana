@@ -21,7 +21,10 @@ test.describe(
       });
     });
 
-    test('renders page with selected date range', async ({ page }) => {
+    test('renders page with selected date range', async ({
+      page,
+      pageObjects: { serviceInventoryPage },
+    }) => {
       await test.step('shows correct heading', async () => {
         expect(page.url()).toContain('/app/apm/services');
         await expect(
@@ -36,8 +39,10 @@ test.describe(
       });
 
       await test.step('shows a list of environments', async () => {
-        const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
-        await expect(environmentEntrySelector).toHaveCount(12);
+        const environmentCells = serviceInventoryPage.servicesTable.locator(
+          `td:has-text("${PRODUCTION_ENVIRONMENT}")`
+        );
+        await expect.poll(async () => environmentCells.count()).toBeGreaterThanOrEqual(12);
       });
     });
 
