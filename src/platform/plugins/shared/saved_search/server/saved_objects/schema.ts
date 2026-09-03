@@ -170,8 +170,28 @@ const SCHEMA_TAB_V14 = SCHEMA_TAB_V13.extends({
   attributes: SCHEMA_TAB_ATTRIBUTES_V14,
 });
 
-const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
+export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
+  documentsDisplayMode: schema.maybe(
+    schema.oneOf([schema.literal('table'), schema.literal('json')])
+  ),
+  jsonModeSettings: schema.maybe(
+    schema.object({
+      hideNulls: schema.maybe(schema.boolean()),
+      wrapLines: schema.maybe(schema.boolean()),
+    })
+  ),
+});
+
+const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V15,
+});
+
+export const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 // Tab type payloads, keyed by `type`.
@@ -191,7 +211,7 @@ const SCHEMA_HISTOGRAM_PERCENTILE = schema.oneOf([
   schema.literal(`${HistogramPercentileValue.P99}`),
 ]);
 
-const SCHEMA_TAB_TYPE_STATE_V15 = schema.oneOf([
+const SCHEMA_TAB_TYPE_STATE_V16 = schema.oneOf([
   schema.object({
     type: schema.literal(DiscoverTabType.Metrics),
     dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
@@ -204,16 +224,16 @@ const SCHEMA_TAB_TYPE_STATE_V15 = schema.oneOf([
   }),
 ]);
 
-const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
-  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V15),
+const SCHEMA_TAB_ATTRIBUTES_V16 = SCHEMA_TAB_ATTRIBUTES_V15.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V16),
 });
 
-const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
-  attributes: SCHEMA_TAB_ATTRIBUTES_V15,
+const SCHEMA_TAB_V16 = SCHEMA_TAB_V15.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V16,
 });
 
-const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
-  tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+const SCHEMA_DISCOVER_SESSION_V16 = SCHEMA_DISCOVER_SESSION_V15.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V16, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 // Add new model versions here, which automatically registers them
@@ -248,11 +268,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V15,
     },
   },
+  16: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V16.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V16,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V15;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V15;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V16;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V16;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

@@ -38,7 +38,6 @@ jest.mock('@kbn/field-utils/src/components/field_select/field_select', () => ({
     onTypeChange: (type: string) => void;
   }) => {
     return (
-      // eslint-disable-next-line jsx-a11y/no-onchange
       <select
         data-test-subj="field-type-select"
         value={selectedType || ''}

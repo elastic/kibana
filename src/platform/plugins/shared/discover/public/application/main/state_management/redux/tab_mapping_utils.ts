@@ -50,6 +50,8 @@ export const fromSavedObjectTabToAppState = ({
       breakdownField: tab.breakdownField,
       interval: tab.chartInterval,
       density: tab.density,
+      documentsDisplayMode: tab.documentsDisplayMode,
+      jsonModeSettings: tab.jsonModeSettings,
       esqlApproximation: tab.esqlApproximation,
     },
     isUndefined
@@ -154,6 +156,8 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
+  documentsDisplayMode: tab.documentsDisplayMode,
+  jsonModeSettings: tab.jsonModeSettings,
   visContext: tab.visContext, // managed via Redux state now
   controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
@@ -216,6 +220,8 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField || '',
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
+    documentsDisplayMode: tab.appState.documentsDisplayMode,
+    jsonModeSettings: tab.appState.jsonModeSettings,
     visContext: tab.attributes.visContext,
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
@@ -276,6 +282,8 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
+    documentsDisplayMode: savedSearch.documentsDisplayMode,
+    jsonModeSettings: savedSearch.jsonModeSettings,
     visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
     controlGroupJson: tab.attributes
       ? tab.attributes?.controlGroupState

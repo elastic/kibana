@@ -19,7 +19,12 @@ import type {
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -130,6 +135,14 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  /**
+   * Documents display mode: 'table' or 'json'
+   */
+  documentsDisplayMode?: DocumentsDisplayMode;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode
+   */
+  jsonModeSettings?: JsonModeSettings;
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
