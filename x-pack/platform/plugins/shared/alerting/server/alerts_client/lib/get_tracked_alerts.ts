@@ -21,7 +21,7 @@ import {
 import { get } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
 import type { TrackedAADAlerts, SearchResult } from '../types';
-import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../alerts_service/lib/retry_transient_es_errors';
 
 export interface GetTrackedAlertsParams<AlertData extends RuleAlertData> {
   ruleId: string;
