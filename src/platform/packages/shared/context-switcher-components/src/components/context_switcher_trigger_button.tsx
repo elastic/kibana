@@ -17,6 +17,7 @@ import { POPOVER_WIDTH_PX } from './types';
 interface ContextSwitcherTriggerButtonProps {
   readonly solutionIcon: IconType;
   readonly label: string;
+  readonly spaceName: string;
   readonly onClick: () => void;
   readonly isSelected?: boolean;
 }
@@ -28,6 +29,7 @@ interface ContextSwitcherTriggerButtonProps {
 export const ContextSwitcherTriggerButton = ({
   solutionIcon,
   label,
+  spaceName,
   onClick,
   isSelected,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
@@ -41,6 +43,7 @@ export const ContextSwitcherTriggerButton = ({
       iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isSelected}
+      data-space-name={spaceName}
       data-test-subj="contextSwitcherTriggerButton"
       css={css`
         color: ${euiTheme.colors.textSubdued};

@@ -258,6 +258,7 @@ export const ContextSwitcher = ({
         <ContextSwitcherTriggerButton
           solutionIcon={triggerButtonIcon}
           label={triggerLabel}
+          spaceName={spaces.active.name}
           onClick={togglePopover}
           isSelected={isOpen}
         />

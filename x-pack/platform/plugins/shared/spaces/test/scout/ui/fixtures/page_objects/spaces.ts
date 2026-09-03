@@ -80,12 +80,7 @@ export class SpacesPage {
     await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
 
     if (await contextTrigger.isVisible()) {
-      const text = (await contextTrigger.innerText()).trim();
-      if (!text) return null;
-
-      const separator = ': ';
-      const separatorIndex = text.lastIndexOf(separator);
-      return separatorIndex === -1 ? text : text.slice(separatorIndex + separator.length);
+      return (await contextTrigger.getAttribute('data-space-name'))?.trim() ?? null;
     }
 
     // Classic nav exposes the space name only via `title`.
