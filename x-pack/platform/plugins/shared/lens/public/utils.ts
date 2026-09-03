@@ -82,6 +82,21 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 /**
  * Returns true when the chart's data is powered by ES|QL (text-based datasource),
  * i.e. at least one layer resolves to the text-based datasource.
+ *
+ * Complements the existing text-based checks, which don't cover this case:
+ * - `isTextBasedAttributes` / `hasTextBasedLayers` (`@kbn/lens-common`) inspect the
+ *   persisted document, which is not available in runtime call sites like
+ *   `getConfiguration`, `hasLayerSettings`, or layer headers — these only get a
+ *   `FramePublicAPI`.
+ * - `DatasourcePublicAPI.isTextBasedLanguage()` is per-layer and returns false for
+ *   form-based helper layers (e.g. reference lines) that coexist with ES|QL data
+ *   layers, even though the chart as a whole is ES|QL-powered.
+ * - `selectCanEditTextBasedQuery` gates editor visibility off the legacy
+ *   `state.query` shape, not the chart type.
+ *
+ * The "any layer is text-based" semantics are sound because mixing DSL and ES|QL
+ * data layers is not allowed; the only form-based layers on an ES|QL chart are
+ * helper layers (reference lines).
  */
 export const isEsqlChart = (datasourceLayers: FramePublicAPI['datasourceLayers']): boolean =>
   Object.values(datasourceLayers).some(
