@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';
-export const MAX_DIMENSIONS_REACHED_EVENT_TYPE = 'discover_metrics_max_dimensions_reached';
-export const METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE =
-  'discover_metrics_aggregation_config_changed';
+import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
+
+export type MetricAggregationConfigMetricType = 'counter' | 'gauge' | 'histogram';
+
+export interface MetricAggregationConfigChangedEvent {
+  metric_type: MetricAggregationConfigMetricType;
+  previous_aggregation: SimpleAggregation | HistogramPercentile;
+  new_aggregation: SimpleAggregation | HistogramPercentile;
+}
