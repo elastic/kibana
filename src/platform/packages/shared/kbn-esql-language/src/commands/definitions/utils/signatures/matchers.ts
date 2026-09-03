@@ -28,6 +28,14 @@ const REPEATING_SIGNATURE_ALWAYS_COMPATIBLE_TYPES: SupportedDataType[] = [
   'param',
 ];
 
+/** Detects the optional default position in repeating condition/value signatures. */
+const isRepeatingDefaultPosition = (index: number, totalArgs: number): boolean =>
+  totalArgs % 2 === 1 && index === totalArgs - 1;
+
+/** Detects result positions in repeating condition/value signatures such as CASE. */
+export const isRepeatingValuePosition = (index: number, totalArgs: number): boolean =>
+  index % 2 === 1 || isRepeatingDefaultPosition(index, totalArgs);
+
 /** Checks whether one argument type can be used for one parameter type. */
 export function argMatchesParamType(
   givenType: SupportedDataType | 'unknown',
@@ -93,7 +101,7 @@ export function getMatchingSignatures(
     const totalArgs = givenTypes.length;
 
     return givenTypes.every((givenType, index) => {
-      const isDefault = !!isSignatureRepeating && totalArgs % 2 === 1 && index === totalArgs - 1;
+      const isDefault = !!isSignatureRepeating && isRepeatingDefaultPosition(index, totalArgs);
 
       const param = getEffectiveParamAtPosition(sig, index, isDefault);
 
@@ -156,11 +164,10 @@ function getEffectiveParamAtPosition(
  */
 function areRepeatingValuesCompatible(givenTypes: Array<SupportedDataType | 'unknown'>): boolean {
   const { length } = givenTypes;
-  const isValuePosition = (index: number) =>
-    index % 2 === 1 || (length % 2 === 1 && index === length - 1);
   const valueTypes = givenTypes.filter(
     (type, index) =>
-      isValuePosition(index) && !REPEATING_SIGNATURE_ALWAYS_COMPATIBLE_TYPES.includes(type)
+      isRepeatingValuePosition(index, length) &&
+      !REPEATING_SIGNATURE_ALWAYS_COMPATIBLE_TYPES.includes(type)
   );
   const [first, ...rest] = valueTypes;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RawRule } from '../../../types';
 import type { RuleDomain } from '../../../application/rule/types';
 import type { AdHocRunStatus, BackfillInitiator } from '../../../../common/constants';
@@ -82,7 +83,7 @@ export interface AdHocRun {
   initiator: BackfillInitiator;
   initiatorId?: string;
   rule: AdHocRunRule;
-  spaceId: string;
+  spaceId: SpaceId;
   start: string;
   status: AdHocRunStatus;
   schedule: AdHocRunSchedule[];
