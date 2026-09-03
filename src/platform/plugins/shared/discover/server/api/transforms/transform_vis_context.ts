@@ -9,7 +9,7 @@
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import type { DiscoverSessionApiTab } from '../schema';
+import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];

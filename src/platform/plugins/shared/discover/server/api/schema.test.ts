@@ -14,7 +14,6 @@ import {
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
-  discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
   MAX_BREAKDOWN_FIELD_LENGTH,
   MAX_SESSION_DESCRIPTION_LENGTH,
@@ -23,7 +22,8 @@ import {
   MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
-} from './schema';
+} from '@kbn/as-code-discover-schema';
+import { discoverSessionApiResponseSchema } from './schema';
 
 const classicTab = {
   id: 'tab-classic',

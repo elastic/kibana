@@ -14,7 +14,8 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
+import type { DiscoverSessionApiEsqlTab } from '@kbn/as-code-discover-schema';
+import type { DiscoverSessionApiData } from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {

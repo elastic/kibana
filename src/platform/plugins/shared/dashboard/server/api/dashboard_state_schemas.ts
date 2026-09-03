@@ -10,11 +10,8 @@
 import {
   getPanelSchema as getPanelSchemaFromPackage,
   getDashboardDataSchema,
-  accessControlSchema,
 } from '@kbn/as-code-dashboard-schema';
 import { embeddableService } from '../kibana_services';
-
-export { accessControlSchema };
 
 export function getPanelSchema() {
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};

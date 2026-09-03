@@ -10,22 +10,6 @@
 import type { z } from '@kbn/zod';
 import type { warningsSchema } from './warnings_schema';
 
-export type {
-  DashboardApiDataInput,
-  DashboardState,
-  DashboardStateInput,
-  DashboardPanel,
-  DashboardSection,
-  DashboardOptions,
-  DashboardOptionsInput,
-  GridData,
-  GridDataInput,
-  DashboardPinnedPanelsState,
-  DashboardPinnedPanelsStateInput,
-  DashboardPinnedPanel,
-  DashboardPinnedPanelInput,
-} from '@kbn/as-code-dashboard-schema';
-
 export type Warnings = z.output<typeof warningsSchema>;
 
 export type Operation = 'create' | 'read' | 'update' | 'search';

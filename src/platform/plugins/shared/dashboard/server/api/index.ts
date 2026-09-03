@@ -27,7 +27,7 @@ export type {
   DashboardOptionsInput,
   GridData,
   GridDataInput,
-} from './types';
+} from '@kbn/as-code-dashboard-schema';
 
 export { create } from './create/create';
 export { read } from './read/read';

@@ -15,33 +15,12 @@ import {
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
+import type { discoverSessionControlPanelsSchema } from '@kbn/as-code-discover-schema';
 import {
-  discoverSessionControlPanelSchema,
-  discoverSessionControlPanelsSchema,
   discoverSessionApiDataSchema,
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_SESSION_DESCRIPTION_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
-  MAX_DISCOVER_SESSION_CONTROL_PANELS,
   MAX_DISCOVER_SESSION_TAGS,
   MAX_SEARCH_QUERY_LENGTH,
 } from '@kbn/as-code-discover-schema';
-
-export {
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_SESSION_DESCRIPTION_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
-  MAX_DISCOVER_SESSION_CONTROL_PANELS,
-  MAX_DISCOVER_SESSION_TAGS,
-  MAX_SEARCH_QUERY_LENGTH,
-  discoverSessionControlPanelSchema,
-  discoverSessionControlPanelsSchema,
-  discoverSessionApiDataSchema,
-};
 
 export const discoverSessionApiResponseSchema = z
   .object({
@@ -138,10 +117,3 @@ export type DiscoverSessionControlPanels = z.output<typeof discoverSessionContro
 
 // Input types (shape accepted by the API, before defaults applied)
 export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;
-
-// Re-export tab types from the schema package for external consumers
-export type {
-  DiscoverSessionApiClassicTab,
-  DiscoverSessionApiEsqlTab,
-  DiscoverSessionApiTab,
-} from '@kbn/as-code-discover-schema';
