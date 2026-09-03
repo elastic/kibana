@@ -16,8 +16,6 @@ let mockArtifacts: Record<string, Artifact>;
 
 describe('Annotate', () => {
   beforeEach(() => {
-    process.env.SLACK_NOTIFICATIONS_CHANNEL = '#some-team-channel';
-
     mockFailure = {
       url: 'https://buildkite.com/elastic/kibana-pull-request/builds/53',
       jobId: 'job-id',
@@ -36,7 +34,7 @@ describe('Annotate', () => {
   });
 
   afterEach(() => {
-    delete process.env.SLACK_NOTIFICATIONS_CHANNEL;
+    delete process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM;
   });
 
   describe('getAnnotation', () => {
@@ -105,22 +103,14 @@ describe('Annotate', () => {
       );
     });
 
-    it('should append a needs-team note when channel is unset', () => {
-      delete process.env.SLACK_NOTIFICATIONS_CHANNEL;
+    it('should append a needs-team note when SLACK_NOTIFICATIONS_NEEDS_TEAM is set', () => {
+      process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM = 'true';
       const annotation = getSlackMessage([mockFailure], {});
 
       expect(annotation).toContain('⚠️ _This step has no team channel configured.');
     });
 
-    it('should append a needs-team note when channel is the SDH fallback', () => {
-      process.env.SLACK_NOTIFICATIONS_CHANNEL = '#sdh-security-team';
-      const annotation = getSlackMessage([mockFailure], {});
-
-      expect(annotation).toContain('⚠️ _This step has no team channel configured.');
-    });
-
-    it('should not append a needs-team note when a team channel is set', () => {
-      process.env.SLACK_NOTIFICATIONS_CHANNEL = '#security-threat-hunting';
+    it('should not append a needs-team note when SLACK_NOTIFICATIONS_NEEDS_TEAM is unset', () => {
       const annotation = getSlackMessage([mockFailure], {});
 
       expect(annotation).not.toContain('⚠️');

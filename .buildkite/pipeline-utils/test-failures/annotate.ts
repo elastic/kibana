@@ -108,10 +108,9 @@ export const getSlackMessage = (
   failures: TestFailure[],
   failureHtmlArtifacts: Record<string, Artifact>
 ): string => {
-  const channel = process.env.SLACK_NOTIFICATIONS_CHANNEL;
   const needsTeamNote =
-    !channel || channel === '#sdh-security-team'
-      ? `\n⚠️ _This step has no team channel configured. Set \`SLACK_NOTIFICATIONS_CHANNEL\` in \`.buildkite/pipelines/security_solution_on_merge.yml\` to route these alerts to the right team._\n`
+    process.env.SLACK_NOTIFICATIONS_NEEDS_TEAM === 'true'
+      ? `\n⚠️ _This step has no team channel configured. Set \`SLACK_NOTIFICATIONS_CHANNEL\` on this step to route these alerts to the right team._\n`
       : '';
   return (
     `*Test Failures*\n` +
