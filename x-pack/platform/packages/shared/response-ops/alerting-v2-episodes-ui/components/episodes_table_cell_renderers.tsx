@@ -27,7 +27,7 @@ import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import type { EpisodeActionState, EpisodeStatusGroupAction } from '../types/action';
 import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
-import { AlertEpisodeTags } from './actions/tags';
+import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import * as i18n from './translations';
@@ -67,7 +67,27 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
 export const EpisodeTagsCell = ({ row }: CellRendererProps) => {
   const tags = (row.flattened.last_tags as string[] | undefined) ?? [];
 
-  return <AlertEpisodeTags tags={tags} />;
+  return <TagBadges tags={tags} data-test-subj="episodeTagsCell" />;
+};
+
+export interface EpisodeRuleTagsCellProps extends CellRendererProps {
+  rulesCache: Record<string, Rule>;
+  isLoadingRules: boolean;
+}
+
+export const EpisodeRuleTagsCell = ({
+  row,
+  rulesCache,
+  isLoadingRules,
+}: EpisodeRuleTagsCellProps) => {
+  const ruleId = row.flattened['rule.id'] as string | undefined;
+  const rule = ruleId ? rulesCache[ruleId] : undefined;
+
+  if (isLoadingRules && ruleId && !rule) {
+    return <EuiSkeletonText lines={1} />;
+  }
+
+  return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
