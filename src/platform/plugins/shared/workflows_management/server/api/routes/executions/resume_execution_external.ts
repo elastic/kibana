@@ -36,7 +36,7 @@ const externalResumeParamsSchema = schema.object({
 });
 
 export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit, logger } = deps;
+  const { router, api, spaces, logger } = deps;
 
   router.versioned
     .post({
@@ -73,25 +73,17 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
           const { executionId, stepId } = request.params;
           const { token } = resolveExternalResumeCredentials(request.query);
           const spaceId = spaces.getSpaceId(request);
-          const { resumedBy } = await api.resumeWorkflowExecutionExternallyWithInput({
+          await api.resumeWorkflowExecutionExternallyWithInput({
             token,
             executionId,
             stepId,
             spaceId,
             input: request.body as Record<string, unknown>,
-          });
-
-          audit.logExecutionResumed(request, {
-            executionId,
-            resumedBy,
+            request,
           });
 
           return htmlSuccess(response);
         } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
           return handleExternalResumeError(response, error, logger);
         }
       })
@@ -99,7 +91,7 @@ export function registerExternalResumeExecutionPostRoute(deps: RouteDependencies
 }
 
 export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit, logger } = deps;
+  const { router, api, spaces, logger } = deps;
 
   router.versioned
     .get({
@@ -151,25 +143,17 @@ export function registerExternalResumeExecutionGetRoute(deps: RouteDependencies)
         try {
           const { executionId, stepId } = request.params;
           const { token } = resolveExternalResumeCredentials(request.query);
-          const { resumedBy } = await api.resumeWorkflowExecutionExternallyViaGet({
+          await api.resumeWorkflowExecutionExternallyViaGet({
             token,
             executionId,
             stepId,
             spaceId: spaces.getSpaceId(request),
             query: request.query as Record<string, unknown>,
-          });
-
-          audit.logExecutionResumed(request, {
-            executionId,
-            resumedBy,
+            request,
           });
 
           return htmlSuccess(response);
         } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
           return handleExternalResumeError(response, error, logger);
         }
       })

@@ -1,0 +1,75 @@
+{
+  "sha1": "c1341a08ebaef66c453c9c49519386eab3c28203",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7d673dd978e1b4a-cf5e873501b4a12",
+      "title": "Setup environment for Transform CPS UI tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "349cbe848eaa3b1-d4e8ef09aa8637d",
+      "title": "Transform CPS project scope UI flows creates a transform with project scope and verifies the table details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/tests/transforms_project_scope.spec.ts",
+        "line": 154,
+        "column": 11
+      }
+    },
+    {
+      "id": "349cbe848eaa3b1-3d090aade1fdff7",
+      "title": "Transform CPS project scope UI flows shows linked-only project scope as a custom subset in the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/tests/transforms_project_scope.spec.ts",
+        "line": 185,
+        "column": 15
+      }
+    },
+    {
+      "id": "349cbe848eaa3b1-1da7960e572e412",
+      "title": "Transform CPS project scope UI flows edits a transform project scope through the Edit action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/tests/transforms_project_scope.spec.ts",
+        "line": 202,
+        "column": 15
+      }
+    },
+    {
+      "id": "349cbe848eaa3b1-4bda5e4cbb0541f",
+      "title": "Transform CPS project scope UI flows edits multiple transform project scopes from the bulk action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/tests/transforms_project_scope.spec.ts",
+        "line": 228,
+        "column": 9
+      }
+    }
+  ]
+}

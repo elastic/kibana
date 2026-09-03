@@ -75,6 +75,7 @@ import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
 import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
@@ -349,6 +350,7 @@ export async function getPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -413,6 +415,7 @@ export async function getInstalledPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -805,22 +808,29 @@ export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  failOnUnexpectedError?: boolean;
 }) {
-  const { savedObjectsClient, pkgName, logger } = options;
+  const { savedObjectsClient, pkgName, logger, failOnUnexpectedError } = options;
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
       // Not being installed is an expected condition (e.g. fetching input schema for a package
       // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
-      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        logger?.error(e);
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
       }
+      if (failOnUnexpectedError) {
+        throw e;
+      }
+      logger?.error(e);
       return undefined;
     });
 
   if (!installation) {
     return;
   }
+
+  installation.attributes = brandInstallationSpaceId(installation.attributes);
 
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
@@ -846,6 +856,7 @@ async function getInstallationObjects(options: {
   );
 
   for (const installation of installations) {
+    installation.attributes = brandInstallationSpaceId(installation.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,

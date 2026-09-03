@@ -6,6 +6,7 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { TextAttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -119,11 +120,12 @@ describe('createBulkAlertsAttachmentType', () => {
         : undefined;
 
       expect(representation?.type).toBe('text');
-      expect(representation?.value).toContain('2 security alerts');
-      expect(representation?.value).toContain('Alert 1:');
-      expect(representation?.value).toContain('Alert 2:');
-      expect(representation?.value).toContain('"_id": "abc123"');
-      expect(representation?.value).toContain('"_id": "def456"');
+      const textRepr = representation as TextAttachmentRepresentation | undefined;
+      expect(textRepr?.value).toContain('2 security alerts');
+      expect(textRepr?.value).toContain('Alert 1:');
+      expect(textRepr?.value).toContain('Alert 2:');
+      expect(textRepr?.value).toContain('"_id": "abc123"');
+      expect(textRepr?.value).toContain('"_id": "def456"');
     });
 
     it('marks missing alerts with an error placeholder', async () => {
@@ -141,8 +143,12 @@ describe('createBulkAlertsAttachmentType', () => {
         ? await formatted.getRepresentation()
         : undefined;
 
-      expect(representation?.value).toContain('"_id": "missing-id"');
-      expect(representation?.value).toContain('"error": "not found"');
+      expect((representation as TextAttachmentRepresentation | undefined)?.value).toContain(
+        '"_id": "missing-id"'
+      );
+      expect((representation as TextAttachmentRepresentation | undefined)?.value).toContain(
+        '"error": "not found"'
+      );
     });
 
     it('logs a warn and returns placeholders when ES search throws', async () => {
@@ -219,7 +225,9 @@ describe('createBulkAlertsAttachmentType', () => {
       const formatted2 = await attachmentType.format(attachment, formatContext);
       const second = await formatted2.getRepresentation?.();
 
-      expect(second?.value).toBe(first?.value);
+      expect((second as TextAttachmentRepresentation | undefined)?.value).toBe(
+        (first as TextAttachmentRepresentation | undefined)?.value
+      );
       expect(rawCore.getStartServices).not.toHaveBeenCalled();
     });
   });

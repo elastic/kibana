@@ -23,7 +23,7 @@ import type {
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer, SourceDisplayMode } from '../types';
+import type { CustomCellRenderer, JsonModeSettings, DocumentsDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
 import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
@@ -44,7 +44,8 @@ export const getRenderCellValueFn = ({
   isPlainRecord,
   isCompressed = true,
   columnsMeta,
-  sourceDisplayMode,
+  documentsDisplayMode,
+  jsonModeSettings,
   selectedColumns,
 }: {
   dataView: DataView;
@@ -57,7 +58,8 @@ export const getRenderCellValueFn = ({
   isPlainRecord?: boolean;
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
-  sourceDisplayMode: SourceDisplayMode;
+  documentsDisplayMode: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
   selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
@@ -136,7 +138,7 @@ export const getRenderCellValueFn = ({
 
     const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
 
-    if (isSourceColumn && sourceDisplayMode === 'json') {
+    if (isSourceColumn && documentsDisplayMode === 'json') {
       return (
         <SourceDocumentJsonMode
           row={row}
@@ -144,6 +146,7 @@ export const getRenderCellValueFn = ({
           columnsMeta={columnsMeta}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
+          jsonModeSettings={jsonModeSettings}
           selectedColumns={selectedColumns}
         />
       );

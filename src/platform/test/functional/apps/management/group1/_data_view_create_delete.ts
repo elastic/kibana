@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -112,7 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.be('without-timefield');
+          expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)).to.be(
+            'without-timefield'
+          );
         });
         await testSubjects.missingOrFail('currentIndexPatternTimeField');
         await PageObjects.settings.clickKibanaIndexPatterns();
@@ -200,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+          expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)).to.contain(
             `Logstash Star`
           );
         });
@@ -214,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+          expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)).to.contain(
             `Logstash Star`
           );
         });
@@ -228,7 +231,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await retry.try(async () => {
-          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
+          expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.title)).to.contain(
+            `Index Star`
+          );
         });
       });
 

@@ -20,7 +20,11 @@ import type {
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
-import type { ConversationReadByEntry, PersistentConversationRound } from './types';
+import type {
+  ConversationPinnedByEntry,
+  ConversationReadByEntry,
+  PersistentConversationRound,
+} from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
 
@@ -35,7 +39,22 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      conversation_rounds: types.object({
+        dynamic: false,
+        properties: {
+          feedback: types.object({
+            dynamic: false,
+            properties: {
+              vote: types.keyword({}),
+              chips: types.keyword({}),
+              comment: types.text({}),
+              submitted_at: types.date({}),
+              connector_id: types.keyword({}),
+              model: types.keyword({}),
+            },
+          }),
+        },
+      }),
       events: types.nested({
         properties: {
           id: types.keyword({}),
@@ -73,7 +92,14 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      // legacy field, superseded by pinned_by
       pinned: types.boolean({}),
+      pinned_by: types.nested({
+        properties: {
+          userId: types.keyword({}),
+        },
+        dynamic: false,
+      }),
       read_only: types.boolean({}),
       workspace_id: types.keyword({}),
       parent_conversation: types.object({
@@ -136,7 +162,9 @@ export interface ConversationProperties {
   // legacy field, superseded by read_by
   read?: boolean;
   read_by?: ConversationReadByEntry[];
+  // legacy field, superseded by pinned_by
   pinned?: boolean;
+  pinned_by?: ConversationPinnedByEntry[];
   read_only?: boolean;
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;

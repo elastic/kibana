@@ -7,25 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { StepExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
+import { createMockStepDataClient } from '@kbn/workflows-execution-engine/server/mocks';
 import { searchStepExecutions } from './search_step_executions';
 
 describe('searchStepExecutions', () => {
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseParams = {
-    esClient: {} as ElasticsearchClient,
+    stepExecutionsDataClient: {} as StepExecutionsDataClient,
     logger: loggerMock.create(),
-    stepsExecutionIndex: '.workflows-steps',
     spaceId: 'default',
   };
 
   beforeEach(() => {
-    mockEsClient = {
-      search: jest.fn(),
-    } as unknown as jest.Mocked<ElasticsearchClient>;
+    mockStepDataClient = createMockStepDataClient();
     mockLogger = loggerMock.create();
     jest.clearAllMocks();
   });
@@ -34,11 +32,11 @@ describe('searchStepExecutions', () => {
     await expect(
       searchStepExecutions({
         ...baseParams,
-        esClient: mockEsClient,
+        stepExecutionsDataClient: mockStepDataClient,
         logger: mockLogger,
       })
     ).rejects.toThrow('Either workflowExecutionId or workflowId must be provided');
-    expect(mockEsClient.search).not.toHaveBeenCalled();
+    expect(mockStepDataClient.search).not.toHaveBeenCalled();
   });
 
   it('should call ES with workflowExecutionId and return results with total', async () => {
@@ -56,7 +54,7 @@ describe('searchStepExecutions', () => {
         scopeStack: [],
       },
     ];
-    mockEsClient.search.mockResolvedValue({
+    mockStepDataClient.search.mockResolvedValue({
       hits: {
         hits: stepResults.map((s) => ({ _source: s })),
         total: 1,
@@ -65,7 +63,7 @@ describe('searchStepExecutions', () => {
 
     const result = await searchStepExecutions({
       ...baseParams,
-      esClient: mockEsClient,
+      stepExecutionsDataClient: mockStepDataClient,
       logger: mockLogger,
       workflowExecutionId: 'run-1',
     });
@@ -73,7 +71,7 @@ describe('searchStepExecutions', () => {
     expect(result.results).toHaveLength(1);
     expect(result.total).toBe(1);
     expect(result.results[0].id).toBe('step-1');
-    expect(mockEsClient.search).toHaveBeenCalledWith(
+    expect(mockStepDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           bool: {
@@ -88,13 +86,13 @@ describe('searchStepExecutions', () => {
   });
 
   it('should call ES with workflowId and optional stepId', async () => {
-    mockEsClient.search.mockResolvedValue({
+    mockStepDataClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0 } },
     } as any);
 
     await searchStepExecutions({
       ...baseParams,
-      esClient: mockEsClient,
+      stepExecutionsDataClient: mockStepDataClient,
       logger: mockLogger,
       workflowId: 'wf-1',
       stepId: 'my_step',
@@ -102,7 +100,7 @@ describe('searchStepExecutions', () => {
       size: 50,
     });
 
-    expect(mockEsClient.search).toHaveBeenCalledWith(
+    expect(mockStepDataClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           bool: {

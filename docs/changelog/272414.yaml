@@ -1,11 +1,10 @@
 prs:
 - https://github.com/elastic/kibana/pull/272414
-type: breaking-change
+type: deprecation
 products:
 - product: cloud-serverless
-  target: 2026-06-16
+- product: kibana
 areas:
 - Kibana platform
 title: Deprecate `elastic.apm` settings
-impact: The Elastic APM instrumentation is deprecated and will be removed in a future version.
-action: Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [Instrumenting with OTel Traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information.
+description: Elastic APM instrumentation is deprecated and will be removed in future versions. Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [these docs](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information about how to configure it.

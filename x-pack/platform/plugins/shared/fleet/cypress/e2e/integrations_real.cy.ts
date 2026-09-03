@@ -91,8 +91,6 @@ function getAllIntegrations() {
 }
 
 describe('Add Integration - Real API', () => {
-  const integration = 'apache';
-
   beforeEach(() => {
     login();
 
@@ -128,10 +126,10 @@ describe('Add Integration - Real API', () => {
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
-    setupIntegrations();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
-    cy.getBySel(getIntegrationCard(integration)).click();
+    // Navigate directly to the Apache detail page: the browse page now renders Apache
+    // as a collection tile (enableIntegrationCollectionTiles is enabled by default),
+    // so clicking the tile lands on the collection overview rather than the add-integration flow.
+    cy.visit('/app/integrations/detail/apache/overview');
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
     cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
@@ -290,7 +288,7 @@ describe.skip('Dashboards link for installed integration - Real API', () => {
     cy.getBySel(LOADING_SPINNER).should('not.exist');
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
     cy.getBySel(getIntegrationCard(integration)).click();
-    addIntegration();
+    addIntegration({ skipButtonClick: true });
     cy.visit('/app/integrations/installed');
     cy.getBySel(INSTALLED_INTEGRATIONS_TABLE_ROW)
       .contains('Apache')
