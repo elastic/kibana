@@ -53,6 +53,7 @@ const defaultParams = () => ({
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
   telemetryService: createMockTelemetryService(),
+  setIsHistoryOpen: jest.fn(),
 });
 
 describe('useQueryActions', () => {
@@ -84,10 +85,22 @@ describe('useQueryActions', () => {
         source: QuerySource.MANUAL,
         query: 'FROM logs',
       });
+      expect(params.setIsHistoryOpen).not.toHaveBeenCalled();
       expect(params.onTextLangQuerySubmit).toHaveBeenCalledWith(
         { esql: 'FROM logs' },
         expect.any(AbortController)
       );
+    });
+
+    it('closes history when closeHistoryOnSubmit is true', () => {
+      const params = { ...defaultParams(), closeHistoryOnSubmit: true };
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onQuerySubmit(QuerySource.MANUAL);
+      });
+
+      expect(params.setIsHistoryOpen).toHaveBeenCalledWith(false);
     });
 
     it('does not track telemetry when editor value is empty', () => {
@@ -116,6 +129,7 @@ describe('useQueryActions', () => {
 
       // Should have cancelled, not submitted
       expect(params.onTextLangQuerySubmit).not.toHaveBeenCalled();
+      expect(params.setIsHistoryOpen).not.toHaveBeenCalled();
       expect(result.current.isQueryLoading).toBe(false);
     });
   });

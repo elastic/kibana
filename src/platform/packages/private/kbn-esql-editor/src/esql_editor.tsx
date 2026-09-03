@@ -114,6 +114,7 @@ const ESQLEditorInternal = function ESQLEditor({
   dataTestSubj,
   allowQueryCancellation,
   hideQueryHistory,
+  closeHistoryOnSubmit,
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
@@ -329,6 +330,8 @@ const ESQLEditorInternal = function ESQLEditor({
     onTextLangQuerySubmit,
     onQueryUpdate,
     telemetryService,
+    setIsHistoryOpen,
+    closeHistoryOnSubmit,
   });
 
   // Measure keystroke to React commit by waiting for the code state update.

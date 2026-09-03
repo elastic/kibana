@@ -26,6 +26,8 @@ interface UseQueryActionsParams {
   onTextLangQuerySubmit: ESQLEditorProps['onTextLangQuerySubmit'];
   onQueryUpdate: (value: string) => void;
   telemetryService: ESQLEditorTelemetryService;
+  setIsHistoryOpen: (isOpen: boolean) => void;
+  closeHistoryOnSubmit?: boolean;
 }
 
 export const useQueryActions = ({
@@ -37,12 +39,16 @@ export const useQueryActions = ({
   onTextLangQuerySubmit,
   onQueryUpdate,
   telemetryService,
+  setIsHistoryOpen,
+  closeHistoryOnSubmit = false,
 }: UseQueryActionsParams) => {
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   // Read via ref inside onQuerySubmit to avoid recreating the callback on every loading toggle,
   // which would cascade to onUpdateAndSubmitQuery and all downstream consumers.
   const isQueryLoadingRef = useRef(isQueryLoading);
   isQueryLoadingRef.current = isQueryLoading;
+  const closeHistoryOnSubmitRef = useRef(closeHistoryOnSubmit);
+  closeHistoryOnSubmitRef.current = closeHistoryOnSubmit;
   const abortControllerRef = useRef(new AbortController());
 
   const onQuerySubmit = useCallback(
@@ -63,10 +69,20 @@ export const useQueryActions = ({
             query: currentValue,
           });
         }
+        if (closeHistoryOnSubmitRef.current) {
+          setIsHistoryOpen(false);
+        }
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [isLoading, allowQueryCancellation, onTextLangQuerySubmit, telemetryService, editorRef]
+    [
+      isLoading,
+      allowQueryCancellation,
+      onTextLangQuerySubmit,
+      telemetryService,
+      editorRef,
+      setIsHistoryOpen,
+    ]
   );
 
   const onUpdateAndSubmitQuery = useCallback(
