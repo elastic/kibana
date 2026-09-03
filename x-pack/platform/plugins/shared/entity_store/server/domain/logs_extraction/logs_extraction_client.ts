@@ -65,6 +65,7 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   checkpointTimestamp: null,
   paginationId: null,
   lastExecutionTimestamp: null,
+  sliceEndTimestamp: null,
 };
 
 interface LogsExtractionOptions {
@@ -192,6 +193,7 @@ export class LogsExtractionClient {
             checkpointTimestamp: null,
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+            sliceEndTimestamp: null,
           },
           error: null,
         });

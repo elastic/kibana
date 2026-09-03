@@ -319,11 +319,48 @@ const version6: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionRuntimeStateSchemaV7 = schema.object({
+  checkpointTimestamp: schema.nullable(schema.string()),
+  paginationId: schema.nullable(schema.string()),
+  lastExecutionTimestamp: schema.nullable(schema.string()),
+  sliceEndTimestamp: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV7 = schema.object({
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV7,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+// Adds logExtractionState.sliceEndTimestamp (nullable, defaults null — no backfill needed).
+// No mappings addition: runtime cursor fields are stored but not indexed (dynamic: false),
+// same as checkpointTimestamp in v6.
+const version7: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV7,
+    forwardCompatibility: engineDescriptorSchemaV7.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5, 6: version6 },
+  modelVersions: {
+    1: version1,
+    2: version2,
+    3: version3,
+    4: version4,
+    5: version5,
+    6: version6,
+    7: version7,
+  },
   hiddenFromHttpApis: true,
 };

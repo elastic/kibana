@@ -17,6 +17,10 @@ export const EngineLogExtractionState = z.object({
   checkpointTimestamp: z.string().nullable().default(null),
   paginationId: z.string().nullable().default(null),
   lastExecutionTimestamp: z.string().nullable().default(null),
+  /** Inclusive upper bound of the in-progress log slice. Set only while entity pages of a slice
+   * are being processed; cleared when the slice completes. On resume it pins the slice bounds so
+   * the (sampled, non-deterministic) boundary probe is not re-run for a partially processed slice. */
+  sliceEndTimestamp: z.string().nullable().default(null),
 });
 
 export type EngineError = z.infer<typeof EngineError>;
