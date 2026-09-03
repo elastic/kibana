@@ -120,6 +120,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
             setRuleType(ApmRuleType.TransactionDuration);
             setPopoverOpen(false);
           },
+          'data-test-subj': 'apmAlertsMenuItemLatency',
         },
         // Throughput *** TO BE ADDED ***
         // Failed transactions rate
@@ -129,6 +130,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
             setRuleType(ApmRuleType.TransactionErrorRate);
             setPopoverOpen(false);
           },
+          'data-test-subj': 'apmAlertsMenuItemFailedTransactionRate',
         },
       ],
     },
