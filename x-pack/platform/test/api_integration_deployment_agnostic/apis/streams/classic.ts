@@ -540,6 +540,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('Clears the data stream mappings override when all field overrides are removed', async () => {
+        const setResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+        expect(setResponse.status).to.eql(200);
+
         const mappingsBefore = await esClient.indices.getDataStreamMappings({
           name: TEST_STREAM_NAME,
         });
