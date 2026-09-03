@@ -267,7 +267,6 @@ describe('ServiceFlyoutOverview key metrics chart implementation per schema', ()
       expect.objectContaining({ latencyAggregationType: 'p95' })
     );
   });
-
 });
 
 describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {
