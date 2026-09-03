@@ -22,8 +22,8 @@ export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as cons
  * hyphen, so it covers the per-space filtered aliases and never this bare index, which
  * carries every space's candidates at every confidence level.
  *
- * Reports and sources stay under `.kibana-`: only the internal user touches them, and the
- * sources index holds feed credentials.
+ * Reports and sources stay under `.kibana-`: only the internal user touches them. Feed
+ * URLs are resolved from the code catalog and are not stored in the sources index.
  */
 export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
@@ -38,7 +38,8 @@ export const ASSESS_RELEVANCE_API_PATH = `${THREAT_INTEL_API_BASE}/assess_releva
 export const ENRICH_TAXONOMY_API_PATH = `${THREAT_INTEL_API_BASE}/enrich_taxonomy` as const;
 export const CLASSIFY_SEVERITY_API_PATH = `${THREAT_INTEL_API_BASE}/classify_severity` as const;
 export const LIST_SOURCES_API_PATH = `${THREAT_INTEL_API_BASE}/sources/list` as const;
-export const CREATE_SOURCE_API_PATH = `${THREAT_INTEL_API_BASE}/sources` as const;
+// The approved catalog is fixed: the only mutation is toggling `enabled` on an
+// existing source via PATCH, so there is no create-source path.
 export const SOURCE_BY_ID_API_PATH = `${THREAT_INTEL_API_BASE}/sources/{sourceId}` as const;
 
 /**
@@ -67,21 +68,53 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const SOURCE_TYPES = [
+export const FETCH_ADAPTER_TYPES = ['rss', 'text_indicator_list', 'kev'] as const;
+export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
+
+/**
+ * Stable document ids for the fixed, code-authoritative source catalog. Keep in
+ * sync with `DEFAULT_SOURCES` in server setup seeding.
+ */
+export const APPROVED_CATALOG_SOURCE_IDS = [
+  'kev:cisa-known-exploited-vulnerabilities',
+  'vendor_api:elastic-security-labs',
+  'rss:mandiant-research',
+  'rss:unit42',
+  'rss:talos',
+  'rss:crowdstrike',
+  'rss:cisa-alerts',
+  'text_indicator_list:maltrail-cobaltstrike',
+  'rss:aws-security',
+  'rss:aws-security-bulletins',
+  'rss:fortiguard-advisories',
+  'rss:fortiguard-threat-signal',
+] as const;
+
+export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
+
+export const REPORT_SOURCE_TYPES = [
   'rss',
-  'stix',
-  'taxii',
-  'vendor_api',
   'text_indicator_list',
   'kev',
   'email',
   'manual',
   'telemetry',
 ] as const;
-export type SourceType = (typeof SOURCE_TYPES)[number];
+export type SourceType = (typeof REPORT_SOURCE_TYPES)[number];
 
 export const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
 export type SeverityLevel = (typeof SEVERITY_LEVELS)[number];
+
+/**
+ * The `ioc_tier` values a consumer that wants precision should see.
+ *
+ * `.threat-intel-indicators` deliberately stores the full candidate set,
+ * including `uncertain`, because precision is a property of the consumer rather than
+ * of the intel: a hunt query wants recall and a blocking rule wants precision, and
+ * one write-time threshold cannot serve both. This is the read-side half of that
+ * split, and the filtered per-space alias is built from it.
+ */
+export const PRECISION_IOC_TIERS = ['discriminating', 'contextual'] as const;
 
 export const IOC_TYPES = ['hash', 'ip', 'domain', 'url', 'email', 'cidr', 'wallet'] as const;
 export type IocType = (typeof IOC_TYPES)[number];
