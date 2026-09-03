@@ -299,8 +299,6 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(installation)
     );
-    currentAttributes = { installed_es: installation.installed_es };
-
     await installTransforms({
       packageInstallContext: {
         packageInfo: {
@@ -342,7 +340,9 @@ describe('test transform install with legacy schema', () => {
     });
 
     // The transform ref must still be present — not wiped by the reinstall.
-    expect(currentAttributes.installed_es).toEqual([
+    const lastUpdateCall =
+      savedObjectsClient.update.mock.calls[savedObjectsClient.update.mock.calls.length - 1];
+    expect(lastUpdateCall[2].installed_es).toEqual([
       { id: transformId, type: ElasticsearchAssetType.transform },
     ]);
   });
