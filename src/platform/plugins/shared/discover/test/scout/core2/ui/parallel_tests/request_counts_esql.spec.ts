@@ -37,6 +37,10 @@ spaceTest.describe(
       // Activate the histogram: the first explicit submit loads the chart (Lens) so
       // subsequent submits fire both docs + chart requests. Without it every test
       // here counts 1 instead of 2.
+      const histogramProgressBar = page.testSubj.locator('unifiedHistogramProgressBar');
+      const progressBarStarted = histogramProgressBar
+        .waitFor({ state: 'visible', timeout: 2_000 })
+        .catch(() => {});
       let initialCount = 0;
       const drainInitial = page.waitForResponse(
         (response) =>
@@ -45,15 +49,10 @@ spaceTest.describe(
       );
       await pageObjects.discover.submitQuery();
       await drainInitial;
-      // The first response isn't completion: an async search answers immediately with
-      // `is_running: true` and finishes over its polls. Leaving with searches in flight
-      // makes showChart() re-request that data, so the "no requests" test counts 1
-      // instead of 0. Settle on UI state, which covers the whole poll cycle.
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
-      await page.testSubj
-        .locator('unifiedHistogramProgressBar')
-        .waitFor({ state: 'hidden', timeout: 30_000 });
+      await progressBarStarted;
+      await histogramProgressBar.waitFor({ state: 'hidden', timeout: 30_000 });
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace, scoutSpace }) => {

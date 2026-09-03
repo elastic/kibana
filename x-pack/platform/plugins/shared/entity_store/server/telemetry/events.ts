@@ -119,12 +119,16 @@ interface EntityMaintainerRunSummaryFunnel {
   applied: number;
   /** 404 bulk errors — entity absent from store; omitted when not applicable */
   droppedNotInStore?: number;
+  /** Target EUIDs pruned because they don't exist in the entity store; omitted when not applicable */
+  targetIdsNotInStore?: number;
   /** Entities intentionally skipped (ambiguous, deferred); omitted when not applicable */
   skipped?: number;
   /** Non-404 write errors */
   failed: number;
   /** Relationship metadata docs successfully appended to the metadata datastream; omitted when not applicable */
   metadataDocsApplied?: number;
+  /** Relationship metadata docs that failed to append; omitted when not applicable */
+  metadataDocsFailed?: number;
 }
 
 interface EntityMaintainerRunSummarySource {
@@ -429,6 +433,14 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
             description: '404 bulk errors — entity absent from store; omitted when not applicable',
           },
         },
+        targetIdsNotInStore: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description:
+              "Target EUIDs pruned because they don't exist in the entity store; omitted when not applicable",
+          },
+        },
         skipped: {
           type: 'long',
           _meta: {
@@ -447,6 +459,14 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
             optional: true,
             description:
               'Relationship metadata docs successfully appended to the metadata datastream; omitted when not applicable',
+          },
+        },
+        metadataDocsFailed: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description:
+              'Relationship metadata docs that failed to append; omitted when not applicable',
           },
         },
       },
