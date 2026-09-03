@@ -125,6 +125,7 @@ MODEL_ENV = {
     # exceeded" at attempt 2/3). 120 min per shard leaves headroom without
     # hiding a wedge: per-request KBN_EVALS_HTTP_TIMEOUT_MS still bounds a hang.
     "openrouter-zai-glm-5-3-flash": "PERSONA_MATRIX_TIMEOUT_MINUTES=120",
+    "openrouter-deepseek-v4-pro": "PERSONA_MATRIX_TIMEOUT_MINUTES=120",
 }
 # Vars forwarded to every VM. EVAL_CONNECTOR_ID must stay here: run_model.sh only
 # honours an override it actually receives, and otherwise re-derives its Anthropic
@@ -265,6 +266,19 @@ PATCHED_PW_CONFIG = (
     / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts"
 )
+# Trace-evaluator retry budget (commit 1f4d2e2596dc): the 62s budget burned
+# inside the OTel flush lag (~3-7 min), erroring Tool Calls/Tokens/Latency/
+# SkillInvoked on every VM run. Overlaid like the other patched kbn-evals
+# sources — the base image predates the fix.
+PATCHED_TRACE_FACTORY = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/factory.ts"
+)
+TRACE_FACTORY_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/"
+    "evaluators/trace_based/factory.ts"
+)
 # Env seeds/tools seed/spec live in the matrix branch itself (merged as
 # f85527ed "Unbreak failing columns", plus the tool-registration assert).
 # Overlay from this worktree — the persona-matrix-env-truth worktree predates
@@ -332,6 +346,10 @@ MODELS = [
     # OSS-row candidate; 87.8 calls/example measured 2026-09-03 — pair it
     # with --shards 4, never single-stack.
     "openrouter-zai-glm-5-3-flash",
+    # DeepSeek V4 Pro: OSS candidate #2 on the OpenRouter path. Canary
+    # 2026-09-03: clean tool call, 1.7s round-trip (10x faster than GLM-5.3).
+    # Same proxy + endpoint flow; --shards 4 to start.
+    "openrouter-deepseek-v4-pro",
     # NOTE: gemini-3.7-flash exists only as an OpenRouter connector and needs
     # the proxy + ES JAR reasoning patch flow (kibana-evals skill
     # scripts/openrouter-proxy.py). It is NOT in the default sweep; run it as
@@ -482,6 +500,7 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
+    scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
     if persona_only:
         # Every import evaluate_dataset.ts pulls from ./datasets must exist
         # locally before we ship it. A missing file used to surface only on
@@ -521,6 +540,7 @@ def deploy(ip: str) -> None:
         f"grep -q SCOUT_READY_TIMEOUT_MS ~/{EVAL_STACK_REMOTE}",
         f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE}",
         f"grep -q getStatusCode ~/{RETRY_UTILS_REMOTE}",
+        f"grep -q 'retries: 8' ~/{TRACE_FACTORY_REMOTE}",
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
