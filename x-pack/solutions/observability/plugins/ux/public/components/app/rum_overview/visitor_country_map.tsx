@@ -118,7 +118,6 @@ export function VisitorCountryMap({
       layerList,
       isLayerTOCOpen: false,
       hideFilterActions: true,
-      isSharable: false,
       mapSettings: {
         disableInteractive: false,
         hideToolbarOverlay: false,
