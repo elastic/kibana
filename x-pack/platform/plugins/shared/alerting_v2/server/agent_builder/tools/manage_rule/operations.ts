@@ -165,11 +165,27 @@ export const setQueryOperationSchema = z
   .object({
     operation: z.literal('set_query'),
     query: querySchema,
-    recovery_strategy: recoveryStrategySchema.optional(),
-    no_data_strategy: noDataStrategySchema.optional(),
   })
   .describe(
-    'Use `set_query` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.'
+    'Use `set_query` to define the ES|QL query that should fire the rule. Use `set_recovery_strategy` and `set_no_data_strategy` to control recovery and no-data behavior separately.'
+  );
+
+export const setRecoveryStrategyOperationSchema = z
+  .object({
+    operation: z.literal('set_recovery_strategy'),
+    recovery_strategy: recoveryStrategySchema,
+  })
+  .describe(
+    'Use `set_recovery_strategy` to control how alert episodes recover without rewriting the query. `"no_breach"` (default) recovers when the breach condition stops; `"query"` uses a custom recovery query (provide via `set_query`); `"none"` disables recovery.'
+  );
+
+export const setNoDataStrategyOperationSchema = z
+  .object({
+    operation: z.literal('set_no_data_strategy'),
+    no_data_strategy: noDataStrategySchema,
+  })
+  .describe(
+    'Use `set_no_data_strategy` to control what happens when data stops arriving, without rewriting the query. `"none"` (default) ignores no-data; `"last_known_status"` holds the last status; `"recover"` forces recovery. Standalone-format rules need a `no_data` query block via `set_query` when not `"none"`.'
   );
 
 export const setGroupingOperationSchema = groupingSchema
@@ -233,6 +249,8 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setKindOperationSchema,
   setScheduleOperationSchema,
   setQueryOperationSchema,
+  setRecoveryStrategyOperationSchema,
+  setNoDataStrategyOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setDashboardsOperationSchema,
@@ -403,36 +421,17 @@ export const executeRuleOperations = async (
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
-          ...(op.recovery_strategy !== undefined
-            ? { recovery_strategy: op.recovery_strategy }
-            : {}),
-          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
-
-        if (!isRecoveryQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.recovery is only allowed when recovery_strategy is "query".'
-          );
-        }
-        if (!isRecoveryQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'recovery_strategy "query" requires a recovery block in the query ' +
-              '(recovery: { segment } for composed, recovery: { query } for standalone).'
-          );
-        }
-        if (!isNoDataQueryConsistentWithStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
-          );
-        }
-        if (!isNoDataQueryProvidedForStrategy(next)) {
-          throw new RuleOperationValidationError(
-            'no_data_strategy (other than "none") requires a no_data block in the query ' +
-              'for standalone-format rules.'
-          );
-        }
         break;
       }
+
+      case 'set_recovery_strategy':
+        next = { ...next, recovery_strategy: op.recovery_strategy };
+        break;
+
+      case 'set_no_data_strategy':
+        next = { ...next, no_data_strategy: op.no_data_strategy };
+        break;
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -567,6 +566,29 @@ export const executeRuleOperations = async (
   if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
       'Signal rules cannot set recovery_strategy or no_data_strategy.'
+    );
+  }
+
+  if (!isRecoveryQueryConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'query.recovery is only allowed when recovery_strategy is "query".'
+    );
+  }
+  if (!isRecoveryQueryProvidedForStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'recovery_strategy "query" requires a recovery block in the query ' +
+        '(recovery: { segment } for composed, recovery: { query } for standalone).'
+    );
+  }
+  if (!isNoDataQueryConsistentWithStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
+    );
+  }
+  if (!isNoDataQueryProvidedForStrategy(next)) {
+    throw new RuleOperationValidationError(
+      'no_data_strategy (other than "none") requires a no_data block in the query ' +
+        'for standalone-format rules.'
     );
   }
 
