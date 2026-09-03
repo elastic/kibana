@@ -1,8 +1,7 @@
 {
-  "sha1": "be625ddc6f810cc56857d28fa1cd6f3b6317b39c",
+  "sha1": "2ee3fa5ee357b3699ea21cf3bf3a846c6b4c3f8b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -61,8 +60,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 111,
-        "column": 16
+        "line": 75,
+        "column": 71
       }
     },
     {
@@ -162,7 +161,7 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
         "line": 75,
-        "column": 25
+        "column": 27
       }
     },
     {
@@ -181,7 +180,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 13
       }
     },

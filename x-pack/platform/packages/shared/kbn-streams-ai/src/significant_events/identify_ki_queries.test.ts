@@ -188,6 +188,7 @@ const createReasoningResponse = (
     content: '',
     toolCalls: [],
     tokens,
+    diagnostics: { externalContentToolContinuations: 0 },
   } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
 
 interface HarnessOptions {
@@ -201,6 +202,12 @@ interface HarnessOptions {
   scriptedAddQueries?: Array<Array<Record<string, unknown>>>;
   callGetStreamFeatures?: boolean;
   features?: Feature[];
+  /** When set, `get_stream_features` rejects with this error. */
+  getFeaturesError?: Error;
+  /** Wall-clock budget forwarded to the reasoning agent. */
+  maxDurationMs?: number;
+  /** Overrides the ES client, so tests can script probe/validation responses. */
+  esClient?: ElasticsearchClient;
 }
 
 const scriptedQuery = (
@@ -217,12 +224,14 @@ const scriptedQuery = (
 });
 
 const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
-  const getFeatures = jest.fn(
-    async () =>
-      (options.features ?? [
-        { id: 'feat-1', type: 'entity', title: 'Service A', description: 'A service' },
-      ]) as Feature[]
-  );
+  const getFeatures = jest.fn(async () => {
+    if (options.getFeaturesError) {
+      throw options.getFeaturesError;
+    }
+    return (options.features ?? [
+      { id: 'feat-1', type: 'entity', title: 'Service A', description: 'A service' },
+    ]) as Feature[];
+  });
 
   const toolResponses: unknown[] = [];
   const addQueriesResponses: unknown[] = [];
@@ -246,7 +255,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
 
   const result = await identifyKIQueries({
     stream: options.stream ?? stream,
-    esClient: createEsClient().esClient,
+    esClient: options.esClient ?? createEsClient().esClient,
     getFeatures,
     inferenceClient,
     signal,
@@ -256,6 +265,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
     collectQueryAttempts: options.collectQueryAttempts,
     existingQueries: options.existingQueries,
     maxExistingQueriesForContext: options.maxExistingQueriesForContext,
+    maxDurationMs: options.maxDurationMs,
   });
 
   return {
@@ -408,6 +418,15 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('query attempt diagnostics', () => {
+    it('forwards maxDurationMs to the reasoning agent', async () => {
+      const { capturedOptions } = await runIdentifyKIQueries({
+        maxDurationMs: 300000,
+        scriptedAddQueries: [],
+      });
+
+      expect(capturedOptions()?.maxDurationMs).toBe(300000);
+    });
+
     it('collects every attempt across multiple add_queries calls in order', async () => {
       const { result } = await runIdentifyKIQueries({
         collectQueryAttempts: true,
@@ -598,5 +617,252 @@ describe('identifyKIQueries agent', () => {
 
       expect(result.queryAttempts).toBeUndefined();
     });
+  });
+
+  describe('over-broad full-text predicate rejection', () => {
+    it('rejects a multi-word `:` value and asks for a rewrite', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message : "request failed"')]],
+      });
+
+      expect(result.queries).toHaveLength(0);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string; failureReason?: string; error?: string }> };
+      };
+      const [rejected] = response.response.queries;
+      expect(rejected.status).toBe('Failed to add');
+      expect(rejected.failureReason).toBe('validation_error');
+      expect(rejected.error).toContain('MATCH_PHRASE');
+    });
+
+    it('admits the AND-of-single-terms and MATCH_PHRASE rewrites', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [
+          [
+            scriptedQuery('FROM logs | WHERE message:"request" AND message:"failed"'),
+            scriptedQuery('FROM logs | WHERE MATCH_PHRASE(message, "request failed")'),
+          ],
+        ],
+      });
+
+      expect(result.queries).toHaveLength(2);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string }> };
+      };
+      expect(response.response.queries.map((q) => q.status)).toEqual(['Added', 'Added']);
+    });
+  });
+
+  describe('mapping-conflict-aware validation', () => {
+    // One mock routes all ES calls by query text: STATS = volume probe, `\n| LIMIT 0` = candidate validation, else = source-wide conflict probe.
+    const createScriptedClient = (probeColumns: unknown[]) => {
+      const candidateCalls: Array<Record<string, unknown>> = [];
+      const query = jest.fn(async (params: Record<string, unknown>) => {
+        const q = String(params.query);
+        if (q.includes('STATS')) {
+          // Dense => narrow (now-10m) lookback, so a filter would prune history.
+          return countResponse(100_000);
+        }
+        if (q.includes('\n| LIMIT 0')) {
+          candidateCalls.push(params);
+          return { columns: [], values: [] };
+        }
+        return { columns: probeColumns, values: [] };
+      });
+      return {
+        esClient: { esql: { query } } as unknown as ElasticsearchClient,
+        candidateCalls,
+      };
+    };
+
+    const CONFLICT_COLUMNS = [
+      {
+        name: 'exception.message',
+        type: 'unsupported',
+        original_types: ['keyword', 'text'],
+        suggested_cast: 'keyword',
+      },
+    ];
+
+    it('drops the lookback filter for a candidate that references a union field', async () => {
+      const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [
+          [scriptedQuery('FROM logs | WHERE exception.message::keyword == "boom"')],
+        ],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0]).not.toHaveProperty('filter');
+    });
+
+    it('keeps the lookback filter for a candidate that references no union field, even when the source has conflicts', async () => {
+      const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "boom"')]],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0].filter).toEqual({
+        range: { '@timestamp': { gte: 'now-10m', lte: 'now' } },
+      });
+    });
+
+    it('keeps the narrow lookback filter when the stream has no conflicts', async () => {
+      const { esClient, candidateCalls } = createScriptedClient([
+        { name: 'message', type: 'text' },
+      ]);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "boom"')]],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0].filter).toEqual({
+        range: { '@timestamp': { gte: 'now-10m', lte: 'now' } },
+      });
+    });
+  });
+});
+
+describe('zero-query observability', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const zeroQueryWarnLines = () =>
+    (logger.warn as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .filter((line) => line.includes('Generated 0 Significant Event KI queries'));
+
+  const zeroQueryDebugLines = () =>
+    (logger.debug as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .filter((line) => line.includes('Generated 0 Significant Event KI queries'));
+
+  const allLogLines = () =>
+    [
+      ...(logger.warn as jest.Mock).mock.calls,
+      ...(logger.debug as jest.Mock).mock.calls,
+      ...(logger.trace as jest.Mock).mock.calls,
+    ].map((call) => String(call[0]));
+
+  it('logs exactly one debug zero-query line, and no warn zero-query line, for a featureless stream', async () => {
+    const { result } = await runIdentifyKIQueries({
+      features: [],
+      callGetStreamFeatures: true,
+    });
+
+    expect(result.queries).toHaveLength(0);
+    expect(zeroQueryDebugLines()).toHaveLength(1);
+    expect(zeroQueryDebugLines()[0]).toContain('observed=no_features_returned');
+    expect(zeroQueryDebugLines()[0]).toContain('max_steps=4');
+    expect(zeroQueryWarnLines()).toHaveLength(0);
+  });
+
+  it('warns when the model submits queries after feature inspection returns nothing', async () => {
+    const { result } = await runIdentifyKIQueries({
+      features: [],
+      callGetStreamFeatures: true,
+      scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
+    });
+
+    expect(result.queries).toHaveLength(0);
+    expect(result.toolUsage.add_queries.calls).toBe(1);
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain('observed=add_queries_called_no_accepted_queries');
+    expect(zeroQueryWarnLines()[0]).toContain('features_returned=0');
+    expect(zeroQueryDebugLines()).toHaveLength(0);
+  });
+
+  it('warns exactly one zero-query line with observed=no_get_stream_features_calls when no feature inspection ran', async () => {
+    const { result } = await runIdentifyKIQueries({
+      callGetStreamFeatures: false,
+      scriptedAddQueries: [],
+    });
+
+    expect(result.queries).toHaveLength(0);
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain('observed=no_get_stream_features_calls');
+    expect(zeroQueryWarnLines()[0]).toContain('get_stream_features_calls=0');
+  });
+
+  it('warns exactly one zero-query line with observed=get_stream_features_failed when feature inspection failed', async () => {
+    const { result } = await runIdentifyKIQueries({
+      getFeaturesError: new Error('ES unavailable'),
+    });
+
+    expect(result.queries).toHaveLength(0);
+    // The failure path may emit an unrelated warning; filter by the zero-query message itself.
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain('observed=get_stream_features_failed');
+    expect(zeroQueryWarnLines()[0]).toContain('get_stream_features_failures=1');
+  });
+
+  it('warns exactly one zero-query line with observed=no_add_queries_calls when features were returned but no add_queries call ran', async () => {
+    const { result } = await runIdentifyKIQueries({ scriptedAddQueries: [] });
+
+    expect(result.queries).toHaveLength(0);
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain('observed=no_add_queries_calls');
+    expect(zeroQueryWarnLines()[0]).toContain('features_returned=1');
+  });
+
+  it('warns exactly one zero-query line with observed=add_queries_called_no_accepted_queries when nothing was accepted', async () => {
+    const { result } = await runIdentifyKIQueries({
+      scriptedAddQueries: [
+        [scriptedQuery('FROM logs | WHERE message : "customer secret query text"')],
+      ],
+    });
+
+    expect(result.queries).toHaveLength(0);
+    expect(result.toolUsage.add_queries.calls).toBe(1);
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryWarnLines()[0]).toContain('observed=add_queries_called_no_accepted_queries');
+    expect(zeroQueryWarnLines()[0]).toContain('add_queries_calls=1');
+    expect(zeroQueryWarnLines()[0]).toContain('add_queries_failures=1');
+  });
+
+  it('does not warn when generation succeeds', async () => {
+    const { result } = await runIdentifyKIQueries({
+      scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
+    });
+
+    expect(result.queries).toHaveLength(1);
+    expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 0 });
+    expect(zeroQueryWarnLines()).toHaveLength(0);
+    expect(zeroQueryDebugLines()).toHaveLength(0);
+  });
+
+  it('logs exactly one zero-query line, on the warn channel, when feature inspection fails', async () => {
+    await runIdentifyKIQueries({ getFeaturesError: new Error('ES unavailable') });
+    expect(zeroQueryWarnLines()).toHaveLength(1);
+    expect(zeroQueryDebugLines()).toHaveLength(0);
+  });
+
+  it('never logs query text, feature content, or other model-authored text', async () => {
+    await runIdentifyKIQueries({
+      scriptedAddQueries: [
+        [scriptedQuery('FROM logs | WHERE message : "customer secret query text"')],
+      ],
+    });
+
+    for (const line of allLogLines()) {
+      expect(line).not.toContain('customer secret query text');
+      expect(line).not.toContain('Detects the condition');
+      expect(line).not.toContain('Service A');
+      expect(line).not.toContain('A service');
+      expect(line).not.toContain('FROM logs');
+    }
   });
 });

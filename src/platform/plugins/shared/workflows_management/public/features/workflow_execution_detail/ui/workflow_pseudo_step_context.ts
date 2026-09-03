@@ -41,7 +41,12 @@ export function buildTriggerContextFromExecution(
     const event = executionContext.event as Record<string, unknown>;
     if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
-    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+    } else if (
+      isEventDrivenWorkflowTriggerSource({
+        triggeredBy,
+        context: executionContext,
+      })
+    ) {
       triggerType = 'event';
     } else {
       triggerType = 'document';

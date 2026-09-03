@@ -17,6 +17,7 @@ export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
 export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
 
 export const DEFAULT_MAX_AUDIT_MESSAGE_SIZE = 500;
+export const TRANSFORM_PROJECT_ROUTING_MAX_LENGTH = 10000;
 
 export const PLUGIN = {
   ID: 'transform',
@@ -42,6 +43,7 @@ export const TRANSFORM_REACT_QUERY_KEYS = {
   GET_ES_INDICES: 'transform.get_es_indices',
   GET_ES_INGEST_PIPELINES: 'transform.get_es_ingest_pipelines',
   GET_HISTOGRAMS_FOR_FIELDS: 'transform.get_histograms_for_fields',
+  GET_TRANSFORM_CPS_ENABLED: 'transform.get_transform_cps_enabled',
   GET_TRANSFORM: 'transform.get_transform',
   GET_TRANSFORM_NODES: 'transform.get_transform_nodes',
   GET_TRANSFORM_AUDIT_MESSAGES: 'transform.get_transform_audit_messages',

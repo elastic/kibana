@@ -7,7 +7,6 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -16,7 +15,6 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
@@ -36,6 +34,7 @@ import {
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common/entity_summary';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
@@ -326,21 +325,20 @@ export const EntityHighlightsAccordion: React.FC<{
 
   return (
     <>
-      <EuiAccordion
-        initialIsOpen
-        id="entity-highlights"
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.highlights.title"
-                defaultMessage="Entity summary"
-              />{' '}
-              <AiIcon iconType="sparkles" aria-hidden={true} />
-            </h3>
-          </EuiTitle>
+      <ExpandableSection
+        expanded={true}
+        gutterSize="none"
+        headingLevel="h3"
+        data-test-subj="entity-highlights-accordion"
+        title={
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.title"
+              defaultMessage="Entity summary"
+            />{' '}
+            <AiIcon iconType="sparkles" aria-hidden={true} />
+          </>
         }
-        data-test-subj="asset-criticality-selector"
         extraAction={
           canGenerate &&
           (aiConnectors?.length ?? 0) > 0 && (
@@ -363,7 +361,6 @@ export const EntityHighlightsAccordion: React.FC<{
           )
         }
       >
-        <EuiSpacer size="m" />
         {showErrorBanner && (
           <>
             <EuiCallOut
@@ -502,7 +499,7 @@ export const EntityHighlightsAccordion: React.FC<{
             </EuiFlexGroup>
           </EuiPanel>
         )}
-      </EuiAccordion>
+      </ExpandableSection>
       <EuiHorizontalRule />
     </>
   );

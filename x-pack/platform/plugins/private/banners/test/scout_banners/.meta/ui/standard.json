@@ -1,5 +1,8 @@
 {
   "sha1": "657b31e1084b78e57340c5a825aaa793b6709f88",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "eea7c4462a87227-22c66376801ebaf",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/global.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 12,
+        "column": 14
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 36,
-        "column": 7
+        "line": 31,
+        "column": 26
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 47,
-        "column": 7
+        "line": 33,
+        "column": 62
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/banners/test/scout_banners/ui/tests/spaces.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 41,
+        "column": 21
       }
     }
   ]

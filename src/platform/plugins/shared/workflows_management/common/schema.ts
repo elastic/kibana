@@ -11,6 +11,7 @@ import type {
   BaseConnectorContract,
   ConnectorContractUnion,
   ConnectorTypeInfo,
+  CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
 } from '@kbn/workflows';
@@ -461,15 +462,15 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = [],
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
   options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
   if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggerIds);
+    return generateLightweightYamlSchema(registeredTriggers);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
+  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
 };
 
 export const getWorkflowZodSchemaLoose = (

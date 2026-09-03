@@ -171,7 +171,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickFlyoutEnableSwitchButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
+        await retryService.waitFor(
+          'flyout enable switch to reflect the disabled state',
+          async () => (await rule.rulePage.getEnableSwitchButtonState()) === 'false'
+        );
         await rule.rulePage.clickCloseFlyoutButton();
       });
       it('Alerts section of Rules Flyout shows Disabled text when Rules are disabled', async () => {

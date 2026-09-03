@@ -7,11 +7,13 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  ConversationAccessControlMode,
   ConversationRoundStatus,
   ConversationOriginType,
   createAgentNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../common/constants';
 import { registerConversationRoutes } from './conversations';
 
@@ -62,8 +64,12 @@ describe('registerConversationRoutes', () => {
           },
         },
       ],
+    } as Conversation;
+    const conversationWithPermissions = {
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: true },
     };
-    const get = jest.fn().mockResolvedValue(conversation);
+    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
 
     const router = {
       versioned: {
@@ -129,7 +135,10 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(get).toHaveBeenCalledWith('conversation-1');
-    expect(result.payload).toBe(conversation);
+    expect(result.payload).toEqual({
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: true },
+    });
     expect(result.payload.origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
@@ -158,7 +167,11 @@ describe('registerConversationRoutes', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
     };
-    const list = jest.fn().mockResolvedValue([conversation]);
+    const conversationWithPermissions = {
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: true },
+    };
+    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
 
     const router = {
       versioned: {
@@ -221,9 +234,116 @@ describe('registerConversationRoutes', () => {
       response
     );
 
-    expect(list).toHaveBeenCalledWith({ agentId: undefined });
+    expect(list).toHaveBeenCalledWith({
+      agentId: undefined,
+      page: undefined,
+      perPage: undefined,
+      sortOrder: undefined,
+      pinned: undefined,
+    });
     expect(result.payload.results[0].origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+    });
+    expect(result.payload.results[0].permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: true,
+    });
+  });
+
+  it('reports rename and delete permissions for an admin viewing a public conversation owned by another user', async () => {
+    let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    let listConversationsHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const conversation = {
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      user: { id: 'conversation-owner', username: 'owner' },
+      title: 'Public conversation',
+      created_at: '2026-07-10T00:00:00.000Z',
+      updated_at: '2026-07-10T00:00:01.000Z',
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+      rounds: [],
+    } as Conversation;
+    const conversationWithPermissions = {
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: false },
+    };
+    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
+    const list = jest.fn().mockResolvedValue({ results: [conversationWithPermissions], total: 1 });
+
+    const router = {
+      versioned: {
+        get: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === GET_CONVERSATION_PATH) {
+                  getConversationHandler = handler;
+                }
+                if (config.path === `${publicApiPath}/conversations`) {
+                  listConversationsHandler = handler;
+                }
+              }
+            ),
+        })),
+        delete: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
+        post: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
+        put: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
+      },
+    };
+
+    registerConversationRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({
+            get,
+            list,
+          }),
+        },
+      }),
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const context = {
+      core: Promise.resolve({}),
+      licensing: Promise.resolve({
+        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      }),
+    };
+    const response = {
+      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+
+    const getResult = await getConversationHandler!(
+      context,
+      { params: { conversation_id: conversation.id } },
+      response
+    );
+    const listResult = await listConversationsHandler!(context, { query: {} }, response);
+
+    expect(getResult.payload.permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: false,
+    });
+    expect(listResult.payload.results[0].permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: false,
     });
   });
 
@@ -400,7 +520,7 @@ describe('POST /conversations', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
     );
-    expect(mockGet).toHaveBeenCalledWith(createdConversation.id);
+    expect(mockGet).not.toHaveBeenCalled();
     expect(result.status).toBe(200);
     expect(result.payload).toBe(createdConversation);
   });

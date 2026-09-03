@@ -7,11 +7,20 @@
 
 import React, { useCallback } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { OBLT_DEFAULT_CATEGORIES } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon, type SupportedLogo } from '../shared/logo_icon';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
+
+// Repeated category query params are Fleet's multi-filter encoding. A path
+// category like /browse/observability drops the OpenTelemetry default.
+const catalogueParams = new URLSearchParams();
+for (const category of OBLT_DEFAULT_CATEGORIES) {
+  catalogueParams.append('category', category);
+}
+const CATALOGUE_PATH = `/browse?${catalogueParams.toString()}`;
 
 const CHIP_LOGOS: readonly SupportedLogo[] = [
   'nginx',
@@ -30,7 +39,7 @@ export const BrowseAllIntegrationsTile = () => {
 
   const handleClick = useCallback(() => {
     application.navigateToApp('integrations', {
-      path: addPathParamToUrl('/browse/observability', {}),
+      path: addPathParamToUrl(CATALOGUE_PATH, {}),
     });
   }, [application]);
 

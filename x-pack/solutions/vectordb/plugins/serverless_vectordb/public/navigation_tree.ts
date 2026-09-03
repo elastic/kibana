@@ -28,9 +28,6 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const NAV_TITLE = i18n.translate('xpack.serverlessVectordb.nav.title', {
-  defaultMessage: 'Vector DB',
-});
 const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessVectordb.nav.performance', {
   defaultMessage: 'Performance',
 });
@@ -68,15 +65,20 @@ export function createNavigationTree({
   return {
     body: [
       {
-        icon: 'logoVectorDB',
+        icon: 'home',
         link: 'vectordb',
-        renderAs: 'home',
-        title: NAV_TITLE,
+        title: i18n.translate('xpack.serverlessVectordb.nav.home', {
+          defaultMessage: 'Home',
+        }),
         breadcrumbStatus: 'hidden',
       },
       {
         icon: 'productAgent',
         link: 'agent_builder',
+      },
+      {
+        icon: 'sparkles',
+        link: 'context_engine',
       },
       {
         link: 'discover',

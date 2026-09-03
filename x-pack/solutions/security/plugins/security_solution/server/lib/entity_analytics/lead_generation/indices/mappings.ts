@@ -7,7 +7,6 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-/** ES mappings for lead documents. Shared by both adhoc and scheduled indices. */
 export const generateLeadIndexMappings = (): MappingTypeMapping => ({
   dynamic: 'strict',
   properties: {
@@ -15,7 +14,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     title: { type: 'text', fields: { keyword: { type: 'keyword' } } },
     byline: { type: 'text' },
     description: { type: 'text' },
-    entities: {
+    entity: {
       type: 'object',
       properties: {
         type: { type: 'keyword' },
@@ -42,7 +41,30 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
         metadata: { type: 'object', enabled: false },
       },
     },
+    top_related_entities: {
+      type: 'object',
+      properties: {
+        id: { type: 'keyword' },
+        type: { type: 'keyword' },
+        name: { type: 'keyword' },
+        kinds: { type: 'keyword' },
+        risk_level: { type: 'keyword' },
+        criticality: { type: 'keyword' },
+        interacted_with_at_least: { type: 'integer' },
+      },
+    },
+    related_entity_counts: {
+      type: 'object',
+      properties: {
+        kind: { type: 'keyword' },
+        count: { type: 'integer' },
+      },
+    },
     execution_uuid: { type: 'keyword' },
     source_type: { type: 'keyword' },
+    created_at: { type: 'date' },
+    changed_at: { type: 'date' },
+    version: { type: 'integer' },
+    content_hash: { type: 'keyword' },
   },
 });

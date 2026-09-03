@@ -66,9 +66,11 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   // Streams layout
-  public readonly streamsLayoutSourcesPlaceholder;
+  public readonly streamsSourcesTable;
+  public readonly streamsAddSourceButton;
   public readonly streamsLayoutPipelinesPlaceholder;
-  public readonly streamsLayoutDestinationsPlaceholder;
+  public readonly streamsDestinationsTable;
+  public readonly streamsDestinationsSearch;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -129,15 +131,13 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     // Streams layout locators
-    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutSourcesPlaceholder'
-    );
+    this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
+    this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
       'streamsLayoutPipelinesPlaceholder'
     );
-    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutDestinationsPlaceholder'
-    );
+    this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
+    this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }
 
   async goto() {
@@ -215,8 +215,22 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  /**
+   * Click near the top of a node card so the floating toolbar (bottom-center)
+   * cannot intercept the pointer when a node sits toward the bottom of the pane.
+   */
+  async clickCanvasNode(
+    node: Locator,
+    options: { button?: 'left' | 'right'; modifiers?: Array<'Shift'> } = {}
+  ) {
+    await node.click({
+      position: { x: 24, y: 16 },
+      ...options,
+    });
+  }
+
   async rightClickCanvasNode(node: Locator) {
-    await node.click({ button: 'right' });
+    await this.clickCanvasNode(node, { button: 'right' });
   }
 
   async openCanvasPaneContextMenu() {
@@ -609,33 +623,15 @@ export class StreamsApp {
 
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
-    // Focus source item and activate DnD
-    await this.page.getByTestId(`routingRuleDragHandle-${sourceStream}`).focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components.draggable(`routingRuleDragHandle-${sourceStream}`).reorder(steps);
   }
 
   async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
-    // Focus source item and activate DnD
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[processorPos];
-    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components
+      .draggable('streamsAppProcessorDragHandle', targetProcessor)
+      .reorder(steps);
   }
 
   // Expectation utility methods

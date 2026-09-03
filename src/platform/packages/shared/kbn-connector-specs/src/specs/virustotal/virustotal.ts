@@ -166,6 +166,7 @@ export const VirusTotalConnector: ConnectorSpec = {
   actions: {
     scanFileHash: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           hash: z.string().min(32).describe('File hash (MD5, SHA-1, or SHA-256)'),
@@ -201,6 +202,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     scanUrl: {
       isTool: true,
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           url: urlOrDomainSchema.describe('Absolute URL to scan, or bare domain to look up'),
@@ -261,6 +263,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getAnalysisResults: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         id: z
           .string()
@@ -313,6 +316,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     submitFile: {
       isTool: true,
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           file: z.string().describe('Base64-encoded file content'),
@@ -351,6 +355,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     getIpReport: {
       isTool: true,
+      scope: 'read',
       input: lazySchema(() =>
         z.object({
           ip: z.ipv4().describe('IP address'),

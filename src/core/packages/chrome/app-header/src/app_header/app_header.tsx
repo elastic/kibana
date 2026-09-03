@@ -10,44 +10,26 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { DistributiveOmit } from '@elastic/eui';
-import type { AppHeaderBack, AppHeaderConfig, AppHeaderSpacing, AppHeaderTitle } from '../types';
 import {
-  useCanAccessIntegrations,
-  useHasLegacyActionMenu,
+  AppHeaderView as AppHeaderPresentation,
+  type AppHeaderViewProps as AppHeaderPresentationProps,
+} from '@kbn/ui-app-header';
+import type { AppHeaderTitle } from '../types';
+import {
+  useAppHeaderStaticItems,
+  useBackNavTargets,
   useInlineAppHeader,
+  useLegacyActionMenu,
   useResolvedBadges,
 } from './hooks';
-import { AppHeaderShell } from './app_header_shell';
-import { AppBadges } from './app_badges';
-import { AppTabs } from './app_tabs';
-import { TitleArea } from './title_area';
-import { TitleActions } from './title_actions';
-import { AppMenu } from './app_menu';
-import { AppHeaderMetadata } from './app_header_metadata';
-import { AppHeaderDescription } from './app_header_description';
-import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
+import { LegacyHeaderActionMenu } from './legacy_action_menu';
 
-export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back' | 'spacing'> & {
-  back?: AppHeaderBack | AppHeaderBack[];
-  /**
-   * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
-   * sticky-header mechanism for the correct scrolling container.
-   */
-  sticky?: boolean;
-  /**
-   * Controls the horizontal inset. `standard` keeps the 16px symmetric gutter. When omitted it
-   * defaults to `standard`, except a titleless header (only a back and/or overflow button) defaults
-   * to `compact` so sparse legacy states don't look too tall. Bleed modes are compatibility options
-   * for headers that cannot yet move outside a padded parent.
-   */
-  spacing?: AppHeaderSpacing;
+export type AppHeaderViewProps = DistributiveOmit<
+  AppHeaderPresentationProps,
+  'staticItems' | 'fallbackMenu' | 'titleAppend' | 'borderless'
+> & {
   docLink?: string;
   showAddIntegrations?: boolean;
-};
-
-type AppHeaderViewInternalProps = AppHeaderViewProps & {
-  titleAppend?: ReactNode;
-  borderless?: boolean;
 };
 
 const getPublicAppHeaderViewProps = ({
@@ -83,122 +65,47 @@ const getPublicAppHeaderViewProps = ({
   };
 };
 
-const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
-  ({
-    title,
+const usePresentationProps = (
+  props: AppHeaderViewProps,
+  extras?: Pick<AppHeaderPresentationProps, 'titleAppend' | 'borderless'>
+): AppHeaderPresentationProps => {
+  const publicProps = getPublicAppHeaderViewProps(props);
+  const back = useBackNavTargets(publicProps.back);
+  const resolvedBadges = useResolvedBadges(publicProps.badges);
+  const staticItems = useAppHeaderStaticItems({
+    docLink: publicProps.docLink,
+    showAddIntegrations: publicProps.showAddIntegrations,
+  });
+  const legacyActionMenu = useLegacyActionMenu();
+  const { docLink, showAddIntegrations, ...rest } = publicProps;
+
+  return {
+    ...rest,
     back,
-    tabs,
-    badges,
-    menu,
-    favorite,
-    share,
-    titleAppend,
-    description,
-    metadata,
-    sticky,
-    spacing,
-    borderless,
-    docLink,
-    showAddIntegrations,
-  }) => {
-    const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const resolvedBadges = useResolvedBadges(badges);
-    const canAccessIntegrations = useCanAccessIntegrations();
-    const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
-
-    // Sparse legacy states (only a back and/or overflow-menu button, no title or other content) look
-    // too tall at the standard height, so default them to the shorter `compact` spacing. An explicit
-    // `spacing` from the caller always wins.
-    const isSparse =
-      title === undefined &&
-      !resolvedBadges?.length &&
-      !tabs?.length &&
-      !description &&
-      !metadata?.length &&
-      !titleAppend &&
-      !favorite &&
-      !share;
-    const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
-
-    // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
-    // roomier standard/bleed headers use `s`.
-    const titleSize = resolvedSpacing === 'compact' ? 'xs' : 's';
-
-    const show =
-      title !== undefined ||
-      back !== undefined ||
-      !!tabs?.length ||
-      !!resolvedBadges?.length ||
-      !!menu?.items?.length ||
-      !!titleAppend ||
-      !!share ||
-      !!favorite ||
-      !!description ||
-      !!metadata?.length ||
-      !!docLink ||
-      showIntegrations ||
-      hasLegacyActionMenu;
-
-    if (!show) {
-      return null;
-    }
-
-    return (
-      <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} />}
-        badges={<AppBadges badges={resolvedBadges} />}
-        titleActions={<TitleActions shareAction={share} favorite={favorite} />}
-        titleAppend={titleAppend}
-        trailing={
-          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
-        }
-        secondaryContent={
-          description ? (
-            <AppHeaderDescription description={description} />
-          ) : metadata?.length ? (
-            <AppHeaderMetadata metadata={metadata} />
-          ) : undefined
-        }
-        secondaryContentTestSubj={
-          description
-            ? APP_HEADER_TEST_SUBJECTS.description
-            : metadata?.length
-            ? APP_HEADER_TEST_SUBJECTS.metadata
-            : undefined
-        }
-        tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
-        sticky={sticky}
-        spacing={resolvedSpacing}
-        borderless={borderless}
-      />
-    );
-  }
-);
-
-AppHeaderViewInternal.displayName = 'AppHeaderViewInternal';
+    badges: resolvedBadges,
+    staticItems,
+    fallbackMenu:
+      !publicProps.menu && legacyActionMenu ? (
+        <LegacyHeaderActionMenu mount={legacyActionMenu} />
+      ) : undefined,
+    ...extras,
+  };
+};
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>((props) => {
-  return <AppHeaderViewInternal {...getPublicAppHeaderViewProps(props)} />;
+  const presentationProps = usePresentationProps(props);
+  return <AppHeaderPresentation {...presentationProps} />;
 });
 
 AppHeaderView.displayName = 'AppHeaderView';
 
 export type AppHeaderProps = AppHeaderViewProps & { title: AppHeaderTitle };
 
-type InlineAppHeaderProps = AppHeaderViewInternalProps & {
-  title: AppHeaderTitle;
-};
-
-const InlineAppHeader = React.memo<InlineAppHeaderProps>((props) => {
+export const AppHeader = React.memo<AppHeaderProps>((props) => {
   useInlineAppHeader();
-  return <AppHeaderViewInternal {...props} />;
+  const presentationProps = usePresentationProps(props);
+  return <AppHeaderPresentation {...presentationProps} title={props.title} />;
 });
-
-InlineAppHeader.displayName = 'InlineAppHeader';
-
-export const AppHeader = React.memo<AppHeaderProps>((props) => (
-  <InlineAppHeader {...getPublicAppHeaderViewProps(props)} title={props.title} />
-));
 
 AppHeader.displayName = 'AppHeader';
 
@@ -206,13 +113,13 @@ export type DiscoverAppHeaderProps = AppHeaderProps & {
   tabsBar?: ReactNode;
 };
 
-export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => (
-  <InlineAppHeader
-    {...getPublicAppHeaderViewProps(props)}
-    title={props.title}
-    titleAppend={tabsBar}
-    borderless={tabsBar != null}
-  />
-));
+export const DiscoverAppHeader = React.memo<DiscoverAppHeaderProps>(({ tabsBar, ...props }) => {
+  useInlineAppHeader();
+  const presentationProps = usePresentationProps(props, {
+    titleAppend: tabsBar,
+    borderless: tabsBar != null,
+  });
+  return <AppHeaderPresentation {...presentationProps} title={props.title} />;
+});
 
 DiscoverAppHeader.displayName = 'DiscoverAppHeader';

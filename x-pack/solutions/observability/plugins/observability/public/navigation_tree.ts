@@ -14,6 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
@@ -25,7 +26,6 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
-const icon = 'logoObservability';
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -72,9 +72,10 @@ function createNavTree({
         : []),
       {
         link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
+        }),
+        icon: 'home',
       },
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -89,6 +90,10 @@ function createNavTree({
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
+      },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
       ...getWorkflowsNavPanel(coreStart),
       {
@@ -289,6 +294,10 @@ function createNavTree({
               icon: 'productAgent',
             },
           ]),
+      {
+        icon: 'sparkles',
+        link: 'context_engine' as const,
+      },
       {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
@@ -637,7 +646,6 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
-              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },

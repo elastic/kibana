@@ -16,6 +16,21 @@ import type {
 } from '@kbn/lists-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Mutable } from 'utility-types';
+import { validateYaraRule } from '../../../endpoint/lib/libyara';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
+
+jest.mock('../../../endpoint/lib/libyara', () => ({
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+  })),
+  getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
+}));
+
+const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
 
 describe('YARA Signatures API validations', () => {
   let mockEndpointAppContextService: ReturnType<typeof createMockEndpointAppContextService>;
@@ -30,6 +45,14 @@ describe('YARA Signatures API validations', () => {
       httpServerMock.createKibanaRequest()
     );
     exceptionsGenerator = new ExceptionsListItemGenerator();
+    mockValidateYaraRule.mockReset();
+    mockValidateYaraRule.mockResolvedValue({
+      errors: [],
+      warnings: [],
+      errorCount: 0,
+      warningCount: 0,
+      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+    });
   });
 
   it('should initialize', () => {
@@ -237,4 +260,74 @@ describe('YARA Signatures API validations', () => {
   //  `x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows`
   //
   // -----------------------------------------------------------------------------
+
+  describe('libyara compile validation', () => {
+    beforeEach(() => {
+      (
+        mockEndpointAppContextService.experimentalFeatures as Mutable<ExperimentalFeatures>
+      ).customYaraSignaturesEnabled = true;
+    });
+
+    const buildCreateItem = (): CreateExceptionListItemOptions => {
+      const generated = exceptionsGenerator.generateCustomYaraSignatureForCreate();
+      return {
+        ...generated,
+        namespaceType: 'agnostic',
+        osTypes: generated.os_types,
+        listId: generated.list_id,
+        itemId: generated.item_id,
+        tags: [GLOBAL_ARTIFACT_TAG],
+      } as unknown as CreateExceptionListItemOptions;
+    };
+
+    it('rejects create when libyara reports compile errors', async () => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [{ severity: 'error', message: 'syntax error', line: 2 }],
+        warnings: [],
+        errorCount: 1,
+        warningCount: 0,
+        rules: [],
+      });
+
+      await expect(
+        customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
+      ).rejects.toThrow(
+        /Invalid YARA rules \(libyara MOCKED_VERSION\), 1 error found: \[line 2\] syntax error/
+      );
+      expect(mockValidateYaraRule).toHaveBeenCalled();
+    });
+
+    it('allows create when libyara only returns warnings', async () => {
+      mockValidateYaraRule.mockResolvedValue({
+        errors: [],
+        warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
+        errorCount: 0,
+        warningCount: 1,
+        rules: [{ identifier: 'T', meta: {}, duplicateMeta: [] }],
+      });
+
+      await expect(
+        customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
+      ).resolves.not.toThrow();
+    });
+
+    it('rejects create with a safe 500 when the YARA engine fails', async () => {
+      const engineError = new WebAssembly.RuntimeError('memory access out of bounds');
+      mockValidateYaraRule.mockRejectedValue(engineError);
+
+      const error = await customYaraSignaturesValidator
+        .validatePreCreateItem(buildCreateItem())
+        .catch((err) => err);
+
+      expect(error).toBeInstanceOf(EndpointArtifactExceptionValidationError);
+      expect(error.message).toContain(
+        'Unable to validate YARA rule due to an internal error. Please try again later.'
+      );
+      expect(error.message).not.toContain('memory access out of bounds');
+      expect(error.getStatusCode()).toBe(500);
+
+      const logger = mockEndpointAppContextService.createLogger.mock.results.at(-1)?.value;
+      expect(logger.error).toHaveBeenCalledWith(engineError);
+    });
+  });
 });

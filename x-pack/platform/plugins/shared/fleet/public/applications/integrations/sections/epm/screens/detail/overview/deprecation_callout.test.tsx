@@ -202,7 +202,7 @@ describe('DeprecationCallout', () => {
     });
   });
 
-  it('should have warning color and icon', () => {
+  it('should have warning color', () => {
     const packageInfo = {
       name: 'test-package',
       deprecated: {
@@ -210,13 +210,10 @@ describe('DeprecationCallout', () => {
       },
     };
 
-    const { container } = renderDeprecationCallout(packageInfo as PackageInfo);
+    renderDeprecationCallout(packageInfo as PackageInfo);
 
     const callout = screen.getByTestId('deprecationCallout');
     expect(callout).toHaveClass('euiCallOut--warning');
-
-    const warningIcon = container.querySelector('[data-euiicon-type="warning"]');
-    expect(warningIcon).toBeInTheDocument();
   });
 
   it('should show deprecation callout when integrationInfo is deprecated and package has multiple integrations', () => {

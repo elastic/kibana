@@ -66,13 +66,16 @@ export const createConversationClientMock = (): ConversationClientMock => {
     update: jest.fn(),
     addAttachmentsToLastRound: jest.fn(),
     upsertRound: jest.fn(),
+    appendEvents: jest.fn(),
+    replaceRoundEvents: jest.fn(),
+    updateRoundFeedback: jest.fn(),
+    markRead: jest.fn(),
+    setPinned: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
     updateAccessControl: jest.fn(),
     applyTemplate: jest.fn(),
     patchMetadata: jest.fn(),
-    appendEvents: jest.fn(),
-    getEvents: jest.fn(),
   };
 };
 

@@ -72,11 +72,18 @@ export type {
   UIExtensionsStorage,
 } from './types/ui_extensions';
 
-export { pagePathGetters, EPM_API_ROUTES, CLOUD_CONNECTOR_API_ROUTES } from './constants';
+export {
+  pagePathGetters,
+  EPM_API_ROUTES,
+  CLOUD_CONNECTOR_API_ROUTES,
+  OBLT_DEFAULT_CATEGORIES,
+} from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
 export { CardIcon, PackageIcon } from './components/package_icon';
+export { DataStreamTypeSelector } from './components/data_stream_type_selector';
+export type { DataStreamTypeSelectorProps } from './components/data_stream_type_selector';
 // Export Package editor components for custom editors
 export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
@@ -86,6 +93,10 @@ export type { DynamicPagePathValues } from './constants';
 
 // This Type export is added to prevent error TS4023
 export type { InputFieldProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field';
+
+// Fleet status — required by PackagePolicyInputVarField when rendered outside Fleet's app
+export { FleetStatusProvider } from './hooks/use_fleet_status';
+export type { FleetStatusProviderProps } from './hooks/use_fleet_status';
 
 export const LazyPackagePolicyInputVarField = lazy(() =>
   import(

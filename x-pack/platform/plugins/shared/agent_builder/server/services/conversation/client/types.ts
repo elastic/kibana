@@ -15,6 +15,7 @@ import type {
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -28,12 +29,18 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
+import type { TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
   'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
 > & {
   id?: string;
+  /**
+   * Optional user override. Used to set the parent conversation's user when creating a child conversation for a subagent
+   */
+  user?: UserIdAndName;
   access_control?: ConversationAccessControl;
 };
 
@@ -43,6 +50,8 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       Conversation,
       | 'title'
       | 'rounds'
+      | 'events'
+      | 'schema_version'
       | 'attachments'
       | 'state'
       | 'status'
@@ -54,18 +63,11 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'template_id'
       | 'template_version'
     >
-  >;
+  > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  | 'id'
-  | 'title'
-  | 'attachments'
-  | 'read'
-  | 'pinned'
-  | 'metadata'
-  | 'template_id'
-  | 'template_version'
+  'id' | 'title' | 'attachments' | 'read' | 'metadata' | 'template_id' | 'template_version'
 >;
 
 export interface GetEventsOptions {
@@ -92,6 +94,40 @@ export interface UpsertRoundRequest {
   workspaceId?: string;
 }
 
+/** Appends timeline events onto a conversation.*/
+export interface AppendEventsRequest {
+  id: string;
+  /** Timeline events to append; already materialized (ids, actor, created_at set). */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the append. */
+  status?: Conversation['status'];
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
+export interface ReplaceRoundEventsRequest {
+  /** Conversation to update. */
+  id: string;
+  /** The round whose stored events should be replaced. */
+  roundId: string;
+  /** The fresh canonical projection for the round. */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the write. */
+  status?: Conversation['status'];
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
 /**
  * Adds attachments to the conversation and references them from the last stored
  * round. Merge semantics: the target round and the attachment list are both
@@ -107,6 +143,15 @@ export interface AddAttachmentsToLastRoundRequest {
 
 export interface ConversationListOptions {
   agentId?: string;
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
+}
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
 }
 
 /**
@@ -134,7 +179,8 @@ export type PersistentConversationRoundStep =
   | BackgroundAgentCompleteStep
   | TodosStep
   | AskUserQuestionStep
-  | RelevantSkillsStep;
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
@@ -162,3 +208,29 @@ export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
   LegacyRoundFields & {
     steps: PersistentConversationRoundStep[];
   };
+
+/**
+ * One user who has read a conversation. An entry object rather than a bare id string
+ * so fields such as `read_at` can be added later without another shape migration.
+ */
+export interface ConversationReadByEntry {
+  userId: string;
+}
+
+/**
+ * One user who has pinned a conversation. An entry object rather than a bare id string
+ * so fields such as `pinned_at` can be added later without another shape migration.
+ */
+export interface ConversationPinnedByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` and `pinned_by` lists that back the public `Conversation.read` and
+ * `Conversation.pinned` booleans.
+ */
+export type NormalizedConversation = Conversation & {
+  read_by?: ConversationReadByEntry[];
+  pinned_by?: ConversationPinnedByEntry[];
+};

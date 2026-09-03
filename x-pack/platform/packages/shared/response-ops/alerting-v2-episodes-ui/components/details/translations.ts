@@ -98,13 +98,6 @@ export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.f
 });
 
 /** --- Header --- */
-export const HEADER_LOADING_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.header.loadingTitle',
-  {
-    defaultMessage: 'Loading…',
-  }
-);
-
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
   {
@@ -274,7 +267,7 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
 export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
   {
-    defaultMessage: 'Tags',
+    defaultMessage: 'Alert tags',
   }
 );
 
