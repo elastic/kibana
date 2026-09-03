@@ -1,10 +1,26 @@
 # The whole Slack message, both ways: Relay ⇄ Agent Builder
 
-**Status:** buckets A, B1, B2, C1, and C2 implemented (PoC). B3 is the remaining outbound gap and needs Relay sign-off first.
+**Status:** buckets A, B1, B2, C1, C2, and C3 implemented (PoC). B3 is the remaining outbound gap and needs Relay sign-off first.
 **Surfaces:** Agent Builder callback converse, Adaptive UI, Relay (`elastic/relay-service`).
 **Scope:** not in the portable-chat demo requirements. This is the follow-up the Relay/AB round-trip critique is actually asking for.
 
-> **Implemented across two repos.** Kibana work is on `adaptive-ui/relay-slack-projection`. Relay work is on two independent branches in `elastic/relay-service`: `feat/kibana-surface-projection` (outbound Block Kit) and `feat/slack-mrkdwn-normalization` (inbound prose). The outbound round-trip now works end to end: Kibana composes and projects, Relay posts. See [Built so far](#built-so-far).
+> **Implemented across two repos.** Kibana work is on `adaptive-ui/relay-slack-projection`. Relay work is on two independent branches in `elastic/relay-service`: `feat/kibana-surface-projection` (outbound Block Kit + charts) and `feat/slack-mrkdwn-normalization` (inbound prose). The outbound round-trip now works end to end: Kibana composes and projects, Relay uploads assets and posts. See [Built so far](#built-so-far).
+
+## Status TL;DR
+
+**Everything but B3 is built and verified end-to-end.**
+
+Outbound (AB → Slack): Kibana resolves attachment tags, composes the full reply into a `ViewSpec`, projects it to Slack Block Kit with `renderSlack`, rasterizes chart nodes to PNG at 2× density, and ships blocks + asset bytes on `projection.slack`. Relay uploads the PNGs, rewrites `slack_file` refs to file ids, and posts the blocks. Markdown is the fallback at every stage — a failed rasterization, a payload-too-large chart set, or a malformed block all degrade gracefully rather than costing the answer.
+
+Inbound (Slack → AB): Relay normalizes Slack mrkdwn to standard Markdown before AB sees it — mentions resolved to display names, links unwrapped, HTML entities decoded, code blocks preserved. The AB transcript shows who asked and from which surface.
+
+**What remains:**
+
+- **B3 (per-message granularity):** One Slack message per assistant `message_complete`, not just the terminal one. Needs joint Relay design sign-off on `message_key → ts` semantics before code. See [Bucket B](#bucket-b--lockstep-with-relay).
+- **HITL bridging:** Replies typed in the Kibana AB UI for a Slack-originated conversation do not return to Slack. The callback is per-execution: Relay submits each turn with `callback.url = relay/v1/events`; the Kibana UI does not, so `deliverCallbackEvents` exits immediately for UI-initiated turns. Fixing this requires either storing the Relay callback URL on the conversation or a push path from Kibana back through Relay. See [Later, not this feature](#later-not-this-feature).
+- **Inbound files:** Slack file references dropped by Relay; a named `slack.file` attachment type and resolver are needed before implementation.
+- **`format()` fallback:** Unresolvable native-type tags degrade to a stub. Wiring `format()` is deferred to A2 follow-up.
+- **Canonical spec registry:** Server map is still hand-maintained, held at parity with `adapterGallery` by a CI test.
 
 ## TL;DR
 
@@ -48,14 +64,16 @@ The two directions are different problems. Outbound pivots on `ViewSpec` and `re
 | B2 (Relay) | Prefers the projection over the markdown wrap | `src/outbound/slack-renderer.ts` |
 | C1 | Slack mrkdwn normalized to Markdown, mentions resolved | `src/surfaces/slack/mrkdwn.ts` |
 | C2 | Transcript names the asker and the surface | `agent_builder/…/round_input_attribution.tsx` |
+| C3 | Chart PNGs rasterized at 2× density, uploaded by Relay, refs resolved before post | `adaptive_ui/server/slack/render_png.ts`, `src/surfaces/slack/chart-assets.ts` |
 
-Three findings from building it, none of which change the plan's shape:
+Four findings from building it, none of which change the plan's shape:
 
 - **The tag parse is now shared by both server consumers.** `parse_reply.ts` owns the pattern, the attribute read, and tag-to-spec resolution; the markdown projection and the composer are two callers. The divergence from the remark plugin's parser still stands.
 - **`format()` fallback is still not wired**, as [Resolving attachments to specs](#resolving-attachments-to-specs) says. An unresolvable tag degrades to a stub in both projections.
 - **A rejected projection now retries as markdown** before Relay's canned notice. The plan flagged malformed Block Kit as costing the whole answer; that is now a formatting loss instead.
+- **C3 landed as part of B2, not separately.** Charts were implemented in the same pass as Block Kit projection. `assets` travels alongside `blocks` on `projection.slack`; Relay uploads each PNG, polls `files.info` for readiness, and rewrites `slack_file.ref` to the uploaded id before calling `toPostableBlocks`. An `image` block with an unresolved `ref` is treated as invalid and drops the whole projection to markdown, which is the correct failure mode.
 
-Deliberately still not built: B3 (per-message projection), charts on the Relay path (C3), and inbound files.
+Deliberately still not built: B3 (per-message projection) and inbound files.
 
 ---
 
@@ -290,9 +308,11 @@ Two things to avoid. Do not replace `response.message` with Block Kit, because K
 
 ### Charts and files
 
-`collectAssets: true` emits image placeholders that need a PNG upload. The Elastic Slack app on the Relay path historically has no `files:write`.
+**Charts are implemented (C3 landed with B2).** `renderSlack` is called with `collectAssets: true`; each emitted asset is rasterized to PNG at 2× pixel density in Kibana and shipped as base64 on `projection.slack.assets`. Relay decodes each asset, uploads it via `filesUploadV2`, polls `files.info` until `mimetype` appears (the documented readiness signal), then rewrites the matching `slack_file.ref` to the file id before calling `toPostableBlocks`. An `image` block with a surviving `ref` (upload failed or timed out) causes the whole projection to fall back to markdown — a partial resolution would fail the Slack message.
 
-Initially, if assets cannot be uploaded, re-render without `collectAssets`. That is the same degrade `post_view.ts` already implements. Step C3 adds upload on the Relay app, after which `slack_file` ids can be filled before posting. Do not block prose and cards on charts.
+Degradation is all-or-nothing at two budget checkpoints: Kibana refuses to ship more than 2 MB of chart bytes on the callback, and Relay enforces the same limit on decode. If either fires, the projector re-renders without `collectAssets` so charts degrade to their text form rather than leaving unresolved refs.
+
+`files:write` and `files:read` are now in the default OAuth scopes. `files:read` is used to confirm upload readiness; if the scope is absent Relay waits a fixed interval instead of polling, which is safe but slower.
 
 ### What not to put on the callback
 
@@ -303,6 +323,9 @@ Initially, if assets cannot be uploaded, re-render without `collectAssets`. That
 ### Later, not this feature
 
 - **Interactive HITL** (`prompt_request` / `awaiting_prompt`). Block Kit buttons are the natural projection for a prompt request, and per-message projection is what makes it possible. It also carries its own failure modes — HITL state, Slack interactivity endpoints, Relay's `needs_input` path — so it is a separate feature. Relay keeps treating it as `needs_input` for now.
+
+  Related: replies typed in the **Kibana AB UI** for a Slack-originated conversation do not return to Slack today. The reason is structural, not an oversight. `CallbackDeliveryService.getCallbackUrl` returns `execution.agentParams.callback?.url`, which is only present when the **caller** (Relay) supplies `callback.url` in the converse request. The Kibana UI calls the public `POST /api/agent_builder/converse` endpoint, which does not accept or forward a callback URL — `deliverCallbackEvents` exits immediately as a no-op for those turns. Each execution carries its own callback independently; there is no conversation-level callback URL that Relay could register once and reuse. Fixing this requires either storing the Relay callback URL on the conversation so Kibana-UI turns can inherit it, or a push path from Kibana back through Relay after each UI-initiated round.
+
 - GitHub and MS Teams projectors: same composer, different `render*`, `projection.<surface>`.
 - Slack `event.blocks` and files on converse `attachments`.
 
@@ -427,13 +450,13 @@ Without this sign-off, Kibana can build a projection that Relay cannot safely po
 
 ### Bucket C — independent of both
 
-| # | Step | Owner |
-| --- | --- | --- |
-| C1 | Inbound mrkdwn normalize + file passthrough into `ConverseInput` | Relay |
-| C2 | Transcript renders `origin` / `author` / files on `RoundInput` | Kibana |
-| C3 | Charts on the Relay path | Relay |
+| # | Step | Owner | Status |
+| --- | --- | --- | --- |
+| C1 | Inbound mrkdwn normalize + file passthrough into `ConverseInput` | Relay | Normalize ✅; files deferred |
+| C2 | Transcript renders `origin` / `author` / files on `RoundInput` | Kibana | ✅ (files deferred) |
+| C3 | Charts on the Relay path | Relay | ✅ landed with B2 |
 
-C3 needs `files:write` added to the OAuth scopes, which forces a re-install and re-auth of every connected workspace. Price that in before promising charts.
+C3 forced `files:write` and `files:read` into the default OAuth scopes. Existing installs will need a re-authorization on the next deploy.
 
 **What to say in the thread.** Bucket A shipped and makes Slack threads readable. B1 and B2 shipped together and are the actual answer to *"convert that to whatever Adaptive UI is doing before it gets back to Slack"* — Kibana composes the reply into a `ViewSpec` and projects it; Relay posts those blocks. The remaining outbound gap is B3, because posting one Slack message per assistant message is a Relay behavior change rather than a rendering change, and it needs the sign-off below before code.
 
