@@ -11,25 +11,43 @@ import { i18n } from '@kbn/i18n';
 import type { AxiosError } from 'axios';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
+  AddUserToChannelInputSchema,
+  ChannelIdInputSchema,
+  CreateChannelInputSchema,
   CreateDirectChannelInputSchema,
+  CreateEphemeralPostInputSchema,
   CreatePostInputSchema,
   EmptyInputSchema,
   FindUserByEmailInputSchema,
   GetThreadInputSchema,
+  ListChannelMembersInputSchema,
   ListChannelsInputSchema,
   ListPostsInputSchema,
   MattermostConfigSchema,
+  PostIdInputSchema,
+  ReactionInputSchema,
+  SearchChannelsInputSchema,
   SearchPostsInputSchema,
+  UserIdInputSchema,
 } from './types';
 import type {
+  AddUserToChannelInput,
+  ChannelIdInput,
+  CreateChannelInput,
   CreateDirectChannelInput,
+  CreateEphemeralPostInput,
   CreatePostInput,
   FindUserByEmailInput,
   GetThreadInput,
+  ListChannelMembersInput,
   ListChannelsInput,
   ListPostsInput,
   MattermostConfig,
+  PostIdInput,
+  ReactionInput,
+  SearchChannelsInput,
   SearchPostsInput,
+  UserIdInput,
 } from './types';
 
 const DEFAULT_PER_PAGE = 60;
@@ -44,14 +62,24 @@ type UnknownRecord = Record<string, unknown>;
 const isRecord = (value: unknown): value is UnknownRecord =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+const truncateAtCodePoints = (value: string, maxLength: number): string => {
+  let end = 0;
+  let count = 0;
+  for (const codePoint of value) {
+    if (count === maxLength) {
+      break;
+    }
+    end += codePoint.length;
+    count += 1;
+  }
+  return value.slice(0, end);
+};
+
 const stringValue = (value: unknown, maxLength = MAX_SELECTED_TEXT_LENGTH): string | undefined =>
-  typeof value === 'string' ? value.slice(0, maxLength) : undefined;
+  typeof value === 'string' ? truncateAtCodePoints(value, maxLength) : undefined;
 
 const numberValue = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-
-const integerValue = (value: unknown): number | undefined =>
-  typeof value === 'number' && Number.isSafeInteger(value) ? value : undefined;
 
 const booleanValue = (value: unknown): boolean | undefined =>
   typeof value === 'boolean' ? value : undefined;
@@ -138,6 +166,183 @@ const trimChannel = (value: unknown) => {
   };
 };
 
+const malformedResponse = (action: string, responseType: string): never => {
+  throw new Error(`Mattermost ${action} failed: malformed ${responseType} response`);
+};
+
+const requiredResponseId = (value: unknown, action: string, responseType: string): string => {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 200) {
+    return malformedResponse(action, responseType);
+  }
+  return value;
+};
+
+const optionalResponseId = (
+  value: unknown,
+  action: string,
+  responseType: string
+): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== 'string' || value.length > 200) {
+    return malformedResponse(action, responseType);
+  }
+  return value;
+};
+
+const optionalResponseString = (
+  value: unknown,
+  action: string,
+  responseType: string,
+  maxLength = MAX_SELECTED_TEXT_LENGTH
+): string | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== 'string') {
+    return malformedResponse(action, responseType);
+  }
+  return truncateAtCodePoints(value, maxLength);
+};
+
+const optionalResponseInteger = (
+  value: unknown,
+  action: string,
+  responseType: string
+): number | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) {
+    return malformedResponse(action, responseType);
+  }
+  return value;
+};
+
+const optionalResponseBoolean = (
+  value: unknown,
+  action: string,
+  responseType: string
+): boolean | undefined => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== 'boolean') {
+    return malformedResponse(action, responseType);
+  }
+  return value;
+};
+
+const trimValidatedUser = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'User');
+  }
+  const id = requiredResponseId(value.id, action, 'User');
+  for (const key of ['username', 'email', 'first_name', 'last_name', 'nickname'] as const) {
+    optionalResponseString(value[key], action, 'User');
+  }
+  for (const key of ['create_at', 'update_at', 'delete_at'] as const) {
+    optionalResponseInteger(value[key], action, 'User');
+  }
+  return { ...trimUser(value), id };
+};
+
+const trimValidatedTeam = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'Team');
+  }
+  const id = requiredResponseId(value.id, action, 'Team');
+  for (const key of ['display_name', 'name', 'description', 'type'] as const) {
+    optionalResponseString(value[key], action, 'Team');
+  }
+  for (const key of ['create_at', 'update_at', 'delete_at'] as const) {
+    optionalResponseInteger(value[key], action, 'Team');
+  }
+  return { ...trimTeam(value), id };
+};
+
+const trimValidatedChannel = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'Channel');
+  }
+  const id = requiredResponseId(value.id, action, 'Channel');
+  optionalResponseId(value.team_id, action, 'Channel');
+  for (const key of ['type', 'display_name', 'name', 'header', 'purpose'] as const) {
+    optionalResponseString(value[key], action, 'Channel');
+  }
+  for (const key of [
+    'last_post_at',
+    'total_msg_count',
+    'create_at',
+    'update_at',
+    'delete_at',
+  ] as const) {
+    optionalResponseInteger(value[key], action, 'Channel');
+  }
+  return { ...trimChannel(value), id };
+};
+
+const trimChannelMember = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'ChannelMember');
+  }
+  const channelId = requiredResponseId(value.channel_id, action, 'ChannelMember');
+  const userId = requiredResponseId(value.user_id, action, 'ChannelMember');
+  return {
+    channelId,
+    userId,
+    roles: optionalResponseString(value.roles, action, 'ChannelMember'),
+    lastViewedAt: optionalResponseInteger(value.last_viewed_at, action, 'ChannelMember'),
+    messageCount: optionalResponseInteger(value.msg_count, action, 'ChannelMember'),
+    mentionCount: optionalResponseInteger(value.mention_count, action, 'ChannelMember'),
+    rootMentionCount: optionalResponseInteger(value.mention_count_root, action, 'ChannelMember'),
+    urgentMentionCount: optionalResponseInteger(
+      value.urgent_mention_count,
+      action,
+      'ChannelMember'
+    ),
+    rootMessageCount: optionalResponseInteger(value.msg_count_root, action, 'ChannelMember'),
+    lastUpdateAt: optionalResponseInteger(value.last_update_at, action, 'ChannelMember'),
+    schemeGuest: optionalResponseBoolean(value.scheme_guest, action, 'ChannelMember'),
+    schemeUser: optionalResponseBoolean(value.scheme_user, action, 'ChannelMember'),
+    schemeAdmin: optionalResponseBoolean(value.scheme_admin, action, 'ChannelMember'),
+    explicitRoles: optionalResponseString(value.explicit_roles, action, 'ChannelMember'),
+  };
+};
+
+const trimChannelStats = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'ChannelStats');
+  }
+  const channelId = requiredResponseId(value.channel_id, action, 'ChannelStats');
+  const requiredCount = (key: string) => {
+    const count = optionalResponseInteger(value[key], action, 'ChannelStats');
+    if (count === undefined) {
+      return malformedResponse(action, 'ChannelStats');
+    }
+    return count;
+  };
+  return {
+    channelId,
+    memberCount: requiredCount('member_count'),
+    guestCount: requiredCount('guest_count'),
+    pinnedPostCount: requiredCount('pinnedpost_count'),
+    fileCount: requiredCount('files_count'),
+  };
+};
+
+const assertStatusOk = (value: unknown, action: string): void => {
+  if (
+    !isRecord(value) ||
+    typeof value.status !== 'string' ||
+    value.status.length !== 2 ||
+    value.status.toLowerCase() !== 'ok'
+  ) {
+    return malformedResponse(action, 'status');
+  }
+};
+
 const trimPost = (value: unknown) => {
   const post = isRecord(value) ? value : {};
   return {
@@ -162,6 +367,58 @@ const trimPost = (value: unknown) => {
   };
 };
 
+const trimValidatedPost = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'Post');
+  }
+  const id = requiredResponseId(value.id, action, 'Post');
+  const userId = requiredResponseId(value.user_id, action, 'Post');
+  const channelId = requiredResponseId(value.channel_id, action, 'Post');
+  for (const key of ['root_id', 'original_id'] as const) {
+    optionalResponseId(value[key], action, 'Post');
+  }
+  optionalResponseString(value.message, action, 'Post', 16_383);
+  optionalResponseString(value.type, action, 'Post', 200);
+  for (const key of ['create_at', 'update_at', 'delete_at', 'edit_at', 'reply_count'] as const) {
+    optionalResponseInteger(value[key], action, 'Post');
+  }
+  if (value.file_ids !== undefined) {
+    if (!Array.isArray(value.file_ids)) {
+      return malformedResponse(action, 'Post');
+    }
+    for (const fileId of value.file_ids.slice(0, 10)) {
+      requiredResponseId(fileId, action, 'Post');
+    }
+  }
+  return { ...trimPost(value), id, userId, channelId };
+};
+
+const trimReaction = (value: unknown, action: string) => {
+  if (!isRecord(value)) {
+    return malformedResponse(action, 'Reaction');
+  }
+  const userId = requiredResponseId(value.user_id, action, 'Reaction');
+  const postId = requiredResponseId(value.post_id, action, 'Reaction');
+  if (
+    typeof value.emoji_name !== 'string' ||
+    value.emoji_name.length === 0 ||
+    value.emoji_name.length > 64 ||
+    !/^[A-Za-z0-9+_-]+$/.test(value.emoji_name)
+  ) {
+    return malformedResponse(action, 'Reaction');
+  }
+  const createAt = optionalResponseInteger(value.create_at, action, 'Reaction');
+  if (createAt === undefined || createAt === 0) {
+    return malformedResponse(action, 'Reaction');
+  }
+  return {
+    userId,
+    postId,
+    emojiName: value.emoji_name,
+    createAt,
+  };
+};
+
 const malformedPostList = (action: string): never => {
   throw new Error(`Mattermost ${action} failed: malformed PostList response`);
 };
@@ -180,10 +437,11 @@ const trimPostList = (
     return malformedPostList(action);
   }
 
-  const firstInaccessiblePostTime = integerValue(value.first_inaccessible_post_time);
-  if (value.first_inaccessible_post_time !== undefined && firstInaccessiblePostTime === undefined) {
-    return malformedPostList(action);
-  }
+  const firstInaccessiblePostTime = optionalResponseInteger(
+    value.first_inaccessible_post_time,
+    action,
+    'PostList'
+  );
 
   if (value.order === undefined && value.posts === undefined) {
     if (allowInaccessibleSentinel && firstInaccessiblePostTime !== undefined) {
@@ -209,8 +467,8 @@ const trimPostList = (
     if (!isRecord(sourcePost)) {
       return malformedPostList(action);
     }
-    const post = trimPost(sourcePost);
-    if (!post.id || post.id !== postId) {
+    const post = trimValidatedPost(sourcePost, action);
+    if (post.id !== postId) {
       return malformedPostList(action);
     }
     return post;
@@ -218,14 +476,7 @@ const trimPostList = (
 
   const optionalString = (key: 'next_post_id' | 'prev_post_id') => {
     const rawValue = value[key];
-    if (rawValue === undefined) {
-      return undefined;
-    }
-    const selectedValue = stringValue(rawValue, 200);
-    if (selectedValue === undefined) {
-      return malformedPostList(action);
-    }
-    return selectedValue;
+    return optionalResponseId(rawValue, action, 'PostList');
   };
   const nextPostId = optionalString('next_post_id');
   const previousPostId = optionalString('prev_post_id');
@@ -273,11 +524,7 @@ const getCurrentUser = async (ctx: ActionContext, action: string) => {
   const response = await request(action, () =>
     ctx.client.get(`${getBaseUrl(ctx)}/api/v4/users/me`)
   );
-  const user = trimUser(response.data);
-  if (!user.id) {
-    throw new Error(`Mattermost ${action} failed: /api/v4/users/me returned no user ID`);
-  }
-  return { ...user, id: user.id };
+  return trimValidatedUser(response.data, action);
 };
 
 const trimCollection = <T extends { id?: string }>(
@@ -312,11 +559,11 @@ export const Mattermost: ConnectorSpec = {
     displayName: 'Mattermost',
     description: i18n.translate('core.kibanaConnectorSpecs.mattermost.metadata.description', {
       defaultMessage:
-        'Browse teams and channels, find users, search conversations, and post messages in Mattermost',
+        'Browse Mattermost content and manage channels, memberships, posts, reactions, and users',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -339,7 +586,7 @@ export const Mattermost: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.mattermost.auth.bearer.token.helpText',
                 {
                   defaultMessage:
-                    'A Mattermost bot account access token. Add the bot to every team and channel used by the connector. Grant create_post for createPost, create_direct_channel for createDirectChannel, and upload_file when createPost attaches fileIds.',
+                    'A Mattermost bot account access token. Add the bot to every required team and channel. Reads can require read_channel, read_channel_content, list_team_channels, view_members, and view_team. Grant create_post, create_direct_channel, upload_file, create_public_channel or create_private_channel, join_public_channels or manage_public_channel_members or manage_private_channel_members, delete_public_channel or delete_private_channel, manage_team or sysconsole_write_user_management_channels, delete_post or delete_others_posts, add_reaction, remove_reaction, and edit_other_users only for the actions you enable. createEphemeralPost requires create_post_ephemeral, currently system-admin-only. Deactivating a system administrator and some channel operations also require manage_system.',
                 }
               ),
             },
@@ -358,25 +605,40 @@ export const Mattermost: ConnectorSpec = {
     fields: ['serverUrl'],
   },
 
-  skill: `Mattermost is a collaboration platform organized into teams, channels, posts, and post threads.
+  skill: `Mattermost is a collaboration platform organized into teams, channels, users, posts, threads, and reactions.
 
-Typical flow:
-1. Use listTeams to resolve a team ID visible to the bot.
-2. Use listChannels with that team ID to resolve a channel ID.
-3. Use listPosts, getThread, or searchPosts to gather conversation context.
-4. In a workflow, use createPost to send a channel message or reply. To message a person directly, use findUserByEmail, createDirectChannel, then createPost with the returned channel ID.
+Available read tools:
+- listTeams and listChannels discover destinations visible to the connector user.
+- findUserByEmail and getUserById resolve selected, non-secret user fields.
+- listChannelMembers, searchChannels, and getChannelStats inspect channel membership and state.
+- listPosts, getThread, searchPosts, and listReactions gather conversation context.
 
-Search tips:
-- searchPosts supports Mattermost modifiers such as from:username and in:channel-name.
-- Search pagination only takes effect when Elasticsearch search is configured on the Mattermost server.
+Workflow-only state changes:
+- createDirectChannel, createChannel, addUserToChannel, createPost, createEphemeralPost, and createReaction use write scope.
+- deleteChannel, restoreChannel, deletePost, deleteReaction, and deactivateUser use destroy scope.
+- deleteChannel, deletePost, and deactivateUser always use Mattermost soft deletion. They never expose permanent deletion.
+
+Recommended flows:
+1. Use listTeams, then listChannels or searchChannels, to resolve a channel ID.
+2. Use listPosts, getThread, searchPosts, listReactions, or getChannelStats to gather context.
+3. In a reviewed workflow, use createPost for a channel message or reply. To message a person directly, use findUserByEmail, createDirectChannel, then createPost.
+4. For channel administration, createChannel first, then addUserToChannel. Use deleteChannel only to archive and restoreChannel only for an archived channel.
+
+Search and pagination:
+- searchPosts requires view_team and supports Mattermost modifiers such as from:username and in:channel-name. Its pagination needs Mattermost Elasticsearch search.
+- searchChannels uses the team-scoped endpoint. Without list_team_channels, a team member sees only joined channels.
 - listPosts since mode cannot be combined with page, perPage, before, or after and may return up to 1000 modified posts.
+- getThread normally returns empty nextPostId and previousPostId values. When hasNext is true, continue with the last returned reply's id as fromPost and its createAt as fromCreateAt.
 
-Safety:
-- createDirectChannel and createPost are workflow-only write actions. Confirm the intended recipient or channel before executing them.
-- Grant the bot create_direct_channel for createDirectChannel and create_post for createPost. Attaching existing fileIds also requires upload_file.
-- Mattermost accepts priority metadata only on root posts and only when PostPriority is enabled. Omit priority whenever createPost includes rootId for a thread reply. requestedAck also requires an eligible Professional or Enterprise plan.
-- File upload is not included. createPost can attach at most ten file IDs that already exist in Mattermost when the bot has upload_file.
-- getThread normally returns empty nextPostId and previousPostId values. When hasNext is true, continue with the last returned reply's id as fromPost and its createAt as fromCreateAt.`,
+Permissions and safety:
+- Confirm every target and payload before a workflow-only action. createEphemeralPost is transient, not queryable, and requires create_post_ephemeral, currently system-admin-only.
+- Reads can require read_channel, read_channel_content, list_team_channels, view_members, or view_team depending on the resource and caller membership.
+- addUserToChannel needs join_public_channels for self-join, manage_public_channel_members for another public-channel user, or manage_private_channel_members for a private channel. Direct and group message channels are rejected.
+- createChannel needs create_public_channel or create_private_channel. deleteChannel needs delete_public_channel, delete_private_channel, or manage_system. restoreChannel needs manage_team on the documented REST contract; current handlers can also allow sysconsole_write_user_management_channels.
+- createPost needs create_post. Existing fileIds also need upload_file. Priority is root-post-only and needs PostPriority; requestedAck also needs an eligible Professional or Enterprise plan.
+- createReaction and deleteReaction always derive the authenticated connector user to prevent reaction impersonation. They need add_reaction and remove_reaction respectively.
+- deactivateUser needs self access or edit_other_users; deactivating a system administrator also needs manage_system and revokes sessions.
+- createUser is intentionally unavailable. Mattermost email-auth creation requires a password, but Workflow action inputs and execution records do not provide protected per-run secret storage or redaction. If this action is enabled in the future, its password must come only from protected Workflow secret material and must never be hardcoded or placed in workflow YAML.`,
 
   actions: {
     listTeams: {
@@ -392,7 +654,12 @@ Safety:
             `${getBaseUrl(ctx)}/api/v4/users/${encodeURIComponent(currentUser.id)}/teams`
           )
         );
-        return trimCollection(response.data, trimTeam, 'teams', 'listTeams');
+        return trimCollection(
+          response.data,
+          (team) => trimValidatedTeam(team, 'listTeams'),
+          'teams',
+          'listTeams'
+        );
       },
     },
 
@@ -411,7 +678,155 @@ Safety:
             )}/teams/${encodeURIComponent(input.teamId)}/channels`
           )
         );
-        return trimCollection(response.data, trimChannel, 'channels', 'listChannels');
+        return trimCollection(
+          response.data,
+          (channel) => trimValidatedChannel(channel, 'listChannels'),
+          'channels',
+          'listChannels'
+        );
+      },
+    },
+
+    addUserToChannel: {
+      isTool: false,
+      scope: 'write',
+      description:
+        'Add one user to a public or private channel. Adding yourself to a public channel requires join_public_channels; adding another user requires manage_public_channel_members, or manage_private_channel_members for a private channel. Direct and group message channels are not supported. Returns selected membership fields. Workflow-only write action.',
+      input: AddUserToChannelInputSchema,
+      handler: async (ctx, input: AddUserToChannelInput) => {
+        const response = await request('addUserToChannel', () =>
+          ctx.client.post(
+            `${getBaseUrl(ctx)}/api/v4/channels/${encodeURIComponent(input.channelId)}/members`,
+            {
+              user_id: input.userId,
+              ...(input.postRootId !== undefined ? { post_root_id: input.postRootId } : {}),
+            }
+          )
+        );
+        return { member: trimChannelMember(response.data, 'addUserToChannel') };
+      },
+    },
+
+    createChannel: {
+      isTool: false,
+      scope: 'write',
+      description:
+        'Create a public or private channel in one team. Requires create_public_channel or create_private_channel for the target team. Board and Space channel types are not accepted. Returns selected channel fields. Workflow-only write action.',
+      input: CreateChannelInputSchema,
+      handler: async (ctx, input: CreateChannelInput) => {
+        const response = await request('createChannel', () =>
+          ctx.client.post(`${getBaseUrl(ctx)}/api/v4/channels`, {
+            team_id: input.teamId,
+            name: input.name,
+            display_name: input.displayName,
+            type: input.type,
+            ...(input.purpose !== undefined ? { purpose: input.purpose } : {}),
+            ...(input.header !== undefined ? { header: input.header } : {}),
+          })
+        );
+        return { channel: trimValidatedChannel(response.data, 'createChannel') };
+      },
+    },
+
+    deleteChannel: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        'Archive a public or private channel with Mattermost soft deletion. This action never requests permanent deletion. Requires delete_public_channel, delete_private_channel, or manage_system. Direct and group message channels cannot be archived. Returns a success marker with the channel ID and permanent false. Workflow-only destructive action.',
+      input: ChannelIdInputSchema,
+      handler: async (ctx, input: ChannelIdInput) => {
+        const response = await request('deleteChannel', () =>
+          ctx.client.delete(
+            `${getBaseUrl(ctx)}/api/v4/channels/${encodeURIComponent(input.channelId)}`
+          )
+        );
+        assertStatusOk(response.data, 'deleteChannel');
+        return { success: true, channelId: input.channelId, permanent: false };
+      },
+    },
+
+    listChannelMembers: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List one bounded page of members in a channel. Requires read_channel. Mattermost may omit private last-viewed and last-update timestamps for other users.',
+      input: ListChannelMembersInputSchema,
+      handler: async (ctx, input: ListChannelMembersInput) => {
+        const response = await request('listChannelMembers', () =>
+          ctx.client.get(
+            `${getBaseUrl(ctx)}/api/v4/channels/${encodeURIComponent(input.channelId)}/members`,
+            {
+              params: {
+                page: input.page ?? 0,
+                per_page: input.perPage ?? DEFAULT_PER_PAGE,
+              },
+            }
+          )
+        );
+        if (!Array.isArray(response.data)) {
+          throw new Error('Mattermost listChannelMembers failed: expected an array response');
+        }
+        const members = response.data
+          .slice(0, MAX_LIST_ITEMS)
+          .map((member) => trimChannelMember(member, 'listChannelMembers'));
+        return {
+          members,
+          ...(response.data.length > MAX_LIST_ITEMS ? { truncated: true } : {}),
+        };
+      },
+    },
+
+    restoreChannel: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        'Restore an archived channel. Requires manage_team according to the REST contract; current servers may also allow sysconsole_write_user_management_channels. Returns selected channel fields. Workflow-only state-changing action.',
+      input: ChannelIdInputSchema,
+      handler: async (ctx, input: ChannelIdInput) => {
+        const response = await request('restoreChannel', () =>
+          ctx.client.post(
+            `${getBaseUrl(ctx)}/api/v4/channels/${encodeURIComponent(input.channelId)}/restore`
+          )
+        );
+        return { channel: trimValidatedChannel(response.data, 'restoreChannel') };
+      },
+    },
+
+    searchChannels: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Search visible channels within one team. With list_team_channels, results can include all public team channels; otherwise a team member receives only joined channels. This read action uses the team-scoped POST search endpoint.',
+      input: SearchChannelsInputSchema,
+      handler: async (ctx, input: SearchChannelsInput) => {
+        const response = await request('searchChannels', () =>
+          ctx.client.post(
+            `${getBaseUrl(ctx)}/api/v4/teams/${encodeURIComponent(input.teamId)}/channels/search`,
+            { term: input.term }
+          )
+        );
+        return trimCollection(
+          response.data,
+          (channel) => trimValidatedChannel(channel, 'searchChannels'),
+          'channels',
+          'searchChannels'
+        );
+      },
+    },
+
+    getChannelStats: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get validated member, guest, pinned-post, and file counts for a channel. Requires read_channel.',
+      input: ChannelIdInputSchema,
+      handler: async (ctx, input: ChannelIdInput) => {
+        const response = await request('getChannelStats', () =>
+          ctx.client.get(
+            `${getBaseUrl(ctx)}/api/v4/channels/${encodeURIComponent(input.channelId)}/stats`
+          )
+        );
+        return { stats: trimChannelStats(response.data, 'getChannelStats') };
       },
     },
 
@@ -425,11 +840,36 @@ Safety:
         const response = await request('findUserByEmail', () =>
           ctx.client.get(`${getBaseUrl(ctx)}/api/v4/users/email/${encodeURIComponent(input.email)}`)
         );
-        const user = trimUser(response.data);
-        if (!user.id) {
-          throw new Error('Mattermost findUserByEmail failed: response did not include a user ID');
-        }
-        return { user };
+        return { user: trimValidatedUser(response.data, 'findUserByEmail') };
+      },
+    },
+
+    getUserById: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get selected fields for one Mattermost user by ID. Requires an active session and permission to see that user; visibility may depend on view_members and team or channel membership. Sensitive authentication fields are never returned.',
+      input: UserIdInputSchema,
+      handler: async (ctx, input: UserIdInput) => {
+        const response = await request('getUserById', () =>
+          ctx.client.get(`${getBaseUrl(ctx)}/api/v4/users/${encodeURIComponent(input.userId)}`)
+        );
+        return { user: trimValidatedUser(response.data, 'getUserById') };
+      },
+    },
+
+    deactivateUser: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        'Archive a Mattermost user and revoke their sessions. This action never requests permanent deletion. The caller must be that user or have edit_other_users; deactivating a system administrator also requires manage_system. Returns a success marker with the user ID and permanent false. Workflow-only destructive action.',
+      input: UserIdInputSchema,
+      handler: async (ctx, input: UserIdInput) => {
+        const response = await request('deactivateUser', () =>
+          ctx.client.delete(`${getBaseUrl(ctx)}/api/v4/users/${encodeURIComponent(input.userId)}`)
+        );
+        assertStatusOk(response.data, 'deactivateUser');
+        return { success: true, userId: input.userId, permanent: false };
       },
     },
 
@@ -437,7 +877,7 @@ Safety:
       isTool: false,
       scope: 'write',
       description:
-        'Create or return a direct-message channel between the authenticated bot and one other Mattermost user. The request always contains exactly those two user IDs and requires create_direct_channel. Workflow-only write action.',
+        'Create or return a direct-message channel between the authenticated bot and one other Mattermost user. The request always contains exactly those two user IDs and requires create_direct_channel. Returns selected channel fields. Workflow-only write action.',
       input: CreateDirectChannelInputSchema,
       handler: async (ctx, input: CreateDirectChannelInput) => {
         const currentUser = await getCurrentUser(ctx, 'createDirectChannel');
@@ -450,13 +890,7 @@ Safety:
             input.userId,
           ])
         );
-        const channel = trimChannel(response.data);
-        if (!channel.id) {
-          throw new Error(
-            'Mattermost createDirectChannel failed: response did not include a channel ID'
-          );
-        }
-        return { channel };
+        return { channel: trimValidatedChannel(response.data, 'createDirectChannel') };
       },
     },
 
@@ -464,7 +898,7 @@ Safety:
       isTool: false,
       scope: 'write',
       description:
-        'Create a Mattermost root post or thread reply with valid bounded JSON props. Requires create_post; attaching existing fileIds also requires upload_file. Important or urgent priority is available only for root posts with PostPriority enabled, and requestedAck also requires an eligible Professional or Enterprise plan. Supports Mattermost Markdown. Workflow-only write action.',
+        'Create a Mattermost root post or thread reply with valid bounded JSON props. Requires create_post; attaching existing fileIds also requires upload_file. Important or urgent priority is available only for root posts with PostPriority enabled, and requestedAck also requires an eligible Professional or Enterprise plan. Supports Mattermost Markdown. Returns selected post fields. Workflow-only write action.',
       input: CreatePostInputSchema,
       handler: async (ctx, input: CreatePostInput) => {
         const body = {
@@ -489,11 +923,117 @@ Safety:
         const response = await request('createPost', () =>
           ctx.client.post(`${getBaseUrl(ctx)}/api/v4/posts`, body)
         );
-        const post = trimPost(response.data);
-        if (!post.id) {
-          throw new Error('Mattermost createPost failed: response did not include a post ID');
+        return { post: trimValidatedPost(response.data, 'createPost') };
+      },
+    },
+
+    deletePost: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        "Soft-delete a Mattermost post. This action never requests permanent deletion. Deleting the connector user's own post requires delete_post; deleting another user's post requires delete_others_posts. Returns a success marker with the post ID and permanent false. Workflow-only destructive action.",
+      input: PostIdInputSchema,
+      handler: async (ctx, input: PostIdInput) => {
+        const response = await request('deletePost', () =>
+          ctx.client.delete(`${getBaseUrl(ctx)}/api/v4/posts/${encodeURIComponent(input.postId)}`)
+        );
+        assertStatusOk(response.data, 'deletePost');
+        return { success: true, postId: input.postId, permanent: false };
+      },
+    },
+
+    createEphemeralPost: {
+      isTool: false,
+      scope: 'write',
+      description:
+        'Deliver a transient Mattermost post to one user in one channel. The post is sent over WebSocket and is not persisted or queryable. Requires create_post_ephemeral, which current Mattermost servers grant only to system administrators. Returns selected post fields, the target user ID, and persisted false. Workflow-only high-privilege write action.',
+      input: CreateEphemeralPostInputSchema,
+      handler: async (ctx, input: CreateEphemeralPostInput) => {
+        const response = await request('createEphemeralPost', () =>
+          ctx.client.post(`${getBaseUrl(ctx)}/api/v4/posts/ephemeral`, {
+            user_id: input.userId,
+            post: {
+              channel_id: input.channelId,
+              message: input.message,
+            },
+          })
+        );
+        return {
+          post: trimValidatedPost(response.data, 'createEphemeralPost'),
+          targetUserId: input.userId,
+          persisted: false,
+        };
+      },
+    },
+
+    createReaction: {
+      isTool: false,
+      scope: 'write',
+      description:
+        'Add a reaction to a post as the authenticated connector user. The user ID is resolved internally because Mattermost forbids reaction impersonation. Requires add_reaction on the post channel. Returns selected reaction fields. Workflow-only write action.',
+      input: ReactionInputSchema,
+      handler: async (ctx, input: ReactionInput) => {
+        const currentUser = await getCurrentUser(ctx, 'createReaction');
+        const emojiName = input.emojiName.toLowerCase();
+        const response = await request('createReaction', () =>
+          ctx.client.post(`${getBaseUrl(ctx)}/api/v4/reactions`, {
+            user_id: currentUser.id,
+            post_id: input.postId,
+            emoji_name: emojiName,
+          })
+        );
+        return { reaction: trimReaction(response.data, 'createReaction') };
+      },
+    },
+
+    deleteReaction: {
+      isTool: false,
+      scope: 'destroy',
+      description:
+        'Remove a reaction made by the authenticated connector user. The user ID is resolved internally, so this action never removes another user reaction. Requires remove_reaction on the post channel. Returns a success marker with the connector user ID, post ID, and emoji name. Workflow-only destructive action.',
+      input: ReactionInputSchema,
+      handler: async (ctx, input: ReactionInput) => {
+        const currentUser = await getCurrentUser(ctx, 'deleteReaction');
+        const emojiName = input.emojiName.toLowerCase();
+        const response = await request('deleteReaction', () =>
+          ctx.client.delete(
+            `${getBaseUrl(ctx)}/api/v4/users/${encodeURIComponent(
+              currentUser.id
+            )}/posts/${encodeURIComponent(input.postId)}/reactions/${encodeURIComponent(emojiName)}`
+          )
+        );
+        assertStatusOk(response.data, 'deleteReaction');
+        return {
+          success: true,
+          userId: currentUser.id,
+          postId: input.postId,
+          emojiName,
+        };
+      },
+    },
+
+    listReactions: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'List selected fields for reactions on a post. Requires permission to read the post and its channel content.',
+      input: PostIdInputSchema,
+      handler: async (ctx, input: PostIdInput) => {
+        const response = await request('listReactions', () =>
+          ctx.client.get(
+            `${getBaseUrl(ctx)}/api/v4/posts/${encodeURIComponent(input.postId)}/reactions`
+          )
+        );
+        if (!Array.isArray(response.data)) {
+          throw new Error('Mattermost listReactions failed: expected an array response');
         }
-        return { post };
+        const reactions = response.data
+          .slice(0, MAX_LIST_ITEMS)
+          .map((reaction) => trimReaction(reaction, 'listReactions'));
+        return {
+          reactions,
+          ...(response.data.length > MAX_LIST_ITEMS ? { truncated: true } : {}),
+        };
       },
     },
 
@@ -554,7 +1094,7 @@ Safety:
       isTool: true,
       scope: 'read',
       description:
-        'Search posts visible to the bot within a team. Supports Mattermost search modifiers such as from:username and in:channel-name. Page and perPage only take effect when Mattermost Elasticsearch search is configured.',
+        'Search posts visible to the bot within a team. Requires view_team. Supports Mattermost search modifiers such as from:username and in:channel-name. Page and perPage only take effect when Mattermost Elasticsearch search is configured.',
       input: SearchPostsInputSchema,
       handler: async (ctx, input: SearchPostsInput) => {
         const response = await request('searchPosts', () =>

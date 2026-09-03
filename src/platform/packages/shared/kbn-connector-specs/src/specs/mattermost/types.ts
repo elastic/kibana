@@ -19,6 +19,16 @@ const MAX_PAGE = 10_000;
 const MAX_PER_PAGE = 200;
 const DEFAULT_PER_PAGE = 60;
 
+const boundedUnicodeString = (maxRunes: number, description: string, minRunes = 0) =>
+  z
+    .string()
+    .min(minRunes)
+    .max(maxRunes * 2)
+    .refine((value) => Array.from(value).length <= maxRunes, {
+      message: `Must contain at most ${maxRunes} Unicode code points`,
+    })
+    .describe(description);
+
 const isJsonValue = (value: unknown, ancestors: WeakSet<object>): boolean => {
   if (
     value === null ||
@@ -148,12 +158,78 @@ export const ListChannelsInputSchema = lazySchema(() =>
 );
 export type ListChannelsInput = z.infer<typeof ListChannelsInputSchema>;
 
+export const AddUserToChannelInputSchema = lazySchema(() =>
+  z.object({
+    channelId: idSchema('ID of the public or private channel'),
+    userId: idSchema('ID of the user to add to the channel'),
+    postRootId: idSchema('Optional root post ID in the same channel').optional(),
+  })
+);
+export type AddUserToChannelInput = z.infer<typeof AddUserToChannelInputSchema>;
+
+export const CreateChannelInputSchema = lazySchema(() =>
+  z.object({
+    teamId: idSchema('ID of the team where the channel will be created'),
+    name: z
+      .string()
+      .min(1)
+      .max(64)
+      .regex(
+        /^[a-z0-9][a-z0-9_-]*$/,
+        'Channel names start with a lowercase letter or number and contain only lowercase letters, numbers, hyphens, and underscores'
+      )
+      .describe('Unique URL-safe channel name'),
+    displayName: boundedUnicodeString(64, 'Channel display name', 1),
+    type: z.enum(['O', 'P']).describe('O for public or P for private'),
+    purpose: boundedUnicodeString(250, 'Optional channel purpose').optional(),
+    header: boundedUnicodeString(1024, 'Optional channel header').optional(),
+  })
+);
+export type CreateChannelInput = z.infer<typeof CreateChannelInputSchema>;
+
+export const ChannelIdInputSchema = lazySchema(() =>
+  z.object({
+    channelId: idSchema('Mattermost channel ID'),
+  })
+);
+export type ChannelIdInput = z.infer<typeof ChannelIdInputSchema>;
+
+export const ListChannelMembersInputSchema = lazySchema(() =>
+  z.object({
+    channelId: idSchema('ID of the channel whose members should be listed'),
+    page: z.number().int().min(0).max(MAX_PAGE).default(0).describe('Zero-based results page'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PER_PAGE)
+      .default(DEFAULT_PER_PAGE)
+      .describe(`Members per page, from 1 to ${MAX_PER_PAGE}`),
+  })
+);
+export type ListChannelMembersInput = z.infer<typeof ListChannelMembersInputSchema>;
+
+export const SearchChannelsInputSchema = lazySchema(() =>
+  z.object({
+    teamId: idSchema('ID of the team whose visible channels should be searched'),
+    term: z.string().min(1).max(200).describe('Channel name or display-name search term'),
+  })
+);
+export type SearchChannelsInput = z.infer<typeof SearchChannelsInputSchema>;
+
 export const FindUserByEmailInputSchema = lazySchema(() =>
   z.object({
     email: z.email().max(320).describe('Exact email address of the Mattermost user to find'),
   })
 );
 export type FindUserByEmailInput = z.infer<typeof FindUserByEmailInputSchema>;
+
+export const UserIdInputSchema = lazySchema(() =>
+  z.object({
+    userId: idSchema('Mattermost user ID'),
+  })
+);
+export type UserIdInput = z.infer<typeof UserIdInputSchema>;
 
 export const CreateDirectChannelInputSchema = lazySchema(() =>
   z.object({
@@ -166,11 +242,7 @@ export const CreatePostInputSchema = lazySchema(() =>
   z
     .object({
       channelId: idSchema('ID of the channel where the post will be created'),
-      message: z
-        .string()
-        .min(1)
-        .max(MAX_MESSAGE_LENGTH)
-        .describe('Post message in Mattermost Markdown'),
+      message: boundedUnicodeString(MAX_MESSAGE_LENGTH, 'Post message in Mattermost Markdown', 1),
       rootId: idSchema('Root post ID when creating a reply').optional(),
       fileIds: z
         .array(idSchema('ID of a file that is already uploaded to Mattermost'))
@@ -211,6 +283,46 @@ export const CreatePostInputSchema = lazySchema(() =>
     })
 );
 export type CreatePostInput = z.infer<typeof CreatePostInputSchema>;
+
+export const PostIdInputSchema = lazySchema(() =>
+  z.object({
+    postId: idSchema('Mattermost post ID'),
+  })
+);
+export type PostIdInput = z.infer<typeof PostIdInputSchema>;
+
+export const CreateEphemeralPostInputSchema = lazySchema(() =>
+  z.object({
+    userId: idSchema('ID of the user who should receive the ephemeral post'),
+    channelId: idSchema('ID of the channel where the ephemeral post should appear'),
+    message: boundedUnicodeString(
+      MAX_MESSAGE_LENGTH,
+      'Transient post message in Mattermost Markdown',
+      1
+    ),
+  })
+);
+export type CreateEphemeralPostInput = z.infer<typeof CreateEphemeralPostInputSchema>;
+
+const reactionEmojiSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(
+    /^[A-Za-z0-9+_-]+$/,
+    'Emoji names contain only letters, numbers, plus signs, hyphens, and underscores'
+  )
+  .describe('Mattermost emoji name without surrounding colons');
+
+export const ReactionInputSchema = lazySchema(() =>
+  z
+    .object({
+      postId: idSchema('ID of the post to react to'),
+      emojiName: reactionEmojiSchema,
+    })
+    .strict()
+);
+export type ReactionInput = z.infer<typeof ReactionInputSchema>;
 
 export const ListPostsInputSchema = lazySchema(() =>
   z
