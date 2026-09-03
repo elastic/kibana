@@ -24,6 +24,7 @@ import type {
   PersonaMatrixExample,
   PersonaMatrixExampleInput,
 } from './datasets/persona_matrix_prompts';
+import { selectShard } from './datasets/select_shard';
 import type { PersonaMatrixChatClient } from './chat_client';
 
 /**
@@ -384,7 +385,18 @@ export function createEvaluatePersonaMatrixDataset({
   }: {
     dataset: EvaluationDataset<PersonaMatrixExample>;
   }): Promise<void> {
-    const wrappedExamples = dataset.examples.map(toDatasetExample);
+    // Shard before wrapping so a sharded run seeds and grades only its slice.
+    // Slow models need hours for all 21 examples on one stack; the sweeper fans
+    // shards out to one VM each.
+    const shardedExamples = selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD);
+    const wrappedExamples = shardedExamples.map(toDatasetExample);
+
+    if (process.env.PERSONA_MATRIX_SHARD) {
+      log.info(
+        `[persona-matrix] shard ${process.env.PERSONA_MATRIX_SHARD}: ` +
+          `${shardedExamples.length}/${dataset.examples.length} examples`
+      );
+    }
 
     const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
       traceEsClient,

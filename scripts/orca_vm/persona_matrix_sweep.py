@@ -121,7 +121,7 @@ MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATR
 # default — a judge-panel sweep would then grade with the incumbent judge and still
 # pass its doc-count gate.
 FORWARDED_ENV_VARS = ("EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES", "EVAL_CONNECTOR_ID",
-                      "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE")
+                      "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE", "PERSONA_MATRIX_SHARD")
 GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
@@ -564,6 +564,20 @@ def self_test() -> int:
               SUITE_PROFILES["security-automatic-migrations"]["gate"], "floor")
         check("migrations floor set",
               SUITE_PROFILES["security-automatic-migrations"]["min_docs"] > 0, True)
+
+        # Sharding: PERSONA_MATRIX_SHARD must reach the VM, or run_model.sh runs
+        # all 21 examples on every shard and the sweep still reports complete.
+        # Assert on build_env_prefix output, not list membership: membership
+        # passes even if the builder never consults FORWARDED_ENV_VARS.
+        check("shard var forwarded to VM",
+              "export PERSONA_MATRIX_SHARD=2/4 && " in
+              build_env_prefix("m", {"PERSONA_MATRIX_SHARD": "2/4"}), True)
+        # Shard sizes must match the suite's stride assignment and sum to the
+        # whole dataset -- an off-by-one here FAILs a good run or passes a short one.
+        shard_sizes = [len(range(i, 21, 4)) for i in range(4)]
+        check("shard sizes stride 21/4", shard_sizes, [6, 5, 5, 5])
+        check("shard sizes sum to dataset", sum(shard_sizes), 21)
+        check("shard sizes balanced", max(shard_sizes) - min(shard_sizes) <= 1, True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
@@ -789,7 +803,17 @@ def check_golden(model: str, ip: str) -> dict:
         result["expected"] = prof["min_docs"]
         result["gate"] = "floor"
     else:
-        result["expected"] = prof["n_examples"] * n_evaluators * reps
+        # A sharded run only produces its own slice, so the exact gate must
+        # expect that slice -- not the whole dataset -- or every shard FAILs.
+        # Shard sizes follow the suite's stride assignment (index k -> shard
+        # k % total), so shard i holds ceil((n - (i-1)) / total) examples.
+        n_examples = prof["n_examples"]
+        shard = os.environ.get("PERSONA_MATRIX_SHARD", "").strip()
+        if shard:
+            idx, total = (int(x) for x in shard.split("/"))
+            n_examples = len(range(idx - 1, n_examples, total))
+            result["shard"] = shard
+        result["expected"] = n_examples * n_evaluators * reps
         result["gate"] = "exact"
     result["execution_id"] = exec_id
     return result
