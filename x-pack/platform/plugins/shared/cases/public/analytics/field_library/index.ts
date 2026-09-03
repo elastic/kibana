@@ -23,3 +23,9 @@ export const registerFieldLibraryAnalytics = ({
 }) => {
   registerFieldLibraryManagementEvents({ analyticsService });
 };
+
+export {
+  useFieldDefinitionCreatedEBT,
+  useFieldDefinitionDeletedEBT,
+  useFieldDefinitionUpdatedEBT,
+} from './use_field_definition_management_ebt';
