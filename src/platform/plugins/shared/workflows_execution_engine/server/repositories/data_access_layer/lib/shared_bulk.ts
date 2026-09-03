@@ -156,25 +156,6 @@ export async function sharedBulk<TExecution extends { id: string }>(
     return { items: [], errors: false };
   }
 
-  // retryOnConflicts handles the conflict-retry loop. sharedBulk passes [] for indexes
-  // because it only receives BulkPlainItem — no updater items need mget resolution here.
-  // return retryOnConflicts(esClient, logger, [], request, async (bulkRequest) => {
-  //   // Items passed back by retryOnConflicts are the original SharedBulkItem objects
-  //   // (cast to BulkPlainItem by retryOnConflicts — index is still present at runtime).
-  //   const operations = (bulkRequest.items as Array<SharedBulkItem<TExecution>>).flatMap(
-  //     toBulkOperations
-  //   );
-
-  //   return retryTransientEsErrors(
-  //     () =>
-  //       esClient.bulk<TExecution, Partial<TExecution> & { id: string }>({
-  //         refresh: bulkRequest.refresh,
-  //         operations,
-  //       }),
-  //     { logger }
-  //   );
-  // });
-
   let queuedItems: Array<QueueItem<TExecution>> = request.items.map((item, index) => ({
     item,
     originalIndex: index,
@@ -290,16 +271,24 @@ export async function sharedBulk<TExecution extends { id: string }>(
         logger
       );
 
-      // Separate conflicts into three buckets:
+      // Separate conflicts into four buckets:
       // - updater-origin: re-queue original BulkUpdaterItem so the next iteration re-mgets
       // - plain OCC (seqNo set): mget fresh seqNo/primaryTerm before re-queuing
+      // - create already-exists: mget backing index and retry as update (data streams
+      //   convert version-miss upserts to create; retrying create can never succeed)
       // - plain non-OCC (no seqNo, using retry_on_conflict): re-queue unchanged
       const conflictingUpdaters: Array<QueueItem<TExecution>> = [];
       interface ConflictingPlainOcc {
         qi: QueueItem<TExecution>;
         plainItem: BulkPlainItem<TExecution>;
       }
+      interface ConflictingCreate {
+        qi: QueueItem<TExecution>;
+        plainItem: BulkPlainItem<TExecution>;
+        responseItem: BulkItemResponse;
+      }
       const conflictingOcc: ConflictingPlainOcc[] = [];
+      const conflictingCreates: ConflictingCreate[] = [];
       const nextQueue: Array<QueueItem<TExecution>> = [];
 
       esResponse.items.forEach((esItem, idx) => {
@@ -326,6 +315,8 @@ export async function sharedBulk<TExecution extends { id: string }>(
             conflictingUpdaters.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
           } else if (plainItem.seqNo !== undefined) {
             conflictingOcc.push({ qi, plainItem });
+          } else if (plainItem.operation === 'create') {
+            conflictingCreates.push({ qi, plainItem, responseItem });
           } else {
             nextQueue.push({ ...qi, remainingRetries: qi.remainingRetries - 1 });
           }
@@ -356,6 +347,35 @@ export async function sharedBulk<TExecution extends { id: string }>(
             originalIndex: qi.originalIndex,
             remainingRetries: qi.remainingRetries - 1,
           });
+        });
+      }
+
+      if (conflictingCreates.length > 0) {
+        const docsToRefetch = conflictingCreates.map(({ plainItem, responseItem }) => ({
+          id: plainItem.document.id,
+          // Prefer the backing index ES already named on the conflict; mget
+          // against a data-stream alias is not reliable.
+          index: responseItem.index || undefined,
+        }));
+        const versionById = await fetchFreshVersions(
+          esClient,
+          logger,
+          docsToRefetch,
+          fallbackIndexes
+        );
+
+        conflictingCreates.forEach(({ qi, plainItem, responseItem }) => {
+          const version = versionById.get(plainItem.document.id);
+          if (version) {
+            nextQueue.push({
+              item: { ...plainItem, operation: 'update', ...version },
+              originalIndex: qi.originalIndex,
+              remainingRetries: qi.remainingRetries - 1,
+            });
+            return;
+          }
+          result[qi.originalIndex] = responseItem;
+          hasErrors = true;
         });
       }
 
