@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalTeardownHook } from '@kbn/scout';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
+globalTeardownHook('Disable the Vega API feature flag', async ({ apiServices }) => {
+  await apiServices.core.settings({
+    'feature_flags.overrides': { 'vega.apiEnabled': false },
+  });
 });

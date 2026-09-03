@@ -17,12 +17,9 @@ apiTest.describe('vega - get', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let createdId: string;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': true },
-    });
 
     const response = await apiClient.post(VEGA_API_PATH, {
       headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
@@ -32,11 +29,8 @@ apiTest.describe('vega - get', { tag: tags.deploymentAgnostic }, () => {
     createdId = response.body.id;
   });
 
-  apiTest.afterAll(async ({ kbnClient, apiServices }) => {
+  apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'] });
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': false },
-    });
   });
 
   apiTest('should return a vega library item by id', async ({ apiClient }) => {

@@ -22,19 +22,13 @@ apiTest.describe('vega - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': true },
-    });
   });
 
-  apiTest.afterAll(async ({ kbnClient, apiServices }) => {
+  apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'] });
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': false },
-    });
   });
 
   apiTest('should create a vega library item with hjson spec', async ({ apiClient }) => {

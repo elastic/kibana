@@ -16,12 +16,9 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
   let editorCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': true },
-    });
 
     await apiClient.post(VEGA_API_PATH, {
       headers: { ...COMMON_HEADERS, ...editorCredentials.apiKeyHeader },
@@ -35,11 +32,8 @@ apiTest.describe('vega - search', { tag: tags.deploymentAgnostic }, () => {
     });
   });
 
-  apiTest.afterAll(async ({ kbnClient, apiServices }) => {
+  apiTest.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'] });
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': false },
-    });
   });
 
   apiTest('should return a paginated list of vega library items', async ({ apiClient }) => {

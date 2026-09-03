@@ -18,12 +18,18 @@ import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
  * Use zod schema once https://github.com/elastic/kibana/pull/262683 is merged.
  */
 export const vegaLibraryItemSavedObjectSchema = schema.object({
-  title: schema.string(),
+  title: schema.string({ minLength: 1 }),
   description: schema.maybe(schema.string()),
-  spec: schema.object({
-    format: schema.string(),
-    value: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
-  }),
+  spec: schema.oneOf([
+    schema.object({
+      format: schema.literal('hjson'),
+      value: schema.string({ minLength: 1 }),
+    }),
+    schema.object({
+      format: schema.literal('json'),
+      value: schema.object({}, { unknowns: 'allow' }),
+    }),
+  ]),
 });
 
 const modelVersion1: SavedObjectsFullModelVersion = {

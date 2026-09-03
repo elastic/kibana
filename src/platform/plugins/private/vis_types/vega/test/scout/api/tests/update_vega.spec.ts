@@ -17,12 +17,9 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
   let createdId: string;
 
-  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': true },
-    });
   });
 
   apiTest.beforeEach(async ({ apiClient }) => {
@@ -36,12 +33,6 @@ apiTest.describe('vega - update', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.afterEach(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'] });
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.core.settings({
-      'feature_flags.overrides': { 'vega.apiEnabled': false },
-    });
   });
 
   apiTest('should update a vega library item', async ({ apiClient }) => {
