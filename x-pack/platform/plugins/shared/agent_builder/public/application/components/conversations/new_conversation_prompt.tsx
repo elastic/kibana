@@ -15,30 +15,14 @@ import {
   conversationElementWidthStyles,
 } from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
+import { useKibana } from '../../hooks/use_kibana';
+import { useSpaceSolution } from '../../hooks/use_space_solution';
 import { useTypewriterLoop } from './use_typewriter_loop';
+import { getCapabilityMessagesForSolution } from './capability_messages';
 
 const greetingPrefix = i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt', {
   defaultMessage: 'How can I help you?',
 });
-
-const capabilityMessages = [
-  i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt.createDashboardsDetail', {
-    defaultMessage: 'I can create dashboards',
-  }),
-  i18n.translate('xpack.agentBuilder.conversations.newConversationPrompt.analyzeIncidentsDetail', {
-    defaultMessage: 'I can analyze incidents',
-  }),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.investigateAnomaliesDetail',
-    {
-      defaultMessage: 'I can investigate anomalies',
-    }
-  ),
-] as const;
-
-const longestCapabilityMessage = capabilityMessages.reduce((longest, message) =>
-  message.length > longest.length ? message : longest
-);
 
 const caretBlink = keyframes`
   0%, 49% {
@@ -52,9 +36,15 @@ const caretBlink = keyframes`
 export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext, greetingMessage } = useConversationContext();
+  const {
+    services: { plugins },
+  } = useKibana();
+  const spaceSolution = useSpaceSolution(plugins.spaces);
+  const capabilityMessages = spaceSolution ? getCapabilityMessagesForSolution(spaceSolution) : [];
   const typedCapability = useTypewriterLoop({
     messages: capabilityMessages,
-    enabled: greetingMessage === undefined,
+    // Wait until Solution View is known so we don't flash Classic messages then switch.
+    enabled: greetingMessage === undefined && spaceSolution !== undefined,
   });
 
   const centerFlexItemStyles = css`
@@ -77,9 +67,16 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     vertical-align: baseline;
   `;
 
+  // Stack every candidate in one cell so reserved width matches the visually widest string.
   const reservedWidthStyles = css`
     grid-area: 1 / 1;
     visibility: hidden;
+    display: inline-grid;
+    justify-items: start;
+  `;
+
+  const reservedMessageStyles = css`
+    grid-area: 1 / 1;
     white-space: nowrap;
   `;
 
@@ -107,8 +104,12 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       {greetingPrefix}{' '}
       <span css={typedTextStyles} aria-hidden="true" data-test-subj="agentBuilderWelcomeTypedText">
         <span css={reservedWidthStyles}>
-          {longestCapabilityMessage}
-          <span css={caretStyles} />
+          {capabilityMessages.map((message) => (
+            <span key={message} css={reservedMessageStyles}>
+              {message}
+              <span css={caretStyles} />
+            </span>
+          ))}
         </span>
         <span css={typedOverlayStyles}>
           {typedCapability}
