@@ -41,6 +41,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
@@ -217,14 +218,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
-    const pinnedFilter =
-      pinned === undefined
-        ? []
-        : pinned
-        ? [{ term: { pinned: true } }]
-        : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
-          // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
-          [{ bool: { must_not: { term: { pinned: true } } } }];
+    const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.

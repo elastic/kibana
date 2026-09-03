@@ -30,6 +30,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
+import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
@@ -442,57 +443,38 @@ describe('ConversationClient', () => {
 
     // --- pinned filter ---
 
+    const listFilter = async (options?: { pinned?: boolean }) => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter as unknown[];
+    };
+
+    // Shape is covered in access_control/query.test.ts; here we only assert list() applies it.
+    const pinnedByCurrentUser = buildPinnedFilter({
+      user: { id: 'user-1', username: 'test-user' },
+      pinned: true,
+    })[0];
+
     it('omits the pinned filter when pinned is undefined', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const filterArray = await listFilter();
 
-      await client.list();
-
-      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
-      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+      expect(filterArray).not.toContainEqual(pinnedByCurrentUser);
+      expect(filterArray).not.toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
     });
 
-    it('adds { term: { pinned: true } } when pinned is true', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-
-      await client.list({ pinned: true });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: true } }]),
-            }),
-          }),
-        })
-      );
+    it('matches only conversations the calling user pinned when pinned is true', async () => {
+      expect(await listFilter({ pinned: true })).toContainEqual(pinnedByCurrentUser);
     });
 
-    it('adds a must_not negation for pinned: false to include pre-field documents', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    it('negates the per-user match for pinned: false to include pre-field documents', async () => {
+      const filterArray = await listFilter({ pinned: false });
 
-      await client.list({ pinned: false });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ bool: { must_not: { term: { pinned: true } } } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
       // A plain term: { pinned: false } would silently exclude documents created
       // before the pinned field was added; must never be used.
-      expect(mockEsClient.search).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: false } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).not.toContainEqual({ term: { pinned: false } });
     });
   });
 
