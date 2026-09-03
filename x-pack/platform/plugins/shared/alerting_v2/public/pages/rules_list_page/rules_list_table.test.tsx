@@ -85,7 +85,6 @@ const defaultProps: RulesListTableProps = {
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
   onQuickEdit: jest.fn(),
-  onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
   onToggleEnabled: jest.fn(),
@@ -426,17 +425,13 @@ describe('RulesListTable', () => {
   });
 
   describe('row actions menu', () => {
-    it('calls onEdit when edit action is clicked', async () => {
-      const onEdit = jest.fn();
-      renderTable({ onEdit });
+    it('does not include edit in the actions menu (edit lives in the row quick-edit button)', async () => {
+      renderTable();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
-      expect(await screen.findByTestId('editRule-rule-1')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('editRule-rule-1'));
-
-      expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(await screen.findByTestId('cloneRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('calls onClone when clone action is clicked', async () => {

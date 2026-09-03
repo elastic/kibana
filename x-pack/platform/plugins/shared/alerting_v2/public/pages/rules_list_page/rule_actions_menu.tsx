@@ -24,7 +24,8 @@ export interface RuleActionsMenuProps {
   rule: RuleApiResponse;
   /** Gates write actions (run, edit, clone, enable/disable, delete); read actions always show. */
   canWrite: boolean;
-  onEdit: (rule: RuleApiResponse) => void;
+  /** When provided, adds an "Edit" write action. Omitted where edit lives outside the menu. */
+  onEdit?: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled?: (rule: RuleApiResponse) => void;
@@ -115,21 +116,22 @@ export const RuleActionsMenu = ({
       </EuiContextMenuItem>
     ) : null;
 
-  const editItem = canWrite ? (
-    <EuiContextMenuItem
-      key="edit"
-      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onEdit(rule);
-      }}
-      data-test-subj={`editRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
-        defaultMessage: 'Edit',
-      })}
-    </EuiContextMenuItem>
-  ) : null;
+  const editItem =
+    canWrite && onEdit ? (
+      <EuiContextMenuItem
+        key="edit"
+        icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
+        onClick={() => {
+          setIsOpen(false);
+          onEdit(rule);
+        }}
+        data-test-subj={`editRule-${rule.id}`}
+      >
+        {i18n.translate('xpack.alertingV2.rulesList.action.edit', {
+          defaultMessage: 'Edit',
+        })}
+      </EuiContextMenuItem>
+    ) : null;
 
   const cloneItem = canWrite ? (
     <EuiContextMenuItem

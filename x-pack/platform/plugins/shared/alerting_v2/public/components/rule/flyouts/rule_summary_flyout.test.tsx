@@ -204,16 +204,48 @@ describe('RuleSummaryFlyout', () => {
     });
 
     it('shows only read actions when canWrite is false', () => {
-      renderFlyout({ canWrite: false });
+      renderFlyout({ canWrite: false, onViewChangeHistory: jest.fn() });
       openMenu();
 
-      // View details (read) stays available.
+      // Read actions stay available.
       expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
       // Write actions are hidden.
       expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
       // Close still available.
       expect(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton')).toBeInTheDocument();
+    });
+
+    it('shows View change history in the read group when onViewChangeHistory is provided', () => {
+      const onViewChangeHistory = jest.fn();
+      renderFlyout({ onViewChangeHistory });
+      openMenu();
+
+      const changeHistory = screen.getByTestId('viewChangeHistoryRule-rule-1');
+      expect(changeHistory).toBeInTheDocument();
+
+      // View change history sits in the first (read) group, right after View details.
+      const panel = changeHistory.closest('.euiContextMenuPanel');
+      const readGroup = [
+        'viewRuleDetails-rule-1',
+        'viewChangeHistoryRule-rule-1',
+        'editRule-rule-1',
+      ];
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => readGroup.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(readGroup);
+
+      fireEvent.click(changeHistory);
+      expect(onViewChangeHistory).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('omits View change history when onViewChangeHistory is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('viewChangeHistoryRule-rule-1')).not.toBeInTheDocument();
     });
   });
 

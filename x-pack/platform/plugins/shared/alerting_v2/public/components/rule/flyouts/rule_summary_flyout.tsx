@@ -45,6 +45,7 @@ export interface RuleSummaryFlyoutProps {
   onToggleEnabled: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
   onUpdateApiKey?: (rule: RuleApiResponse) => void;
+  onViewChangeHistory?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
@@ -60,6 +61,7 @@ export const RuleSummaryFlyout = ({
   onToggleEnabled,
   onRun,
   onUpdateApiKey,
+  onViewChangeHistory,
   canWrite = true,
   session,
   ownFocus = true,
@@ -178,6 +180,7 @@ export const RuleSummaryFlyout = ({
                   onToggleEnabled={onToggleEnabled}
                   onRun={onRun}
                   onUpdateApiKey={onUpdateApiKey}
+                  onViewChangeHistory={onViewChangeHistory}
                   renderButton={({ toggle }) => <TakeActionButton onClick={toggle} />}
                 />
               </EuiFlexItem>

@@ -129,7 +129,6 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         onNavigateToDetails={action('navigateToDetails')}
         onExpand={action('expand')}
         onQuickEdit={action('quickEdit')}
-        onEdit={action('edit')}
         onClone={action('clone')}
         onDelete={action('delete')}
         onToggleEnabled={action('toggleEnabled')}

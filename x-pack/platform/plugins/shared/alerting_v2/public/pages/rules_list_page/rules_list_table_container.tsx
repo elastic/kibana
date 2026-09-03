@@ -236,7 +236,6 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
-        onEdit={(r) => onEditInFlyout(r)}
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
@@ -266,6 +265,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
           onRun={(r) => runRuleMutation.mutate({ id: r.id })}
           onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
+          onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
         />
       ) : null}
       {ruleToDelete ? (

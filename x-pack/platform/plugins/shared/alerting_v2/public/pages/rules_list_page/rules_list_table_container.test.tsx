@@ -187,17 +187,11 @@ describe('RulesListTableContainer', () => {
   });
 
   describe('navigation callbacks', () => {
-    it('calls onEditInFlyout when edit action is clicked', async () => {
+    it('calls onEditInFlyout when the row quick-edit button is clicked', async () => {
       renderContainer();
       await waitForRules();
 
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('editRule-rule-1')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('editRule-rule-1'));
+      fireEvent.click(screen.getByTestId('quickEditRule-rule-1'));
 
       expect(mockOnEditInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
