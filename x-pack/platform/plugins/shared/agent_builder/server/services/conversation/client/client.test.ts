@@ -30,6 +30,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
+import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
@@ -81,6 +82,7 @@ describe('ConversationClient', () => {
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
+    pinnedBy = [{ userId: 'unrelated-pinner-id' }],
     schemaVersion,
     events,
   }: {
@@ -100,6 +102,7 @@ describe('ConversationClient', () => {
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
+    pinnedBy?: Array<{ userId: string }>;
     schemaVersion?: number;
     events?: TimelineEvent[];
   } = {}): Document =>
@@ -116,6 +119,7 @@ describe('ConversationClient', () => {
         updated_at: '2025-08-04T06:44:19.123Z',
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
+        pinned_by: pinnedBy,
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -130,6 +134,7 @@ describe('ConversationClient', () => {
 
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
+    expect(conversation).not.toHaveProperty('pinned_by');
   };
 
   const expectNoReadByInList = (conversations: unknown[]) => {
@@ -438,57 +443,38 @@ describe('ConversationClient', () => {
 
     // --- pinned filter ---
 
+    const listFilter = async (options?: { pinned?: boolean }) => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter as unknown[];
+    };
+
+    // Shape is covered in access_control/query.test.ts; here we only assert list() applies it.
+    const pinnedByCurrentUser = buildPinnedFilter({
+      user: { id: 'user-1', username: 'test-user' },
+      pinned: true,
+    })[0];
+
     it('omits the pinned filter when pinned is undefined', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const filterArray = await listFilter();
 
-      await client.list();
-
-      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
-      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+      expect(filterArray).not.toContainEqual(pinnedByCurrentUser);
+      expect(filterArray).not.toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
     });
 
-    it('adds { term: { pinned: true } } when pinned is true', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-
-      await client.list({ pinned: true });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: true } }]),
-            }),
-          }),
-        })
-      );
+    it('matches only conversations the calling user pinned when pinned is true', async () => {
+      expect(await listFilter({ pinned: true })).toContainEqual(pinnedByCurrentUser);
     });
 
-    it('adds a must_not negation for pinned: false to include pre-field documents', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    it('negates the per-user match for pinned: false to include pre-field documents', async () => {
+      const filterArray = await listFilter({ pinned: false });
 
-      await client.list({ pinned: false });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ bool: { must_not: { term: { pinned: true } } } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
       // A plain term: { pinned: false } would silently exclude documents created
       // before the pinned field was added; must never be used.
-      expect(mockEsClient.search).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: false } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).not.toContainEqual({ term: { pinned: false } });
     });
   });
 
@@ -1069,6 +1055,100 @@ describe('ConversationClient', () => {
       const { document } = mockEsClient.index.mock.calls[0][0];
       expect(document.read_by).toEqual([]);
       expect(result.read).toBe(false);
+    });
+  });
+
+  describe('setPinned', () => {
+    it('adds only the calling user to pinned_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+              pinnedBy: [],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
+      expectNoReadBy(result);
+      expect(result.pinned).toBe(true);
+    });
+
+    it('does not clobber pinned_by entries written by another user', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
+        // another user pinned it concurrently
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                pinnedBy: [{ userId: 'other-user-id' }],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[1][0];
+      expect(document.pinned_by).toEqual(
+        expect.arrayContaining([{ userId: 'other-user-id' }, { userId: 'user-1' }])
+      );
+    });
+
+    it('removes only the calling user when unpinning', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+            }),
+          ],
+        },
+      });
+
+      await client.setPinned('conversation-1', false);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'other-id' }]);
+    });
+
+    it('is a no-op when the calling user has no stable id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [],
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      client = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { username: 'no-profile-user', isAdmin: false },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      expectNoReadBy(result);
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([]);
+      expect(result.pinned).toBe(false);
     });
   });
 
