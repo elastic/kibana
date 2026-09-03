@@ -15,7 +15,10 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
     "@kbn/zod",
+    "@kbn/zod-helpers",
     "@kbn/i18n",
     "@kbn/deeplinks-security",
   ]

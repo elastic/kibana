@@ -1261,3 +1261,32 @@ describe('`if` condition on step schemas', () => {
     expect(IfStepSchema.safeParse({ ...ifStep, condition: overLimit }).success).toBe(false);
   });
 });
+
+describe('`on-failure` on built-in leaf step schemas', () => {
+  // Runtime accepts step-level on-failure on any leaf step (visitAbstractStep).
+  // Connector schemas already merge it; these built-ins were missing it.
+  const cases = [
+    {
+      name: 'wait',
+      schema: WaitStepSchema,
+      step: { name: 's', type: 'wait', with: { duration: '5s' } },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('accepts `on-failure.continue` on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('on-failure');
+    expect(schema.parse({ ...step, 'on-failure': { continue: true } })['on-failure']).toEqual({
+      continue: true,
+    });
+  });
+});

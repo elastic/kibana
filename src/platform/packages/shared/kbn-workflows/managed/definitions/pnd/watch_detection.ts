@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WATCH_MANAGEMENT } from './constants';
+import {
+  PND_MANAGED_WORKFLOW_PLUGIN_ID,
+  PND_RULE_WORKFLOW_MANAGEMENT,
+  PND_WORKER_VISIBILITY,
+} from './constants';
 import WATCH_DETECTION_YAML from './watch_detection.yaml';
-import type { PndWatchTemplateValues } from './watch_template_values';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
 export const PND_WATCH_DETECTION_WORKFLOW_ID = 'system-security-watch-detection';
 
 export const PND_WATCH_DETECTION_WORKFLOW = {
   billable: false,
   id: PND_WATCH_DETECTION_WORKFLOW_ID,
-  management: PND_WATCH_MANAGEMENT,
+  management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
-  yamlTemplate: ({ settingsVersion, autonomyLevel }: PndWatchTemplateValues): string =>
-    WATCH_DETECTION_YAML.replaceAll(
-      '__WATCH_SETTINGS_VERSION__',
-      String(settingsVersion)
-    ).replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel),
-} as const satisfies ManagedWorkflowDefinition<PndWatchTemplateValues>;
+  version: 8,
+  visibility: PND_WORKER_VISIBILITY,
+  yamlTemplate: (_values: ManagedWorkflowTemplateValues): string => WATCH_DETECTION_YAML,
+} as const satisfies ManagedWorkflowDefinition;

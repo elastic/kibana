@@ -31,10 +31,6 @@ export const COL_LAST_RUN = i18n.translate('xpack.pnd.watches.skills.col.lastRun
   defaultMessage: 'Last run',
 });
 
-export const COL_ENABLED = i18n.translate('xpack.pnd.watches.skills.col.enabled', {
-  defaultMessage: 'Enabled',
-});
-
 export const NO_SKILLS = i18n.translate('xpack.pnd.watches.skills.empty', {
   defaultMessage: 'No skills are available yet.',
 });
@@ -54,12 +50,6 @@ export const NOT_IMPLEMENTED_BODY = i18n.translate('xpack.pnd.watches.skills.not
   defaultMessage:
     'The skill catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
 });
-
-export const enableSkillAriaLabel = (name: string) =>
-  i18n.translate('xpack.pnd.watches.skills.enableAriaLabel', {
-    defaultMessage: 'Enable skill {name}',
-    values: { name },
-  });
 
 /**
  * Name and description per skill id. The API carries ids only, so all skill copy lives here.

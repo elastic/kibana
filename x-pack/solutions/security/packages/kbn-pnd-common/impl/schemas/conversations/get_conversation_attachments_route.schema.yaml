@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: Get PND Conversation attachments API endpoint
+  version: '1'
+paths:
+  /internal/pnd/conversations/{conversationId}/attachments:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetConversationAttachments
+      description: >
+        List one conversation's attachments (D10) — an S11-guarded proxy over the **public**
+        Agent Builder API `GET /api/agent_builder/conversations/{id}/attachments`, called as the
+        requesting user through `http.selfClient.asScoped(request).fetch` so the caller's own
+        privileges apply and access control is inherited rather than re-implemented.
+
+
+        The three attachments `_ensure` creates on a thread (Attack Discovery markdown, proposed
+        rule change, backtest comparison) are what the lifecycle flyout's Attachments tab renders.
+
+
+        ⚠️ Known asymmetry, deliberate this round: the PND agents keep `NO_TOOLS`, so these
+        attachments are visible to the **analyst** but not readable by the **agent**. Granting
+        `attachment_list` / `attachment_read` / `attachment_diff` is a follow-up.
+      summary: Get conversation attachments
+      tags:
+        - PND API
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Agent Builder conversation id
+        - name: correlationId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: nonempty
+            maxLength: 1024
+          description: >
+            Attack Discovery 2.0 alert id the conversation must be derivable from (security
+            finding **S11**). Required on every PND conversation route: the handler asserts
+            `conversationId` is a member of the set derived from this alert id, which is what
+            keeps these routes from becoming a generic Agent Builder CRUD proxy reachable by any
+            PND-privileged user.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attachments:
+                    type: array
+                    maxItems: 100
+                    items:
+                      $ref: '../components/attachment.schema.yaml#/components/schemas/PndConversationAttachment'
+                    description: >
+                      Active attachments only, in Agent Builder's own order. Soft-deleted ones are
+                      excluded — PND never passes `include_deleted`.
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - attachments
+                  - total

@@ -8,27 +8,27 @@
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { httpStatusFromWatchError } from '../../services/watches/workflows_read_authz';
+import { getWatchRouteAuthz } from './watch_route_security';
 
 const GetWatchRequestParams = z.object({
   watchId: z.string().min(1).max(128),
 });
 
 export const registerGetWatchRoute = ({
-  router,
-  logger,
+  config,
   getSpaceId,
   getWatchesService,
+  logger,
+  router,
 }: RouteDependencies) => {
   router.versioned
     .get({
       path: PND_WATCH_URL_TEMPLATE,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: {
-          requiredPrivileges: [PND_API_PRIVILEGE_READ],
-        },
+        authz: getWatchRouteAuthz(config.ui.useMockData),
       },
       summary: 'Get a PND watch by id',
     })
@@ -56,7 +56,7 @@ export const registerGetWatchRoute = ({
         } catch (error) {
           logger.error(`Failed to get watch: ${error}`);
           return response.customError({
-            statusCode: 500,
+            statusCode: httpStatusFromWatchError(error),
             body: { message: 'Failed to get watch' },
           });
         }

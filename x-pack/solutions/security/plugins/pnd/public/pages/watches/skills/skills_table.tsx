@@ -17,10 +17,25 @@ import {
 import type { WatchSkill } from '@kbn/pnd-common';
 import { useSkills } from '../../../hooks/use_skills_api';
 import { formatRelativeTime } from '../components/format_relative_time';
+import {
+  flushLastRowStyles,
+  oneLineCellStyles,
+  truncatedDescriptionStyles,
+} from '../components/table_styles';
 import { WatchBadges } from '../components/watch_badges';
 import * as sectionI18n from '../translations';
 import * as i18n from './translations';
 
+/**
+ * The Skills catalog, read-only.
+ *
+ * ⛔ There is deliberately no Enabled column and no switch (bead kibana-phf4.33): the 2026-08-10
+ * declutter removed the per-row enable toggles from both catalogs and the watch detail page. The write
+ * path itself survives untouched — `useToggleSkill` and `PATCH /internal/pnd/skills/{skillId}` are
+ * upstream's (#284009) and a skill's global flag is a real stored field — so this is a surface
+ * decision, not a contract change. It does mean that flag currently has no producer in the UI, which
+ * register `#38` records.
+ */
 export const SkillsTable: React.FC = () => {
   const { data, isLoading, error } = useSkills();
 
@@ -52,8 +67,11 @@ export const SkillsTable: React.FC = () => {
               </EuiFlexItem>
               {skill.summary ? (
                 <EuiFlexItem grow={false}>
+                  {/* One line only — the full text is the title, per the 2026-08-10 declutter. */}
                   <EuiText size="xs" color="subdued">
-                    {skill.summary}
+                    <span css={truncatedDescriptionStyles} title={skill.summary}>
+                      {skill.summary}
+                    </span>
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
@@ -87,7 +105,7 @@ export const SkillsTable: React.FC = () => {
     <EuiBasicTable
       items={data?.skills ?? []}
       columns={columns}
-      tableLayout="auto"
+      css={[flushLastRowStyles, oneLineCellStyles]}
       tableCaption={i18n.TABLE_CAPTION}
       loading={isLoading}
       error={error ? i18n.LOAD_ERROR : undefined}

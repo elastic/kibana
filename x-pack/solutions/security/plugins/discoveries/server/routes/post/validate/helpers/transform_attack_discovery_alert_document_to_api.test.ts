@@ -6,6 +6,7 @@
  */
 
 import {
+  ALERT_RISK_SCORE,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -247,5 +248,38 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     });
 
     expect(result.replacements).toBeUndefined();
+  });
+
+  it('surfaces risk_score when the document carries a numeric risk score', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: { ...baseDoc, [ALERT_RISK_SCORE]: 73 },
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.risk_score).toBe(73);
+  });
+
+  it('returns undefined for risk_score when the document has no risk score', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: baseDoc,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.risk_score).toBeUndefined();
+  });
+
+  it('returns undefined for risk_score when the risk score is not a number', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: { ...baseDoc, [ALERT_RISK_SCORE]: 'not-a-number' },
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.risk_score).toBeUndefined();
   });
 });

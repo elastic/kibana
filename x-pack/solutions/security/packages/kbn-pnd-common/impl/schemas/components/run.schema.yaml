@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: PND Run component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndRunStatus:
+      type: string
+      enum:
+        - running
+        - waiting_for_input
+        - succeeded
+        - failed
+        - cancelled
+        - timed_out
+      description: >
+        Closed lifecycle status for a PND orchestrator run. This is intentionally a
+        closed enum (mirroring Attack Discovery 2.0's terminal-state branching) and
+        is why WatchRecentRun.status (an open string) cannot be reused for a run row.
+
+    PndRun:
+      type: object
+      required:
+        - executionId
+        - workflowId
+        - workflowRunId
+        - watchId
+        - correlationId
+        - startedAt
+        - status
+        - summary
+        - pendingGateCount
+        - deepLinkPath
+      properties:
+        executionId:
+          type: string
+          maxLength: 1024
+        workflowId:
+          type: string
+          maxLength: 1024
+        workflowRunId:
+          type: string
+          maxLength: 1024
+        watchId:
+          type: string
+          maxLength: 1024
+        correlationId:
+          type: string
+          maxLength: 1024
+          description: Attack Discovery 2.0 alert id that triggered this run
+        startedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp
+        endedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp; absent while the run is non-terminal
+        status:
+          $ref: '#/components/schemas/PndRunStatus'
+        summary:
+          type: string
+          maxLength: 4096
+          description: Best-effort headline for run cards and tables
+        triggeredBy:
+          type: string
+          maxLength: 1024
+          description: Trigger id or actor that started the run
+        pendingGateCount:
+          type: integer
+          minimum: 0
+          description: Number of HITL gates currently awaiting input
+        reason:
+          type: string
+          maxLength: 4096
+          description: Failure or cancellation reason when terminal and not successful
+        deepLinkPath:
+          type: string
+          maxLength: 2048
+          description: >
+            Path to this run's execution details, **relative to the Workflows app**:
+            `/{workflowId}?tab=executions&executionId={workflowRunId}`, plus
+            `&stepExecutionId={id}` when one step is the interesting one (plan F1). It is NOT an
+            `/app/pnd` path, and it carries no app mount and no `/s/{space}` prefix — resolve it
+            with `getUrlForApp('workflows', { path })` / `navigateToApp('workflows', { path })`,
+            which add both, and never by concatenating `/app/workflows` by hand. Built by
+            `buildRunDeepLink` (`pnd/server/routes/get/runs/helpers/build_run_deep_link`), which is
+            authoritative for the shape.

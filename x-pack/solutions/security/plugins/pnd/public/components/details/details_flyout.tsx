@@ -6,44 +6,25 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlyout } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
-import { ConversationDetailsFlyoutHeader } from './flyout_header';
+import { LifecycleFlyout } from '../lifecycle_flyout/lifecycle_flyout';
 import type { BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
-import { ConversationDetailsFlyoutBody } from './flyout_body';
-import { ConversationDetailsFlyoutFooter } from './flyout_footer';
-import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutProps {
-  investigation: Investigation;
-  onClose: () => void;
-  onClickAction: BaseActionsProps['onClickAction'];
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  chatId?: string;
+  correlationId: string;
+  onClickAction?: BaseActionsProps['onClickAction'];
+  onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  onClose?: () => void;
+  primaryActionLabel?: string;
 }
 
+/**
+ * The one details overlay. Chrome, URL params (`?lifecycle=` / `?lifecycleTab=`), and
+ * `/executions/:id` live in {@link LifecycleFlyout}; this is the public name main shipped.
+ */
 export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
-  ({ investigation, onClose, onClickAction, onClickRecommendedAction }) => {
-    return (
-      <EuiFlyout
-        aria-label={DETAILS_FLYOUT_LABELS.ariaLabel}
-        type="push"
-        size="s"
-        paddingSize="m"
-        onClose={onClose}
-        ownFocus={false}
-        hideCloseButton
-      >
-        <ConversationDetailsFlyoutHeader onClose={onClose} />
-        <ConversationDetailsFlyoutBody investigation={investigation} />
-        <ConversationDetailsFlyoutFooter
-          investigation={investigation}
-          onClickAction={onClickAction}
-          onClickRecommendedAction={onClickRecommendedAction}
-        />
-      </EuiFlyout>
-    );
-  }
+  ({ correlationId }) => <LifecycleFlyout correlationId={correlationId} />
 );
 
 ConversationDetailsFlyout.displayName = 'ConversationDetailsFlyout';

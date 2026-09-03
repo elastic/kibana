@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Get PND Proposals Activity API endpoint
+  version: '1'
+paths:
+  /internal/pnd/proposals/activity:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetProposalsActivity
+      description: >
+        Gates opened per hour over the last 24 hours, bucketed by recommended action — the series
+        behind the KPI tiles' sparklines.
+
+        This is a DIFFERENT metric from the tile's headline count, which stays what it is today:
+        the gates still awaiting action, derived from the already-filtered queue with no second
+        query. Conflating the two would make a tile contradict its own chart.
+
+        Takes no parameters: the 24h window is fixed, the space comes from the request, and the
+        workflow and step allow-lists are hard-coded server-side. The 24h bound applies to this
+        series only — the queue itself stays unbounded, so a pending human decision never silently
+        ages out (D4).
+      summary: Get proposal activity series
+      tags:
+        - PND API
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  buckets:
+                    type: array
+                    maxItems: 24
+                    description: >
+                      Exactly 24 hourly buckets, oldest first, zero-filled. The server normalises
+                      the `date_histogram` to that length: `extended_bounds` over a 24h range can
+                      emit a 25th partial bucket, and a chart with a ragged tail reads as a data
+                      outage rather than as a quiet hour.
+                    items:
+                      $ref: '../components/activity.schema.yaml#/components/schemas/PndActivityBucket'
+                required:
+                  - buckets

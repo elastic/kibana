@@ -36,6 +36,7 @@ import {
 } from '@kbn/discoveries/impl/lib/telemetry/event_based_telemetry';
 import { reportMisconfiguration } from '@kbn/discoveries/impl/lib/telemetry/report_misconfiguration';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
+import { attackDiscoveryCreatedTriggerCommonDefinition } from '../common/workflow_triggers/attack_discovery_created';
 import { DEFAULT_CONNECTOR_TIMEOUT_MS } from '.';
 import { logStartupHealthCheck } from './lib/startup_health_check';
 import { workflowExecutor } from './lib/schedules/workflow_executor';
@@ -151,6 +152,19 @@ export class DiscoveriesPlugin
     // feature-flag-gated in `start()`.
     if (this.config.enabled) {
       registerOwner({ workflowsExtensions: plugins.workflowsExtensions });
+
+      // Register the `security.attackDiscoveryCreated` workflow trigger definition.
+      // The server trigger contract (`registerTriggerDefinition`) is synchronous and
+      // setup-only, and the `attackDiscoveryWorkflowsEnabled` feature flag is not
+      // readable during setup — so, like `registerOwner` above, this is gated on
+      // plugin config only. Registering the definition is inert on its own: nothing
+      // emits the event (emission is separately flag-gated in the write paths) and
+      // nothing subscribes (the orchestrator managed workflows are installed only
+      // when the flag is ON in `start()`), so the trigger stays dormant while the
+      // flag is OFF.
+      plugins.workflowsExtensions.registerTriggerDefinition(
+        attackDiscoveryCreatedTriggerCommonDefinition
+      );
     }
 
     if (!plugins.ruleRegistry) {

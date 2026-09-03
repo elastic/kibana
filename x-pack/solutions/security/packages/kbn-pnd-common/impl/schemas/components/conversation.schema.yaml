@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: PND Conversation component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndConversationRelation:
+      type: string
+      enum: [thread, worker]
+      description: >
+        How a derived conversation relates to its parent. The camelCase field
+        `parentConversationRelation` maps 1:1 onto Agent Builder PR #284458's
+        `parent_conversation_relation`. That PR only carries `subagent`; PND
+        needs these two members instead — the requirements artifact
+        kibana-tjil.17 sends to workchat-eng.
+
+
+        `thread` — a HITL proposal thread hanging under a container
+        (investigation or incident), recovered from `PND_GATE_REGISTRY.parentKind`.
+
+
+        `worker` — a specialist conversation hanging under the investigation
+        (the tuning conversation today; a Deep Watch conversation minted
+        under `PND_WORKER_NAMESPACE` when that watch writes to its own id).
+
+
+        Parentage is a read-time fold, stored nowhere: Agent Builder documents
+        do not carry these fields, and PND does not write them.
+
+    PndConversation:
+      type: object
+      required:
+        - id
+        - kind
+        - title
+        - correlationId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          maxLength: 1024
+          description: Deterministic UUIDv5 conversation id (see deriveConversationIds)
+        kind:
+          type: string
+          enum: [investigation, incident, tuning, thread]
+          description: >
+            Which derived Agent Builder conversation this is. The first three are keyed on
+            the Attack Discovery alert id alone, one per alert, and name the phase of the
+            four-phase lifecycle they drive: the investigation (phase 2), the incident
+            (phase 3) or the detection tuning (phase 4). `thread` is the fourth namespace
+            (D1 / ADR-012): the conversation paired 1:1 with a single HITL proposal, keyed
+            on `(correlationId, gateId)`, so an alert has one per registered gate
+            rather than one in total. Inlined rather than shared as a component so it does
+            not collide with the pre-existing PndConversationKind type, which models the
+            not-found `undefined` case and is deliberately **not** widened with `thread`
+            (it also names which of the three installed agents answers a thread, and there
+            is no fourth agent).
+        # The HITL gate whose proposal this thread is paired with. Present only when `kind` is
+        # `thread`; absent on the three alert-keyed kinds, which have no gate. Shared with
+        # `EnsureThreadRequestBody` as one component rather than two copies of the enum — the
+        # rationale for the closed member list lives on `PndGateId` itself.
+        gateId:
+          $ref: './gate.schema.yaml#/components/schemas/PndGateId'
+        # Maps 1:1 onto #284458's `parent_conversation_id`. Recovered on read by `parentOf`,
+        # stored nowhere. Absent on container kinds (investigation, incident): they have no
+        # parent. The incident's upward sibling link is `promotedFrom`, not this field.
+        parentConversationId:
+          type: string
+          maxLength: 1024
+          description: >
+            Id of the parent conversation, recovered on read. CamelCase maps 1:1
+            onto Agent Builder PR #284458's `parent_conversation_id`. Absent on
+            container kinds. Never persisted — `parentOf` folds it from
+            `correlationId`, `kind`, `gateId` and
+            `PND_GATE_REGISTRY.parentKind`.
+        # Maps 1:1 onto #284458's `parent_conversation_relation`.
+        parentConversationRelation:
+          $ref: '#/components/schemas/PndConversationRelation'
+        # Upward sibling link, incident → originating investigation. Recovered on read
+        # by `promotedFrom`, stored nowhere. Absent on every kind except `incident`.
+        # The investigation has no reverse field — it does not know about its incidents.
+        # Carry-over renders by traversing this id, never by copying.
+        #
+        # 1:1 thin-slice divergence: decision 7 is many-to-many, but PND keys both
+        # conversation ids on one Attack Discovery alert id, so this always points at
+        # exactly one investigation. Changing that would break the derivation.
+        promotedFrom:
+          type: string
+          maxLength: 1024
+          description: >
+            Id of the originating investigation conversation, recovered on read
+            when `kind` is `incident`. Absent on every other kind. Never
+            persisted — `promotedFrom` folds it from `correlationId`.
+            The investigation does not carry a reverse list of incidents.
+        title:
+          type: string
+          maxLength: 1024
+        correlationId:
+          type: string
+          maxLength: 1024
+          description: >
+            Correlation id this conversation was derived from (Aug-19 decision 5).
+            On the Attack Discovery path this is the producer alert id; it also
+            keys an incident imported from elsewhere, which has no attack discovery.
+        createdAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp
+        updatedAt:
+          type: string
+          maxLength: 64
+          description: ISO 8601 timestamp

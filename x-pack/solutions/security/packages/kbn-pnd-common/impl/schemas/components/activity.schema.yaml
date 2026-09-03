@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: PND Proposal activity component schemas
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PndActivityCounts:
+      type: object
+      description: >
+        Gates opened in one bucket, per recommended action. Every action is required so a tile can
+        read `counts[action]` without a lookup that misses, and so a quiet hour renders as a zero
+        rather than as a gap in the sparkline. Keyed on the four `RECOMMENDED_ACTIONS`; the server
+        joins `stepId` to `gate.recommendedAction` through PND_GATE_REGISTRY in JS, because
+        category is not a mapped Elasticsearch field (G4).
+      required:
+        - contain
+        - escalate
+        - investigate
+        - tune
+      properties:
+        contain:
+          type: integer
+          minimum: 0
+        escalate:
+          type: integer
+          minimum: 0
+        investigate:
+          type: integer
+          minimum: 0
+        tune:
+          type: integer
+          minimum: 0
+
+    PndActivityBucket:
+      type: object
+      description: One hour of the 24h sparkline series.
+      required:
+        - counts
+        - time
+      properties:
+        counts:
+          $ref: '#/components/schemas/PndActivityCounts'
+        time:
+          type: integer
+          minimum: 0
+          description: >
+            Epoch milliseconds at the start of the hour, UTC — the `date_histogram` bucket key,
+            passed straight to `@elastic/charts` as a time-scaled x value.

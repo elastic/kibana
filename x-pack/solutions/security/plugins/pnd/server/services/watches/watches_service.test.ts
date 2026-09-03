@@ -293,7 +293,6 @@ describe('WatchesService', () => {
         .mockRejectedValueOnce(new Error('state unavailable'));
 
       const body = await service.get(request, FLOOR, SPACE);
-
       expect(body?.watch.id).toBe(FLOOR);
       expect(body?.settings).toBeUndefined();
       expect(body?.settingsRevision).toBeNull();
@@ -435,10 +434,6 @@ describe('WatchesService', () => {
 
       expect(service.listWorkers().length).toBeGreaterThan(0);
       expect((await service.listSkills(request, SPACE)).length).toBeGreaterThan(0);
-
-      expect(service.setWorkerEnabled('containment', false)?.enabled).toBe(false);
-
-      expect(service.setWorkerEnabled('nope', false)).toBeUndefined();
     });
   });
 });

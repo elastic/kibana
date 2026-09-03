@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Derive PND Conversations API endpoint
+  version: '1'
+paths:
+  /internal/pnd/conversations/_derive:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeriveConversationIds
+      description: >
+        Prepare the whole conversation context for an Attack Discovery 2.0 alert in one
+        call: the three deterministic UUIDv5 conversation ids (investigation, incident and
+        tuning), the alert's rendered markdown and title, the per-phase Agent Builder agent
+        ids, and whether demo mode is forcing the incident verdict.
+      summary: Derive conversation ids
+      tags:
+        - PND API
+      parameters:
+        - name: correlationId
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Attack Discovery 2.0 alert id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  investigationConversationId:
+                    type: string
+                    maxLength: 1024
+                  incidentConversationId:
+                    type: string
+                    maxLength: 1024
+                  tuningConversationId:
+                    type: string
+                    maxLength: 1024
+                    description: >
+                      Phase-4 conversation id, derived from the third fixed UUIDv5 namespace.
+                      Optional so the widened response can land before the route fills it in.
+                  attackDiscoveryMarkdown:
+                    type: string
+                    maxLength: 100000
+                    description: Rendered Attack Discovery markdown seeded into the conversation
+                  attackDiscoveryTitle:
+                    type: string
+                    maxLength: 200
+                    description: >
+                      Attack Discovery title. The watch titles the investigation, incident and
+                      tuning conversations from it alone: the kind each one renders with is
+                      re-derived from the namespace that minted its id, never read back out of
+                      the title.
+                  investigationAgentId:
+                    type: string
+                    maxLength: 1024
+                    description: >
+                      Agent Builder agent id for the phase-2 conversation. Returned over the
+                      wire rather than hardcoded in the YAML so agent existence and agent-id
+                      availability succeed or degrade together (ADR-011): when derive_ids
+                      exhausts its retries and `continue: true` fires, `agent-id` renders empty
+                      and the step falls back to the default agent instead of hard-failing on
+                      an agent that was never ensured.
+                  incidentAgentId:
+                    type: string
+                    maxLength: 1024
+                    description: Agent Builder agent id for the phase-3 conversation
+                  tuningAgentId:
+                    type: string
+                    maxLength: 1024
+                    description: Agent Builder agent id for the phase-4 conversation
+                  demoForceIncident:
+                    type: boolean
+                    description: >
+                      Mirror of `xpack.pnd.demo.forceIncident` (default false). The Watch Floor
+                      ORs it with the model's real `isIncident` verdict, and the UI badges a run
+                      as demo mode when it is on. Absent renders empty, KQL yields false, and
+                      the condition falls through to the real verdict — so a broken demo switch
+                      can never silently force-escalate.
+                required:
+                  - investigationConversationId
+                  - incidentConversationId
+                  - attackDiscoveryMarkdown

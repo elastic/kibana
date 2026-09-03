@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Respond to PND Proposal API endpoint
+  version: '1'
+paths:
+  /internal/pnd/proposals/{sourceId}/_respond:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: RespondToProposal
+      description: >
+        Respond to a pending HITL gate, resuming the paused workflow step. Every gate's
+        input is closed to an explicit decision and a required, non-empty rationale.
+      summary: Respond to proposal
+      tags:
+        - PND API
+      parameters:
+        - name: sourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Opaque id of the pending gate being responded to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: object
+                  additionalProperties: false
+                  required:
+                    - decision
+                    - rationale
+                  properties:
+                    decision:
+                      type: string
+                      enum: [approve, dismiss]
+                      description: >
+                        The human's decision (security finding D2). Required and closed: a body
+                        carrying only a rationale used to proceed as an **approval**, and so did
+                        a capitalized "Dismiss", while the orchestrator YAMLs only ever match
+                        `decision : "dismiss"`. That was fail-open on a consequential path.
+                    rationale:
+                      type: string
+                      format: nonempty
+                      maxLength: 2000
+                      description: >
+                        Required, non-empty human rationale for the decision. Mandatory for a
+                        dismissal too — there is no rationale-free path through a gate.
+              required:
+                - input
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sourceId:
+                    type: string
+                    maxLength: 1024
+                  resumed:
+                    type: boolean
+                    description: True when the paused workflow step was resumed
+                required:
+                  - sourceId
+                  - resumed

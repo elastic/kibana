@@ -22,7 +22,7 @@ import {
 } from '@kbn/attack-discovery-schedules-common';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
-import { ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE, ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -43,6 +43,7 @@ import {
 import { isWorkflowsEnabledForSpace } from '../../is_workflows_enabled_for_space';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
+import { emitAttackDiscoveryCreatedEvent } from '../../../workflows/emit_attack_discovery_created_event';
 import { wrapManagementApiForScheduledExecution } from './helpers/wrap_management_api_for_scheduled_execution';
 
 const DEFAULT_INSIGHT_TYPE = 'attack_discovery';
@@ -320,6 +321,28 @@ export const workflowExecutor = async ({
             context,
             id: alertInstanceId,
             payload: baseAlertDocument,
+          });
+
+          // Emit `security.attackDiscoveryCreated` for the reported discovery.
+          // This is reached only inside the `isWorkflowsEnabledForSpace` guard
+          // above, so no additional feature-flag check is needed here.
+          // ⚠️ `alertsClient.report` only STAGES the alert; the alerting
+          // framework can still drop it. An event emitted here means "reported",
+          // not "durably written". The emit helper never throws, so a Workflows
+          // failure cannot fail the scheduled generation.
+          const riskScore = baseAlertDocument[ALERT_RISK_SCORE];
+
+          await emitAttackDiscoveryCreatedEvent({
+            logger: tracedLogger,
+            payload: {
+              alertIds: attackDiscovery.alertIds,
+              attackDiscoveryAlertId: alertDocId,
+              generationUuid: executionUuid,
+              riskScore: typeof riskScore === 'number' ? riskScore : undefined,
+              spaceId,
+            },
+            request: deps.request,
+            workflowsExtensions: deps.workflowsExtensions,
           });
 
           return { alertIds: attackDiscovery.alertIds, attackId: alertDocId };

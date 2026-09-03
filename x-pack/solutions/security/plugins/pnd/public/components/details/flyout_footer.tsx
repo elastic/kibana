@@ -7,25 +7,26 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { BaseActions, type BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
-  investigation: Investigation;
+  chatId?: string;
   onClickAction: BaseActionsProps['onClickAction'];
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  primaryActionLabel?: string;
+  recordId: string;
 }
 
 export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFooterProps>(
-  ({ investigation, onClickAction, onClickRecommendedAction }) => {
-    const onOpenChat = useOpenInChat(investigation.id);
+  ({ chatId, onClickAction, onClickRecommendedAction, primaryActionLabel, recordId }) => {
+    const onOpenChat = useOpenInChat(chatId);
 
     return (
       <EuiFlyoutFooter>
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton iconType="productAgent" onClick={onOpenChat} size="s">
               {DETAILS_FLYOUT_LABELS.actions.openChat}
@@ -33,10 +34,12 @@ export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFoo
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <BaseActions
-              investigation={investigation}
+              chatId={chatId}
               isFlyout={true}
               onClickAction={onClickAction}
               onClickRecommendedAction={onClickRecommendedAction}
+              primaryActionLabel={primaryActionLabel}
+              recordId={recordId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

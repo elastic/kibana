@@ -16,7 +16,7 @@ import {
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { type Investigation } from '@kbn/pnd-common';
+import type { RecommendedAction } from '@kbn/pnd-common';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
@@ -24,9 +24,10 @@ import { getActionButtonIconProps } from '../helpers';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 
 interface ActionConfig {
-  key: string;
-  icon: IconType;
   color?: EuiContextMenuItemProps['color'];
+  disabled?: boolean;
+  icon: IconType;
+  key: string;
   name: string;
   onClick: () => void;
   /** Inserts a horizontal rule before this item */
@@ -40,14 +41,15 @@ const useContextMenuItems = (
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () =>
-      actions.flatMap(({ key, icon, color = 'text', name, onClick, separator }) => {
+      actions.flatMap(({ color = 'text', disabled, icon, key, name, onClick, separator }) => {
         const item = (
           <EuiContextMenuItem
             style={{
               padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
             }}
-            key={key}
+            disabled={disabled}
             icon={icon}
+            key={key}
             color={color}
             onClick={(ev) => {
               ev.stopPropagation();
@@ -66,37 +68,45 @@ const useContextMenuItems = (
   );
 };
 
-export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
+export type CardActionType = 'assign' | 'dismiss' | 'openIncident';
+
 export interface BaseActionsProps {
-  investigation: Investigation;
+  chatId?: string;
   isFlyout?: boolean;
-  onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickAction: (action: CardActionType) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
+  primaryActionLabel?: string;
+  recommendedAction?: RecommendedAction;
+  recordId: string;
   'data-test-subj'?: string;
 }
 
 export const BaseActions = memo<BaseActionsProps>(
   ({
-    investigation,
+    chatId,
     isFlyout = false,
     onClickAction,
     onClickRecommendedAction,
+    primaryActionLabel,
+    recommendedAction,
+    recordId,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
-    const onOpenChat = useOpenInChat(investigation.id);
+    const onOpenChat = useOpenInChat(chatId);
+    const iconProps = getActionButtonIconProps({ recommendedAction });
 
     const button = isFlyout ? (
       <EuiButton
-        size="s"
         color="primary"
-        fill
-        iconType="chevronSingleDown"
-        iconSide="right"
-        onClick={handleToggle}
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
+        fill
+        iconSide="right"
+        iconType="chevronSingleDown"
+        onClick={handleToggle}
+        size="s"
       >
         {ACTIONS_TRANSLATIONS.buttons.actions}
       </EuiButton>
@@ -104,62 +114,67 @@ export const BaseActions = memo<BaseActionsProps>(
       <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
         onClick={handleToggle}
+        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
       />
     );
 
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        ...(onClickRecommendedAction
+        ...(onClickRecommendedAction != null && primaryActionLabel != null
           ? [
               {
+                color: iconProps.color,
+                icon: iconProps.type,
                 key: 'proposedAction',
-                icon: getActionButtonIconProps(investigation).type,
-                color: getActionButtonIconProps(investigation).color,
-                name: investigation.primaryActionLabel ?? '',
-                onClick: () =>
-                  onClickRecommendedAction({
-                    id: investigation.id,
-                  }),
+                name: primaryActionLabel,
+                onClick: () => onClickRecommendedAction({ id: recordId }),
               },
             ]
           : []),
-        ...(!isFlyout
+        ...(!isFlyout && chatId != null
           ? [
               {
+                icon: 'productAgent' as const,
                 key: 'openChat',
-                icon: 'productAgent',
                 name: ACTIONS_TRANSLATIONS.buttons.openInChat,
                 onClick: onOpenChat,
-                // TODO: Add a isDisabled for actions that are disabled
-                // might apply to openIncident if the investigation already has an incident created
               },
             ]
           : []),
         {
-          key: 'openIncident',
+          disabled: true,
           icon: 'document',
+          key: 'openIncident',
           name: ACTIONS_TRANSLATIONS.buttons.openIncident,
-          onClick: () => onClickAction('openIncident', investigation.recordId),
-          // TODO: Add a isDisabled for actions that are disabled
-          // might apply to openIncident if the investigation already has an incident created
+          onClick: () => onClickAction('openIncident'),
         },
         {
-          key: 'assign',
+          disabled: true,
           icon: 'user',
+          key: 'assign',
           name: ACTIONS_TRANSLATIONS.buttons.assign,
-          onClick: () => onClickAction('assign', investigation.recordId),
+          onClick: () => onClickAction('assign'),
           separator: true,
         },
         {
-          key: 'dismiss',
           icon: 'trash',
+          key: 'dismiss',
           name: ACTIONS_TRANSLATIONS.buttons.dismiss,
-          onClick: () => onClickAction('dismiss', investigation.recordId),
+          onClick: () => onClickAction('dismiss'),
         },
       ],
-      [onClickRecommendedAction, investigation, isFlyout, onOpenChat, onClickAction]
+      [
+        chatId,
+        iconProps.color,
+        iconProps.type,
+        isFlyout,
+        onClickAction,
+        onClickRecommendedAction,
+        onOpenChat,
+        primaryActionLabel,
+        recordId,
+      ]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);
@@ -167,19 +182,19 @@ export const BaseActions = memo<BaseActionsProps>(
     return (
       <EuiPopover
         anchorPosition="downRight"
-        panelPaddingSize="none"
-        data-test-subj={dataTestSubj}
-        button={button}
-        isOpen={isOpen}
-        closePopover={handleClose}
         aria-label={ACTIONS_TRANSLATIONS.popover.ariaLabel}
+        button={button}
+        closePopover={handleClose}
+        data-test-subj={dataTestSubj}
+        isOpen={isOpen}
+        panelPaddingSize="none"
       >
         <EuiContextMenuPanel
           css={`
             padding: 0;
           `}
-          items={items}
           data-test-subj={dataTestSubj ? `${dataTestSubj}-panel` : undefined}
+          items={items}
         />
       </EuiPopover>
     );

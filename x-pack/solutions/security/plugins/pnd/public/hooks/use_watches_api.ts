@@ -19,20 +19,7 @@ import type {
   UpdateWatchResponse,
 } from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
-
-export const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
-  if (failureCount >= 3) {
-    return false;
-  }
-  if (isHttpFetchError(error)) {
-    const status = error.response?.status;
-    if (status === 501) {
-      return false;
-    }
-    return !status || status >= 500;
-  }
-  return true;
-};
+import { retryOnTransientError } from './retry_on_transient_error';
 
 const WATCH_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
   'xpack.pnd.watchSettingsConflictErrorMessage',
@@ -101,9 +88,13 @@ export const useWatch = (watchId: string | undefined) => {
  * Patches a watch and its settings in one request. Bound to a single watch, so callers pass only the
  * fields that changed.
  *
- * Optimistic, so switches and sliders respond immediately and roll back if the server rejects the
- * value. Deliberately does not invalidate the worker or skill catalogs: a per-watch attachment toggle
- * does not change a worker's or skill's global flag.
+ * Optimistic, so the page reflects the write immediately and rolls back if the server rejects it —
+ * which matters most for the settings page's Save, where a whole page of accumulated edits rides in
+ * one request and a rejection has to put every one of them back.
+ *
+ * Deliberately does not invalidate the skill catalog: a per-watch attachment toggle does not
+ * change a skill's global flag. The worker catalog is not invalidated either, for a stronger reason —
+ * it is projected from the lanes' `ai.agent` steps and nothing this route accepts can change it.
  */
 export const useUpdateWatch = (watchId: string) => {
   const { services } = useKibana();
@@ -161,12 +152,20 @@ export const useUpdateWatch = (watchId: string) => {
 /**
  * Mirrors what the server does to a watch, so the optimistic cache matches the eventual response.
  * Only fields the UI can change are handled; unknown option ids are left to the server to reject.
+ *
+ * `autonomyLevel` is deliberately absent: the route rejects it (autonomy is written only by
+ * `PUT /internal/pnd/autonomy`, behind `pnd_manage_autonomy`), so mirroring it here would paint a
+ * raise the server never applied and then roll it back. `worker` is absent for the same reason and one
+ * more: a worker is a read-only projection of an `ai.agent` step (kibana-phf4.6), so a watch carries
+ * no worker state for a mirror to write to. `approvalGates` joined them in bead kibana-phf4.33: the
+ * 2026-08-10 design deleted the section that rendered them and the route now rejects the field, so a
+ * mirror could only paint a gate policy the server refused.
  */
 const applyWatchPatch = (
   current: GetWatchResponse,
   patch: UpdateWatchRequestBody
 ): GetWatchResponse => {
-  const { enabled, autonomyLevel, triggers, scopeRouting, approvalGate, worker, skill } = patch;
+  const { enabled, triggers, scopeRouting, skill } = patch;
   const watch = enabled == null ? current.watch : { ...current.watch, enabled };
   const settings = current.settings;
 
@@ -179,7 +178,6 @@ const applyWatchPatch = (
     watch,
     settings: {
       ...settings,
-      autonomy: autonomyLevel ?? settings.autonomy,
       triggers:
         triggers && settings.triggers
           ? {
@@ -206,24 +204,6 @@ const applyWatchPatch = (
               ),
             }
           : settings.scopeRouting,
-      approvalGates: approvalGate
-        ? settings.approvalGates?.map((gate) =>
-            gate.id === approvalGate.gateId
-              ? {
-                  ...gate,
-                  requirement: approvalGate.requirement ?? gate.requirement,
-                  approverRoleId: approvalGate.approverRoleId ?? gate.approverRoleId,
-                }
-              : gate
-          )
-        : settings.approvalGates,
-      workers: worker
-        ? settings.workers?.map((attachment) =>
-            attachment.workerId === worker.workerId
-              ? { ...attachment, enabled: worker.enabled }
-              : attachment
-          )
-        : settings.workers,
       skills: skill
         ? settings.skills?.map((attachment) =>
             attachment.skillId === skill.skillId
@@ -252,3 +232,32 @@ const touchesSettings = ({
 
 const applySelect = <T extends { selectedId: string }>(setting: T, selectedId?: string): T =>
   selectedId == null ? setting : { ...setting, selectedId };
+
+/** POC stub — custom watch creation lands in a follow-up PR. */
+export const useCreateWatch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<GetWatchResponse> => {
+      throw new Error('Custom watch creation is not available in this foundation PR');
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
+    },
+  });
+};
+
+/** POC stub — custom watch deletion lands in a follow-up PR. */
+export const useDeleteWatch = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (_watchId: string): Promise<void> => {
+      throw new Error('Custom watch deletion is not available in this foundation PR');
+    },
+    onSuccess: async (_data, watchId) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.list() });
+      await queryClient.removeQueries({ queryKey: queryKeys.watches.detail(watchId) });
+    },
+  });
+};

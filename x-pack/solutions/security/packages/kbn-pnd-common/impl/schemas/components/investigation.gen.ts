@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { PndTuningPreview } from './tuning.gen';
+
 export const TemplateId = lazySchema(() => z.enum(['investigation', 'proposal', 'incident']));
 export type TemplateId = z.infer<typeof TemplateId>;
 export type TemplateIdEnum = typeof TemplateId.enum;
@@ -121,6 +123,12 @@ export const Investigation = lazySchema(() =>
 );
 export type Investigation = z.infer<typeof Investigation>;
 
+/**
+  * A proposal awaiting a decision. The **single** proposal contract: both `GET /internal/pnd/investigations/{id}/proposals` (this shape) and the grouped HITL queue's `PndProposalRow` describe the same object, and the queue's row is projected onto this type by `proposalRowToProposal` rather than by a second, parallel declaration.
+
+The `pnd*` block at the end of `properties` is what a **real** proposal — one projected from a parked `waitForInput` gate rather than from a fixture — carries and this type had no field for. Every one of them is optional, so nothing that already consumed a `Proposal` has to change; a second type would have forked the contract instead (epic decision 9: contracts widen additively).
+
+  */
 export const Proposal = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -133,7 +141,11 @@ export const Proposal = lazySchema(() =>
      * Proposal action type (e.g. contain, escalate, tune)
      */
     type: z.string(),
-    confidence: z.number().min(0).max(1),
+    /**
+      * Producer confidence in the proposal, 0..1. **Optional**, and omitted rather than invented: a proposal projected from a parked HITL gate has no measured confidence, and `security.detectionChangeSignal` already made the same field optional for the same reason ("there is no measured confidence at containment"). Every fixture still supplies it and no surface reads it, so relaxing it broke no consumer.
+
+      */
+    confidence: z.number().min(0).max(1).optional(),
     reasoning: z.string(),
     evidenceRefs: z.array(EvidenceRef),
     status: ProposalStatus,
@@ -147,6 +159,40 @@ export const Proposal = lazySchema(() =>
     approvalRequired: z.boolean(),
     summary: z.string(),
     recommendation: z.string(),
+    /**
+     * True when this gate can never be auto-accepted at any autonomy level (D15)
+     */
+    alwaysGate: z.boolean().optional(),
+    /**
+      * The Attack Discovery alert the gate's run was correlated to. Absent — never blank — for an uncorrelated gate, so a surface can tell "no discovery" from "a discovery at id ''".
+
+      */
+    correlationId: z.string().max(1024).optional(),
+    /**
+     * ISO 8601 timestamp the gate parked
+     */
+    createdAt: z.string().max(64).optional(),
+    /**
+      * Gate id from `PND_GATE_REGISTRY`. Left a free string rather than `$ref`-ing the closed `PndGateId` enum for the reason `gate.schema.yaml` already records against `PndProposalRow.gateId`: widening a *response* field to a closed enum makes an older parked row unparseable rather than merely unrecognised.
+
+      */
+    gateId: z.string().max(1024).optional(),
+    /**
+     * JSON schema describing the input this gate expects in `_respond`
+     */
+    inputSchema: z.object({}).catchall(z.unknown()).optional(),
+    preview: PndTuningPreview.optional(),
+    reversible: z.boolean().optional(),
+    /**
+      * Opaque id addressing this pending gate in `_respond`. Equal to `id` by construction — `id` is the same value under this type's own name, so a client that only knows `Proposal` can still answer the gate.
+
+      */
+    sourceId: z.string().max(1024).optional(),
+    /**
+      * Deterministic `[Thread]` conversation id for this proposal (D1), derived server-side from `(correlationId, gateId)` — the same key the queue dedupes on. Absent — never blank — when the derivation fails closed.
+
+      */
+    threadConversationId: z.string().max(1024).optional(),
   })
 );
 export type Proposal = z.infer<typeof Proposal>;

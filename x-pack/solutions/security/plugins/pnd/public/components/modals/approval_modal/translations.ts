@@ -23,4 +23,10 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   alwaysAllowAriaLabel: i18n.translate('xpack.pnd.approvalModal.alwaysAllow.ariaLabel', {
     defaultMessage: 'Always allow this action',
   }),
+  dismissTitle: i18n.translate('xpack.pnd.approvalModal.dismissTitle', {
+    defaultMessage: 'Dismiss',
+  }),
+  rationaleLabel: i18n.translate('xpack.pnd.approvalModal.rationaleLabel', {
+    defaultMessage: 'Rationale',
+  }),
 });

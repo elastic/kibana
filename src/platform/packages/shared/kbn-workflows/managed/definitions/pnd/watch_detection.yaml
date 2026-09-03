@@ -3,7 +3,7 @@ name: Detection Watch
 description: >
   Runs detection engineering work by dispatching to one worker per run: rule tuning by
   default, or rule creation when a caller supplies a detection gap.
-enabled: false
+enabled: true
 tags:
   - watch
   - watch-detection
@@ -41,9 +41,6 @@ triggers:
       additionalProperties: false
 consts:
   watch_policy:
-    settingsVersion: __WATCH_SETTINGS_VERSION__
-    # Persisted plumbing only; runtime autonomy semantics are defined separately.
-    autonomy: "__WATCH_AUTONOMY_LEVEL__"
     mandate: Detection engineering
     ui:
       color: "#e7664c"

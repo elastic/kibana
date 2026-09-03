@@ -7,30 +7,40 @@
 
 import React, { memo, useState } from 'react';
 import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
-import { AttachmentsTab, OverviewTab, TimelineTab } from './details_flyout_tab_contents';
+import { LifecycleAttachmentsSection } from '../lifecycle_flyout/sections/attachments_section';
+import { LifecycleSummarySection } from '../lifecycle_flyout/sections/summary_section';
+import { LifecycleTuningSection } from '../lifecycle_flyout/sections/tuning_section';
+import { LifecycleTimelineTab } from '../lifecycle_flyout/tabs/timeline_tab';
 import { ConversationDetailsFlyoutTabs } from './details_flyout_tabs';
 import type { FlyoutTab } from './details_flyout_tab_contents';
 
 export interface ConversationDetailsFlyoutBodyProps {
-  investigation: Investigation;
+  correlationId: string;
 }
 
 export const ConversationDetailsFlyoutBody = memo<ConversationDetailsFlyoutBodyProps>(
-  ({ investigation }) => {
+  ({ correlationId }) => {
     const [selectedTab, setSelectedTab] = useState<FlyoutTab>('overview');
 
     return (
       <EuiFlyoutBody>
         <ConversationDetailsFlyoutTabs
-          investigation={investigation}
-          selectedTab={selectedTab}
+          correlationId={correlationId}
           onTabChange={setSelectedTab}
+          selectedTab={selectedTab}
         />
         <EuiSpacer size="m" />
-        {selectedTab === 'overview' && <OverviewTab investigation={investigation} />}
-        {selectedTab === 'attachments' && <AttachmentsTab />}
-        {selectedTab === 'timeline' && <TimelineTab events={investigation.events} />}
+        {selectedTab === 'overview' && (
+          <>
+            <LifecycleSummarySection correlationId={correlationId} />
+            <EuiSpacer size="m" />
+            <LifecycleTuningSection correlationId={correlationId} />
+          </>
+        )}
+        {selectedTab === 'attachments' && (
+          <LifecycleAttachmentsSection correlationId={correlationId} />
+        )}
+        {selectedTab === 'timeline' && <LifecycleTimelineTab correlationId={correlationId} />}
       </EuiFlyoutBody>
     );
   }
