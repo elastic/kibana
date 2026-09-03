@@ -8,7 +8,7 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 
 // Code evidence is stamped as `code: <repository>[@<fingerprint>][:<location>] …`.
-const CODE_EVIDENCE_REPOSITORY_RE = /code:\s*([^@\s:]+(?:\/[^@\s:]+)*)/;
+const CODE_EVIDENCE_REPOSITORY_RE = /^\s*code:\s*([^@\s:]+(?:\/[^@\s:]+)*)/;
 
 const repositoryFromEvidence = (evidence: string[] | undefined): string | undefined => {
   for (const line of evidence ?? []) {

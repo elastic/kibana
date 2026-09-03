@@ -63,4 +63,15 @@ describe('getKnowledgeIndicatorRepository', () => {
 
     expect(getKnowledgeIndicatorRepository(knowledgeIndicator)).toBe('elastic/kibana');
   });
+
+  it('does not treat code text inside non-code evidence as repository provenance', () => {
+    const knowledgeIndicator: KnowledgeIndicator = {
+      kind: 'query',
+      query: makeQuery({ evidence: ['HTTP status code: 500 from upstream'] }),
+      rule: { backed: false, id: 'rule-id' },
+      stream_name: 'logs.test',
+    };
+
+    expect(getKnowledgeIndicatorRepository(knowledgeIndicator)).toBeUndefined();
+  });
 });

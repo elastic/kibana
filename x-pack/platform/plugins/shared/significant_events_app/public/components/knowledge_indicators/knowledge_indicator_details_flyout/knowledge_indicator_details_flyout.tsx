@@ -56,6 +56,7 @@ import { useBlocksNewActivity } from '../../../hooks/use_significant_events_main
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorRepository } from '../utils/get_knowledge_indicator_repository';
 import { getKnowledgeIndicatorSource } from '../utils/get_knowledge_indicator_source';
 import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
@@ -97,6 +98,10 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+  const source = getKnowledgeIndicatorSource(knowledgeIndicator);
+  const repository = source.includes('code')
+    ? getKnowledgeIndicatorRepository(knowledgeIndicator)
+    : undefined;
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
@@ -414,17 +419,21 @@ export function KnowledgeIndicatorDetailsFlyout({
               </>
             )}
             <EuiFlexItem>
-              <FlyoutMetadataCard title={STREAM_LABEL}>
-                <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
-                  {streamName}
-                </EuiBadge>
-              </FlyoutMetadataCard>
+              {repository ? (
+                <FlyoutMetadataCard title={REPOSITORY_LABEL}>
+                  <EuiBadge color="hollow">{repository}</EuiBadge>
+                </FlyoutMetadataCard>
+              ) : (
+                <FlyoutMetadataCard title={STREAM_LABEL}>
+                  <EuiBadge color="hollow" iconType="productStreamsClassic" iconSide="left">
+                    {streamName}
+                  </EuiBadge>
+                </FlyoutMetadataCard>
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={SOURCE_LABEL}>
-                <KnowledgeIndicatorSourceBadge
-                  source={getKnowledgeIndicatorSource(knowledgeIndicator)}
-                />
+                <KnowledgeIndicatorSourceBadge source={source} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -500,6 +509,13 @@ const STREAM_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
   {
     defaultMessage: 'Stream',
+  }
+);
+
+const REPOSITORY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.repositoryLabel',
+  {
+    defaultMessage: 'Repository',
   }
 );
 
