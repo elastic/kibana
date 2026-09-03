@@ -204,7 +204,8 @@ steps:
             and the delivery vector; (b) a chronological attack timeline, as an
             ordered timestamp-labeled sequence of events, host-scoped, including
             any lateral movement between named hosts; and (c) the indicators of
-            compromise worth pivoting on.
+            compromise worth pivoting on, each rendered as a single
+            "type | value | context" string.
             Cite the index and ES|QL query behind each claim. Where telemetry
             does not support a conclusion, say so rather than inferring it.
           schema:
@@ -227,25 +228,21 @@ steps:
                 type: array
                 maxItems: 100
                 description: Indicators worth pivoting on.
+                # Flat strings, not objects: the workflow `outputs` contract
+                # below declares `iocs` as the legacy `array` type, whose
+                # elements validate as string | number | boolean. An array of
+                # IOC objects passes this agent schema and then fails
+                # `emit_result` output validation at runtime, so the indicator
+                # is rendered here instead of being structured and flattened
+                # later.
                 items:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                      description: >
-                        Indicator kind — for example hash, ip, domain, path,
-                        registry_key, or process.
-                    value:
-                      type: string
-                      description: The indicator itself.
-                    context:
-                      type: string
-                      maxLength: 500
-                      description: Where it was observed and why it matters.
-                  required:
-                    - type
-                    - value
-                  additionalProperties: false
+                  type: string
+                  maxLength: 600
+                  description: >
+                    One indicator as "type | value | context" — for example
+                    "ip | 185.220.101.42 | C2 contacted by powershell.exe on
+                    WKSTN-RECV01". Indicator kinds include hash, ip, domain,
+                    path, registry_key, and process.
             required:
               - patientZero
               - attackTimeline

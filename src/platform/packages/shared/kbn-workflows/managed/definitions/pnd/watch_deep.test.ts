@@ -343,15 +343,37 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
         'patientZero',
       ]);
     });
-    it('asks for IoCs as structured rows rather than prose', () => {
+    /**
+     * Regression: the agent schema and the workflow `outputs` contract must agree.
+     *
+     * `outputs.iocs` is the legacy `array` type, whose elements validate as
+     * string | number | boolean — there is no object element type. An earlier
+     * revision asked the model for `{type, value, context}` rows; every step ran,
+     * the model answered correctly, and then `emit_result` died with
+     * "Output validation failed: iocs: Invalid input" against a live stack.
+     * Unit tests passed throughout, because they asserted the object shape rather
+     * than checking it against what `outputs` can actually carry.
+     */
+    it('asks for IoCs as scalar strings, the only element type outputs.array can carry', () => {
       const iocs = step().with?.schema?.properties?.iocs;
       expect(iocs?.type).toBe('array');
-      expect(Object.keys(iocs?.items?.properties ?? {}).sort()).toEqual([
-        'context',
-        'type',
-        'value',
-      ]);
-      expect(iocs?.items?.required?.slice().sort()).toEqual(['type', 'value']);
+      expect(iocs?.items?.type).toBe('string');
+      expect(iocs?.items?.properties).toBeUndefined();
+    });
+
+    it('declares no output whose agent schema emits objects', () => {
+      const declared = parsed.outputs ?? [];
+      const props = step().with?.schema?.properties ?? {};
+      for (const output of declared) {
+        if (output.name == null) continue;
+        const schema = props[output.name];
+        if (schema == null) continue;
+        if (output.type === 'array') {
+          expect(schema.items?.type).not.toBe('object');
+        } else {
+          expect(schema.type).not.toBe('object');
+        }
+      }
     });
     it('does not name an agent-id, so projectWorkers still skips this unowned step', () => {
       expect((step() as { 'agent-id'?: string })['agent-id']).toBeUndefined();
