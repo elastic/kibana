@@ -11,6 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { extract } from '@kbn/dev-utils';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 import { Config } from '../../lib';
@@ -18,8 +19,12 @@ import { ExtractNodeBuilds } from './extract_node_builds_task';
 
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
+jest.mock('@kbn/dev-utils', () => ({
+  extract: jest.fn(),
+}));
 
 const BuildFs = jest.requireMock('../../lib/fs');
+const mockExtract = extract as jest.MockedFunction<typeof extract>;
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
@@ -109,7 +114,7 @@ async function runExtractNodeBuildsTask() {
   await ExtractNodeBuilds.run(config, log);
 
   return Object.fromEntries(
-    Object.entries(BuildFs)
+    Object.entries({ ...BuildFs, extract: mockExtract })
       .filter((entry): entry is [string, jest.Mock] => {
         const [, mock] = entry;
 
