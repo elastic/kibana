@@ -24,6 +24,110 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.5.3 [kibana-9.5.3-release-notes]
+
+### Features and enhancements [kibana-9.5.3-features-enhancements]
+
+**Alerting and cases**:
+* Warn in the field library and template editors when a required case field has no default value, because automated case creation can't fill it in, and show a field's name and type as permanent as soon as you create it [#285453]({{kib-pull}}285453).
+* Enforce required global fields on API and workflow case creation when case templates are enabled, and accept `extended_fields` on the public and workflow case create and update APIs [#283350]({{kib-pull}}283350).
+
+**Developer tools**:
+* Raise the Dev Tools Console **Copy to curl** limit so a request-body string of up to `100000` characters copies successfully [#287526]({{kib-pull}}287526).
+
+### Fixes [kibana-9.5.3-fixes]
+
+**Elastic Agent Builder**:
+* Fix the research agent re-asking clarifying questions you already answered in the same round [#284800]({{kib-pull}}284800).
+* Fix disabled pre-execution workflows disappearing from Agent Builder settings so you cannot remove them. A disabled workflow stays visible and is labeled **(disabled)** [#286826]({{kib-pull}}286826).
+% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-02). Re-verify against the next BC before publishing.
+% * Teach the Agent Builder cases-management skill to use `set_extended_fields` when case templates are enabled [#287638]({{kib-pull}}287638).
+
+**Alerting and cases**:
+* Fix legacy custom fields and their v2 field-definition counterparts falling out of sync, by linking each legacy field to its definition and keeping both representations equal on every write [#282772]({{kib-pull}}282772).
+* Fix cases created from a case template by a rule action not inheriting the template's external connector, **Sync alerts** and **Extract observables** settings, and assignees [#284854]({{kib-pull}}284854).
+* Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
+* Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
+* Fix saved Lens visualizations missing from case attachments, and add helper text in the markdown editor for inline Timeline and Lens references [#286164]({{kib-pull}}286164).
+* Fix creating a case from a workflow, a case template, or {{ml}} so **Sync alerts** is not turned on unless that solution enables it [#286670]({{kib-pull}}286670).
+* Fix the **Additional fields** editor on the {{sn-itsm}}, {{sn-sir}}, and Jira connectors rejecting Mustache context variables as invalid JSON [#286578]({{kib-pull}}286578).
+* Fix required-on-close validation skipping global fields that a template includes by `$ref` [#287306]({{kib-pull}}287306).
+* Fix a template `$ref` global field ignoring its hide-on-value condition when the controlling field is in another section [#287308]({{kib-pull}}287308).
+* Fix global field column selections not syncing between the Cases list and table views [#287327]({{kib-pull}}287327).
+* Fix the Cases list keeping the previous page after you change filters [#287945]({{kib-pull}}287945).
+* Fix custom threshold **no data** alerts firing for groups that belong to a different custom threshold rule [#287151]({{kib-pull}}287151).
+* Fix custom threshold **Rate** aggregations not firing when a counter increases from 0 to a positive value [#283973]({{kib-pull}}283973).
+* Fix experimental alerting system `.rule-events` and `.alert-actions` data streams requesting a replica on single-node clusters, which left those shards unassigned [#287544]({{kib-pull}}287544).
+* Fix alerting resource installation using unbounded concurrency, which could exhaust {{kib}} heap when many contexts and namespaces install at once [#287643]({{kib-pull}}287643).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.5.3-8832a483 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+% * Relabel the top-level **Alerting** privilege as **Alerting V2** in the Roles UI and mark it experimental [#288163]({{kib-pull}}288163).
+
+**Dashboards and Visualizations**:
+* Fix by-reference visualization panels disappearing from dashboards when the panel's `savedObjectRef` reference is missing [#285476]({{kib-pull}}285476).
+* Fix metric chart background trendlines failing for {{esql}} time-series queries that use `TBUCKET(...)` [#284839]({{kib-pull}}284839).
+* Fix the Maps timeslider close button registering clicks only on the top quarter of the control [#287441]({{kib-pull}}287441).
+* Fix Canvas functions API creating data tables with more than 50 columns per row [#287935]({{kib-pull}}287935).
+
+**Data ingestion and {{fleet}}**:
+* Fix package policy inputs for newer agent versions not being backfilled after a {{kib}} minor upgrade [#284710]({{kib-pull}}284710).
+* Avoid querying {{es}} for integration sync when no cross-cluster replication follower index exists [#285526]({{kib-pull}}285526).
+* Fix space awareness on Fleet agent tag, upload, file, and unenroll API handlers [#284936]({{kib-pull}}284936).
+* Fix Fleet wrapping a Kafka **Dynamic topic** multi-field format string such as `%{[data_stream.type]}-%{[data_stream.namespace]}`, which produced an invalid topic expression [#285581]({{kib-pull}}285581).
+* Fix Fleet package manifests accepting cluster privileges outside the documented allow list [#286084]({{kib-pull}}286084).
+* Fix Fleet agent CSV export failing when `xpack.reporting.csv.scroll.strategy` is `scroll`, or when **Search in frozen indices** is enabled [#286119]({{kib-pull}}286119).
+* Fix the Fleet agent-status-change task failing when the {{es}} response is too large [#286324]({{kib-pull}}286324).
+* Fix sorting the Agents table by **Host** so it uses the hostname keyword field instead of the analyzed text field [#286383]({{kib-pull}}286383).
+* Fix package policies accepting a whitespace-only namespace, which saved while ingestion failed silently [#286385]({{kib-pull}}286385).
+* Fix the CPU and memory tooltip on offline agents showing misleading messages instead of clearly stating the agent is offline [#286386]({{kib-pull}}286386).
+* Fix managed integration throughput index patterns for streams that use a dynamic dataset [#286758]({{kib-pull}}286758).
+* Fix update and delete of legacy managed integration policies returning HTTP 404 or reporting success while the deployment kept running [#287011]({{kib-pull}}287011).
+* Fix stale version-specific Fleet policies remaining after their agent version dropped out of the bounded set, and refresh variants that still have enrolled agents [#287095]({{kib-pull}}287095).
+* Fix slow Fleet outputs fetching on Fleet setup and Integrations UI page load  [#287113]({{kib-pull}}287113).
+* Fix Fleet API-key invalidation failing when more than 10,000 keys need to be invalidated at once [#287252]({{kib-pull}}287252).
+* Fix the Fleet integration policy editor showing the wrong credential method for policies created before the package introduced `var_groups` [#287389]({{kib-pull}}287389).
+* Fix the version-specific policy icon showing on agents that already meet the policy's version requirements [#287504]({{kib-pull}}287504).
+* Fix the Fleet policy editor not validating `data_stream.dataset` on integration packages [#287557]({{kib-pull}}287557).
+* Fix managed integration orphan cleanup so it respects package-policy ownership and the force flag [#287571]({{kib-pull}}287571).
+* Fix Fleet package policies keeping stale secret references after you rotate credentials [#287642]({{kib-pull}}287642).
+
+**Developer tools**:
+* Fix Dev Tools Console autocomplete not triggering at request-body completion positions, and fix template expansion and text corruption when accepting a suggestion mid-string [#284530]({{kib-pull}}284530).
+* Fix Dev Tools Console body autocomplete after a closed triple-quoted string value [#286695]({{kib-pull}}286695).
+* Fix Console autocomplete inserting boolean and numeric suggestions as quoted strings instead of JSON primitives [#286699]({{kib-pull}}286699).
+* Fix Console body autocomplete preferring a same-name global rule over an explicit field rule [#286703]({{kib-pull}}286703).
+* Fix duplicate **Cut**, **Copy**, and **Paste** actions in the Dev Tools Console context menu [#286704]({{kib-pull}}286704).
+
+**Discover**:
+* Fix {{esql}} filters generating invalid casts such as `::text` for types {{esql}} does not support [#287416]({{kib-pull}}287416).
+% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-02). Re-verify against a later 9.5.x BC before publishing.
+% * Fix the Base64 Decode transform failing to decode on the server and mangling multi-byte UTF-8 characters in the browser [#281366]({{kib-pull}}281366).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.5.3 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.5.3 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix the date range picker rejecting {{es}} date math that combines rounding with a further offset, such as `now/y+3M`. Chained expressions stay as shorthand instead of converting to absolute dates [#287010]({{kib-pull}}287010).
+* Fix audit log records omitting the client IP address for requests made over HTTP/2 [#285344]({{kib-pull}}285344).
+* Fix PKI authentication sessions being invalidated when in-flight HTTP/2 requests are cancelled, which logged you out. This affects deployments with `server.protocol: http2`, the default in 9.0.0 when TLS is enabled [#285153]({{kib-pull}}285153).
+* Fix {{kib}} failing to start when the file-based audit log appender cannot write. {{kib}} reports a degraded state instead [#282347]({{kib-pull}}282347).
+
+**Machine learning and {{infer}}**:
+* Fix hung LLM response streams blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
+* Fix chat {{infer}} requests using a non-default connector when `genAiSettings:defaultAIConnectorOnly` is enabled [#288107]({{kib-pull}}288107).
+
+**Workflows**:
+* Fix generated workflow edits stripping YAML comments and formatting [#288075]({{kib-pull}}288075).
+* Fix single-step workflow runs dropping `variables` from the historical context override [#287347]({{kib-pull}}287347).
+* Fix the **Filter executions** dropdown showing the same **Waiting** label for waiting-for-input and waiting-for-child statuses. The dropdown now uses **Waiting**, **Waiting for input**, and **Waiting for child workflow** [#285345]({{kib-pull}}285345).
+% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-09-02). Re-verify against a later 9.5.x BC before publishing.
+% * Fix workflow custom steps failing with HTTP 404 when Kibana is configured with a base path [#283101]({{kib-pull}}283101).
+% * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
+% * Fix the execution highlight in the workflow graph view for branching steps such as `if`, `switch`, and `parallel` [#281696]({{kib-pull}}281696).
+% * Fix overlapping nodes in the workflow graph layout for branching scenarios [#281304]({{kib-pull}}281304).
+
 ## 9.5.2 [kibana-9.5.2-release-notes]
 
 ### Features and enhancements [kibana-9.5.2-features-enhancements]
@@ -32,8 +136,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a public API to create, update, and delete case templates (`POST`, `PUT`, and `DELETE /api/cases/templates`), including a dry-run mode that validates a template without saving it [#280144]({{kib-pull}}280144).
 * Improve the Cases view, cases list, and field library by keeping the case details panel in view as you scroll, saving status and other fields immediately when changed, and adding drag-and-drop field reordering to the field library [#282197]({{kib-pull}}282197).
 * Add an Agent Builder tool to attach saved dashboards, maps, Discover sessions, and Lens visualizations to a case [#279680]({{kib-pull}}279680).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (not yet on the 9.5 branch as of 2026-08-19). Re-verify against the next BC before publishing.
-% * Warn in the field library and template editors when a required case field has no default value, because automated case creation can't fill it in, and show a field's name and type as permanent as soon as you create it [#285453]({{kib-pull}}285453).
 
 **Dashboards and Visualizations**:
 * Restore **Defer loading panels below "the fold"** (`labs:dashboard:deferBelowFold`) so off-screen dashboard panels wait to fetch data until they scroll into view. The setting is off by default [#284004]({{kib-pull}}284004).
@@ -64,8 +166,6 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix agent custom instructions failing to save because the full edit payload was sent, which broke access control entries [#277176]({{kib-pull}}277176).
 * Fix visualizations generated from a specified index silently returning an empty chart when the query read from a different source. Agent Builder now retries once and then reports an error [#282212]({{kib-pull}}282212).
 * Fix the custom answer text field losing focus after you select its radio button when an agent asks a clarifying question [#283326]({{kib-pull}}283326).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Keep answers to clarifying questions in the research agent's context when a later question is asked in the same round [#284800]({{kib-pull}}284800).
 
 **Alerting and cases**:
 * Fix Cases free-text search failing when a case's extended fields produced too many runtime-field values [#284475]({{kib-pull}}284475).
@@ -79,19 +179,12 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix global case field defaults not being applied to cases created through the API or workflow steps, and prevent the field-migration backfill from overwriting values you've already set or cleared [#283185]({{kib-pull}}283185).
 * Fix the case details **Associated Users** and **Associated Hosts** counts omitting directly attached user and host entities [#283036]({{kib-pull}}283036).
 * Fix the Alerting V2 update API rejecting a valid change of a signal rule's query format to `composed` [#283754]({{kib-pull}}283754).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff, or not yet on the 9.5 branch). Re-verify against the next BC before publishing.
-% * Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
-% * Fix cases created from v2 templates by a system action not inheriting the template's external connector, sync and observables settings, and assignees [#284854]({{kib-pull}}284854).
-% * Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
-% * Fix legacy custom fields and their v2 field-definition counterparts falling out of sync, by linking each legacy field to its definition and keeping both representations equal on every write [#282772]({{kib-pull}}282772).
 
 **Dashboards and Visualizations**:
 * Fix Lens metric trendline breakdown ordering to rank by the trendline's own metric instead of falling back to alphabetical order [#283159]({{kib-pull}}283159).
 * Fix histogram granularity to preserve the saved bar count instead of resetting to **Auto** above 7 bars. The effective ceiling remains the `histogram:maxBars` advanced setting [#283058]({{kib-pull}}283058).
 * Fix duration format to preserve decimal and compact settings on round-trip, except when using the automatic (`auto-approximate`) duration format [#282815]({{kib-pull}}282815).
 * Fix the dashboards list endpoint not sorting by last updated date in descending order when no search query is set [#282363]({{kib-pull}}282363).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (not yet on the 9.5 branch). Re-verify against the next BC before publishing.
-% * Fix by-reference Lens panels disappearing from dashboards when the panel's `savedObjectRef` reference is missing [#285476]({{kib-pull}}285476).
 
 **Data ingestion and {{fleet}}**:
 * Fix deleting a package policy from an agent policy with many agents blocking on a full synchronous redeploy instead of deploying asynchronously [#282580]({{kib-pull}}282580).
@@ -100,14 +193,9 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix the managed integration enrollment flyout failing to detect enrolled agents assigned to version-specific policies [#283434]({{kib-pull}}283434).
 * Fix expired Fleet enrollment tokens still showing as **Active**, and add an **Expired** status to the enrollment tokens list [#284280]({{kib-pull}}284280).
 * Fix disabling namespace index templates for a package policy with a custom ILM policy failing with an ILM update error [#284818]({{kib-pull}}284818).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix package policy inputs for newer agent versions not being backfilled after a {{kib}} minor upgrade [#284710]({{kib-pull}}284710).
-% * Avoid querying Elasticsearch for integration sync when no cross-cluster replication follower index exists [#285526]({{kib-pull}}285526).
 
 **Developer tools**:
 * Fix Dev Tools Console showing autocomplete suggestions inside non-query triple-quoted strings [#282424]({{kib-pull}}282424).
-% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
-% * Fix Dev Tools Console autocomplete not triggering at request-body completion positions, and fix template expansion and text corruption when accepting a suggestion mid-string [#284530]({{kib-pull}}284530).
 
 **Discover**:
 * Fix formatted numbers showing a sign when the rounded value is zero [#282919]({{kib-pull}}282919).
@@ -138,10 +226,6 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 **Alerting and cases**:
 * Add limits on case templates and fields (200 templates and 200 fields per owner, and size limits on template and field definitions) to keep large template libraries performant, and clean up the field library editor [#281650]({{kib-pull}}281650).
 * Store assignee usernames, full names, and email addresses on cases so case analytics dashboards can show assignee details without an extra lookup. Available by default in traditional deployments [#281579]({{kib-pull}}281579).
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Add a public API to create, update, and delete case templates (`POST`, `PUT`, and `DELETE /api/cases/templates`), including a dry-run mode that validates a template without saving it [#280144]({{kib-pull}}280144).
-% * Improve the case view, cases list, and field library with a sticky attributes panel, collapsible activity and attachment sections, and clearer cases list filters [#282197]({{kib-pull}}282197).
-
 
 **Data management**:
 * Add an **Import from another stream** flow in the Data lifecycle tab to reuse another stream's lifecycle configuration [#275948]({{kib-pull}}275948).
@@ -153,19 +237,9 @@ For the {{product.observability}} 9.5.1 release information, refer to [{{product
 **{{elastic-sec}} solution**:
 For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-% **{{es}} solution**:
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Add a toggle to the **Manage region preferences** modal so you can remove a custom region policy and revert to allowing all regions [#282769]({{kib-pull}}282769).
-
-% **Workflows**:
-% Excluded from 9.5.2 as well: #280381 is labeled `release_note:skip` (feature-flagged workflow-step surface).
-% * Add a `cases.setExtendedFields` workflow step to bulk-update case fields, and support case templates stored as `cases-template` saved objects in the `cases.createCaseFromTemplate` step [#280381]({{kib-pull}}280381).
-
 ### Fixes [kibana-9.5.1-fixes]
 
 **Elastic Agent Builder**:
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Fix missing screen reader announcements when toggling the **Show active only** filter on the agent tools page [#282276]({{kib-pull}}282276).
 * Fix Agent Builder retrying indefinitely on repeated empty responses from Anthropic models, which could exhaust the conversation before surfacing an error [#281616]({{kib-pull}}281616).
 * Fix Anthropic chat completion requests unexpectedly setting `temperature: 0` when no temperature was configured, which could cause errors for Agent Builder and Attack Discovery [#281179]({{kib-pull}}281179).
 * Fix the attachment input pill border color in Agent Builder chat [#282279]({{kib-pull}}282279).
@@ -190,8 +264,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix Metric chart values colored by a value outside the configured range to use the default text color instead of blending into the background [#280816]({{kib-pull}}280816).
 * Disable **Fast mode** for Basic and Platinum licenses; approximate results in Discover and Dashboards require an Enterprise license [#279903]({{kib-pull}}279903).
 * Fix the dashboards listing page failing to load when the `savedObjects:listingLimit` advanced setting exceeds 1,000 [#282100]({{kib-pull}}282100).
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005 (manual backport landed later).
-% * Sort the dashboards list endpoint response by last updated date, descending, when no search query is set [#282363]({{kib-pull}}282363).
 
 **Data ingestion and {{fleet}}**:
 * Increase the maximum number of hosts allowed on Elasticsearch, remote Elasticsearch, Logstash, and Kafka outputs from 10 to 100 [#282397]({{kib-pull}}282397).
@@ -204,8 +276,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix Fleet Server detection to recognize agents assigned to version-specific Fleet Server policies, which could leave the onboarding screen showing indefinitely [#281092]({{kib-pull}}281092).
 * Fix Fleet secrets being stored inline instead of in the secrets index when package policies are created in bulk [#282213]({{kib-pull}}282213).
 * Fix the agent policy download endpoint returning an HTTP 500 error for policies that reuse the same permissions object in more than one place [#280669]({{kib-pull}}280669).
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Fix deleting a package policy from an agent policy with many agents blocking on a full synchronous redeploy instead of deploying asynchronously [#282580]({{kib-pull}}282580).
 
 **Data management**:
 * Fix ILM Explain data not returning results for hidden and system indices in Index Management [#282137]({{kib-pull}}282137).
@@ -213,8 +283,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 **Discover**:
 * Fix the Short Dots transform dropping single-character path segments, for example rendering `a.b.c` as `a.c` [#281930]({{kib-pull}}281930).
 * Align the null-value label for server-side date fields with the client so CSV exports and the UI both show `(null)` [#281367]({{kib-pull}}281367).
-% !!DEFERRED!! Not yet backported to the 9.5 branch (no commit on 9.5). Re-verify against a later 9.5.x BC before publishing.
-% * Fix the Base64 Decode transform failing to decode on the server and mangling multi-byte UTF-8 characters in the browser [#281366]({{kib-pull}}281366).
 * Fix the Date Nanos formatter ignoring the configured date format for numeric values, such as aggregation results [#281343]({{kib-pull}}281343).
 * Fix Geo point degrees-minutes-seconds output rounding near-zero coordinates up to a full degree [#281336]({{kib-pull}}281336).
 * Fix CSV exports covering a different time window than what was shown in Discover for relative time ranges. For scheduled reports, this applies only to reports created or re-saved after upgrading; existing schedules keep their previous behavior until recreated [#278305]({{kib-pull}}278305).
@@ -236,19 +304,10 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Fix autocomplete suggesting continuation columns after `TS_INFO` and `METRICS_INFO`, which replace the table with metadata rows [#280524]({{kib-pull}}280524).
 
 **Machine learning and {{infer}}**:
-% Reverted before 9.5.1 shipped (#282883, backported as #283157); the fix re-lands as #283177, already documented in 9.5.2.
-% * Fix prompts containing special tokens such as `<|endoftext|>` causing the Kibana AI Agent to error or crash [#281546]({{kib-pull}}281546).
 * Strengthen trained model ID checks so the infer, update, and stop APIs can't be used to access a different model's deployment [#280511]({{kib-pull}}280511).
 
 **Workflows**:
 * Fix custom workflow steps, including `security.enableRule` and `security.disableRule`, calling Kibana APIs in the default space instead of the workflow's own space [#280986]({{kib-pull}}280986).
-% Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array [#283360]({{kib-pull}}283360).
-% !!DEFERRED!! Not yet backported to the 9.5 branch (no commit on 9.5). Re-verify against a later 9.5.x BC before publishing.
-% * Fix workflow custom steps failing with HTTP 404 when Kibana is configured with a base path [#283101]({{kib-pull}}283101).
-% * Fix a crash when opening the trigger tab in workflow step execution details [#282920]({{kib-pull}}282920).
-% * Fix the execution highlight in the workflow graph view for branching steps such as `if`, `switch`, and `parallel` [#281696]({{kib-pull}}281696).
-% * Fix overlapping nodes in the workflow graph layout for branching scenarios [#281304]({{kib-pull}}281304).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
@@ -736,9 +795,9 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 
 ## 9.4.6 [kibana-9.4.6-release-notes]
 
-% ::::{NOTE}
-% ::::
-
+::::{important} 
+The 9.4.6 release contains fixes for potential security vulnerabilities. For details, go to [security announcements](https://discuss.elastic.co/c/announcements/security-announcements/31).
+::::
 
 ### Features and enhancements [kibana-9.4.6-features-enhancements]
 
@@ -759,13 +818,9 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Anthropic {{infer}} endpoint requests sending `temperature: 0` when no temperature was configured, causing unexpected model behavior in Agent Builder [#281179]({{kib-pull}}281179).
 
 **Alerting**:
-% !!DEFERRED!! #287643 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
-% * Fix alerts-as-data resource installation concurrency deadlock that caused excessive peak heap usage [#287643]({{kib-pull}}287643).
 * Fix alert suppression creating duplicate alerts when stored alerts use nested `_source` fields instead of flat dot-notation keys [#282192]({{kib-pull}}282192).
 
 **Dashboards and Visualizations**:
-% !!DEFERRED!! #287441 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
-% * Fix the timeslider close button responding only when clicked on the top quarter of the button area [#287441]({{kib-pull}}287441).
 * Fix by-reference Lens panels being removed from dashboards when their saved object references are missing [#285476]({{kib-pull}}285476).
 
 **Data ingestion and {{fleet}}**:
@@ -773,8 +828,6 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Remove the proxy configuration option from Kafka outputs, which don't support it [#282313]({{kib-pull}}282313).
 
 **Developer tools**:
-% !!DEFERRED!! #286703 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
-% * Fix Dev Tools Console autocomplete not prioritizing explicit field rules when a same-name global rule also exists [#286703]({{kib-pull}}286703).
 * Fix duplicate Cut, Copy, and Paste entries appearing in the Console context menu [#286704]({{kib-pull}}286704).
 * Fix Console autocomplete inserting boolean and numeric values as quoted strings instead of JSON primitives [#286699]({{kib-pull}}286699).
 * Fix Console body autocomplete failing after closed triple-quoted string values [#286695]({{kib-pull}}286695).
@@ -794,8 +847,6 @@ For the {{product.observability}} 9.4.6 release information, refer to [{{product
 For the {{elastic-sec}} 9.4.6 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **{{kib}} platform**:
-% !!DEFERRED!! #285344 not yet confirmed in build candidate 9.4.6-31343951 (backport merged after BC cutoff).
-% * Fix {{kib}} using the wrong socket for HTTP/2 requests, causing audit log records to omit the client IP address [#285344]({{kib-pull}}285344).
 * Fix PKI authentication sessions being unexpectedly invalidated when in-flight HTTP/2 requests are canceled, logging users out on TLS-enabled deployments [#285153]({{kib-pull}}285153).
 * Fix the **Roles** management page allowing navigation without warning when there are unsaved changes [#283525]({{kib-pull}}283525).
 * Fix {{kib}} failing to start when the audit log file location is misconfigured, and instead report a degraded state [#282347]({{kib-pull}}282347).
@@ -861,10 +912,6 @@ For the Elastic Security 9.4.5 release information, refer to [Elastic Security S
 * Fix the checkbox for applying an annotation to a single series not resetting when you edit an existing annotation [#279875]({{kib-pull}}279875).
 * Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
 * Fix the anomaly detection, data frame analytics, and trained model saved object APIs denying access to users who hold only a subset of the required privileges [#276936]({{kib-pull}}276936).
-
-% !!DEFERRED!! Workflows section has no confirmed entries yet: #283360 not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff). Restore the "**Workflows**:" header when an entry is confirmed.
-% **Workflows**:
-% * Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array, deferring the check to runtime [#283360]({{kib-pull}}283360).
 
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
