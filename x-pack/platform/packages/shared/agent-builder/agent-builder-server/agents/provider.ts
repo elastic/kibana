@@ -56,6 +56,11 @@ import type { AiIndexResolver } from './ai_index_resolver';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<{ changedFields: string[] }>;
 }
 
 export type AgentHandlerFn = (
