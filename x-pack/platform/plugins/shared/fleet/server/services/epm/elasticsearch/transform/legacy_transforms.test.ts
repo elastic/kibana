@@ -345,9 +345,7 @@ describe('test transform install with legacy schema', () => {
       savedObjectsClient.update.mock.calls[savedObjectsClient.update.mock.calls.length - 1];
     expect(
       (lastUpdateCall[2] as { installed_es: Array<{ id: string; type: string }> }).installed_es
-    ).toEqual([
-      { id: transformId, type: ElasticsearchAssetType.transform },
-    ]);
+    ).toEqual([{ id: transformId, type: ElasticsearchAssetType.transform }]);
   });
 
   test('can install new version and when no older version', async () => {
