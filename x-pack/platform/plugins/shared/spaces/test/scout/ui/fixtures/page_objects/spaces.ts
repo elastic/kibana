@@ -75,7 +75,21 @@ export class SpacesPage {
   }
 
   async getCurrentSpaceTitle() {
-    return (await this.spacesSelectorLocator().getAttribute('title'))?.trim() ?? null;
+    const contextTrigger = this.page.testSubj.locator('contextSwitcherTriggerButton');
+    const classicTrigger = this.page.testSubj.locator('spacesNavSelector');
+    await contextTrigger.or(classicTrigger).waitFor({ state: 'visible' });
+
+    if (await contextTrigger.isVisible()) {
+      const text = (await contextTrigger.innerText()).trim();
+      if (!text) return null;
+
+      const separator = ': ';
+      const separatorIndex = text.lastIndexOf(separator);
+      return separatorIndex === -1 ? text : text.slice(separatorIndex + separator.length);
+    }
+
+    // Classic nav exposes the space name only via `title`.
+    return (await classicTrigger.getAttribute('title'))?.trim() ?? null;
   }
 
   getCurrentUrl() {
