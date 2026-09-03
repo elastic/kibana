@@ -95,6 +95,8 @@ describe('ConversationClient', () => {
     hasReadBy = true,
     schemaVersion,
     events,
+    space = testSpace,
+    hasSpace = true,
   }: {
     id?: string;
     agentId?: string;
@@ -114,6 +116,8 @@ describe('ConversationClient', () => {
     hasReadBy?: boolean;
     schemaVersion?: number;
     events?: TimelineEvent[];
+    space?: string;
+    hasSpace?: boolean;
   } = {}): Document =>
     ({
       _id: id,
@@ -122,7 +126,7 @@ describe('ConversationClient', () => {
         agent_id: agentId,
         user_id: userId,
         user_name: username,
-        space: testSpace,
+        ...(hasSpace ? { space } : {}),
         title,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -622,6 +626,55 @@ describe('ConversationClient', () => {
       mockRawEsClient.get.mockRejectedValue(error);
 
       await expect(client.exists('conversation-1')).rejects.toBe(error);
+    });
+  });
+
+  // Reads-by-id go through `esClient.get` (no space filter), so cross-space isolation is enforced
+  // in application code inside `getDocument`. These tests lock in that guarantee, which used to
+  // come for free from the DSL `createSpaceDslFilter`.
+  describe('space isolation for reads-by-id', () => {
+    const createClientInSpace = (space: string) =>
+      createClient({
+        space,
+        logger: loggerMock.create(),
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+      });
+
+    it('treats a doc from a different space as not-found for a non-default-space client', async () => {
+      const otherSpaceClient = createClientInSpace('team-a');
+      mockGetDocumentResponse(createConversationDocument({ space: 'team-b' }));
+
+      await expect(otherSpaceClient.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(otherSpaceClient.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('treats a doc without a space field as not-found for a non-default-space client', async () => {
+      const otherSpaceClient = createClientInSpace('team-a');
+      mockGetDocumentResponse(createConversationDocument({ hasSpace: false }));
+
+      await expect(otherSpaceClient.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(otherSpaceClient.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('treats a doc from a non-default space as not-found for a default-space client', async () => {
+      mockGetDocumentResponse(createConversationDocument({ space: 'team-a' }));
+
+      await expect(client.get('conversation-1')).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+      await expect(client.exists('conversation-1')).resolves.toBe(false);
+    });
+
+    it('accepts a doc without a space field for a default-space client (legacy pre-space docs)', async () => {
+      mockGetDocumentResponse(createConversationDocument({ hasSpace: false }));
+
+      await expect(client.exists('conversation-1')).resolves.toBe(true);
     });
   });
 
