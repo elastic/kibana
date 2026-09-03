@@ -735,8 +735,8 @@ describe('JiraConnector', () => {
   });
 
   describe('deleteIssue action', () => {
-    it('has isTool: false to prevent agent exposure', () => {
-      expect(JiraConnector.actions.deleteIssue.isTool).toBe(false);
+    it('has isTool: true (agent-accessible with HITL recommended)', () => {
+      expect(JiraConnector.actions.deleteIssue.isTool).toBe(true);
     });
 
     it('deletes the issue and returns { deleted: true, issueId }', async () => {
