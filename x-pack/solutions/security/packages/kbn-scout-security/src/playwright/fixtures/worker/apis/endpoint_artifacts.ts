@@ -61,12 +61,14 @@ export const getEndpointArtifactsApiService = ({
   return {
     createList: async ({ listId, type, name }) => {
       await measurePerformanceAsync(log, 'security.endpointArtifacts.createList', async () => {
+        // Agnostic lists persist across spaces. A leftover list + items would
+        // make create look successful (409) and poison `toHaveCount(1)`.
+        await deleteList(listId);
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}${EXCEPTION_LIST_URL}`,
           headers: PUBLIC_API_HEADERS,
           retries: 0,
-          ignoreErrors: [409],
           body: {
             name: name ?? listId,
             description: 'Scout endpoint artifact list',

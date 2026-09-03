@@ -21,6 +21,9 @@ export const TRUSTED_APP_HASH = 'a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301
  * `public/management/cypress/fixtures/artifacts_page.ts` is a live fork used
  * by `artifacts.cy.ts`. If you change a criteriaConditions string here, update
  * the other.
+ *
+ * Event Filters / Endpoint Exceptions autocomplete fields (`@timestamp`,
+ * `agent.version`, `process.name`) are seeded in `seed_endpoint_field_caps.ts`.
  */
 export interface ArtifactTabCase {
   kind: PolicyArtifactKind;

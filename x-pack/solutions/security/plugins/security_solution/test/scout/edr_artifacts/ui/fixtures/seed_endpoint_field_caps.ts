@@ -12,9 +12,15 @@ import type { EsClient, ScoutLogger } from '@kbn/scout-security';
  * and Endpoint Exceptions field autocomplete reads field caps from these
  * patterns (`logs-endpoint.events.*`, `logs-endpoint.alerts-*`). Cypress
  * populated them via `indexEndpointHosts`; this suite does not enroll hosts.
+ *
+ * Seeded fields must stay in sync with `artifact_tabs_test_data.ts` and
+ * `policy_artifacts.ts` form fills: `@timestamp` (Event Filters create),
+ * `agent.version` (Endpoint Exceptions create), `process.name` (API-created
+ * Event Filters / Endpoint Exceptions items).
  */
 const ENDPOINT_EVENTS_INDEX = 'logs-endpoint.events.process-default';
 const ENDPOINT_ALERTS_INDEX = 'logs-endpoint.alerts-default';
+const FIELD_CAPS_DOC_ID = 'scout-edr-artifacts-field-caps-seed';
 
 const FIELD_CAPS_DOC = {
   '@timestamp': new Date().toISOString(),
@@ -34,6 +40,14 @@ export const seedEndpointFieldCapsDocs = async (
   });
 };
 
+export const deleteEndpointFieldCapsDocs = async (
+  esClient: EsClient,
+  log: ScoutLogger
+): Promise<void> => {
+  await deleteFieldCapsDoc(esClient, log, ENDPOINT_EVENTS_INDEX);
+  await deleteFieldCapsDoc(esClient, log, ENDPOINT_ALERTS_INDEX);
+};
+
 const indexFieldCapsDoc = async (
   esClient: EsClient,
   log: ScoutLogger,
@@ -43,8 +57,17 @@ const indexFieldCapsDoc = async (
   log.debug(`[setup] seeding field-caps document into ${index}`);
   await esClient.index({
     index,
+    id: FIELD_CAPS_DOC_ID,
     document,
     refresh: 'wait_for',
-    op_type: 'create',
   });
+};
+
+const deleteFieldCapsDoc = async (
+  esClient: EsClient,
+  log: ScoutLogger,
+  index: string
+): Promise<void> => {
+  log.debug(`[teardown] deleting field-caps document from ${index}`);
+  await esClient.delete({ index, id: FIELD_CAPS_DOC_ID, refresh: 'wait_for' }, { ignore: [404] });
 };

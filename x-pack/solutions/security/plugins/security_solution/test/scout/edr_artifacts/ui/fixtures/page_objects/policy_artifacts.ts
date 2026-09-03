@@ -216,10 +216,12 @@ export class PolicyArtifactsPage {
     await this.page.testSubj
       .locator('trustedDevices-form-descriptionField')
       .fill('This is the trusted device description');
-    await this.page.testSubj.locator('trustedDevices-form-osSelectField').click();
-    await this.page.getByRole('option', { name: 'Windows and Mac', exact: true }).click();
-    await this.page.testSubj.locator('trustedDevices-form-entry0fieldSelect').click();
-    await this.page.getByRole('option', { name: 'Host', exact: true }).click();
+    // OS is an EuiComboBox; field is an EuiSuperSelect. Both render options in
+    // a body portal, so page-wide `getByRole('option')` can hit the wrong list.
+    await this.fillComboBox('trustedDevices-form-osSelectField', 'Windows and Mac');
+    await this.page.components
+      .superSelect('trustedDevices-form-entry0fieldSelect')
+      .selectOptionByLabel('Host');
     await this.fillComboBox('trustedDevices-form-entry0valueField', 'test-host', true);
   }
 

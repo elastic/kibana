@@ -15,7 +15,12 @@ export const ARTIFACT_TAB_POLICY_DETAILS_TAGS = [
   ...tags.serverless.security.complete,
 ];
 
-/** Local only — the endpoint-exceptions opt-in writes an agnostic SO with no revert. */
+/**
+ * Local only. New deployments auto-opt-in (`reason: 'newDeployment'`). Cypress
+ * resets via a system-index DELETE of the reference-data doc, which is not
+ * MKI-safe, and the opt-in POST is an internal route. Keep EE off cloud/MKI
+ * until there is a supported revert.
+ */
 export const ARTIFACT_TAB_POLICY_DETAILS_LOCAL_TAGS = ARTIFACT_TAB_POLICY_DETAILS_TAGS.filter(
   (tag) => tag.startsWith('@local-')
 );
@@ -37,7 +42,7 @@ export const describeArtifactTabPolicyDetails = (
     { tag: options?.tag ?? ARTIFACT_TAB_POLICY_DETAILS_TAGS },
     () => {
       spaceTest.beforeAll(async ({ apiServices }) => {
-        // Persistent agnostic SO; only this file needs it. Keep it off MKI via local tags.
+        // Agnostic opt-in SO. This file is the only consumer; local tags keep it off MKI.
         if (artifact.kind === 'endpointExceptions') {
           await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
         }
@@ -199,10 +204,9 @@ export const describeArtifactTabPolicyDetails = (
             await pageObjects.policyArtifactsPage.openAssignFromUnassigned();
             await expect(pageObjects.policyArtifactsPage.assignConfirmButton).toBeDisabled();
             await pageObjects.policyArtifactsPage.assignArtifact(artifact.artifactName);
-            // Each artifact type uses a different toast sentence; they all include this.
-            await expect(
-              page.getByText(new RegExp(`"${artifact.artifactName}".*has been added`))
-            ).toBeVisible();
+            // Each type uses a different sentence; the quoted name is shared.
+            // Scope to the toast list so this cannot match the assigned card.
+            await pageObjects.toasts.waitForToastWithText(`"${artifact.artifactName}"`);
             await pageObjects.policyArtifactsPage.waitForAssignedList();
             await expect(pageObjects.policyArtifactsPage.artifactCard).toHaveCount(1);
           });
@@ -211,7 +215,7 @@ export const describeArtifactTabPolicyDetails = (
 
       spaceTest(
         `ALL user can assign and remove artifacts from the policy`,
-        async ({ browserAuth, page, pageObjects, apiServices, endpointPolicy }) => {
+        async ({ browserAuth, pageObjects, apiServices, endpointPolicy }) => {
           await apiServices.endpointArtifacts.createList({
             listId: artifact.listId,
             type: artifact.listType,
@@ -240,7 +244,7 @@ export const describeArtifactTabPolicyDetails = (
 
           await spaceTest.step('remove the artifact from the policy', async () => {
             await pageObjects.policyArtifactsPage.removeAssignedArtifactFromPolicy();
-            await expect(page.getByText('Successfully removed')).toBeVisible();
+            await pageObjects.toasts.waitForToastWithText('Successfully removed');
           });
         }
       );

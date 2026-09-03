@@ -1,5 +1,5 @@
 {
-  "sha1": "f2b72544b09042db16427d933b9501c18753d32e",
+  "sha1": "0076aaae48a761334ae99e1b01a3e0dd9224cda1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,24 +16,8 @@
       }
     },
     {
-      "id": "284eb0f2fe043d6-71fe168818583e6",
-      "title": "Artifact tabs in Policy Details page — Blocklist Blocklist tab is hidden when the user has no artifact privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
-        "column": 9
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-2153bfe834969ee",
-      "title": "Artifact tabs in Policy Details page — Blocklist Blocklist READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-cc3e31c71eaa62c",
+      "title": "Artifact tabs in Policy Details page — Blocklist Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -44,74 +28,76 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
-        "column": 27
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-c3407f2a55fac62",
-      "title": "Artifact tabs in Policy Details page — Blocklist Blocklist ALL user can add an artifact from an empty tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
-        "column": 17
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-dbb06baa3bf76c4",
-      "title": "Artifact tabs in Policy Details page — Blocklist Blocklist ALL user can manage and assign unassigned artifacts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
-        "column": 42
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-46b1710768ffb94",
-      "title": "Artifact tabs in Policy Details page — Blocklist Blocklist ALL user can assign and remove artifacts from the policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-8ee511b78cfa012",
-      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Endpoint exceptions tab is hidden when the user has no artifact privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@local-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
         "column": 9
       }
     },
     {
-      "id": "284eb0f2fe043d6-9133f0f3a62e4f7",
-      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Endpoint exceptions READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-410c4f1c48cbb6d",
+      "title": "Artifact tabs in Policy Details page — Blocklist READ user can view artifacts but cannot add, assign, or remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 53,
+        "column": 27
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-e441b771da69183",
+      "title": "Artifact tabs in Policy Details page — Blocklist ALL user can add an artifact from an empty tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 116,
+        "column": 17
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-b1beb508bfe0b63",
+      "title": "Artifact tabs in Policy Details page — Blocklist ALL user can manage and assign unassigned artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 144,
+        "column": 42
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-73acdecce07c04a",
+      "title": "Artifact tabs in Policy Details page — Blocklist ALL user can assign and remove artifacts from the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 181,
+        "column": 29
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-c7099999330dc71",
+      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -120,12 +106,12 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
-        "column": 27
+        "column": 9
       }
     },
     {
-      "id": "284eb0f2fe043d6-5cbbb947c87b192",
-      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Endpoint exceptions ALL user can add an artifact from an empty tab",
+      "id": "284eb0f2fe043d6-ed88f91a1ff21c7",
+      "title": "Artifact tabs in Policy Details page — Endpoint exceptions READ user can view artifacts but cannot add, assign, or remove",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -133,13 +119,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
-        "column": 17
+        "line": 53,
+        "column": 27
       }
     },
     {
-      "id": "284eb0f2fe043d6-3428dc6b8056343",
-      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Endpoint exceptions ALL user can manage and assign unassigned artifacts",
+      "id": "284eb0f2fe043d6-991a959e2e3b230",
+      "title": "Artifact tabs in Policy Details page — Endpoint exceptions ALL user can add an artifact from an empty tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -147,13 +133,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
-        "column": 42
+        "line": 116,
+        "column": 17
       }
     },
     {
-      "id": "284eb0f2fe043d6-8b4cd7e1586f4ec",
-      "title": "Artifact tabs in Policy Details page — Endpoint exceptions Endpoint exceptions ALL user can assign and remove artifacts from the policy",
+      "id": "284eb0f2fe043d6-13b4fff9220ee2d",
+      "title": "Artifact tabs in Policy Details page — Endpoint exceptions ALL user can manage and assign unassigned artifacts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -161,29 +147,27 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
+        "line": 144,
+        "column": 42
       }
     },
     {
-      "id": "284eb0f2fe043d6-b059ec9aa451cfa",
-      "title": "Artifact tabs in Policy Details page — Event Filters Event Filters tab is hidden when the user has no artifact privilege",
+      "id": "284eb0f2fe043d6-00754629599ce01",
+      "title": "Artifact tabs in Policy Details page — Endpoint exceptions ALL user can assign and remove artifacts from the policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
-        "column": 9
+        "line": 181,
+        "column": 29
       }
     },
     {
-      "id": "284eb0f2fe043d6-d6d4f2ecc794196",
-      "title": "Artifact tabs in Policy Details page — Event Filters Event Filters READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-a3f8a76454539b6",
+      "title": "Artifact tabs in Policy Details page — Event Filters Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -194,76 +178,76 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
-        "column": 27
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-fcd571b2f49f299",
-      "title": "Artifact tabs in Policy Details page — Event Filters Event Filters ALL user can add an artifact from an empty tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
-        "column": 17
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-309de17e0e0f481",
-      "title": "Artifact tabs in Policy Details page — Event Filters Event Filters ALL user can manage and assign unassigned artifacts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
-        "column": 42
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-995ea9c433f38c5",
-      "title": "Artifact tabs in Policy Details page — Event Filters Event Filters ALL user can assign and remove artifacts from the policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-64359bf8602e9b9",
-      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Host isolation exceptions tab is hidden when the user has no artifact privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
         "column": 9
       }
     },
     {
-      "id": "284eb0f2fe043d6-51bfa3bc6fb6608",
-      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Host isolation exceptions READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-b73616217ed2e9c",
+      "title": "Artifact tabs in Policy Details page — Event Filters READ user can view artifacts but cannot add, assign, or remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 53,
+        "column": 27
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-4c2ddeac4c147d0",
+      "title": "Artifact tabs in Policy Details page — Event Filters ALL user can add an artifact from an empty tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 116,
+        "column": 17
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-15447b04b778b22",
+      "title": "Artifact tabs in Policy Details page — Event Filters ALL user can manage and assign unassigned artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 144,
+        "column": 42
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-9f32df4f29681c4",
+      "title": "Artifact tabs in Policy Details page — Event Filters ALL user can assign and remove artifacts from the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 181,
+        "column": 29
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-6365d0af05160da",
+      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -274,76 +258,76 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
-        "column": 27
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-bdc0682223d7055",
-      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Host isolation exceptions ALL user can add an artifact from an empty tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
-        "column": 17
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-25c8673bdbc5ba1",
-      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Host isolation exceptions ALL user can manage and assign unassigned artifacts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
-        "column": 42
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-bd3602410910d95",
-      "title": "Artifact tabs in Policy Details page — Host isolation exceptions Host isolation exceptions ALL user can assign and remove artifacts from the policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-f84d72976bff620",
-      "title": "Artifact tabs in Policy Details page — Trusted applications Trusted applications tab is hidden when the user has no artifact privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
         "column": 9
       }
     },
     {
-      "id": "284eb0f2fe043d6-9922b38f35d0e88",
-      "title": "Artifact tabs in Policy Details page — Trusted applications Trusted applications READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-53f0c6c784e56ac",
+      "title": "Artifact tabs in Policy Details page — Host isolation exceptions READ user can view artifacts but cannot add, assign, or remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 53,
+        "column": 27
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-2a566f327693807",
+      "title": "Artifact tabs in Policy Details page — Host isolation exceptions ALL user can add an artifact from an empty tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 116,
+        "column": 17
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-455a1a119136ad5",
+      "title": "Artifact tabs in Policy Details page — Host isolation exceptions ALL user can manage and assign unassigned artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 144,
+        "column": 42
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-a57be80263997ab",
+      "title": "Artifact tabs in Policy Details page — Host isolation exceptions ALL user can assign and remove artifacts from the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 181,
+        "column": 29
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-b83cb8fa19086a3",
+      "title": "Artifact tabs in Policy Details page — Trusted applications Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -354,76 +338,76 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
-        "column": 27
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-6881e514bedc7f6",
-      "title": "Artifact tabs in Policy Details page — Trusted applications Trusted applications ALL user can add an artifact from an empty tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
-        "column": 17
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-18cc7464d1423d4",
-      "title": "Artifact tabs in Policy Details page — Trusted applications Trusted applications ALL user can manage and assign unassigned artifacts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
-        "column": 42
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-bcea3c0013f59da",
-      "title": "Artifact tabs in Policy Details page — Trusted applications Trusted applications ALL user can assign and remove artifacts from the policy",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
-      }
-    },
-    {
-      "id": "284eb0f2fe043d6-0a635604e10452c",
-      "title": "Artifact tabs in Policy Details page — Trusted devices Trusted devices tab is hidden when the user has no artifact privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 43,
         "column": 9
       }
     },
     {
-      "id": "284eb0f2fe043d6-5a6fb5b48d006f6",
-      "title": "Artifact tabs in Policy Details page — Trusted devices Trusted devices READ user can view artifacts but cannot add, assign, or remove",
+      "id": "284eb0f2fe043d6-d60128afbe25243",
+      "title": "Artifact tabs in Policy Details page — Trusted applications READ user can view artifacts but cannot add, assign, or remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 53,
+        "column": 27
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-571e5f1f93050ab",
+      "title": "Artifact tabs in Policy Details page — Trusted applications ALL user can add an artifact from an empty tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 116,
+        "column": 17
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-ef84c3f66f9a265",
+      "title": "Artifact tabs in Policy Details page — Trusted applications ALL user can manage and assign unassigned artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 144,
+        "column": 42
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-af7c2a05cd4a3e1",
+      "title": "Artifact tabs in Policy Details page — Trusted applications ALL user can assign and remove artifacts from the policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 181,
+        "column": 29
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-d191588dbabad0f",
+      "title": "Artifact tabs in Policy Details page — Trusted devices Tab is hidden when the user has no artifact privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -434,12 +418,28 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
         "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "284eb0f2fe043d6-a8a4ebfcaa26c90",
+      "title": "Artifact tabs in Policy Details page — Trusted devices READ user can view artifacts but cannot add, assign, or remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
+        "line": 53,
         "column": 27
       }
     },
     {
-      "id": "284eb0f2fe043d6-31004f858207c42",
-      "title": "Artifact tabs in Policy Details page — Trusted devices Trusted devices ALL user can add an artifact from an empty tab",
+      "id": "284eb0f2fe043d6-03d3688def15271",
+      "title": "Artifact tabs in Policy Details page — Trusted devices ALL user can add an artifact from an empty tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -449,13 +449,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 111,
+        "line": 116,
         "column": 17
       }
     },
     {
-      "id": "284eb0f2fe043d6-2225d8868d58264",
-      "title": "Artifact tabs in Policy Details page — Trusted devices Trusted devices ALL user can manage and assign unassigned artifacts",
+      "id": "284eb0f2fe043d6-f4b70551425ca94",
+      "title": "Artifact tabs in Policy Details page — Trusted devices ALL user can manage and assign unassigned artifacts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -465,13 +465,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 139,
+        "line": 144,
         "column": 42
       }
     },
     {
-      "id": "284eb0f2fe043d6-4fbead685ecf456",
-      "title": "Artifact tabs in Policy Details page — Trusted devices Trusted devices ALL user can assign and remove artifacts from the policy",
+      "id": "284eb0f2fe043d6-212a6babb888cc7",
+      "title": "Artifact tabs in Policy Details page — Trusted devices ALL user can assign and remove artifacts from the policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -481,13 +481,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ui/fixtures/artifact_tabs_suite.ts",
-        "line": 174,
-        "column": 48
+        "line": 181,
+        "column": 29
       }
     },
     {
-      "id": "0b7734aefce775d-e18ee14aea98c6e",
-      "title": "Delete leftover agnostic endpoint artifact lists",
+      "id": "0b7734aefce775d-e39f6d4d2f6f1e7",
+      "title": "Delete leftover agnostic endpoint artifact lists and field-caps seed docs",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
