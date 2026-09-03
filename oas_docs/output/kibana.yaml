@@ -54773,7 +54773,6 @@ paths:
                       has_seen_add_data_notice:
                         type: boolean
                       id:
-                        maxLength: 50
                         type: string
                       ilm_migration_status:
                         additionalProperties: false
@@ -54817,7 +54816,6 @@ paths:
                       ssl_secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
-                        maxLength: 50
                         nullable: true
                         type: string
                       use_space_awareness_migration_status:
@@ -54827,7 +54825,6 @@ paths:
                           - error
                         type: string
                       version:
-                        maxLength: 50
                         type: string
                 required:
                   - item
@@ -54994,7 +54991,6 @@ paths:
                       has_seen_add_data_notice:
                         type: boolean
                       id:
-                        maxLength: 50
                         type: string
                       ilm_migration_status:
                         additionalProperties: false
@@ -55038,7 +55034,6 @@ paths:
                       ssl_secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
-                        maxLength: 50
                         nullable: true
                         type: string
                       use_space_awareness_migration_status:
@@ -55048,7 +55043,6 @@ paths:
                           - error
                         type: string
                       version:
-                        maxLength: 50
                         type: string
                 required:
                   - item
@@ -101066,6 +101060,7 @@ components:
                               properties:
                                 indices:
                                   items:
+                                    maxLength: 1024
                                     type: string
                                   maxItems: 100
                                   type: array
@@ -114695,7 +114690,7 @@ components:
                 type: string
               value:
                 anyOf:
-                  - maxLength: 1000
+                  - maxLength: 10000
                     type: string
                   - type: number
             required:
@@ -123827,7 +123822,7 @@ components:
                 type: string
               value:
                 anyOf:
-                  - maxLength: 1000
+                  - maxLength: 10000
                     type: string
                   - type: number
             required:
@@ -124794,6 +124789,7 @@ components:
                               properties:
                                 indices:
                                   items:
+                                    maxLength: 1024
                                     type: string
                                   maxItems: 100
                                   type: array
