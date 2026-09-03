@@ -43,6 +43,12 @@ consts:
   # so a later sweep cannot rediagnose the same alerts into the same proposal. The
   # mark steps below spell the tag lists inline: setAlertTags validates them statically.
   reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-dismissed
+  applied_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-applied
 steps:
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
@@ -457,9 +463,7 @@ steps:
         if: "${{ steps.review_tuning.output.response.approved == false }}"
         with:
           alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - detection-watch:tuning-reviewed
-            - detection-watch:tuning-dismissed
+          tags_to_add: "${{ consts.dismissed_tags }}"
           tags_to_remove: []
         on-failure:
           continue: true
@@ -477,9 +481,7 @@ steps:
             and steps.classify_apply_failures.output.disable_failed != true }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - detection-watch:tuning-reviewed
-            - detection-watch:tuning-applied
+          tags_to_add: "${{ consts.applied_tags }}"
           tags_to_remove: []
         on-failure:
           continue: true
