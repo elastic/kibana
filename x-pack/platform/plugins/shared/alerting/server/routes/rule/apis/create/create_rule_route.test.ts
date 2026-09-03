@@ -48,6 +48,7 @@ describe('createRuleRoute', () => {
     enableFrameworkAlerts: true,
     alertsService: {
       totalFieldsLimit: 2800,
+      coordinateInstallation: true,
     },
     cancelAlertsOnRuleTimeout: true,
     ruleChangeTracking: {

@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/lock-manager",
     "@kbn/actions-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
