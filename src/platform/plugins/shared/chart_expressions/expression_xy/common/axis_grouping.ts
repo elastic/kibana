@@ -9,7 +9,6 @@
 
 import { Position } from '@elastic/charts';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { DataSeriesDescriptor } from './axis_format_policy';
 
 export const LEFT_AXIS_GROUP_ID = 'left';
 export const RIGHT_AXIS_GROUP_ID = 'right';
@@ -22,7 +21,10 @@ export interface AxisSeriesDescriptor {
   requestedGroupPosition?: Position;
 }
 
-export type GroupedAxisSeries = Record<string, DataSeriesDescriptor[]>;
+export type GroupedAxisSeries<T extends AxisSeriesDescriptor = AxisSeriesDescriptor> = Record<
+  string,
+  T[]
+>;
 
 const isFormatterCompatible = (
   first: SerializedFieldFormat,
@@ -35,11 +37,11 @@ const acceptsFormatter = (
 ): boolean =>
   series.every(({ fieldFormat }) => isFormatterCompatible(fieldFormat, currentSeries.fieldFormat));
 
-export const groupAxisSeries = (
-  descriptors: DataSeriesDescriptor[],
+export const groupAxisSeries = <T extends AxisSeriesDescriptor>(
+  descriptors: T[],
   hasTables: boolean
-): GroupedAxisSeries => {
-  const groups: GroupedAxisSeries = {
+): GroupedAxisSeries<T> => {
+  const groups: GroupedAxisSeries<T> = {
     auto: [],
     [LEFT_AXIS_GROUP_ID]: [],
     [RIGHT_AXIS_GROUP_ID]: [],
