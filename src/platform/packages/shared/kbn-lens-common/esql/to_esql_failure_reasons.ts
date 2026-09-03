@@ -23,6 +23,7 @@ export type EsqlConversionFailureReason =
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
   | 'saved_to_library_not_supported'
+  | 'query_annotations_not_supported'
   | 'trendline_not_supported'
   | 'unsupported_settings'
   | 'unknown';
@@ -80,6 +81,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
+    }
+  ),
+  query_annotations_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlQueryAnnotationsTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Query-based annotations will be supported in an upcoming update.',
     }
   ),
   trendline_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendlineTooltip', {

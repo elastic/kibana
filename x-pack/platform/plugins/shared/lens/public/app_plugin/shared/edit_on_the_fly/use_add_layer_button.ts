@@ -32,6 +32,7 @@ import {
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { generateId } from '../../../id_generator';
+import { isEsqlChart } from '../../../utils';
 
 export const getDatasourceIdForNewLayer = (
   layerType: Parameters<AddLayerFunction>[0],
@@ -143,6 +144,8 @@ export const useAddLayerButton = (
         },
         registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
         isInlineEditing: Boolean(setIsInlineFlyoutVisible),
+        // annotation library groups are data-view-based and not supported on ES|QL charts
+        hideAnnotationLibrary: isEsqlChart(framePublicAPI.datasourceLayers),
       }) ?? null
     );
   }, [
