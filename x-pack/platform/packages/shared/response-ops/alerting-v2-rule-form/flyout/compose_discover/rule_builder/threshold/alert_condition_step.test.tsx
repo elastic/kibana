@@ -815,6 +815,38 @@ describe('RuleBuilderAlertConditionStep', () => {
     });
   });
 
+  it('disables preview button when childOpen is true', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState({ childOpen: true })}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
+  });
+
+  it('enables preview button when childOpen is false', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState({ childOpen: false })}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('ruleBuilderOpenPreview')).not.toBeDisabled();
+  });
+
   describe('recovery condition sync', () => {
     const makeStateWithRecovery = (overrides: Partial<ThresholdFormValues> = {}) =>
       makeBuilderState({

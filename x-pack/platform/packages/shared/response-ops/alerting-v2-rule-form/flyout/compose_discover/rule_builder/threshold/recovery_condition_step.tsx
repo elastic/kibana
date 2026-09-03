@@ -36,7 +36,7 @@ import {
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
+export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = ({ state, dispatch }) => {
   const { state: builderState, setState: onBuilderStateChange } =
     useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<FormValues>();
@@ -81,6 +81,8 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
       recovery: { segment: generatedRecoveryBlock },
     });
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
+
+  const hasValidRecoveryBlock = Boolean(generatedRecoveryBlock);
 
   const metricOptions = useMemo(() => {
     const statLabels = builderState.stats.filter((s) => s.label.trim()).map((s) => s.label);
@@ -133,14 +135,43 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4>
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
-            defaultMessage="Recovery threshold conditions"
-          />
-        </h4>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.recoveryCondition.thresholdTitle"
+                defaultMessage="Recovery threshold conditions"
+              />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.alertingV2.composeDiscover.recoveryCondition.previewTooltip',
+              { defaultMessage: 'Preview results' }
+            )}
+          >
+            <EuiButtonIcon
+              iconType="inspect"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.recoveryCondition.previewAriaLabel',
+                { defaultMessage: 'Preview results' }
+              )}
+              isDisabled={!hasValidRecoveryBlock || state.childOpen}
+              onClick={() =>
+                dispatch({
+                  type: 'OPEN_CHILD_FOR_STEP',
+                  step: state.step,
+                  isAlert: true,
+                })
+              }
+              data-test-subj="ruleBuilderRecoveryPreview"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       {recoveryConfig.conditions.length > 1 && (

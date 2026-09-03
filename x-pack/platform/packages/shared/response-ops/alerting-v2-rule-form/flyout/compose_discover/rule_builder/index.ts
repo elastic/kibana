@@ -9,7 +9,7 @@ export type { RuleBuilderDefinition, RuleBuilderStepProps, BuilderState } from '
 export { RULE_BUILDER_REGISTRY } from './registry';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
-export { buildThresholdEsql, buildRecoveryBlock } from './threshold/build_esql';
+export { buildThresholdEsql } from './threshold/build_esql';
 export { parseThresholdEsql, parseDiscoverQueryForBuilder } from './threshold/parse_esql';
 export type {
   ThresholdFormValues,

@@ -34,8 +34,6 @@ export interface InitialStateConfig {
   isQueryPrePopulated?: boolean;
   /** When true, the flyout opens directly in YAML mode with the sandbox open. */
   forceYamlMode?: boolean;
-  /** When true, preview tabs start on `base` rather than the ES|QL unified-editor fallback. */
-  isBuilderMode?: boolean;
 }
 
 export const createInitialState = ({
@@ -44,21 +42,18 @@ export const createInitialState = ({
   initialRecoveryType = 'default',
   isQueryPrePopulated = false,
   forceYamlMode = false,
-  isBuilderMode = false,
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
   return {
     step: 0,
     recoveryType,
-    activeTab: isBuilderMode
-      ? 'base'
-      : defaultTabForTabs(
-          getSandboxTabs(initialKind === 'alert', {
-            step: 0,
-            recoveryType,
-            manualSplitEnabled: false,
-          })
-        ),
+    activeTab: defaultTabForTabs(
+      getSandboxTabs(initialKind === 'alert', {
+        step: 0,
+        recoveryType,
+        manualSplitEnabled: false,
+      })
+    ),
     childOpen: forceYamlMode,
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
@@ -104,10 +99,8 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom'
-          ? action.isBuilderMode
-            ? { activeTab: 'recovery' as const }
-            : { childOpen: true, activeTab: 'recovery' as const }
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
+          ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
     case 'KIND_CHANGE':
@@ -150,9 +143,7 @@ export function reducer(
       return {
         ...state,
         childOpen: true,
-        activeTab: action.isBuilderMode
-          ? 'base'
-          : defaultTabForTabs(getSandboxTabs(action.isAlert, state)),
+        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, state)),
       };
     case 'OPEN_CHILD_FOR_STEP': {
       const stateAtStep = { ...state, step: action.step };

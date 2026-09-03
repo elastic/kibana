@@ -29,10 +29,6 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
   const baseQuery = query?.format === 'composed' ? query.base : '';
   const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
 
-  if (!state || !dispatch) {
-    return null;
-  }
-
   return (
     <>
       <QueryBlock
