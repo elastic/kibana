@@ -11,14 +11,18 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription, of } from 'rxjs';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import {
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiIcon,
+  euiCanAnimate,
   transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
@@ -40,7 +44,8 @@ import {
 import type { ControlsRendererParentApi } from '../types';
 import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
-import { DragHandle } from './drag_handle';
+import { ControlClone } from './control_clone';
+import { DragHandle, DragHandleContext } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 import { ControlLabelTooltip } from './control_label_tooltip';
 import { useIndicateRelatedPanelsSelector } from '../hooks';
@@ -48,11 +53,21 @@ import { useIndicateRelatedPanelsSelector } from '../hooks';
 export const ControlPanel = ({
   parentApi,
   control: { id, grow, width, type },
-  setControlPanelRef,
+  displayPosition,
+  onKeyboardReorder,
+  reorderInstructionsId,
 }: {
   parentApi: ControlsRendererParentApi;
   control: Required<PinnedControlLayoutState>;
-  setControlPanelRef: (id: string, ref: HTMLElement | null) => void;
+  /**
+   * Where this control sits while the group reflows around an in-flight drag, or `null` when no
+   * drag is in progress. Handed to flexbox as an `order` so that it works out the wrapping and the
+   * widths, which change as controls move between rows.
+   */
+  displayPosition: number | null;
+  onKeyboardReorder: (id: string, direction: 'back' | 'forward') => void;
+  /** Id of the shared instructions describing keyboard reordering, for the drag handle to reference */
+  reorderInstructionsId: string;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
 
@@ -60,9 +75,9 @@ export const ControlPanel = ({
     (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
   >(null);
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id,
-  });
+  const elementRef = useRef<HTMLElement | null>(null);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
@@ -138,13 +153,9 @@ export const ControlPanel = ({
     };
   }, [api, selectedPanel]);
 
-  const setRefs = useCallback(
-    (ref: HTMLElement | null) => {
-      setNodeRef(ref);
-      setControlPanelRef(id, ref);
-    },
-    [id, setNodeRef, setControlPanelRef]
-  );
+  const setRefs = useCallback((ref: HTMLElement | null) => {
+    elementRef.current = ref;
+  }, []);
 
   const onApiAvailable = useCallback(
     (controlApi: DefaultEmbeddableApi) => {
@@ -155,6 +166,59 @@ export const ControlPanel = ({
   );
 
   const isEditable = viewMode === 'edit';
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || !isEditable) return;
+
+    return draggable({
+      element,
+      dragHandle: dragHandleRef.current ?? undefined,
+      getInitialData: () => ({ id }),
+      onGenerateDragPreview: ({ location, nativeSetDragImage, source }) => {
+        setCustomNativeDragPreview({
+          nativeSetDragImage,
+          // Keep the preview under the point that was grabbed, so the drag handle stays
+          // beneath the pointer rather than the control jumping away from it
+          getOffset: preserveOffsetOnSource({
+            element: source.element,
+            input: location.current.input,
+          }),
+          render: ({ container }) => {
+            const { width: sourceWidth, height: sourceHeight } =
+              source.element.getBoundingClientRect();
+            const root = createRoot(container);
+            flushSync(() =>
+              root.render(
+                <ControlClone
+                  state={parentApi.getSerializedStateForChild(id)}
+                  width={sourceWidth}
+                  height={sourceHeight}
+                />
+              )
+            );
+            return () => root.unmount();
+          },
+        });
+      },
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+  }, [id, isEditable, parentApi]);
+
+  const handleDragHandleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        onKeyboardReorder(id, 'back');
+      } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        onKeyboardReorder(id, 'forward');
+      }
+    },
+    [id, onKeyboardReorder]
+  );
+
   const enableIndicateRelatedPanels = Boolean(canIndicateRelatedPanels && numberOfRelatedPanels);
   const handleToggleIndicateRelated = useCallback(
     () => (enableIndicateRelatedPanels ? onToggleIndicateRelatedPanels() : null),
@@ -200,88 +264,87 @@ export const ControlPanel = ({
   );
 
   return (
-    <EuiFlexItem
-      component="li"
-      ref={setRefs}
-      style={{
-        transition,
-        transform: CSS.Translate.toString(transform),
-      }}
-      grow={Boolean(grow)}
-      data-test-subj="control-frame"
-      css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-      className={`controlFrameWrapper--${width}`}
-    >
-      <FloatingActions
-        data-test-subj="control-frame-floating-actions"
-        api={api}
-        uuid={id}
-        viewMode={viewMode}
-        disabledActions={disabledActionIds}
-        prependWrapperRef={prependWrapperRef}
+    <DragHandleContext.Provider value={isEditable ? dragHandleRef : null}>
+      <EuiFlexItem
+        component="li"
+        ref={setRefs}
+        grow={Boolean(grow)}
+        data-test-subj="control-frame"
+        css={css([isDragging && styles.draggingItem, styles.reflowing, styles.controlWidthStyles])}
+        className={`controlFrameWrapper--${width}`}
+        style={displayPosition === null ? undefined : { order: displayPosition }}
       >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          id={`control-title-${id}`}
-          aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
-            defaultMessage: 'Control for ${controlTitle}',
-            values: { controlTitle: panelLabel },
-          })}
+        <FloatingActions
+          data-test-subj="control-frame-floating-actions"
+          api={api}
+          uuid={id}
+          viewMode={viewMode}
+          disabledActions={disabledActionIds}
+          prependWrapperRef={prependWrapperRef}
         >
-          <EuiFormControlLayout
+          <EuiFormRow
+            data-test-subj="control-frame-title"
             fullWidth
-            className={classNames('controlFrame__formControlLayout', {
-              'controlFrame__formControlLayout--edit': isEditable,
-              'controlFrame__formControlLayout--focused': indicateControl,
-              'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
-              type,
+            id={`control-title-${id}`}
+            aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
+              defaultMessage: 'Control for ${controlTitle}',
+              values: { controlTitle: panelLabel },
             })}
-            css={styles.formControl}
-            prepend={
-              <>
-                {api?.CustomPrependComponent ? (
-                  <>
-                    <DragHandle
-                      isEditable={isEditable}
-                      controlTitle={panelLabel}
-                      className="controlFrame__dragHandle"
-                      {...attributes}
-                      {...listeners}
-                    />
-                    <api.CustomPrependComponent />
-                  </>
-                ) : (
-                  <>
-                    <DragHandle
-                      isEditable={isEditable}
-                      controlTitle={panelLabel}
-                      className="controlFrame__dragHandle"
-                      highContrast={isIndicatingRelatedPanels}
-                      {...attributes}
-                      {...listeners}
-                    >
-                      {!enableIndicateRelatedPanels && controlLabel}
-                    </DragHandle>
-                    {enableIndicateRelatedPanels && controlLabel}
-                  </>
-                )}
-              </>
-            }
-            compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
-            <EmbeddableRenderer
-              key={id}
-              maybeId={id}
-              type={type}
-              getParentApi={() => parentApi}
-              onApiAvailable={onApiAvailable}
-              hidePanelChrome
-            />
-          </EuiFormControlLayout>
-        </EuiFormRow>
-      </FloatingActions>
-    </EuiFlexItem>
+            <EuiFormControlLayout
+              fullWidth
+              className={classNames('controlFrame__formControlLayout', {
+                'controlFrame__formControlLayout--edit': isEditable,
+                'controlFrame__formControlLayout--focused': indicateControl,
+                'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
+                type,
+              })}
+              css={styles.formControl}
+              prepend={
+                <>
+                  {api?.CustomPrependComponent ? (
+                    <>
+                      <DragHandle
+                        isEditable={isEditable}
+                        controlTitle={panelLabel}
+                        className="controlFrame__dragHandle"
+                        onKeyDown={handleDragHandleKeyDown}
+                        reorderInstructionsId={reorderInstructionsId}
+                      />
+                      <api.CustomPrependComponent />
+                    </>
+                  ) : (
+                    <>
+                      <DragHandle
+                        isEditable={isEditable}
+                        controlTitle={panelLabel}
+                        className="controlFrame__dragHandle"
+                        highContrast={isIndicatingRelatedPanels}
+                        onKeyDown={handleDragHandleKeyDown}
+                        reorderInstructionsId={reorderInstructionsId}
+                      >
+                        {!enableIndicateRelatedPanels && controlLabel}
+                      </DragHandle>
+                      {enableIndicateRelatedPanels && controlLabel}
+                    </>
+                  )}
+                </>
+              }
+              compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
+            >
+              <EmbeddableRenderer
+                key={id}
+                maybeId={id}
+                type={type}
+                getParentApi={() => parentApi}
+                onApiAvailable={onApiAvailable}
+                hidePanelChrome
+              />
+            </EuiFormControlLayout>
+          </EuiFormRow>
+        </FloatingActions>
+      </EuiFlexItem>
+    </DragHandleContext.Provider>
   );
 };
 
@@ -290,6 +353,17 @@ const controlPanelStyles = {
     opacity: 0,
     visibility: 'hidden',
   }),
+  /**
+   * Animates the reordering the group asks flexbox for. Layout changes cannot be transitioned, so
+   * the group takes the control back to where it was with a transform and lets this carry it to its
+   * new place; see `useReflowAnimation`.
+   */
+  reflowing: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      [euiCanAnimate]: {
+        transition: `transform ${euiTheme.animation.fast} ease`,
+      },
+    }),
   controlWidthStyles,
   tooltipStyles: {
     height: '100%',

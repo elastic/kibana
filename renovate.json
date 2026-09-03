@@ -1408,15 +1408,6 @@
       "enabled": true
     },
     {
-      "groupName": "dnd-kit",
-      "matchDepNames": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
-      "reviewers": ["team:kibana-presentation"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Presentation"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@elastic/ems client",
       "matchDepNames": ["@elastic/ems-client"],
       "reviewers": ["team:kibana-presentation"],
@@ -2269,7 +2260,7 @@
         "@atlaskit/pragmatic-drag-and-drop",
         "@atlaskit/pragmatic-drag-and-drop-hitbox"
       ],
-      "reviewers": ["team:streams-ui"],
+      "reviewers": ["team:streams-ui", "team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",

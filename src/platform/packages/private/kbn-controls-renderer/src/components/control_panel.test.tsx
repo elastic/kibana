@@ -88,7 +88,9 @@ describe('render', () => {
             order: 0,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          displayPosition={null}
+          onKeyboardReorder={jest.fn()}
+          reorderInstructionsId="reorder-instructions"
         />
       );
       const controlFrame = controlPanel.getByTestId('control-frame');
@@ -107,7 +109,9 @@ describe('render', () => {
             grow: true,
           }}
           parentApi={parentApi}
-          setControlPanelRef={jest.fn()}
+          displayPosition={null}
+          onKeyboardReorder={jest.fn()}
+          reorderInstructionsId="reorder-instructions"
         />
       );
       const controlFrame = controlPanel.getByTestId('control-frame');

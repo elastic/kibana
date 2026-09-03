@@ -19,13 +19,18 @@ import { controlWidthStyles } from './control_panel.styles';
 /**
  * A simplified clone version of the control which is dragged. This version only shows
  * the title so that we don't recreate the embeddable API on drag.
+ *
+ * `width` and `height` are taken from the control being dragged, so that the clone lines up
+ * with it and the pointer stays over the drag handle for the duration of the drag.
  */
 export const ControlClone = ({
   state,
   width,
+  height,
 }: {
   state: object | undefined;
   width: number | undefined;
+  height: number | undefined;
 }) => {
   const styles = useMemoCss(controlCloneStyles);
 
@@ -37,9 +42,13 @@ export const ControlClone = ({
     return width ? css({ width: `${width}px` }) : undefined;
   }, [width]);
 
+  const heightStyle = useMemo(() => {
+    return height ? css({ height: `${height}px` }) : undefined;
+  }, [height]);
+
   return (
     <EuiFlexItem css={[styles.container, widthStyle]}>
-      <EuiFlexGroup responsive={false} gutterSize="none" css={styles.dragContainer}>
+      <EuiFlexGroup responsive={false} gutterSize="none" css={[styles.dragContainer, heightStyle]}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="dragHorizontal" css={styles.grabIcon} aria-hidden={true} />
         </EuiFlexItem>
