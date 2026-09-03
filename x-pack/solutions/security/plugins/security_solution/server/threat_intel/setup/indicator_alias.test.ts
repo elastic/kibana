@@ -195,6 +195,57 @@ describe('ensureIndicatorAliasForSpace', () => {
     expect(esClient.indices.putAlias).toHaveBeenCalledTimes(1);
   });
 
+  // The alias exists to enforce exactly the space and tier scope. An extra clause narrows
+  // it further than intended, so a stored filter carrying one must be repaired, not accepted.
+  it('does rewrite when the filter carries an extra clause', async () => {
+    const { esClient, logger } = setup({
+      [INDEX]: {
+        aliases: {
+          [`${INDEX}-marketing`]: {
+            filter: {
+              bool: {
+                filter: [
+                  { terms: { space_id: ['marketing', '*'] } },
+                  { terms: { ioc_tier: ['discriminating', 'contextual'] } },
+                  { terms: { source_type: ['rss'] } },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await ensureIndicatorAliasForSpace({ esClient, spaceId: 'marketing', logger });
+
+    expect(esClient.indices.putAlias).toHaveBeenCalledTimes(1);
+  });
+
+  // Two `space_id` clauses can disagree; the first must not be trusted while a later one is
+  // ignored. A duplicate is drift, so it must be repaired.
+  it('does rewrite when a space_id clause is duplicated', async () => {
+    const { esClient, logger } = setup({
+      [INDEX]: {
+        aliases: {
+          [`${INDEX}-marketing`]: {
+            filter: {
+              bool: {
+                filter: [
+                  { terms: { space_id: ['marketing', '*'] } },
+                  { terms: { space_id: ['other'] } },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await ensureIndicatorAliasForSpace({ esClient, spaceId: 'marketing', logger });
+
+    expect(esClient.indices.putAlias).toHaveBeenCalledTimes(1);
+  });
+
   it('repairs an alias whose filter has drifted', async () => {
     const { esClient, logger } = setup({
       [INDEX]: {

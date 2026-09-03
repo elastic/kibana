@@ -86,10 +86,27 @@ const sameSet = (a: readonly string[] | undefined, b: readonly string[]): boolea
  */
 const aliasFilterMatches = (current: unknown, spaceId: string): boolean => {
   const clauses = (current as { bool?: { filter?: unknown[] } } | undefined)?.bool?.filter;
-  if (!Array.isArray(clauses)) return false;
+  // Exactly the two clauses we write, no more. The point of this function is to repair a
+  // filter that has drifted, so anything beyond `space_id` and `ioc_tier` terms (an extra
+  // narrowing clause, a duplicate `space_id`, a `must_not`) is drift we did not intend and
+  // must trigger a rewrite rather than be silently accepted.
+  if (!Array.isArray(clauses) || clauses.length !== 2) return false;
 
-  const spaces = clauses.map((c) => termsValues(c, 'space_id')).find(Boolean);
-  const tiers = clauses.map((c) => termsValues(c, 'ioc_tier')).find(Boolean);
+  // Classify each clause independently instead of picking the first match, so an empty or
+  // duplicate `terms` cannot be chosen ahead of the real one.
+  let spaces: string[] | undefined;
+  let tiers: string[] | undefined;
+  for (const clause of clauses) {
+    const clauseSpaces = termsValues(clause, 'space_id');
+    const clauseTiers = termsValues(clause, 'ioc_tier');
+    if (clauseSpaces && !clauseTiers && spaces === undefined) {
+      spaces = clauseSpaces;
+    } else if (clauseTiers && !clauseSpaces && tiers === undefined) {
+      tiers = clauseTiers;
+    } else {
+      return false;
+    }
+  }
 
   return sameSet(spaces, [spaceId, GLOBAL_SPACE_ID]) && sameSet(tiers, [...PRECISION_IOC_TIERS]);
 };
