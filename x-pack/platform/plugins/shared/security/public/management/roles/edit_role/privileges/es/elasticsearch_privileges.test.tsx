@@ -88,8 +88,6 @@ test('addDataSourcePrivilege preserves other global entries when global is an ar
       global: [
         {
           application: { manage: { applications: ['kibana-*'] } },
-          profile: {},
-          role: {},
         },
         {
           application: { manage: { applications: [] } },
@@ -100,15 +98,11 @@ test('addDataSourcePrivilege preserves other global entries when global is an ar
   };
 
   const wrapper = shallowWithIntl(
-    <ElasticsearchPrivileges
-      {...props}
-      role={roleWithArrayGlobal as any}
-      isDataFederationEnabled
-    />
+    <ElasticsearchPrivileges {...props} role={roleWithArrayGlobal as any} isDataFederationEnabled />
   );
 
   // Invoke the handler wired to the child component
-  wrapper.find('DataSourcePrivileges').prop('onAdd')();
+  (wrapper.find('DataSourcePrivileges').prop('onAdd') as unknown as () => void)();
 
   expect(props.onChange).toHaveBeenCalledWith({
     ...roleWithArrayGlobal,
@@ -123,6 +117,86 @@ test('addDataSourcePrivilege preserves other global entries when global is an ar
             { names: [], privileges: [] },
           ],
         },
+      ],
+    },
+  });
+});
+
+test('addDataSourcePrivilege appends when global is an object', () => {
+  const props = getProps();
+  const roleWithObjectGlobal = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: {
+        application: { manage: { applications: ['kibana-*'] } },
+        data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+      },
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges
+      {...props}
+      role={roleWithObjectGlobal as any}
+      isDataFederationEnabled
+    />
+  );
+
+  (wrapper.find('DataSourcePrivileges').prop('onAdd') as unknown as () => void)();
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithObjectGlobal,
+    elasticsearch: {
+      ...roleWithObjectGlobal.elasticsearch,
+      global: {
+        ...(roleWithObjectGlobal.elasticsearch.global as any),
+        data_source: [
+          { names: ['acme_*'], privileges: ['read'] },
+          { names: [], privileges: [] },
+        ],
+      },
+    },
+  });
+});
+
+test('addDataSourcePrivilege writes to index 0 when global is an array with no data_source entry', () => {
+  const props = getProps();
+  const roleWithArrayGlobalNoDataSource = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: [
+        {
+          application: { manage: { applications: ['kibana-*'] } },
+        },
+        {
+          application: { manage: { applications: [] } },
+        },
+      ],
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges
+      {...props}
+      role={roleWithArrayGlobalNoDataSource as any}
+      isDataFederationEnabled
+    />
+  );
+
+  (wrapper.find('DataSourcePrivileges').prop('onAdd') as unknown as () => void)();
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithArrayGlobalNoDataSource,
+    elasticsearch: {
+      ...roleWithArrayGlobalNoDataSource.elasticsearch,
+      global: [
+        {
+          ...(roleWithArrayGlobalNoDataSource.elasticsearch.global as any)[0],
+          data_source: [{ names: [], privileges: [] }],
+        },
+        (roleWithArrayGlobalNoDataSource.elasticsearch.global as any)[1],
       ],
     },
   });
