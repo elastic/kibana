@@ -655,11 +655,13 @@ describe('project watch', () => {
       }
     });
 
-    it('keeps the skills and the preview worker inside the workers themselves', () => {
+    // The sweep has no ai.agent step; the diagnosing skill lives in the proposal child.
+    it('keeps the skills inside the workers themselves', () => {
       const workerSkills = (id: string) =>
         projectSkillsFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
 
-      expect(workerSkills(PND_RULE_TUNING_WORKFLOW_ID)).toEqual(
+      expect(workerSkills(PND_RULE_TUNING_WORKFLOW_ID)).toEqual([]);
+      expect(workerSkills(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: 'investigate-rule', kind: 'skill' })])
       );
       expect(workerSkills(PND_RULE_CREATION_WORKFLOW_ID)).toEqual(
