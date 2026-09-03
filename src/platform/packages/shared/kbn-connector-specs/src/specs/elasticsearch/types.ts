@@ -160,4 +160,3 @@ export type RequestInput = z.infer<typeof RequestInputSchema>;
 
 export const GetClusterInfoInputSchema = lazySchema(() => z.object({}));
 export type GetClusterInfoInput = z.infer<typeof GetClusterInfoInputSchema>;
-
