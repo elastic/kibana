@@ -156,6 +156,7 @@ export function DashboardApp({
     embedSettings,
     incomingEmbeddables,
     validateOutcome,
+    savedDashboardId,
   });
 
   useEffect(() => {

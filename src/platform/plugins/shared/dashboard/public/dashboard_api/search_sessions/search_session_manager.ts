@@ -10,8 +10,10 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 
 import { dataService } from '../../services/kibana_services';
+import { dashboardCacheService } from '../../services/dashboard_cache_service';
 import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
@@ -38,7 +40,7 @@ export function initializeSearchSessionManager(
       searchSessionGenerationInProgress$
     );
 
-    const { sessionIdToRestore } = searchSessionSettings;
+    const { sessionIdToRestore, cachedSessionId } = searchSessionSettings;
 
     // if this incoming embeddable has a session, continue it.
     incomingEmbeddables?.forEach((embeddablePackage) => {
@@ -48,15 +50,35 @@ export function initializeSearchSessionManager(
     });
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
+    } else if (cachedSessionId) {
+      // Use `continue` (not `restore`) to avoid setting isRestore=true which would
+      // bypass the client-side response cache.
+      dataService.search.session.continue(cachedSessionId);
     }
     const existingSession = dataService.search.session.getSessionId();
 
     const initialSearchSessionId =
       sessionIdToRestore ??
+      cachedSessionId ??
       (existingSession && incomingEmbeddables?.length
         ? existingSession
         : dataService.search.session.start());
     searchSessionId$.next(initialSearchSessionId);
+
+    // Store fresh sessions in the cache so subsequent reopens can reuse the session and frozen time.
+    // Skip when restoring from URL or continuing from cache (those already have the right state).
+    if (!sessionIdToRestore && !cachedSessionId && initialSearchSessionId) {
+      const dashboardId = dashboardApi.savedObjectId$.getValue();
+      if (dashboardId) {
+        const currentTimeRange = dashboardApi.timeRange$.getValue();
+        if (currentTimeRange) {
+          dashboardCacheService.setCacheEntry(dashboardId, {
+            sessionId: initialSearchSessionId,
+            absoluteTimeRange: getAbsoluteTimeRange(currentTimeRange),
+          });
+        }
+      }
+    }
 
     // `requestSearchSessionId` should be used when you need to ensure that you have the up-to-date search session ID
     requestSearchSessionId = async () => {

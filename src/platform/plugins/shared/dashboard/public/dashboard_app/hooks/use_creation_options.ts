@@ -17,7 +17,8 @@ import { useCallback } from 'react';
 import type { DashboardState } from '../../../common/types';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import type { DashboardCreationOptions } from '../..';
-import { screenshotModeService } from '../../services/kibana_services';
+import { dataService, screenshotModeService } from '../../services/kibana_services';
+import { dashboardCacheService } from '../../services/dashboard_cache_service';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import type { DashboardEmbedSettings } from '../types';
 import {
@@ -37,6 +38,7 @@ interface UseCreationOptionsProps {
   embedSettings?: DashboardEmbedSettings;
   incomingEmbeddables: IncomingEmbeddables;
   validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'];
+  savedDashboardId?: string;
 }
 
 export const useCreationOptions = ({
@@ -46,9 +48,21 @@ export const useCreationOptions = ({
   embedSettings,
   incomingEmbeddables,
   validateOutcome,
+  savedDashboardId,
 }: UseCreationOptionsProps) => {
   return useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+
+    // Check if there's a cached session for this dashboard
+    const cachedEntry = savedDashboardId
+      ? dashboardCacheService.getCacheEntry(savedDashboardId)
+      : undefined;
+
+    // If restoring from cache, freeze the global timefilter to the cached absolute time
+    // so that all search requests use identical time bounds and hit the response cache.
+    if (cachedEntry) {
+      dataService.query.timefilter.timefilter.setTime(cachedEntry.absoluteTimeRange);
+    }
 
     const getInitialInput = () => {
       const scopedHistory = getScopedHistory();
@@ -95,6 +109,13 @@ export const useCreationOptions = ({
         screenshotModeService.getScreenshotContext('layout') === 'print'
           ? { viewMode: 'print' as ViewMode }
           : {}),
+
+        // If restoring from cache (and not restoring a specific URL session), override
+        // time_range with frozen absolute timestamps. This ensures dashboards with
+        // timeRestore=true use the frozen time instead of the saved relative range.
+        ...(cachedEntry && !searchSessionIdFromURL
+          ? { time_range: cachedEntry.absoluteTimeRange }
+          : {}),
       };
     };
 
@@ -114,6 +135,9 @@ export const useCreationOptions = ({
       searchSessionSettings: {
         createSessionRestorationDataProvider,
         sessionIdToRestore: searchSessionIdFromURL,
+        // Pass cached session ID separately - uses `continue` (not `restore`) to
+        // avoid setting isRestore=true which would bypass the client-side response cache.
+        cachedSessionId: cachedEntry?.sessionId,
         sessionIdUrlChangeObservable: getSessionURLObservable(history),
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
@@ -136,5 +160,6 @@ export const useCreationOptions = ({
     getScopedHistory,
     kbnUrlStateStorage,
     incomingEmbeddables,
+    savedDashboardId,
   ]);
 };

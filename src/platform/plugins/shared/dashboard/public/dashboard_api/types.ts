@@ -103,6 +103,11 @@ export interface DashboardCreationOptions {
   /** Settings for search session integration. */
   searchSessionSettings?: {
     sessionIdToRestore?: string;
+    /**
+     * Session ID from the dashboard cache. Uses `continue` (not `restore`) so the
+     * client-side response cache is not bypassed.
+     */
+    cachedSessionId?: string;
     sessionIdUrlChangeObservable?: Observable<string | undefined>;
     getSearchSessionIdFromURL: () => string | undefined;
     removeSessionIdFromUrl: () => void;
