@@ -264,10 +264,7 @@ export const APIKeysGridPage: FunctionComponent<APIKeysGridPageProps> = ({ cpsMa
   const hasQueryError = Boolean(
     queryResult && 'queryError' in queryResult && queryResult.queryError
   );
-  const queryError =
-    hasQueryError && queryResult && 'queryError' in queryResult
-      ? queryResult.queryError
-      : undefined;
+  const queryError = hasQueryError ? queryResult?.queryError : undefined;
 
   // Extract success-only properties when there's no query error
   // Cast to access properties that only exist on success result
