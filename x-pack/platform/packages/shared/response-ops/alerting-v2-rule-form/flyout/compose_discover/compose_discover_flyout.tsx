@@ -71,6 +71,7 @@ import {
   getSandboxTabs,
   getStepIds,
   getBuilderStepIds,
+  getDefaultOpenTab,
   useComposeDiscoverState,
 } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -656,15 +657,13 @@ export function ComposeDiscoverFlyout({
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
-  const hasCustomRecoveryRef = useRef(hasCustomRecovery);
-  hasCustomRecoveryRef.current = hasCustomRecovery;
 
   /*
    * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
-   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
-   * Read isAlert and hasCustomRecovery via refs so this effect only fires on
-   * flyoutKey changes, not on kind or recovery toggles (where reopenChildRef
-   * is always false anyway).
+   * the sandbox (cascade-closed by closeAllFlyouts()) needs reopening on the
+   * tab it would default to for the current step/recovery/manual-split state.
+   * isAlert is read via ref so this effect doesn't fire on kind toggles; the
+   * body is gated by reopenChildRef, so extra runs from other deps are no-ops.
    */
   useEffect(() => {
     if (reopenChildRef.current) {
@@ -672,10 +671,15 @@ export function ComposeDiscoverFlyout({
       dispatch({
         type: 'OPEN_CHILD',
         isAlert: isAlertRef.current,
-        hasCustomRecovery: hasCustomRecoveryRef.current,
+        focusedTab: getDefaultOpenTab(
+          isAlertRef.current,
+          uiState.step,
+          hasCustomRecovery,
+          uiState.manualSplitEnabled
+        ),
       });
     }
-  }, [flyoutKey, dispatch]);
+  }, [flyoutKey, dispatch, hasCustomRecovery, uiState.step, uiState.manualSplitEnabled]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
@@ -741,7 +745,7 @@ export function ComposeDiscoverFlyout({
           };
         });
         if (!isBuilderMode) {
-          dispatch({ type: 'OPEN_CHILD', isAlert, hasCustomRecovery: true });
+          dispatch({ type: 'OPEN_CHILD', isAlert, focusedTab: 'recovery' });
         }
       } else {
         /*
@@ -1301,7 +1305,16 @@ export function ComposeDiscoverFlyout({
                             iconType="chevronLimitLeft"
                             isDisabled={uiState.childOpen}
                             onClick={() =>
-                              dispatch({ type: 'OPEN_CHILD', isAlert, hasCustomRecovery })
+                              dispatch({
+                                type: 'OPEN_CHILD',
+                                isAlert,
+                                focusedTab: getDefaultOpenTab(
+                                  isAlert,
+                                  uiState.step,
+                                  hasCustomRecovery,
+                                  uiState.manualSplitEnabled
+                                ),
+                              })
                             }
                             data-test-subj="composeDiscoverYamlQuerySandbox"
                           >

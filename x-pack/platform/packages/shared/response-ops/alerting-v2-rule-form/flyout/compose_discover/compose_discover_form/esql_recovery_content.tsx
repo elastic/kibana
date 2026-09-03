@@ -63,7 +63,7 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
             type: 'OPEN_CHILD_FOR_STEP',
             step: state.step,
             isAlert: true,
-            hasCustomRecovery: true,
+            focusedTab: 'recovery',
           })
         }
         data-test-subj="composeDiscoverEditRecovery"

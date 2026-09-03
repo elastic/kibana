@@ -89,8 +89,8 @@ export type ComposeDiscoverAction =
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT'; isAlert: boolean; isBuilderMode?: boolean }
   | { type: 'GO_BACK'; isBuilderMode?: boolean }
-  | { type: 'OPEN_CHILD'; isAlert: boolean; hasCustomRecovery?: boolean }
-  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean; hasCustomRecovery?: boolean }
+  | { type: 'OPEN_CHILD'; isAlert: boolean; focusedTab?: QueryTab }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean; focusedTab?: QueryTab }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
   | { type: 'INVALIDATE_QUERY' }

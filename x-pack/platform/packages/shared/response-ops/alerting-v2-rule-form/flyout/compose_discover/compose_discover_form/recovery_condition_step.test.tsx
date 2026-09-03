@@ -153,7 +153,7 @@ describe('RecoveryConditionStep', () => {
       type: 'OPEN_CHILD_FOR_STEP',
       step: state.step,
       isAlert: true,
-      hasCustomRecovery: true,
+      focusedTab: 'recovery',
     });
   });
 

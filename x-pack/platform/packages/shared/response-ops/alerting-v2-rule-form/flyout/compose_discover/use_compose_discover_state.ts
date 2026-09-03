@@ -85,6 +85,18 @@ function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   return 'alert';
 }
 
+/**
+ * Resolves the tab the Sandbox should land on for the given state, for callers
+ * that open the Sandbox without a fixed target (e.g. reopen or the YAML button).
+ */
+export const getDefaultOpenTab = (
+  isAlert: boolean,
+  step: number,
+  hasCustomRecovery: boolean,
+  manualSplitEnabled: boolean
+): QueryTab =>
+  defaultTabForTabs(getSandboxTabs(isAlert, { step, hasCustomRecovery, manualSplitEnabled }));
+
 export function reducer(
   state: ComposeDiscoverState,
   action: ComposeDiscoverAction
@@ -121,26 +133,18 @@ export function reducer(
       return {
         ...state,
         childOpen: true,
-        activeTab: defaultTabForTabs(
-          getSandboxTabs(action.isAlert, {
-            step: state.step,
-            hasCustomRecovery: action.hasCustomRecovery ?? false,
-            manualSplitEnabled: state.manualSplitEnabled,
-          })
-        ),
+        activeTab:
+          action.focusedTab ??
+          getDefaultOpenTab(action.isAlert, state.step, false, state.manualSplitEnabled),
       };
     case 'OPEN_CHILD_FOR_STEP':
       return {
         ...state,
         step: action.step,
         childOpen: true,
-        activeTab: defaultTabForTabs(
-          getSandboxTabs(action.isAlert, {
-            step: action.step,
-            hasCustomRecovery: action.hasCustomRecovery ?? false,
-            manualSplitEnabled: state.manualSplitEnabled,
-          })
-        ),
+        activeTab:
+          action.focusedTab ??
+          getDefaultOpenTab(action.isAlert, action.step, false, state.manualSplitEnabled),
       };
     case 'CLOSE_CHILD':
       return { ...state, childOpen: false };

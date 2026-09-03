@@ -117,16 +117,16 @@ describe('reducer', () => {
   });
 
   describe('OPEN_CHILD', () => {
-    it('focuses the recovery tab when hasCustomRecovery is true on the outcome step', () => {
+    it('focuses the tab passed as focusedTab', () => {
       const state = createState({ step: 1 });
-      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true, hasCustomRecovery: true });
+      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true, focusedTab: 'recovery' });
 
       expect(next.childOpen).toBe(true);
       expect(next.activeTab).toBe('recovery');
     });
 
-    it('does not focus the recovery tab when hasCustomRecovery is omitted', () => {
-      const state = createState({ step: 1, activeTab: 'alert' });
+    it('falls back to the step default tab when focusedTab is omitted', () => {
+      const state = createState({ step: 1, activeTab: 'recovery' });
       const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true });
 
       expect(next.childOpen).toBe(true);
