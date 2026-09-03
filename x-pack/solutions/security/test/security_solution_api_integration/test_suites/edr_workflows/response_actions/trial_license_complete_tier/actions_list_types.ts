@@ -15,6 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_fleet_actions';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import type { ActionListApiResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
+import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createSupertestErrorLogger } from '../../utils';
 
@@ -22,10 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const es = getService('es');
   const log = getService('log');
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   describe('@ess @serverless @skipInServerlessMKI Endpoint action list types filter', function () {
+    let adminSupertest: TestAgent;
     let indexedData: IndexedHostsAndAlertsResponse;
     let automatedActions: IndexedEndpointAndFleetActionsForHostResponse;
     let agentId = '';
@@ -33,22 +35,28 @@ export default function ({ getService }: FtrProviderContext) {
     const isAutomated = (action: ActionListApiResponse['data'][number]): boolean =>
       Boolean(action.alertIds?.length);
 
+    const belongsToSeededHost = (action: ActionListApiResponse['data'][number]): boolean =>
+      action.agents.includes(agentId);
+
     const fetchActions = async (
       query: Record<string, string | number | string[]> = {}
-    ): Promise<ActionListApiResponse> => {
-      const { body } = await supertest
+    ): Promise<Pick<ActionListApiResponse, 'data' | 'total'>> => {
+      const { body } = await adminSupertest
         .get(BASE_ENDPOINT_ACTION_ROUTE)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .set('x-elastic-internal-origin', 'kibana')
-        .query({ agentIds: agentId, pageSize: 100, ...query })
+        .query({ pageSize: 100, ...query })
         .on('error', createSupertestErrorLogger(log))
         .expect(200);
 
-      return body as ActionListApiResponse;
+      const data = (body as ActionListApiResponse).data.filter(belongsToSeededHost);
+
+      return { data, total: data.length };
     };
 
     before(async () => {
+      adminSupertest = await utils.createSuperTest();
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;
       automatedActions = await indexEndpointAndFleetActionsForHost(
