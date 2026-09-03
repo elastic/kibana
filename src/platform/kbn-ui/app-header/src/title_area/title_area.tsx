@@ -14,7 +14,7 @@ import React, { useMemo } from 'react';
 import type { AppHeaderBack, AppHeaderEditableTitle } from '../types';
 import { toBackTargets } from '../to_back_targets';
 import { BackButton } from '../back_button';
-import { Title, isEditableTitle } from './title';
+import { Title, getNoBackTitleOffset, isEditableTitle } from './title';
 
 export interface TitleAreaProps {
   title?: string | AppHeaderEditableTitle;
@@ -25,47 +25,56 @@ export interface TitleAreaProps {
    * share the same gap and offset as a real title.
    */
   placeholder?: ReactNode;
+  /**
+   * Compact headers use a larger no-back title offset so the title clears a rounded
+   * workspace corner. Does not apply when a back button is present.
+   */
+  compact?: boolean;
 }
 
-export const TitleArea = React.memo<TitleAreaProps>(({ title, back, size, placeholder }) => {
-  const { euiTheme } = useEuiTheme();
-  const backTargets = toBackTargets(back);
-  const hasBack = backTargets.length > 0;
-  const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
-  const showPlaceholder = !showTitle && placeholder != null;
+export const TitleArea = React.memo<TitleAreaProps>(
+  ({ title, back, size, placeholder, compact }) => {
+    const { euiTheme } = useEuiTheme();
+    const backTargets = toBackTargets(back);
+    const hasBack = backTargets.length > 0;
+    const showTitle = !!title && (isEditableTitle(title) || title.length > 0);
+    const showPlaceholder = !showTitle && placeholder != null;
 
-  const styles = useMemo(() => {
-    const wrapper = css`
-      display: flex;
-      align-items: center;
-      gap: ${euiTheme.size.s};
-      flex: 0 1 auto;
-      min-width: 0;
-      max-width: 100%;
-    `;
+    const styles = useMemo(() => {
+      const wrapper = css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.s};
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 100%;
+      `;
 
-    // Same inset `Title` applies when there is no back button, so a lone placeholder
-    // lines up with where the title text sits.
-    const placeholderOffset = css`
-      padding-left: ${euiTheme.size.xs};
-    `;
+      // Same inset `Title` applies when there is no back button, so a lone placeholder
+      // lines up with where the title text sits.
+      const placeholderOffset = css`
+        padding-inline-start: ${getNoBackTitleOffset(euiTheme, compact)};
+      `;
 
-    return { wrapper, placeholderOffset };
-  }, [euiTheme]);
+      return { wrapper, placeholderOffset };
+    }, [compact, euiTheme]);
 
-  if (!showTitle && !hasBack && !showPlaceholder) {
-    return null;
+    if (!showTitle && !hasBack && !showPlaceholder) {
+      return null;
+    }
+
+    return (
+      <div css={styles.wrapper}>
+        {hasBack && <BackButton targets={backTargets} />}
+        {showTitle && title && (
+          <Title title={title} titleOffset={!hasBack} size={size} compact={compact} />
+        )}
+        {showPlaceholder && (
+          <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
+        )}
+      </div>
+    );
   }
-
-  return (
-    <div css={styles.wrapper}>
-      {hasBack && <BackButton targets={backTargets} />}
-      {showTitle && title && <Title title={title} titleOffset={!hasBack} size={size} />}
-      {showPlaceholder && (
-        <div css={!hasBack ? styles.placeholderOffset : undefined}>{placeholder}</div>
-      )}
-    </div>
-  );
-});
+);
 
 TitleArea.displayName = 'TitleArea';
