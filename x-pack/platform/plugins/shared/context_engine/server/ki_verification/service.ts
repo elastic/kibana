@@ -38,7 +38,7 @@ export class KiVerificationService {
     const results: KiVerifierResult[] = [];
 
     const seen = new Set<string>();
-    for (const id of verifiers) {
+    const selectedVerifiers = verifiers.map((id) => {
       if (seen.has(id)) {
         throw new KiVerificationInputError(`Duplicate verifier id: "${id}"`);
       }
@@ -48,6 +48,10 @@ export class KiVerificationService {
         throw new KiVerificationInputError(`Unknown verifier id: "${id}"`);
       }
 
+      return { id, verifier };
+    });
+
+    for (const { id, verifier } of selectedVerifiers) {
       try {
         if (!verifier.applies(ki, verifierContext)) {
           continue;

@@ -44,15 +44,20 @@ describe('KiVerificationService', () => {
     );
   });
 
-  it('throws when the same verifier id appears more than once', async () => {
-    registry.register(makeVerifier('a', { passed: true }));
+  it('throws before running any verifier when an id appears more than once', async () => {
+    const first = makeVerifier('first', { passed: true });
+    const duplicate = makeVerifier('duplicate', { passed: true });
+    registry.register(first);
+    registry.register(duplicate);
 
-    await expect(run('a', 'a')).rejects.toEqual(
+    await expect(run('first', 'duplicate', 'duplicate')).rejects.toEqual(
       expect.objectContaining({
         name: KiVerificationInputError.name,
-        message: 'Duplicate verifier id: "a"',
+        message: 'Duplicate verifier id: "duplicate"',
       })
     );
+    expect(first.verify).not.toHaveBeenCalled();
+    expect(duplicate.verify).not.toHaveBeenCalled();
   });
 
   it('passes when every applicable verifier passes', async () => {
@@ -169,15 +174,17 @@ describe('KiVerificationService', () => {
     expect(summary).toEqual({ passed: true, results: [] });
   });
 
-  it('throws when an unknown verifier id is specified', async () => {
-    registry.register(makeVerifier('a', { passed: true }));
+  it('throws before running any verifier when an unknown id is specified', async () => {
+    const known = makeVerifier('known', { passed: true });
+    registry.register(known);
 
-    await expect(run('a', 'nonexistent')).rejects.toEqual(
+    await expect(run('known', 'nonexistent')).rejects.toEqual(
       expect.objectContaining({
         name: KiVerificationInputError.name,
         message: 'Unknown verifier id: "nonexistent"',
       })
     );
+    expect(known.verify).not.toHaveBeenCalled();
   });
 
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {
