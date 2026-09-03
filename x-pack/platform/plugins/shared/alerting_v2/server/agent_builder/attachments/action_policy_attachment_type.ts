@@ -16,13 +16,25 @@ import {
   type ActionPolicyAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import Boom from '@hapi/boom';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
+import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
+import { getActionPolicyExecutionHistoryTool } from '../tools/get_action_policy_execution_history';
+import { getWorkflowExecutionHistoryTool } from '../tools/get_workflow_execution_history';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
+  getExecutionHistoryClient: (context: {
+    request: import('@kbn/core-http-server').KibanaRequest;
+  }) => ActionPolicyExecutionHistoryClient;
+  getPrivilegeChecker: (context: {
+    request: import('@kbn/core-http-server').KibanaRequest;
+  }) => PrivilegeChecker;
+  getWorkflowApi: () => WorkflowsServerPluginSetup['management'];
 }
 
 const formatActionPolicyDescription = (
@@ -53,6 +65,9 @@ ${data.tags?.length ? `Tags: ${data.tags.join(', ')}` : ''}`.trim();
 export const createActionPolicyAttachmentType = ({
   logger,
   getActionPolicyClient,
+  getExecutionHistoryClient,
+  getPrivilegeChecker,
+  getWorkflowApi,
 }: CreateActionPolicyAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof ACTION_POLICY_ATTACHMENT_TYPE,
   ActionPolicyAttachmentData
@@ -127,6 +142,28 @@ export const createActionPolicyAttachmentType = ({
       type: 'text',
       value: formatActionPolicyDescription(attachment.id, attachment.data),
     }),
+    getBoundedTools: () => {
+      const policyId = attachment.origin ?? attachment.data.id;
+      if (!policyId) {
+        return [];
+      }
+      return [
+        getActionPolicyExecutionHistoryTool({
+          attachmentId: attachment.id,
+          policyId,
+          logger,
+          getExecutionHistoryClient,
+          getPrivilegeChecker,
+        }),
+        getWorkflowExecutionHistoryTool({
+          attachmentId: attachment.id,
+          policyId,
+          logger,
+          getWorkflowApi,
+          getPrivilegeChecker,
+        }),
+      ];
+    },
   }),
 
   getAgentDescription: () =>
