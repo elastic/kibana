@@ -30,6 +30,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
+import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
@@ -81,6 +82,7 @@ describe('ConversationClient', () => {
     read = false,
     readBy = [{ userId: 'unrelated-reader-id' }],
     hasReadBy = true,
+    pinnedBy = [{ userId: 'unrelated-pinner-id' }],
     schemaVersion,
     events,
   }: {
@@ -100,6 +102,7 @@ describe('ConversationClient', () => {
     read?: boolean;
     readBy?: Array<{ userId: string }>;
     hasReadBy?: boolean;
+    pinnedBy?: Array<{ userId: string }>;
     schemaVersion?: number;
     events?: TimelineEvent[];
   } = {}): Document =>
@@ -116,6 +119,7 @@ describe('ConversationClient', () => {
         updated_at: '2025-08-04T06:44:19.123Z',
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
+        pinned_by: pinnedBy,
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -130,6 +134,7 @@ describe('ConversationClient', () => {
 
   const expectNoReadBy = (conversation: unknown) => {
     expect(conversation).not.toHaveProperty('read_by');
+    expect(conversation).not.toHaveProperty('pinned_by');
   };
 
   const expectNoReadByInList = (conversations: unknown[]) => {
@@ -438,57 +443,38 @@ describe('ConversationClient', () => {
 
     // --- pinned filter ---
 
+    const listFilter = async (options?: { pinned?: boolean }) => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list(options);
+
+      return mockEsClient.search.mock.calls[0][0].query.bool.filter as unknown[];
+    };
+
+    // Shape is covered in access_control/query.test.ts; here we only assert list() applies it.
+    const pinnedByCurrentUser = buildPinnedFilter({
+      user: { id: 'user-1', username: 'test-user' },
+      pinned: true,
+    })[0];
+
     it('omits the pinned filter when pinned is undefined', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      const filterArray = await listFilter();
 
-      await client.list();
-
-      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
-      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+      expect(filterArray).not.toContainEqual(pinnedByCurrentUser);
+      expect(filterArray).not.toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
     });
 
-    it('adds { term: { pinned: true } } when pinned is true', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-
-      await client.list({ pinned: true });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: true } }]),
-            }),
-          }),
-        })
-      );
+    it('matches only conversations the calling user pinned when pinned is true', async () => {
+      expect(await listFilter({ pinned: true })).toContainEqual(pinnedByCurrentUser);
     });
 
-    it('adds a must_not negation for pinned: false to include pre-field documents', async () => {
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    it('negates the per-user match for pinned: false to include pre-field documents', async () => {
+      const filterArray = await listFilter({ pinned: false });
 
-      await client.list({ pinned: false });
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ bool: { must_not: { term: { pinned: true } } } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).toContainEqual({ bool: { must_not: pinnedByCurrentUser } });
       // A plain term: { pinned: false } would silently exclude documents created
       // before the pinned field was added; must never be used.
-      expect(mockEsClient.search).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              filter: expect.arrayContaining([{ term: { pinned: false } }]),
-            }),
-          }),
-        })
-      );
+      expect(filterArray).not.toContainEqual({ term: { pinned: false } });
     });
   });
 
@@ -669,8 +655,6 @@ describe('ConversationClient', () => {
     });
 
     it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
-      // Regression for: caller passes boolean/number, raw value lands in ES, and
-      // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
       const template: ConversationTemplate = {
         id: 'tmpl-serialize',
         version: 1,
@@ -1069,6 +1053,100 @@ describe('ConversationClient', () => {
       const { document } = mockEsClient.index.mock.calls[0][0];
       expect(document.read_by).toEqual([]);
       expect(result.read).toBe(false);
+    });
+  });
+
+  describe('setPinned', () => {
+    it('adds only the calling user to pinned_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+              pinnedBy: [],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
+      expectNoReadBy(result);
+      expect(result.pinned).toBe(true);
+    });
+
+    it('does not clobber pinned_by entries written by another user', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
+        // another user pinned it concurrently
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                pinnedBy: [{ userId: 'other-user-id' }],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      await client.setPinned('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[1][0];
+      expect(document.pinned_by).toEqual(
+        expect.arrayContaining([{ userId: 'other-user-id' }, { userId: 'user-1' }])
+      );
+    });
+
+    it('removes only the calling user when unpinning', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+            }),
+          ],
+        },
+      });
+
+      await client.setPinned('conversation-1', false);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([{ userId: 'other-id' }]);
+    });
+
+    it('is a no-op when the calling user has no stable id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              pinnedBy: [],
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      client = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { username: 'no-profile-user', isAdmin: false },
+      });
+
+      const result = await client.setPinned('conversation-1', true);
+
+      expectNoReadBy(result);
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.pinned_by).toEqual([]);
+      expect(result.pinned).toBe(false);
     });
   });
 
@@ -2768,6 +2846,196 @@ describe('ConversationClient', () => {
         'round-crash::execution_started',
         'round-crash::execution_terminated',
       ]);
+    });
+
+    // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
+    // (no terminal event), matching what step flushes append mid-round.
+    const startTimelineEvents = (roundId: string): TimelineEvent[] => [
+      {
+        id: `${roundId}::user_message`,
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'hello' },
+      },
+      {
+        id: `${roundId}::execution_started`,
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      },
+    ];
+
+    const stepTimelineEvent = (roundId: string, sequence: number): TimelineEvent =>
+      ({
+        id: `${roundId}::step::${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
+      } as TimelineEvent);
+
+    it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
+      const start = startTimelineEvents('round-1');
+      const step0 = stepTimelineEvent('round-1', 0);
+      const step1 = stepTimelineEvent('round-1', 1);
+
+      mockEsClient.search
+        // First OCC read: only the start events are stored.
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [createConversationDocument({ schemaVersion: 1, events: start })],
+          },
+        })
+        // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      // This flush carries step::0 (already persisted concurrently) and step::1 (new).
+      await client.appendEvents({ id: 'conversation-1', events: [step0, step1] });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
+        document: { events?: Array<{ id: string }> };
+      };
+      // The concurrent writer's step::0 is kept exactly once, and step::1 is appended.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+      ]);
+    });
+
+    it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
+      const storedRound1UserMessage = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'raw input' },
+      } as TimelineEvent;
+      const storedRound1ExecutionStarted = {
+        id: 'round-1::execution_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: { trigger_type: 'user_message' },
+      } as TimelineEvent;
+      const storedRound1Step0 = stepTimelineEvent('round-1', 0);
+      const storedRound1Step1 = stepTimelineEvent('round-1', 1);
+      // Stale live-streamed step that is NOT in the canonical projection — must be dropped.
+      const staleRound1Step2 = stepTimelineEvent('round-1', 2);
+      const additiveEvent = {
+        id: 'additive-error-1',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:02.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {},
+      } as TimelineEvent;
+      const round2UserMessage = {
+        id: 'round-2::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:43:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'round two input' },
+      } as TimelineEvent;
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              events: [
+                storedRound1UserMessage,
+                storedRound1ExecutionStarted,
+                storedRound1Step0,
+                storedRound1Step1,
+                staleRound1Step2,
+                additiveEvent,
+                round2UserMessage,
+              ],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const canonicalUserMessage = {
+        ...storedRound1UserMessage,
+        data: { message: 'processed input', attachment_refs: [] },
+      } as TimelineEvent;
+      const canonicalStep0: TimelineEvent = {
+        ...storedRound1Step0,
+        created_at: 'CANONICAL_TS_0',
+      };
+      const canonicalStep1: TimelineEvent = {
+        ...storedRound1Step1,
+        created_at: 'CANONICAL_TS_1',
+      };
+      const terminated = {
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:10.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          outcome: { type: 'responded', response: { message: 'done' } },
+          model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+        },
+      } as TimelineEvent;
+
+      await client.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'round-1',
+        events: [
+          canonicalUserMessage,
+          storedRound1ExecutionStarted,
+          canonicalStep0,
+          canonicalStep1,
+          terminated,
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          events?: Array<{ id: string; created_at?: string; data?: { message?: string } }>;
+        };
+      };
+      // Round-1 events replaced wholesale; stale step::2 dropped; additive event and round-2
+      // event survive untouched.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'additive-error-1',
+        'round-2::user_message',
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+        'round-1::execution_terminated',
+      ]);
+      const replacedUserMessage = indexed.events?.find(
+        (event) => event.id === 'round-1::user_message'
+      );
+      expect(replacedUserMessage?.data?.message).toBe('processed input');
+      const replacedStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
+      expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
     });
 
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
