@@ -66,7 +66,7 @@ const SPARKLINE_FILL_ACTIVE = 'rgba(0, 45, 128, 0.12)';
  * stay unchanged).
  */
 const V3_CARD_TRENDS: Record<SignalCardId, number[]> = {
-  untriagedHighRisk: [14, 16, 15, 18, 19, 21, 23],
+  untriagedHighRisk: [6, 7, 7, 8, 8, 9, 10],
   newToCritical: [2, 3, 3, 4, 5, 5, 6],
   riskMovers: [6, 8, 7, 9, 11, 10, 14],
   newAndAlerting: [1, 2, 2, 3, 3, 4, 4],

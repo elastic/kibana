@@ -6,18 +6,18 @@
  */
 
 /**
- * Summary pie aggregations for facelift v.5 — counted over the same corpus the
+ * Summary pie aggregations for facelift v.6 — counted over the same corpus the
  * Entities table shows for the active page filters + Resolved / Raw view.
  */
 
-import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { EntityType } from '../../../../../../common/entity_analytics/types';
-import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import type { SeverityCount } from '../../../severity/types';
-import type { PageFilters, TableView } from './data';
-import { EMPTY_PAGE_FILTERS, FACELIFT_WATCHLISTS, getFaceliftRiskLevel } from './data';
-import type { EntityRow } from './resolved_entities_data';
-import { getRawRecords, getResolvedEntities } from './resolved_entities_data';
+import { RiskSeverity } from '../../../../../../../../common/search_strategy';
+import { EntityType } from '../../../../../../../../common/entity_analytics/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../../../common/entity_analytics/asset_criticality/types';
+import type { SeverityCount } from '../../../../../severity/types';
+import type { PageFilters, TableView } from '../../data';
+import { EMPTY_PAGE_FILTERS, FACELIFT_WATCHLISTS, getFaceliftRiskLevel } from '../../data';
+import type { EntityRow } from '../../resolved_entities_data';
+import { getRawRecords, getResolvedEntities } from '../../resolved_entities_data';
 
 export interface SummarySourceCount {
   key: string;

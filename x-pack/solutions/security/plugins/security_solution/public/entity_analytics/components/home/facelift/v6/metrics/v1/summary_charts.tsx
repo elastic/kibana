@@ -34,24 +34,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 
-import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { HeaderSection } from '../../../../../common/components/header_section';
-import { useThemes } from '../../../../../common/components/charts/common';
-import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { DonutChart } from '../../../../../common/components/charts/donutchart';
-import type { FillColor } from '../../../../../common/components/charts/donutchart';
-import { StackByComboBox } from '../../../../../detections/components/alerts_kpis/common/components';
-import { useRiskScoreFillColor } from '../../../risk_score_donut_chart/use_risk_score_fill_color';
-import { RiskLevelBreakdownTable } from '../../risk_level_breakdown_table';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../../../common/entity_analytics/asset_criticality/types';
+import { EntityType } from '../../../../../../../../common/entity_analytics/types';
+import { RiskSeverity } from '../../../../../../../../common/search_strategy';
+import { HeaderSection } from '../../../../../../../common/components/header_section';
+import { useThemes } from '../../../../../../../common/components/charts/common';
+import { ChartLabel } from '../../../../../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { DonutChart } from '../../../../../../../common/components/charts/donutchart';
+import type { FillColor } from '../../../../../../../common/components/charts/donutchart';
+import { StackByComboBox } from '../../../../../../../detections/components/alerts_kpis/common/components';
+import { useRiskScoreFillColor } from '../../../../../risk_score_donut_chart/use_risk_score_fill_color';
+import { RiskLevelBreakdownTable } from '../../../../risk_level_breakdown_table';
 import {
   AssetCriticalityBadge,
   getCriticalityLevelColor,
-} from '../../../asset_criticality/asset_criticality_badge';
-import { CRITICALITY_LEVEL_TITLE } from '../../../asset_criticality/translations';
-import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
-import type { PageFilters, TableView } from './data';
+} from '../../../../../asset_criticality/asset_criticality_badge';
+import { CRITICALITY_LEVEL_TITLE } from '../../../../../asset_criticality/translations';
+import { EntityIconByType } from '../../../../../entity_store/entity_icon_by_type';
+import type { PageFilters, TableView } from '../../data';
 import {
   getSummaryCriticalityCounts,
   getSummaryEntityTypeCounts,
@@ -142,18 +142,20 @@ const chartSlotCss = css`
   block-size: 100%;
 `;
 
-const donutFrameCss = css`
+/** Match Lens/Elastic Charts numeric stack: Elastic UI Numeric → Inter. */
+const getDonutFrameCss = (fontFamily: string) => css`
   inline-size: ${DONUT_SIZE}px;
   block-size: ${DONUT_SIZE}px;
 
-  /* Vertically center the donut label stack; count (first flex item) at 20px. */
+  /* Vertically center the donut label stack; count (first flex item) at 36px. */
   [data-test-subj='donut-chart'] > .euiFlexItem > .euiFlexGroup {
     top: 50% !important;
     transform: translateY(-50%);
   }
 
   [data-test-subj='donut-chart'] > .euiFlexItem > .euiFlexGroup > .euiFlexItem:first-of-type {
-    font-size: 32px;
+    font-size: 36px;
+    font-family: ${fontFamily};
   }
 `;
 
@@ -376,6 +378,7 @@ const CriticalityBreakdownTable: React.FC<{ counts: SummaryCriticalityCount }> =
 const SummaryRiskDonut: React.FC<{ severityCount: ReturnType<typeof getSummaryRiskLevelCounts> }> = ({
   severityCount,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const fillColor = useRiskScoreFillColor();
   const donutChartData = useMemo(
     () =>
@@ -392,7 +395,7 @@ const SummaryRiskDonut: React.FC<{ severityCount: ReturnType<typeof getSummaryRi
 
   return (
     <div css={chartSlotCss} data-test-subj="eaFaceliftSummaryRiskDonut">
-      <div css={donutFrameCss} className="eui-textCenter">
+      <div css={getDonutFrameCss(`'Elastic UI Numeric', ${euiTheme.font.family}`)} className="eui-textCenter">
         <DonutChart
           data={donutChartData}
           fillColor={fillColor}
@@ -431,7 +434,7 @@ const CriticalityDonutChart: React.FC<{ counts: SummaryCriticalityCount }> = ({ 
 
   return (
     <div css={chartSlotCss} data-test-subj="eaFaceliftSummaryCriticalityDonut">
-      <div css={donutFrameCss} className="eui-textCenter">
+      <div css={getDonutFrameCss(`'Elastic UI Numeric', ${euiTheme.font.family}`)} className="eui-textCenter">
         <DonutChart
           data={data}
           fillColor={fillColor}
@@ -556,7 +559,7 @@ const EntityTypeDonutChart: React.FC<{ counts: SummaryEntityTypeCount }> = ({ co
 
   return (
     <div css={chartSlotCss} data-test-subj="eaFaceliftSummaryEntityTypeDonut">
-      <div css={donutFrameCss} className="eui-textCenter">
+      <div css={getDonutFrameCss(`'Elastic UI Numeric', ${euiTheme.font.family}`)} className="eui-textCenter">
         <DonutChart
           data={data}
           fillColor={fillColor}

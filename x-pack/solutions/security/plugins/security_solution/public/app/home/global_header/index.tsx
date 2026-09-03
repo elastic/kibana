@@ -39,7 +39,9 @@ import {
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import { useActiveFaceliftVersion } from '../../../entity_analytics/components/home/facelift/active_version';
 import { FaceliftVersionHeaderControl } from './facelift_version_header_control';
+import { MetricsVersionHeaderControl } from './metrics_version_header_control';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -73,6 +75,8 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const entityAnalyticsHomePath = isEntityAnalyticsHomePagePath(pathname);
+  const [faceliftVersion] = useActiveFaceliftVersion();
+  const showMetricsVersionControl = entityAnalyticsHomePath && faceliftVersion === 'v6';
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -126,10 +130,15 @@ export const GlobalHeader = React.memo(() => {
             alignItems="center"
             responsive={false}
             css={css`
-              /* 16px between Prototype version dropdown and Add integrations */
+              /* 16px between Metrics version / Prototype version / Add integrations */
               gap: ${euiTheme.size.base};
             `}
           >
+            {showMetricsVersionControl ? (
+              <EuiFlexItem grow={false}>
+                <MetricsVersionHeaderControl />
+              </EuiFlexItem>
+            ) : null}
             {entityAnalyticsHomePath ? (
               <EuiFlexItem grow={false}>
                 <FaceliftVersionHeaderControl />

@@ -46,6 +46,10 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
+import {
+  FACELIFT_V6_DEFAULT_FROM,
+  FACELIFT_V6_DEFAULT_TO,
+} from '../components/home/facelift/v6/time_range';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -189,7 +193,7 @@ const EntityAnalyticsHomePageContent = () => {
       },
     ];
 
-    // Save view is v.2 only; Create watchlist is the v.5 primary header action.
+    // Save view is v.2 only; Create watchlist is the v.5+ primary header action.
     if (faceliftVersion === 'v2') {
       return {
         primaryActionItem: {
@@ -204,7 +208,7 @@ const EntityAnalyticsHomePageContent = () => {
       };
     }
 
-    if (faceliftVersion === 'v5') {
+    if (faceliftVersion === 'v5' || faceliftVersion === 'v6') {
       return {
         primaryActionItem: {
           id: 'entityAnalyticsCreateWatchlist',
@@ -221,24 +225,25 @@ const EntityAnalyticsHomePageContent = () => {
     return { items };
   }, [faceliftVersion, managementHref, openCreateWatchlist, watchlistsManagementHref]);
 
-  // Design prototype: show "Today" in the KQL bar date picker on page entry
-  // (same relative range Alerts/Discover use via DEFAULT_FROM / DEFAULT_TO).
+  // Design prototype: v.6 opens on “Last 30 days”; older versions keep “Today”.
   useEffect(() => {
-    const from = dateMath.parse(DEFAULT_FROM)?.toISOString();
-    const to = dateMath.parse(DEFAULT_TO, { roundUp: true })?.toISOString();
+    const fromStr = faceliftVersion === 'v6' ? FACELIFT_V6_DEFAULT_FROM : DEFAULT_FROM;
+    const toStr = faceliftVersion === 'v6' ? FACELIFT_V6_DEFAULT_TO : DEFAULT_TO;
+    const from = dateMath.parse(fromStr)?.toISOString();
+    const to = dateMath.parse(toStr, { roundUp: true })?.toISOString();
     if (!from || !to) {
       return;
     }
     dispatch(
       inputsActions.setRelativeRangeDatePicker({
         id: InputsModelId.global,
-        fromStr: DEFAULT_FROM,
-        toStr: DEFAULT_TO,
+        fromStr,
+        toStr,
         from,
         to,
       })
     );
-  }, [dispatch]);
+  }, [dispatch, faceliftVersion]);
 
   const { data: entityStoreStatusData } = useEntityStoreStatus();
   const entityStoreDisabled =

@@ -8,7 +8,7 @@
 /**
  * Active EA Facelift prototype version.
  *
- * Home UI lives in `./v1`–`./v5` as independent code snapshots. Flyout / table
+ * Home UI lives in `./v1`–`./v6` as independent code snapshots. Flyout / table
  * mock bridges read this module so external hooks follow the selected version.
  * To ship a single final version later: keep that folder, delete the others,
  * drop the switcher, and point the thin root bridges at the survivor (or move
@@ -19,15 +19,20 @@
  *
  * The Kibana chrome header dropdown and the home page both read/write this
  * module; `subscribeActiveFaceliftVersion` keeps React state in sync.
+ *
+ * Within v.6 only, metric charts can also be swapped via
+ * `./active_metrics_version` (Metrics version header control) without
+ * changing the rest of the page. Prototype v.5 keeps a fixed metrics v.1 look.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
-export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5';
+export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6';
 
-export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v5';
+export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v6';
 
 export const FACELIFT_VERSION_OPTIONS: Array<{ key: FaceliftVersion; label: string }> = [
+  { key: 'v6', label: 'v.6' },
   { key: 'v5', label: 'v.5' },
   { key: 'v4', label: 'v.4' },
   { key: 'v3', label: 'v.3' },
@@ -77,4 +82,8 @@ export const useActiveFaceliftVersion = (): [
 
 /** v.2+ share the AppHeader chrome and in-page search layout. */
 export const isFaceliftAppHeaderVersion = (version: FaceliftVersion): boolean =>
-  version === 'v2' || version === 'v3' || version === 'v4' || version === 'v5';
+  version === 'v2' ||
+  version === 'v3' ||
+  version === 'v4' ||
+  version === 'v5' ||
+  version === 'v6';

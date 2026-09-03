@@ -171,7 +171,7 @@ export const SIGNAL_CARDS: SignalCardData[] = [
   {
     id: 'untriagedHighRisk',
     title: 'Untriaged high-risk',
-    value: 23,
+    value: 10,
     description: 'High- or critical-risk entities with open alerts',
     filterLabel: 'Untriaged high-risk',
   },
@@ -270,6 +270,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: true,
     hasNewAnomalies: false,
     isDormantActive: false,
+    isUntriaged: true,
     topRiskContributions: [
       { label: 'Critical alerts', value: 38 },
       { label: 'Rare process execution', value: 12 },
@@ -304,6 +305,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: false,
     isDormantActive: false,
+    isUntriaged: true,
   },
   {
     id: 'id-db-core',
@@ -349,6 +351,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     hasNewAnomalies: false,
     isDormantActive: false,
     isNewThisWeek: true,
+    isUntriaged: true,
   },
   {
     id: 'id-svc-backup',
@@ -364,6 +367,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     hasNewAnomalies: false,
     isDormantActive: true,
     isNewThisWeek: true,
+    isUntriaged: true,
   },
   {
     id: 'id-liam',
@@ -384,7 +388,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     id: 'id-kiosk',
     name: 'kiosk-lobby-2',
     entityType: EntityType.host,
-    riskScore: 64,
+    riskScore: 70, // max raw 78; High so it counts in Untriaged high-risk
     riskDelta24h: -2,
     criticality: 'low_impact',
     alerts: 1,
@@ -394,6 +398,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     hasNewAnomalies: false,
     isDormantActive: false,
     isNewThisWeek: true,
+    isUntriaged: true,
   },
   {
     id: 'id-sofia',
@@ -1108,7 +1113,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.host,
     domain: 'corp.acme.com',
     source: 'Endpoint',
-    // Elevated raw record under a Medium identity → Hidden risk signal.
+    // Raw risk stays above the High identity score (Untriaged high-risk).
     riskScore: 78,
     riskDelta24h: 14,
     criticality: 'low_impact',

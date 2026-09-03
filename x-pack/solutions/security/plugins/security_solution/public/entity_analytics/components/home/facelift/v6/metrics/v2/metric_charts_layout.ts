@@ -6,15 +6,18 @@
  */
 
 /**
- * Shared height for the v.5 overview pair: Needs-attention metrics (2×3) and
- * the Entities-by pie panel.
+ * Shared height for this metrics version’s overview pair: Needs-attention
+ * metrics (2×3) and the Entities-by pie panel.
  */
 
 /** Height of each metric card / row in the 2×3 grid. */
 export const METRIC_CARD_HEIGHT = 156;
 
-/** Full metrics panel height (two rows). */
-export const METRIC_CHARTS_BODY_HEIGHT = METRIC_CARD_HEIGHT * 2;
+/** Gap between separate metric cards (row and column). */
+export const METRIC_CARD_GAP = 16;
+
+/** Full metrics panel height (two rows + one inter-row gap). */
+export const METRIC_CHARTS_BODY_HEIGHT = METRIC_CARD_HEIGHT * 2 + METRIC_CARD_GAP;
 
 /**
  * Entities-by header row (title + compressed StackByComboBox).

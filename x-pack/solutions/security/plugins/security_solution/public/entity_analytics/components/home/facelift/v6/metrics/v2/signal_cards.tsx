@@ -14,7 +14,6 @@ import {
   Settings,
 } from '@elastic/charts';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,50 +26,57 @@ import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
-import { METRIC_CHARTS_BODY_HEIGHT } from './metric_charts_layout';
+import type { ActiveFilter, SignalCardData, SignalCardId } from '../../data';
+import { expandTrendToThirtyDays } from '../../time_range';
+import { METRIC_CARD_GAP, METRIC_CHARTS_BODY_HEIGHT } from './metric_charts_layout';
 
 export interface SignalCardsProps {
   activeFilter: ActiveFilter | null;
   /** Card values for the current page filters — see `getSignalCards`. */
   cards: SignalCardData[];
   onFilterForCard: (cardId: SignalCardId) => void;
-  /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.4. */
+  /** Kept for MetricChartsPanel wiring; cards are whole-card toggles in v.5. */
   onFilterOutCard?: (cardId: SignalCardId) => void;
   onAddCardToTimeline?: (cardId: SignalCardId) => void;
 }
 
 /**
- * Needs-attention metric cards row height.
+ * Needs-attention metrics panel height (matches Entities-by pie panel).
  */
 const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
-const VALUE_FONT_SIZE = 42;
-/** Title matches EUI `s` +2px; subtitle is +1px vs `xs`; delta / captions +2px. */
-const TITLE_FONT_SIZE = 17;
+/**
+ * Match Elastic Charts `Metric` defaults for a ~156px tile
+ * (`theme.metric.spacing: 'small'`, height breakpoint `s`: 150–200px).
+ * See `@elastic/charts` `text_measurements.js` + `.echMetricText` CSS.
+ */
+const VALUE_FONT_SIZE = 36;
+const TITLE_FONT_SIZE = 16;
 const SUBTITLE_FONT_SIZE = 14;
 const BODY_FONT_SIZE = 14;
-const TITLE_SUBTITLE_GAP = 8;
-const SUBTITLE_STATUS_GAP = 8;
-const DELTA_VALUE_GAP = 4;
+const TITLE_SUBTITLE_GAP = 5;
+/** Metric `primaryAdjacentGap` for bottom value + extra is 0. */
+const DELTA_VALUE_GAP = 0;
+const METRIC_LINE_HEIGHT = 1.2;
 const DIMMED_OPACITY = 0.7;
 const SPARKLINE_HEIGHT_RATIO = 0.5;
+/** Metric `panelPadding` (small spacing). */
 const CARD_PADDING = 8;
-/** Default sparkline fill: #2B394F at 8% opacity. */
+/** Default sparkline fill when there is no delta: #2B394F at 8% opacity. */
 const SPARKLINE_FILL = 'rgba(43, 57, 79, 0.08)';
-/** Active-state sparkline fill: #002D80 at 12% opacity. */
+/** Active-state sparkline fill when there is no delta: #002D80 at 12% opacity. */
 const SPARKLINE_FILL_ACTIVE = 'rgba(0, 45, 128, 0.12)';
 
 /**
- * v.4-only mock trends / deltas (kept out of shared `v2/data` so v.2 charts
- * stay unchanged).
+ * v.6 mock trends / deltas framed for Last 30 days (kept out of shared v.2 data).
  */
 const V3_CARD_TRENDS: Record<SignalCardId, number[]> = {
-  untriagedHighRisk: [6, 7, 7, 8, 8, 9, 10],
-  newToCritical: [2, 3, 3, 4, 5, 5, 6],
-  riskMovers: [6, 8, 7, 9, 11, 10, 14],
-  newAndAlerting: [1, 2, 2, 3, 3, 4, 4],
-  newAnomalies: [52, 48, 45, 41, 44, 39, 37],
-  hiddenRisk: [18, 16, 15, 14, 13, 13, 12],
+  // 30 daily points — matches Last-30-days picker (expanded from the 7-day mock).
+  untriagedHighRisk: expandTrendToThirtyDays([6, 7, 7, 8, 8, 9, 10]),
+  newToCritical: expandTrendToThirtyDays([2, 3, 3, 4, 5, 5, 6]),
+  riskMovers: expandTrendToThirtyDays([6, 8, 7, 9, 11, 10, 14]),
+  newAndAlerting: expandTrendToThirtyDays([1, 2, 2, 3, 3, 4, 4]),
+  newAnomalies: expandTrendToThirtyDays([52, 48, 45, 41, 44, 39, 37]),
+  hiddenRisk: expandTrendToThirtyDays([18, 16, 15, 14, 13, 13, 12]),
 };
 
 const V3_CARD_DELTAS: Partial<Record<SignalCardId, number>> = {
@@ -82,25 +88,26 @@ const V3_CARD_DELTAS: Partial<Record<SignalCardId, number>> = {
   hiddenRisk: -2,
 };
 
-/** v.4 title overrides (tooltip uses the same string). */
+/** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
   newToCritical: 'New to critical',
+};
+
+/** v.5 subtitle / description overrides (shared mock corpus stays unchanged). */
+const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
+  untriagedHighRisk: 'High-/critical-risk entities with open alerts',
+  hiddenRisk: 'Low-/medium-risk entities containing a high-/critical-risk record',
 };
 
 const displayTitleFor = (card: SignalCardData): string =>
   V3_CARD_TITLES[card.id] ?? card.title;
 
-const FILTERING_TABLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCards.filteringTable',
-  { defaultMessage: 'Filtering table' }
-);
-const ALL_CLEAR = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCards.allClear',
-  { defaultMessage: 'All clear' }
-);
-const VS_YESTERDAY = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsYesterday',
-  { defaultMessage: 'vs yesterday' }
+const displayDescriptionFor = (card: SignalCardData): string =>
+  V5_CARD_DESCRIPTIONS[card.id] ?? card.description;
+
+const VS_PREVIOUS_PERIOD = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPrevious30Days',
+  { defaultMessage: 'vs previous 30 days' }
 );
 
 const filterTableTooltip = (title: string) =>
@@ -108,6 +115,15 @@ const filterTableTooltip = (title: string) =>
     defaultMessage: 'Filter table: {title}',
     values: { title },
   });
+
+const unfilterTableTooltip = (title: string) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCards.unfilterTableTooltip',
+    {
+      defaultMessage: 'Unfilter table: {title}',
+      values: { title },
+    }
+  );
 
 /**
  * Delta under the description. These six metrics count “bad things”, so the
@@ -130,39 +146,16 @@ const DeltaCaption: React.FC<{ delta: number }> = ({ delta }) => {
           color={tone}
           css={css`
             font-size: ${BODY_FONT_SIZE}px;
-            line-height: 1.2;
+            line-height: ${METRIC_LINE_HEIGHT};
           `}
         >
           {sign}
-          {delta} {VS_YESTERDAY}
+          {delta} {VS_PREVIOUS_PERIOD}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
-
-const StatusCaption: React.FC<{
-  iconType: 'filterInclude' | 'checkInCircleFilled';
-  label: string;
-  color: string;
-}> = ({ iconType, label, color }) => (
-  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type={iconType} size="s" color={color} aria-hidden />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText
-        color={color}
-        css={css`
-          font-size: ${BODY_FONT_SIZE}px;
-          line-height: 1.2;
-        `}
-      >
-        {label}
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const CornerControl: React.FC<{
   selected: boolean;
@@ -176,7 +169,41 @@ const CornerControl: React.FC<{
     return null;
   }
 
-  const iconColor = selected || emphasized ? 'primary' : euiTheme.colors.textSubdued;
+  // Match default filter chrome; selection is signaled by the accent dot only.
+  const iconColor = emphasized ? 'primary' : euiTheme.colors.textSubdued;
+
+  const icon = (
+    <span
+      css={css`
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 0;
+      `}
+    >
+      <EuiIcon type="filter" size="m" color={iconColor} aria-hidden />
+      {selected ? (
+        <EuiIcon
+          type="dot"
+          size="m"
+          color="accent"
+          aria-hidden
+          css={css`
+            position: absolute;
+            inset-block-start: -8px;
+            inset-inline-end: -8px;
+            inline-size: 20px !important;
+            block-size: 20px !important;
+            pointer-events: none;
+            stroke: ${euiTheme.colors.emptyShade};
+            stroke-width: 1px;
+            paint-order: stroke;
+          `}
+        />
+      ) : null}
+    </span>
+  );
 
   if (selected && onClear) {
     return (
@@ -204,15 +231,14 @@ const CornerControl: React.FC<{
           border: 0;
           background: transparent;
           cursor: pointer;
-          color: ${euiTheme.colors.textPrimary};
         `}
       >
-        <EuiIcon type="cross" size="m" color="primary" aria-hidden />
+        {icon}
       </button>
     );
   }
 
-  return <EuiIcon type="filter" size="m" color={iconColor} aria-hidden />;
+  return icon;
 };
 
 /** Decorative area sparkline behind the value — fill only, no stroke. */
@@ -292,13 +318,24 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   // Active keeps a white tile; only the border (and sparkline tint) mark selection.
   const tileBackground = selected ? defaultBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
-  const sparklineFill = selected ? SPARKLINE_FILL_ACTIVE : SPARKLINE_FILL;
 
   const delta = V3_CARD_DELTAS[card.id] ?? card.delta;
   const showDelta = interactive && !isZero && delta !== undefined && delta !== 0;
+  // Match DeltaCaption polarity (increase = danger, decrease = success) using
+  // backgrounds/light/{danger|success}; fall back to grey when there is no delta.
+  const sparklineFill =
+    showDelta && delta! > 0
+      ? euiTheme.colors.backgroundLightDanger
+      : showDelta && delta! < 0
+        ? euiTheme.colors.backgroundLightSuccess
+        : selected
+          ? SPARKLINE_FILL_ACTIVE
+          : SPARKLINE_FILL;
+
   const trendKeyframes = V3_CARD_TRENDS[card.id] ?? card.trend;
   const showTrend = interactive && Boolean(trendKeyframes && trendKeyframes.length > 1);
   const displayTitle = displayTitleFor(card);
+  const displayDescription = displayDescriptionFor(card);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -338,7 +375,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         block-size: 100%;
         padding: ${CARD_PADDING}px;
         border: 1px solid ${borderColor};
-        border-radius: 0;
+        border-radius: ${euiTheme.border.radius.medium};
         background: ${tileBackground};
         opacity: ${dimmed ? DIMMED_OPACITY : 1};
         cursor: ${interactive ? 'pointer' : 'default'};
@@ -392,7 +429,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
               css={css`
                 font-size: ${TITLE_FONT_SIZE}px;
                 font-weight: ${euiTheme.font.weight.bold};
-                line-height: 1.25;
+                line-height: ${METRIC_LINE_HEIGHT};
               `}
             >
               {displayTitle}
@@ -402,41 +439,11 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
               css={css`
                 margin-block-start: ${TITLE_SUBTITLE_GAP}px;
                 font-size: ${SUBTITLE_FONT_SIZE}px;
-                line-height: 1.3;
+                line-height: ${METRIC_LINE_HEIGHT};
               `}
             >
-              {card.description}
+              {displayDescription}
             </EuiText>
-            {selected ? (
-              <div
-                css={css`
-                  margin-block-start: ${SUBTITLE_STATUS_GAP}px;
-                `}
-              >
-                <EuiBadge
-                  color="primary"
-                  iconType="filterInclude"
-                  css={css`
-                    font-size: ${BODY_FONT_SIZE}px;
-                  `}
-                >
-                  {FILTERING_TABLE}
-                </EuiBadge>
-              </div>
-            ) : null}
-            {isZero ? (
-              <div
-                css={css`
-                  margin-block-start: ${SUBTITLE_STATUS_GAP}px;
-                `}
-              >
-                <StatusCaption
-                  iconType="checkInCircleFilled"
-                  label={ALL_CLEAR}
-                  color={euiTheme.colors.textSuccess}
-                />
-              </div>
-            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CornerControl
@@ -475,7 +482,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 css={css`
                   font-size: ${VALUE_FONT_SIZE}px;
                   font-weight: ${euiTheme.font.weight.bold};
-                  line-height: 1;
+                  line-height: ${METRIC_LINE_HEIGHT};
                   text-align: end;
                   color: ${euiTheme.colors.textParagraph};
                 `}
@@ -495,7 +502,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 
   return (
     <EuiToolTip
-      content={filterTableTooltip(displayTitle)}
+      content={selected ? unfilterTableTooltip(displayTitle) : filterTableTooltip(displayTitle)}
       display="block"
       anchorProps={{
         css: css`
@@ -509,8 +516,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 };
 
 /**
- * Row of six Needs-attention metrics. Each card toggles an in-page table
- * filter (no KQL pill); selection stays on the card itself.
+ * Needs-attention metrics as separate cards in a 2×3 grid (8px gaps).
+ * Each card toggles an in-page table filter; selection stays on the card.
  */
 export const SignalCards: React.FC<SignalCardsProps> = ({
   activeFilter,
@@ -521,34 +528,35 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
 
   return (
     <EuiPanel
-      hasBorder
+      hasBorder={false}
+      hasShadow={false}
       paddingSize="none"
       data-test-subj="eaFaceliftSignalCards"
       css={css`
         block-size: ${CARDS_HEIGHT}px;
-        overflow: hidden;
+        overflow: visible;
       `}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        alignItems="stretch"
+      <div
         css={css`
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-rows: repeat(2, minmax(0, 1fr));
+          gap: ${METRIC_CARD_GAP}px;
           block-size: 100%;
         `}
       >
-        {cards.map((card, index) => {
+        {cards.map((card) => {
           const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
           const dimmed = Boolean(anySelected && !selected);
 
           return (
-            <EuiFlexItem
+            <div
               key={card.id}
-              grow={1}
               css={css`
                 min-inline-size: 0;
-                /* Overlap adjacent 1px borders so dividers stay 1px and selection paints on top. */
-                margin-inline-start: ${index > 0 ? '-1px' : '0'};
+                min-block-size: 0;
+                block-size: 100%;
                 position: relative;
                 z-index: ${selected ? 2 : 1};
 
@@ -564,10 +572,10 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                 dimmed={dimmed}
                 onToggle={() => onFilterForCard(card.id)}
               />
-            </EuiFlexItem>
+            </div>
           );
         })}
-      </EuiFlexGroup>
+      </div>
     </EuiPanel>
   );
 };

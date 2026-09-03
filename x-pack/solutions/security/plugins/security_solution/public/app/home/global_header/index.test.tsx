@@ -169,20 +169,23 @@ describe('global header', () => {
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('shows the prototype version control left of Add integrations on Entity analytics home', () => {
+  it('shows metrics + prototype version controls left of Add integrations on Entity analytics home (v.6)', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: '/entity_analytics_home_page' });
     const { getByTestId, getByText } = render(
       <TestProviders store={store}>
         <GlobalHeader />
       </TestProviders>
     );
+    expect(getByTestId('eaMetricsVersionHeaderControl')).toBeInTheDocument();
+    expect(getByText('Metrics version:')).toBeInTheDocument();
+    expect(getByTestId('eaMetricsVersionSelect')).toBeInTheDocument();
     expect(getByTestId('eaFaceliftVersionHeaderControl')).toBeInTheDocument();
     expect(getByText('Prototype version:')).toBeInTheDocument();
     expect(getByTestId('eaFaceliftVersionSelect')).toBeInTheDocument();
     expect(getByText('Add integrations')).toBeInTheDocument();
   });
 
-  it('hides the prototype version control off Entity analytics home', () => {
+  it('hides the prototype and metrics version controls off Entity analytics home', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: '/alerts' });
     const { queryByTestId } = render(
       <TestProviders store={store}>
@@ -190,6 +193,7 @@ describe('global header', () => {
       </TestProviders>
     );
     expect(queryByTestId('eaFaceliftVersionHeaderControl')).not.toBeInTheDocument();
+    expect(queryByTestId('eaMetricsVersionHeaderControl')).not.toBeInTheDocument();
   });
 
   it('shows AI Assistant header link', () => {
