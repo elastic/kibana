@@ -34,16 +34,16 @@ interface ManagedResource {
  *
  * Privilege model:
  * - Routes that return workflow data to the caller require `read`.
- * - Routes that return execution data require `readExecution`, which is an extension of `read`:
- *   both `read` and `readExecution` are required (the execution document includes the YAML
- *   snapshot of the workflow definition).
+ * - Execution routes require `readExecution`. Callers who also hold `read` receive the full
+ *   `WorkflowExecutionDto` (which includes the YAML snapshot and step executions); callers with
+ *   only `readExecution` receive a narrow `WorkflowExecutionSummaryDto` (status, timing, who ran
+ *   it — no definition data). `read` is surfaced via `extendedPrivileges` so handlers can branch
+ *   on `authzResult.read` without it becoming a hard gate.
  * - Routes that mutate or execute perform internal reads as part of the operation
  *   (merge, space-scoping, loading the definition to run it). These reads are
  *   implementation details and do NOT require the `read` privilege.
  * - `get_workflows` and `get_stats` use `extendedPrivileges` for optional
  *   execution/managed privileges checked via `authzResult` without gating access.
- * - Execution routes use `extendedPrivileges` for `readManagedExecution` so handlers can
- *   branch on managed access via `authzResult` without it becoming a hard gate.
  */
 export const WORKFLOW_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.read] },
@@ -97,26 +97,22 @@ export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.readExecution] },
 };
 /**
- * Requires only `readExecution` — intentionally does NOT require `read`.
+ * Requires `readExecution` and surfaces `read` and `readManagedExecution` as optional
+ * privileges in `authzResult` without enforcing them as hard gates.
  *
- * Use this for routes that return trigger-event records only (no execution documents,
- * no workflow YAML snapshot). The `readExecution` operation set normally includes `read`
- * because execution documents embed the workflow definition, but trigger-event records
- * contain no workflow definition data, so the `read` extension is not warranted here.
- */
-export const WORKFLOW_TRIGGER_EVENTS_READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.readExecution] },
-};
-/**
- * Requires `read` and `readExecution` (the `readExecution` operation privilege set already
- * includes `read`), and surfaces the optional `readManagedExecution` privilege in `authzResult`
- * without enforcing it. Handlers use `authzResult.readManagedExecution` to decide whether
- * managed executions should be included or accessible.
+ * Handlers branch on `authzResult.read` to decide the response shape:
+ * - `read` present → full `WorkflowExecutionDto` (includes yaml snapshot and step executions)
+ * - `read` absent  → narrow `WorkflowExecutionSummaryDto` (status, timing, who ran it)
+ *
+ * Handlers branch on `authzResult.readManagedExecution` to decide managed-execution access.
  */
 export const WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [...WorkflowsManagementOperationPrivileges.readExecution],
-    extendedPrivileges: [WorkflowsManagementApiActions.readManagedExecution],
+    extendedPrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readManagedExecution,
+    ],
   },
 };
 export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {

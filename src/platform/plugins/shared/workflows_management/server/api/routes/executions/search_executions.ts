@@ -20,6 +20,7 @@ import {
   ExecutionTypeValues,
   WorkflowExecutionCollapseFields,
 } from '@kbn/workflows';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
@@ -32,6 +33,7 @@ import {
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   canReadManagedWorkflowExecutions,
+  hasWorkflowReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -208,8 +210,12 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             includeManagedExecutions: canReadManagedWorkflowExecutions(request),
           };
 
+          const result = await api.searchExecutionsView(params, spaceId);
+          if (hasWorkflowReadPrivilege(request)) {
+            return response.ok({ body: result });
+          }
           return response.ok({
-            body: await api.searchExecutionsView(params, spaceId),
+            body: { ...result, results: result.results.map(toExecutionSummaryDto) },
           });
         } catch (error) {
           if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {
