@@ -37,7 +37,7 @@ export const buildOtelKubernetesActionLinks = ({
           id: CLUSTER_OVERVIEW_DASHBOARD_ID,
           title: i18n.translate(
             'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
-            { defaultMessage: 'Check your Kubernetes cluster health:' }
+            { defaultMessage: 'Check your Kubernetes system at a glance' }
           ),
           label: i18n.translate(
             'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
