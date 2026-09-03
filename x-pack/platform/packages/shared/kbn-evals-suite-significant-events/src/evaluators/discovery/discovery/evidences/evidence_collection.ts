@@ -6,7 +6,10 @@
  */
 
 import type { SignalEntry } from '@kbn/significant-events-schema';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { DiscoveryEvaluator } from '../../types';
+import { extractOrderedToolCalls, isToolId } from '../../utils/tool_usage';
+import { alreadyRecordedNoiseUuids } from '../../utils/already_recorded_noise';
 
 const detectionSignalsByRuleUuid = (
   events: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['significantEvents']
@@ -24,16 +27,38 @@ const detectionSignalsByRuleUuid = (
   return signalsByRuleUuid;
 };
 
+const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
+  signal.evidence == null &&
+  signal.verdict === 'not_checked' &&
+  /no backed query KI (?:matched|available)/i.test(signal.description);
+
 /** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ input, output }) => {
     const detections = output.inputDetections ?? input.detections ?? [];
     const expectedRuleUuids = new Set(
       detections
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+    );
+    const orderedCalls = extractOrderedToolCalls(output.steps ?? []);
+    const recordedNoise = alreadyRecordedNoiseUuids(orderedCalls, [...expectedRuleUuids]);
+    const ranConfirmationQuery = orderedCalls.some(
+      ({ results, toolId }) =>
+        isToolId(toolId, platformCoreTools.executeEsql) &&
+        results.some(
+          (result) =>
+            typeof result === 'object' &&
+            result !== null &&
+            'data' in result &&
+            typeof result.data === 'object' &&
+            result.data !== null &&
+            !('error' in result.data) &&
+            typeof (result.data as Record<string, unknown>).message !== 'string'
+        )
     );
     const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
     const issues: string[] = [];
@@ -48,12 +73,16 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     }
 
     for (const ruleUuid of expectedRuleUuids) {
+      if (recordedNoise.has(ruleUuid) && ranConfirmationQuery) {
+        covered++;
+        continue;
+      }
       const signals = signalsByRuleUuid.get(ruleUuid) ?? [];
       if (signals.length === 0) {
         issues.push(`missing signal for input rule "${ruleUuid}"`);
       } else if (signals.length > 1) {
         issues.push(`duplicate signals for input rule "${ruleUuid}"`);
-      } else if (signals[0].evidence == null) {
+      } else if (signals[0].evidence == null && !hasQuietNoQueryDisposition(signals[0])) {
         issues.push(`no ES|QL evidence for input rule "${ruleUuid}"`);
       } else {
         covered++;

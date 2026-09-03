@@ -33,8 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       jobGroups: [...new Set(expectedJobGroups)].sort(),
       recordCount: '2,399',
       memoryStatus: 'ok',
-      jobState: 'closed',
-      datafeedState: 'stopped',
+      jobAndDatafeedState: 'closed stopped',
       latestTimestamp: '2016-02-11 23:56:59',
     };
   }

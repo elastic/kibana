@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/gen-ai-settings-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,10 +14,11 @@ project:
   title: '@kbn/gen-ai-settings-plugin'
   description: Moon project for @kbn/gen-ai-settings-plugin
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/plugins/private/gen_ai_settings
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/management-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
@@ -37,7 +38,7 @@ dependsOn:
   - '@kbn/management-settings-types'
   - '@kbn/management-settings-utilities'
   - '@kbn/management-settings-field-definition'
-  - '@kbn/react-kibana-context-theme'
+  - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-plugin'
   - '@kbn/management-settings-components-field-row'
   - '@kbn/react-query'

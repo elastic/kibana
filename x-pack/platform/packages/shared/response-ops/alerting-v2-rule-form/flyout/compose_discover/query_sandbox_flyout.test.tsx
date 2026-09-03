@@ -26,12 +26,17 @@ jest.mock('../../form/hooks/use_data_fields', () => ({
   useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
 }));
 
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+}));
+
 jest.mock('../../form/contexts/rule_form_context', () => ({
   useRuleFormServices: () => ({
     http: {},
     data: { search: { search: jest.fn() } },
     dataViews: {},
     application: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
   }),
 }));
 

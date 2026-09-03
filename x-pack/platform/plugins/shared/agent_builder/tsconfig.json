@@ -94,6 +94,7 @@
     "@kbn/elastic-assistant",
     "@kbn/inference-connectors",
     "@kbn/react-query",
+    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
@@ -123,6 +124,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/agent-builder-sml-plugin",
     "@kbn/shared-ux-ai-components",
+    "@kbn/app-header",
     "@kbn/fs",
     "@kbn/react-hooks",
     "@kbn/search-inference-endpoints",
@@ -142,5 +144,8 @@
     "@kbn/telemetry",
     "@kbn/embeddable-plugin",
     "@kbn/storybook",
+    "@kbn/context-engine-plugin",
+    "@kbn/files-plugin",
+    "@kbn/ui-callout",
   ]
 }

@@ -7,6 +7,7 @@
 
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
 import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
@@ -26,6 +27,12 @@ export interface ApiKeyAndUserScope {
   userScope: TaskUserScope;
 }
 
+export interface RequestApiKeyCredentials {
+  /** Key id; absent for user-created Cloud (UIAM) API keys, which are raw `essu_` secrets. */
+  id?: string;
+  api_key?: string;
+}
+
 const getCredentialsFromRequest = (request: KibanaRequest) => {
   const authorizationHeaderValue = request.headers.authorization;
   if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
@@ -33,6 +40,29 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
   }
   const [scheme] = authorizationHeaderValue.split(/\s+/);
   return authorizationHeaderValue.substring(scheme.length + 1);
+};
+
+/**
+ * Normalizes a stored task `uiamApiKey` into the credential UIAM expects on the wire.
+ *
+ * Two writers persist this attribute in different shapes:
+ * - the grant path (`EsAndUiamApiKeyStrategy.grantApiKeys`) stores the raw `essu_…` secret;
+ * - the UIAM provisioning (convert) path stores `base64(<id>:<secret>)`, mirroring how ES API
+ *   keys are encoded.
+ *
+ * Only the raw secret authenticates. Presenting the base64 envelope makes Elasticsearch parse it
+ * as a native `id:api_key` pair and look the id up in its own key store, which fails with a
+ * generic authentication error without the cloud realm — and therefore UIAM — ever being reached.
+ * A value in neither shape is returned untouched, so behavior for it is unchanged.
+ */
+export const getUiamApiKeySecret = (storedUiamApiKey: string): string => {
+  if (isUiamCredential(storedUiamApiKey)) {
+    return storedUiamApiKey;
+  }
+
+  const [, secret] = Buffer.from(storedUiamApiKey, 'base64').toString().split(':');
+
+  return secret && isUiamCredential(secret) ? secret : storedUiamApiKey;
 };
 
 export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
@@ -48,9 +78,16 @@ export const requestHasApiKey = (security: SecurityServiceStart, request: Kibana
   return hasApiKey(user, request);
 };
 
-export const getApiKeyFromRequest = (request: KibanaRequest) => {
+export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCredentials | null => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {
+    // A user-created Cloud API key (obtained from the Elastic Cloud UI) is a raw `essu_`
+    // secret with no key id and no base64 encoding, unlike framework-granted UIAM keys
+    // and Elasticsearch API keys, which are encoded as `base64(id:key)`.
+    if (isUiamCredential(credentials)) {
+      return { api_key: credentials };
+    }
+
     const apiKey = Buffer.from(credentials, 'base64').toString().split(':');
 
     return {
@@ -76,10 +113,12 @@ const grantApiKeysForTaskTypes = async ({
   taskInstances,
   user,
   createKey,
+  onApiKeyCreated,
 }: {
   taskInstances: TaskInstance[];
   user: AuthenticatedUser | null;
   createKey: (params: { name: string }) => Promise<{ id: string; api_key: string } | null>;
+  onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated'];
 }) => {
   const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
@@ -96,6 +135,7 @@ const grantApiKeysForTaskTypes = async ({
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
+    onApiKeyCreated?.({ apiKeyId: id });
 
     apiKeyByTaskTypeMap.set(taskType, {
       apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
@@ -139,6 +179,7 @@ export const createApiKey = async (
     return grantApiKeysForTaskTypes({
       taskInstances,
       user,
+      onApiKeyCreated: options?.onApiKeyCreated,
       createKey: ({ name }) =>
         security.authc.apiKeys.cloneAsInternalUser(request, {
           name,
@@ -157,10 +198,19 @@ export const createApiKey = async (
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
 
+    // A raw user-created Cloud (UIAM) API key has no key id and no Elasticsearch counterpart,
+    // so it cannot be persisted as an ES API key. In serverless deployments
+    // `EsAndUiamApiKeyStrategy` persists it UIAM-only before reaching this path.
+    if (!id) {
+      throw Error(
+        'Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required.'
+      );
+    }
+
     taskInstances.forEach((task) => {
       apiKeyByTaskIdMap.set(task.id!, {
         apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
-        apiKeyId: apiKeyCreateResult.id,
+        apiKeyId: id,
       });
     });
 
@@ -171,6 +221,7 @@ export const createApiKey = async (
   return grantApiKeysForTaskTypes({
     taskInstances,
     user,
+    onApiKeyCreated: options?.onApiKeyCreated,
     createKey: async ({ name }) =>
       security.authc.apiKeys.grantAsInternalUser(request, {
         name,

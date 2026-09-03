@@ -14,6 +14,7 @@ import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_c
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { ContentTabIds, type Tab } from '../types';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 interface MockHistory {
   goBack: jest.Mock;
@@ -37,7 +38,7 @@ const mockUseHistory = jest.fn<MockHistory, []>(() => ({
 const mockUseLocation = jest.fn<MockLocation, []>(() => ({
   state: null,
 }));
-const mockChromeNextIsEnabled = jest.fn<boolean, []>(() => false);
+const mockChromeStyle = jest.fn<'classic' | 'project', []>(() => 'classic');
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => mockUseHistory(),
@@ -45,7 +46,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => true,
+  useUiSetting: jest.fn(() => true),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -55,11 +56,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
         navigateToApp: jest.fn(),
       },
       chrome: {
-        next: {
-          get isEnabled() {
-            return mockChromeNextIsEnabled();
-          },
-        },
+        getChromeStyle: () => mockChromeStyle(),
       },
     },
   }),
@@ -85,6 +82,7 @@ const useAssetDetailsRenderPropsContextMock =
   useAssetDetailsRenderPropsContext as jest.MockedFunction<
     typeof useAssetDetailsRenderPropsContext
   >;
+const mockUseUiSetting = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
 
 const mockProfilingTab: Tab = {
   id: ContentTabIds.PROFILING,
@@ -94,6 +92,11 @@ const mockProfilingTab: Tab = {
 const mockOverviewTab: Tab = {
   id: ContentTabIds.OVERVIEW,
   name: 'Overview',
+};
+
+const mockDashboardsTab: Tab = {
+  id: ContentTabIds.DASHBOARDS,
+  name: 'Dashboards',
 };
 
 describe('usePageHeader', () => {
@@ -107,7 +110,8 @@ describe('usePageHeader', () => {
     mockUseLocation.mockReturnValue({
       state: null,
     });
-    mockChromeNextIsEnabled.mockReturnValue(false);
+    mockChromeStyle.mockReturnValue('classic');
+    mockUseUiSetting.mockReturnValue(true);
 
     useTabSwitcherContextMock.mockReturnValue({
       showTab: jest.fn(),
@@ -219,9 +223,37 @@ describe('usePageHeader', () => {
     });
   });
 
+  describe('dashboards tab visibility', () => {
+    it('should include the dashboards tab when custom dashboards are enabled', () => {
+      mockUseUiSetting.mockReturnValue(true);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockDashboardsTab], []));
+
+      const dashboardsTabEntry = result.current.tabEntries.find(
+        (tab) => tab.id === ContentTabIds.DASHBOARDS
+      );
+
+      expect(dashboardsTabEntry).toBeDefined();
+      expect(dashboardsTabEntry?.['data-test-subj']).toBe('infraAssetDetailsDashboardsTab');
+      expect(dashboardsTabEntry?.label).toBe('Dashboards');
+    });
+
+    it('should exclude the dashboards tab when custom dashboards are disabled', () => {
+      mockUseUiSetting.mockReturnValue(false);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockDashboardsTab], []));
+
+      const dashboardsTabEntry = result.current.tabEntries.find(
+        (tab) => tab.id === ContentTabIds.DASHBOARDS
+      );
+
+      expect(dashboardsTabEntry).toBeUndefined();
+    });
+  });
+
   describe('return breadcrumb visibility', () => {
-    it('should hide the Return breadcrumb when Chrome Next is enabled', () => {
-      mockChromeNextIsEnabled.mockReturnValue(true);
+    it('should hide the Return breadcrumb in the project layout', () => {
+      mockChromeStyle.mockReturnValue('project');
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
       });
@@ -231,8 +263,7 @@ describe('usePageHeader', () => {
       expect(result.current.breadcrumbs).toEqual([]);
     });
 
-    it('should show the Return breadcrumb for classic chrome when origin state exists', () => {
-      mockChromeNextIsEnabled.mockReturnValue(false);
+    it('should show the Return breadcrumb in the classic layout', () => {
       mockUseLocation.mockReturnValue({
         state: mockOriginRouteState,
       });

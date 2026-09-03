@@ -13,10 +13,12 @@ import type {
   QueryOccurrencesResponse,
   SignalEntry,
   SignificantEvent,
+  SignificantEventResponse,
 } from '@kbn/significant-events-schema';
 
-export const checkoutEvent: SignificantEvent = {
+export const checkoutEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
+  created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
   event_uuid: 'checkout-latency-v1',
   status: 'open',
@@ -29,6 +31,8 @@ export const checkoutEvent: SignificantEvent = {
   causal_features: [
     {
       feature_id: 'checkout-api',
+      type: 'entity',
+      subtype: 'service',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
@@ -36,9 +40,18 @@ export const checkoutEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'checkout-api',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
+    },
+    // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
+    {
+      type: 'entity',
+      subtype: 'service',
+      feature_id: 'inventory-service',
+      name: 'inventory-service',
+      stream_name: 'logs.inventory-service',
     },
   ],
 };
@@ -57,6 +70,8 @@ export const inventoryEvent: SignificantEvent = {
   causal_features: [
     {
       feature_id: 'inventory-service',
+      type: 'entity',
+      subtype: 'service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
     },
@@ -64,6 +79,7 @@ export const inventoryEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -113,6 +129,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   stream_name: 'logs.checkout-api',
   description:
     'P95 latency for `checkout-api` rose from 420 ms to 2.8 s immediately after the latest deployment.',
+  verdict: 'confirms',
   evidence: {
     esql_query:
       'FROM logs.checkout-api\n| STATS p95_latency = PERCENTILE(transaction.duration, 95) BY DATE_TRUNC(5 minutes, @timestamp)',
@@ -127,7 +144,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   },
 };
 
-export const checkoutEventWithSignals: SignificantEvent = {
+export const checkoutEventWithSignals: SignificantEventResponse = {
   ...checkoutEvent,
   signals: [checkoutDetectionSignal],
 };
@@ -228,15 +245,27 @@ export const completedInvestigationState: InvestigationState = {
       reason: 'Payment gateway response times remained within their normal range.',
     },
   ],
-  conclusion: `# Conclusion
-The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.
-
-## Next Steps
-- Roll back the checkout deployment · Revert version 2026.07.24-1 and monitor P95 latency.
-- Add a deployment guardrail · Block releases when checkout latency exceeds the service baseline.`,
-  gaps_found: [
-    'Missing database spans · The slow inventory query is not represented in distributed traces.',
-    'Limited deployment metadata · Commit identifiers are not included in checkout logs.',
+  conclusion:
+    'The latest checkout deployment introduced a synchronous inventory lookup that increased request latency.',
+  recommendations: [
+    {
+      title: 'Roll back the checkout deployment',
+      description: 'Revert version 2026.07.24-1 and monitor P95 latency.',
+    },
+    {
+      title: 'Add a deployment guardrail',
+      description: 'Block releases when checkout latency exceeds the service baseline.',
+    },
+  ],
+  blind_spots: [
+    {
+      title: 'Missing database spans',
+      description: 'The slow inventory query is not represented in distributed traces.',
+    },
+    {
+      title: 'Limited deployment metadata',
+      description: 'Commit identifiers are not included in checkout logs.',
+    },
   ],
 };
 

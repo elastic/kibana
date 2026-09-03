@@ -16,10 +16,6 @@ jest.mock('@kbn/as-code-utils', () => ({
   findWithTagFilter: jest.fn(),
 }));
 
-jest.mock('../get_use_ga_schemas', () => ({
-  getUseGASchemas: jest.fn().mockResolvedValue(true),
-}));
-
 jest.mock('../transforms', () => ({
   transformDashboardOut: jest.fn().mockReturnValue({
     dashboardState: {
@@ -55,7 +51,7 @@ describe('dashboard search sort options', () => {
   });
 
   it('passes updated_at desc when query is omitted', async () => {
-    await search(createRequestCtx(), { page: 1, per_page: 20 }, jest.fn() as never, true);
+    await search(createRequestCtx(), { page: 1, per_page: 20 }, jest.fn() as never);
 
     expect(findWithTagFilterMock.mock.calls[0][1]).toEqual(
       expect.objectContaining({
@@ -66,12 +62,7 @@ describe('dashboard search sort options', () => {
   });
 
   it('omits sort options when query is present', async () => {
-    await search(
-      createRequestCtx(),
-      { page: 1, per_page: 20, query: 'sales' },
-      jest.fn() as never,
-      true
-    );
+    await search(createRequestCtx(), { page: 1, per_page: 20, query: 'sales' }, jest.fn() as never);
 
     const findOptions = findWithTagFilterMock.mock.calls[0][1];
     expect(findOptions).not.toHaveProperty('sortField');

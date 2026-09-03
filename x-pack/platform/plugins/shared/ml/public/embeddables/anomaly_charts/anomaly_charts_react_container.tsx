@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import moment from 'moment-timezone';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import { EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
@@ -213,20 +214,16 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   if (error) {
     return (
-      <EuiCallOut
-        announceOnMount={false}
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.errorMessage"
             defaultMessage="Unable to load the data for the anomaly charts"
           />
         }
-        color="danger"
-        iconType="warning"
         css={{ width: '100%' }}
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
+        text={error.message}
+      />
     );
   }
 

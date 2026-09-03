@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { EuiDataGridWrapper, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { EuiDataGridObject, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { ALERTS_TABLE_TEST_SUBJECTS as SUBJ, ALERT_TABLE_DATE_RANGE } from '../constants';
 
 /**
@@ -36,7 +36,7 @@ export class AlertsTablePage {
   public readonly createCaseFlyout: Locator;
   public readonly addToExistingCaseModal: Locator;
   public readonly queryInput: Locator;
-  public readonly dataGrid: EuiDataGridWrapper;
+  public readonly dataGrid: EuiDataGridObject;
   public readonly groupSelector: Locator;
   // Alert summary widget (full-size, rendered above the table)
   public readonly summaryWidget: Locator;
@@ -49,7 +49,7 @@ export class AlertsTablePage {
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator(SUBJ.TABLE_LOADED);
-    this.dataGrid = new EuiDataGridWrapper(this.page, SUBJ.TABLE_LOADED);
+    this.dataGrid = this.page.components.dataGrid(SUBJ.TABLE_LOADED);
     this.pageWithData = this.page.testSubj.locator(SUBJ.PAGE_WITH_DATA);
     this.noDataState = this.page.testSubj.locator(SUBJ.TABLE_EMPTY_STATE);
     this.errorPrompt = this.page.testSubj.locator(SUBJ.TABLE_ERROR_PROMPT);
@@ -200,6 +200,10 @@ export class AlertsTablePage {
 
   async clickViewRuleDetails() {
     await this.page.testSubj.click('viewRuleDetails');
+  }
+
+  async clickInvestigate() {
+    await this.page.testSubj.click('o11yAlertActionsInvestigate');
   }
 
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)

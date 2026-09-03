@@ -14,6 +14,7 @@ import type { TaskManagerMetric } from '../task_events';
 import { getTaskTypeGroup, type SerializedHistogram, SimpleHistogram } from './lib';
 import type { TaskManagerMetrics } from './task_metrics_collector';
 import type { ITaskMetricsAggregator } from './types';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
@@ -39,6 +40,11 @@ export interface TaskOverdueMetric extends JsonObject {
 
 export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<TaskOverdueMetric> {
   private histograms: Record<string, SimpleHistogram> = {};
+  private definitions: TaskTypeDictionary;
+
+  constructor(definitions: TaskTypeDictionary) {
+    this.definitions = definitions;
+  }
 
   public initialMetric(): TaskOverdueMetric {
     return {
@@ -85,7 +91,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
             this.histograms[`${TaskOverdueMetricKeys.OVERALL}.${OVERDUE_BY_KEY}`] = hist;
           } else {
             const taskType = key.replaceAll('.', '__');
-            const taskTypeGroup = getTaskTypeGroup(taskType);
+            const taskTypeGroup = getTaskTypeGroup(this.definitions.get(key)?.taskTypeGroup);
             this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskType}.${OVERDUE_BY_KEY}`] =
               hist;
 

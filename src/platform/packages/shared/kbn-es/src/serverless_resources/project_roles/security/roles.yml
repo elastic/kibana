@@ -42,9 +42,10 @@ viewer:
         - '.entities.v1.latest.security_*'
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - '.entity_analytics.entity-leads*'
         - '.entity_analytics.watchlists.*'
@@ -130,9 +131,12 @@ editor:
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -231,14 +235,21 @@ t1_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
+    - names:
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+      privileges:
+        - read
+        - view_index_metadata
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -307,6 +318,7 @@ t2_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
@@ -314,8 +326,11 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
       privileges:
         - read
         - view_index_metadata
@@ -364,8 +379,11 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
+        - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -402,6 +420,7 @@ t3_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -468,8 +487,8 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -553,8 +572,8 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -648,9 +667,12 @@ soc_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -675,10 +697,14 @@ soc_manager:
         - write
         - view_index_metadata
     - names:
+        - risk-score.risk-score-*
+      privileges:
+        - read
+        - write
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
-        - risk-score.risk-score-*
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
@@ -773,8 +799,8 @@ detections_admin:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
       privileges:
         - read
@@ -824,6 +850,7 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
+        - .internal.alerts-security.alerts-*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
@@ -840,9 +867,12 @@ platform_engineer:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
+        - 'entities-metadata-*'
+        - '.entity_analytics.watchlists.*'
+        - '.entity_analytics.entity-leads*'
       privileges:
         - read
         - view_index_metadata
@@ -944,8 +974,8 @@ endpoint_operations_analyst:
         - view_index_metadata
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -1028,8 +1058,8 @@ endpoint_policy_manager:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
-        - '.entities.v2.metadata.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata

@@ -33,6 +33,16 @@ export interface LeadEntity {
   readonly name: string;
 }
 
+export interface RelatedEntity {
+  readonly id: string;
+  readonly type: string;
+  readonly name: string;
+  readonly kinds: string[];
+  readonly riskLevel?: string;
+  readonly criticality?: string;
+  readonly interactedWithAtLeast?: number;
+}
+
 export type ObservationSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 /** A single signal produced by an {@link ObservationModule}. */
@@ -53,6 +63,14 @@ export interface Observation {
   readonly description: string;
   /** Arbitrary metadata specific to the module */
   readonly metadata: Record<string, unknown>;
+}
+
+export interface ScoredEntity {
+  readonly entity: LeadEntity;
+  readonly priority: number;
+  readonly observations: Observation[];
+  readonly topRelatedEntities: RelatedEntity[];
+  readonly relatedEntityCounts: Record<string, number>;
 }
 
 /** Configuration for an observation module registration. */
@@ -101,8 +119,8 @@ export interface Lead {
   readonly byline: string;
   /** Detailed description: evidence chain, investigation guide, the "why" */
   readonly description: string;
-  /** Entities involved in this lead */
-  readonly entities: LeadEntity[];
+  /** The entity this lead is about */
+  readonly entity: LeadEntity;
   /** Tags: keywords + MITRE ATT&CK tactics/techniques */
   readonly tags: string[];
   /** Priority score (1–10, 10 = most urgent) — normalized from composite score */
@@ -115,6 +133,8 @@ export interface Lead {
   readonly staleness: LeadStaleness;
   /** All observations that contributed to this lead */
   readonly observations: Observation[];
+  readonly topRelatedEntities: RelatedEntity[];
+  readonly relatedEntityCounts: Record<string, number>;
 }
 
 /** Engine configuration. */

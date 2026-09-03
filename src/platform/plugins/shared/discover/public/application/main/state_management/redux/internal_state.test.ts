@@ -254,25 +254,25 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const prevProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
     store.dispatch(
-      internalStateActions.setProfileStateFieldsToReset({
+      internalStateActions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
     );
 
-    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const nextProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
-    expect(nextDefaultProfileState.fieldsToReset).toBe('all');
-    expect(typeof nextDefaultProfileState.resetId).toBe('string');
-    expect(nextDefaultProfileState.resetId).not.toBe('');
-    expect(nextDefaultProfileState.resetId).not.toBe(prevDefaultProfileState.resetId);
-    expect(nextDefaultProfileState.snapshotsByProfileId).toBe(
-      prevDefaultProfileState.snapshotsByProfileId
+    expect(nextProfileAppStateDefaults.fieldsToReset).toBe('all');
+    expect(typeof nextProfileAppStateDefaults.resetId).toBe('string');
+    expect(nextProfileAppStateDefaults.resetId).not.toBe('');
+    expect(nextProfileAppStateDefaults.resetId).not.toBe(prevProfileAppStateDefaults.resetId);
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId).toBe(
+      prevProfileAppStateDefaults.snapshotsByProfileId
     );
-    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
       columns: ['field1'],
       rowHeight: 3,
     });
@@ -284,13 +284,13 @@ describe('InternalStateStore', () => {
     const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
 
     store.dispatch(
-      internalStateActions.setProfileStateFieldsToReset({
+      internalStateActions.setProfileAppStateDefaultFieldsToReset({
         tabId,
         fieldsToReset: ['columns'],
       })
     );
 
-    const prevDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const prevProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
     store.dispatch(
       internalStateActions.setAppState({
@@ -301,11 +301,13 @@ describe('InternalStateStore', () => {
       })
     );
 
-    const nextDefaultProfileState = selectTab(store.getState(), tabId).defaultProfileState;
+    const nextProfileAppStateDefaults = selectTab(store.getState(), tabId).profileAppStateDefaults;
 
-    expect(nextDefaultProfileState.fieldsToReset).toEqual(prevDefaultProfileState.fieldsToReset);
-    expect(nextDefaultProfileState.resetId).toBe(prevDefaultProfileState.resetId);
-    expect(nextDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+    expect(nextProfileAppStateDefaults.fieldsToReset).toEqual(
+      prevProfileAppStateDefaults.fieldsToReset
+    );
+    expect(nextProfileAppStateDefaults.resetId).toBe(prevProfileAppStateDefaults.resetId);
+    expect(nextProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
       columns: ['field1'],
     });
   });
@@ -337,13 +339,15 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
-      [profileId]: {
-        columns: ['field2'],
-        rowHeight: 3,
-        breakdownField: 'extension',
-      },
-    });
+    expect(selectTab(store.getState(), tabId).profileAppStateDefaults.snapshotsByProfileId).toEqual(
+      {
+        [profileId]: {
+          columns: ['field2'],
+          rowHeight: 3,
+          breakdownField: 'extension',
+        },
+      }
+    );
   });
 
   it('should not update snapshotsByProfileId for system-triggered app state changes', async () => {
@@ -370,11 +374,13 @@ describe('InternalStateStore', () => {
       })
     );
 
-    expect(selectTab(store.getState(), tabId).defaultProfileState.snapshotsByProfileId).toEqual({
-      [profileId]: {
-        columns: ['field1'],
-      },
-    });
+    expect(selectTab(store.getState(), tabId).profileAppStateDefaults.snapshotsByProfileId).toEqual(
+      {
+        [profileId]: {
+          columns: ['field1'],
+        },
+      }
+    );
   });
 
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {

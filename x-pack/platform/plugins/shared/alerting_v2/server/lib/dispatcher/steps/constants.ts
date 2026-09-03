@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DispatchFailureReason as SchemaDispatchFailureReason } from '@kbn/alerting-v2-schemas';
+
 export const ACTION_POLICY_EVENT_PROVIDER = 'alerting_v2' as const;
 
 export const ACTION_POLICY_EVENT_ACTIONS = {
@@ -31,7 +33,6 @@ export const DISPATCH_FAILURE_REASONS = {
   WORKFLOW_DISABLED: 'workflow_disabled',
   /** Scheduling the workflow execution threw (e.g. Task Manager error). */
   SCHEDULE_ERROR: 'schedule_error',
-} as const;
+} as const satisfies Record<string, SchemaDispatchFailureReason>;
 
-export type DispatchFailureReason =
-  (typeof DISPATCH_FAILURE_REASONS)[keyof typeof DISPATCH_FAILURE_REASONS];
+export type DispatchFailureReason = SchemaDispatchFailureReason;

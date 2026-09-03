@@ -43,6 +43,7 @@ import { WorkflowExecutionsTableEndOfResults } from './workflow_executions_table
 import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
 import { useSerialPolling } from '../../hooks/use_serial_polling';
+import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 
 const PAGE_SIZE_OPTIONS = [...EXECUTION_TABLE_PAGE_SIZE_OPTIONS];
@@ -99,12 +100,14 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const fullscreenButtonRef = useRef<HTMLButtonElement>(null);
     const { euiTheme } = useEuiTheme();
     const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+    const telemetry = useTelemetry();
 
     const handleOpenExecution = useCallback(
       (execution: { id: string }) => {
         setSelectedExecution(execution.id);
+        telemetry.reportWorkflowExecutionsDetailOpened({ executionId: execution.id });
       },
-      [setSelectedExecution]
+      [setSelectedExecution, telemetry]
     );
 
     const maxPageIndex = useMemo(() => getMaxPageIndex(pageSize), [pageSize]);

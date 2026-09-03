@@ -418,7 +418,7 @@ function NodeStatusIcon({
       {isRunning ? (
         <EuiLoadingSpinner size="m" />
       ) : isSuccess ? (
-        <EuiIcon type="checkInCircleFilled" color={successColor} size="m" aria-hidden={true} />
+        <EuiIcon type="checkCircleFill" color={successColor} size="m" aria-hidden={true} />
       ) : (
         <EuiIcon type="errorFill" color={failColor} size="m" aria-hidden={true} />
       )}

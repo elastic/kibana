@@ -8,9 +8,8 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-// Only the "users route" tests remain here — they require the queryHistoryRework
-// experimental flag (enabled in config.ts) which registers the internal endpoint.
-// All other saved-query tests have been migrated to Scout:
+// Only the CRUD contract tests and the "users route" tests (internal endpoint)
+// remain here. All other saved-query tests have been migrated to Scout:
 //   x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_*.spec.ts
 
 export default function ({ getService }: FtrProviderContext) {

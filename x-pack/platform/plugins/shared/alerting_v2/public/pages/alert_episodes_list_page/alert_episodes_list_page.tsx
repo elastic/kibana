@@ -96,6 +96,25 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   }),
 };
 
+// The table fills the space left below the KPIs and the histogram. On short viewports that space
+// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
+// scroll instead.
+const MIN_TABLE_HEIGHT = 400;
+
+/**
+ * Two reasons this is a whole pixel value rather than the `1.6em` default:
+ *
+ * - The grid derives its row height from `parseInt` of the cell's computed line height, so the
+ *   default (19.199px at the grid font size) under-allocates every row by ~1.6px.
+ * - The row is one pixel taller than its cells (the row border is not part of the row height
+ *   calculation), so the last line of a cell always loses a pixel to `overflow: hidden`.
+ *
+ * 24px leaves a 20px badge two pixels of slack per side, which survives that lost pixel. Other
+ * data tables with badges in cells (asset inventory, entity analytics, cloud security) land on
+ * the same value.
+ */
+const TABLE_ROW_LINE_HEIGHT = '24px';
+
 const getTableCss = (euiTheme: EuiThemeComputed) => css`
   height: 100%;
   border-radius: ${euiTheme.border.radius.medium};
@@ -376,6 +395,11 @@ export const AlertEpisodesListPage = () => {
     [setVisibleColumns]
   );
 
+  const getRuleDetailsHref = useCallback(
+    (ruleId: string) => services.http.basePath.prepend(paths.ruleDetails(ruleId)),
+    [services.http.basePath]
+  );
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
@@ -387,6 +411,7 @@ export const AlertEpisodesListPage = () => {
           rulesCache={rulesCache}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
+          getRuleDetailsHref={getRuleDetailsHref}
           sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
@@ -397,7 +422,14 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, isLoadingRules, rowHeight, services.userProfile, sourceDataViewsByRule]
+    [
+      rulesCache,
+      isLoadingRules,
+      rowHeight,
+      getRuleDetailsHref,
+      services.userProfile,
+      sourceDataViewsByRule,
+    ]
   );
 
   const episodesMenu = useMemo(
@@ -466,6 +498,7 @@ export const AlertEpisodesListPage = () => {
           grow
           css={css`
             min-width: 0;
+            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -495,6 +528,7 @@ export const AlertEpisodesListPage = () => {
                       cellPadding: 'l',
                       header: 'shade',
                     }}
+                    rowLineHeightOverride={TABLE_ROW_LINE_HEIGHT}
                     dataView={dataView}
                     columns={visibleColumns}
                     onSetColumns={onSetColumns}

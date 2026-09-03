@@ -56,6 +56,8 @@ Also read thoroughly:
 
 For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
 
+Build a scenario parity map with one row for every FTR `it(...)` block. Record its behavior and assertions, its exact Scout destination, and whether it becomes a Scout `test`, `test.step`, API test, RTL/Jest test, drop, or defer. Never group away or omit individual blocks; justify every move, drop, or defer.
+
 **File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
 ### 3. Complexity estimation
@@ -104,7 +106,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 1. **Catalog every FTR service and page object** used by the tests: name, what it does, which files use it, and whether it contains hidden assertions (`existOrFail`, `missingOrFail`, or `expect` calls that should move to specs)
 2. **Check for existing Scout equivalents**: does a matching page object or API service already exist in the Scout packages or in other plugins' `test/scout` trees? Note: exists / exists-but-in-wrong-scope / missing
 3. **For missing equivalents**, recommend scope (shared Scout package vs solution-scoped vs plugin-local) based on how many plugins would benefit
-4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor knows where to use Scout's EUI wrappers
+4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor can use a published EUI test helpers through `page.components.*`.
 5. **Flag brittle locator strategies**: `find.byCssSelector(...)`, `find.byClassName(...)`, or text-based lookups. Note where `data-test-subj` attributes are missing in source code and need to be added
 6. **Flag FTR page objects with hidden assertions**: these need restructuring since page objects should return state, with assertions belonging in the spec
 
@@ -152,7 +154,7 @@ Scan every test file for patterns that need attention during migration:
 | **Global loading indicator waits** | `waitForSelector('globalLoadingIndicator')` or similar global spinners |
 | **Hardcoded timeouts** | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)` |
 | **Shared mutable state** | Variables mutated across `it()` blocks relying on execution order |
-| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state) |
+| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state). Record the `beforeEach`/`afterEach` behavior and expected application state at the start and end of every block so the executor can preserve resets when converting blocks to `test.step()` |
 | **Duplicate test cases** | Multiple `it()` blocks testing the same behavior with minor variations |
 | **Missing cleanup** | Setup in `before`/`beforeEach` without corresponding teardown |
 | **Retry wrappers** | `retry.try(...)`, `retry.waitFor(...)` around assertions |

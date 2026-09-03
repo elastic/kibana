@@ -14,6 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
@@ -90,6 +91,10 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
+      },
       ...getWorkflowsNavPanel(coreStart),
       {
         link: 'observability-overview:alerts',
@@ -109,7 +114,7 @@ function createNavTree({
       },
       {
         link: 'slo',
-        icon: 'visGauge',
+        icon: 'chartGauge',
       },
       ...(streamsAvailable
         ? [
@@ -290,6 +295,10 @@ function createNavTree({
             },
           ]),
       {
+        icon: 'sparkles',
+        link: 'context_engine' as const,
+      },
+      {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
           defaultMessage: 'Machine Learning',
@@ -432,7 +441,7 @@ function createNavTree({
             title: i18n.translate('xpack.observability.obltNav.ingestHub', {
               defaultMessage: 'Ingest Hub',
             }),
-            icon: 'launch',
+            icon: 'rocket',
             children: [
               {
                 link: 'ingestHub' as const,
@@ -451,7 +460,7 @@ function createNavTree({
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             children: [
               {
                 link: 'onboarding' as const,
@@ -637,7 +646,6 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
-              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },

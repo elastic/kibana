@@ -60,6 +60,7 @@ import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../ser
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  inferVarGroupSelections,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
 import { useMultipleAgentPolicies } from '../../../hooks';
@@ -184,8 +185,13 @@ export const EditPackagePolicyForm = memo<{
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
+    // The policy predates the package's var_groups: prefer inferring the selection
+    // from its populated vars over the first-visible-option default, so an existing
+    // configuration (e.g. direct access keys) is not presented as a different one
+    const defaults = computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [packagePolicy.var_group_selections, packagePolicy.vars, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -401,7 +407,8 @@ export const EditPackagePolicyForm = memo<{
           ilmPolicyRef.current,
           packageInfo,
           notifications,
-          packageInfo.title ?? packageInfo.name
+          packageInfo.title ?? packageInfo.name,
+          namespaceCustomizationEnabledRef.current
         );
       }
       setIsEdited(false);

@@ -16,6 +16,8 @@ const createEdge = (
     errorValue?: string;
     errorSkipped?: string;
     count?: number;
+    agentName?: string;
+    hostName?: string;
   } = {}
 ): ResultEdges[number] => ({
   _id: `result-${agentId}`,
@@ -32,6 +34,8 @@ const createEdge = (
     ...(overrides.errorKeyword ? { 'error.keyword': [overrides.errorKeyword] } : {}),
     ...(overrides.errorValue ? { error: [overrides.errorValue] } : {}),
     ...(overrides.errorSkipped ? { 'error.skipped': [overrides.errorSkipped] } : {}),
+    ...(overrides.agentName ? { 'agent.name': [overrides.agentName] } : {}),
+    ...(overrides.hostName ? { 'host.name': [overrides.hostName] } : {}),
   },
 });
 
@@ -130,6 +134,55 @@ describe('transformStatusEdgesToRecords', () => {
     });
 
     expect(records[0].flattened.agent_id).toBe('unknown-agent');
+  });
+
+  it('should fall back to the hostname on the response doc when the agent is not in Fleet', () => {
+    const edges = [
+      createEdge('unknown-agent', {
+        completedAt: '2025-01-20T00:00:00Z',
+        agentName: 'osq-linked',
+      }),
+    ];
+    const records = transformStatusEdgesToRecords({
+      edges,
+      agentNameMap,
+      expired: false,
+    });
+
+    expect(records[0].flattened.agent_id).toBe('osq-linked');
+    expect(records[0].flattened._raw_agent_id).toBe('unknown-agent');
+  });
+
+  it('should fall back to host.name when agent.name is missing', () => {
+    const edges = [
+      createEdge('unknown-agent', {
+        completedAt: '2025-01-20T00:00:00Z',
+        hostName: 'osq-linked',
+      }),
+    ];
+    const records = transformStatusEdgesToRecords({
+      edges,
+      agentNameMap,
+      expired: false,
+    });
+
+    expect(records[0].flattened.agent_id).toBe('osq-linked');
+  });
+
+  it('should prefer the Fleet agent name over the hostname on the response doc', () => {
+    const edges = [
+      createEdge('agent-1', {
+        completedAt: '2025-01-20T00:00:00Z',
+        agentName: 'stale-hostname',
+      }),
+    ];
+    const records = transformStatusEdgesToRecords({
+      edges,
+      agentNameMap,
+      expired: false,
+    });
+
+    expect(records[0].flattened.agent_id).toBe('host-alpha');
   });
 
   it('should display "-" when count is not available', () => {

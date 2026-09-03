@@ -20,7 +20,6 @@
       "embeddable",
       "fieldFormats",
       "uiActions",
-      "presentationUtil",
       "features",
       "files",
       "inspector",
@@ -41,7 +40,7 @@
       "esql",
       "savedObjectsTagging",
       "streams",
-      "kql"
+      "kql",
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
@@ -60,7 +59,8 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significantEvents"
+      "significantEvents",
+      "nightshiftInvestigations",
     ],
     "requiredBundles": [
       "aiops",
@@ -73,8 +73,8 @@
       "kibanaUtils",
       "significantEvents",
       "stackAlerts",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
     ],
-    "extraPublicDirs": ["common"]
-  }
+    "extraPublicDirs": ["common"],
+  },
 }

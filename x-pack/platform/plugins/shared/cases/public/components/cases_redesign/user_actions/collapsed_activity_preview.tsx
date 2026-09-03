@@ -110,7 +110,7 @@ export const CollapsedActivityPreview: React.FC<CollapsedActivityPreviewProps> =
         <EuiButtonEmpty
           size="xs"
           flush="left"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={onExpand}
           data-test-subj={dataTestSubj ? `${dataTestSubj}-show-more` : undefined}
         >

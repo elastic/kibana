@@ -6,6 +6,7 @@
  */
 
 import type { DiscoveryEvaluator } from '../../types';
+import { f1 } from '../common/metrics';
 
 function detectionKey(d: { rule_uuid?: string; metadata?: { rule_uuid?: string } }): string {
   return d.rule_uuid ?? d.metadata?.rule_uuid ?? '';
@@ -39,6 +40,7 @@ function intersectionSize(a: Set<string>, b: Set<string>): number {
 export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: ({ output, expected }) => {
     // Derive the expected grouping from the canonical expected_significant_events: each event's
     // detection signals form one group, keyed by rule_uuid from signal metadata.
@@ -61,18 +63,24 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
         explanation: 'Agent emitted zero significant events — every expected rule is missing',
       });
     }
-    const actualGroups = events.map((event) => {
+    const expectedUniverse = new Set(expectedGroups.flat());
+    // The expected event set may intentionally omit valid standalone dismissed events, such as
+    // unrelated positive detections. Score grouping only for rules in the declared expected
+    // universe; scenario/status evaluators grade those additional dispositions separately.
+    const actualGroupsRaw = events.map((event) => {
       const signals = event.signals ?? [];
       return signals.map((s) => detectionKey(s.metadata ?? {})).filter(Boolean);
     });
-
-    const expectedUniverse = new Set(expectedGroups.flat());
+    const actualUniverseRaw = new Set(actualGroupsRaw.flat());
+    const actualGroups = actualGroupsRaw.map((group) =>
+      group.filter((ruleUuid): ruleUuid is string => expectedUniverse.has(ruleUuid))
+    );
     const actualUniverse = new Set(actualGroups.flat());
 
     // Guard: if the actual and expected rule universes are completely disjoint (e.g. snapshot run
     // against a different detection catalog) the score is trivially 0 for the wrong reason.
-    const hasOverlap = [...actualUniverse].some((key) => expectedUniverse.has(key));
-    if (!hasOverlap && actualUniverse.size > 0) {
+    const hasOverlap = [...actualUniverseRaw].some((key) => expectedUniverse.has(key));
+    if (!hasOverlap && actualUniverseRaw.size > 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
@@ -104,16 +112,11 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
     const missingAssignments = [...expectedUniverse]
       .filter((ruleUuid) => !actualUniverse.has(ruleUuid))
       .sort();
-    const unexpectedAssignments = [...actualUniverse]
-      .filter((ruleUuid) => !expectedUniverse.has(ruleUuid))
-      .sort();
-    if (missingAssignments.length > 0 || unexpectedAssignments.length > 0) {
+    if (missingAssignments.length > 0) {
       return Promise.resolve({
         score: 0,
         label: 'incomplete-rule-assignment',
-        explanation: `Rule assignment mismatch: missing [${missingAssignments.join(
-          ', '
-        )}], unexpected [${unexpectedAssignments.join(', ')}]`,
+        explanation: `Rule assignment mismatch: missing [${missingAssignments.join(', ')}]`,
       });
     }
 
@@ -140,7 +143,7 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
     const truePositives = intersectionSize(actualPairs, expectedPairs);
     const precision = actualPairs.size === 0 ? 0 : truePositives / actualPairs.size;
     const recall = expectedPairs.size === 0 ? 0 : truePositives / expectedPairs.size;
-    const score = precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    const score = f1(precision, recall);
 
     return Promise.resolve({
       score,

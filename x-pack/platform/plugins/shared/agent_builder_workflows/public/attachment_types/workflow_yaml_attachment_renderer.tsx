@@ -309,7 +309,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     if (showOpenInEditor) {
       buttons.push({
         label: labels.openInEditor,
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.SECONDARY,
         handler: handleOpenInEditor,
       });
@@ -411,7 +411,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
             'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
             { defaultMessage: 'Open in editor' }
           ),
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {
             application.navigateToApp(WORKFLOW_PLUGIN_ID, { path: attachment.data.workflowId });

@@ -73,5 +73,6 @@ export function esqlColumnValuesToOptionsListResponse(
     suggestions,
     totalCardinality: suggestions.length,
     invalidSelections,
+    isPartial: false,
   };
 }

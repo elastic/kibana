@@ -14,6 +14,9 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
 } from '@kbn/management-settings-ids';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalScheduledDiscoveryRoutes } from './route';
@@ -48,6 +51,9 @@ const createHandlerParams = ({
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD]: 10,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES]: 360,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE]: 80,
   },
 }: {
   scheduledDiscovery: NonNullable<HandlerParams['params']>['body']['scheduledDiscovery'];
@@ -146,6 +152,9 @@ describe('scheduled significant events discovery settings route', () => {
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         maxReviewPasses: 4,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -182,6 +191,9 @@ describe('scheduled significant events discovery settings route', () => {
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -222,6 +234,9 @@ describe('scheduled significant events discovery settings route', () => {
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });
@@ -293,6 +308,9 @@ describe('scheduled significant events discovery settings route', () => {
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
       },
     });
   });

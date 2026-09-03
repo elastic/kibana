@@ -49,7 +49,7 @@ export const PlatformIcon = memo<PlatformIconProps>(
 
     return (
       <EuiIcon
-        type={!platformIcon ? 'desktop' : platformIcon}
+        type={!platformIcon ? 'display' : platformIcon}
         title={iconTitle}
         size={size}
         data-test-subj={dataTestSubj}

@@ -1,0 +1,64 @@
+{
+  "sha1": "8e2c134be902c786cfdf564fef712917af422a51",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a5dc581b971cba4-fda1f94441bc0cf",
+      "title": "Rollup jobs - hybrid data view creates a rollup data view over regular + rollup indices with the Rollup badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
+        "line": 47,
+        "column": 55
+      }
+    },
+    {
+      "id": "a5dc581b971cba4-9ceb46d2c15bd68",
+      "title": "Rollup jobs - hybrid data view creates a rollup data view over an alias to the rollup index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
+        "line": 61,
+        "column": 15
+      }
+    },
+    {
+      "id": "9e3d555ee740da5-1be76d2db4e531e",
+      "title": "Rollup jobs - create wizard walks the create-job wizard and lists the new job, accessible at each step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/rollup_jobs_wizard.spec.ts",
+        "line": 32,
+        "column": 13
+      }
+    },
+    {
+      "id": "a7e15e4675376cb-9ea795554e8093c",
+      "title": "Rollup jobs - TSVB integration renders a TSVB Metric panel reading a rollup index by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/tsvb.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    }
+  ]
+}

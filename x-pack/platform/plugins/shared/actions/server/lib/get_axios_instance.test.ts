@@ -9,7 +9,12 @@ import sinon from 'sinon';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { buildUserAgent, getAxiosInstanceWithAuth } from './get_axios_instance';
+import {
+  buildUserAgent,
+  getAxiosInstanceWithAuth,
+  getCredentialWithAuth,
+  UnsupportedAuthProducerError,
+} from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
@@ -139,6 +144,20 @@ describe('getAxiosInstance', () => {
     expect(logger.error).toHaveBeenCalledWith(
       `Error getting configured axios instance configured for auth type "foo": Auth type "foo" is not registered. `
     );
+  });
+
+  test('throws when getting credentials for an auth type without getAuthHeaders', async () => {
+    const getCredential = getCredentialWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const credential = getCredential({
+      connectorId: '1',
+      secrets: { authType: 'oauth_authorization_code' },
+    });
+
+    await expect(credential.getAuthHeaders()).rejects.toBeInstanceOf(UnsupportedAuthProducerError);
   });
 
   test('returns axios instance configured for basic auth', async () => {

@@ -46,9 +46,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
-   * Release: 9.6
+   * Release: 9.6, backported to 9.5.x
    */
-  responseActionsEndpointMemoryDumpRaw: false,
+  responseActionsEndpointMemoryDumpRaw: true,
 
   /**
    * `runscript` response action for Elastic Defend Endpoint
@@ -86,6 +86,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Off until the request
+   * user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -333,6 +340,26 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
+
+  /**
+   * Threat-intel supply pipeline (indices, ingest adapters, create
+   * report, IOC extraction, LLM enrichment, Diamond, promote task). Default
+   * off. Enable with:
+   *   xpack.securitySolution.enableExperimental: ['threatIntelSupplyEnabled']
+   */
+  threatIntelSupplyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

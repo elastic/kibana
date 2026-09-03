@@ -16,7 +16,9 @@ import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/referenc
 import { set } from '@kbn/safer-lodash-set';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -329,7 +331,7 @@ describe('fetchActionRequests()', () => {
   });
 
   it('should filter by `automated` action type', async () => {
-    fetchOptions.types = ['manual'];
+    fetchOptions.types = ['automated'];
     await fetchActionRequests(fetchOptions);
 
     expect(esClientMock.search).toHaveBeenCalledWith(
@@ -345,7 +347,7 @@ describe('fetchActionRequests()', () => {
               },
               { bool: { filter: [] } },
             ],
-            must_not: { exists: { field: 'data.alert_id' } },
+            filter: { exists: { field: 'data.alert_id' } },
           },
         },
         from: 0,
@@ -478,6 +480,262 @@ describe('fetchActionRequests()', () => {
         }),
         expect.anything()
       );
+    });
+  });
+
+  describe('and CPS is enabled', () => {
+    let readEsClientMock: ElasticsearchClientMock;
+    let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+
+    beforeEach(() => {
+      readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      applyActionListEsSearchMock(readEsClientMock);
+
+      const endpointService =
+        fetchOptions.endpointService as jest.Mocked<EndpointAppContextService>;
+      endpointService.isCpsEnabled.mockReturnValue(true);
+      endpointService.getReadEsClient.mockReturnValue(readEsClientMock);
+
+      request = httpServerMock.createKibanaRequest();
+      fetchOptions.scoped = endpointService.asScoped(request);
+    });
+
+    it('should read as the request user so the search can fan out to linked projects', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(fetchOptions.endpointService.getReadEsClient).toHaveBeenCalledWith(request);
+      expect(readEsClientMock.search).toHaveBeenCalled();
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('should scope the search by originSpaceId or a locally visible integration policy', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { originSpaceId: 'default' } },
+                          {
+                            terms: {
+                              'agent.policy.integrationPolicyId': expect.any(Array),
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should resolve integration policy ids from Fleet for the shared-policy case', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(
+        fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
+      ).toHaveBeenCalled();
+    });
+
+    it('should exclude documents with no originSpaceId, which may belong to a named space on a linked project', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [{ query: { bool: { must: unknown[] } } }]
+      >;
+
+      expect(JSON.stringify(query.bool.must)).not.toContain('must_not');
+    });
+
+    it('should still scope a named space by originSpaceId', async () => {
+      fetchOptions.spaceId = 'foo';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { originSpaceId: 'foo' } },
+                          {
+                            terms: {
+                              'agent.policy.integrationPolicyId': expect.any(Array),
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should keep the orphan actions branch, matched on the tag rather than on originSpaceId', async () => {
+      const initialValue = await REF_DATA_KEY_INITIAL_VALUE[
+        REF_DATA_KEYS.orphanResponseActionsSpace
+      ]({} as SavedObjectsClientContract, {} as ExperimentalFeatures);
+
+      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+        set(initialValue, 'metadata.spaceId', 'bar')
+      );
+      fetchOptions.spaceId = 'bar';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                { term: { originSpaceId: 'bar' } },
+                                {
+                                  terms: {
+                                    'agent.policy.integrationPolicyId': expect.any(Array),
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include an action whose integration policy is visible in the active space even if its originSpaceId differs', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
+
+      expect(spaceFilter.bool.should).toEqual(
+        expect.arrayContaining([{ terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } }])
+      );
+    });
+
+    it('should include an action whose originSpaceId matches the active space', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
+
+      expect(spaceFilter.bool.should).toEqual(
+        expect.arrayContaining([{ term: { originSpaceId: 'default' } }])
+      );
+    });
+
+    it('should require at least one space-visibility condition, excluding actions matching neither', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: {
+              bool: {
+                must: Array<{ bool: { filter: { bool: { minimum_should_match: number } } } }>;
+              };
+            };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as {
+        bool: { minimum_should_match: number };
+      };
+
+      expect(spaceFilter.bool.minimum_should_match).toBe(1);
+    });
+
+    describe('and the caller has no request identity', () => {
+      beforeEach(() => {
+        fetchOptions.scoped = undefined;
+      });
+
+      it('should keep the pre-CPS space filter, since the read cannot fan out', async () => {
+        await fetchActionRequests(fetchOptions);
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      filter: {
+                        terms: { 'agent.policy.integrationPolicyId': ['111', '222'] },
+                      },
+                    },
+                  },
+                  { bool: { filter: [] } },
+                ],
+              },
+            },
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should read as the internal user', async () => {
+        await fetchActionRequests(fetchOptions);
+
+        expect(readEsClientMock.search).not.toHaveBeenCalled();
+      });
     });
   });
 });

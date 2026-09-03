@@ -25,6 +25,7 @@ import { createSignificantEventsAvailability } from '../significant_events_avail
 import {
   EVENT_SEARCH_DEFAULT_PER_PAGE,
   EVENT_SEARCH_MAX_PER_PAGE,
+  EVENT_SEARCH_SIGNAL_PAGE_SIZE,
   normalizeEventSearchQuery,
   searchEventsToolHandler,
 } from './handler';
@@ -41,7 +42,7 @@ const searchEventsSchema = significantEventSchema
     status: significantEventSchema.shape.status.default('open').describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
         defaultMessage:
-          'Event state to search. Defaults to open so continuation searches cannot select closed events. Specify closed or dismissed only when intentionally reviewing that state.',
+          'Event status to filter by. Defaults to "open". Use "closed" or "dismissed" only when intentionally reviewing events in that state.',
       })
     ),
     query: z
@@ -52,32 +53,20 @@ const searchEventsSchema = significantEventSchema
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query', {
           defaultMessage:
             'Optional substring search over the event title, summary, and symptom hypothesis fields. ' +
-            'Use it to narrow results to a known incident. ' +
+            'Defaults to no text filter. Use it to narrow results to a known incident. ' +
             'Matching is case-insensitive and not semantic — omit it when you want all events for a stream or state.',
         })
       ),
     rule_uuids: z
       .array(z.string())
       .max(100)
+      .transform((ruleUuids) => (ruleUuids.length === 0 ? undefined : ruleUuids))
       .optional()
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.ruleUuids', {
           defaultMessage:
-            'Optional rule UUIDs to match against event signals. When combined with stream names, only events matching both filters are returned.',
+            'Optional rule UUIDs to match against event signals. Defaults to no rule filter. When combined with stream names, only events matching both filters are returned.',
         })
-      ),
-    exclude_unconfirmed_signals: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe(
-        i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.excludeUnconfirmedSignals',
-          {
-            defaultMessage:
-              'When true, omit signals whose confirmed value is false from returned events. Rule-filtered searches also omit events that matched only excluded signals. Signals with confirmed true or omitted remain. Note: total and has_more reflect the pre-filter ES count; treat returned < per_page as the effective end-of-results signal when this filter is active.',
-          }
-        )
       ),
     event_ids: z
       .array(z.string())
@@ -85,7 +74,7 @@ const searchEventsSchema = significantEventSchema
       .optional()
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.eventIds', {
-          defaultMessage: 'Optional stable event IDs to retrieve.',
+          defaultMessage: 'Optional stable event IDs to retrieve. Defaults to no event ID filter.',
         })
       ),
     topology_feature_ids: z
@@ -97,7 +86,7 @@ const searchEventsSchema = significantEventSchema
           'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
           {
             defaultMessage:
-              'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. An event matches when either topology field contains any requested ID.',
+              'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
           }
         )
       ),
@@ -108,9 +97,24 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.view', {
           defaultMessage:
-            'Response detail. compact returns identity, correlation, topology, and signal summaries and is the default. full returns complete stored events and is capped at 10 events per page.',
+            'Response detail. Defaults to "compact", which returns bounded routing data. "full" requires exactly one event_id and returns one bounded page of that event’s signal details.',
         })
       ),
+    signals_page: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Signal page for a "full" event response. Defaults to 1.'),
+    signals_per_page: z
+      .number()
+      .int()
+      .min(1)
+      .max(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
+      .optional()
+      .default(EVENT_SEARCH_SIGNAL_PAGE_SIZE)
+      .describe('Number of signals per "full" event response. Defaults to 10 and is capped at 10.'),
     page: z
       .number()
       .int()
@@ -119,7 +123,7 @@ const searchEventsSchema = significantEventSchema
       .default(1)
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.page', {
-          defaultMessage: 'Current page. Defaults to 1.',
+          defaultMessage: 'Current compact-result page. Defaults to 1.',
         })
       ),
     per_page: z
@@ -132,7 +136,7 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.perPage', {
           defaultMessage:
-            'Number of events to return per page. Defaults to 20; compact responses are capped at 50 and full responses at 10. Controls page size only — never change it on a repeated call to retry the same filters; set page to the next_page value from the previous response instead.',
+            'Number of compact events to return per page. Defaults to 20 and is capped at 50. "full" returns exactly one known event.',
         })
       ),
     from: z
@@ -142,7 +146,7 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.from', {
           defaultMessage:
-            'Start of the search range as ISO 8601 or Elasticsearch date math. Defaults to now-7d.',
+            'Start of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now-7d".',
         })
       ),
     to: z
@@ -152,22 +156,14 @@ const searchEventsSchema = significantEventSchema
       .describe(
         i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.to', {
           defaultMessage:
-            'End of the search range as ISO 8601 or Elasticsearch date math. Defaults to now.',
+            'End of the search range as ISO 8601 or Elasticsearch date math. Defaults to "now".',
         })
       ),
   })
-  .refine(
-    ({ event_ids, query, rule_uuids, stream_names, topology_feature_ids }) =>
-      query !== undefined ||
-      (stream_names?.length ?? 0) > 0 ||
-      (rule_uuids?.length ?? 0) > 0 ||
-      (event_ids?.length ?? 0) > 0 ||
-      (topology_feature_ids?.length ?? 0) > 0,
-    {
-      message:
-        'Provide at least one search filter: query, stream_names, rule_uuids, event_ids, or topology_feature_ids. Do not call event_search with an empty object.',
-    }
-  );
+  .refine(({ event_ids, view }) => view !== 'full' || event_ids?.length === 1, {
+    message: 'Full event search requires exactly one event_id.',
+    path: ['event_ids'],
+  });
 
 export function createSearchEventsTool({
   getScopedClients,
@@ -191,19 +187,26 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. Follow next_page while has_more is true. Searches default to open events; specify a non-open status only when intentionally reviewing that state.',
+          'Use "compact" for broad searches and continuation matching. It includes the event summary and symptom hypothesis for correlation, plus signal counts, complete rule UUIDs, unresolved rule UUIDs, and topology. Use "full" only for one known event and request later signal pages when signals_has_more is true. Searches default to "open" events; specify a non-open status only when intentionally reviewing that state.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
         defaultMessage:
-          'Provide at least one filter. Good: `\'{ "rule_uuids": ["..."], "status": "open" }\'`. Invalid: `\'{}\'`. Never re-call this tool with the same filters and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
+          'Filters are optional for bounded broad searches: omitted values default to "open" events from "now-7d" to "now", "compact" view, page 1, and 20 events per page. Use rule, topology, event, stream, or query filters to narrow results. When has_more is true, increment page with all other compact-search parameters unchanged. For "full", use signals_page to continue only the known event’s signals.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
         defaultMessage:
-          'A compact event caps its signals list and sets signals_truncated to true when a long-running event has more signals than shown; total_signals holds the real count. To read every signal for such an event, call again with view: full and event_ids: [event_id].',
+          'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. Do not close an event while unresolved_rule_uuids is non-empty. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
       })}
     `,
+    annotations: {
+      title: 'Search Significant Events',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchEventsSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),

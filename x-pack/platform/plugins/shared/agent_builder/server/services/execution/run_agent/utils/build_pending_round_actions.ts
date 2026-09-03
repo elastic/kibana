@@ -15,6 +15,10 @@ import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_questio
 
 /**
  * Build the action list from the current pending round, for execution resuming (after HITL interrupts).
+ *
+ * `roundToActions` walks the round in step order (tool-call groups and already-answered
+ * clarifying waves). `pendingAskUserQuestionStepsToActions` then appends the prompt
+ * currently being answered — the only step still missing from the round itself.
  */
 export const buildPendingRoundActions = ({
   round,

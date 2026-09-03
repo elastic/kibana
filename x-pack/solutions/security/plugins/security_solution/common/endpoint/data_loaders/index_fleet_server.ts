@@ -28,7 +28,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { indexFleetServerAgent } from './index_fleet_agent';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { usageTracker } from './usage_tracker';
 import { createToolingLogger, fetchActiveSpaceId, wrapErrorAndRejectPromise } from './utils';
 
@@ -95,7 +95,7 @@ const getOrCreateFleetServerAgentPolicy = async (
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
       },
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 
   if (packagePolicies.data.items[0]) {
     log.debug(
@@ -109,7 +109,7 @@ const getOrCreateFleetServerAgentPolicy = async (
         method: 'GET',
         path: agentPolicyRouteService.getInfoPath(packagePolicies.data.items[0].policy_ids[0]),
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .then((response) => {
         log.debug(`Returning existing Fleet Server agent policy [${response.data.item.id}]`);
         log.verbose(
@@ -154,7 +154,7 @@ const getOrCreateFleetServerAgentPolicy = async (
 
       return response.data.item;
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };
 
 const hasFleetServerAgent = async (
