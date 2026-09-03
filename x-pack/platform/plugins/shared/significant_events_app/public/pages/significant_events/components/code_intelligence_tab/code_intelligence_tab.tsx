@@ -370,7 +370,7 @@ export function CodeIntelligenceTab() {
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
-                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    iconType={isExpanded ? 'minimize' : 'maximize'}
                     aria-label={isExpanded ? MINIMIZE_LABEL : VIEW_DETAILS_LABEL}
                     onClick={toggle}
                   />
