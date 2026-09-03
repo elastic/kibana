@@ -34,12 +34,10 @@ import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
-import { TabHrefOverridesProvider, type TabHrefOverrides } from './tab_href_overrides_context';
 
 export interface AlertingV2PageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  tabHrefOverrides?: TabHrefOverrides;
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
@@ -50,12 +48,10 @@ export interface InternalPageProps extends AlertingV2PageProps {
 const StandardProviders = ({
   container,
   setBreadcrumbs,
-  tabHrefOverrides,
   children,
 }: {
   container: Container;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
-  tabHrefOverrides?: TabHrefOverrides;
   children: React.ReactNode;
 }) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -63,29 +59,19 @@ const StandardProviders = ({
     <Context.Provider value={container}>
       <QueryClientProvider client={queryClient}>
         <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
-          <TabHrefOverridesProvider value={tabHrefOverrides ?? {}}>
-            <I18nProvider>
-              <MemoryRouter>
-                <EuiPageSection paddingSize="m">{children}</EuiPageSection>
-              </MemoryRouter>
-            </I18nProvider>
-          </TabHrefOverridesProvider>
+          <I18nProvider>
+            <MemoryRouter>
+              <EuiPageSection paddingSize="m">{children}</EuiPageSection>
+            </MemoryRouter>
+          </I18nProvider>
         </BreadcrumbProvider>
       </QueryClientProvider>
     </Context.Provider>
   );
 };
 
-export const AlertingV2RulesPage = ({
-  container,
-  setBreadcrumbs,
-  tabHrefOverrides,
-}: InternalPageProps) => (
-  <StandardProviders
-    container={container}
-    setBreadcrumbs={setBreadcrumbs}
-    tabHrefOverrides={tabHrefOverrides}
-  >
+export const AlertingV2RulesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
+  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <RulesApp />
   </StandardProviders>
 );
