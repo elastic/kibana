@@ -2,7 +2,7 @@
 
 This package contains components and services for the unified doc viewer component.
 
-Discover (Document explorer → Toggle dialog with details)
+Discover (Document explorer → View details)
 
 ![image](https://github.com/elastic/kibana/assets/1178348/c9c11587-c53f-4bcd-8d48-aaceb64981ea)
 
