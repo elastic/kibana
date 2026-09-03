@@ -185,13 +185,13 @@ describe('Authenticator', () => {
     it('fails if authentication providers are not configured.', () => {
       expect(
         () => new Authenticator(getMockOptions({ providers: {}, http: { enabled: false } }))
-      ).toThrowError(
+      ).toThrow(
         'No authentication provider is configured. Verify `xpack.security.authc.*` config value.'
       );
     });
 
     it('fails if configured authentication provider is not known.', () => {
-      expect(() => new Authenticator(getMockOptions({ providers: ['super-basic'] }))).toThrowError(
+      expect(() => new Authenticator(getMockOptions({ providers: ['super-basic'] }))).toThrow(
         'Unsupported authentication provider name: super-basic.'
       );
     });
@@ -200,7 +200,7 @@ describe('Authenticator', () => {
       expect(
         () =>
           new Authenticator(getMockOptions({ providers: { basic: { __http__: { order: 0 } } } }))
-      ).toThrowError('Provider name "__http__" is reserved.');
+      ).toThrow('Provider name "__http__" is reserved.');
     });
 
     describe('#options.urls.loggedOut', () => {
@@ -473,13 +473,13 @@ describe('Authenticator', () => {
     it('fails if login attempt is not provided or invalid.', async () => {
       await expect(
         authenticator.login(httpServerMock.createKibanaRequest(), undefined as any)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
 
       await expect(
         authenticator.login(httpServerMock.createKibanaRequest(), {} as any)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
 
@@ -488,7 +488,7 @@ describe('Authenticator', () => {
           provider: 'basic',
           value: {},
         } as any)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
 
@@ -497,7 +497,7 @@ describe('Authenticator', () => {
           provider: { type: 'oidc' },
           value: undefined,
         } as any)
-      ).rejects.toThrowError('Login "attempt.value" should not be empty.');
+      ).rejects.toThrow('Login "attempt.value" should not be empty.');
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
@@ -2961,7 +2961,10 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
-      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(request, mockSessVal);
+      expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledWith(
+        request,
+        mockSessVal
+      );
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 

@@ -17,10 +17,12 @@ export const createLogEntryDatasetsQuery = (
   endTime: number,
   runtimeMappings: estypes.MappingRuntimeFields,
   size: number,
-  afterKey?: CompositeDatasetKey
+  afterKey?: CompositeDatasetKey,
+  projectRouting?: estypes.ProjectRouting
 ) => ({
   ...defaultRequestParameters,
   body: {
+    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
     query: {
       bool: {
         filter: [

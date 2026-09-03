@@ -76,7 +76,6 @@
     "@kbn/test-suites-src",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/config-schema",
-    "@kbn/ml-string-hash",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
     "@kbn/typed-react-router-config",
