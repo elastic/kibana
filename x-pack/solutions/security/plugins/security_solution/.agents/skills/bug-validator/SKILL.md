@@ -140,7 +140,7 @@ When sections are missing: infer from free-form text, check [Elastic Security do
 2. Search for role/permission checks from "Preconditions"
 3. Grep error messages from "Current behavior" — if present, path is still reachable
 4. Check for feature flag gating (`common/experimental_features.ts`, `useIsExperimentalFeatureEnabled`)
-5. Verify feature still documented (see `references/domain-knowledge.md` → Documentation Reference)
+5. Verify feature still documented (see `x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md` → Documentation Reference)
 6. **Space-awareness** (if bug mentions spaces): check saved object `namespaceType`, raw `esClient` usage, index naming
 
 **Flag graduation check:**
@@ -171,7 +171,7 @@ Report: files read, key logic, whether defect still exists with code evidence, r
 ### Step 1c: Team Ownership Check *(run in parallel with 1/1b)*
 
 1. Check `owner` in the nearest `kibana.jsonc` to affected files; fallback to `.github/CODEOWNERS`
-2. Map to issue labels using Team Ownership tables in `references/domain-knowledge.md`
+2. Map to issue labels using Team Ownership tables in `x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md`
 3. Flag mismatches: no label, wrong team, multi-team, or root cause in a platform plugin (Table B)
 
 ### Step 2: Change History Analysis
@@ -380,7 +380,7 @@ When you identify a recurring pattern not yet documented, **print the proposed a
 
 ## Reference Files
 
-- **`references/domain-knowledge.md`** — Security Solution codebase paths, team label → code path mapping, ownership tables, common page routes, platform plugin boundaries, test locations, documentation reference, feature flags, permission patterns
+- **`x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md`** — Security Solution codebase paths, team label → code path mapping, ownership tables, common page routes, platform plugin boundaries, test locations, documentation reference, feature flags, permission patterns
 - **`references/defect-patterns.md`** — 8 common recurring defect patterns with investigation shortcuts
 - **`references/bulk-mode.md`** — Two-pass bulk triage strategy, duplicate detection, quick vs full analysis comparison
 
