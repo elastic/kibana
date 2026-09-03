@@ -38,7 +38,7 @@ describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let currentAttributes: Partial<Installation> = {};
-  
+
   const authorizationHeader = new HTTPAuthorizationHeader(
     'Basic',
     'bW9uaXRvcmluZ191c2VyOm1scWFfYWRtaW4='
