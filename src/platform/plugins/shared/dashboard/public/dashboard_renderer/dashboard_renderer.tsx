@@ -40,6 +40,9 @@ import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardChangeHistoryProvider } from './dashboard_change_history_provider';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { dashboardQueryClient } from '../services/dashboard_query_client';
 
 /**
  * Props for the {@link DashboardRenderer} component.
@@ -225,8 +228,12 @@ export function DashboardRenderer({
           <KibanaContextProvider services={{ uiActions: uiActionsService }}>
             <DashboardContext.Provider value={dashboard.api}>
               <DashboardInternalContext.Provider value={dashboard.internalApi}>
-                {dashboard.showControlGroup && <DashboardControlsRenderer />}
-                <DashboardViewport />
+                <QueryClientProvider client={dashboardQueryClient}>
+                  <DashboardChangeHistoryProvider dashboardId={dashboard.api.uuid}>
+                    {dashboard.showControlGroup && <DashboardControlsRenderer />}
+                    <DashboardViewport />
+                  </DashboardChangeHistoryProvider>
+                </QueryClientProvider>
               </DashboardInternalContext.Provider>
             </DashboardContext.Provider>
           </KibanaContextProvider>
