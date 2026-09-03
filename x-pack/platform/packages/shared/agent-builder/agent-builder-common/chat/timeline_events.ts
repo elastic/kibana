@@ -19,13 +19,8 @@ import type { RoundState } from './round_state';
 
 /**
  * The projection format that new writes are stamped at.
- *
- * Bump this whenever the on-disk event shape changes semantically (event ids, actor logic, the set
- * of event types a round can produce). v2 added the append-only HITL resume shape: a round may span
- * multiple executions (`${roundId}::execution::${k}`) linked by `prompt_response` events. v1 docs
- * are single-execution and still read correctly (they fold trivially).
  */
-export const CONVERSATION_SCHEMA_VERSION = 2;
+export const CONVERSATION_SCHEMA_VERSION = 1;
 
 /**
  * The floor for "this document carries a stored events projection".

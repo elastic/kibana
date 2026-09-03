@@ -21,7 +21,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
-import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
+import { prepareMessages, groupToolCallSteps } from './to_langchain_messages';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -30,7 +30,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 
-describe('convertPreviousRounds', () => {
+describe('prepareMessages', () => {
   const now = new Date().toISOString();
 
   const makeRoundInput = (
@@ -126,7 +126,7 @@ describe('convertPreviousRounds', () => {
 
   it('returns only the user message if no previous rounds', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -136,7 +136,7 @@ describe('convertPreviousRounds', () => {
 
   it('prefixes the next-input user message when conversationTimestamp is provided', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -147,7 +147,7 @@ describe('convertPreviousRounds', () => {
 
   it('includes the author in the next-input prefix when provided', async () => {
     const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -158,7 +158,7 @@ describe('convertPreviousRounds', () => {
 
   it('emits a user-only prefix when the author is provided without a timestamp', async () => {
     const nextInput = makeRoundInput('hello', [], { author: { id: 'u1', username: 'alice' } });
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -169,13 +169,13 @@ describe('convertPreviousRounds', () => {
     const nameOnlyInput = makeRoundInput('hello', [], {
       author: { id: 'u1', full_name: 'Alice Smith' },
     });
-    const nameOnlyResult = await convertPreviousRounds({
+    const nameOnlyResult = await prepareMessages({
       conversation: createConversation({ nextInput: nameOnlyInput }),
     });
     expect(nameOnlyResult[0].content).toBe(`[User: Alice Smith]\n\nhello`);
 
     const idOnlyInput = makeRoundInput('hello', [], { author: { id: 'u1' } });
-    const idOnlyResult = await convertPreviousRounds({
+    const idOnlyResult = await prepareMessages({
       conversation: createConversation({ nextInput: idOnlyInput }),
     });
     expect(idOnlyResult[0].content).toBe(`[User: u1]\n\nhello`);
@@ -191,7 +191,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -213,7 +213,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('prompt answer', [], {
@@ -236,7 +236,7 @@ describe('convertPreviousRounds', () => {
       'This is the formatted text content'
     );
     const nextInput = makeRoundInput('hello with attachment', [attachment]);
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ nextInput }),
       conversationTimestamp: now,
     });
@@ -260,7 +260,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('prompt answer'),
@@ -285,7 +285,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
 
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({
         previousRounds,
         nextInput: makeRoundInput('current message'),
@@ -310,7 +310,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -347,7 +347,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -415,7 +415,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('bye');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -476,7 +476,7 @@ describe('convertPreviousRounds', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -497,7 +497,7 @@ describe('convertPreviousRounds', () => {
         'This is the formatted text content'
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
@@ -528,7 +528,7 @@ describe('convertPreviousRounds', () => {
         attachment1,
         attachment2,
       ]);
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -563,7 +563,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next message');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -592,7 +592,7 @@ describe('convertPreviousRounds', () => {
         attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -620,7 +620,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('follow-up', [], {
@@ -644,7 +644,7 @@ describe('convertPreviousRounds', () => {
         attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'unknown-type' }],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [], // 'unknown-type' has no entry in the master list
@@ -657,7 +657,7 @@ describe('convertPreviousRounds', () => {
     it('omits type instructions when there are no attachment_refs', async () => {
       const nextInput = makeRoundInput('hello');
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -697,7 +697,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('follow-up', [], {
@@ -736,7 +736,7 @@ describe('convertPreviousRounds', () => {
         attachment_context: sampleContext,
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -758,7 +758,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds,
           nextInput: makeRoundInput('next question'),
@@ -773,7 +773,7 @@ describe('convertPreviousRounds', () => {
     it('omits attachment_context when the field is absent', async () => {
       const nextInput = makeRoundInput('just a message');
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ nextInput }),
       });
 
@@ -791,7 +791,7 @@ describe('convertPreviousRounds', () => {
           '<attachment-context count="1"><attachment attachment_id="att-1" /></attachment-context>',
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'text', description: 'Plain text.' }],
@@ -816,7 +816,7 @@ describe('convertPreviousRounds', () => {
         attachment_context: 'The following attachment(s) were added this turn:\n\n<x/>',
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           nextInput,
           attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
@@ -867,7 +867,7 @@ describe('convertPreviousRounds', () => {
         );
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -934,7 +934,7 @@ describe('convertPreviousRounds', () => {
         return aggregated;
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation,
         resultTransformer: customTransformer,
       });
@@ -976,7 +976,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1014,7 +1014,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1052,7 +1052,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1090,7 +1090,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1123,7 +1123,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1176,7 +1176,7 @@ describe('convertPreviousRounds', () => {
         }),
       ];
       const nextInput = makeRoundInput('next');
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -1212,7 +1212,7 @@ describe('convertPreviousRounds', () => {
         steps: [makeBgStep()],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1242,7 +1242,7 @@ describe('convertPreviousRounds', () => {
         ],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1265,7 +1265,7 @@ describe('convertPreviousRounds', () => {
         steps: [],
       });
 
-      const result = await convertPreviousRounds({
+      const result = await prepareMessages({
         conversation: createConversation({
           previousRounds: [round],
           nextInput: makeRoundInput('next'),
@@ -1402,7 +1402,7 @@ describe('groupToolCallSteps', () => {
   });
 });
 
-describe('convertPreviousRounds — relevant_skills replay', () => {
+describe('prepareMessages — relevant_skills replay', () => {
   const conversationWith = (steps: ConversationRoundStep[]): ProcessedConversation =>
     ({
       nextInput: { message: 'current', attachments: [] },
@@ -1439,7 +1439,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
     } as unknown as ConversationRoundStep);
 
   it('replays a relevant_skills step as a <relevant_skills> user notification', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([
         relevantSkillsStep([
           {
@@ -1464,7 +1464,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
   });
 
   it('renders the notice between the round input and the assistant response', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([
         relevantSkillsStep([
           { id: 'a.b', name: 'alpha', path: '/p/SKILL.md', description: 'Alpha' },
@@ -1480,7 +1480,7 @@ describe('convertPreviousRounds — relevant_skills replay', () => {
   });
 
   it('emits no notice for an empty relevant_skills step', async () => {
-    const result = await convertPreviousRounds({
+    const result = await prepareMessages({
       conversation: conversationWith([relevantSkillsStep([])]),
     });
     const hasNotice = result

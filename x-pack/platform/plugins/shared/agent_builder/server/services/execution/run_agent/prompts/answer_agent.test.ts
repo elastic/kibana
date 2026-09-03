@@ -7,10 +7,10 @@
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getStructuredAnswerPrompt } from './answer_agent';
-import { convertPreviousRounds } from '../utils/to_langchain_messages';
+import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
-  convertPreviousRounds: jest.fn().mockResolvedValue([['human', 'history']]),
+  prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
 describe('getStructuredAnswerPrompt', () => {
@@ -49,7 +49,7 @@ describe('getStructuredAnswerPrompt', () => {
 
     const systemMessage = (messages[0] as ['system', string])[1];
     expect(systemMessage).not.toContain('Current date');
-    expect(convertPreviousRounds).toHaveBeenCalledWith(
+    expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
   });

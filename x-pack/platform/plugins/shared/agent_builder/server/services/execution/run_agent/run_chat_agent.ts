@@ -127,9 +127,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversationClient,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation, action });
+  // The agent context is reconstructed from the conversation's event timeline (falling back to
+  // stored rounds only for legacy, pre-events documents). This single reconstruction feeds the
+  // whole context path — message building, token estimation, compaction, the resume initializer,
+  // pending-round detection and input preflight — so nothing reads `conversation.rounds` directly
+  // and the views can't diverge (notably for a multi-execution HITL round).
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
 
-  const pendingRound = getPendingRound(conversation);
+  ensureValidInput({ input: nextInput, previousRounds, action });
+
+  const pendingRound = getPendingRound(previousRounds);
   // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
@@ -186,8 +193,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   };
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
-
-  const previousRounds = conversation ? roundsForContext(conversation) : [];
 
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
