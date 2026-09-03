@@ -94,12 +94,13 @@ const resolveUserProfiles = async (
   userProfileService: UserProfileServiceStart,
   items: Array<{ user?: { id?: string } }>
 ): Promise<Map<string, UserProfile>> => {
+  console.log({ items });
   const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
 
   if (uids.size === 0) {
     return new Map();
   }
-
+  console.log({ uids });
   const profiles = await userProfileService.bulkGet({ uids });
 
   return new Map(profiles.map((profile) => [profile.uid, profile]));
