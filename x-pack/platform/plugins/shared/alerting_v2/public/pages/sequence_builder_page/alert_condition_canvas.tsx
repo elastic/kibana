@@ -15,6 +15,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ColorMode } from '@xyflow/react';
 import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
@@ -37,6 +38,7 @@ import type {
 import { RulesApi } from '../../services/rules_api';
 import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { useCanvasFitView } from './use_canvas_fit_view';
+import { CollapsibleSidePanel } from './collapsible_side_panel';
 
 const nodeTypes = { sequenceStage: SequenceNode };
 const edgeTypes = { sequenceHop: SequenceEdge };
@@ -151,12 +153,16 @@ const RuleListItem: React.FC<{ rule: FetchedRule }> = ({ rule }) => (
 export interface AlertConditionCanvasProps {
   seqValues: SequenceFormValues;
   setSeqValues: React.Dispatch<React.SetStateAction<SequenceFormValues>>;
+  isRuleListOpen: boolean;
+  onToggleRuleList: () => void;
   excludeRuleId?: string;
 }
 
 export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   seqValues,
   setSeqValues,
+  isRuleListOpen,
+  onToggleRuleList,
   excludeRuleId,
 }) => {
   const { colorMode } = useEuiTheme();
@@ -357,55 +363,54 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
     ]
   );
 
+  const availableRulesTitle = i18n.translate(
+    'xpack.alertingV2.sequenceBuilderPage.availableRulesTitle',
+    { defaultMessage: 'Available rules' }
+  );
+
   return (
     <EuiFlexGroup gutterSize="none" style={{ height: '100%', overflow: 'hidden' }}>
-      <EuiFlexItem grow={false} style={{ width: 260, overflow: 'auto', padding: 8 }}>
-        <EuiText size="xs">
-          <strong>
+      <CollapsibleSidePanel
+        title={availableRulesTitle}
+        isOpen={isRuleListOpen}
+        onToggle={onToggleRuleList}
+      >
+        {isLoadingRules ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexGroup>
+        ) : isRulesError ? (
+          <EuiText size="s" color="danger">
             <FormattedMessage
-              id="xpack.alertingV2.sequenceBuilderPage.availableRulesTitle"
-              defaultMessage="Available rules"
+              id="xpack.alertingV2.sequenceBuilderPage.rulesLoadError"
+              defaultMessage="Failed to load rules"
             />
-          </strong>
-        </EuiText>
-        <EuiFlexGroup direction="column" gutterSize="xs" style={{ marginTop: 8 }}>
-          {isLoadingRules ? (
-            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexGroup>
-          ) : isRulesError ? (
-            <EuiText size="s" color="danger">
-              <FormattedMessage
-                id="xpack.alertingV2.sequenceBuilderPage.rulesLoadError"
-                defaultMessage="Failed to load rules"
-              />
-            </EuiText>
-          ) : (
-            <>
-              {availableRules.map((rule) => (
-                <EuiFlexItem key={rule.id} grow={false}>
-                  <RuleListItem rule={rule} />
-                </EuiFlexItem>
-              ))}
-              {availableRules.length === 0 && (
-                <EuiText size="s" color="subdued">
-                  {fetchedRules.length === 0 ? (
-                    <FormattedMessage
-                      id="xpack.alertingV2.sequenceBuilderPage.noRulesFound"
-                      defaultMessage="No rules found"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.alertingV2.sequenceBuilderPage.allRulesUsed"
-                      defaultMessage="All rules are placed on the canvas"
-                    />
-                  )}
-                </EuiText>
-              )}
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          </EuiText>
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            {availableRules.map((rule) => (
+              <EuiFlexItem key={rule.id} grow={false}>
+                <RuleListItem rule={rule} />
+              </EuiFlexItem>
+            ))}
+            {availableRules.length === 0 && (
+              <EuiText size="s" color="subdued">
+                {fetchedRules.length === 0 ? (
+                  <FormattedMessage
+                    id="xpack.alertingV2.sequenceBuilderPage.noRulesFound"
+                    defaultMessage="No rules found"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.alertingV2.sequenceBuilderPage.allRulesUsed"
+                    defaultMessage="All rules are placed on the canvas"
+                  />
+                )}
+              </EuiText>
+            )}
+          </EuiFlexGroup>
+        )}
+      </CollapsibleSidePanel>
 
       <EuiFlexItem style={{ minWidth: 0 }}>
         <ReactFlowProvider>
