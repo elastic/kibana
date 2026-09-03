@@ -1845,22 +1845,18 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocumentWithTemplate({
-                templateId: template.id,
-                metadata: { status: 'open' },
-              }),
-            ],
-          },
-        });
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            metadata: { status: 'open' },
+          })
+        );
 
         await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
 
@@ -1877,7 +1873,7 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
@@ -1893,7 +1889,7 @@ describe('ConversationClient', () => {
           relation: 'subagent',
         };
 
-        mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+        mockGetDocumentResponse(docWithParent);
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
 
@@ -1907,23 +1903,19 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocumentWithTemplate({
-                templateId: template.id,
-                // status is already 'open' — writing the same value is a no-op
-                metadata: { status: 'open' },
-              }),
-            ],
-          },
-        });
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({
+            templateId: template.id,
+            // status is already 'open' — writing the same value is a no-op
+            metadata: { status: 'open' },
+          })
+        );
 
         await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
 
@@ -1935,17 +1927,13 @@ describe('ConversationClient', () => {
         const clientWithCb = createClient({
           space: testSpace,
           logger: loggerMock.create(),
-          esClient: {} as never,
+          esClient: mockRawEsClient as unknown as ElasticsearchClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           onMetadataPatched,
         });
 
-        mockEsClient.search.mockResolvedValue({
-          hits: {
-            hits: [createConversationDocumentWithTemplate({ templateId: template.id })],
-          },
-        });
+        mockGetDocumentResponse(createConversationDocumentWithTemplate({ templateId: template.id }));
         mockEsClient.index.mockRejectedValue(new Error('disk full'));
 
         await expect(
