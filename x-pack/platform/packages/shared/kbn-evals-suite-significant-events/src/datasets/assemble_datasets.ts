@@ -96,6 +96,14 @@ export const assembleDatasets = (entries: GroundTruthEntry[]): Record<string, Da
           `${sliceEntry.relativePath}: snapshot "${slice.snapshot}" does not match directory "${snapshotName}"`
         );
       }
+      // One format version per run: a slice and its manifest must agree. Both schemas only accept
+      // the current version today, so this guards the day a second version exists.
+      if (slice.schema_version !== manifest.schema_version) {
+        throw new Error(
+          `${sliceEntry.relativePath}: schema_version ${slice.schema_version} does not match ` +
+            `${DATASET_MANIFEST_FILENAME} schema_version ${manifest.schema_version}`
+        );
+      }
       dataset.kiQueryGeneration.push(...stamp(slice.kiQueryGeneration, snapshotName));
       dataset.kiFeatureExtraction.push(...stamp(slice.kiFeatureExtraction, snapshotName));
       dataset.kiFeatureExclusion.push(...stamp(slice.kiFeatureExclusion, snapshotName));

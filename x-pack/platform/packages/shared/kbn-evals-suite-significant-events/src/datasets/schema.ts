@@ -17,7 +17,11 @@ import type {
   KIQueryGenerationScenario,
 } from './types';
 
-/** Bump when the file shape changes; the assembler rejects files it does not understand. */
+/**
+ * Version of the whole ground-truth file format. `dataset.json` and every `ground-truth.json` of a
+ * run carry the same value; bump it once for both when either shape changes. The assembler rejects
+ * files it does not understand and files that disagree with their manifest.
+ */
 export const GROUND_TRUTH_SCHEMA_VERSION = 1;
 
 export type WithoutSnapshotSource<T> = Omit<T, 'snapshot_source'>;
