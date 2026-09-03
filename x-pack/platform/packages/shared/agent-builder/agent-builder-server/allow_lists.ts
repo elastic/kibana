@@ -207,6 +207,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Context Engine
   'ki-retrieval',
   'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',

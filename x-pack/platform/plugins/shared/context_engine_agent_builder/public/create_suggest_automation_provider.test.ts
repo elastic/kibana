@@ -11,7 +11,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { ANALYZE_AND_IMPROVE_SKILL_ID } from '../common/agent_builder_skills';
+import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+} from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
@@ -143,6 +147,23 @@ describe('createSuggestAutomationProvider', () => {
         ],
       })
     );
+  });
+
+  it.each([
+    ['suggestAutomation' as const, [AI_INDEX_AUTOMATIONS_SKILL_ID]],
+    ['startGuidedSetup' as const, [AI_INDEX_SOURCES_SKILL_ID, AI_INDEX_AUTOMATIONS_SKILL_ID]],
+  ])('asks %s for the skills that carry the tools it needs', (method, skillIds) => {
+    // `analyze-and-improve` is read-only. Both buttons exist to produce an automation, so the
+    // brief names the writing skills up front instead of leaving the agent to discover midway
+    // that it cannot author one.
+    const { provider, openChat } = createProvider();
+
+    provider[method]({ aiIndex, onSaved: jest.fn() });
+
+    const { initialMessage } = openChat.mock.calls[0][0];
+    for (const skillId of skillIds) {
+      expect(initialMessage).toContain(`skill://${skillId}`);
+    }
   });
 
   it('asks the agent to work out the sources rather than having the user name them', () => {

@@ -9,7 +9,6 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import content from './analyze_and_improve.skill.md.text';
-import indexSelectionReferenceYaml from './index_selection_reference.yaml.text';
 
 export const analyzeAndImproveSkill = defineSkillType({
   id: 'analyze-and-improve',
@@ -17,31 +16,15 @@ export const analyzeAndImproveSkill = defineSkillType({
   basePath: 'skills/platform/context-engine',
   experimental: true,
   description:
-    'Decide what a Context Engine AI index should contain and what workflow automation should produce it. Load when setting up the Context Engine for a user\'s Elasticsearch data or connector sources, when generating Knowledge Indicators (KIs), when drafting or editing a KI automation, when handling an "Analyze & improve" hand-off, or when diagnosing why an index\'s KIs are not being retrieved and agents keep falling back to raw data.',
+    'Decide what a Context Engine AI index should contain and whether what it contains is working. Load when setting up the Context Engine for a user\'s Elasticsearch data or connector sources, when choosing a Knowledge Indicator (KI) generation strategy, when handling an "Analyze & improve" hand-off, or when diagnosing why an index\'s KIs are not being retrieved and agents keep falling back to raw data. Directs to `context-engine-signals`, `ai-index-sources` and `ai-index-automations` for the mechanics.',
   content,
-  referencedContent: [
-    {
-      name: 'index-selection-reference-workflow',
-      relativePath: '.',
-      content: indexSelectionReferenceYaml,
-    },
-  ],
-  // The union of what setting an index up and diagnosing one both need. Skill tools are additive
-  // to the agent's own set, so binding the authoring tools here hands them to every agent that
-  // loads this skill — an unattended analysis run must withhold them in its own configuration
-  // rather than relying on the skill to stay read-only.
+  // Read-only by construction. Skill tools are additive, so keeping the authoring and execution
+  // tools in `ai-index-automations` is what lets an unattended analysis run load this skill without
+  // gaining the ability to write.
   getRegistryTools: () => [
-    platformCoreTools.generateWorkflow,
-    platformCoreTools.executeWorkflow,
-    platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
     platformCoreTools.listIndices,
     platformCoreTools.getIndexMapping,
-    platformCoreTools.getWorkflowExecutionStatus,
-    `${internalNamespaces.workflows}.validate_workflow`,
     `${internalNamespaces.workflows}.get_workflow`,
-    `${internalNamespaces.workflows}.get_step_definitions`,
-    `${internalNamespaces.workflows}.get_examples`,
-    `${internalNamespaces.workflows}.get_connectors`,
   ],
 });

@@ -34,52 +34,32 @@ describe('analyzeAndImproveSkill', () => {
     expect(analyzeAndImproveSkill.content.length).toBeGreaterThan(0);
   });
 
-  it('carries the index-selection reference workflow as its one referencedContent entry', () => {
-    expect(analyzeAndImproveSkill.referencedContent).toHaveLength(1);
-    const [reference] = analyzeAndImproveSkill.referencedContent!;
-    expect(reference.name).toBe('index-selection-reference-workflow');
-    expect(reference.relativePath).toBe('.');
-    expect(reference.content.length).toBeGreaterThan(0);
+  it('carries no referenced content of its own, having delegated the mechanics', () => {
+    expect(analyzeAndImproveSkill.referencedContent ?? []).toHaveLength(0);
   });
 
-  it('mentions every referencedContent entry by name in the skill content', () => {
-    for (const reference of analyzeAndImproveSkill.referencedContent ?? []) {
-      expect(analyzeAndImproveSkill.content).toContain(reference.name);
-    }
-  });
-
-  it('matches tags with MV_CONTAINS, never with a comparison operator', () => {
-    // `tags` is multi-valued. A comparison operator applied to a multi-valued field evaluates to
-    // null, so `tags == "<tag>"` matches only signals carrying that tag and no other — silently
-    // dropping every multi-tag signal. Elasticsearch reports this as a warning, and execute_esql
-    // does not surface warnings, so a regression here is invisible at runtime.
-    expect(analyzeAndImproveSkill.content).not.toMatch(/\btags\s*(==|!=)/);
-    expect(analyzeAndImproveSkill.content).toContain('MV_CONTAINS(tags,');
-  });
-
-  it('binds the tools both diagnosing an index and authoring its automations need', async () => {
+  it('binds only the read-only tools judging an index needs', async () => {
     const toolIds = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
 
     expect(toolIds).toEqual([
-      platformCoreTools.generateWorkflow,
-      platformCoreTools.executeWorkflow,
-      platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
       platformCoreTools.listIndices,
       platformCoreTools.getIndexMapping,
-      platformCoreTools.getWorkflowExecutionStatus,
-      `${internalNamespaces.workflows}.validate_workflow`,
       `${internalNamespaces.workflows}.get_workflow`,
-      `${internalNamespaces.workflows}.get_step_definitions`,
-      `${internalNamespaces.workflows}.get_examples`,
-      `${internalNamespaces.workflows}.get_connectors`,
     ]);
   });
 
-  it('binds no tool that writes a KI directly, since KIs come from automations', async () => {
+  it('binds no tool that writes anything, so an unattended run stays a proposer', async () => {
     const toolIds = (await analyzeAndImproveSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds.some((id) => /createKi|updateKi|deleteKi/i.test(id))).toBe(false);
+    // Skill tools are additive to the agent's own set, so this skill staying read-only is what
+    // lets an analysis run load it without gaining the ability to author or run a workflow.
+    // Anything that writes lives in `ai-index-automations`, which such a run does not load.
+    expect(
+      toolIds.some((id) =>
+        /generate_workflow|execute_workflow|createKi|updateKi|deleteKi/i.test(id)
+      )
+    ).toBe(false);
   });
 
   it('only instructs the agent to call tools that are actually bound', async () => {
@@ -104,6 +84,16 @@ describe('analyzeAndImproveSkill', () => {
   describe('content', () => {
     const { content } = analyzeAndImproveSkill;
 
+    it('names each skill it delegates the mechanics to', () => {
+      expect(content).toContain('context-engine-signals');
+      expect(content).toContain('ai-index-sources');
+      expect(content).toContain('ai-index-automations');
+    });
+
+    it('explains that staying read-only is why the split exists', () => {
+      expect(content).toMatch(/Loading a skill adds its tools to yours/);
+    });
+
     it('leaves applying versus proposing to the run rather than deciding it in the skill', () => {
       expect(content).toContain('Propose or apply — the run decides');
     });
@@ -112,15 +102,16 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).toContain('Never write knowledge indicator documents directly');
     });
 
-    it('covers the setup half: what a KI is, its shape, access patterns, and the strategies', () => {
+    it('keeps the judgement it owns: what a KI is, its shape, and the strategies', () => {
       expect(content).toContain('What a knowledge indicator is');
       expect(content).toContain('KI document shape');
       expect(content).toContain('Access patterns');
       expect(content).toContain('Strategy catalog');
     });
 
-    it('carries the corpus filter, which bounds generation and explains coverage gaps', () => {
+    it('keeps the corpus filter as a diagnosis, delegating how to configure one', () => {
       expect(content).toContain('The corpus filter');
+      expect(content).toMatch(/coverage-gap finding that does not\s+say which it is/);
     });
 
     it('uses one calibrated confidence scale for both KIs and findings', () => {
@@ -134,45 +125,39 @@ describe('analyzeAndImproveSkill', () => {
       expect(content).not.toContain('save_automation');
     });
 
-    it('documents the signals index and the three classification tags', () => {
-      expect(content).toContain('context-engine-signals-*');
+    it('does not restate the signal mechanics it delegates', () => {
+      // The field table, the ES|QL idioms and the traces join live in `context-engine-signals`.
+      // Two copies drift, and a stale one here is worse than none.
+      expect(content).not.toContain('field_extract(data, ');
+      expect(content).not.toContain('MV_CONTAINS(tags,');
+      expect(content).not.toContain('traces-agent_builder.otel-');
+    });
+
+    it('does not restate the workflow authoring mechanics it delegates', () => {
+      expect(content).not.toContain('context-engine.verifyKi');
+      expect(content).not.toContain('validate_workflow');
+    });
+
+    it('still names the three tags, which the reasoning about findings is written in', () => {
       expect(content).toContain('query_error');
       expect(content).toContain('empty_retrieval');
       expect(content).toContain('coverage_gap');
     });
 
-    it('explains that flattened sub-fields need field_extract in ES|QL', () => {
-      expect(content).toContain('flattened');
-      expect(content).toContain('field_extract(data, ');
-    });
-
-    it('tells the agent to prefer the signals handed to it by the run', () => {
-      expect(content).toContain('Prefer the signals you were given');
+    it('warns that signals never establish what the index holds', () => {
+      expect(content).toMatch(/Signals say what agents asked for, never what the index holds/);
     });
 
     it('allows proposing nothing when the evidence is thin', () => {
       expect(content).toContain('When to propose nothing');
     });
 
+    it('does not read an absence of signals as evidence of health', () => {
+      expect(content).toContain('No signals, on an index that exists');
+    });
+
     it('warns against re-proposing rejected improvements', () => {
       expect(content).toContain('already rejected');
-    });
-
-    it('points at the traces skill rather than restating how the traces index is shaped', () => {
-      expect(content).toContain('agent-builder-traces');
-    });
-
-    it('points at the workflow authoring skill for definition syntax', () => {
-      expect(content).toContain('workflow-authoring');
-    });
-
-    it('requires workflow YAML to be validated before it is proposed', () => {
-      expect(content).toContain('Validate any workflow YAML before you propose it');
-      expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
-    });
-
-    it('does not let validating a workflow be read as licence to run it', () => {
-      expect(content).toMatch(/Do not execute a workflow unless\s+the run has told you to/);
     });
   });
 });

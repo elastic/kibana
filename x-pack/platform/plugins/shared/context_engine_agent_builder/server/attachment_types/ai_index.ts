@@ -12,6 +12,8 @@ import {
   type AiIndexAttachmentData,
 } from '../../common/agent_builder_attachment_schemas';
 import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
@@ -53,9 +55,10 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'sources, and workflow automations). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
       `For querying KIs in this index, load the \`${KI_RETRIEVAL_SKILL_ID}\` skill.`,
-      `To decide what this index should hold and to draft or edit its automations, load`,
-      `\`${ANALYZE_AND_IMPROVE_SKILL_ID}\` (or follow the user's initial message if it already`,
-      'references that skill).',
+      `To decide what this index should hold, load \`${ANALYZE_AND_IMPROVE_SKILL_ID}\`. That skill`,
+      `is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft, validate or run an`,
+      `automation, and \`${AI_INDEX_SOURCES_SKILL_ID}\` to choose or change the data it draws on.`,
+      "Follow the user's initial message where it already names the skills to load.",
       'This attachment authorizes you to apply changes, not only to propose them. Work interactively:',
       'confirm the strategy and the corpus filter with the user before drafting, and use',
       '`ask_user_question` whenever the choice is a fixed set of options — which automation to edit,',

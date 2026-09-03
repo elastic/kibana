@@ -1,0 +1,121 @@
+## When to Use This Skill
+
+Load this skill to work out **which data an AI index should draw on, and how to express that as its
+sources** — when setting an index up, when a gap suggests the wrong data is being fed in, or when
+you need to judge whether a coverage complaint is a source problem at all.
+
+Deciding what the index should contain, and reading the evidence that something is wrong, is
+`analyze-and-improve`. Turning a chosen source into a workflow that generates indicators is
+`ai-index-automations`.
+
+## What a source is
+
+An AI index carries a list of sources: the data its automations draw on. Each is one of two kinds.
+
+| Kind | Value | What it is |
+|---|---|---|
+| `esql` | An ES\|QL query | A query over Elasticsearch data, including the filter that bounds it. |
+| `connector` | A connector id | A configured connector to an external system (Google Drive, Jira, ServiceNow, and so on). |
+
+A source is a **declaration of intent**, not a pipeline. Nothing runs because a source is listed;
+automations read it. So a source list that looks right while no automation reads it produces an
+empty index, and that is worth checking before concluding anything about generation.
+
+Connector ids are validated when the AI index is saved, so a source naming a connector that does
+not exist is rejected rather than silently ignored.
+
+## Choosing sources
+
+An AI index usually starts with nothing configured and a user who knows what they want answered but
+not which index answers it. Work from the question, not from the data:
+
+1. **Get the question class first.** "What should an agent be able to answer from this?" A source
+   chosen before that is a guess, and a wrong one is expensive: it seeds automations, which seed
+   indicators, which are what agents actually see.
+2. **Find the candidates.** `platform.core.list_indices` lists what exists. Prefer indices whose
+   names and mappings plainly relate to the question over ones that merely could.
+3. **Read the mapping and sample the data.** `platform.core.get_index_mapping` gives you the real
+   field names; `platform.core.execute_esql` shows you what the documents actually hold. Do both.
+   An index can have exactly the right name and hold nothing usable, and a mapping alone will not
+   tell you whether a field is populated.
+4. **Confirm it answers the question.** Write the query you think a user's question becomes and run
+   it. If it comes back empty or nonsensical, the index is not the source you want, however
+   promising the name was.
+5. **Name what it excludes.** Say what the source does *not* cover, so a later coverage gap can be
+   recognised as a known boundary rather than investigated from scratch.
+
+Never propose a source you have not queried. Field names are the single most common thing to get
+confidently wrong, and every downstream artifact inherits the error.
+
+## Writing an ES|QL source
+
+The source query is the corpus definition. It should:
+
+- **Select the documents, not summarize them.** Automations read this query and iterate its rows.
+  A query ending in `STATS` gives an automation aggregate rows to make indicators from, which is
+  almost never what is wanted.
+- **Keep the fields the generation step needs**, and no more. `KEEP` the id, the title-ish field,
+  and the body. Carrying whole documents costs tokens on every run.
+- **Carry the corpus filter** described below.
+- **Run before it ships.** `platform.core.execute_esql` reads and writes nothing, so there is no
+  reason to propose an unrun query. `platform.core.generate_esql` will rewrite one that fails,
+  given the query, the error and the mapping.
+
+## Connector sources
+
+A connector source names a configured connector; the connector holds the credentials and the
+endpoint. `platform.workflows.get_connectors` lists what is available.
+
+Two things follow from a connector being external:
+
+- **You usually cannot inspect its contents.** When a question turns on what a connector holds, say
+  that you could not verify it and describe what would settle it, rather than reasoning about
+  documents you never saw.
+- **Reaching it is a call, not a query.** Automations read connector sources through connector
+  steps, and indicators built from one carry `execute_connector_sub_action` access patterns rather
+  than ES|QL. `platform.workflows.get_step_definitions` gives the parameters for a given connector
+  type.
+
+## The corpus filter
+
+Every source is a filtered slice, not the whole thing: a time window (last 90 days), a status
+condition (resolved cases only), or a numeric cap (at most 1,000 indicators). Agree the filter
+before an automation is drafted. Running without one risks cost and index bloat, and the Context
+Engine is a cache — generating over an entire corpus eagerly defeats the point.
+
+**Read the filter before diagnosing a coverage gap.** When agents keep reaching for data no
+indicator covers, the most common cause is not that generation is failing — it is that the corpus
+filter excluded that data. Those are different fixes: widening a filter is cheap and reversible,
+redesigning a generation prompt is neither. A coverage-gap conclusion that does not say which it is
+has not finished the job.
+
+A filter is also the natural first lever. When the evidence supports widening a window or relaxing
+a status condition, propose that before proposing a new automation.
+
+## Diagnosing a source
+
+When evidence points at data that seems to be missing, settle these in order.
+
+1. **Is it in any source at all?** If not, this is a source problem, and adding or widening one is
+   the fix. Nothing about the automations needs to change.
+2. **Is it in a source but filtered out?** An `esql` source is a query you can run — run it, and
+   run it again without the filter. If the data appears once the filter is gone, the filter is the
+   fix.
+3. **Is it in the source and reaching the automation?** Then it is not a source problem, and
+   `ai-index-automations` is where the answer is.
+
+For a connector source you cannot inspect, stop at the first step you cannot verify and say so.
+
+## Changing sources
+
+Sources are a property of the AI index, edited on the index itself rather than by a workflow. When
+proposing a change, name the source and give the exact replacement — the full query for an `esql`
+source, the connector for a `connector` one — not a description of the change.
+
+Widening a source has a cost the user pays on the next run: more documents, more model calls, more
+indicators. Say roughly how much more, from the row counts you already ran, so the choice is an
+informed one.
+
+Removing a source does not remove the indicators it produced. They stay until their automation
+re-runs or they age out, so an index can keep answering from data that is no longer connected. Call
+that out rather than leaving it to be discovered.

@@ -7,6 +7,8 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
@@ -53,6 +55,15 @@ describe('createAiIndexAttachmentType', () => {
       new RegExp(`Load the \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` skill and follow`)
     );
     expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
+  });
+
+  it('names the skills that carry the tools, since the analysis skill is read-only', () => {
+    // `analyze-and-improve` decides what should change but binds nothing that writes. An agent
+    // pointed only at it would get all the way to a draft before finding it cannot author one.
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toContain(AI_INDEX_AUTOMATIONS_SKILL_ID);
+    expect(description).toContain(AI_INDEX_SOURCES_SKILL_ID);
   });
 
   it('carries the interactive choreography, which the skill deliberately leaves out', () => {
