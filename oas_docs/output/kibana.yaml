@@ -101221,6 +101221,7 @@ components:
               frozen:
                 type: boolean
               type:
+                maxLength: 100
                 type: string
               value:
                 nullable: true
@@ -124946,6 +124947,7 @@ components:
               frozen:
                 type: boolean
               type:
+                maxLength: 100
                 type: string
               value:
                 nullable: true
