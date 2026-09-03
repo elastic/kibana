@@ -1,0 +1,22 @@
+{
+  "sha1": "04ae616ca0e83872654886e1474ba1f10ce93c44",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4bf752947ddd033-74b431144b61fee",
+      "title": "Initial solution setup API enforces authorization and completes setup",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_initial_solution_setup_api/api/tests/initial_solution_setup.spec.ts",
+        "line": 23,
+        "column": 11
+      }
+    }
+  ]
+}
