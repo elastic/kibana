@@ -51,12 +51,14 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
       params: {
         query: 'FROM my-index | LIMIT 10',
         format: 'json',
+        approximation: true,
       },
       snippet: `- name: run_esql_query
   type: elasticsearch.esql.query
   with:
     format: "json"
-    query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"`,
+    query: "FROM logs-* | WHERE @timestamp > NOW() - 1h | STATS count() BY host.name"
+    approximation: true`,
     },
     parameterEnhancements: {
       query: {
