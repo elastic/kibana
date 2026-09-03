@@ -1069,7 +1069,7 @@ x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
-x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team
+x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-elastic-agent-condition-language @elastic/fleet
