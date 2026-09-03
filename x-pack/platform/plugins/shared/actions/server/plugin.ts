@@ -684,6 +684,7 @@ export class ActionsPlugin
         evictClientPool: async (connectorId: string) => {
           await this.clientLeasePool.evict(connectorId);
         },
+        securityService: core.security,
       });
     };
 
@@ -1130,6 +1131,7 @@ export class ActionsPlugin
             getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
+            securityService: coreStart.security,
           });
         },
         listTypes: (featureId?: string) => {
