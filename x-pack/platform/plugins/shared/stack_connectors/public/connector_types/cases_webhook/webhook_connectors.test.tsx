@@ -379,8 +379,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
     });
 
-    // Flaky - https://github.com/elastic/kibana/issues/205708
-    it.skip('Step 2 is properly validated', async () => {
+    it('Step 2 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         config: {
