@@ -21,6 +21,7 @@ import {
   type ConversationAccessControlEntry,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -41,6 +42,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
@@ -51,11 +53,13 @@ import {
 } from '../access_control';
 import type {
   AddAttachmentsToLastRoundRequest,
+  AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
   NormalizedConversation,
+  ReplaceRoundEventsRequest,
   ConversationListResult,
   UpsertRoundRequest,
 } from './types';
@@ -70,6 +74,7 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
+import { updatePinnedBy } from './pinned_by';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -113,7 +118,16 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  appendEvents(
+    request: AppendEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
+  setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
@@ -215,14 +229,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
-    const pinnedFilter =
-      pinned === undefined
-        ? []
-        : pinned
-        ? [{ term: { pinned: true } }]
-        : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
-          // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
-          [{ bool: { must_not: { term: { pinned: true } } } }];
+    const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -242,6 +249,7 @@ class ConversationClientImpl implements ConversationClient {
         'read',
         'read_by',
         'pinned',
+        'pinned_by',
         'read_only',
         'access_control',
         'origin',
@@ -505,6 +513,92 @@ class ConversationClientImpl implements ConversationClient {
     return result;
   }
 
+  /** Appends timeline events onto a conversation.*/
+  async appendEvents(
+    request: AppendEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const { access } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const existingIds = new Set(currentEvents.map((event) => event.id));
+        const newEvents = events.filter((event) => !existingIds.has(event.id));
+        const appended = [...currentEvents, ...newEvents];
+        return {
+          events: appended,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
+  async replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const {
+      id: conversationId,
+      roundId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+    } = request;
+    const { access } = options;
+    const roundPrefix = `${roundId}::`;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const replaced = [...nonRoundEvents, ...events];
+        return {
+          events: replaced,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {
     return this.writeConversation({
       conversationId,
@@ -515,6 +609,20 @@ class ConversationClientImpl implements ConversationClient {
           readBy: current.read_by,
           currentRead: current.read ?? false,
           nextRead: read,
+        }),
+    });
+  }
+
+  async setPinned(conversationId: string, pinned: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updatePinnedBy({
+          userId: this.user.id,
+          pinnedBy: current.pinned_by,
+          currentPinned: current.pinned ?? false,
+          nextPinned: pinned,
         }),
     });
   }
