@@ -32,6 +32,7 @@ import { AdministrationListPage } from '../administration_list_page';
 
 import type { PaginatedContentProps } from '../paginated_content';
 import { PaginatedContent } from '../paginated_content';
+import { ArtifactSimpleTable } from './components/artifact_simple_table';
 
 import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 import { ArtifactEntryCard } from '../artifact_entry_card';
@@ -54,6 +55,7 @@ import type { ExceptionsListApiClient } from '../../services/exceptions_list/exc
 import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { XOR } from '../../../../common/utility_types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -72,7 +74,7 @@ type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
   ArtifactEntryCardType
 >;
 
-export interface ArtifactListPageProps {
+interface ArtifactListPageBaseProps {
   apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
@@ -94,9 +96,30 @@ export interface ArtifactListPageProps {
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
   callout?: React.ReactNode;
-  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
   additionalActions?: Action[];
 }
+
+interface ArtifactListPageWithCardProps {
+  /**
+   * A component that will be used to decorate the artifact cards.
+   *
+   * Cannot be used in combination with `showAsSimpleTable`.
+   */
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+}
+
+interface ArtifactListPageWithSimpleTableProps {
+  /**
+   * When set, artifacts are rendered as a compact `EuiBasicTable` instead of cards.
+   * Create/edit/delete/import/export still use the same flyouts and modals.
+   *
+   * Cannot be used in combination with `CardDecorator`.
+   */
+  showAsSimpleTable?: boolean;
+}
+
+export type ArtifactListPageProps = ArtifactListPageBaseProps &
+  XOR<ArtifactListPageWithCardProps, ArtifactListPageWithSimpleTableProps>;
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
   ({
@@ -114,6 +137,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardDeleteAction = true,
     CardDecorator,
     additionalActions,
+    showAsSimpleTable = false,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -200,6 +224,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
       allowCardDeleteAction,
       allowCardEditAction,
+      disabled: showAsSimpleTable,
     });
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
@@ -501,19 +526,34 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
             <EuiSpacer size="s" />
 
-            <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-              items={items}
-              ItemComponent={ArtifactEntryCard}
-              itemComponentProps={handleCardProps}
-              onChange={handlePaginationChange}
-              error={error as React.ReactNode}
-              loading={isLoading}
-              pagination={uiPagination}
-              contentClassName="card-container"
-              data-test-subj={getTestId('list')}
-              CardDecorator={CardDecorator}
-              dataUpdatedAt={dataUpdatedAt}
-            />
+            {showAsSimpleTable ? (
+              <ArtifactSimpleTable
+                items={items}
+                pagination={uiPagination}
+                onChange={handlePaginationChange}
+                onAction={handleOnCardActionClick}
+                labels={labels}
+                loading={isLoading}
+                error={(error?.body as ServerApiError)?.message || error?.message}
+                allowCardEditAction={allowCardEditAction}
+                allowCardDeleteAction={allowCardDeleteAction}
+                data-test-subj={getTestId('simpleTable')}
+              />
+            ) : (
+              <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+                items={items}
+                ItemComponent={ArtifactEntryCard}
+                itemComponentProps={handleCardProps}
+                onChange={handlePaginationChange}
+                error={error as React.ReactNode}
+                loading={isLoading}
+                pagination={uiPagination}
+                contentClassName="card-container"
+                data-test-subj={getTestId('list')}
+                CardDecorator={CardDecorator}
+                dataUpdatedAt={dataUpdatedAt}
+              />
+            )}
           </>
         )}
       </AdministrationListPage>
