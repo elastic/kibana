@@ -136,28 +136,60 @@ export async function startAgentStack({
   let dockerOutputId: string | undefined;
   let dockerFleetHostId: string | undefined;
   let fleetServerPolicyId: string | undefined;
+  let syntheticsPolicyId: string | undefined;
+  let privateLocationId: string | undefined;
   let enrolledAgentId: string | undefined;
 
+  const runCleanup = async (label: string, fn: () => Promise<void> | void) => {
+    try {
+      await fn();
+    } catch (error) {
+      log.warning(
+        `agent-e2e teardown ${label} failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
+
   const stop = async () => {
-    if (agentStarted) {
-      removeContainer(agentContainer);
-    }
-    if (fleetServerStarted) {
-      removeContainer(fleetServerContainer);
-    }
-    await stopTargetServer(target.server);
+    // Best-effort: one failed delete must not skip the rest (shared Scout server).
+    await runCleanup('agent container', () => {
+      if (agentStarted) {
+        removeContainer(agentContainer);
+      }
+    });
+    await runCleanup('fleet-server container', () => {
+      if (fleetServerStarted) {
+        removeContainer(fleetServerContainer);
+      }
+    });
+    await runCleanup('target server', () => stopTargetServer(target.server));
     if (enrolledAgentId) {
-      await apiServices.fleet.agent.delete(enrolledAgentId);
+      await runCleanup('enrolled agent', () => apiServices.fleet.agent.delete(enrolledAgentId));
+    }
+    if (privateLocationId) {
+      await runCleanup('private location', () =>
+        apiServices.syntheticsPrivateLocations.deletePrivateLocation(privateLocationId)
+      );
+    }
+    if (syntheticsPolicyId) {
+      await runCleanup('synthetics policy', () =>
+        apiServices.fleet.agent_policies.delete(syntheticsPolicyId, true)
+      );
     }
     if (fleetServerPolicyId) {
-      await apiServices.fleet.agent_policies.delete(fleetServerPolicyId, true);
+      await runCleanup('fleet server policy', () =>
+        apiServices.fleet.agent_policies.delete(fleetServerPolicyId, true)
+      );
     }
-    await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
     if (dockerFleetHostId) {
-      await apiServices.fleet.server_hosts.delete(dockerFleetHostId);
+      await runCleanup('fleet host', () =>
+        apiServices.fleet.server_hosts.delete(dockerFleetHostId)
+      );
     }
     if (dockerOutputId) {
-      await apiServices.fleet.outputs.delete(dockerOutputId);
+      await runCleanup('es output', () => apiServices.fleet.outputs.delete(dockerOutputId));
     }
   };
 
@@ -253,11 +285,12 @@ export async function startAgentStack({
     });
 
     const syntheticsPolicyName = `scout-synthetics-agent-e2e-${runId}`;
-    const { id: syntheticsPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-      syntheticsPolicyName
-    );
+    const createdSyntheticsPolicyId = (
+      await apiServices.syntheticsPrivateLocations.addFleetPolicy(syntheticsPolicyName)
+    ).id;
+    syntheticsPolicyId = createdSyntheticsPolicyId;
     await apiServices.fleet.agent_policies.update({
-      agentPolicyId: syntheticsPolicyId,
+      agentPolicyId: createdSyntheticsPolicyId,
       policyName: syntheticsPolicyName,
       policyNamespace: 'default',
       params: {
@@ -266,17 +299,18 @@ export async function startAgentStack({
       },
     });
     const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations([
-      syntheticsPolicyId,
+      createdSyntheticsPolicyId,
     ]);
+    privateLocationId = privateLocation.id;
 
     const { data: enrollmentKeys } = await kbnClient.request<{ items: EnrollmentApiKeyItem[] }>({
       method: 'GET',
       path: '/api/fleet/enrollment_api_keys',
-      query: { kuery: `policy_id:"${syntheticsPolicyId}"` },
+      query: { kuery: `policy_id:"${createdSyntheticsPolicyId}"` },
     });
     const enrollmentToken = enrollmentKeys.items[0]?.api_key;
     if (!enrollmentToken) {
-      throw new Error(`No enrollment API key for synthetics policy ${syntheticsPolicyId}`);
+      throw new Error(`No enrollment API key for synthetics policy ${createdSyntheticsPolicyId}`);
     }
 
     log.info(`Starting synthetics agent ${agentImage}`);
@@ -300,7 +334,7 @@ export async function startAgentStack({
     agentStarted = true;
 
     try {
-      enrolledAgentId = await waitForAgentOnline(kbnClient, log, syntheticsPolicyId);
+      enrolledAgentId = await waitForAgentOnline(kbnClient, log, createdSyntheticsPolicyId);
     } catch (error) {
       log.error(`Agent failed to come online:\n${containerLogs(agentContainer)}`);
       throw error;

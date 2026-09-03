@@ -57,9 +57,7 @@ const searchLatest = async (
     sort: [{ '@timestamp': { order: 'desc' } }],
     query: {
       bool: {
-        filter: filters,
-        // Prefer the test-now run without requiring the field on every doc.
-        ...(testRunId ? { should: [{ term: { test_run_id: testRunId } }] } : {}),
+        filter: testRunId ? [...filters, { term: { test_run_id: testRunId } }] : filters,
       },
     },
   });
