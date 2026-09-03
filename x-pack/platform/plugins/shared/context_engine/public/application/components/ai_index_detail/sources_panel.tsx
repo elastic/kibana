@@ -53,6 +53,12 @@ export const SourcesPanel = ({
     enabled: hasConnectorSources,
   });
   const { canSuggest, startGuidedSetup } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+
+  // Offered alongside Edit, where the other panels put their assistant action, rather than inside
+  // the empty state. Only while the index has no sources: "set this up" is an answer to an index
+  // that is not set up, and once it is, Edit is the way to change what is there.
+  const showGuidedSetup = canSuggest && !isLoading && sources.length === 0;
+
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
@@ -78,18 +84,36 @@ export const SourcesPanel = ({
         </EuiFlexItem>
         {!isManaged && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={onEditSources}
-              isDisabled={!canEdit}
-              data-test-subj="contextEditSourcesButton"
-            >
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-                defaultMessage="Edit"
-              />
-            </EuiButtonEmpty>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {showGuidedSetup && (
+                <EuiFlexItem grow={false}>
+                  <AiButton
+                    size="s"
+                    iconType="productAgent"
+                    onClick={startGuidedSetup}
+                    data-test-subj="contextSetUpAiIndexButton"
+                  >
+                    {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.setUpButton', {
+                      defaultMessage: 'Help me set this up',
+                    })}
+                  </AiButton>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="pencil"
+                  onClick={onEditSources}
+                  isDisabled={!canEdit}
+                  data-test-subj="contextEditSourcesButton"
+                >
+                  <FormattedMessage
+                    id="xpack.contextEngine.aiIndexDetail.sources.editButton"
+                    defaultMessage="Edit"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -132,21 +156,6 @@ export const SourcesPanel = ({
                 />
               )}
             </p>
-          }
-          actions={
-            canSuggest
-              ? [
-                  <AiButton
-                    iconType="productAgent"
-                    onClick={startGuidedSetup}
-                    data-test-subj="contextSetUpAiIndexButton"
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.setUpButton', {
-                      defaultMessage: 'Help me set this up',
-                    })}
-                  </AiButton>,
-                ]
-              : undefined
           }
         />
       ) : (

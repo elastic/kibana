@@ -136,6 +136,24 @@ describe('SourcesPanel', () => {
     expect(startGuidedSetup).toHaveBeenCalledTimes(1);
   });
 
+  it('offers guided setup beside Edit rather than inside the empty state', () => {
+    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true }));
+
+    renderPanel({ aiIndex: buildAiIndex([]) });
+
+    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).not.toContainElement(
+      screen.getByTestId('contextSetUpAiIndexButton')
+    );
+  });
+
+  it('waits for the index before offering setup, so a loading panel does not flash the button', () => {
+    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true }));
+
+    renderPanel({ isLoading: true, aiIndex: undefined, canEdit: false });
+
+    expect(screen.queryByTestId('contextSetUpAiIndexButton')).not.toBeInTheDocument();
+  });
+
   it('does not offer guided setup once the index has sources', () => {
     mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true }));
 
