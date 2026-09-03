@@ -89843,13 +89843,13 @@ components:
               maxLength: 256
               type: string
             tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 20
               minItems: 1
+              nullable: true
               type: array
         no_data_strategy:
           anyOf:
