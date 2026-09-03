@@ -3,7 +3,7 @@ steps:
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     branches: main
     env:
-      SLACK_NOTIFICATIONS_CHANNEL: '#security-entity-analytics'
+      SLACK_NOTIFICATIONS_CHANNEL: '#security-entity-analytics-alerts'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -397,7 +397,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
     env:
-      SLACK_NOTIFICATIONS_CHANNEL: '#security-entity-analytics'
+      SLACK_NOTIFICATIONS_CHANNEL: '#security-entity-analytics-alerts'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
