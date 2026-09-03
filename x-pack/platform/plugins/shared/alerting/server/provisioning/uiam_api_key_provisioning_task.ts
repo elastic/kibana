@@ -399,6 +399,7 @@ export class UiamApiKeyProvisioningTask {
     }
     try {
       const result = await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
+      const persistedIds = new Set<string>();
       for (const so of result?.saved_objects ?? []) {
         if (isSavedObjectErrorResult(so)) {
           // Per-item SOR failure: next run will re-attempt the same id via `overwrite: true`.
@@ -408,14 +409,21 @@ export class UiamApiKeyProvisioningTask {
             `Failed to persist UIAM provisioning status ${so.id}: ${so.error.message}`,
             { tags: TAGS }
           );
+        } else {
+          persistedIds.add(so.id);
         }
       }
       this.logger.info(
         `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
         { tags: TAGS }
       );
-      // Only after the namespaced docs are persisted, so a failure here never loses the status.
-      await deleteLegacyProvisioningStatusDocs(context.savedObjectsClient, this.logger, docs);
+      // Only for docs whose write is confirmed persisted: deleting the legacy doc after a
+      // failed (or unconfirmed) namespaced write would lose that entity's only status.
+      await deleteLegacyProvisioningStatusDocs(
+        context.savedObjectsClient,
+        this.logger,
+        docs.filter(({ id }) => persistedIds.has(id))
+      );
     } catch (e) {
       // Whole-call failure is tagged so log pipelines can alert on 'status-write-failed'
       // without parsing the message. The error is swallowed: status writes are best-effort

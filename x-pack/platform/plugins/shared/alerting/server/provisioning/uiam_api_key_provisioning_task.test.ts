@@ -74,6 +74,15 @@ function createMockCore(uiamConvert: jest.Mock): {
   // `create_provisioning_run_context.ts`).
   const unsafeSavedObjectsClient = savedObjectsClientMock.create();
   const savedObjectsClient = savedObjectsRepositoryMock.create();
+  // Echo inputs back as successful writes so the legacy cleanup sees them as persisted.
+  savedObjectsClient.bulkCreate.mockImplementation(async (objects) => ({
+    saved_objects: objects.map(({ type, id, attributes }) => ({
+      type,
+      id: id ?? '',
+      attributes,
+      references: [],
+    })),
+  }));
   savedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
@@ -1614,6 +1623,11 @@ describe('UiamApiKeyProvisioningTask', () => {
         expect.stringContaining('Wrote provisioning status:'),
         { tags: TAGS }
       );
+      // r1's namespaced write failed, so its legacy bare-id doc must be kept (it is the only
+      // remaining status for that rule); only r2's legacy doc is cleaned up.
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'uiam_api_keys_provisioning_status', id: 'r2' },
+      ]);
     });
 
     it('tags the whole-call bulkCreate error log with status-write-failed and swallows the throw', async () => {

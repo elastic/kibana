@@ -183,20 +183,28 @@ export const writeTaskUiamProvisioningObservabilityStatus = async (
   }
   try {
     const result = await savedObjectsClient.bulkCreate(docs, { overwrite: true });
+    const persistedIds = new Set<string>();
     result.saved_objects.forEach((so) => {
       if (isSavedObjectErrorResult(so)) {
         logger.warn(
           `Error writing task provisioning status for ${so.id}: ${so.error.message ?? so.error}`,
           { tags: TAGS }
         );
+      } else {
+        persistedIds.add(so.id);
       }
     });
     logger.info(
       `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
       { tags: TAGS }
     );
-    // Only after the namespaced docs are persisted, so a failure here never loses the status.
-    await deleteLegacyTaskProvisioningStatusDocs(savedObjectsClient, logger, docs);
+    // Only for docs whose write is confirmed persisted: deleting the legacy doc after a
+    // failed (or unconfirmed) namespaced write would lose that entity's only status.
+    await deleteLegacyTaskProvisioningStatusDocs(
+      savedObjectsClient,
+      logger,
+      docs.filter(({ id }) => persistedIds.has(id))
+    );
   } catch (e) {
     logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
       error: {

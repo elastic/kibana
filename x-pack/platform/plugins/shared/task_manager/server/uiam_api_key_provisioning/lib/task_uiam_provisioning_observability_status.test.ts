@@ -21,7 +21,8 @@ const createSavedObjectsClientMock = (
   overrides: Partial<Record<'bulkCreate' | 'bulkDelete', jest.Mock>> = {}
 ) =>
   ({
-    bulkCreate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    // Echo inputs back as successful writes so the legacy cleanup sees them as persisted.
+    bulkCreate: jest.fn().mockImplementation(async (docs) => ({ saved_objects: docs })),
     bulkDelete: jest.fn().mockResolvedValue({ statuses: [] }),
     ...overrides,
   } as unknown as ISavedObjectsRepository);
@@ -80,6 +81,11 @@ describe('task_uiam_provisioning_observability_status', () => {
       expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(logger.info).toHaveBeenCalled();
+    // task-failed's namespaced write failed, so its legacy bare-id doc must be kept (it is
+    // the only remaining status for that task); only task-ok's legacy doc is cleaned up.
+    expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+      { type: UIAM_PROVISIONING_STATUS_TYPE, id: 'task-ok' },
+    ]);
   });
 
   it('writes namespaced ids and then deletes the legacy bare-id docs', async () => {
