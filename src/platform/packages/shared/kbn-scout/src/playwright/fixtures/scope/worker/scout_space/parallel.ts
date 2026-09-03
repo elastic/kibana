@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingValues } from '@kbn/kbn-client';
+import { KbnClientRequesterError, type UiSettingValues } from '@kbn/kbn-client';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
 import type { ImportSavedObjects, ScoutSpaceParallelFixture, SpaceSolutionView } from '.';
@@ -26,7 +26,17 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         disabledFeatures: [],
       };
       await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
-        return kbnClient.spaces.create(spacePayload);
+        try {
+          return await kbnClient.spaces.create(spacePayload);
+        } catch (error) {
+          // A prior worker in this parallel slot may have crashed before its teardown
+          // deleted the space; clear the leftover and recreate so setup can recover.
+          if (error instanceof KbnClientRequesterError && error.status === 409) {
+            await kbnClient.spaces.delete(spaceId);
+            return kbnClient.spaces.create(spacePayload);
+          }
+          throw error;
+        }
       });
 
       // cache saved objects ids in space
