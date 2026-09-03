@@ -318,6 +318,11 @@ MODELS = [
     "eis-anthropic-claude-5-sonnet",
     "eis-openai-gpt-5-5",
     "eis-zai-glm-5-2",
+    # OpenRouter provider path: needs the on-VM SSE-normalizing proxy +
+    # ES endpoint (run_model.sh openrouter- branch). GLM-5.3-flash is the
+    # OSS-row candidate; 87.8 calls/example measured 2026-09-03 — pair it
+    # with --shards 4, never single-stack.
+    "openrouter-zai-glm-5-3-flash",
     # NOTE: gemini-3.7-flash exists only as an OpenRouter connector and needs
     # the proxy + ES JAR reasoning patch flow (kibana-evals skill
     # scripts/openrouter-proxy.py). It is NOT in the default sweep; run it as
@@ -440,6 +445,11 @@ def deploy(ip: str) -> None:
     scp(GOLDEN_ENV_LOCAL, ip, "/tmp/golden-cluster-env.sh")
     scp(str(base / "run_model.sh"), ip, "/tmp/run_model.sh")
     scp(str(base / "export_scores.py"), ip, "/tmp/export_scores.py")
+    # OpenRouter path (models named openrouter-*): on-VM SSE-normalizing proxy
+    # + ES endpoint creator. Harmless for EIS models — run_model.sh only uses
+    # them inside its openrouter- branch.
+    scp(str(base / "openrouter_proxy.py"), ip, "/tmp/openrouter_proxy.py")
+    scp(str(base / "create_openrouter_endpoint.py"), ip, "/tmp/create_openrouter_endpoint.py")
     scp(os.path.expanduser("~/.elastic/eis-connectors-cache.json"), ip,
         ".elastic/eis-connectors-cache.json")
     scp(os.path.expanduser("~/.elastic/eis-ccm-key.json"), ip,
