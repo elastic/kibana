@@ -2792,10 +2792,10 @@ components:
           maxLength: 256
           minLength: 1
           type: string
-      required:
-        - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
       type: object
+      required:
+        - scriptName
     MemoryDump:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
@@ -2806,6 +2806,8 @@ components:
                 type: object
                 properties:
                   content:
+                    title: Memory dump output
+                    type: object
                     properties:
                       code:
                         type: string
@@ -2819,12 +2821,12 @@ components:
                       path:
                         description: The path to the memory dump compressed file on the host machine
                         type: string
-                    title: Memory dump output
-                    type: object
               type: object
             parameters:
               oneOf:
-                - properties:
+                - title: Kernel memory dump
+                  type: object
+                  properties:
                     type:
                       description: Kernel-level memory dump
                       enum:
@@ -2832,9 +2834,9 @@ components:
                       type: string
                   required:
                     - type
-                  title: Kernel memory dump
+                - title: Process memory dump with PID
                   type: object
-                - properties:
+                  properties:
                     pid:
                       description: The process ID (PID)
                       type: number
@@ -2846,9 +2848,9 @@ components:
                   required:
                     - type
                     - pid
-                  title: Process memory dump with PID
+                - title: Process memory dump with entity ID
                   type: object
-                - properties:
+                  properties:
                     entity_id:
                       description: The process entity ID
                       type: string
@@ -2860,8 +2862,6 @@ components:
                   required:
                     - type
                     - entity_id
-                  title: Process memory dump with entity ID
-                  type: object
           required:
             - parameters
     MemoryDumpRouteRequestBody:
@@ -3651,10 +3651,10 @@ components:
           maxLength: 8192
           minLength: 1
           type: string
-      required:
-        - scriptId
       title: SentinelOne Run Script Parameters
       type: object
+      required:
+        - scriptId
     SortDirection:
       description: Determines the sort order.
       enum:
