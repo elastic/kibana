@@ -44,11 +44,10 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
+import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
-
-const DEFAULT_SPACE_ID = 'default';
 
 export class ContextEnginePlugin
   implements
@@ -186,7 +185,7 @@ export class ContextEnginePlugin
       if (!security) {
         return true;
       }
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const spaceId = resolveSpaceId(spaces, request);
       const { hasAllRequested } = await security.authz
         .checkPrivilegesWithRequest(request)
         .atSpace(spaceId, {
