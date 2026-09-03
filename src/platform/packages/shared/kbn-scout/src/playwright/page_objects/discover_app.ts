@@ -166,6 +166,14 @@ export class DiscoverApp {
 
     await flyout.waitFor({ state: 'visible' });
 
+    // The editor renders a skeleton in place of the form until it has loaded the
+    // index sources and the existing data view names, and `isLoadingSources$` can
+    // flip back to loading, so a visible flyout does not mean the fields exist
+    // yet. Listing sources takes a while on a loaded CI worker, so wait for the
+    // title field explicitly rather than leaving it to the much shorter default
+    // action timeout on the `fill` calls below.
+    const editorReadyTimeout = 30_000;
+
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
@@ -180,6 +188,8 @@ export class DiscoverApp {
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const isLastAttempt = attempt === maxAttempts;
+
+      await titleInput.waitFor({ state: 'visible', timeout: editorReadyTimeout });
 
       if (attempt > 1) {
         await titleInput.fill(''); // force a real value change to re-trigger validation
