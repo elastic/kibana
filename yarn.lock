@@ -22234,15 +22234,16 @@ globalthis@^1.0.3:
   dependencies:
     define-properties "^1.1.3"
 
-globby@16.2.3, globby@^16.2.1:
-  version "16.2.3"
-  resolved "https://registry.yarnpkg.com/globby/-/globby-16.2.3.tgz#24fbc7665f283a0f306fcbf2adff596b1200e120"
-  integrity sha512-VZX7TV7jmd/pn71vdnLKtgwy1IWqc3KjI9x1/UtPkwoKk5fKrNLY30ltDe3cAM5xruIN7YuuaulFt133jRrKZg==
+globby@16.2.4, globby@^16.2.1:
+  version "16.2.4"
+  resolved "https://registry.yarnpkg.com/globby/-/globby-16.2.4.tgz#2108d8e952843366b6f1df9cc5f6e7b3ac24630a"
+  integrity sha512-c8B/VNLmxRcmqqenRA9t+9IyOjf9+V6lTxPaUJLqOCONdQkWZ0ETYgX0qbtJqPsgCNusT9MZ5Jeidw8Eb9tn2g==
   dependencies:
     "@sindresorhus/merge-streams" "^4.0.0"
     fast-glob "^3.3.3"
     ignore "^7.0.5"
     is-path-inside "^4.0.0"
+    micromatch "^4.0.8"
     slash "^5.1.0"
     unicorn-magic "^0.4.0"
 
