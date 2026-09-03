@@ -107,7 +107,7 @@ export class LensClient {
       useApiFormat && this.builder
         ? (() => {
             const { tags } = toAsCodeTags(references);
-            const chartConfig = this.builder!.toAPIFormat({
+            const chartConfig = this.builder.toAPIFormat({
               description,
               visualizationType,
               state,
@@ -183,7 +183,7 @@ export class LensClient {
       useApiFormat && this.builder
         ? (() => {
             const { tags } = toAsCodeTags(references);
-            const chartConfig = this.builder!.toAPIFormat({
+            const chartConfig = this.builder.toAPIFormat({
               description,
               visualizationType,
               state,

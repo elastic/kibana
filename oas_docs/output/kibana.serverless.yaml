@@ -101818,18 +101818,21 @@ components:
     Kibana_HTTP_APIs_lensApiConfigLibItemNoESQL:
       allOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfigNoESQL'
-        - additionalProperties: false
-          type: object
-          properties:
-            tags:
-              default: []
-              description: Tag IDs to associate with this visualization.
-              items:
-                maxLength: 250
-                type: string
-              maxItems: 1000
-              type: array
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfigLibItemSharedSchema'
       title: Library Visualization Item
+    Kibana_HTTP_APIs_lensApiConfigLibItemSharedSchema:
+      additionalProperties: false
+      properties:
+        tags:
+          default: []
+          description: Tag IDs to associate with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+      title: Library Visualization Item Shared Schema
+      type: object
     Kibana_HTTP_APIs_lensApiConfigNoESQL:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricNoESQL'
