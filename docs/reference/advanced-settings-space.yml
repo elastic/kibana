@@ -525,12 +525,8 @@ groups:
         id: fileupload-maxfilesize
         description: |
           Sets the file size limit when importing files. The highest supported value for this setting is `1GB`.
-
-          The default value depends on your version:
-
-          * {applies_to}`stack: ga 9.4+` Defaults to `500MB`.
-          * {applies_to}`stack: ga 9.0-9.3` Defaults to `100MB`.
         datatype: string
+        default: 500MB
         applies_to:
           stack: ga
           ech: ga
@@ -538,6 +534,9 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, this setting defaults to `100MB`.
 
       - setting: enableESQL
         id: enableESQL
