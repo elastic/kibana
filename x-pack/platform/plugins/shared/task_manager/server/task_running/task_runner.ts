@@ -61,6 +61,7 @@ import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 import { millisToNanos } from '../lib/millis_to_nanos';
+import { withTaskTypeHeapProfileLabels } from '../lib/experimental_heap_profile_labels';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -490,8 +491,13 @@ export class TaskManagerRunner implements TaskRunner {
             description: 'run task',
           });
 
+          // Experimental: attribute allocations to the registered task type only
+          // (KBN_HEAP_PROFILE_LABELS=1 + custom Node heap-profile labels API).
+          // run() is awaited here, so withHeapProfileLabels covers the async body.
           const result = await runner.run(() =>
-            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+            withSpan({ name: 'run', type: 'task manager' }, () =>
+              withTaskTypeHeapProfileLabels(this.taskType, () => this.task!.run())
+            )
           );
 
           stopUpdatingLongRunningTasks();

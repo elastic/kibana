@@ -18,9 +18,10 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
   if (platform.isLinux()) {
     if (platform.isServerless()) {
       variants.push('pointer-compression');
-    } else {
-      variants.push('glibc-217');
     }
+    // Experiment: no glibc-217 build exists for the patched 26.8.1, so only the
+    // default Linux variant is bundled. The launcher falls back to glibc-217
+    // only when the default binary fails to run.
 
     // Overrides for running all tests with specific variants enabled
     if (Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION)) variants = ['pointer-compression'];
