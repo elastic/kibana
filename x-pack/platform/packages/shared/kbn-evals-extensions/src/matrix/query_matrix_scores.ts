@@ -106,7 +106,13 @@ export interface AggregatedDatasetScores {
 
 export interface AggregatedSuiteScores {
   suiteId: string;
+  /** Primary execution id retained for backward compatibility. */
   experimentId: string;
+  /**
+   * Every execution contributing to this suite row. Sharded sweeps have one
+   * execution per VM; trace and per-prefix readers must query all of them.
+   */
+  executionIds?: string[];
   timestamp?: string;
   /**
    * Commit the graded run executed against, straight from the experiment
@@ -563,11 +569,19 @@ export const queryMatrixScores = async (
       const examplePrefixes = prefixesBySuite[suiteId] ?? [];
       if (examplePrefixes.length > 0) {
         try {
-          const scores = await evalsClient.getExperimentScores(latest.experiment_id, {
-            suiteId,
-            taskModelId: modelId,
-            executionId: latest.execution_id ?? latest.experiment_id,
-          });
+          // Per-prefix bucketing must see every shard's docs: fetching only the
+          // newest execution would fill columns only for its stride of examples.
+          const scores = (
+            await Promise.all(
+              shards.map((shard) =>
+                evalsClient.getExperimentScores(shard.experiment_id, {
+                  suiteId,
+                  taskModelId: modelId,
+                  executionId: shard.execution_id ?? shard.experiment_id,
+                })
+              )
+            )
+          ).flat();
           // Capture WHY scores were dropped. Without this the caller cannot tell
           // "model never ran" from "model ran and every grade was rejected" —
           // they render identically as a blank cell and invite a pointless
@@ -644,6 +658,7 @@ export const queryMatrixScores = async (
       model.suites.push({
         suiteId,
         experimentId: latest.experiment_id,
+        executionIds: shards.map((s) => s.execution_id ?? s.experiment_id),
         timestamp: latest.timestamp,
         commitSha: latest.git_commit_sha ?? undefined,
         // Derived from the experiment's own judge/task ids, NOT from the
