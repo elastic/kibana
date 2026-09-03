@@ -269,7 +269,6 @@ export type DashboardInternalApi = ReturnType<
     publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
     unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[]>;
     publishVariables: () => void;
-    disableUndoRedo$: PublishingSubject<boolean>;
   };
 
 export interface DashboardUser {
