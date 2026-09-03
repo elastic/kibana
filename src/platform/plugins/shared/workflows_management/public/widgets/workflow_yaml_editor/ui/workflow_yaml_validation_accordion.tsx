@@ -174,18 +174,16 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
         />
       </EuiFlexItem>
       <EuiFlexItem css={styles.validationErrorText}>
-        <p>
+        <div
+          role="button"
+          tabIndex={0}
+          css={styles.validationErrorTrigger}
+          data-test-subj="workflowYamlValidationErrorMessage"
+          onClick={handleRowClick}
+          onKeyDown={handleRowKeyDown}
+        >
           <EuiText color="text" size="xs" component="span">
-            <span
-              className="validation-error-message"
-              role="button"
-              tabIndex={0}
-              data-test-subj="workflowYamlValidationErrorMessage"
-              onClick={handleRowClick}
-              onKeyDown={handleRowKeyDown}
-            >
-              {message}
-            </span>
+            <span className="validation-error-message">{message}</span>
           </EuiText>
           <EuiText color="subdued" size="xs" component="span" css={styles.validationErrorLocation}>
             <span>
@@ -204,7 +202,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
               <span>{error.ruleId}</span>
             </EuiText>
           ) : null}
-        </p>
+        </div>
       </EuiFlexItem>
       {onFixWithAi || message ? (
         <EuiFlexItem grow={false} css={styles.rowActions}>
@@ -364,7 +362,12 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       id={accordionId}
       data-test-subj="workflowYamlEditorValidationErrorsList"
       buttonContent={
-        <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          css={styles.buttonContent}
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem
             css={styles.buttonContentText}
@@ -447,19 +450,18 @@ const componentStyles = {
     css({
       ...euiFontSize(euiThemeContext, 'xs'),
       textAlign: 'left',
-      cursor: 'pointer',
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: euiThemeContext.euiTheme.size.s,
       userSelect: 'text',
-      '&:hover': {
-        textDecoration: 'none',
-        '& .validation-error-message': {
-          textDecoration: 'underline',
-        },
-      },
     }),
+  validationErrorTrigger: css({
+    cursor: 'pointer',
+    '&:hover .validation-error-message, &:focus-visible .validation-error-message': {
+      textDecoration: 'underline',
+    },
+  }),
   validationErrorText: css({
     minWidth: 0,
   }),
