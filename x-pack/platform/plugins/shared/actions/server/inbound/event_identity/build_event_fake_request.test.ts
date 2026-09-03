@@ -22,11 +22,19 @@ describe('buildEventScheduleRequest', () => {
     expect(isExternalUiamCredential(request)).toBe(false);
   });
 
-  test('falls back to uiamApiKey when apiKey is missing', () => {
+  test('unwraps an encoded UIAM key to the raw essu_ secret', () => {
     const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted')!;
     const request = buildEventScheduleRequest({ uiamApiKey }, 'sales');
 
-    expect(request.headers.authorization).toBe(`ApiKey ${uiamApiKey}`);
+    expect(request.headers.authorization).toBe('ApiKey essu_granted');
+  });
+
+  test('prefers UIAM over ES when both are present', () => {
+    const apiKey = encodeApiKey('es-id', 'es-secret')!;
+    const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted')!;
+    const request = buildEventScheduleRequest({ apiKey, uiamApiKey }, 'default');
+
+    expect(request.headers.authorization).toBe('ApiKey essu_granted');
   });
 
   test('marks an external UIAM credential', () => {

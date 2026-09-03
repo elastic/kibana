@@ -11,14 +11,18 @@ import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { RawAction } from '../../types';
-import { hasConnectorEventIdentity, identityFromRawAction } from './encode_api_key';
+import {
+  authorizationCredentialFromIdentity,
+  hasConnectorEventIdentity,
+  identityFromRawAction,
+} from './encode_api_key';
 import type { ConnectorEventIdentity } from './types';
 
 export const buildEventScheduleRequest = (
   identity: ConnectorEventIdentity,
   spaceId: string
 ): KibanaRequest => {
-  const credential = identity.apiKey ?? identity.uiamApiKey;
+  const credential = authorizationCredentialFromIdentity(identity);
   const requestHeaders: Headers = {};
   if (credential) {
     requestHeaders.authorization = `ApiKey ${credential}`;
@@ -31,7 +35,7 @@ export const buildEventScheduleRequest = (
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
-  if (credential && identity.uiamApiKeyExternal === true) {
+  if (credential && identity.uiamApiKey && identity.uiamApiKeyExternal === true) {
     markExternalUiamCredential(fakeRequest);
   }
 

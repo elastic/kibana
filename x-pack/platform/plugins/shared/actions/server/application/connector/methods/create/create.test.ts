@@ -1298,6 +1298,22 @@ describe('create()', () => {
       expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
     });
 
+    test('does not return last-saver identity on the public create result', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          secrets: {},
+        },
+      });
+
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('uiamApiKey');
+      expect(result).not.toHaveProperty('secrets');
+    });
+
     test('ignores a client-supplied apiKey', async () => {
       await create({
         context: inboundContext,
@@ -1330,5 +1346,31 @@ describe('create()', () => {
       ).rejects.toThrow('encrypted saved objects are not available');
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
+  });
+
+  test('does not mint last-saver identity for non-inbound connectors', async () => {
+    const securityService = securityServiceMock.createStart();
+    unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+      id: options?.id ?? '1',
+      type: 'action',
+      attributes,
+      references: [],
+    }));
+
+    await create({
+      context: { ...mockContext, securityService },
+      action: {
+        name: 'my name',
+        actionTypeId: 'my-connector-type',
+        config: {},
+        secrets: {},
+      },
+    });
+
+    const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+      apiKey?: string;
+    };
+    expect(saved.apiKey).toBeUndefined();
+    expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
   });
 });

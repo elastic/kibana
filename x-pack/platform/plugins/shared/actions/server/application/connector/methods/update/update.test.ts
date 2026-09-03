@@ -1026,5 +1026,25 @@ describe('update()', () => {
       };
       expect(saved.apiKey).toBe(nextApiKey);
     });
+
+    test('returns 400 when encryption is unavailable', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+        ...existingRawAction,
+        attributes: {
+          ...existingRawAction.attributes,
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: storedHash },
+        },
+      } as never);
+
+      await expect(
+        update({
+          context: { ...inboundContext, isESOCanEncrypt: false },
+          id: 'connector-id',
+          action: { name: 'renamed', config: {}, secrets: {} },
+        })
+      ).rejects.toThrow('encrypted saved objects are not available');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
   });
 });

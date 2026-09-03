@@ -90,4 +90,17 @@ describe('getDecryptedInboundConnector', () => {
       { namespace: 'sales' }
     );
   });
+
+  it('throws when Encrypted Saved Objects is missing from start', async () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}] as never);
+
+    await expect(
+      getDecryptedInboundConnector({
+        getStartServices: coreSetup.getStartServices,
+        connectorId: 'c1',
+        spaceId: 'default',
+      })
+    ).rejects.toThrow('Encrypted Saved Objects plugin is not available');
+  });
 });

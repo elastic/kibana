@@ -133,3 +133,30 @@ describe('setupSavedObjects - onImport', () => {
     expect(result.warnings.length).toBeGreaterThan(0);
   });
 });
+
+describe('setupSavedObjects - encrypted action type', () => {
+  it('registers V3 encryption for secrets and last-saver identity keys', () => {
+    const savedObjectsSetup = {
+      registerType: jest.fn(),
+    } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+
+    setupSavedObjects(
+      savedObjectsSetup,
+      encryptedSavedObjects,
+      actionTypeRegistry as unknown as ActionTypeRegistry,
+      '.kibana_task_manager',
+      [],
+      () => undefined as unknown as ISavedObjectsRepository
+    );
+
+    expect(encryptedSavedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'action',
+        attributesToEncrypt: new Set(['secrets', 'apiKey', 'uiamApiKey']),
+        attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+      })
+    );
+  });
+});
