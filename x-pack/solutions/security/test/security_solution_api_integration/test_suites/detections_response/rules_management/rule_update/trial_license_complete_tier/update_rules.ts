@@ -988,9 +988,9 @@ export default ({ getService }: FtrProviderContext) => {
 
           const updatedResponseActions = [
             {
-              action_type_id: '.endpoint',
+              action_type_id: '.endpoint' as const,
               params: {
-                command: 'suspend-process',
+                command: 'suspend-process' as const,
                 comment: 'Example suspend process description',
                 config: { field: 'process.entity_id', overwrite: false },
               },
