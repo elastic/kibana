@@ -394,6 +394,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-controls-renderer @elastic/kibana-presentation
 src/platform/packages/private/kbn-cps-common @elastic/kibana-presentation
 src/platform/packages/private/kbn-data-streams @elastic/kibana-core
+src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-dot-text @elastic/kibana-operations
 src/platform/packages/private/kbn-dot-text-loader @elastic/kibana-operations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
@@ -438,7 +439,6 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
-src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/response-ops
