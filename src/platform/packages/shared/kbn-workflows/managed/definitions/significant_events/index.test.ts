@@ -88,6 +88,6 @@ describe('significant events persistence workflow contracts', () => {
     const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
     expect(getInvestigation.with?.path).toContain('/internal/nightshift/investigations/');
     expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body?.trigger_feedback).toContain('result.trigger_feedback');
+    expect(attach.with?.body?.trigger_feedback).toContain('output.trigger_feedback');
   });
 });
