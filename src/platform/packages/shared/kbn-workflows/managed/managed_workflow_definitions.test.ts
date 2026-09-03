@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
+  CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   EXAMPLE_MANAGED_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
@@ -49,6 +50,10 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: {
+    aiIndexId: 'my-ai-index',
+    intervalMinutes: 1440,
   },
   [PND_WATCH_FLOOR_WORKFLOW_ID]: {
     settingsVersion: 1,

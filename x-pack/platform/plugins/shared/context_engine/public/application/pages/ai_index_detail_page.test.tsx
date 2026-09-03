@@ -155,6 +155,15 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
 
 const waitForAiIndexDetailLoaded = () => screen.findByTestId('contextAiIndexSourceRow');
 
+/**
+ * How many times the AI index itself was fetched. Counted by path rather than by total `http.get`
+ * calls, since panels on this page fetch their own data.
+ */
+const countAiIndexFetches = (services: ReturnType<typeof createServices>) =>
+  services.http.get.mock.calls.filter(
+    ([path]) => typeof path === 'string' && path === `/api/context_engine/ai_index/${aiIndex.id}`
+  ).length;
+
 describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
@@ -254,7 +263,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
 
@@ -280,7 +289,7 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
     });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('opens the edit sources flyout with the current sources selected', async () => {
@@ -305,7 +314,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await screen.findByTestId('contextEditSourcesButton');
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
@@ -332,7 +341,7 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
     });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('renders an empty state when there are no automations', async () => {
@@ -522,7 +531,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
     fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
@@ -541,7 +550,7 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('switches to the Knowledge Indicators tab', async () => {

@@ -23,6 +23,7 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AutomationsPanel,
   DescriptionPanel,
+  ImprovementsPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
@@ -158,6 +159,8 @@ export const AiIndexDetailPage = () => {
             onSaved={refetch}
             isManaged={isManaged}
           />
+          <EuiSpacer size="m" />
+          <ImprovementsPanel isLoading={isLoading} aiIndex={aiIndex} />
           <EuiSpacer size="m" />
           <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
         </>
