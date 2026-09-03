@@ -18,23 +18,19 @@ test.describe('APM feature controls - rules', { tag: tags.stateful.classic }, ()
   });
 
   test('opens the latency rule flyout and shows the related dashboards section on details', async ({
-    page,
+    pageObjects: { alertsControls },
   }) => {
     await test.step('open the alerts menu and create a latency threshold rule', async () => {
-      await page.getByTestId('apmAlertAndRulesHeaderLink').waitFor({ state: 'visible' });
-      await page.getByTestId('apmAlertAndRulesHeaderLink').click();
-      await page.getByTestId('apmAlertsMenuItemCreateThreshold').waitFor({ state: 'visible' });
-      await page.getByTestId('apmAlertsMenuItemCreateThreshold').click();
-      await page.getByRole('menuitem', { name: 'Latency' }).waitFor({ state: 'visible' });
-      await page.getByRole('menuitem', { name: 'Latency' }).click();
+      await alertsControls.openContextMenu();
+      await alertsControls.openLatencyFlyout();
     });
 
     await test.step('navigate to the Details step', async () => {
-      await page.getByRole('button', { name: 'Details' }).click();
+      await alertsControls.addRuleFlyout.jumpToStep('details');
     });
 
     await test.step('related dashboards section is visible', async () => {
-      await expect(page.getByTestId('ruleLinkedDashboards')).toBeVisible({
+      await expect(alertsControls.addRuleFlyout.relatedDashboards).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
     });

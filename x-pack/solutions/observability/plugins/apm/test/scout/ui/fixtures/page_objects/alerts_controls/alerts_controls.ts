@@ -16,6 +16,8 @@ export class AlertsControls {
 
   public readonly errorCountItem: Locator;
   public readonly manageRulesItem: Locator;
+  public readonly createThresholdItem: Locator;
+  public readonly latencyItem: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.addRuleFlyout = new AddRuleFlyout(this.page);
@@ -25,6 +27,8 @@ export class AlertsControls {
 
     this.errorCountItem = this.contextMenu.getByTestId('apmAlertsMenuItemErrorCount');
     this.manageRulesItem = this.contextMenu.getByTestId('apmAlertsMenuItemManageRules');
+    this.createThresholdItem = this.contextMenu.getByTestId('apmAlertsMenuItemCreateThreshold');
+    this.latencyItem = this.contextMenu.getByTestId('apmAlertsMenuItemLatency');
   }
 
   public async openContextMenu() {
@@ -35,6 +39,16 @@ export class AlertsControls {
   public async openErrorCountFlyout() {
     await this.errorCountItem.click();
     await this.addRuleFlyout.waitForErrorCountToLoad();
+  }
+
+  public async openLatencyFlyout() {
+    await this.createThresholdItem.click();
+    await this.contextMenu
+      .getByTestId('contextMenuPanelTitle')
+      .getByText('Create threshold rule')
+      .waitFor();
+    await this.latencyItem.click();
+    await this.addRuleFlyout.waitForLatencyToLoad();
   }
 
   public async goToManageRules() {
