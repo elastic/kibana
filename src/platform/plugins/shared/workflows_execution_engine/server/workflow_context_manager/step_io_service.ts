@@ -1019,10 +1019,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     if (this.transientlyRehydratedIds.length === 0) {
       return;
     }
-    const idx = this.transientlyRehydratedIds.indexOf(stepExecutionId);
-    if (idx !== -1) {
-      this.transientlyRehydratedIds.splice(idx, 1);
-    }
+    // Filter (not single-splice): defensive against duplicate entries — one
+    // surviving entry is enough for a later release to re-evict the value.
+    this.transientlyRehydratedIds = this.transientlyRehydratedIds.filter(
+      (id) => id !== stepExecutionId
+    );
   }
 
   /**
@@ -1079,8 +1080,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // output, and `null` only occurs when ES legitimately stored null.
       this.outputs.set(doc.id, doc.output ?? null);
       // Track for transient release: predecessors brought back into memory
-      // for one step's read should not stay there forever.
-      this.transientlyRehydratedIds.push(doc.id);
+      // for one step's read should not stay there forever. Membership check
+      // because concurrent rehydrations (e.g. parallel-branch pre-warms) can
+      // both pass the evicted filter before either clears it — a duplicate
+      // entry would survive `forgetTransientRehydration` and let a later
+      // release re-evict a freshly (re)written output, forcing a stale ES
+      // re-read before the flush lands.
+      if (!this.transientlyRehydratedIds.includes(doc.id)) {
+        this.transientlyRehydratedIds.push(doc.id);
+      }
       restoredCount++;
 
       // Restore size tracking so:
