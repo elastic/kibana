@@ -246,15 +246,45 @@ export class IndexManagement extends AbstractPageObject {
       await expect(this.page.testSubj.locator('appHeaderBack')).toBeVisible();
     },
 
-    changeTab: async (
-      tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
-    ) => {
-      await this.page.testSubj.locator(tab).click();
-    },
-
     mappingsAddFieldButton: () => this.page.testSubj.locator('indexDetailsMappingsAddField'),
 
     editSettingsSwitch: () => this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch'),
+
+    changeTab: async (tab: 'overview' | 'settings' | 'mappings' | 'stats') => {
+      await this.page.testSubj.locator(`indexDetailsTab-${tab}`).click();
+      await this.page
+        .locator(`[data-test-subj="indexDetailsTab-${tab}"][aria-selected="true"]`)
+        .waitFor({ state: 'visible' });
+      // The tabs that back a settings/stats a11y scan fetch on mount, so wait for
+      // their content — otherwise the scan can capture a loading spinner and pass
+      // vacuously. Overview and mappings render deterministically once selected.
+      const contentSubjByTab: Partial<Record<typeof tab, string>> = {
+        settings: 'indexDetailsSettingsCodeBlock',
+        stats: 'indexDetailsStatsCodeBlock',
+      };
+      const contentSubj = contentSubjByTab[tab];
+      if (contentSubj) {
+        await this.page.testSubj
+          .locator(contentSubj)
+          .waitFor({ state: 'visible', timeout: 30_000 });
+      }
+    },
+
+    /** Flips the settings tab from read-only to the editable JSON view. */
+    enableSettingsEditMode: async () => {
+      const editModeSwitch = this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch');
+      await editModeSwitch.waitFor({ state: 'visible' });
+      await editModeSwitch.click();
+      // Edit mode swaps the read-only code block for the Monaco editor. Wait for
+      // both: the read-only block detaches AND the editor wrapper attaches, so a
+      // caller (e.g. an a11y scan) never captures the transitional empty panel.
+      await this.page.testSubj
+        .locator('indexDetailsSettingsCodeBlock')
+        .waitFor({ state: 'detached', timeout: 30_000 });
+      await this.page.testSubj
+        .locator('indexDetailsSettingsEditor')
+        .waitFor({ state: 'attached', timeout: 30_000 });
+    },
   };
 
   indexTemplateWizard = {

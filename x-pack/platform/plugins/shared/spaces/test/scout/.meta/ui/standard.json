@@ -1,5 +1,5 @@
 {
-  "sha1": "8bbfe37f81ef135a14a29d8f43f8b42c597c28ff",
+  "sha1": "f8e60a2e31fd011a52f7c7d158cabe8bc04082c0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -332,6 +332,42 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
         "line": 52,
         "column": 23
+      }
+    },
+    {
+      "id": "189eab9ce25b4bf-c5fc0b050726c79",
+      "title": "Spaces feature visibility in serverless does not offer feature visibility when creating a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/serverless_feature_visibility.spec.ts",
+        "line": 37,
+        "column": 25
+      }
+    },
+    {
+      "id": "189eab9ce25b4bf-7076b10ab5cfd14",
+      "title": "Spaces feature visibility in serverless does not offer feature visibility when editing a space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/serverless_feature_visibility.spec.ts",
+        "line": 46,
+        "column": 7
       }
     },
     {

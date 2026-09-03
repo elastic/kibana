@@ -37,6 +37,7 @@ plugins:
     - error_boundary_example
     - event_annotation_listing
     - exploratory_view
+    - files_management
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings

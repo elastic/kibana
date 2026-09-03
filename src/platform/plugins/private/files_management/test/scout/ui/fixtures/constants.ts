@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginFunctionalProviderContext } from '../../services';
+// The `defaultImage` file kind is registered by the files plugin out of the box,
+// so tests can create files through it without registering a kind of their own.
+export const FILE_KIND = 'defaultImage';
 
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('management plugin', () => {
-    loadTestFile(require.resolve('./management_plugin'));
-  });
-}
+export const FILES_API = {
+  CREATE: `/api/files/files/${FILE_KIND}`,
+  // Delete is a per-kind route; every file this suite creates is `FILE_KIND`.
+  delete: (id: string) => `/api/files/files/${FILE_KIND}/${id}`,
+};

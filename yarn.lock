@@ -7706,10 +7706,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-test-plugin@link:src/platform/test/plugin_functional/plugins/management_test_plugin":
-  version "0.0.0"
-  uid ""
-
 "@kbn/manifest@link:packages/kbn-manifest":
   version "0.0.0"
   uid ""

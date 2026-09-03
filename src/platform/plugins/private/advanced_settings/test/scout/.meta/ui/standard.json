@@ -1,9 +1,23 @@
 {
-  "sha1": "7d87791f6be5b70ca3b0454934bb745a6680933e",
+  "sha1": "ed7924abd2fb42ddccc8af9b1c028fb0cb6544c2",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "3fbb83247d46cbc-f88b548a3856022",
+      "title": "Advanced settings - accessibility settings page has no a11y violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts",
+        "line": 28,
+        "column": 64
+      }
+    },
     {
       "id": "a3e4b1438a281ec-a15d1ea44076beb",
       "title": "security feature controls global advanced_settings all privileges - shows management navlink",
@@ -145,6 +159,20 @@
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_spaces.spec.ts",
         "line": 57,
         "column": 5
+      }
+    },
+    {
+      "id": "d0bff8bcf31a6fc-cac56ebdcbd5306",
+      "title": "Advanced settings - state:storeInSessionStorage hashes global state in the URL once enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/state_store_in_session_storage.spec.ts",
+        "line": 65,
+        "column": 10
       }
     }
   ]

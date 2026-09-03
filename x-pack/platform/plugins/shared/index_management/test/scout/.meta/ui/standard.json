@@ -1,5 +1,5 @@
 {
-  "sha1": "034ef3cdef2d0c8e6a83aae435e9b38e99cdfe39",
+  "sha1": "1c7e4f7a836803c988d3f48fc916081ad8984579",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -684,8 +684,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 23,
-        "column": 63
+        "line": 28,
+        "column": 20
       }
     },
     {
@@ -702,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 30,
-        "column": 86
+        "line": 31,
+        "column": 98
       }
     },
     {

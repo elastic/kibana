@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
-import type { ManagementTestPluginSetup, ManagementTestPluginStart } from './plugin';
-import { ManagementTestPlugin } from './plugin';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>
-  new ManagementTestPlugin();
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

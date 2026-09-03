@@ -306,6 +306,15 @@ export class SpacesPage {
     return this.page.testSubj.locator('cps-project-picker-button');
   }
 
+  /**
+   * "Hide all" shortcut in the feature-visibility section of the create/edit
+   * space form. Absent when `xpack.spaces.allowFeatureVisibility` is off, which
+   * is the case for every serverless project type.
+   */
+  hideAllFeaturesLinkLocator() {
+    return this.page.testSubj.locator('hideAllFeaturesLink');
+  }
+
   async setSpaceName(name: string) {
     await this.page.testSubj.fill('addSpaceName', name);
   }
