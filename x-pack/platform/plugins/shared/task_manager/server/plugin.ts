@@ -88,6 +88,8 @@ import {
   UiamApiKeyProvisioningTask,
   taskManagerUiamProvisioningEvents,
 } from './uiam_api_key_provisioning';
+import { startHeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
+import type { HeapProfileLabelsMetrics } from './lib/heap_profile_labels_metrics';
 
 export interface TaskManagerSetupContract {
   /**
@@ -175,6 +177,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private enrichFakeRequest?: FakeRequestEnricher;
+  private heapProfileLabelsMetrics?: HeapProfileLabelsMetrics;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -572,10 +575,13 @@ export class TaskManagerPlugin
       })
       .catch(() => {});
 
+    this.heapProfileLabelsMetrics = startHeapProfileLabelsMetrics(this.logger);
+
     return this.startContract;
   }
 
   public async stop() {
+    this.heapProfileLabelsMetrics?.stop();
     this.licenseSubscriber?.cleanup();
     this.uiamApiKeyProvisioningTask?.stop();
 

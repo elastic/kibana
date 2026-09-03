@@ -1,6 +1,6 @@
 # Experiment: Task Manager heap-profile labels → OTel
 
-**Status:** experimental, opt-in, stock-Node no-op.
+**Status:** experimental, on when the custom Node API exists, stock-Node no-op.
 
 ## Objective
 
@@ -24,10 +24,9 @@ Label cardinality is bounded to **registered task types** (`task.type`). Never
 ## Why a custom Node binary
 
 Stock Node has no `v8.withHeapProfileLabels`. The instrumentation
-feature-detects and is a **no-op** unless both are true:
-
-- `KBN_HEAP_PROFILE_LABELS=1`
-- `typeof require('v8').withHeapProfileLabels === 'function'`
+feature-detects and is a **no-op** unless
+`typeof require('v8').withHeapProfileLabels === 'function'`.
+Set `KBN_HEAP_PROFILE_LABELS=0` to opt out on a labels-capable Node.
 
 Built binary with the API:
 
@@ -100,22 +99,23 @@ runs.
 
 The wrap lives in
 `x-pack/platform/plugins/shared/task_manager/server/lib/experimental_heap_profile_labels.ts`
-and is a no-op without the env flag / API.
+and is a no-op without the API (or when `KBN_HEAP_PROFILE_LABELS=0`).
 
-To export metrics from a full Kibana process, start the scrape module from a
-debug entry (or require
-`experiments/heap_profile_label_otel/scrape_export.js` and call
-`startHeapProfileLabelExport()`). Booting Kibana under the custom Node binary
-is intentionally out of scope for this experiment.
+On plugin `start()`, Task Manager registers observable gauges on Kibana's
+global OTel meter (`metrics.getMeter('nodejs.heap_profile')`) and scrapes
+`getAllocationProfile()` in the export callback. See
+`x-pack/platform/plugins/shared/task_manager/server/lib/heap_profile_labels_metrics.ts`.
+The standalone harness in this directory remains for local runs without
+booting Kibana.
 
 ## Metrics
 
-Meter: `nodejs.heap_profile` (isolated `MeterProvider`, does not replace
-Kibana's `@kbn/metrics` global).
+Meter: `nodejs.heap_profile` (Kibana's global `@kbn/metrics` meter; the
+harness still uses an isolated `MeterProvider` for local runs).
 
 | Name | Type | Unit | Attributes |
 | --- | --- | --- | --- |
-| `nodejs.heap_profile.live` | ObservableGauge | `By` | `task.type`, `memory.source` (`exact` \| `sampled_heap`), `confidence` |
+| `nodejs.heap_profile.live` | ObservableGauge | `By` | `task.type`, `memory.source` (`exact` \| `sampled_heap`) |
 | `nodejs.heap_profile.sample.count` | ObservableGauge | `{sample}` | `task.type` |
 | `nodejs.heap_profile.scrape.duration` | ObservableGauge | `ms` | — |
 
@@ -171,5 +171,6 @@ experiment.
   later reused/held by task B still attributes to A's label context
   (allocation-time labels). Treat external bytes as *origin*, not current
   logical owner.
-- **Feature is experimental.** Env-gated, clearly marked, does not change
-  Task Manager timeouts, cancellation, or error handling.
+- **Feature is experimental.** On whenever the labels API exists; opt out
+  with `KBN_HEAP_PROFILE_LABELS=0`. Does not change Task Manager timeouts,
+  cancellation, or error handling.

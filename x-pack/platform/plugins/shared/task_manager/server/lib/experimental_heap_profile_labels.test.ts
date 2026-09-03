@@ -23,19 +23,18 @@ describe('experimental_heap_profile_labels', () => {
     }
   });
 
-  test('is disabled unless KBN_HEAP_PROFILE_LABELS=1', () => {
+  test('is disabled on stock Node regardless of env (API is absent)', () => {
     delete process.env[HEAP_PROFILE_LABELS_ENV];
+    expect(hasHeapProfileLabelsApi()).toBe(false);
     expect(isHeapProfileLabelsEnabled()).toBe(false);
     process.env[HEAP_PROFILE_LABELS_ENV] = '1';
-    expect(isHeapProfileLabelsEnabled()).toBe(true);
+    expect(isHeapProfileLabelsEnabled()).toBe(false);
+    process.env[HEAP_PROFILE_LABELS_ENV] = '0';
+    expect(isHeapProfileLabelsEnabled()).toBe(false);
   });
 
-  test('stock Node has no heap profile labels API', () => {
-    expect(hasHeapProfileLabelsApi()).toBe(false);
-  });
-
-  test('wrap is a transparent no-op on stock Node even when the env flag is set', async () => {
-    process.env[HEAP_PROFILE_LABELS_ENV] = '1';
+  test('wrap is a transparent no-op on stock Node', async () => {
+    delete process.env[HEAP_PROFILE_LABELS_ENV];
     const result = await withTaskTypeHeapProfileLabels('alerting:monitoring', async () => 7);
     expect(result).toBe(7);
   });
