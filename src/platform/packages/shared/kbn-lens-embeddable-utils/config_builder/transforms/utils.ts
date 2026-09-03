@@ -444,9 +444,10 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
   }
 }
 
-// Stamps each column's ES|QL Control Variable using the layer's query as the source of truth.
-// A genuine Identifier Control (`??field`) appears as a `??` query parameter.
-// This mirrors the render-time mapping in `mapVariableToColumn` (`@kbn/esql-utils`).
+/**
+ * Stamps each column's ES|QL Control Variable by matching `??`-prefixed field names against the
+ * Identifier (`??`) variables declared in the layer query.
+ */
 function reconstructESQLControlVariables(
   columns: TextBasedLayerColumn[],
   esql: string
