@@ -23,6 +23,7 @@ interface WorkflowStep {
   timeout?: string;
   with?: {
     path?: string;
+    body?: Record<string, unknown>;
     inputs?: Record<string, unknown>;
     [key: string]: unknown;
   };
@@ -73,6 +74,9 @@ const findInput = (
     .flatMap((trigger) => trigger.inputs ?? [])
     .find((input) => input.name === name);
 
+const stepIndex = (definition: WorkflowDefinition, name: string): number =>
+  flattenSteps(definition.steps).findIndex((step) => step.name === name);
+
 const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown =>
   createWorkflowLiquidEngine().evalValueSync(expression.slice(3, -2).trim(), context);
 
@@ -83,75 +87,105 @@ const evaluateStepCondition = (step: WorkflowStep, context: Record<string, unkno
   return evaluateExpression(step.condition, context);
 };
 
-describe('Significant Events run quota workflow invariants', () => {
-  it('runs gates only for workers propagated from scheduled drivers', () => {
-    expect(quotaSteps.map(({ name }) => name).sort()).toEqual(
-      ['check_budget', 'check_budget', 'reserve_investigation_budget'].sort()
-    );
-    for (const step of quotaSteps) {
-      expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
-      expect(step.with?.path).toMatch(/^\/s\/\{\{ workflow\.spaceId \}\}\//);
+describe('Significant Events run quota workflow contracts', () => {
+  it('propagates scheduled and manual origins from both managed drivers', () => {
+    const scheduledReviewWorker = findStep(definitions.scheduledReview, 'discover');
+    const continuousKiWorker = findStep(definitions.continuousOnboarding, 'schedule_onboarding');
+
+    for (const worker of [scheduledReviewWorker, continuousKiWorker]) {
+      const rootTriggeredBy = worker.with?.inputs?.rootTriggeredBy;
+      expect(rootTriggeredBy).toBe('${{ execution.triggeredBy }}');
+      expect(
+        evaluateExpression(rootTriggeredBy as string, {
+          execution: { triggeredBy: 'scheduled' },
+        })
+      ).toBe('scheduled');
+      expect(
+        evaluateExpression(rootTriggeredBy as string, {
+          execution: { triggeredBy: 'manual' },
+        })
+      ).toBe('manual');
     }
   });
 
-  it('continues after a gate timeout or request failure without retrying', () => {
+  it('runs all three gates only for workers whose root origin is scheduled', () => {
+    expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
+      ['detection', 'investigation', 'ki_extraction'].sort()
+    );
+
     for (const step of quotaSteps) {
+      expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
+      expect(
+        evaluateExpression(step.if as string, { inputs: { rootTriggeredBy: 'scheduled' } })
+      ).toBe(true);
+      expect(evaluateExpression(step.if as string, { inputs: { rootTriggeredBy: 'manual' } })).toBe(
+        false
+      );
+      expect(evaluateExpression(step.if as string, { inputs: {} })).toBe(false);
+    }
+  });
+
+  it('uses a space-prefixed fail-open request without retries for every gate', () => {
+    for (const step of quotaSteps) {
+      expect(step.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+      );
       expect(step.timeout).toBe('10s');
       expect(step['on-failure']).toEqual({ continue: true });
       expect(step['on-failure']).not.toHaveProperty('retry');
     }
   });
 
-  it('places worker gates before eligibility or expensive work', () => {
-    expect(definitions.scheduledReview.steps[0].name).toBe('run_review_until_drained');
-    expect(definitions.continuousOnboarding.steps[0].name).toBe('get_eligible');
-    expect(definitions.discovery.steps[0].name).toBe('check_budget');
-    expect(definitions.onboarding.steps[0].name).toBe('check_budget');
-  });
-
-  it('declares the propagated worker inputs with their canonical types', () => {
-    expect(findInput(definitions.discovery, 'rootTriggeredBy')).toEqual(
-      expect.objectContaining({
-        name: 'rootTriggeredBy',
-        type: 'string',
-      })
+  it('places discovery and KI gates before their expensive work', () => {
+    expect(definitions.discovery.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+      'check_budget',
+      'exit_if_budget_denied',
+    ]);
+    expect(definitions.onboarding.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+      'check_budget',
+      'exit_if_budget_denied',
+    ]);
+    expect(stepIndex(definitions.discovery, 'check_budget')).toBeLessThan(
+      stepIndex(definitions.discovery, 'get_detections')
     );
-    expect(findInput(definitions.discovery, 'quotaSlot')).toEqual(
-      expect.objectContaining({
-        name: 'quotaSlot',
-        type: 'number',
-      })
+    expect(stepIndex(definitions.discovery, 'check_budget')).toBeLessThan(
+      stepIndex(definitions.discovery, 'run_discovery_agent')
     );
-    expect(findInput(definitions.onboarding, 'rootTriggeredBy')).toEqual(
-      expect.objectContaining({
-        name: 'rootTriggeredBy',
-        type: 'string',
-      })
+    expect(stepIndex(definitions.onboarding, 'check_budget')).toBeLessThan(
+      stepIndex(definitions.onboarding, 'identify_features')
     );
   });
 
-  it('returns normal no-work outputs on an explicit worker denial', () => {
+  it('stops workers only on an explicit denial and returns valid outputs', () => {
     const discoveryDenial = findStep(definitions.discovery, 'exit_if_budget_denied');
     const onboardingDenial = findStep(definitions.onboarding, 'exit_if_budget_denied');
 
-    expect(discoveryDenial).toEqual(
-      expect.objectContaining({
-        condition: '${{ steps.check_budget.output.allowed == false }}',
-        steps: [
-          expect.objectContaining({
-            type: 'workflow.output',
-            with: {
-              processedCount: 0,
-              hasWork: false,
-              suppressedRuleCount: 0,
-            },
-          }),
-        ],
+    expect(
+      evaluateStepCondition(discoveryDenial, {
+        steps: { check_budget: { output: { allowed: false } } },
       })
-    );
-    expect(onboardingDenial.condition).toBe('${{ steps.check_budget.output.allowed == false }}');
+    ).toBe(true);
+    expect(
+      evaluateStepCondition(onboardingDenial, {
+        steps: { check_budget: { output: { allowed: false } } },
+      })
+    ).toBe(true);
+    expect(evaluateStepCondition(discoveryDenial, { steps: { check_budget: {} } })).toBe(false);
+    expect(evaluateStepCondition(onboardingDenial, { steps: { check_budget: {} } })).toBe(false);
+
+    expect(discoveryDenial.steps).toEqual([
+      expect.objectContaining({
+        type: 'workflow.output',
+        with: {
+          processedCount: 0,
+          hasWork: false,
+          suppressedRuleCount: 0,
+        },
+      }),
+    ]);
     expect(findStep(definitions.onboarding, 'output_budget_denied')).toEqual(
       expect.objectContaining({
+        type: 'workflow.output',
         status: 'cancelled',
         with: {
           streamName: '${{ inputs.streamName }}',
@@ -167,30 +201,92 @@ describe('Significant Events run quota workflow invariants', () => {
         },
       })
     );
-
-    const failedGateContext = { steps: { check_budget: {} } };
-    expect(evaluateStepCondition(discoveryDenial, failedGateContext)).toBe(false);
-    expect(evaluateStepCondition(onboardingDenial, failedGateContext)).toBe(false);
   });
 
-  it('fails open only after the per-event reservation gate', () => {
-    const reserve = findStep(definitions.discovery, 'reserve_investigation_budget');
-    const grantGuard = findStep(definitions.discovery, 'guard_investigation_budget');
+  it('gates investigations after eligibility, event resolution, and deduplication but before launch', () => {
+    const orderedSteps = [
+      'gate_investigatable_severity',
+      'resolve_open_event',
+      'check_prior_investigation',
+      'guard_resolved_event',
+      'guard_missing_investigation',
+      'consume_investigation_quota',
+      'guard_investigation_quota',
+      'trigger_investigation',
+    ];
+    const indexes = orderedSteps.map((name) => stepIndex(definitions.discovery, name));
 
-    expect(reserve.with?.path).toContain('/run_quotas/investigation/_reserve');
-    expect(grantGuard.condition).toBe(
-      '${{ steps.reserve_investigation_budget.output.granted != false }}'
+    expect(indexes.every((index) => index >= 0)).toBe(true);
+    expect(indexes).toEqual([...indexes].sort((left, right) => left - right));
+  });
+
+  it('derives investigation criticality from the resolved event severity', () => {
+    const gate = findStep(definitions.discovery, 'consume_investigation_quota');
+    const critical = gate.with?.body?.critical;
+
+    expect(critical).toBe(
+      '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
     );
     expect(
-      evaluateStepCondition(grantGuard, {
-        steps: { reserve_investigation_budget: {} },
+      evaluateExpression(critical as string, {
+        steps: {
+          resolve_open_event: {
+            output: { hits: { hits: [{ _source: { severity: '80-critical' } }] } },
+          },
+        },
       })
     ).toBe(true);
-    expect(grantGuard.steps?.[0]).toEqual(
+    expect(
+      evaluateExpression(critical as string, {
+        steps: {
+          resolve_open_event: {
+            output: { hits: { hits: [{ _source: { severity: '60-high' } }] } },
+          },
+        },
+      })
+    ).toBe(false);
+  });
+
+  it('prevents investigation launch only on explicit denial', () => {
+    const guard = findStep(definitions.discovery, 'guard_investigation_quota');
+
+    expect(
+      evaluateStepCondition(guard, {
+        steps: { consume_investigation_quota: { output: { allowed: false } } },
+      })
+    ).toBe(false);
+    expect(
+      evaluateStepCondition(guard, {
+        steps: { consume_investigation_quota: { output: { allowed: true } } },
+      })
+    ).toBe(true);
+    expect(
+      evaluateStepCondition(guard, {
+        steps: { consume_investigation_quota: {} },
+      })
+    ).toBe(true);
+    expect(guard.steps?.[0]).toEqual(
       expect.objectContaining({
         name: 'trigger_investigation',
         type: 'workflow.executeAsync',
       })
     );
+  });
+
+  it('keeps only the root origin worker input', () => {
+    expect(findInput(definitions.discovery, 'rootTriggeredBy')).toEqual(
+      expect.objectContaining({
+        name: 'rootTriggeredBy',
+        type: 'string',
+      })
+    );
+    expect(findInput(definitions.onboarding, 'rootTriggeredBy')).toEqual(
+      expect.objectContaining({
+        name: 'rootTriggeredBy',
+        type: 'string',
+      })
+    );
+    expect(findInput(definitions.discovery, 'quotaSlot')).toBeUndefined();
+    expect(findInput(definitions.onboarding, 'quotaSlot')).toBeUndefined();
   });
 });

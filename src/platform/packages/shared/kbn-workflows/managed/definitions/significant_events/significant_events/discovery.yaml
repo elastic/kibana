@@ -45,10 +45,6 @@ triggers:
         type: string
         required: false
         description: 'Root workflow trigger type propagated by a managed driver.'
-      - name: quotaSlot
-        type: number
-        required: false
-        description: 'Scheduled review loop iteration used for stable quota decisions.'
 outputs:
   - name: processedCount
     type: number
@@ -67,9 +63,9 @@ steps:
     if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume?group=detection'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
       body:
-        executionId: '${{ execution.id }}'
+        group: 'detection'
       headers:
         x-elastic-internal-origin: 'kibana'
     timeout: '10s'
@@ -431,32 +427,31 @@ steps:
                         and steps.resolve_open_event.output.hits.hits[0] != null }}
                     steps:
                       # Keep the dedupe condition as a wrapping step so the
-                      # reservation can run only after event deduplication.
+                      # quota gate can run only after event deduplication.
                       - name: guard_missing_investigation
                         type: if
                         condition: >-
                           ${{ steps.check_prior_investigation.error != null
                             or steps.check_prior_investigation.output.count == 0 }}
                         steps:
-                          - name: reserve_investigation_budget
+                          - name: consume_investigation_quota
                             type: kibana.request
                             if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
                             with:
                               method: POST
-                              path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/investigation/_reserve'
+                              path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
                               body:
-                                executionId: '${{ execution.id }}'
-                                eventId: '{{ foreach.item.event_id }}'
-                                eventUuid: '{{ foreach.item.event_uuid }}'
+                                group: 'investigation'
+                                critical: '${{ steps.resolve_open_event.output.hits.hits[0]._source.severity == "80-critical" }}'
                               headers:
                                 x-elastic-internal-origin: 'kibana'
                             timeout: '10s'
                             on-failure:
                               continue: true
 
-                          - name: guard_investigation_budget
+                          - name: guard_investigation_quota
                             type: if
-                            condition: '${{ steps.reserve_investigation_budget.output.granted != false }}'
+                            condition: '${{ steps.consume_investigation_quota.output.allowed != false }}'
                             steps:
                               - name: trigger_investigation
                                 type: workflow.executeAsync

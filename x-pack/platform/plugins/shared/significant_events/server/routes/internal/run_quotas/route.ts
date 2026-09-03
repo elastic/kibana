@@ -6,72 +6,91 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED } from '@kbn/management-settings-ids';
-import type { RunBudgetGroupId, RunLimit } from '../../../../common/run_quotas';
 import {
-  DEFAULT_RUN_LIMITS,
   MAX_RUN_LIMIT,
-  RUN_BUDGET_GROUP_IDS,
+  MIN_RUN_LIMIT,
+  type RunQuotaConsumeRequest,
+  type RunQuotasResponse,
 } from '../../../../common/run_quotas';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
-  RUN_QUOTA_LEDGER_SO_TYPE,
-  countRunQuotaWorkflowExecutions,
-  createRunQuotaInternalRepository,
-  createRunQuotaExecutionReader,
-  dayKey,
-  getRunQuotaLedgerId,
-  mutateRunQuotaSettings,
-  readRunQuotaSettings,
-  reserveInvestigationRunQuota,
-  resolveDailyWindow,
+  assertCanManageRunQuotas,
+  canManageRunQuotas,
   consumeRunQuota,
-  type RunQuotaLedgerAttributes,
+  createRunQuotaInternalRepository,
+  dayKey,
+  patchRunQuotaSettings,
+  readRunQuotaLedger,
+  readRunQuotaSettings,
+  resolveDailyWindow,
   type RunQuotaSavedObjectsRepository,
+  type RunQuotaSettingsAttributes,
 } from '../../../lib/run_quotas';
-import { assertCanManageRunQuotas, canManageRunQuotas } from '../../../lib/run_quotas/privileges';
 
-const MAX_ROUTE_ID_LENGTH = 1024;
+const limitsUpdateSchema = z
+  .object({
+    detection: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+    investigation: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+    ki_extraction: z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).optional(),
+  })
+  .strict()
+  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined), {
+    message: 'At least one run limit is required',
+  });
 
-const runLimitSchema = z.discriminatedUnion('enabled', [
-  z.object({ enabled: z.literal(false), max: z.literal(0) }),
-  z.object({ enabled: z.literal(true), max: z.number().int().min(1).max(MAX_RUN_LIMIT) }),
+const settingsUpdateSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    limits: limitsUpdateSchema.optional(),
+  })
+  .strict()
+  .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
+    message: 'At least one run quota setting is required',
+  });
+
+const consumeRequestSchema = z.discriminatedUnion('group', [
+  z.object({ group: z.literal('detection') }).strict(),
+  z.object({ group: z.literal('ki_extraction') }).strict(),
+  z.object({ group: z.literal('investigation'), critical: z.boolean() }).strict(),
 ]);
 
-const limitsPatchSchema = z
-  .object({
-    detection: runLimitSchema.optional(),
-    investigation: runLimitSchema.optional(),
-    ki_extraction: runLimitSchema.optional(),
-  })
-  .refine((limits) => Object.values(limits).some((limit) => limit !== undefined));
+const readRunQuotaSnapshot = async ({
+  internalRepository,
+  settings,
+  now,
+  canManage,
+}: {
+  internalRepository: RunQuotaSavedObjectsRepository;
+  settings: RunQuotaSettingsAttributes;
+  now: Date;
+  canManage: boolean;
+}): Promise<RunQuotasResponse> => {
+  const window = resolveDailyWindow(now);
+  const date = dayKey(window);
+  const [detection, investigation, kiExtraction] = await Promise.all([
+    readRunQuotaLedger(internalRepository, date, 'detection'),
+    readRunQuotaLedger(internalRepository, date, 'investigation'),
+    readRunQuotaLedger(internalRepository, date, 'ki_extraction'),
+  ]);
 
-const readLedger = async (
-  internalRepository: RunQuotaSavedObjectsRepository,
-  date: string,
-  group: RunBudgetGroupId
-): Promise<RunQuotaLedgerAttributes | undefined> => {
-  try {
-    const savedObject = await internalRepository.get<RunQuotaLedgerAttributes>(
-      RUN_QUOTA_LEDGER_SO_TYPE,
-      getRunQuotaLedgerId(date, group)
-    );
-    return savedObject.attributes;
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-      return undefined;
-    }
-    throw error;
-  }
+  return {
+    enabled: settings.enabled,
+    limits: {
+      detection: settings.limits.detection,
+      investigation: settings.limits.investigation,
+      ki_extraction: settings.limits.ki_extraction,
+    },
+    counts: {
+      detection: detection.count,
+      investigation: investigation.count,
+      ki_extraction: kiExtraction.count,
+    },
+    window,
+    canManage,
+  };
 };
-
-const resolveKnownLimits = (limits: Record<string, RunLimit>) =>
-  Object.fromEntries(
-    RUN_BUDGET_GROUP_IDS.map((group) => [group, limits[group] ?? DEFAULT_RUN_LIMITS[group]])
-  ) as Record<RunBudgetGroupId, RunLimit>;
 
 const getRunQuotasRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/run_quotas',
@@ -85,48 +104,17 @@ const getRunQuotasRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, server, getScopedClients, logger }) => {
+  handler: async ({ request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    const now = new Date();
     const internalRepository = createRunQuotaInternalRepository(server);
-    const settings = await readRunQuotaSettings(internalRepository);
-    const limits = resolveKnownLimits(settings.limits);
-    const window = resolveDailyWindow();
-    const date = dayKey(window);
-    const [ledgers, displayCounts] = await Promise.all([
-      Promise.all(RUN_BUDGET_GROUP_IDS.map((group) => readLedger(internalRepository, date, group))),
-      countRunQuotaWorkflowExecutions({
-        esClient: server.core.elasticsearch.client.asInternalUser,
-        window,
-      }).catch((error) => {
-        logger.warn(
-          `Failed to read workflow execution counts for run quotas: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        throw error;
-      }),
+    const [settings, canManage] = await Promise.all([
+      readRunQuotaSettings(internalRepository),
+      canManageRunQuotas({ request, server }),
     ]);
 
-    return {
-      settings: {
-        limits,
-      },
-      window,
-      groups: RUN_BUDGET_GROUP_IDS.map((group, index) => {
-        const ledger = ledgers[index];
-        const counted = ledger?.count ?? 0;
-        const limit = limits[group];
-        return {
-          group,
-          limit,
-          used: displayCounts[group],
-          counted,
-          remaining: limit.enabled ? Math.max(0, limit.max - counted) : null,
-          criticalOverrideCount: ledger?.criticalOverrideCount ?? 0,
-        };
-      }),
-    };
+    return readRunQuotaSnapshot({ internalRepository, settings, now, canManage });
   },
 });
 
@@ -142,112 +130,22 @@ const putRunQuotasRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.object({
-      limits: limitsPatchSchema,
-    }),
+    body: settingsUpdateSchema,
   }),
-  handler: async ({
-    params,
-    request,
-    server,
-    getScopedClients,
-    continuousKiOnboardingWorkflowService,
-  }) => {
-    const { licensing, globalUiSettingsClient } = await getScopedClients({ request });
+  handler: async ({ params, request, server, getScopedClients }) => {
+    const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
     await assertCanManageRunQuotas({ request, server });
+    const now = new Date();
     const internalRepository = createRunQuotaInternalRepository(server);
-    const currentSettings = await readRunQuotaSettings(internalRepository);
-    const previousKiLimit =
-      currentSettings.limits.ki_extraction ?? DEFAULT_RUN_LIMITS.ki_extraction;
-    const nextKiLimit = params.body.limits.ki_extraction;
-    if (
-      currentSettings.enforcementEnabled &&
-      nextKiLimit?.enabled &&
-      !previousKiLimit.enabled &&
-      (await globalUiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-      ))
-    ) {
-      if (!continuousKiOnboardingWorkflowService) {
-        throw new Error('Workflows management is required to cap continuous KI onboarding');
-      }
-      await continuousKiOnboardingWorkflowService.ensureCappedContinuousKiScheduled({
-        request,
-      });
-    }
-    const actor = server.core.security.authc.getCurrentUser(request)?.username;
-    const now = new Date().toISOString();
-    await mutateRunQuotaSettings(internalRepository, () => ({
-      limits: params.body.limits,
-      updatedAt: now,
-      ...(actor ? { updatedBy: actor } : {}),
-    }));
-  },
-});
+    const settings = await patchRunQuotaSettings(internalRepository, params.body);
 
-const enforcementRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/run_quotas/_enforcement',
-  options: {
-    access: 'internal',
-    summary: 'Enable or disable Significant Events daily run-limit enforcement',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      enabled: z.boolean(),
-      limits: limitsPatchSchema.optional(),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    server,
-    getScopedClients,
-    continuousKiOnboardingWorkflowService,
-  }) => {
-    const { licensing, globalUiSettingsClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
-    await assertCanManageRunQuotas({ request, server });
-    const internalRepository = createRunQuotaInternalRepository(server);
-    const currentSettings = await readRunQuotaSettings(internalRepository);
-    const nextKiLimit =
-      params.body.limits?.ki_extraction ??
-      currentSettings.limits.ki_extraction ??
-      DEFAULT_RUN_LIMITS.ki_extraction;
-    if (
-      params.body.enabled &&
-      nextKiLimit.enabled &&
-      (await globalUiSettingsClient.get<boolean>(
-        OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-      ))
-    ) {
-      if (!continuousKiOnboardingWorkflowService) {
-        throw new Error('Workflows management is required to cap continuous KI onboarding');
-      }
-      await continuousKiOnboardingWorkflowService.ensureCappedContinuousKiScheduled({
-        request,
-      });
-    }
-    const actor = server.core.security.authc.getCurrentUser(request)?.username;
-    const now = new Date().toISOString();
-    const settings = await mutateRunQuotaSettings(internalRepository, () => ({
-      enforcementEnabled: params.body.enabled,
-      ...(params.body.limits ? { limits: params.body.limits } : {}),
-      ...(params.body.enabled
-        ? {
-            enabledAt: now,
-            ...(actor ? { enabledBy: actor } : {}),
-          }
-        : {}),
-      updatedAt: now,
-      ...(actor ? { updatedBy: actor } : {}),
-    }));
-    return { enabled: settings.enforcementEnabled === true };
+    return readRunQuotaSnapshot({
+      internalRepository,
+      settings,
+      now,
+      canManage: true,
+    });
   },
 });
 
@@ -255,7 +153,7 @@ const consumeRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/run_quotas/_consume',
   options: {
     access: 'internal',
-    summary: 'Consume one verified Significant Events worker grant',
+    summary: 'Consume one Significant Events scheduled run quota',
   },
   security: {
     authz: {
@@ -263,120 +161,20 @@ const consumeRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      group: z.enum(['detection', 'ki_extraction']),
-    }),
-    body: z.object({
-      executionId: z.string().max(MAX_ROUTE_ID_LENGTH),
-    }),
+    body: consumeRequestSchema,
   }),
-  handler: async ({ params, request, server, getScopedClients, getSpaceId, logger }) => {
-    const { licensing, scopedClusterClient } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
-    const routeLogger = logger.get('run_quotas', params.query.group);
-    try {
-      return await consumeRunQuota({
-        internalRepository: createRunQuotaInternalRepository(server),
-        executionReader: createRunQuotaExecutionReader(scopedClusterClient.asInternalUser),
-        request,
-        executionId: params.body.executionId,
-        group: params.query.group,
-        spaceId: await getSpaceId(request),
-      });
-    } catch (error) {
-      routeLogger.warn(
-        `Run quota consumption failed: ${error instanceof Error ? error.message : String(error)}`
-      );
-      throw error;
-    }
-  },
-});
-
-const reserveInvestigationRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/run_quotas/investigation/_reserve',
-  options: {
-    access: 'internal',
-    summary: 'Reserve one automated investigation grant',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.object({
-      executionId: z.string().max(MAX_ROUTE_ID_LENGTH),
-      eventId: z.string().max(MAX_ROUTE_ID_LENGTH),
-      eventUuid: z.string().max(MAX_ROUTE_ID_LENGTH),
-    }),
-  }),
-  handler: async ({ params, request, server, getScopedClients, getSpaceId, logger }) => {
-    const { licensing, scopedClusterClient, getEventClient } = await getScopedClients({
-      request,
-    });
-    await assertSignificantEventsAccess({ server, licensing });
-    const routeLogger = logger.get('run_quotas', 'investigation');
-    try {
-      return await reserveInvestigationRunQuota({
-        internalRepository: createRunQuotaInternalRepository(server),
-        executionReader: createRunQuotaExecutionReader(scopedClusterClient.asInternalUser),
-        eventResolver: getEventClient(),
-        request,
-        executionId: params.body.executionId,
-        eventId: params.body.eventId,
-        eventUuid: params.body.eventUuid,
-        spaceId: await getSpaceId(request),
-        actor: server.core.security.authc.getCurrentUser(request)?.username ?? 'unknown',
-        logger: routeLogger,
-      });
-    } catch (error) {
-      routeLogger.warn(
-        `Investigation run quota reservation failed: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      throw error;
-    }
-  },
-});
-
-const statusRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/run_quotas/_status',
-  options: {
-    access: 'internal',
-    summary: 'Get Significant Events run-limit enforcement status',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({}),
-  handler: async ({ request, server, getScopedClients }) => {
+  handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    const settings = await readRunQuotaSettings(createRunQuotaInternalRepository(server));
-    const canManageLimits = await canManageRunQuotas({ request, server });
-    const enabled = settings.enforcementEnabled === true;
-
-    return {
-      enabled,
-      ...(enabled && canManageLimits && settings.enabledAt
-        ? { enabledAt: settings.enabledAt }
-        : {}),
-      ...(enabled && canManageLimits && settings.enabledBy
-        ? { enabledBy: settings.enabledBy }
-        : {}),
-      canManageLimits,
-    };
+    return consumeRunQuota({
+      internalRepository: createRunQuotaInternalRepository(server),
+      ...(params.body as RunQuotaConsumeRequest),
+    });
   },
 });
 
 export const internalRunQuotaRoutes = {
   ...getRunQuotasRoute,
   ...putRunQuotasRoute,
-  ...enforcementRoute,
   ...consumeRoute,
-  ...reserveInvestigationRoute,
-  ...statusRoute,
 };

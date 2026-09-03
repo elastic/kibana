@@ -5,354 +5,258 @@
  * 2.0.
  */
 
-import type { SignificantEventsServer } from '../../../types';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { createInMemoryRunQuotaRepository } from '../../../lib/run_quotas/in_memory_repository.test_utils';
 import {
-  getRunQuotaLedgerId,
-  mutateRunQuotaSettings,
+  DEFAULT_RUN_QUOTA_SETTINGS,
+  type RunQuotaConsumeRequest,
+} from '../../../../common/run_quotas';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import type { SignificantEventsServer } from '../../../types';
+import type {
+  RunQuotaSavedObjectsRepository,
+  RunQuotaSettingsAttributes,
+} from '../../../lib/run_quotas';
+import {
+  assertCanManageRunQuotas,
+  canManageRunQuotas,
+  consumeRunQuota,
+  createRunQuotaInternalRepository,
+  patchRunQuotaSettings,
+  readRunQuotaLedger,
   readRunQuotaSettings,
-} from '../../../lib/run_quotas/repository';
-import { RUN_QUOTA_LEDGER_SO_TYPE } from '../../../lib/run_quotas/saved_objects';
+} from '../../../lib/run_quotas';
 import { internalRunQuotaRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../../../lib/run_quotas', () => ({
+  ...jest.requireActual('../../../lib/run_quotas'),
+  assertCanManageRunQuotas: jest.fn(),
+  canManageRunQuotas: jest.fn(),
+  consumeRunQuota: jest.fn(),
+  createRunQuotaInternalRepository: jest.fn(),
+  patchRunQuotaSettings: jest.fn(),
+  readRunQuotaLedger: jest.fn(),
+  readRunQuotaSettings: jest.fn(),
+}));
+
 const getRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas'];
 const putRoute = internalRunQuotaRoutes['PUT /internal/significant_events/run_quotas'];
-const enforcementRoute =
-  internalRunQuotaRoutes['POST /internal/significant_events/run_quotas/_enforcement'];
 const consumeRoute =
   internalRunQuotaRoutes['POST /internal/significant_events/run_quotas/_consume'];
-const reserveRoute =
-  internalRunQuotaRoutes['POST /internal/significant_events/run_quotas/investigation/_reserve'];
-const statusRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas/_status'];
 
-const makeServer = ({
-  repository,
-  canManage,
-  displayCount = 0,
-  displayCountError,
-}: {
-  repository: ReturnType<typeof createInMemoryRunQuotaRepository>['client'];
-  canManage: boolean;
-  displayCount?: number;
-  displayCountError?: Error;
-}) => {
-  const globally = jest.fn().mockResolvedValue({ hasAllRequested: canManage });
-  const count = displayCountError
-    ? jest.fn().mockRejectedValue(displayCountError)
-    : jest.fn().mockResolvedValue({ count: displayCount });
-  return {
-    server: {
-      core: {
-        elasticsearch: {
-          client: {
-            asInternalUser: {
-              count,
-            },
-          },
-        },
-        savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue(repository),
-        },
-        security: {
-          authc: {
-            getCurrentUser: jest.fn().mockReturnValue({ username: 'elastic' }),
-          },
-        },
-      },
-      security: {
-        authz: {
-          actions: { api: { get: jest.fn((privilege) => `api:${privilege}`) } },
-          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ globally }),
-        },
-      },
-    } as unknown as SignificantEventsServer,
-  };
+const repository = {} as RunQuotaSavedObjectsRepository;
+const server = {} as SignificantEventsServer;
+const request = {};
+
+const defaultSettings: RunQuotaSettingsAttributes = {
+  enabled: DEFAULT_RUN_QUOTA_SETTINGS.enabled,
+  limits: { ...DEFAULT_RUN_QUOTA_SETTINGS.limits },
 };
 
-const baseHandlerParams = (server: SignificantEventsServer) => ({
-  request: {},
+const handlerParams = {
+  request,
   server,
   getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
-  getSpaceId: jest.fn().mockResolvedValue('space-a'),
-  logger: { warn: jest.fn() },
-});
+};
 
-describe('run quota route authorization matrix', () => {
-  it.each([
-    ['read quotas', getRoute, STREAMS_API_PRIVILEGES.read],
-    ['update quotas', putRoute, STREAMS_API_PRIVILEGES.manage],
-    ['toggle enforcement', enforcementRoute, STREAMS_API_PRIVILEGES.manage],
-    ['consume worker quota', consumeRoute, STREAMS_API_PRIVILEGES.manage],
-    ['reserve investigation quota', reserveRoute, STREAMS_API_PRIVILEGES.manage],
-    ['read enforcement status', statusRoute, STREAMS_API_PRIVILEGES.read],
-  ])('%s declares the required Streams privilege', (_, route, requiredPrivilege) => {
-    expect(route.security.authz).toEqual({
-      requiredPrivileges: [requiredPrivilege],
+const mockLedgerCounts = (counts: {
+  detection: number;
+  investigation: number;
+  ki_extraction: number;
+}) => {
+  jest.mocked(readRunQuotaLedger).mockImplementation(async (_repository, date, group) => ({
+    date,
+    group,
+    count: counts[group],
+  }));
+};
+
+describe('Significant Events run quota routes', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-09-03T08:30:00.000Z'));
+    jest.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
+    jest.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
+    jest.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
+    jest
+      .mocked(createRunQuotaInternalRepository)
+      .mockReset()
+      .mockReturnValue(repository as never);
+    jest.mocked(patchRunQuotaSettings).mockReset();
+    jest.mocked(readRunQuotaSettings).mockReset().mockResolvedValue(defaultSettings);
+    jest.mocked(readRunQuotaLedger).mockReset();
+    mockLedgerCounts({ detection: 0, investigation: 0, ki_extraction: 0 });
+    handlerParams.getScopedClients.mockClear();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('registers exactly the three routes with their space-scoped privileges', () => {
+    expect(Object.keys(internalRunQuotaRoutes).sort()).toEqual(
+      [
+        'GET /internal/significant_events/run_quotas',
+        'POST /internal/significant_events/run_quotas/_consume',
+        'PUT /internal/significant_events/run_quotas',
+      ].sort()
+    );
+    expect(getRoute.security.authz).toEqual({
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    });
+    expect(putRoute.security.authz).toEqual({
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    });
+    expect(consumeRoute.security.authz).toEqual({
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     });
   });
-});
 
-describe('run quota route schemas', () => {
-  it('accepts the canonical unlimited value', () => {
+  it('accepts only non-empty bounded settings updates', () => {
+    expect(putRoute.params.safeParse({ body: { enabled: true } }).success).toBe(true);
+    expect(putRoute.params.safeParse({ body: { limits: { detection: 0 } } }).success).toBe(true);
     expect(
       putRoute.params.safeParse({
-        body: { limits: { detection: { enabled: false, max: 0 } } },
+        body: {
+          enabled: false,
+          limits: { detection: 10_000, investigation: 30, ki_extraction: 20 },
+        },
       }).success
     ).toBe(true);
+
+    for (const body of [
+      {},
+      { limits: {} },
+      { limits: { detection: -1 } },
+      { limits: { detection: 10_001 } },
+      { limits: { detection: 1.5 } },
+      { limits: { memory: 1 } },
+    ]) {
+      expect(putRoute.params.safeParse({ body }).success).toBe(false);
+    }
   });
 
-  it('rejects malformed limits and unbounded plumbing identifiers', () => {
-    expect(
-      putRoute.params.safeParse({
-        body: { limits: { detection: { enabled: false, max: 1 } } },
-      }).success
-    ).toBe(false);
-    expect(
-      consumeRoute.params.safeParse({
-        query: { group: 'detection' },
-        body: { executionId: 'x'.repeat(1025) },
-      }).success
-    ).toBe(false);
-    expect(
-      reserveRoute.params.safeParse({
-        body: {
-          executionId: 'execution',
-          eventId: 'event',
-          eventUuid: 'x'.repeat(1025),
-        },
-      }).success
-    ).toBe(false);
+  it('accepts the discriminated consume bodies without identifiers', () => {
+    for (const body of [
+      { group: 'detection' },
+      { group: 'ki_extraction' },
+      { group: 'investigation', critical: false },
+      { group: 'investigation', critical: true },
+    ]) {
+      expect(consumeRoute.params.safeParse({ body }).success).toBe(true);
+    }
+
+    for (const body of [
+      { group: 'investigation' },
+      { group: 'detection', critical: false },
+      { group: 'detection', executionId: 'execution' },
+      { group: 'investigation', critical: true, eventId: 'event' },
+      { group: 'memory' },
+    ]) {
+      expect(consumeRoute.params.safeParse({ body }).success).toBe(false);
+    }
   });
-});
 
-describe('run quota continuous KI reconciliation', () => {
-  const cappedKiLimit = { enabled: true, max: 100 } as const;
-
-  it('reconciles before enabling enforcement with a capped KI limit', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server } = makeServer({ repository: repository.client, canManage: true });
-    const ensureCappedContinuousKiScheduled = jest.fn().mockResolvedValue(undefined);
-
-    await enforcementRoute.handler({
-      ...baseHandlerParams(server),
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
-      }),
-      continuousKiOnboardingWorkflowService: { ensureCappedContinuousKiScheduled },
-      params: {
-        body: {
-          enabled: true,
-          limits: { ki_extraction: cappedKiLimit },
-        },
+  it('returns configured limits and current-day counts while enforcement is disabled', async () => {
+    const settings: RunQuotaSettingsAttributes = {
+      enabled: false,
+      limits: {
+        detection: 0,
+        investigation: 30,
+        ki_extraction: 0,
       },
-    } as never);
-
-    expect(ensureCappedContinuousKiScheduled).toHaveBeenCalledWith({
-      request: expect.anything(),
-    });
-    expect(await readRunQuotaSettings(repository.client)).toEqual(
-      expect.objectContaining({
-        enforcementEnabled: true,
-        limits: expect.objectContaining({ ki_extraction: cappedKiLimit }),
-      })
-    );
-  });
-
-  it('reconciles before changing an enforced KI limit from unlimited to capped', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    await mutateRunQuotaSettings(repository.client, () => ({
-      enforcementEnabled: true,
-      limits: { ki_extraction: { enabled: false, max: 0 } },
-    }));
-    const { server } = makeServer({ repository: repository.client, canManage: true });
-    const ensureCappedContinuousKiScheduled = jest.fn().mockResolvedValue(undefined);
-
-    await putRoute.handler({
-      ...baseHandlerParams(server),
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
-      }),
-      continuousKiOnboardingWorkflowService: { ensureCappedContinuousKiScheduled },
-      params: {
-        body: { limits: { ki_extraction: cappedKiLimit } },
-      },
-    } as never);
-
-    expect(ensureCappedContinuousKiScheduled).toHaveBeenCalledTimes(1);
-    expect((await readRunQuotaSettings(repository.client)).limits.ki_extraction).toEqual(
-      cappedKiLimit
-    );
-  });
-
-  it('does not reconcile when continuous KI is disabled', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server } = makeServer({ repository: repository.client, canManage: true });
-    const ensureCappedContinuousKiScheduled = jest.fn();
-
-    await enforcementRoute.handler({
-      ...baseHandlerParams(server),
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        globalUiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
-      }),
-      continuousKiOnboardingWorkflowService: { ensureCappedContinuousKiScheduled },
-      params: {
-        body: {
-          enabled: true,
-          limits: { ki_extraction: cappedKiLimit },
-        },
-      },
-    } as never);
-
-    expect(ensureCappedContinuousKiScheduled).not.toHaveBeenCalled();
-  });
-
-  it('does not enable enforcement when capped KI reconciliation fails', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server } = makeServer({ repository: repository.client, canManage: true });
-
-    await expect(
-      enforcementRoute.handler({
-        ...baseHandlerParams(server),
-        getScopedClients: jest.fn().mockResolvedValue({
-          licensing: {},
-          globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
-        }),
-        continuousKiOnboardingWorkflowService: {
-          ensureCappedContinuousKiScheduled: jest
-            .fn()
-            .mockRejectedValue(new Error('reconciliation failed')),
-        },
-        params: {
-          body: {
-            enabled: true,
-            limits: { ki_extraction: cappedKiLimit },
-          },
-        },
-      } as never)
-    ).rejects.toThrow('reconciliation failed');
-
-    expect((await readRunQuotaSettings(repository.client)).enforcementEnabled).toBe(false);
-  });
-
-  it('keeps KI unlimited when capped KI reconciliation fails', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const unlimitedKiLimit = { enabled: false, max: 0 } as const;
-    await mutateRunQuotaSettings(repository.client, () => ({
-      enforcementEnabled: true,
-      limits: { ki_extraction: unlimitedKiLimit },
-    }));
-    const { server } = makeServer({ repository: repository.client, canManage: true });
-
-    await expect(
-      putRoute.handler({
-        ...baseHandlerParams(server),
-        getScopedClients: jest.fn().mockResolvedValue({
-          licensing: {},
-          globalUiSettingsClient: { get: jest.fn().mockResolvedValue(true) },
-        }),
-        continuousKiOnboardingWorkflowService: {
-          ensureCappedContinuousKiScheduled: jest
-            .fn()
-            .mockRejectedValue(new Error('reconciliation failed')),
-        },
-        params: {
-          body: { limits: { ki_extraction: cappedKiLimit } },
-        },
-      } as never)
-    ).rejects.toThrow('reconciliation failed');
-
-    expect((await readRunQuotaSettings(repository.client)).limits.ki_extraction).toEqual(
-      unlimitedKiLimit
-    );
-  });
-});
-
-describe('run quota read routes', () => {
-  it('returns ledger counts with display counts kept separate', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    repository.seed(
-      RUN_QUOTA_LEDGER_SO_TYPE,
-      getRunQuotaLedgerId(new Date().toISOString().slice(0, 10), 'investigation'),
-      {
-        date: new Date().toISOString().slice(0, 10),
-        group: 'investigation',
-        count: 31,
-        criticalOverrideCount: 1,
-        allowedGrantKeys: [],
-        allowedInvestigationKeys: [],
-      }
-    );
-    const { server } = makeServer({
-      repository: repository.client,
-      canManage: false,
-      displayCount: 37,
-    });
+    };
+    jest.mocked(readRunQuotaSettings).mockResolvedValue(settings);
+    jest.mocked(canManageRunQuotas).mockResolvedValue(false);
+    mockLedgerCounts({ detection: 17, investigation: 8, ki_extraction: 4 });
 
     const response = await getRoute.handler({
-      ...baseHandlerParams(server),
+      ...handlerParams,
       params: {},
     } as never);
 
-    expect(response.groups).toContainEqual(
-      expect.objectContaining({
-        group: 'investigation',
-        used: 37,
-        counted: 31,
-        criticalOverrideCount: 1,
-      })
-    );
-  });
-
-  it('fails the read rather than returning incomplete display counts', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    const { server } = makeServer({
-      repository: repository.client,
+    expect(response).toEqual({
+      enabled: false,
+      limits: settings.limits,
+      counts: {
+        detection: 17,
+        investigation: 8,
+        ki_extraction: 4,
+      },
+      window: {
+        start: '2026-09-03T00:00:00.000Z',
+        resetsAt: '2026-09-04T00:00:00.000Z',
+        timezone: 'UTC',
+      },
       canManage: false,
-      displayCountError: new Error('Elasticsearch unavailable'),
     });
-    const warn = jest.fn();
-
-    await expect(
-      getRoute.handler({
-        ...baseHandlerParams(server),
-        logger: { warn },
-        params: {},
-      } as never)
-    ).rejects.toThrow('Elasticsearch unavailable');
-
-    expect(warn).toHaveBeenCalledWith(
-      'Failed to read workflow execution counts for run quotas: Elasticsearch unavailable'
-    );
+    expect(readRunQuotaLedger).toHaveBeenCalledTimes(3);
+    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'detection');
+    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'investigation');
+    expect(readRunQuotaLedger).toHaveBeenCalledWith(repository, '2026-09-03', 'ki_extraction');
   });
 
-  it('returns ownership for an all-spaces manager', async () => {
-    const repository = createInMemoryRunQuotaRepository();
-    await mutateRunQuotaSettings(repository.client, () => ({
-      enforcementEnabled: true,
-      enabledAt: '2026-08-31T12:00:00.000Z',
-      enabledBy: 'admin',
-    }));
-    const { server } = makeServer({ repository: repository.client, canManage: true });
+  it('applies an actual partial update and returns the common snapshot', async () => {
+    const updated: RunQuotaSettingsAttributes = {
+      enabled: true,
+      limits: {
+        detection: 0,
+        investigation: 30,
+        ki_extraction: 20,
+      },
+    };
+    jest.mocked(patchRunQuotaSettings).mockResolvedValue(updated);
+    mockLedgerCounts({ detection: 2, investigation: 3, ki_extraction: 4 });
 
-    const response = await statusRoute.handler({
-      ...baseHandlerParams(server),
-      params: {},
+    const response = await putRoute.handler({
+      ...handlerParams,
+      params: {
+        body: {
+          enabled: true,
+          limits: { detection: 0 },
+        },
+      },
     } as never);
 
-    expect(response).toEqual(
-      expect.objectContaining({
-        enabledAt: '2026-08-31T12:00:00.000Z',
-        enabledBy: 'admin',
-        canManageLimits: true,
-      })
-    );
+    expect(assertCanManageRunQuotas).toHaveBeenCalledWith({ request, server });
+    expect(patchRunQuotaSettings).toHaveBeenCalledWith(repository, {
+      enabled: true,
+      limits: { detection: 0 },
+    });
+    expect(response).toEqual({
+      enabled: true,
+      limits: updated.limits,
+      counts: {
+        detection: 2,
+        investigation: 3,
+        ki_extraction: 4,
+      },
+      window: {
+        start: '2026-09-03T00:00:00.000Z',
+        resetsAt: '2026-09-04T00:00:00.000Z',
+        timezone: 'UTC',
+      },
+      canManage: true,
+    });
+  });
+
+  it.each<RunQuotaConsumeRequest>([
+    { group: 'detection' },
+    { group: 'ki_extraction' },
+    { group: 'investigation', critical: false },
+    { group: 'investigation', critical: true },
+  ])('passes $group admissions to the shared decision engine', async (body) => {
+    await expect(
+      consumeRoute.handler({
+        ...handlerParams,
+        params: { body },
+      } as never)
+    ).resolves.toEqual({ allowed: true });
+
+    expect(consumeRunQuota).toHaveBeenCalledWith({
+      internalRepository: repository,
+      ...body,
+    });
   });
 });

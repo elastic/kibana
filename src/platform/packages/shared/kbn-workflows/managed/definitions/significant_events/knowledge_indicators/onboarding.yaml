@@ -93,9 +93,9 @@ steps:
     if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume?group=ki_extraction'
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
       body:
-        executionId: '${{ execution.id }}'
+        group: 'ki_extraction'
       headers:
         x-elastic-internal-origin: 'kibana'
     timeout: '10s'

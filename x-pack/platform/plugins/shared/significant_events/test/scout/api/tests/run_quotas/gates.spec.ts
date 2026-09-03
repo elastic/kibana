@@ -5,333 +5,201 @@
  * 2.0.
  */
 
-import { randomUUID } from 'crypto';
-import { tags, type ApiClientFixture, type EsClient } from '@kbn/scout';
+import { tags, type ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
-import { createSystemIndicesEsClient } from '../../fixtures/system_indices_es_client';
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
-const EXECUTIONS_INDEX = '.workflows-executions';
-const EVENTS_DATA_STREAM = '.significant_events-events';
-const SPACE_ID = 'default';
-const DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
-const SCHEDULED_REVIEW_WORKFLOW_ID = `system-significant-events-scheduled-review-${SPACE_ID}`;
-const KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
-const CONTINUOUS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-continuous-onboarding';
-const MANAGED_GROUPS = ['detection', 'investigation', 'ki_extraction'] as const;
 
-interface RunQuotaState {
+type RunQuotaGroup = 'detection' | 'investigation' | 'ki_extraction';
+type RunQuotaConsumeBody =
+  | { group: 'detection' }
+  | { group: 'ki_extraction' }
+  | { group: 'investigation'; critical: boolean };
+
+interface RunQuotaSnapshot {
   enabled: boolean;
-  limits: Record<string, { enabled: boolean; max: number }>;
+  limits: Record<RunQuotaGroup, number>;
+  counts: Record<RunQuotaGroup, number>;
+  window: {
+    start: string;
+    resetsAt: string;
+    timezone: string;
+  };
+  canManage: boolean;
 }
 
 apiTest.describe(
-  'Significant Events run quota managed gates',
+  'Significant Events run quota API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
-    let seedEsClient: EsClient;
-    let originalState: RunQuotaState;
-    const executionIds = new Set<string>();
-    const eventIds = new Set<string>();
+    let original: RunQuotaSnapshot;
+    let settingsChanged = false;
 
-    apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
-      ({ cookieHeader } = await samlAuth.asStreamsAdmin());
-      seedEsClient = await createSystemIndicesEsClient(esClient, config);
-    });
+    const headers = () => ({ ...COMMON_API_HEADERS, ...cookieHeader });
 
-    apiTest.beforeEach(async ({ apiClient }) => {
-      const [limitsResponse, statusResponse] = await Promise.all([
-        apiClient.get(RUN_QUOTAS_ENDPOINT, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        }),
-        apiClient.get(`${RUN_QUOTAS_ENDPOINT}/_status`, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        }),
-      ]);
-      expect(limitsResponse).toHaveStatusCode(200);
-      expect(statusResponse).toHaveStatusCode(200);
-      originalState = {
-        enabled: statusResponse.body.enabled,
-        limits: Object.fromEntries(
-          limitsResponse.body.groups
-            .filter(({ group }: { group: string }) =>
-              MANAGED_GROUPS.includes(group as (typeof MANAGED_GROUPS)[number])
-            )
-            .map(
-              ({ group, limit }: { group: string; limit: { enabled: boolean; max: number } }) => [
-                group,
-                limit,
-              ]
-            )
-        ),
-      };
-    });
-
-    apiTest.afterEach(async ({ apiClient }) => {
-      const response = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: originalState,
+    const readSnapshot = async (apiClient: ApiClientFixture): Promise<RunQuotaSnapshot> => {
+      const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
+        headers: headers(),
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
+      return response.body as RunQuotaSnapshot;
+    };
+
+    const updateSettings = async (
+      apiClient: ApiClientFixture,
+      desired: {
+        enabled?: boolean;
+        limits?: Partial<Record<RunQuotaGroup, number>>;
+      }
+    ): Promise<RunQuotaSnapshot> => {
+      const current = await readSnapshot(apiClient);
+      const limits = Object.fromEntries(
+        Object.entries(desired.limits ?? {}).filter(
+          ([group, limit]) => current.limits[group as RunQuotaGroup] !== limit
+        )
+      ) as Partial<Record<RunQuotaGroup, number>>;
+      const body = {
+        ...(desired.enabled !== undefined && desired.enabled !== current.enabled
+          ? { enabled: desired.enabled }
+          : {}),
+        ...(Object.keys(limits).length > 0 ? { limits } : {}),
+      };
+
+      if (Object.keys(body).length === 0) {
+        return current;
+      }
+
+      const response = await apiClient.put(RUN_QUOTAS_ENDPOINT, {
+        headers: headers(),
+        body,
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      settingsChanged = true;
+      return response.body as RunQuotaSnapshot;
+    };
+
+    const consume = async (apiClient: ApiClientFixture, body: RunQuotaConsumeBody) =>
+      apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume`, {
+        headers: headers(),
+        body,
+        responseType: 'json',
+      });
+
+    const consumeAllowed = async (
+      apiClient: ApiClientFixture,
+      body: RunQuotaConsumeBody
+    ): Promise<void> => {
+      const response = await consume(apiClient, body);
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual({ allowed: true });
+    };
+
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      ({ cookieHeader } = await samlAuth.asStreamsAdmin());
     });
 
-    apiTest.afterAll(async () => {
-      await Promise.all([
-        ...[...executionIds].map((id) =>
-          seedEsClient.delete({ index: EXECUTIONS_INDEX, id }, { ignore: [404] })
-        ),
-      ]);
-      if (eventIds.size > 0) {
-        await seedEsClient.deleteByQuery({
-          index: EVENTS_DATA_STREAM,
-          conflicts: 'proceed',
-          refresh: true,
-          query: { terms: { event_id: [...eventIds] } },
+    apiTest.beforeEach(async ({ apiClient }) => {
+      original = await readSnapshot(apiClient);
+      settingsChanged = false;
+    });
+
+    apiTest.afterEach(async ({ apiClient }) => {
+      if (settingsChanged) {
+        await updateSettings(apiClient, {
+          enabled: original.enabled,
+          limits: original.limits,
         });
       }
     });
 
-    const quotaHeaders = (executionId: string) => ({
-      ...COMMON_API_HEADERS,
-      ...cookieHeader,
-      'x-kibana-workflow-execution-id': executionId,
-    });
-
-    const indexExecution = async (execution: Record<string, unknown>) => {
-      const id = execution.id as string;
-      executionIds.add(id);
-      await seedEsClient.index({
-        index: EXECUTIONS_INDEX,
-        id,
-        refresh: true,
-        document: execution,
-      });
-    };
-
-    const seedDetectionChain = async ({
-      prefix,
-      quotaSlot,
-      parentTriggeredBy = 'scheduled',
-      childSpaceId = SPACE_ID,
-      parentWorkflowId = SCHEDULED_REVIEW_WORKFLOW_ID,
-      taskRunAt = new Date().toISOString(),
-    }: {
-      prefix: string;
-      quotaSlot: number;
-      parentTriggeredBy?: string;
-      childSpaceId?: string;
-      parentWorkflowId?: string;
-      taskRunAt?: string;
-    }) => {
-      const parentId = `${prefix}-parent`;
-      const childId = `${prefix}-child`;
-      await indexExecution({
-        id: parentId,
-        workflowId: parentWorkflowId,
-        spaceId: SPACE_ID,
-        status: 'running',
-        triggeredBy: parentTriggeredBy,
-        taskRunAt,
-      });
-      await indexExecution({
-        id: childId,
-        workflowId: DISCOVERY_WORKFLOW_ID,
-        spaceId: childSpaceId,
-        status: 'running',
-        context: {
-          parentWorkflowExecutionId: parentId,
-          inputs: { quotaSlot },
-        },
-      });
-      return { parentId, childId, taskRunAt };
-    };
-
-    const seedKiChain = async ({
-      prefix,
-      streamName,
-      taskRunAt = new Date().toISOString(),
-    }: {
-      prefix: string;
-      streamName: string;
-      taskRunAt?: string;
-    }) => {
-      const parentId = `${prefix}-parent`;
-      const childId = `${prefix}-child`;
-      await indexExecution({
-        id: parentId,
-        workflowId: CONTINUOUS_KI_ONBOARDING_WORKFLOW_ID,
-        spaceId: SPACE_ID,
-        status: 'running',
-        triggeredBy: 'scheduled',
-        taskRunAt,
-      });
-      await indexExecution({
-        id: childId,
-        workflowId: KI_ONBOARDING_WORKFLOW_ID,
-        spaceId: SPACE_ID,
-        status: 'running',
-        context: {
-          parentWorkflowExecutionId: parentId,
-          inputs: { streamName },
-        },
-      });
-      return { childId, taskRunAt };
-    };
-
-    const readGroup = async (apiClient: ApiClientFixture, group: string) => {
-      const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      return response.body.groups.find((candidate: { group: string }) => candidate.group === group);
-    };
-
-    apiTest('enforces detection through a managed execution chain', async ({ apiClient }) => {
-      const prefix = `scout-detection-${randomUUID()}`;
-      const first = await seedDetectionChain({ prefix, quotaSlot: 0 });
-      const before = await readGroup(apiClient, 'detection');
-
-      const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          enabled: true,
-          limits: {
-            detection: { enabled: true, max: before.counted + 1 },
-            ki_extraction: { enabled: false, max: 0 },
-          },
-        },
-        responseType: 'json',
-      });
-      expect(enable).toHaveStatusCode(200);
-
-      const firstConsume = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume?group=detection`, {
-        headers: quotaHeaders(first.childId),
-        body: { executionId: first.childId },
-        responseType: 'json',
-      });
-      expect(firstConsume).toHaveStatusCode(200);
-      expect(firstConsume.body.allowed).toBe(true);
-
-      const denied = await seedDetectionChain({
-        prefix: `${prefix}-denied`,
-        quotaSlot: 1,
-        taskRunAt: first.taskRunAt,
-      });
-      const denial = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume?group=detection`, {
-        headers: quotaHeaders(denied.childId),
-        body: { executionId: denied.childId },
-        responseType: 'json',
-      });
-      expect(denial).toHaveStatusCode(200);
-      expect(denial.body.allowed).toBe(false);
-    });
-
-    apiTest('enforces KI extraction through a managed execution chain', async ({ apiClient }) => {
-      const prefix = `scout-ki-${randomUUID()}`;
-      const before = await readGroup(apiClient, 'ki_extraction');
-      const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-        headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-        body: {
-          enabled: true,
-          limits: {
-            ki_extraction: { enabled: true, max: before.counted + 1 },
-          },
-        },
-        responseType: 'json',
-      });
-      expect(enable).toHaveStatusCode(200);
-
-      const first = await seedKiChain({
-        prefix,
-        streamName: `logs.scout-${randomUUID()}`,
-      });
-      const firstConsume = await apiClient.post(
-        `${RUN_QUOTAS_ENDPOINT}/_consume?group=ki_extraction`,
-        {
-          headers: quotaHeaders(first.childId),
-          body: { executionId: first.childId },
-          responseType: 'json',
-        }
-      );
-      expect(firstConsume).toHaveStatusCode(200);
-      expect(firstConsume.body.allowed).toBe(true);
-
-      const denied = await seedKiChain({
-        prefix: `${prefix}-denied`,
-        streamName: `logs.scout-${randomUUID()}`,
-        taskRunAt: first.taskRunAt,
-      });
-      const denial = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_consume?group=ki_extraction`, {
-        headers: quotaHeaders(denied.childId),
-        body: { executionId: denied.childId },
-        responseType: 'json',
-      });
-      expect(denial).toHaveStatusCode(200);
-      expect(denial.body.allowed).toBe(false);
-    });
-
     apiTest(
-      'reserves an open high-severity event through a managed execution chain',
+      'records admissions while enforcement is disabled and the limit is unlimited',
       async ({ apiClient }) => {
-        const before = await readGroup(apiClient, 'investigation');
-        const enable = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/_enforcement`, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          body: {
-            enabled: true,
-            limits: {
-              investigation: { enabled: true, max: before.counted + 1 },
-              ki_extraction: { enabled: false, max: 0 },
-            },
-          },
-          responseType: 'json',
-        });
-        expect(enable).toHaveStatusCode(200);
-
-        const prefix = `scout-reserve-${randomUUID()}`;
-        const chain = await seedDetectionChain({ prefix, quotaSlot: 5 });
-        const event = {
-          eventId: `${prefix}-event-id`,
-          eventUuid: `${prefix}-event-uuid`,
-          severity: '60-high',
-        };
-        eventIds.add(event.eventId);
-
-        await seedEsClient.create({
-          index: EVENTS_DATA_STREAM,
-          id: event.eventUuid,
-          refresh: true,
-          document: {
-            '@timestamp': new Date().toISOString(),
-            event_id: event.eventId,
-            event_uuid: event.eventUuid,
-            status: 'open',
-            severity: event.severity,
-            kibana: { space_ids: [SPACE_ID] },
-          },
+        const before = await updateSettings(apiClient, {
+          enabled: false,
+          limits: { detection: 0 },
         });
 
-        const response = await apiClient.post(`${RUN_QUOTAS_ENDPOINT}/investigation/_reserve`, {
-          headers: quotaHeaders(chain.childId),
-          body: {
-            executionId: chain.childId,
-            eventId: event.eventId,
-            eventUuid: event.eventUuid,
-          },
-          responseType: 'json',
-        });
+        const response = await consume(apiClient, { group: 'detection' });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toMatchObject({ granted: true });
+        expect(response.body).toStrictEqual({ allowed: true });
+        const after = await readSnapshot(apiClient);
+        expect(after.enabled).toBe(false);
+        expect(after.limits.detection).toBe(0);
+        expect(after.counts.detection).toBe(before.counts.detection + 1);
+      }
+    );
 
-        const after = await readGroup(apiClient, 'investigation');
-        expect(after.counted).toBe(before.counted + 1);
+    apiTest(
+      'denies a non-critical admission at a finite limit without incrementing',
+      async ({ apiClient }) => {
+        let before = await readSnapshot(apiClient);
+        if (before.counts.ki_extraction === 0) {
+          await updateSettings(apiClient, {
+            enabled: false,
+            limits: { ki_extraction: 0 },
+          });
+          await consumeAllowed(apiClient, { group: 'ki_extraction' });
+          before = await readSnapshot(apiClient);
+        }
+        const finiteLimit = Math.min(before.counts.ki_extraction, 10_000);
+        before = await updateSettings(apiClient, {
+          enabled: true,
+          limits: { ki_extraction: finiteLimit },
+        });
+
+        const response = await consume(apiClient, { group: 'ki_extraction' });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ allowed: false });
+        const after = await readSnapshot(apiClient);
+        expect(after.counts.ki_extraction).toBe(before.counts.ki_extraction);
+      }
+    );
+
+    apiTest(
+      'allows and counts a critical investigation beyond its finite limit',
+      async ({ apiClient }) => {
+        let before = await readSnapshot(apiClient);
+        if (before.counts.investigation === 0) {
+          await updateSettings(apiClient, {
+            enabled: false,
+            limits: { investigation: 0 },
+          });
+          await consumeAllowed(apiClient, {
+            group: 'investigation',
+            critical: false,
+          });
+          before = await readSnapshot(apiClient);
+        }
+        const finiteLimit = Math.min(before.counts.investigation, 10_000);
+        before = await updateSettings(apiClient, {
+          enabled: true,
+          limits: { investigation: finiteLimit },
+        });
+
+        const deniedResponse = await consume(apiClient, {
+          group: 'investigation',
+          critical: false,
+        });
+        expect(deniedResponse).toHaveStatusCode(200);
+        expect(deniedResponse.body).toStrictEqual({ allowed: false });
+
+        const criticalResponse = await consume(apiClient, {
+          group: 'investigation',
+          critical: true,
+        });
+        expect(criticalResponse).toHaveStatusCode(200);
+        expect(criticalResponse.body).toStrictEqual({ allowed: true });
+
+        const after = await readSnapshot(apiClient);
+        expect(after.counts.investigation).toBe(before.counts.investigation + 1);
       }
     );
   }
