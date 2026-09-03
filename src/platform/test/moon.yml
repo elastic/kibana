@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-provider-plugin'
   - '@kbn/test'
   - '@kbn/repo-info'
-  - '@kbn/utils'
   - '@kbn/expect'
   - '@kbn/data-plugin'
   - '@kbn/ftr-common-functional-services'
