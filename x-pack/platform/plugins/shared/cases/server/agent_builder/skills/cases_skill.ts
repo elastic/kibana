@@ -58,10 +58,10 @@ const FIND_TEMPLATES_SECTION = `
 
 \`create_from_template\` (see \`${platformCoreCasesTools.manage}\`) requires a \`case_template_id\`, not a name. If the user names a template (e.g. "create a case from the phishing template") instead of giving you an ID, call \`${platformCoreCasesTools.findTemplates}\` first with \`search\` set to the name they gave and the established \`owner\` — do not guess an ID or invent one.
 
-\`search\` also matches template descriptions and field names/labels, not just the template name — check each result's \`nameMatch\` flag:
-- No matches: tell the user, don't fall back to a plain \`create\`.
-- One match with \`nameMatch: true\`: use its \`templateId\` for \`case_template_id\`.
-- Multiple matches, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match.
+\`search\` also matches template descriptions and field names/labels, not just the template name — check each result's \`nameMatch\` flag. Judge how many templates matched by the response's \`total\`, never by how many rows are on the current page (a paginated response can end with a single row that is not a unique hit):
+- \`total: 0\`: tell the user, don't fall back to a plain \`create\`.
+- \`total: 1\` with \`nameMatch: true\`: use its \`templateId\` for \`case_template_id\`.
+- \`total\` greater than 1, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match or a lone last-page row.
 `;
 
 export const buildCasesSkill = (isTemplatesEnabled: boolean) =>

@@ -67,7 +67,7 @@ Use \`search\` with the name the user mentioned — it matches as a case-insensi
 
 Each result includes \`nameMatch\`: true only when the template's own name contains the search term. A result with \`nameMatch: false\` only matched via its description or a field name/label (e.g. searching "phishing" matching a "phishing_url" field on an unrelated template) — do not treat that as a confident match.
 
-If zero templates match, say so — do not guess an ID. If more than one matches, or the only match has \`nameMatch: false\`, list the candidates (name + description) and ask the user to confirm which one before calling \`create_from_template\`.${CASES_TOOL_TEXT_INSTRUCTION}`,
+Judge uniqueness by the response's \`total\`, not by how many rows are on the current page. If \`total\` is 0, say so — do not guess an ID. Only when \`total\` is 1 and that match has \`nameMatch: true\` may you use its \`templateId\` directly. If \`total\` is greater than 1, or the only match has \`nameMatch: false\`, list the candidates (name + description) and ask the user to confirm which one before calling \`create_from_template\`.${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Find Case Templates',
       readOnlyHint: true,
@@ -119,7 +119,6 @@ If zero templates match, say so — do not guess an ID. If more than one matches
           // otherwise-unrelated template). `nameMatch` lets the caller tell a genuine name hit
           // apart from a field/description-only one before treating a single result as certain.
           nameMatch: lowerSearch === undefined || template.name.toLowerCase().includes(lowerSearch),
-          fieldSearchMatches: template.fieldSearchMatches,
         }));
 
         const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
@@ -130,6 +129,12 @@ If zero templates match, say so — do not guess an ID. If more than one matches
             : `No templates found for owner "${owner}".`;
         } else if (requestedPage < totalPages) {
           message = `Showing page ${requestedPage} of ${totalPages} (${results.length} of ${total} matches). Pass \`page\` to fetch additional pages.`;
+        } else if (total > 1) {
+          // On the last page a single leftover row can look like a unique hit; the caller must
+          // judge uniqueness by `total`, not by the number of rows in this page.
+          message = `${total} templates matched${
+            search ? ` "${search}"` : ''
+          } in total — this is the last page. Ask the user which one they meant rather than picking one.`;
         } else if (results.length === 1 && !results[0].nameMatch) {
           message =
             'The single match only matched on a field name/label or description, not the template name itself — confirm with the user before using this template rather than assuming it is the right one.';

@@ -161,7 +161,9 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
-    const { results } = result as { results: Array<{ type: string; data: unknown }> };
+    const { results } = result as {
+      results: Array<{ type: string; data: { templates: Array<Record<string, unknown>> } }>;
+    };
     expect(results[0].data).toMatchObject({
       total: 1,
       templates: [
@@ -176,6 +178,11 @@ describe('findTemplatesTool', () => {
         },
       ],
     });
+    // `toMatchObject` tolerates extra keys, so guard against a later `...template` spread leaking
+    // heavy or internal fields into the agent-facing row.
+    expect(results[0].data.templates[0]).not.toHaveProperty('definition');
+    expect(results[0].data.templates[0]).not.toHaveProperty('fieldDefinitions');
+    expect(results[0].data.templates[0]).not.toHaveProperty('fieldSearchMatches');
   });
 
   it('flags a single result as needing confirmation when it only matched a field/description, not the name', async () => {
@@ -206,6 +213,31 @@ describe('findTemplatesTool', () => {
     };
     expect(results[0].data.templates[0].nameMatch).toBe(false);
     expect(results[0].data.message).toContain('only matched on a field name/label or description');
+  });
+
+  it('does not emit the field-only warning when total is greater than 1, even if the only row on the page is a field-only hit', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [
+        buildTemplate({
+          name: 'SOC Intake',
+          description: 'General intake template',
+          fieldSearchMatches: true,
+        }),
+      ],
+      page: 2,
+      perPage: 1,
+      total: 2,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing', page: 2, perPage: 1 } as never,
+      buildToolContext()
+    );
+
+    const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
+    expect(results[0].data.message).not.toContain('only matched on a field name/label');
+    expect(results[0].data.message).toContain('2 templates matched');
   });
 
   it('does not flag a match when the template name itself contains the search term', async () => {
@@ -266,7 +298,7 @@ describe('findTemplatesTool', () => {
     expect(results[0].data.message).toContain('Showing page 1 of 2');
   });
 
-  it('does not add a pagination hint when already on the last page', async () => {
+  it('on the last page with total > 1, replaces the pagination hint with an ask-the-user message so a lone row is not mistaken for a unique hit', async () => {
     casesClient.templates.getAllTemplates.mockResolvedValue({
       templates: [buildTemplate()],
       page: 2,
@@ -280,8 +312,34 @@ describe('findTemplatesTool', () => {
       buildToolContext()
     );
 
+    const { results } = result as {
+      results: Array<{ type: string; data: { total: number; message?: string } }>;
+    };
+    expect(results[0].data.total).toBe(2);
+    expect(results[0].data.message).not.toContain('Showing page');
+    expect(results[0].data.message).toContain('2 templates matched "phishing"');
+    expect(results[0].data.message).toContain('Ask the user which one they meant');
+  });
+
+  it('emits the multiple-matches message when several templates fit on a single page', async () => {
+    casesClient.templates.getAllTemplates.mockResolvedValue({
+      templates: [
+        buildTemplate(),
+        buildTemplate({ templateId: 'template-2', name: 'Phishing escalation' }),
+      ],
+      page: 1,
+      perPage: 20,
+      total: 2,
+    });
+
+    const tool = buildTool();
+    const result = await tool.handler(
+      { owner: 'securitySolution', search: 'phishing' } as never,
+      buildToolContext()
+    );
+
     const { results } = result as { results: Array<{ type: string; data: { message?: string } }> };
-    expect(results[0].data.message).toBeUndefined();
+    expect(results[0].data.message).toContain('2 templates matched "phishing"');
   });
 
   it('clamps perPage to the maximum allowed value', async () => {
