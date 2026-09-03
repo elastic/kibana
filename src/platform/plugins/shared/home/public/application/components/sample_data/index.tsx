@@ -15,7 +15,15 @@
 
 import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCard, EuiButton, EuiButtonEmpty, EuiIllustration, EuiPanel } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIllustration,
+  EuiPanel,
+} from '@elastic/eui';
 import { monitorGraphCogs } from '@elastic/eui-illustrations';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -32,19 +40,16 @@ export function SampleDataCard({ onDecline, onConfirm }: Props) {
     <EuiCard
       image={
         <EuiPanel paddingSize="m" color="transparent" hasShadow={false} hasBorder={false}>
-          <EuiIllustration
-            type={monitorGraphCogs}
-            fullWidth={false}
-            alt={i18n.translate('home.letsStartIllustrationAriaLabel', {
-              defaultMessage: 'Welcome to Elastic. Add integrations, or explore on your own.',
-            })}
-            style={{
-              display: 'block',
-              inlineSize: 200,
-              blockSize: 'auto',
-              marginInline: 'auto',
-            }}
-          />
+          <EuiFlexGroup justifyContent="center" gutterSize="none">
+            <EuiFlexItem grow={false} css={illustrationFrame}>
+              <EuiIllustration
+                type={monitorGraphCogs}
+                alt={i18n.translate('home.letsStartIllustrationAriaLabel', {
+                  defaultMessage: 'Welcome to Elastic. Add integrations, or explore on your own.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       }
       textAlign="left"
@@ -70,6 +75,11 @@ export function SampleDataCard({ onDecline, onConfirm }: Props) {
     />
   );
 }
+
+const illustrationFrame = css({
+  inlineSize: 200,
+  maxInlineSize: '100%',
+});
 
 const footerAction = ({ euiTheme }: UseEuiTheme) => {
   return css({
