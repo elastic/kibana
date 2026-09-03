@@ -154,14 +154,18 @@ Otherwise, use the replacement instead of an index:
 | To act on every item in a collection   | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so it races the UI |
 | A genuinely positional element         | Only through the escape hatch below, once the rows above are ruled out                                                                                                      |
 
-**Never reach for a file-level suppression.** `/* eslint-disable playwright/no-nth-methods */` silences the rest of the file, including code added later, and turns CI green without fixing anything.
-
-Two cases survive review: a genuinely ordered collection (the last step of a run, the third legend entry), or elements that are truly indistinguishable — typically a duplicated `data-test-subj` in a component you don't own, worth raising with the owning team. Both need a single-line disable stating the reason, preceded by a `toHaveCount` that bounds the index:
+The two exceptions need a single-line disable (never file-level) stating why, bounded by a `toHaveCount`:
 
 ```ts
+// genuinely ordered collection:
 await expect(stepButtons).toHaveCount(4);
 // eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one
 const failedStep = stepButtons.last();
+
+// genuinely indistinguishable elements — also raise the duplicate with the owning team:
+await expect(policyCallout).toHaveCount(2);
+// eslint-disable-next-line playwright/no-nth-methods -- EUI flyout renders this callout twice
+const callout = policyCallout.first();
 ```
 
 :::::{dropdown} Examples
