@@ -9,12 +9,15 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  extractAgentConversationIds,
+  readAgentToolCallsFromTraces,
+} from '@kbn/security-evals-workflow-traces';
+import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
   ALERT_ANALYSIS_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
@@ -72,6 +75,7 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
  * single logical agent step: scan every agent-step record and return the first
  * `structured_output` payload we find.
  */
+
 const readAgentStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
 ): StructuredOutput | undefined => {
@@ -165,19 +169,19 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const { toolCallIds, unavailable } = traceEsClient
-    ? await readWorkflowAgentToolCalls({
-        traceEsClient,
-        traceId: execution.traceId,
-        log,
-      })
-    : { toolCallIds: undefined, unavailable: true };
+  const conversationIds = extractAgentConversationIds(execution.stepExecutions).map(
+    ({ conversationId }) => conversationId
+  );
+  const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+    traceEsClient,
+    conversationIds,
+    log,
+  });
 
-  if (toolCallIds && toolCallIds.length > 0) {
+  if (unavailable) {
     log.warning(
-      `Workflow agent called unexpected tools: ${toolCallIds.join(
-        ', '
-      )} (execution ${workflowExecutionId})`
+      `Agent tool calls unavailable for execution ${workflowExecutionId} ` +
+        `(conversation ids: ${conversationIds.length > 0 ? conversationIds.join(', ') : 'none'})`
     );
   }
 
