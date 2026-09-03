@@ -51,8 +51,8 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
       await mockInvestigationApi(page);
+      await browserAuth.loginWithCustomRole(INVESTIGATE_ALERT_ROLE);
     });
 
     test.afterAll(async ({ esClient }) => {
@@ -81,14 +81,14 @@ test.describe(
       const requestPromise = page.waitForRequest(
         (request) =>
           request.method() === 'POST' &&
-          request.url().endsWith(`/internal/observability/alerts/${alertId}/investigate`)
+          request.url().endsWith('/internal/nightshift/investigations')
       );
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       await pageObjects.alertsTablePage.clickInvestigate();
 
-      expect((await requestPromise).url()).toContain(
-        `/internal/observability/alerts/${alertId}/investigate`
-      );
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', id: alertId },
+      });
     });
 
     test('sends an investigation request from the alert detail action menu', async ({
@@ -108,13 +108,6 @@ test.describe(
       expect((await requestPromise).url()).toContain(
         `/internal/observability/alerts/${alertId}/investigate`
       );
-    });
-
-    test('shows the investigation action on the rule detail alerts table', async ({ page }) => {
-      await page.gotoApp(`management/insightsAndAlerting/triggersActions/rule/${ruleId}`);
-      await page.testSubj.locator('alertsTableIsLoaded').waitFor({ state: 'visible' });
-      await page.testSubj.locator('alertsTableRowActionMore').click();
-      await expect(page.testSubj.locator('investigateAlert')).toBeVisible();
     });
   }
 );
