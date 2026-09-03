@@ -10,7 +10,9 @@
 export type {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
+  InjectedMetadataDisplayLanguage,
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataTheme,
   InjectedMetadataPlugin,
+  LocaleSource,
 } from './src/types';

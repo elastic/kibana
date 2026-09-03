@@ -6,6 +6,11 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
+export { apiTargets, type ApiTarget } from './apis';
+export {
+  ConversationMetadataUpdatedTriggerId,
+  type ConversationMetadataUpdatedEvent,
+} from './triggers';
 export {
   internalNamespaces as toolNamespaces,
   protectedNamespaces as toolReservedNamespaces,
@@ -146,8 +151,13 @@ export {
   SubagentMode,
   ExecutionStatus,
   type SerializedExecutionError,
+  type AutoApprovedApi,
   type InteractivityConfig,
+  type InteractivityConfigInput,
+  createNonInteractiveConfig,
+  isApiAutoApproved,
   normalizeInteractive,
+  toAutoApprovedApis,
   type AgentListOptions,
   type AgentCreateRequest,
   type AgentUpdateRequest,
