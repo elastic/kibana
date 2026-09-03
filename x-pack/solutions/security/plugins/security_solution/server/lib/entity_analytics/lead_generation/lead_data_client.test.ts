@@ -57,6 +57,8 @@ const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead
     priority: 8,
     chatRecommendations: ['What alerts exist?', 'Check risk score history'],
     staleness: 'fresh',
+    topRelatedEntities: [],
+    relatedEntityCounts: {},
     ...overrides,
     entity: { ...entity, record: {} },
     observations,
@@ -279,6 +281,48 @@ describe('LeadDataClient', () => {
       );
     });
 
+    it('converts topRelatedEntities to snake_case script params on create', async () => {
+      const lead = makeTestLead({
+        topRelatedEntities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            riskLevel: 'High',
+            criticality: 'extreme_impact',
+            interactedWithAtLeast: 4,
+          },
+        ],
+        relatedEntityCounts: { administers: 1 },
+      });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+
+      await client.persistLeads({
+        executionId: 'exec-related',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        refreshes: [],
+        creates: [lead],
+        updates: [],
+      });
+
+      const body = esClient.bulk.mock.calls[0][0].body as Array<Record<string, unknown>>;
+      const script = body[1].script as { params: Record<string, unknown> };
+      expect(script.params.top_related_entities).toEqual([
+        {
+          id: 'host:web-01',
+          type: 'host',
+          name: 'web-01',
+          kinds: ['administers'],
+          risk_level: 'High',
+          criticality: 'extreme_impact',
+          interacted_with_at_least: 4,
+        },
+      ]);
+      expect(script.params.related_entity_counts).toEqual([{ kind: 'administers', count: 1 }]);
+    });
+
     it('returns the failed item count when bulk has errors', async () => {
       const leadOk = makeTestLead({
         entity: { type: 'user', name: 'a', id: 'user:a', record: {} },
@@ -466,6 +510,98 @@ describe('LeadDataClient', () => {
         name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
         id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
       });
+    });
+
+    it('converts top_related_entities back to camelCase', async () => {
+      const esDoc = {
+        id: 'lead-related',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        top_related_entities: [
+          {
+            id: 'host:web-01',
+            type: 'host',
+            name: 'web-01',
+            kinds: ['administers'],
+            risk_level: 'High',
+            criticality: 'extreme_impact',
+            interacted_with_at_least: 4,
+          },
+        ],
+        related_entity_counts: [{ kind: 'administers', count: 1 }],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-related',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-related', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([
+        {
+          id: 'host:web-01',
+          type: 'host',
+          name: 'web-01',
+          kinds: ['administers'],
+          riskLevel: 'High',
+          criticality: 'extreme_impact',
+          interactedWithAtLeast: 4,
+        },
+      ]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({ administers: 1 });
+    });
+
+    it('defaults topRelatedEntities to [] for leads persisted before the field existed', async () => {
+      const esDoc = {
+        id: 'lead-legacy',
+        title: 'Test Lead',
+        byline: 'Entity X',
+        description: 'Details',
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
+        tags: [],
+        priority: 8,
+        chat_recommendations: [],
+        timestamp: new Date().toISOString(),
+        staleness: 'fresh',
+        status: 'active',
+        observations: [],
+        execution_uuid: 'exec-uuid',
+        source_type: 'adhoc',
+        created_at: '2026-03-10T00:00:00.000Z',
+        changed_at: '2026-03-10T00:00:00.000Z',
+        version: 1,
+        content_hash: 'hash-legacy',
+      };
+
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          hits: [{ _source: esDoc, _id: 'lead-legacy', _index: indexName }],
+        },
+      } as never);
+
+      const result = await client.findLeads({ page: 1, perPage: 10 });
+
+      expect(result.leads[0].topRelatedEntities).toEqual([]);
+      expect(result.leads[0].relatedEntityCounts).toEqual({});
     });
 
     it('applies status filter when provided', async () => {

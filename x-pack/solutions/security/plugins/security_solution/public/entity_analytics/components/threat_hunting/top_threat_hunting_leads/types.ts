@@ -16,6 +16,16 @@ export interface Observation {
   metadata: Record<string, unknown>;
 }
 
+export interface RelatedEntity {
+  id: string;
+  type: string;
+  name: string;
+  kinds: string[];
+  riskLevel?: string;
+  criticality?: string;
+  interactedWithAtLeast?: number;
+}
+
 export interface HuntingLead {
   id: string;
   title: string;
@@ -30,6 +40,8 @@ export interface HuntingLead {
   status: 'active' | 'dismissed' | 'expired';
   observations: Observation[];
   sourceType: 'adhoc' | 'scheduled';
+  topRelatedEntities: RelatedEntity[];
+  relatedEntityCounts: Record<string, number>;
 }
 
 export interface ApiLead extends HuntingLead {
@@ -50,4 +62,6 @@ export const fromApiLead = (lead: ApiLead): HuntingLead => ({
   status: lead.status,
   observations: lead.observations,
   sourceType: lead.sourceType,
+  topRelatedEntities: lead.topRelatedEntities,
+  relatedEntityCounts: lead.relatedEntityCounts,
 });

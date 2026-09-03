@@ -30,7 +30,8 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/esql-types"
   ],
   "exclude": ["target/**/*"]
 }

@@ -104,6 +104,8 @@ export const saveDiscoverSession = async (
         breakdownField: tab.breakdownField,
         chartInterval: tab.chartInterval,
         density: tab.density,
+        documentsDisplayMode: tab.documentsDisplayMode,
+        jsonModeSettings: tab.jsonModeSettings,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
       },
