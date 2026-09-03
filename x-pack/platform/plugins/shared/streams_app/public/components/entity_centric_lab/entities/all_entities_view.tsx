@@ -127,6 +127,9 @@ import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
 import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
+import { VariationProvider, useVariation } from './variation_context';
+import { VariationSwitcher } from './variation_switcher';
+import type { DataVariation } from './variation_registry';
 import {
   DEFAULT_GROUP_BY,
   getGroupByFields,
@@ -396,7 +399,7 @@ interface AllEntitiesViewProps {
   readonly cloudServiceScope?: string;
 }
 
-export const AllEntitiesView = ({
+const AllEntitiesViewInner = ({
   categoryScope,
   cloudProviderScope,
   cloudServiceScope,
@@ -484,7 +487,8 @@ export const AllEntitiesView = ({
   // or navigates to the target category — see `handleApplyView` below.
   const savedViewsApi = useSavedViews();
 
-  const dataset = useMemo(() => buildFakeEntities(), []);
+  const dataVariation = useVariation('data') as DataVariation;
+  const dataset = useMemo(() => buildFakeEntities(dataVariation), [dataVariation]);
   // Narrow the dataset to the active category once, then drive every
   // downstream concern (facets, summary, grid, list, flyout context) off
   // the same slice. Doing the filter here — rather than at each consumer —
@@ -1691,6 +1695,19 @@ export const AllEntitiesView = ({
           ) : null}
         </EntityFlyoutServicesProvider>
       ) : null}
+      {isElasticOn ? <VariationSwitcher /> : null}
     </>
   );
 };
+
+/**
+ * Public wrapper that places the {@link VariationProvider} above the
+ * view so `useVariation` hooks inside can read URL-backed variation
+ * state. The provider must be above the inner component because React
+ * context requires providers to be ancestors of consumers.
+ */
+export const AllEntitiesView = (props: AllEntitiesViewProps) => (
+  <VariationProvider>
+    <AllEntitiesViewInner {...props} />
+  </VariationProvider>
+);

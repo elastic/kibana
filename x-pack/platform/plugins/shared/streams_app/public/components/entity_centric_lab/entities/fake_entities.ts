@@ -649,66 +649,6 @@ const sortByHealth = (entities: Entity[]): Entity[] =>
     return healthDelta !== 0 ? healthDelta : a.name.localeCompare(b.name);
   });
 
-const buildCategoryEntities = (spec: CategorySpec): Entity[] => {
-  const salt = stableHash(spec.category);
-  const entities: Entity[] = [];
-  for (let i = 0; i < spec.total; i++) {
-    const seed = spec.seedRows[i];
-    const name = seed?.name ?? spec.fallbackName(i);
-    const type = seed?.type ?? spec.typeCycle[i % spec.typeCycle.length];
-    const tags = buildTags(spec.category, i);
-    const baseHealth = seed?.health ?? seededHealth(salt + i * 3, i);
-    const health = regionAdjustedHealth(baseHealth, tags.region);
-    entities.push({
-      id: `${spec.category}-${i + 1}`,
-      name,
-      category: spec.category,
-      type,
-      health,
-      lastHealthChange: '2026-04-14 12:34',
-      age: AGE_SAMPLES[i % AGE_SAMPLES.length],
-      anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-      tags,
-      attributes: buildExtraAttributes(spec.category, spec.category, i),
-      alerts: buildAlerts(name, health),
-    });
-  }
-  return sortByHealth(entities);
-};
-
-const buildKubernetesEntities = (): Entity[] => {
-  const salt = stableHash('kubernetes');
-  const entities: Entity[] = [];
-  let runningOffset = 0;
-  for (const sub of KUBERNETES_SUB_SPECS) {
-    const subEntities: Entity[] = [];
-    for (let i = 0; i < sub.total; i++) {
-      const seed = sub.seedRows[i];
-      const name = seed?.name ?? sub.fallbackName(i);
-      const globalIndex = runningOffset + i;
-      const tags = buildTags(`kubernetes-${sub.label}`, globalIndex);
-      const baseHealth = seed?.health ?? seededHealth(salt + globalIndex * 3, globalIndex);
-      const health = regionAdjustedHealth(baseHealth, tags.region);
-      subEntities.push({
-        id: `kubernetes-${sub.label.toLowerCase()}-${i + 1}`,
-        name,
-        category: 'kubernetes',
-        subType: sub.label,
-        type: sub.type,
-        health,
-        lastHealthChange: '2026-04-14 12:34',
-        age: AGE_SAMPLES[i % AGE_SAMPLES.length],
-        anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-        tags,
-        alerts: buildAlerts(name, health),
-      });
-    }
-    entities.push(...sortByHealth(subEntities));
-    runningOffset += sub.total;
-  }
-  return entities;
-};
-
 /**
  * Cloud entities are generated from the {@link CLOUD_PROVIDERS} taxonomy
  * rather than a flat seed list so the provider > service hierarchy stays
@@ -762,23 +702,172 @@ const findSpec = (category: EntityCategoryId): CategorySpec => {
   return spec;
 };
 
-export const buildFakeEntities = (): FakeEntitiesDataset => {
+// ---------------------------------------------------------------------------
+// Scenario-aware entity generation
+// ---------------------------------------------------------------------------
+
+type DataVariation = 'default' | 'full' | 'degraded';
+
+/**
+ * Multiplier applied to every `CategorySpec.total` and every
+ * `KubernetesSubSpec.total` for the `full` data profile. Cloud entities
+ * are instance-seeded (not count-driven) so they stay unchanged.
+ */
+const FULL_MULTIPLIER = 4;
+
+/**
+ * When the `degraded` scenario is active, override the health
+ * distribution so the vast majority of entities appear unhealthy.
+ *   - 60 % unhealthy
+ *   - 25 % at risk
+ *   - 15 % healthy
+ */
+const degradedHealth = (seed: number, index: number): EntityHealth => {
+  const value = (seed * 31 + index * 17) % 100;
+  if (value < 60) return 'unhealthy';
+  if (value < 85) return 'atRisk';
+  return 'healthy';
+};
+
+/**
+ * Scale a {@link CategorySpec} by a count multiplier (for the `full`
+ * variation). The seed rows and type cycle remain unchanged; extra
+ * entities beyond the original total use the fallback name.
+ */
+const scaleSpec = (spec: CategorySpec, multiplier: number): CategorySpec => ({
+  ...spec,
+  total: spec.total * multiplier,
+});
+
+/**
+ * Scale Kubernetes sub-specs by a count multiplier.
+ */
+const scaleKubernetesSpecs = (
+  multiplier: number
+): readonly KubernetesSubSpec[] =>
+  KUBERNETES_SUB_SPECS.map((sub) => ({
+    ...sub,
+    total: sub.total * multiplier,
+  }));
+
+/**
+ * Build category entities with an optional health override (degraded).
+ */
+const buildCategoryEntitiesWithScenario = (
+  spec: CategorySpec,
+  healthOverride?: (seed: number, index: number) => EntityHealth
+): Entity[] => {
+  const salt = stableHash(spec.category);
+  const entities: Entity[] = [];
+  for (let i = 0; i < spec.total; i++) {
+    const seed = spec.seedRows[i];
+    const name = seed?.name ?? spec.fallbackName(i);
+    const type = seed?.type ?? spec.typeCycle[i % spec.typeCycle.length];
+    const tags = buildTags(spec.category, i);
+    const baseHealth =
+      seed?.health ?? (healthOverride ?? seededHealth)(salt + i * 3, i);
+    const health = regionAdjustedHealth(baseHealth, tags.region);
+    entities.push({
+      id: `${spec.category}-${i + 1}`,
+      name,
+      category: spec.category,
+      type,
+      health,
+      lastHealthChange: '2026-04-14 12:34',
+      age: AGE_SAMPLES[i % AGE_SAMPLES.length],
+      anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
+      tags,
+      attributes: buildExtraAttributes(spec.category, spec.category, i),
+      alerts: buildAlerts(name, health),
+    });
+  }
+  return sortByHealth(entities);
+};
+
+/**
+ * Build Kubernetes entities with optional sub-spec overrides and health
+ * override.
+ */
+const buildKubernetesEntitiesWithScenario = (
+  subSpecs: readonly KubernetesSubSpec[],
+  healthOverride?: (seed: number, index: number) => EntityHealth
+): Entity[] => {
+  const salt = stableHash('kubernetes');
+  const entities: Entity[] = [];
+  let runningOffset = 0;
+  for (const sub of subSpecs) {
+    const subEntities: Entity[] = [];
+    for (let i = 0; i < sub.total; i++) {
+      const seed = sub.seedRows[i];
+      const name = seed?.name ?? sub.fallbackName(i);
+      const globalIndex = runningOffset + i;
+      const tags = buildTags(`kubernetes-${sub.label}`, globalIndex);
+      const baseHealth =
+        seed?.health ?? (healthOverride ?? seededHealth)(salt + globalIndex * 3, globalIndex);
+      const health = regionAdjustedHealth(baseHealth, tags.region);
+      subEntities.push({
+        id: `kubernetes-${sub.label.toLowerCase()}-${i + 1}`,
+        name,
+        category: 'kubernetes',
+        subType: sub.label,
+        type: sub.type,
+        health,
+        lastHealthChange: '2026-04-14 12:34',
+        age: AGE_SAMPLES[i % AGE_SAMPLES.length],
+        anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
+        tags,
+        alerts: buildAlerts(name, health),
+      });
+    }
+    entities.push(...sortByHealth(subEntities));
+    runningOffset += sub.total;
+  }
+  return entities;
+};
+
+export const buildFakeEntities = (
+  scenario: DataVariation = 'default'
+): FakeEntitiesDataset => {
+  const healthFn =
+    scenario === 'degraded' ? degradedHealth : undefined;
+  const multiplier = scenario === 'full' ? FULL_MULTIPLIER : 1;
+
+  const effectiveKubeSpecs =
+    multiplier > 1 ? scaleKubernetesSpecs(multiplier) : KUBERNETES_SUB_SPECS;
+
   const entities: Entity[] = withKubernetesHierarchy([
-    ...buildCategoryEntities(findSpec('hosts')),
-    ...buildKubernetesEntities(),
-    ...buildCategoryEntities(findSpec('databases')),
-    ...buildCategoryEntities(findSpec('services')),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1 ? scaleSpec(findSpec('hosts'), multiplier) : findSpec('hosts'),
+      healthFn
+    ),
+    ...buildKubernetesEntitiesWithScenario(effectiveKubeSpecs, healthFn),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1 ? scaleSpec(findSpec('databases'), multiplier) : findSpec('databases'),
+      healthFn
+    ),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1 ? scaleSpec(findSpec('services'), multiplier) : findSpec('services'),
+      healthFn
+    ),
     ...buildCloudEntities(),
-    ...buildCategoryEntities(findSpec('middlewares')),
-    ...buildCategoryEntities(findSpec('llms')),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1
+        ? scaleSpec(findSpec('middlewares'), multiplier)
+        : findSpec('middlewares'),
+      healthFn
+    ),
+    ...buildCategoryEntitiesWithScenario(
+      multiplier > 1 ? scaleSpec(findSpec('llms'), multiplier) : findSpec('llms'),
+      healthFn
+    ),
   ]);
 
   const categoryCounts: EntityCategoryCounts[] = ENTITY_CATEGORIES.map((descriptor) => {
     if (descriptor.id === 'kubernetes') {
       return {
         category: 'kubernetes' as const,
-        total: KUBERNETES_SUB_SPECS.reduce((sum, sub) => sum + sub.total, 0),
-        subCounts: KUBERNETES_SUB_SPECS.map((sub) => ({ label: sub.label, total: sub.total })),
+        total: effectiveKubeSpecs.reduce((sum, sub) => sum + sub.total, 0),
+        subCounts: effectiveKubeSpecs.map((sub) => ({ label: sub.label, total: sub.total })),
       };
     }
     if (descriptor.id === 'cloud') {
@@ -792,7 +881,8 @@ export const buildFakeEntities = (): FakeEntitiesDataset => {
       };
     }
     const spec = NON_KUBERNETES_SPECS.find((s) => s.category === descriptor.id);
-    return { category: descriptor.id, total: spec?.total ?? 0 };
+    const base = spec?.total ?? 0;
+    return { category: descriptor.id, total: base * multiplier };
   });
 
   return {
