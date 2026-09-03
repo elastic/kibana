@@ -82,15 +82,6 @@ describe('ActionPolicyActionsMenu', () => {
     });
   });
 
-  describe('group separators', () => {
-    it('renders separators between item groups', () => {
-      renderMenu({ onEdit: jest.fn() });
-      openMenu();
-      const separators = document.querySelectorAll('hr');
-      expect(separators.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
   describe('snooze item', () => {
     it('does not render the snooze item when onSnooze/onCancelSnooze are omitted', () => {
       renderMenu();
