@@ -155,16 +155,16 @@ const failedStep = stepButtons.last();
 ```
 
 :::::{dropdown} Examples
-❌ **Don’t:** index into a collection to reach an element you can identify by content:
+❌ **Don’t:** match a prefix and take the first hit — when nothing matches, the failure only says the locator found no elements:
 
 ```ts
-await page.testSubj.locator('tableRow').nth(0).click();
+await page.locator('[data-test-subj^="monitor-page-link-"]').first().click();
 ```
 
-✔️ **Do:** identify it:
+✔️ **Do:** name the element you expect (or identify it with `filter({ hasText })` when the subject isn't unique):
 
 ```ts
-await page.testSubj.locator('tableRow').filter({ hasText: 'nginx-logs' }).click();
+await page.testSubj.click('monitor-page-link-0001-up');
 ```
 
 :::::
