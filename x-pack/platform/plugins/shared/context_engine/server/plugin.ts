@@ -37,6 +37,7 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 import { ContextEngineAnalyticsService } from './telemetry';
+import { resolveSpaceId } from './utils/resolve_space_id';
 
 export class ContextEnginePlugin
   implements
@@ -156,7 +157,7 @@ export class ContextEnginePlugin
         if (!security) {
           return true;
         }
-        const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+        const spaceId = resolveSpaceId(spaces, request);
         const { hasAllRequested } = await security.authz
           .checkPrivilegesWithRequest(request)
           .atSpace(spaceId, {
