@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
-  type RunQuotaConsumeRequest,
   type RunQuotasResponse,
 } from '../../../../common/run_quotas';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -166,9 +165,12 @@ const consumeRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    const allowOverLimit = params.body.group === 'investigation' && params.body.critical;
+
     return consumeRunQuota({
       internalRepository: createRunQuotaInternalRepository(server),
-      ...(params.body as RunQuotaConsumeRequest),
+      group: params.body.group,
+      allowOverLimit,
     });
   },
 });

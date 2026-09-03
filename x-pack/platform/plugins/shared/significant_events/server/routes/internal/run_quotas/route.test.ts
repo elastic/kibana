@@ -241,22 +241,26 @@ describe('Significant Events run quota routes', () => {
     });
   });
 
-  it.each<RunQuotaConsumeRequest>([
-    { group: 'detection' },
-    { group: 'ki_extraction' },
-    { group: 'investigation', critical: false },
-    { group: 'investigation', critical: true },
-  ])('passes $group admissions to the shared decision engine', async (body) => {
-    await expect(
-      consumeRoute.handler({
-        ...handlerParams,
-        params: { body },
-      } as never)
-    ).resolves.toEqual({ allowed: true });
+  it.each<{ body: RunQuotaConsumeRequest; allowOverLimit: boolean }>([
+    { body: { group: 'detection' }, allowOverLimit: false },
+    { body: { group: 'ki_extraction' }, allowOverLimit: false },
+    { body: { group: 'investigation', critical: false }, allowOverLimit: false },
+    { body: { group: 'investigation', critical: true }, allowOverLimit: true },
+  ])(
+    'maps $body.group admission policy at the route boundary',
+    async ({ body, allowOverLimit }) => {
+      await expect(
+        consumeRoute.handler({
+          ...handlerParams,
+          params: { body },
+        } as never)
+      ).resolves.toEqual({ allowed: true });
 
-    expect(consumeRunQuota).toHaveBeenCalledWith({
-      internalRepository: repository,
-      ...body,
-    });
-  });
+      expect(consumeRunQuota).toHaveBeenCalledWith({
+        internalRepository: repository,
+        group: body.group,
+        allowOverLimit,
+      });
+    }
+  );
 });
