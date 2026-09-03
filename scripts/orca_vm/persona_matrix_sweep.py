@@ -194,6 +194,20 @@ DATASET_REMOTE = (
     "Projects/kibana/x-pack/solutions/security/packages/"
     "kbn-evals-suite-security-persona-matrix/src/datasets/persona_matrix_prompts.ts"
 )
+# evaluate_dataset.ts imports ./datasets/select_shard. The overlay copies an
+# explicit file list, so a new module must be added here or the VM runs old
+# code and dies at require time ("Cannot find module './datasets/select_shard'"
+# -> "No tests found" -> 3 failed attempts, observed 2026-09-03).
+PATCHED_SHARD = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/"
+    "src/datasets/select_shard.ts"
+)
+SHARD_REMOTE = (
+    "Projects/kibana/x-pack/solutions/security/packages/"
+    "kbn-evals-suite-security-persona-matrix/src/datasets/select_shard.ts"
+)
 PATCHED_SCOUT_CONFIG = (
     KIBANA_MAIN.parent
     / "kibana.worktrees/persona-matrix-maxpayload"
@@ -434,7 +448,14 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
     if persona_only:
+        # Every import evaluate_dataset.ts pulls from ./datasets must exist
+        # locally before we ship it. A missing file used to surface only on
+        # the VM as "No tests found" after three full stack boots.
+        for _src in (PATCHED_DATASET, PATCHED_SHARD):
+            if not Path(_src).is_file():
+                raise FileNotFoundError(f"overlay source missing: {_src}")
         scp(str(PATCHED_DATASET), ip, DATASET_REMOTE)
+        scp(str(PATCHED_SHARD), ip, SHARD_REMOTE)
     # Scout-readiness timeout overlay (PR #285302) — see PATCHED_EVAL_STACK.
     EVAL_STACK_REMOTE = (
         "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/eval_stack.ts"
@@ -636,6 +657,17 @@ def self_test() -> int:
         _n = SUITE_PROFILES["security-persona-matrix"]["n_examples"]
         _covered = sorted(i for idx in range(1, 5) for i in range(idx - 1, _n, 4))
         check("4 shards partition all 21 examples exactly", _covered, list(range(_n)))
+
+        # The 2026-09-03 smoke run died on every VM because evaluate_dataset.ts
+        # imported ./datasets/select_shard and the overlay never shipped it.
+        # Parse the real imports and require an overlay entry for each.
+        _overlaid = {Path(p).name for p in (PATCHED_DATASET, PATCHED_SHARD)}
+        _ed = Path(PATCHED_EVALUATOR)
+        if _ed.is_file():
+            _imports = set(re.findall(r"from '\./datasets/([a-z_]+)'", _ed.read_text()))
+            _missing = {f"{i}.ts" for i in _imports} - _overlaid
+            check("every ./datasets import is in the VM overlay", sorted(_missing), [])
+            check("overlay actually parsed some imports", len(_imports) > 0, True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
