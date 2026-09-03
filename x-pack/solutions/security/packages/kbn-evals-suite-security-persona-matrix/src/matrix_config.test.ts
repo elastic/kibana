@@ -85,6 +85,7 @@ describe('persona_matrix.config.json extra-suite branch pins', () => {
     expect(branchByColumn.get('attack-discovery')).toStrictEqual([
       'main',
       'patrykkopycinski:feat/attack-discovery-agent-builder-evals',
+      'feat/evals-extensions-matrix-v3',
     ]);
   });
 

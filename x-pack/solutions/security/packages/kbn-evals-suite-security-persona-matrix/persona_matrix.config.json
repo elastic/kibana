@@ -285,7 +285,7 @@
       ],
       "weight": 1,
       "allowSelfJudged": true,
-      "branch": ["main", "patrykkopycinski:feat/attack-discovery-agent-builder-evals"]
+      "branch": ["main", "patrykkopycinski:feat/attack-discovery-agent-builder-evals", "feat/evals-extensions-matrix-v3"]
     },
     {
       "id": "migrations-rules",
@@ -423,6 +423,12 @@
       "label": "GLM-5.3 Flash",
       "openSource": true,
       "matchIds": ["z-ai/glm-5.3-flash"]
+    },
+    {
+      "id": "openrouter-deepseek-v4-pro",
+      "label": "DeepSeek V4 Pro",
+      "openSource": true,
+      "matchIds": ["deepseek/deepseek-v4-pro-0813"]
     }
   ],
   "tokenCost": {},
