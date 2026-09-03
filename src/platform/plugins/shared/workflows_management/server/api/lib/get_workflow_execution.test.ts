@@ -20,7 +20,10 @@ import {
   createMockWorkflowDataClient,
 } from '@kbn/workflows-execution-engine/server/mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
+import {
+  WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../../common';
 
 describe('getWorkflowExecution', () => {
   let mockWorkflowDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
@@ -287,8 +290,11 @@ describe('getWorkflowExecution', () => {
       expect(result?.version).toBeUndefined();
     });
 
-    it('should load only the first 100 step ids when there are more than the mget cap', async () => {
-      const manyIds = Array.from({ length: 101 }, (_, index) => `s${index}`);
+    it('should load only the first step ids up to the mget cap', async () => {
+      const manyIds = Array.from(
+        { length: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT + 1 },
+        (_, index) => `s${index}`
+      );
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, stepExecutionIds: manyIds },
@@ -306,8 +312,10 @@ describe('getWorkflowExecution', () => {
       });
 
       expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
-      expect(mockStepDataClient.getByIds.mock.calls[0][0]).toHaveLength(100);
-      expect(result?.stepExecutions).toHaveLength(100);
+      expect(mockStepDataClient.getByIds.mock.calls[0][0]).toHaveLength(
+        WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT
+      );
+      expect(result?.stepExecutions).toHaveLength(WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT);
     });
 
     it('should return empty steps when search fallback hits a size abort', async () => {

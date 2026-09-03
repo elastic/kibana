@@ -22,9 +22,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-
-/** Max step documents loaded in one `_mget` for execution detail. */
-const STEP_EXECUTIONS_MAX_COUNT = 100;
+import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../common';
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -68,7 +66,10 @@ export const getWorkflowExecution = async ({
         stepExecutions = await getStepExecutionsByWorkflowExecution({
           stepExecutionsDataClient,
           workflowExecutionId,
-          stepExecutionIds: doc.stepExecutionIds?.slice(0, STEP_EXECUTIONS_MAX_COUNT),
+          stepExecutionIds: doc.stepExecutionIds?.slice(
+            0,
+            WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT
+          ),
           sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
         });
       } catch (error) {
