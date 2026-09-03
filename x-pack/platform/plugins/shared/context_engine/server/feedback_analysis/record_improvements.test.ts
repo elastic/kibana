@@ -165,6 +165,20 @@ describe('recordImprovements', () => {
     expect(result.skipped[0]).toMatchObject({ reason: 'limit_exceeded' });
   });
 
+  it('spends the cap on what it accepts, not on where a proposal sat in the input', async () => {
+    // The first proposals are all rejected, so none of them consume the run's budget: every valid
+    // one behind them still fits.
+    const result = await run({
+      proposals: [
+        ...Array.from({ length: MAX_IMPROVEMENTS_PER_RUN }, () => 'not an improvement'),
+        buildProposal({ title: 'A good one', target: { subject: 'orders' } }),
+      ],
+    });
+
+    expect(result.recorded).toEqual([expect.objectContaining({ title: 'A good one' })]);
+    expect(result.skipped.every(({ reason }) => reason === 'invalid')).toBe(true);
+  });
+
   it('survives a proposal that is not an object at all', async () => {
     const result = await run({ proposals: ['not an improvement', null] });
 

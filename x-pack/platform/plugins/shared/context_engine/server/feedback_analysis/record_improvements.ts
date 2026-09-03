@@ -74,8 +74,10 @@ export const recordImprovements = async ({
   const seen = new Set<string>();
   const allowed = new Set<ImprovementAction>(allowedActions);
 
-  for (const [index, raw] of proposals.entries()) {
-    if (index >= MAX_IMPROVEMENTS_PER_RUN) {
+  for (const raw of proposals) {
+    // Bounded by what has been accepted, not by position in the input: a run that proposed thirty
+    // things of which the first ten were malformed still has room for twenty good ones.
+    if (candidates.length >= MAX_IMPROVEMENTS_PER_RUN) {
       skipped.push({
         ...describe(raw),
         reason: 'limit_exceeded',
