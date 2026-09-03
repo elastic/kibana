@@ -93489,7 +93489,6 @@ components:
               frozen:
                 type: boolean
               type:
-                maxLength: 100
                 type: string
               value:
                 nullable: true
@@ -94671,7 +94670,6 @@ components:
                     frozen:
                       type: boolean
                     type:
-                      maxLength: 100
                       type: string
                     value:
                       nullable: true
@@ -94684,18 +94682,14 @@ components:
               enabled:
                 type: boolean
               id:
-                maxLength: 255
                 type: string
               keep_enabled:
                 type: boolean
               migrate_from:
-                maxLength: 1024
                 type: string
               name:
-                maxLength: 255
                 type: string
               policy_template:
-                maxLength: 255
                 type: string
               streams:
                 items:
@@ -94717,7 +94711,6 @@ components:
                           frozen:
                             type: boolean
                           type:
-                            maxLength: 100
                             type: string
                           value:
                             nullable: true
@@ -94730,7 +94723,6 @@ components:
                       type: object
                       properties:
                         dataset:
-                          maxLength: 1024
                           type: string
                         elasticsearch:
                           additionalProperties: false
@@ -94750,7 +94742,6 @@ components:
                                   maxItems: 100
                                   type: array
                         type:
-                          maxLength: 100
                           type: string
                       required:
                         - dataset
@@ -94759,12 +94750,10 @@ components:
                     enabled:
                       type: boolean
                     id:
-                      maxLength: 255
                       type: string
                     keep_enabled:
                       type: boolean
                     migrate_from:
-                      maxLength: 1024
                       type: string
                     release:
                       enum:
@@ -94786,7 +94775,6 @@ components:
                           frozen:
                             type: boolean
                           type:
-                            maxLength: 100
                             type: string
                           value:
                             nullable: true
@@ -94801,7 +94789,6 @@ components:
                 maxItems: 1000
                 type: array
               type:
-                maxLength: 100
                 type: string
               var_group_selections:
                 additionalProperties:
@@ -94817,7 +94804,6 @@ components:
                     frozen:
                       type: boolean
                     type:
-                      maxLength: 100
                       type: string
                     value:
                       nullable: true
@@ -94913,7 +94899,6 @@ components:
               frozen:
                 type: boolean
               type:
-                maxLength: 100
                 type: string
               value:
                 nullable: true
@@ -95022,7 +95007,6 @@ components:
                         frozen:
                           type: boolean
                         type:
-                          maxLength: 100
                           type: string
                         value:
                           nullable: true
@@ -95035,18 +95019,14 @@ components:
                   enabled:
                     type: boolean
                   id:
-                    maxLength: 255
                     type: string
                   keep_enabled:
                     type: boolean
                   migrate_from:
-                    maxLength: 1024
                     type: string
                   name:
-                    maxLength: 255
                     type: string
                   policy_template:
-                    maxLength: 255
                     type: string
                   streams:
                     items:
@@ -95068,7 +95048,6 @@ components:
                               frozen:
                                 type: boolean
                               type:
-                                maxLength: 100
                                 type: string
                               value:
                                 nullable: true
@@ -95081,7 +95060,6 @@ components:
                           type: object
                           properties:
                             dataset:
-                              maxLength: 1024
                               type: string
                             elasticsearch:
                               additionalProperties: false
@@ -95101,7 +95079,6 @@ components:
                                       maxItems: 100
                                       type: array
                             type:
-                              maxLength: 100
                               type: string
                           required:
                             - dataset
@@ -95110,12 +95087,10 @@ components:
                         enabled:
                           type: boolean
                         id:
-                          maxLength: 255
                           type: string
                         keep_enabled:
                           type: boolean
                         migrate_from:
-                          maxLength: 1024
                           type: string
                         release:
                           enum:
@@ -95137,7 +95112,6 @@ components:
                               frozen:
                                 type: boolean
                               type:
-                                maxLength: 100
                                 type: string
                               value:
                                 nullable: true
@@ -95152,7 +95126,6 @@ components:
                     maxItems: 1000
                     type: array
                   type:
-                    maxLength: 100
                     type: string
                   var_group_selections:
                     additionalProperties:
@@ -95168,7 +95141,6 @@ components:
                         frozen:
                           type: boolean
                         type:
-                          maxLength: 100
                           type: string
                         value:
                           nullable: true
@@ -95368,7 +95340,6 @@ components:
                   frozen:
                     type: boolean
                   type:
-                    maxLength: 100
                     type: string
                   value:
                     nullable: true
@@ -111052,7 +111023,6 @@ components:
                         frozen:
                           type: boolean
                         type:
-                          maxLength: 100
                           type: string
                         value:
                           nullable: true
@@ -111065,18 +111035,14 @@ components:
                   enabled:
                     type: boolean
                   id:
-                    maxLength: 255
                     type: string
                   keep_enabled:
                     type: boolean
                   migrate_from:
-                    maxLength: 1024
                     type: string
                   name:
-                    maxLength: 255
                     type: string
                   policy_template:
-                    maxLength: 255
                     type: string
                   streams:
                     items:
@@ -111098,7 +111064,6 @@ components:
                               frozen:
                                 type: boolean
                               type:
-                                maxLength: 100
                                 type: string
                               value:
                                 nullable: true
@@ -111111,7 +111076,6 @@ components:
                           type: object
                           properties:
                             dataset:
-                              maxLength: 1024
                               type: string
                             elasticsearch:
                               additionalProperties: false
@@ -111131,7 +111095,6 @@ components:
                                       maxItems: 100
                                       type: array
                             type:
-                              maxLength: 100
                               type: string
                           required:
                             - dataset
@@ -111140,12 +111103,10 @@ components:
                         enabled:
                           type: boolean
                         id:
-                          maxLength: 255
                           type: string
                         keep_enabled:
                           type: boolean
                         migrate_from:
-                          maxLength: 1024
                           type: string
                         release:
                           enum:
@@ -111167,7 +111128,6 @@ components:
                               frozen:
                                 type: boolean
                               type:
-                                maxLength: 100
                                 type: string
                               value:
                                 nullable: true
@@ -111182,7 +111142,6 @@ components:
                     maxItems: 1000
                     type: array
                   type:
-                    maxLength: 100
                     type: string
                   var_group_selections:
                     additionalProperties:
@@ -111198,7 +111157,6 @@ components:
                         frozen:
                           type: boolean
                         type:
-                          maxLength: 100
                           type: string
                         value:
                           nullable: true
@@ -111398,7 +111356,6 @@ components:
                   frozen:
                     type: boolean
                   type:
-                    maxLength: 100
                     type: string
                   value:
                     nullable: true
@@ -117257,7 +117214,6 @@ components:
               frozen:
                 type: boolean
               type:
-                maxLength: 100
                 type: string
               value:
                 nullable: true
