@@ -31,7 +31,7 @@ export { configIdOf };
  */
 export type ShardedPackagePolicy = Pick<
   PackagePolicy,
-  'id' | 'version' | 'spaceIds' | 'condition' | 'revision' | 'policy_ids'
+  'id' | 'version' | 'spaceIds' | 'name' | 'condition' | 'revision' | 'policy_ids'
 > & {
   inputs: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>>;
 };
@@ -41,8 +41,9 @@ export type ShardedPackagePolicy = Pick<
  * `spaceIds` are omitted because they come off the saved-object envelope and are
  * returned whatever the projection.
  *
- * `name` is not read by this path either; it is fetched so Fleet's `list` can
- * keep naming package policies in its saved-object audit log.
+ * `name` is not part of the rebalance decision; it is fetched so both Fleet's
+ * `list` and the write below can keep naming package policies in the
+ * saved-object audit log.
  */
 export const SHARDED_PACKAGE_POLICY_FIELDS = [
   'name',
@@ -131,6 +132,14 @@ const hasVersion = (
  * task writing the same policy on its own schedule. On conflict the mover lands
  * in the failed set and is retried from a fresh read next cycle (the rebalance
  * is idempotent).
+ *
+ * `name` is re-sent unchanged, the one attribute here that is not part of the
+ * move. Saved-object `bulkUpdate` echoes back only the attributes it was given,
+ * not the merged document, so Fleet's `bulkUpdatePartial` reads
+ * `result.attributes.name` as `undefined` and writes a nameless entry to the
+ * saved-object audit log. Sending it keeps those entries identifiable, and
+ * cannot clobber a concurrent rename: `version` would no longer match and the
+ * write would be rejected as a conflict.
  */
 export const toConditionUpdate = (
   pkgPolicy: ShardedPackagePolicy & { version: string },
@@ -141,6 +150,7 @@ export const toConditionUpdate = (
     version: pkgPolicy.version,
     attributes: {
       condition,
+      name: pkgPolicy.name,
       revision: pkgPolicy.revision + 1,
       updated_at: new Date().toISOString(),
       updated_by: 'system',

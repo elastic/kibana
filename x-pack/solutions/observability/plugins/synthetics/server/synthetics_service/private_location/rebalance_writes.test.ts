@@ -20,6 +20,7 @@ const LOCATION = 'loc1';
 // Fixtures carry exactly what `listByAgentPolicy` projects, so a field this
 // path stops fetching but starts reading fails to compile here.
 const policy = (over: Partial<ShardedPackagePolicy> & { id: string }): ShardedPackagePolicy => ({
+  name: over.id,
   inputs: [{ type: 'synthetics/http', enabled: true }],
   policy_ids: ['agent-policy-1'],
   spaceIds: ['default'],
@@ -104,7 +105,25 @@ describe('toConditionUpdates', () => {
     expect(updates[0].update.attributes.condition).toBe(agentIdCondition('agent-b'));
   });
 
-  it('sends only the condition and revision metadata, not the whole policy', () => {
+  it('re-sends name so Fleet can still name the write in the audit log', () => {
+    const bySpace = toConditionUpdates(
+      [
+        policy({
+          id: `m1-${LOCATION}`,
+          name: 'my monitor',
+          condition: agentIdCondition('agent-a'),
+        }),
+      ],
+      new Map([['m1', 'agent-b']]),
+      LOCATION
+    );
+
+    // Saved-object bulkUpdate echoes back only the attributes it was sent, so
+    // Fleet's bulkUpdatePartial would otherwise log `name: undefined`.
+    expect(bySpace.get('default')![0].update.attributes.name).toBe('my monitor');
+  });
+
+  it('sends only the condition, name and revision metadata, not the whole policy', () => {
     const bySpace = toConditionUpdates(
       [policy({ id: `m1-${LOCATION}`, condition: agentIdCondition('agent-a') })],
       new Map([['m1', 'agent-b']]),
@@ -112,9 +131,11 @@ describe('toConditionUpdates', () => {
     );
 
     // Anything not listed here is left to the saved-objects merge, so a stale
-    // snapshot cannot revert a concurrent edit to inputs/vars/package.
+    // snapshot cannot revert a concurrent edit to inputs/vars/package. `name`
+    // rides along unchanged purely to keep the audit-log entry identifiable.
     expect(Object.keys(bySpace.get('default')![0].update.attributes).sort()).toEqual([
       'condition',
+      'name',
       'revision',
       'updated_at',
       'updated_by',
