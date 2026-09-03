@@ -27,14 +27,8 @@ import type {
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
-  ScriptUpdateRequest,
-  ScriptUpdateResponse,
 } from '../../types';
 import { isBulkUpdaterItem } from '../../types';
-
-const notImplemented = (method: string): never => {
-  throw new Error(`DataStreamDataClient.${method} is not implemented`);
-};
 
 export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
@@ -191,10 +185,6 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     });
 
     return bulkResponse;
-  }
-
-  public async scriptUpdate(_request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
-    return notImplemented('scriptUpdate');
   }
 
   public async deleteByQuery(

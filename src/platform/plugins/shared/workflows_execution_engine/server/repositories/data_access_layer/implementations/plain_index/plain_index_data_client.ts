@@ -10,7 +10,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { executeScriptUpdate } from '../../lib/execute_script_update';
 import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import { sharedBulk } from '../../lib/shared_bulk';
 import type {
@@ -26,8 +25,6 @@ import type {
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
-  ScriptUpdateRequest,
-  ScriptUpdateResponse,
 } from '../../types';
 import { isBulkUpdaterItem } from '../../types';
 
@@ -205,15 +202,6 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
     }
 
     return { items: result, errors: hasErrors };
-  }
-
-  public async scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
-    return executeScriptUpdate({
-      esClient: this.deps.esClient,
-      indexName: this.deps.indexName,
-      request,
-      logger: this.deps.logger,
-    });
   }
 
   public async deleteByQuery(

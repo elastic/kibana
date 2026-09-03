@@ -385,8 +385,8 @@ if (plainItems.length > 0) {
 }
 ```
 
-`scriptUpdate` is **kept** — it remains available for callers that genuinely need
-Painless (arithmetic, array ops).
+`scriptUpdate` was **removed** — queue CAS and HITL claim now use bulk updater items;
+callers that need Painless should add a dedicated bulk updater or plain bulk path.
 
 ---
 

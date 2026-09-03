@@ -29,6 +29,12 @@ export type { PlainIndexDataClientDeps } from './implementations/plain_index/pla
 export { PlainIndexDataClient } from './implementations/plain_index/plain_index_data_client';
 export { createDataClientBundle } from './implementations/create_data_client_bundle';
 
+export {
+  getBulkUpdaterWriteResult,
+  type BulkUpdaterWriteResult,
+} from './lib/bulk_updater_write_result';
+
+export { bulkUpdaterItem, isBulkUpdaterItem } from './types';
 export type {
   BulkItem,
   BulkItemResponse,
@@ -55,9 +61,6 @@ export type {
   StepExecutionsCountRequest,
   StepExecutionsDeleteByQueryRequest,
   StepExecutionsSearchRequest,
-  ScriptUpdateRequest,
-  ScriptUpdateResponse,
-  ScriptUpdateResult,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
   WorkflowExecutionUpsertDocument,

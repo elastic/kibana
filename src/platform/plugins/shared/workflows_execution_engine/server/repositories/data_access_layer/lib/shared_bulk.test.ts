@@ -137,7 +137,7 @@ describe('sharedBulk', () => {
       ],
     } as never);
 
-    const result = await sharedBulk<{ id: string }>(
+    const result = await sharedBulk<{ id: string; status: string }>(
       esClient,
       {
         items: [

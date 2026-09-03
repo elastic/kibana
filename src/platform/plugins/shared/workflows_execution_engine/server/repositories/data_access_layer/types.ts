@@ -94,16 +94,6 @@ export interface WritableDataClient<TExecution extends { id: string }> {
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
 
   /**
-   * Applies a conditional script update to a single execution document by ID.
-   * Returns:
-   *   - `'updated'`   — script ran and modified the document.
-   *   - `'noop'`      — script ran but made no changes (e.g. condition not met).
-   *   - `'not_found'` — no document exists for the given ID; no write performed.
-   * Throws on storage errors other than not-found.
-   */
-  scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse>;
-
-  /**
    * Deletes all execution documents matching the given query.
    * Throws on storage errors.
    */
@@ -161,7 +151,7 @@ export interface BulkUpdaterItem<
   TDocument extends { id: string },
   K extends keyof TDocument & string = keyof TDocument & string
 > {
-  document: never;
+  document?: never;
   operation: 'update';
   documentId: string;
   retryOnConflict?: number;
@@ -173,6 +163,14 @@ export function isBulkUpdaterItem<TDocument extends { id: string }>(
   item: BulkItem<TDocument>
 ): item is BulkUpdaterItem<TDocument> {
   return 'updater' in item;
+}
+
+/** Preserves `K` at array boundaries where `BulkItem` union inference would widen it. */
+export function bulkUpdaterItem<
+  TDocument extends { id: string },
+  K extends keyof TDocument & string
+>(item: BulkUpdaterItem<TDocument, K>): BulkUpdaterItem<TDocument, K> {
+  return item;
 }
 
 export type BulkItem<TDocument extends { id: string }> =
@@ -197,18 +195,4 @@ export interface BulkItemResponse extends DocumentVersionFields {
 export interface BulkResponse {
   items: BulkItemResponse[];
   errors: boolean;
-}
-
-export type ScriptUpdateResult = 'updated' | 'not_found' | 'noop';
-
-export interface ScriptUpdateRequest {
-  id: string;
-  script: string;
-  params: Record<string, unknown>;
-  retryOnConflict?: number;
-  refresh?: boolean | 'wait_for';
-}
-
-export interface ScriptUpdateResponse {
-  result: ScriptUpdateResult;
 }
