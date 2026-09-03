@@ -10,6 +10,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getEpisodeDataQueries } from '../queries';
+import { EpisodeTriage } from '../state';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
@@ -36,15 +37,15 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { dispatchable = [] } = state;
+    const { triage = EpisodeTriage.empty() } = state;
 
-    if (dispatchable.length === 0) {
+    if (!triage.hasDispatchable()) {
       return { type: 'continue' };
     }
 
-    const episodeIds = [...new Set(dispatchable.map((ep) => ep.episode_id))];
+    const episodeIds = triage.dispatchableEpisodeIds();
 
-    const { gte, lte } = computeTimestampBounds(dispatchable);
+    const { gte, lte } = computeTimestampBounds(triage.dispatchable);
 
     const { signal } = state.input;
 
@@ -73,13 +74,13 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
       });
     }
 
-    const hydratedDispatchable: AlertEpisode[] = dispatchable.map((ep) => {
+    const hydratedTriage = triage.mapDispatchable((ep) => {
       const raw = dataByEpisodeId.get(ep.episode_id);
       if (raw == null) return ep;
       return { ...ep, data: parseDataJson(raw) };
     });
 
-    return { type: 'continue', data: { dispatchable: hydratedDispatchable } };
+    return { type: 'continue', data: { triage: hydratedTriage } };
   }
 }
 
