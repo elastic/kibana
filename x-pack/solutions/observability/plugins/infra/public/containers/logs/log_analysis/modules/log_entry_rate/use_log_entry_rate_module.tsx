@@ -9,10 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import createContainer from 'constate';
 import { useMemo } from 'react';
 import type { IdFormat } from '../../../../../../common/http_api/latest';
+import { logEntryRateJobType } from '../../../../../../common/log_analysis';
 import type { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
+import { useLogAnalysisJobProjectRouting } from '../../use_log_analysis_job_project_routing';
 import { logEntryRateModule } from './module_descriptor';
 
 export const useLogEntryRateModule = ({
@@ -76,12 +78,19 @@ export const useLogEntryRateModule = ({
     [logAnalysisModule.jobStatus]
   );
 
+  const projectRouting = useLogAnalysisJobProjectRouting(
+    logAnalysisModule.jobSummaries.find(
+      (jobSummary) => jobSummary.id === logAnalysisModule.jobIds[logEntryRateJobType]
+    )
+  );
+
   return {
     ...logAnalysisModule,
     fetchModuleDefinition,
     hasOutdatedJobConfigurations,
     hasOutdatedJobDefinitions,
     hasStoppedJobs,
+    projectRouting,
   };
 };
 

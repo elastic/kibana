@@ -119,6 +119,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', ()
   AlertEpisodeMetadataSection: () => <div data-test-subj="stubMetadataSection" />,
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => ({
+  AlertEpisodeTimelineSection: () => <div data-test-subj="stubTimelineSection" />,
+}));
+
 jest.mock('./components/episode_action_policy_history_tab', () => ({
   EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
 }));
@@ -419,6 +423,33 @@ describe('EpisodeDetailsPage', () => {
       expect(
         screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('episode details sidebar', () => {
+    it.each([
+      ['alertingV2EpisodeDetailsMainTabMetadata', 'stubMetadataSection'],
+      ['alertingV2EpisodeDetailsMainTabTimeline', 'stubTimelineSection'],
+      ['alertingV2EpisodeDetailsMainTabActionPolicyHistory', 'stubEpisodeActionPolicyHistoryTab'],
+    ])('hides the sidebar on the %s tab', async (tabTestSubj, contentTestSubj) => {
+      renderPage();
+
+      await userEvent.click(screen.getByTestId(tabTestSubj));
+
+      expect(screen.getByTestId(contentTestSubj)).toBeInTheDocument();
+      expect(screen.queryByTestId('alertingV2EpisodeDetailsSidebar')).not.toBeInTheDocument();
+    });
+
+    it('brings the sidebar back when returning to the overview tab', async () => {
+      renderPage();
+
+      await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabTimeline'));
+
+      expect(screen.queryByTestId('alertingV2EpisodeDetailsSidebar')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview'));
+
+      expect(screen.getByTestId('alertingV2EpisodeDetailsSidebar')).toBeInTheDocument();
     });
   });
 
