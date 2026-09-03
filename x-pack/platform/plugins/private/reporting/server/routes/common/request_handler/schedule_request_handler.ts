@@ -32,6 +32,7 @@ import {
   ScheduledReportAuditAction,
   scheduledReportAuditEvent,
 } from '../../../services/audit_events/audit_events';
+import { getReportingUserIdentity } from '../../../lib';
 
 // Using the limit specified in the cloud email service limits
 // https://www.elastic.co/docs/explore-analyze/alerts-cases/watcher/enable-watcher#cloud-email-service-limits
@@ -142,6 +143,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     const auditLogger = await reporting.getAuditLogger(req);
     const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
+    const { id: createdById } = await getReportingUserIdentity({
+      user,
+      request: req,
+      esClient: await reporting.getEsClient(),
+    });
+
     const reportId = id || SavedObjectsUtils.generateId();
     auditLogger.log(
       scheduledReportAuditEvent({
@@ -167,6 +174,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       // we've already checked that user exists in handleRequest
       // this fallback is just to satisfy the type
       createdBy: user ? user.username : 'unknown',
+      ...(createdById ? { createdById } : {}),
       enabled: true,
       jobType,
       meta: {
