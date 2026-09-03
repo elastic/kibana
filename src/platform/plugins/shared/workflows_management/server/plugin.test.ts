@@ -60,6 +60,7 @@ describe('WorkflowsPlugin', () => {
       spaces: {} as any,
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
+      dataViews: {} as any,
     });
 
     expect(start).toEqual({});
@@ -86,6 +87,7 @@ describe('WorkflowsPlugin', () => {
       spaces: {} as any,
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
+      dataViews: {} as any,
     });
 
     setStopping.mockClear();

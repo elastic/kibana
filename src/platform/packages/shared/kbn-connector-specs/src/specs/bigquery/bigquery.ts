@@ -280,6 +280,7 @@ export const BigQuery: ConnectorSpec = {
   actions: {
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a read-only GoogleSQL query in BigQuery. Accepts SELECT, WITH (CTE), and EXPLAIN statements only; rejects DML, DDL, scripts, stored procedures, and semicolon-delimited multi-statement submissions before the request is sent. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: RunQueryInputSchema,
@@ -295,6 +296,7 @@ export const BigQuery: ConnectorSpec = {
 
     executeQuery: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any GoogleSQL query in BigQuery from a workflow or direct connector execution. This action is intentionally hidden from agents because it can run DML, DDL, scripts, stored procedures, or expensive queries. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: ExecuteQueryInputSchema,
@@ -303,6 +305,7 @@ export const BigQuery: ConnectorSpec = {
 
     getQueryResults: {
       isTool: true,
+      scope: 'read',
       description:
         'Poll or page through results for a BigQuery job returned by runQuery. Use this when runQuery returns jobComplete=false or a pageToken. Returns normalized rows as objects plus raw row arrays, schema, job status, and the next page token when available.',
       input: GetQueryResultsInputSchema,
@@ -332,6 +335,7 @@ export const BigQuery: ConnectorSpec = {
 
     listDatasets: {
       isTool: true,
+      scope: 'read',
       description:
         'List BigQuery datasets visible to the configured service account in a project. Use this for discovery before writing fully-qualified table references. Returns BigQuery dataset metadata and pagination tokens.',
       input: ListDatasetsInputSchema,
