@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/execution-identity-poc-plugin",
+  "owner": ["@elastic/kibana-security"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "POC: user-managed service account execution identity, ECH/self-managed (Elasticsearch managed service accounts) backend.",
+  "plugin": {
+    "id": "executionIdentityPoc",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["encryptedSavedObjects"],
+    "optionalPlugins": []
+  }
+}
