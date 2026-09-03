@@ -8,13 +8,55 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   drainConcurrencyQueueSlots,
+  isRecoverablePromoteRunSoonError,
   maybeDrainConcurrencyQueueAfterTerminal,
 } from './concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+describe('isRecoverablePromoteRunSoonError', () => {
+  it('returns true for known infrastructure blips', () => {
+    expect(
+      isRecoverablePromoteRunSoonError(
+        SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('ES unavailable'))
+      )
+    ).toBe(true);
+    expect(
+      isRecoverablePromoteRunSoonError(
+        SavedObjectsErrorHelpers.createTooManyRequestsError('task', 'workflow:exec-1:manual')
+      )
+    ).toBe(true);
+    expect(isRecoverablePromoteRunSoonError(429)).toBe(true);
+    expect(isRecoverablePromoteRunSoonError({ statusCode: 503 })).toBe(true);
+  });
+
+  it('does not treat task-not-found as recoverable (re-queue poison pill)', () => {
+    // Real Task Manager / SO shape from:
+    // "Saved object [task/workflow:{id}:scheduled] not found"
+    const taskId = 'workflow:04e6e2a6-0000-4000-8000-000000000001:scheduled';
+    const soNotFound = SavedObjectsErrorHelpers.createGenericNotFoundError('task', taskId);
+
+    expect(SavedObjectsErrorHelpers.isNotFoundError(soNotFound)).toBe(true);
+    expect(soNotFound.message).toContain(`Saved object [task/${taskId}] not found`);
+    expect(isRecoverablePromoteRunSoonError(soNotFound)).toBe(false);
+
+    // Plain Error with the same message must also stay unrecoverable.
+    expect(
+      isRecoverablePromoteRunSoonError(new Error(`Saved object [task/${taskId}] not found`))
+    ).toBe(false);
+  });
+
+  it('returns false for unknown errors', () => {
+    expect(isRecoverablePromoteRunSoonError(new Error('unexpected boom'))).toBe(false);
+    expect(isRecoverablePromoteRunSoonError(500)).toBe(false);
+    expect(isRecoverablePromoteRunSoonError({ statusCode: 404 })).toBe(false);
+  });
+});
 
 describe('drainConcurrencyQueueSlots', () => {
   const runSoonMock = jest.fn().mockResolvedValue(undefined);
@@ -221,6 +263,193 @@ describe('drainConcurrencyQueueSlots', () => {
       executionId: 'exec-queued-1',
       triggeredBy: 'manual',
     });
+  });
+
+  it('marks failed when runSoon fails permanently (task not found) and continues draining', async () => {
+    jest.useFakeTimers();
+    promoteQueuedRunTask.mockImplementation(async ({ executionId }: { executionId: string }) => {
+      if (executionId === 'exec-missing') {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          'task',
+          'workflow:exec-missing:manual'
+        );
+      }
+    });
+
+    const countMock = jest
+      .fn()
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(0)
+      .mockResolvedValue(1);
+    const oldestMock = jest
+      .fn()
+      .mockResolvedValueOnce('exec-missing')
+      .mockResolvedValueOnce('exec-valid')
+      .mockResolvedValue(null);
+    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const getByIdMock = jest.fn().mockImplementation((id: string) =>
+      Promise.resolve({
+        id,
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      })
+    );
+
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: countMock,
+      getOldestQueuedExecutionIdByConcurrencyGroup: oldestMock,
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: getByIdMock,
+      updateWorkflowExecution: updateMock,
+    } as unknown as WorkflowExecutionRepository;
+
+    const drainPromise = drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+      concurrencySettings: { key: 'g1', strategy: 'queue', max: 2 },
+    });
+
+    // 3 delays between 4 not-found attempts for the missing task
+    await jest.advanceTimersByTimeAsync(750);
+    await drainPromise;
+
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'exec-missing',
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'QueuePromoteRunSoonError',
+          message: 'Failed to start queued workflow execution due to an unrecoverable error.',
+        },
+        finishedAt: expect.any(String),
+      }),
+      { refresh: 'wait_for' }
+    );
+    expect(promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: 'exec-valid',
+      triggeredBy: 'manual',
+    });
+    expect(updateMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'exec-valid' }),
+      expect.anything()
+    );
+    expect(updateMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.QUEUED }),
+      expect.anything()
+    );
+    jest.useRealTimers();
+  });
+
+  it('reverts to queued on recoverable runSoon failures', async () => {
+    jest.useFakeTimers();
+    promoteQueuedRunTask.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('ES unavailable'))
+    );
+
+    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: jest.fn().mockResolvedValue(0),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-queued-1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: updateMock,
+    } as unknown as WorkflowExecutionRepository;
+
+    const drainPromise = drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    await jest.advanceTimersByTimeAsync(750);
+    await drainPromise;
+
+    expect(updateMock).toHaveBeenCalledWith(
+      { id: 'exec-queued-1', status: ExecutionStatus.QUEUED },
+      { refresh: 'wait_for' }
+    );
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(4);
+    jest.useRealTimers();
+  });
+
+  it('marks failed on unknown runSoon errors', async () => {
+    jest.useFakeTimers();
+    promoteQueuedRunTask.mockRejectedValue(new Error('unexpected boom'));
+
+    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-queued-1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: updateMock,
+    } as unknown as WorkflowExecutionRepository;
+
+    const drainPromise = drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    await jest.advanceTimersByTimeAsync(750);
+    await drainPromise;
+
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(4);
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'exec-queued-1',
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'QueuePromoteRunSoonError',
+          message: 'Failed to start queued workflow execution due to an unrecoverable error.',
+        },
+      }),
+      { refresh: 'wait_for' }
+    );
+    jest.useRealTimers();
+  });
+
+  it('leaves pending when runSoon reports the task is already running', async () => {
+    promoteQueuedRunTask.mockRejectedValue(
+      new TaskAlreadyRunningError('workflow:exec-queued-1:manual')
+    );
+
+    const updateMock = jest.fn().mockResolvedValue(undefined);
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: jest
+        .fn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-queued-1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: updateMock,
+    } as unknown as WorkflowExecutionRepository;
+
+    await drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+    });
+
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
+    expect(updateMock).not.toHaveBeenCalled();
   });
 });
 

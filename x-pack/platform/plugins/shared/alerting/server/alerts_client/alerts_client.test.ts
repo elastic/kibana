@@ -88,6 +88,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { DEFAULT_MAX_ALERTS } from '../config';
+import * as RetryTransientEsErrorsModule from '../lib/retry_transient_es_errors';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -659,6 +660,20 @@ describe('Alerts Client', () => {
           );
 
           spy.mockRestore();
+        });
+
+        test('should call retryTransientEsErrors when querying for tracked alerts', async () => {
+          const retrySpy = jest
+            .spyOn(RetryTransientEsErrorsModule, 'retryTransientEsErrors')
+            .mockImplementationOnce((esCall) => esCall());
+
+          const alertsClient = new AlertsClient(alertsClientParams);
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          expect(retrySpy).toHaveBeenCalled();
+
+          retrySpy.mockRestore();
         });
       });
 

@@ -30077,6 +30077,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -37376,7 +37393,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -42435,6 +42452,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -82448,6 +82482,16 @@ components:
       description: The description for the case.
       maxLength: 30000
       type: string
+    Cases_case_extended_fields:
+      additionalProperties:
+        maxLength: 30000
+        type: string
+      description: |
+        Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+      maxProperties: 500
+      title: Case extended fields
+      type: object
+      x-state: Technical preview; added in 9.5.0
     Cases_case_observable:
       description: A single observable attached to a case.
       properties:
@@ -82788,6 +82832,13 @@ components:
           example: 120
           nullable: true
           type: integer
+        extended_fields:
+          additionalProperties:
+            type: string
+          description: |
+            The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+          type: object
+          x-state: Technical preview; added in 9.5.0
         external_service:
           $ref: '#/components/schemas/Cases_external_service'
         id:
@@ -83295,6 +83346,8 @@ components:
           type: array
         description:
           $ref: '#/components/schemas/Cases_case_description'
+        extended_fields:
+          $ref: '#/components/schemas/Cases_case_extended_fields'
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -84336,6 +84389,8 @@ components:
                 type: array
               description:
                 $ref: '#/components/schemas/Cases_case_description'
+              extended_fields:
+                $ref: '#/components/schemas/Cases_case_extended_fields'
               id:
                 description: The identifier for the case.
                 maxLength: 30000
@@ -129162,9 +129217,8 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateFields'
     Security_Detections_API_MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
@@ -134694,7 +134748,6 @@ components:
             parameters:
               oneOf:
                 - description: Dump the entire kernel memory.
-                  type: object
                   properties:
                     type:
                       enum:
@@ -134702,8 +134755,19 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                  title: kernel
                   type: object
+                - description: Dump the entire raw memory.
+                  properties:
+                    type:
+                      enum:
+                        - raw
+                      type: string
+                  required:
+                    - type
+                  title: raw
+                  type: object
+                - description: Dump the entire memory of a process using the PID.
                   properties:
                     pid:
                       type: number
@@ -134714,8 +134778,9 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                  title: Process PID
                   type: object
+                - description: Dump the entire memory of a process using the entity ID.
                   properties:
                     entity_id:
                       type: string
@@ -134726,6 +134791,8 @@ components:
                   required:
                     - type
                     - entity_id
+                  title: Process Entity ID
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
@@ -140287,7 +140354,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.

@@ -8,10 +8,12 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
   ALERTING_V2_FEATURES,
+  type AlertingV2Feature,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
 import { ALERTING_V2_SECTION_ID } from '../../../common/management_apps';
@@ -20,18 +22,41 @@ export { ALERTING_V2_API_PRIVILEGES };
 
 const category: AppCategory = {
   id: 'alerting',
-  label: 'Alerting',
+  label: i18n.translate('xpack.alertingV2.privileges.sectionLabel', {
+    defaultMessage: 'Alerting V2',
+  }),
   order: 1000,
   euiIconType: 'watchesApp',
 };
 
-const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
+const featureDescriptions: Record<AlertingV2Feature, string> = {
+  rules: i18n.translate('xpack.alertingV2.privileges.rulesDescription', {
+    defaultMessage: 'Experimental. Controls access to rules in the experimental alerting system.',
+  }),
+  alerts: i18n.translate('xpack.alertingV2.privileges.alertsDescription', {
+    defaultMessage: 'Experimental. Controls access to alerts in the experimental alerting system.',
+  }),
+  actionPolicies: i18n.translate('xpack.alertingV2.privileges.actionPoliciesDescription', {
+    defaultMessage:
+      'Experimental. Controls access to action policies in the experimental alerting system.',
+  }),
+  executionHistory: i18n.translate('xpack.alertingV2.privileges.executionHistoryDescription', {
+    defaultMessage:
+      'Experimental. Controls access to execution history in the experimental alerting system.',
+  }),
+};
+
+const buildKibanaFeature = (
+  feature: AlertingV2FeatureDefinition,
+  description: string
+): KibanaFeatureConfig => {
   const managementApps = [feature.managementApp];
   const app = [APP_ID];
 
   return {
     id: feature.id,
     name: feature.name,
+    description,
     category,
     app,
     management: {
@@ -72,7 +97,11 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
 };
 
 export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
-  Object.values(ALERTING_V2_FEATURES).forEach((feature) => {
-    features.registerKibanaFeature(buildKibanaFeature(feature));
-  });
+  const registeredFeatures = Object.entries(ALERTING_V2_FEATURES) as Array<
+    [AlertingV2Feature, AlertingV2FeatureDefinition]
+  >;
+
+  for (const [featureKey, feature] of registeredFeatures) {
+    features.registerKibanaFeature(buildKibanaFeature(feature, featureDescriptions[featureKey]));
+  }
 };

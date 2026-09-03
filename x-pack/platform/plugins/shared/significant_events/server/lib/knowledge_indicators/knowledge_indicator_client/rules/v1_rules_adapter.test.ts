@@ -67,7 +67,8 @@ describe('RulesAdapterV1', () => {
 
       expect(rc.create).toHaveBeenCalledTimes(1);
       expect(rc.update).toHaveBeenCalledTimes(1);
-      expect(rc.update).toHaveBeenCalledWith({ id: 'rule-id-1', data: createBody });
+      const { enabled, consumer, alertTypeId, ...updatableFields } = createBody;
+      expect(rc.update).toHaveBeenCalledWith({ id: 'rule-id-1', data: updatableFields });
     });
 
     it('rethrows non-409 errors', async () => {
