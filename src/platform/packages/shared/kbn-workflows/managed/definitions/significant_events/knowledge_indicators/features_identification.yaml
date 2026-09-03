@@ -1,12 +1,10 @@
 # KI Features Identification Workflow
 #
 # On-demand workflow that identifies KI features for a single stream.
-# Each iteration samples documents, runs LLM inference, and reconciles
-# features in a single endpoint call.
 #
 # Flow:
 #   init → while(iterationCount < max) {
-#     identify_inferred → if(noDocuments) break → update_state → mark_success
+#     prepare → if(noDocuments) break → identify_inferred → update_state → mark_success
 #     → track_convergence → if(converged) break
 #   } → if(allFailed) fail → identify_computed → output
 #
@@ -92,13 +90,39 @@ steps:
       effectivePatience: "${{ inputs.convergencePatience | at_least: 1 }}"
 
   # -----------------------------------------------------------------------
-  # Step 2: Main loop — each pass runs identify_inferred_features.
+  # Step 2: Main loop — each pass samples, then identifies inferred features.
   # -----------------------------------------------------------------------
   - name: identify_loop
     type: while
     condition: "${{ variables.iterationResults.size < inputs.maxIterations }}"
     steps:
-      # 2a: Sample, infer, and reconcile in one call.
+      # 2a: Sample documents for this iteration.
+      - name: prepare
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/streams/{{ inputs.streamName }}/features/_identify/inferred/prepare"
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            start: "${{ inputs.start }}"
+            end: "${{ inputs.end }}"
+            runId: "${{ execution.id }}"
+            iteration: "${{ variables.iterationResults.size | plus: 1 }}"
+            sampleSize: "${{ inputs.sampleSize }}"
+            entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
+            diverseRatio: "${{ inputs.diverseRatio }}"
+            maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+
+      # 2b: If no documents were returned, stop the loop.
+      - name: check_docs
+        type: if
+        condition: "steps.prepare.output.hasDocuments:false"
+        steps:
+          - name: stop_loop
+            type: loop.break
+
+      # 2c: Infer and reconcile from the prepared sample.
       - name: identify_inferred
         type: kibana.request
         with:
@@ -108,27 +132,14 @@ steps:
             x-elastic-internal-origin: "kibana"
           body:
             connectorId: "${{ inputs.connectorId }}"
-            start: "${{ inputs.start }}"
-            end: "${{ inputs.end }}"
             runId: "${{ execution.id }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
-            featureTtlDays: "${{ inputs.featureTtlDays }}"
-            sampleSize: "${{ inputs.sampleSize }}"
-            entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
-            diverseRatio: "${{ inputs.diverseRatio }}"
-            maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+            documents: "${{ steps.prepare.output.documents }}"
+            samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
 
-      # 2b: If no documents were returned, stop the loop.
-      - name: check_docs
-        type: if
-        condition: "steps.identify_inferred.output.hasDocuments:false"
-        steps:
-          - name: stop_loop
-            type: loop.break
-
-      # 2c: Update loop variables with iteration output.
+      # 2d: Update loop variables with iteration output.
       - name: update_state
         type: data.set
         with:
@@ -140,7 +151,7 @@ steps:
           totalTokens: "${{ variables.totalTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.total }}"
           totalCachedTokens: "${{ variables.totalCachedTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.cached }}"
 
-      # 2d: Track whether at least one iteration succeeded.
+      # 2e: Track whether at least one iteration succeeded.
       - name: mark_success
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
@@ -150,7 +161,7 @@ steps:
             with:
               hasSuccess: true
 
-      # 2e: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
+      # 2f: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
       - name: track_convergence
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
