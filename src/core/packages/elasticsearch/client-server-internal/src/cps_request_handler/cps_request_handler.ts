@@ -40,6 +40,7 @@ export function getCpsRequestHandler(
     let routingType: 'injected' | 'explicit' | 'stripped' | 'none';
     let bypassReason: string | undefined;
     let routingAccepted = false;
+    let unsupportedParamStripped = false;
 
     if (cpsEnabled) {
       if (isProjectRoutingInQuery(acceptedParams)) {
@@ -66,6 +67,10 @@ export function getCpsRequestHandler(
       } else {
         routingType = 'none';
         bypassReason = determineBypassReason(params, body, acceptedParams);
+
+        if (bypassReason === 'api_does_not_support_routing') {
+          unsupportedParamStripped = stripUnsupportedProjectRouting(params, body, name, logger);
+        }
       }
     } else {
       // Strip from body, querystring, and NDJSON bulk body unconditionally: project_routing is
@@ -83,6 +88,7 @@ export function getCpsRequestHandler(
     const routingContext = {
       routingType,
       routingAccepted,
+      unsupportedParamStripped,
       cpsEnabled,
       apiName: name ?? 'unknown',
       bypassReason,
@@ -125,10 +131,13 @@ function isProjectRoutingInBody(acceptedParams: AcceptedParams | undefined): boo
   return (acceptedParams as StructuredAcceptedParams).body.includes('project_routing');
 }
 
-function stripProjectRoutingBody(body: Record<string, unknown> | undefined): void {
+/** Returns true when a `project_routing` value was present and removed. */
+function stripProjectRoutingBody(body: Record<string, unknown> | undefined): boolean {
   if (body?.project_routing != null) {
     delete body.project_routing;
+    return true;
   }
+  return false;
 }
 
 function injectProjectRoutingBody(
@@ -160,11 +169,14 @@ function injectProjectRoutingQueryString(
   params.querystring.project_routing = projectRouting;
 }
 
-function stripProjectRoutingQueryString(params: Parameters<OnRequestHandler>[1]): void {
+/** Returns true when a `project_routing` value was present and removed. */
+function stripProjectRoutingQueryString(params: Parameters<OnRequestHandler>[1]): boolean {
   const qs = params.querystring;
   if (qs != null && typeof qs === 'object' && qs.project_routing != null) {
     delete qs.project_routing;
+    return true;
   }
+  return false;
 }
 
 /**
@@ -180,15 +192,19 @@ function stripProjectRoutingQueryString(params: Parameters<OnRequestHandler>[1])
  *  - `string` – pre-serialised NDJSON (e.g. via transport.request())
  *
  * Buffer and ReadableStream are skipped because they cannot be safely parsed/rewritten.
+ *
+ * Returns true when at least one `project_routing` value was present and removed.
  */
-function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]): void {
+function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]): boolean {
   const { bulkBody } = params;
-  if (!bulkBody) return;
+  if (!bulkBody) return false;
+
+  let stripped = false;
 
   if (Array.isArray(bulkBody)) {
     for (const entry of bulkBody) {
       if (isPlainObject(entry)) {
-        stripProjectRoutingBody(entry as Record<string, unknown>);
+        stripped = stripProjectRoutingBody(entry as Record<string, unknown>) || stripped;
       }
     }
   } else if (typeof bulkBody === 'string') {
@@ -202,6 +218,7 @@ function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]):
             const obj = parsed as Record<string, unknown>;
             if (obj.project_routing != null) {
               delete obj.project_routing;
+              stripped = true;
               return JSON.stringify(obj);
             }
           }
@@ -213,6 +230,46 @@ function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]):
       .join('\n');
   }
   // Buffer and ReadableStream: cannot safely parse or rewrite — skip.
+
+  return stripped;
+}
+
+/**
+ * Removes a caller-supplied `project_routing` from a request targeting an API that does not
+ * accept it, and warns so the mistake surfaces in logs.
+ *
+ * Elasticsearch rejects unknown body parameters (`parsing_exception`), and the JS client forwards
+ * unrecognised params into the request body, so leaving the value in place guarantees a failed
+ * request (or, for document APIs where the body *is* the document, a stray indexed field).
+ *
+ * Only called when `acceptedParams` is the structured form emitted by the client for a known API,
+ * which is authoritative about what the API accepts. Callers using raw `transport.request()` have
+ * no `acceptedParams` and are left untouched, since their `project_routing` may well be valid.
+ *
+ * Returns true when a value was present and removed.
+ */
+function stripUnsupportedProjectRouting(
+  params: Parameters<OnRequestHandler>[1],
+  body: Record<string, unknown> | undefined,
+  name: string | undefined,
+  logger: Logger
+): boolean {
+  const strippedFromBody = stripProjectRoutingBody(body);
+  const strippedFromQueryString = stripProjectRoutingQueryString(params);
+  const strippedFromNdjsonBody = stripProjectRoutingNdjsonBody(params);
+
+  if (!strippedFromBody && !strippedFromQueryString && !strippedFromNdjsonBody) {
+    return false;
+  }
+
+  logger.warn(
+    `Removed "project_routing" from an Elasticsearch [${
+      name ?? 'unknown'
+    }] request: this API does not accept it and Elasticsearch would have rejected the request. ` +
+      `Remove "project_routing" from the calling code and scope the client instead (see ClusterClient.asScoped).`
+  );
+
+  return true;
 }
 
 /**

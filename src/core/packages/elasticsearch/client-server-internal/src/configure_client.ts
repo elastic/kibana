@@ -73,7 +73,7 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
   const meter = metrics.getMeter('kibana.elasticsearch.cps');
   const cpsRequestCounter = meter.createCounter('kibana.elasticsearch.cps.request.count', {
     description:
-      'Unified count of Elasticsearch CPS requests with routing type, status, and bypass reason',
+      'Unified count of Elasticsearch CPS requests with routing type, status, bypass reason, and whether an unsupported caller-supplied project_routing was stripped',
     unit: '{request}',
     valueType: ValueType.INT,
   });
@@ -87,6 +87,7 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
     const {
       routingType,
       routingAccepted,
+      unsupportedParamStripped,
       cpsEnabled,
       apiName,
       bypassReason,
@@ -100,6 +101,9 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
       'kibana.cps.enabled': cpsEnabled,
       'kibana.cps.routing.type': routingType,
       'kibana.cps.routing.accepted': routingAccepted,
+      // Narrowed rather than passed through: a custom Transport may supply a context that predates
+      // this field, and the attribute must stay a boolean on every data point.
+      'kibana.cps.routing.unsupported_param_stripped': unsupportedParamStripped === true,
       'db.operation.name': apiName,
       'http.response.status_code': httpStatus,
     };
@@ -130,6 +134,7 @@ function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logg
         api_name: apiName,
         is_cps_enabled: cpsEnabled,
         bypass_reason: bypassReason ?? null,
+        unsupported_param_stripped: unsupportedParamStripped === true,
         request_id: requestId,
         route_path: routePath,
         request_path: requestPath,
