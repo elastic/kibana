@@ -76,6 +76,16 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
+  /**
+   * Optional popover-only sections. Does not open the expanded side panel.
+   * When omitted, popover falls back to `sections`.
+   */
+  popoverSections?: SecondaryMenuSection[];
+  /**
+   * Optional custom expanded-panel body. Replaces the sections menu.
+   * Opens the side panel when this item is the active opener.
+   */
+  panelContent?: ReactNode;
 }
 
 /**

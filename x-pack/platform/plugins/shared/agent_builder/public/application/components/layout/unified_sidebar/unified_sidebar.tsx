@@ -32,11 +32,15 @@ export const CONDENSED_SIDEBAR_WIDTH = 64;
 interface UnifiedSidebarProps {
   isCondensed: boolean;
   onToggleCondensed: () => void;
+  fillContainer?: boolean;
+  showCollapseToggle?: boolean;
 }
 
 export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   isCondensed,
   onToggleCondensed,
+  fillContainer = false,
+  showCollapseToggle = true,
 }) => {
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
@@ -59,8 +63,9 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   );
 
   const sidebarStyles = css`
-    width: ${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px;
+    width: ${fillContainer ? '100%' : `${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px`};
     height: 100%;
+    min-width: 0;
     border-radius: 0;
     display: flex;
     flex-direction: column;
@@ -87,6 +92,7 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
         getNavigationPath={getNavigationPath}
         isCondensed={isCondensed}
         onToggleCondensed={onToggleCondensed}
+        showCollapseToggle={showCollapseToggle}
       />
       {!isCondensed && (
         <EuiFlexGroup css={sidebarContentStyles}>

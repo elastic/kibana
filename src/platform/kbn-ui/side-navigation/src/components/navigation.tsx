@@ -158,7 +158,14 @@ export const Navigation = ({
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
-                const { sections, secondaryMenuTitle, ...itemProps } = item;
+                const {
+                  sections,
+                  popoverSections,
+                  secondaryMenuTitle,
+                  panelContent: _panelContent,
+                  ...itemProps
+                } = item;
+                const renderedPopoverSections = popoverSections ?? sections;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
 
@@ -166,7 +173,7 @@ export const Navigation = ({
                   <SideNav.Popover
                     key={item.id}
                     hasContent={getHasSubmenu(item)}
-                    isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    isSidePanelOpen={isSidePanelOpen && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     secondaryMenuTitle={secondaryMenuTitle}
@@ -193,8 +200,8 @@ export const Navigation = ({
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
                       >
-                        {sections?.map((section, sectionIndex) => {
-                          const firstNonEmptySectionIndex = item.sections?.findIndex(
+                        {renderedPopoverSections?.map((section, sectionIndex) => {
+                          const firstNonEmptySectionIndex = renderedPopoverSections.findIndex(
                             (s) => s.items.length > 0
                           );
 
@@ -282,7 +289,13 @@ export const Navigation = ({
                             <SideNav.NestedSecondaryMenu.Section>
                               {allOverflowItems.map((item, index) => {
                                 const hasSubmenu = getHasSubmenu(item);
-                                const { sections, secondaryMenuTitle, ...itemProps } = item;
+                                const {
+                                  sections,
+                                  popoverSections,
+                                  secondaryMenuTitle,
+                                  panelContent: _panelContent,
+                                  ...itemProps
+                                } = item;
                                 const isFirstItem = index === 0;
                                 const ariaDescribedBy =
                                   [
@@ -343,7 +356,7 @@ export const Navigation = ({
                                 title={item.secondaryMenuTitle ?? item.label}
                                 aria-describedby={panelNavigationInstructionsId}
                               />
-                              {item.sections?.map((section) => (
+                              {(item.popoverSections ?? item.sections)?.map((section) => (
                                 <SideNav.NestedSecondaryMenu.Section
                                   key={section.id}
                                   label={section.label}
@@ -382,7 +395,14 @@ export const Navigation = ({
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
-                const { sections, secondaryMenuTitle, ...itemProps } = item;
+                const {
+                  sections,
+                  popoverSections,
+                  secondaryMenuTitle,
+                  panelContent: _panelContent,
+                  ...itemProps
+                } = item;
+                const renderedPopoverSections = popoverSections ?? sections;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;
 
@@ -390,7 +410,7 @@ export const Navigation = ({
                   <SideNav.Popover
                     key={item.id}
                     hasContent={getHasSubmenu(item)}
-                    isSidePanelOpen={!isCollapsed && item.id === openerNode?.id}
+                    isSidePanelOpen={isSidePanelOpen && item.id === openerNode?.id}
                     isAnyPopoverLocked={isAnyPopoverLocked}
                     label={item.label}
                     secondaryMenuTitle={secondaryMenuTitle}
@@ -413,8 +433,8 @@ export const Navigation = ({
                         badgeType={item.badgeType}
                         isNew={getIsNewSecondary(item.id)}
                       >
-                        {sections?.map((section, sectionIndex) => {
-                          const firstNonEmptySectionIndex = item.sections?.findIndex(
+                        {renderedPopoverSections?.map((section, sectionIndex) => {
+                          const firstNonEmptySectionIndex = renderedPopoverSections.findIndex(
                             (s) => s.items.length > 0
                           );
                           return (
@@ -460,48 +480,54 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
-          {({ secondaryNavigationInstructionsId }) => {
-            const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
-              (s) => s.items.length > 0
-            );
+        <SideNav.SidePanel
+          footer={sidePanelFooter}
+          openerNode={openerNode}
+          isMenu={!openerNode.panelContent}
+        >
+          {openerNode.panelContent
+            ? openerNode.panelContent
+            : ({ secondaryNavigationInstructionsId }) => {
+                const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
+                  (s) => s.items.length > 0
+                );
 
-            return (
-              <SideNav.SecondaryMenu
-                badgeType={openerNode.badgeType}
-                isPanel
-                title={openerNode.secondaryMenuTitle ?? openerNode.label}
-                isNew={getIsNewSecondary(openerNode.id)}
-              >
-                {openerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-                    {section.items.map((subItem, subItemIndex) => {
-                      const isFirstItem =
-                        sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
-                      const ariaDescribedBy = isFirstItem
-                        ? secondaryNavigationInstructionsId
-                        : undefined;
+                return (
+                  <SideNav.SecondaryMenu
+                    badgeType={openerNode.badgeType}
+                    isPanel
+                    title={openerNode.secondaryMenuTitle ?? openerNode.label}
+                    isNew={getIsNewSecondary(openerNode.id)}
+                  >
+                    {openerNode.sections?.map((section, sectionIndex) => (
+                      <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                        {section.items.map((subItem, subItemIndex) => {
+                          const isFirstItem =
+                            sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
+                          const ariaDescribedBy = isFirstItem
+                            ? secondaryNavigationInstructionsId
+                            : undefined;
 
-                      return (
-                        <SideNav.SecondaryMenu.Item
-                          aria-describedby={ariaDescribedBy}
-                          key={subItem.id}
-                          isCurrent={actualActiveItemId === subItem.id}
-                          isHighlighted={subItem.id === visuallyActiveSubpageId}
-                          isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
-                          testSubjPrefix={sidePanelItemPrefix}
-                          {...subItem}
-                        >
-                          {subItem.label}
-                        </SideNav.SecondaryMenu.Item>
-                      );
-                    })}
-                  </SideNav.SecondaryMenu.Section>
-                ))}
-              </SideNav.SecondaryMenu>
-            );
-          }}
+                          return (
+                            <SideNav.SecondaryMenu.Item
+                              aria-describedby={ariaDescribedBy}
+                              key={subItem.id}
+                              isCurrent={actualActiveItemId === subItem.id}
+                              isHighlighted={subItem.id === visuallyActiveSubpageId}
+                              isNew={getIsNewSecondary(subItem.id)}
+                              onClick={() => onItemClick?.(subItem)}
+                              testSubjPrefix={sidePanelItemPrefix}
+                              {...subItem}
+                            >
+                              {subItem.label}
+                            </SideNav.SecondaryMenu.Item>
+                          );
+                        })}
+                      </SideNav.SecondaryMenu.Section>
+                    ))}
+                  </SideNav.SecondaryMenu>
+                );
+              }}
         </SideNav.SidePanel>
       )}
     </div>

@@ -14,8 +14,17 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  from,
+  map,
+  shareReplay,
+  switchMap,
+  type Subscription,
+} from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -72,6 +81,8 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { storageKeys } from './application/storage_keys';
+import { appPaths } from './application/utils/app_paths';
+import { sidenavPanelHost$ } from './application/panel/sidenav_panel_host';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
@@ -165,6 +176,39 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+
+    // POC: server conversation list (same source as UnifiedSidebar), not local visit history.
+    // list() is unbounded today; later bound in ES (limit=5, sort=updated_at). Keep shareReplay.
+    startDependencies.navigation.registerNavigationSection({
+      kind: 'linkList',
+      id: 'agentBuilderRecentlyViewed',
+      target: 'agent_builder',
+      title: i18n.translate('xpack.agentBuilder.navigation.recentConversationsTitle', {
+        defaultMessage: 'Recent conversations',
+      }),
+      viewAllHref: core.application.getUrlForApp(AGENTBUILDER_APP_ID),
+      items$: eventsService.activeConversation$.pipe(
+        map((active) => `${active?.id ?? ''}:${active?.conversation?.title ?? ''}`),
+        distinctUntilChanged(),
+        switchMap(() => from(conversationsService.list({}))),
+        map((conversations) =>
+          [...conversations]
+            .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))
+            .slice(0, 5)
+            .map((c) => ({
+              id: c.id,
+              label: c.title || c.id,
+              href: core.application.getUrlForApp(AGENTBUILDER_APP_ID, {
+                path: appPaths.agent.conversations.byId({
+                  agentId: c.agent_id,
+                  conversationId: c.id,
+                }),
+              }),
+            }))
+        ),
+        shareReplay({ bufferSize: 1, refCount: true })
+      ),
+    });
     const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
@@ -273,6 +317,13 @@ export class AgentBuilderPlugin
     this.internalServices = internalServices;
 
     setSidebarServices(core, internalServices);
+
+    startDependencies.navigation.registerNavigationPanel({
+      kind: 'agentBuilder',
+      id: 'agentBuilderPanel',
+      target: 'agent_builder',
+      hostRef: (element) => sidenavPanelHost$.next(element),
+    });
 
     const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
       const { createEmbeddableConversation } = await import(

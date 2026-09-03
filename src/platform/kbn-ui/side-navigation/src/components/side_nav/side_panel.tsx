@@ -56,13 +56,20 @@ export interface SidePanelProps {
   children: SidePanelChildren;
   footer?: ReactNode;
   openerNode: MenuItem;
+  /** Menu mode (default): roving tabindex and arrow-key instructions. Custom content sets false. */
+  isMenu?: boolean;
 }
 
 /**
  * Side navigation panel that opens on mouse click if the primary menu item contains a submenu.
  * Shows only in expanded mode.
  */
-export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
+export const SidePanel = ({
+  children,
+  footer,
+  openerNode,
+  isMenu = true,
+}: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const scrollStyles = useScroll();
   const wrapperStyles = useMemo(
@@ -74,7 +81,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
   });
 
   const panelRef = (ref: HTMLDivElement) => {
-    if (ref) {
+    if (ref && isMenu) {
       const elements = getFocusableElements(ref);
       updateTabIndices(elements);
     }
@@ -83,8 +90,15 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
   const navigationPanelStyles = useMemo(
     () => css`
       ${scrollStyles}
+      ${!isMenu &&
+      css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+      `}
     `,
-    [scrollStyles]
+    [scrollStyles, isMenu]
   );
 
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
@@ -98,17 +112,19 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
 
   return (
     <>
-      <EuiScreenReaderOnly>
-        <p id={secondaryNavigationInstructionsId}>
-          {i18n.translate('kbnUI.sideNavigation.sidePanelInstructions', {
-            defaultMessage:
-              'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
-            values: {
-              label: openerNode.secondaryMenuTitle ?? openerNode.label,
-            },
-          })}
-        </p>
-      </EuiScreenReaderOnly>
+      {isMenu && (
+        <EuiScreenReaderOnly>
+          <p id={secondaryNavigationInstructionsId}>
+            {i18n.translate('kbnUI.sideNavigation.sidePanelInstructions', {
+              defaultMessage:
+                'You are in the {label} secondary menu side panel. Use Up and Down arrow keys to navigate the menu.',
+              values: {
+                label: openerNode.secondaryMenuTitle ?? openerNode.label,
+              },
+            })}
+          </p>
+        </EuiScreenReaderOnly>
+      )}
       <EuiSplitPanel.Outer
         aria-label={i18n.translate('kbnUI.sideNavigation.sidePanelAriaLabel', {
           defaultMessage: `Side panel for {label}`,
@@ -116,7 +132,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
             label: openerNode.secondaryMenuTitle ?? openerNode.label,
           },
         })}
-        aria-describedby={secondaryNavigationInstructionsId}
+        aria-describedby={isMenu ? secondaryNavigationInstructionsId : undefined}
         borderRadius="none"
         className={sidePanelClassName} // Used in Storybook to limit the height of the panel
         css={wrapperStyles}
@@ -129,7 +145,7 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
           color="transparent"
           css={navigationPanelStyles}
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
-          onKeyDown={handleRovingIndex}
+          onKeyDown={isMenu ? handleRovingIndex : undefined}
           panelRef={panelRef}
           paddingSize="none"
         >

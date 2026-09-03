@@ -30,6 +30,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 export type {
   AgentBuilderPluginSetup,
@@ -79,4 +80,5 @@ export interface AgentBuilderStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cps?: CPSPluginStart;
+  navigation: NavigationPublicPluginStart;
 }

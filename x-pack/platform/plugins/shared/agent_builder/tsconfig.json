@@ -77,6 +77,7 @@
     "@kbn/license-management-plugin",
     "@kbn/scout",
     "@kbn/management-plugin",
+    "@kbn/navigation-plugin",
     "@kbn/share-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/workflows-management-plugin",

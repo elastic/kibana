@@ -31,6 +31,8 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationPanel,
+  ProjectNavigationSection,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -101,6 +103,9 @@ export interface InternalChromeStart extends ChromeStart {
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
+    /** Current path+hash with base path, query stripped. Emits on in-app location changes. */
+    getCurrentUrl$(): Observable<string>;
+
     getNavigation$(): Observable<{
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
@@ -145,6 +150,24 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Attach a typed section to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders.
+     */
+    registerNavigationSection(section: ProjectNavigationSection): void;
+
+    /**
+     * Attach a typed expanded-panel owner to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders.
+     */
+    registerNavigationPanel(panel: ProjectNavigationPanel): void;
+
+    /** Registered navigation sections. Live updates. */
+    getRegisteredNavigationSections$(): Observable<readonly ProjectNavigationSection[]>;
+
+    /** Registered navigation panels. Live updates. */
+    getRegisteredNavigationPanels$(): Observable<readonly ProjectNavigationPanel[]>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

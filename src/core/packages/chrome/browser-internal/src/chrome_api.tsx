@@ -71,6 +71,7 @@ export function createChromeApi({
       projectNavigation.initNavigation(id, navigationTree$);
     },
     getNavigation$: () => projectNavigation.getNavigation$(),
+    getCurrentUrl$: () => projectNavigation.getCurrentUrl$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
@@ -80,6 +81,10 @@ export function createChromeApi({
     getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
     registerCustomizeNavigationHandler: (handler) =>
       projectNavigation.registerCustomizeNavigationHandler(handler),
+    registerNavigationSection: (section) => projectNavigation.registerNavigationSection(section),
+    registerNavigationPanel: (panel) => projectNavigation.registerNavigationPanel(panel),
+    getRegisteredNavigationSections$: () => projectNavigation.getRegisteredNavigationSections$(),
+    getRegisteredNavigationPanels$: () => projectNavigation.getRegisteredNavigationPanels$(),
   };
 
   let appHeaderRegistrationId = 0;

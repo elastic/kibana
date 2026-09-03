@@ -301,6 +301,42 @@ export interface NavigationTreeDefinitionUI {
   footer?: Array<ChromeProjectNavigationNode>;
 }
 
+/** Chrome-owned popover row. Not a re-export of SecondaryMenuItem. */
+export interface ProjectNavigationLinkItem {
+  id: string;
+  href: string;
+  label: string;
+  badgeType?: BadgeType;
+  isExternal?: boolean;
+}
+
+/** Popover-only list attached to an existing deep link. */
+export interface ProjectNavigationLinkListSection {
+  kind: 'linkList';
+  id: string;
+  target: AppDeepLinkId;
+  title: string;
+  items$: Observable<readonly ProjectNavigationLinkItem[]>;
+  /** Listing / app href for chrome-owned View all. Omit to hide the row. */
+  viewAllHref?: string;
+}
+
+export type ProjectNavigationSection = ProjectNavigationLinkListSection;
+
+/** Expanded-panel host. Chrome owns the node and calls `hostRef`; Agent Builder portals its existing sidebar. */
+export interface ProjectNavigationAgentBuilderPanel {
+  kind: 'agentBuilder';
+  id: string;
+  target: 'agent_builder';
+  /**
+   * Chrome-owned host callback. Called with the element when the expanded panel mounts,
+   * and with `null` when that host unmounts (collapsed sidenav or another primary is open).
+   */
+  hostRef: (element: HTMLElement | null) => void;
+}
+
+export type ProjectNavigationPanel = ProjectNavigationAgentBuilderPanel;
+
 /**
  * @public
  *
