@@ -274,13 +274,18 @@ export const buildChangePointCards = (params: {
     groups,
   } = ctx;
 
+  const baseLineEsql = buildChangePointLineDataQuery(esql);
+  if (!baseLineEsql) return undefined;
+
   const cards: ChangePointCardModel[] = [];
 
   for (const [entityLabel, { rows }] of groups.entries()) {
     const firstRow = rows[0];
-    let lineEsql = buildChangePointLineDataQuery(esql);
-    if (!lineEsql) continue;
-    lineEsql = appendEntityFiltersToChangePointLineEsql(lineEsql, firstRow, entityColumnIds);
+    const lineEsql = appendEntityFiltersToChangePointLineEsql(
+      baseLineEsql,
+      firstRow,
+      entityColumnIds
+    );
 
     const annotationEvents: ChangePointCardModel['annotationEvents'] = [];
     let hasDetectedChangePoint = false;
