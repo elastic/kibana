@@ -177,6 +177,21 @@ list route **annotates** each item with `isRead` and returns the same order to e
 - Callers with no user profile (API keys, headless consumers) get the list with `isRead` absent
   rather than a 403. The mark routes reject them, since there is no read state to write.
 
+### Unread count
+
+`GET /internal/notification_center/notifications/_unread_count` returns
+`{ unreadCount: number }` for the caller's profile-scoped read state. It accepts no query
+parameters and counts the same newest collapsed representative for each `notification_id` that
+the list route uses. The endpoint requests only `notification_id` and `@timestamp` from
+Elasticsearch and evaluates read state in the application.
+
+The first unread-count request initializes `readAllBefore` through the same path as the list, so
+inherited backlog does not appear as unread. A caller without a user profile receives `403`; a
+user-storage read or initialization failure returns `500` rather than a misleading zero.
+
+The count is bounded to the newest 1,000 collapsed representatives. If more groups exist,
+`unreadCount` is therefore a floor rather than the complete total.
+
 ## Submitting notifications (`forType`)
 
 The server **setup** contract exposes `forType(ref)`, which binds a submitter to a registered

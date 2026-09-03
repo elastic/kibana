@@ -10,6 +10,7 @@ import type { ApiClientFixture } from '@kbn/scout';
 import {
   INTERNAL_HEADERS,
   GET_NOTIFICATIONS_PATH,
+  GET_UNREAD_COUNT_PATH,
   MARK_READ_PATH,
   MARK_ALL_READ_PATH,
   NOTIFICATION_DATA_STREAM_NAME,
@@ -85,6 +86,12 @@ export const createHelpers = (authHeaderGetter: () => Record<string, string>) =>
   return {
     getNotifications: (apiClient: ApiClientFixture, params?: QueryParams) =>
       apiClient.get(withQuery(GET_NOTIFICATIONS_PATH, params), {
+        headers: headers(),
+        responseType: 'json',
+      }),
+
+    getUnreadCount: (apiClient: ApiClientFixture) =>
+      apiClient.get(GET_UNREAD_COUNT_PATH, {
         headers: headers(),
         responseType: 'json',
       }),
