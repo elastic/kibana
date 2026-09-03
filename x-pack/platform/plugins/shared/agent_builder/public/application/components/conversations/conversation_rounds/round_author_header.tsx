@@ -42,11 +42,7 @@ const formatDisplayTime = (startedAt: string): string => {
 };
 
 const formatTooltipTime = (startedAt: string): string => {
-  const formattedDate = moment(startedAt).format('LLL');
-  const tzAbbr = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
-    .formatToParts(new Date(startedAt))
-    .find((part) => part.type === 'timeZoneName')?.value;
-  return tzAbbr ? `${formattedDate} ${tzAbbr}` : formattedDate;
+  return moment(startedAt).format('LLL');
 };
 
 const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
