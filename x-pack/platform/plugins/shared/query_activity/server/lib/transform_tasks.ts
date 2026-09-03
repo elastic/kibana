@@ -15,6 +15,22 @@ const SQL_ACTION_PREFIX = 'indices:data/read/sql';
 const MSEARCH_ACTION_PREFIX = 'indices:data/read/msearch';
 const ASYNC_SEARCH_ACTION_PREFIX = 'indices:data/read/async_search';
 
+export const QUERY_TASK_ACTIONS = [
+  SEARCH_ACTION_PREFIX,
+  `${SEARCH_ACTION_PREFIX}/template`,
+  ESQL_ACTION_PREFIX,
+  `${ESQL_ACTION_PREFIX}[a]`,
+  EQL_ACTION_PREFIX,
+  `${EQL_ACTION_PREFIX}[a]`,
+  SQL_ACTION_PREFIX,
+  `${SQL_ACTION_PREFIX}[a]`,
+  MSEARCH_ACTION_PREFIX,
+  `${MSEARCH_ACTION_PREFIX}/template`,
+  `${ASYNC_SEARCH_ACTION_PREFIX}/submit`,
+] as const;
+
+const QUERY_TASK_ACTION_SET: ReadonlySet<string> = new Set(QUERY_TASK_ACTIONS);
+
 const INDICES_REGEX = /indices\[([^\]]*)\]/;
 const SOURCE_REGEX = /source\[(\{.*\})\]/s;
 const ASYNC_PREFIX_REGEX = /^async_search\{(.*)\}$/s;
@@ -112,26 +128,30 @@ export function parseEsqlDescription(description: string): { indices: number; qu
 }
 
 /**
- * Returns true for top-level search/esql tasks that exceed the runtime threshold.
+ * Returns true for lightweight root query tasks that need detailed enrichment.
  */
-export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boolean {
+export function isQueryTaskCandidate(task: TasksTaskInfo, thresholdNanos: number): boolean {
   if (task.parent_task_id !== undefined && task.parent_task_id !== null) {
     return false;
   }
 
   const action = task.action ?? '';
-  if (
-    !action.startsWith(SEARCH_ACTION_PREFIX) &&
-    !action.startsWith(ESQL_ACTION_PREFIX) &&
-    !action.startsWith(EQL_ACTION_PREFIX) &&
-    !action.startsWith(SQL_ACTION_PREFIX) &&
-    !action.startsWith(MSEARCH_ACTION_PREFIX) &&
-    !action.startsWith(ASYNC_SEARCH_ACTION_PREFIX)
-  ) {
+  if (!QUERY_TASK_ACTION_SET.has(action)) {
     return false;
   }
 
   if ((task.running_time_in_nanos ?? 0) < thresholdNanos) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Returns true for detailed query tasks that can be displayed in the UI.
+ */
+export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boolean {
+  if (!isQueryTaskCandidate(task, thresholdNanos)) {
     return false;
   }
 

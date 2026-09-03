@@ -12,6 +12,7 @@ import {
   getQueryType,
   capitalise,
   isIncludedTask,
+  isQueryTaskCandidate,
   parseDslDescription,
   parseEsqlDescription,
   transformTasks,
@@ -162,10 +163,7 @@ describe('isIncludedTask', () => {
 
   it('includes eql tasks', () => {
     expect(
-      isIncludedTask(
-        { ...baseTask, action: 'indices:data/read/eql/search' },
-        DEFAULT_THRESHOLD_NANOS
-      )
+      isIncludedTask({ ...baseTask, action: 'indices:data/read/eql' }, DEFAULT_THRESHOLD_NANOS)
     ).toBe(true);
   });
 
@@ -227,6 +225,47 @@ describe('isIncludedTask', () => {
         DEFAULT_THRESHOLD_NANOS
       )
     ).toBe(true);
+  });
+});
+
+describe('isQueryTaskCandidate', () => {
+  it('includes a qualifying task without detailed fields', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, cancellable: false, description: undefined },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(true);
+  });
+
+  it('includes verified root action variants', () => {
+    const actions = [
+      'indices:data/read/search/template',
+      'indices:data/read/esql[a]',
+      'indices:data/read/eql[a]',
+      'indices:data/read/sql[a]',
+      'indices:data/read/msearch/template',
+      'indices:data/read/async_search/submit',
+    ];
+
+    for (const action of actions) {
+      expect(isQueryTaskCandidate({ ...baseTask, action }, DEFAULT_THRESHOLD_NANOS)).toBe(true);
+    }
+  });
+
+  it('excludes internal child action variants even without a parent task id', () => {
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/search[phase/query]' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+    expect(
+      isQueryTaskCandidate(
+        { ...baseTask, action: 'indices:data/read/esql/compute' },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
   });
 });
 
@@ -302,7 +341,7 @@ describe('transformTasks', () => {
   it('uses raw description for EQL tasks', () => {
     const task: TasksTaskInfo = {
       ...baseTask,
-      action: 'indices:data/read/eql/search',
+      action: 'indices:data/read/eql',
       description: 'process where true',
       headers: {
         'X-Opaque-Id': 'req4;kibana:application:discover:new',
