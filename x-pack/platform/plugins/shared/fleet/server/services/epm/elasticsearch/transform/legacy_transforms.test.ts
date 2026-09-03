@@ -280,7 +280,6 @@ describe('test transform install with legacy schema', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
       Promise.resolve(installation)
     );
-    currentAttributes = { installed_es: installation.installed_es };
 
     await installTransforms({
       packageInstallContext: {
@@ -307,14 +306,6 @@ describe('test transform install with legacy schema', () => {
             Buffer.from('{"content": "data"}'),
           ],
         ]),
-        archiveIterator: createArchiveIteratorFromMap(
-          new Map([
-            [
-              `endpoint-${version}/elasticsearch/transform/metadata_current/default.json`,
-              Buffer.from('{"content": "data"}'),
-            ],
-          ])
-        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -323,7 +314,11 @@ describe('test transform install with legacy schema', () => {
     });
 
     // The transform ref must still be present — not wiped by the reinstall.
-    expect(currentAttributes.installed_es).toEqual([
+    const lastUpdateCall =
+      savedObjectsClient.update.mock.calls[savedObjectsClient.update.mock.calls.length - 1];
+    const finalInstalledEs = (lastUpdateCall[2] as { installed_es: Array<{ id: string; type: string }> })
+      .installed_es;
+    expect(finalInstalledEs).toEqual([
       { id: transformId, type: ElasticsearchAssetType.transform },
     ]);
   });
