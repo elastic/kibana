@@ -13,6 +13,7 @@ import {
   PACKAGES,
   buildDataStreamName,
   deleteDataStreamIfExists,
+  ensurePackageInstalled,
   fullAccessRoleWithIndices,
   getLogsForDataset,
   indexLogs,
@@ -62,9 +63,19 @@ test.describe(
   'Dataset quality privileges - index scoped',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let uninstallApache: () => Promise<void>;
+
+    const ownedDataStreams = [PLAIN_DATA_STREAM, MONITORED_DATA_STREAM, APACHE_ACCESS_DATA_STREAM];
+
     // Seeded once with the privileged client: each scenario varies the role, not the documents.
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.fleet.integration.installPackage(
+    test.beforeAll(async ({ apiServices, esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean owned streams so an interrupted previous run does not double the seeded docs.
+      for (const dataStream of ownedDataStreams) {
+        await deleteDataStreamIfExists(esClient, dataStream, log);
+      }
+
+      uninstallApache = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.apache.name,
         PACKAGES.apache.version
       );
@@ -76,15 +87,11 @@ test.describe(
       ]);
     });
 
-    test.afterAll(async ({ apiServices, esClient, log }) => {
-      for (const dataStream of [
-        PLAIN_DATA_STREAM,
-        MONITORED_DATA_STREAM,
-        APACHE_ACCESS_DATA_STREAM,
-      ]) {
+    test.afterAll(async ({ esClient, log }) => {
+      for (const dataStream of ownedDataStreams) {
         await deleteDataStreamIfExists(esClient, dataStream, log);
       }
-      await apiServices.fleet.integration.delete(PACKAGES.apache.name);
+      await uninstallApache();
     });
 
     test('keeps the app usable for a user scoped to a single data set type', async ({

@@ -14,6 +14,7 @@ import {
   PRODUCTION_NAMESPACE,
   buildDataStreamName,
   deleteDataStreamIfExists,
+  ensurePackageInstalled,
   getLogsForDataset,
   indexLogs,
 } from '../../common';
@@ -43,12 +44,24 @@ test.describe(
   'Dataset quality details integrations',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.fleet.integration.installPackage(
+    let uninstallApache: () => Promise<void>;
+    let uninstallFleetServer: () => Promise<void>;
+
+    const ownedDataStreams = [APACHE_DATA_STREAM, FLEET_SERVER_DATA_STREAM, PLAIN_DATA_STREAM];
+
+    test.beforeAll(async ({ apiServices, esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean owned streams so an interrupted previous run does not double the seeded docs.
+      for (const dataStream of ownedDataStreams) {
+        await deleteDataStreamIfExists(esClient, dataStream, log);
+      }
+
+      uninstallApache = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.apache.name,
         PACKAGES.apache.version
       );
-      await apiServices.fleet.integration.installPackage(
+      uninstallFleetServer = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.fleetServer.name,
         PACKAGES.fleetServer.version
       );
@@ -69,12 +82,12 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, APACHE_DATA_STREAM, log);
-      await deleteDataStreamIfExists(esClient, FLEET_SERVER_DATA_STREAM, log);
-      await deleteDataStreamIfExists(esClient, PLAIN_DATA_STREAM, log);
-      await apiServices.fleet.integration.delete(PACKAGES.apache.name);
-      await apiServices.fleet.integration.delete(PACKAGES.fleetServer.name);
+    test.afterAll(async ({ esClient, log }) => {
+      for (const dataStream of ownedDataStreams) {
+        await deleteDataStreamIfExists(esClient, dataStream, log);
+      }
+      await uninstallApache();
+      await uninstallFleetServer();
     });
 
     test('hides the integration rows for a data set without an integration', async ({

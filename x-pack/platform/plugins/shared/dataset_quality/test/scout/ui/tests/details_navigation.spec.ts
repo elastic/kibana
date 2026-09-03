@@ -34,7 +34,10 @@ test.describe(
   'Dataset quality details navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean the owned stream so an interrupted previous run does not double the counts.
+      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
+
       await indexLogs(logsSynthtraceEsClient, [
         // 15 timestamps x 15 documents = 225 good docs, cycling 3 service names.
         getLogsForDataset({ to: TO, count: 15, dataset: DATASET }),
