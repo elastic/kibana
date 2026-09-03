@@ -9,7 +9,11 @@ import type { EsqlESQLParams } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { AGENT_BUILDER_TRACES_INDEX_PREFIX, MANAGEMENT_AGENT_ID } from '../../common/constants';
+import {
+  AGENT_BUILDER_TRACES_INDEX_PREFIX,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+  MANAGEMENT_AGENT_ID,
+} from '../../common/constants';
 import type { AgentInfo, ExecuteToolSpan } from './transform';
 
 /** Max rows read per ES|QL query in a single run (the per-run cap). */
@@ -24,6 +28,13 @@ const TRACES_INDEX_PATTERN = `${TRACES_INDEX_PREFIX}*`;
  * they are never fetched only to be discarded by `build()` (query_kind === 'other').
  */
 const EXECUTE_ESQL_TOOL_NAME = 'platform.core.execute_esql';
+
+/**
+ * The tool an agent calls to load a skill. Its arguments name the requested skill, which is
+ * what marks a round as the feedback loop analyzing an AI index.
+ */
+const LOAD_SKILL_TOOL_NAME = 'load_skill';
+
 const BACKING_INDEX_PREFIX = '.ds-';
 const GENERATIONAL_SUFFIX = /-\d{4}\.\d{2}\.\d{2}-\d{6}$/;
 
@@ -36,6 +47,11 @@ export interface InvokeAgentSpanRow {
 
 export interface ToolSpanReadRow extends ExecuteToolSpan {
   _index?: string | null;
+}
+
+export interface LoadSkillSpanRow {
+  trace_id: string;
+  'attributes.gen_ai.tool.call.arguments'?: string | null;
 }
 
 /** Derives the Kibana space from a traces span's `_index`. */
@@ -105,6 +121,58 @@ FROM ${TRACES_INDEX_PATTERN}
 
   const response = await runEsqlQuery(esClient, query, signal, traceIds);
   return response ? esqlRowsToObjects<InvokeAgentSpanRow>(response) : [];
+};
+
+/**
+ * True when a `load_skill` call named the feedback loop's analysis skill. The tool accepts the
+ * skill name, its folder path, or its `SKILL.md` path, and the id appears verbatim in all three,
+ * so the resolved argument is matched by substring rather than by an exact shape.
+ */
+const referencesAnalysisSkill = (args: string | undefined | null): boolean => {
+  if (!args) {
+    return false;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(args);
+  } catch {
+    return false;
+  }
+  const skill = (parsed as { skill?: unknown } | null)?.skill;
+  return typeof skill === 'string' && skill.toLowerCase().includes(ANALYZE_AND_IMPROVE_SKILL_ID);
+};
+
+/**
+ * Reads the rounds that loaded the feedback loop's own analysis skill.
+ *
+ * Scoped by `trace_id` rather than by the watermark on purpose: a round whose `load_skill` span
+ * fell in an earlier batch than the queries it went on to run must still be recognized, otherwise
+ * the loop's own reads leak into signals across a batch boundary.
+ */
+export const querySelfAnalysisTraceIds = async (
+  esClient: ElasticsearchClient,
+  traceIds: string[],
+  signal: AbortSignal
+): Promise<Set<string>> => {
+  if (traceIds.length === 0) {
+    return new Set();
+  }
+  const placeholders = traceIds.map(() => '?').join(', ');
+  const query = `
+FROM ${TRACES_INDEX_PATTERN}
+| WHERE attributes.gen_ai.operation.name == "execute_tool" AND attributes.gen_ai.tool.name == "${LOAD_SKILL_TOOL_NAME}" AND trace_id IN (${placeholders})
+| SORT @timestamp ASC
+| LIMIT ${MAX_ROWS_PER_QUERY}
+| KEEP trace_id, attributes.gen_ai.tool.call.arguments`;
+
+  const response = await runEsqlQuery(esClient, query, signal, traceIds);
+  const rows = response ? esqlRowsToObjects<LoadSkillSpanRow>(response) : [];
+  return new Set(
+    rows
+      .filter((row) => referencesAnalysisSkill(row['attributes.gen_ai.tool.call.arguments']))
+      .map((row) => row.trace_id)
+      .filter((traceId): traceId is string => !!traceId)
+  );
 };
 
 /** Reads new `execute_tool` spans across all spaces since the watermark. */

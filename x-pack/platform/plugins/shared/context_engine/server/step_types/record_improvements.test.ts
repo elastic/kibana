@@ -8,6 +8,7 @@
 import type { AuditLogger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
+import type { RecordImprovementsResponse } from '../../common/http_api/improvements';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { ImprovementsServiceApi } from '../improvements/service';
@@ -19,7 +20,7 @@ jest.mock('../feedback_analysis/record_improvements');
 
 const recordImprovementsMock = jest.mocked(recordImprovements);
 
-const RESULT = {
+const RESULT: RecordImprovementsResponse = {
   recorded: [{ improvement_id: 'imp-1', action: 'add_ki', title: 'Add a KI for refunds' }],
   skipped: [],
 };

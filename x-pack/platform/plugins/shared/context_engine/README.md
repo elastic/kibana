@@ -137,6 +137,40 @@ user against the current space's signals index):
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
 
+### Self-referential exclusion
+
+The feedback loop must not generate signals about itself. An analysis run reads
+signals, traces and the AI index it is diagnosing through `execute_esql` — tool
+calls that would otherwise be traced, turned into signals, and analyzed on the
+next pass, until the loop's own reads are the dominant "evidence" in the store.
+
+Two filters cover the two ways that happens, because neither is sufficient
+alone.
+
+**By target index.** `server/tasks/self_referential.ts` recognizes reads of the
+loop's own observability surface: the `context-engine-` user namespace (signals,
+improvements), the `.contextengine-` system namespace (the AI index registry),
+and `traces-agent_builder.otel-*`. `build` in `server/tasks/transform.ts` drops
+those spans **before** round context is computed, so an analysis round neither
+emits signals nor inflates the `looped` / `fell_back_to_raw` counters of the
+round it shares a trace with. Matching on namespace prefixes rather than on
+individual index names means stores added later are covered without touching
+the list. A bare `FROM *` is deliberately *not* treated as self-referential: it
+reads everything, so it is a genuine coverage signal rather than the loop
+observing itself.
+
+**By round.** The target-index filter cannot see the largest leak: diagnosing an
+AI index means querying that AI index, which is indistinguishable from an agent
+genuinely retrieving from it. So `generate_signals` also drops every span whose
+round loaded the `analyze-and-improve` skill, identified from the round's
+`load_skill` span. That lookup is scoped by `trace_id` and not by the watermark,
+so a round whose skill load and queries fall in different batches is still
+excluded. The watermark still advances over the dropped rounds, which would
+otherwise be re-read on every run.
+
+The round filter depends on the agent actually calling `load_skill`; an agent
+carrying the same guidance in its instructions would go unmarked.
+
 ## Improvements
 
 An **improvement** is a proposed change to one AI index's KI pipeline, derived

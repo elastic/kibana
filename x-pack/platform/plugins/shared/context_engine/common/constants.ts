@@ -133,6 +133,14 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
 
 /**
+ * Skill id of the feedback loop's own analysis skill. A round that loads it is the loop
+ * diagnosing an AI index, so the whole round is excluded from signal generation: its reads
+ * target the index under analysis and are otherwise indistinguishable from an agent
+ * genuinely retrieving from it.
+ */
+export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
+
+/**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept
  * in-plugin — mirrors Agent Builder's exported `buildAgentBuilderTracesIndexPattern` contract —
  * so Context Engine does not take a dependency on `@kbn/agent-builder-plugin`.

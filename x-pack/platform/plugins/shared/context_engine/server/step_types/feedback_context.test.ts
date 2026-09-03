@@ -89,7 +89,7 @@ describe('getFeedbackContextStepDefinition', () => {
 
     const result = await buildStep().handler(context);
 
-    expect(result.output.has_signals).toBe(false);
+    expect(result.output?.has_signals).toBe(false);
   });
 
   it('fails the step when the AI index no longer exists', async () => {
