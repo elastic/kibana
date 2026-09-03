@@ -122,7 +122,14 @@ MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATR
 # pass its doc-count gate.
 FORWARDED_ENV_VARS = ("EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES", "EVAL_CONNECTOR_ID",
                       "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE", "PERSONA_MATRIX_SHARD")
-GOLDEN_ENV_LOCAL = "/tmp/golden-cluster-env.sh"
+# Prefer the durable copy in ~/.elastic: /tmp is cleared by macOS and by
+# routine cleanup, and a missing file here fails per-VM inside scp (every
+# deploy dies, observed 2026-09-03) rather than once, up front.
+GOLDEN_ENV_LOCAL = next(
+    (p for p in (os.path.expanduser("~/.elastic/golden-cluster-env.sh"),
+                 "/tmp/golden-cluster-env.sh") if os.path.isfile(p)),
+    os.path.expanduser("~/.elastic/golden-cluster-env.sh"),
+)
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
 
@@ -1063,6 +1070,14 @@ def main() -> int:
         units = [(m, f"{i}/{args.shards}")
                  for m in models for i in range(1, args.shards + 1)]
     print(f"sweep models ({len(models)}): {', '.join(models)}", flush=True)
+    # Fail before provisioning: a missing local asset otherwise surfaces as an
+    # scp error on every VM, after the whole farm is already booted and billing.
+    _required = [GOLDEN_ENV_LOCAL,
+                 os.path.expanduser("~/.elastic/eis-connectors-cache.json")]
+    _absent = [p for p in _required if not os.path.isfile(p)]
+    if _absent:
+        print(f"PREFLIGHT FAILED: missing local assets: {_absent}", flush=True)
+        return 2
     if args.shards > 1:
         print(f"sharding: {args.shards} VMs/model -> {len(units)} VMs total", flush=True)
 
