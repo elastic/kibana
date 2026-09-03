@@ -16,7 +16,6 @@ import {
   shareReplay,
   ignoreElements,
   concatMap,
-  finalize,
   take,
 } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -286,8 +285,6 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
-        logger,
-        roundId,
       })
     : EMPTY;
 
@@ -519,17 +516,12 @@ const buildPersistenceEvents = ({
   title$,
   agentEvents$,
   action,
-  logger,
-  roundId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
-  logger: Logger;
-  /** Round id at receipt time and threaded into the run. */
-  roundId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -544,42 +536,18 @@ const buildPersistenceEvents = ({
         ? title$
         : undefined;
 
-    let roundReachedTerminal = false;
-
-    const twoPhase$ = roundStartedEvents$.pipe(
+    return roundStartedEvents$.pipe(
       concatMap((startEvent) =>
         appendRoundTerminated$({
           conversation,
           conversationClient,
           roundCompletedEvents$: roundCompletedEvents$.pipe(
             filter((event) => event.data.round.id === startEvent.data.round_id),
-            take(1),
-            tap(() => {
-              roundReachedTerminal = true;
-            })
+            take(1)
           ),
           title$: endTitle$,
         })
       )
-    );
-
-    return twoPhase$.pipe(
-      finalize(() => {
-        if (roundReachedTerminal) {
-          return;
-        }
-        if (conversation.operation !== 'CREATE') {
-          return;
-        }
-        const cleanup = async () => {
-          await conversationClient.delete(conversation.id);
-        };
-        cleanup().catch((error) => {
-          logger.warn(
-            `Failed to clean up aborted round ${roundId} in conversation ${conversation.id}: ${error.message}`
-          );
-        });
-      })
     );
   }
 

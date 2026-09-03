@@ -499,7 +499,6 @@ describe('handleAgentExecution', () => {
       expect(conversationClient.create).toHaveBeenCalledWith(
         expect.objectContaining({ read_only: true })
       );
-      // Happy path on CREATE — no cleanup runs.
       expect(conversationClient.delete).not.toHaveBeenCalled();
     });
   });
@@ -538,7 +537,7 @@ describe('handleAgentExecution', () => {
     });
   });
 
-  describe('two-phase failure cleanup', () => {
+  describe('two-phase failure handling', () => {
     it('keeps the receipt-time user_message on UPDATE when the run fails after round start (no cleanup write)', async () => {
       const conversation = createEmptyConversation({
         id: 'conversation-1',
@@ -569,7 +568,7 @@ describe('handleAgentExecution', () => {
       expect(conversationClient.delete).not.toHaveBeenCalled();
     });
 
-    it('hard-deletes the whole doc on CREATE when the first round fails before completing', async () => {
+    it('keeps the conversation on CREATE when the first round fails before completing', async () => {
       const conversationClient = createConversationClientMock();
       conversationClient.create.mockResolvedValue(
         createEmptyConversation({ id: 'new-conversation' })
@@ -577,7 +576,6 @@ describe('handleAgentExecution', () => {
       conversationClient.appendEvents.mockResolvedValue(
         createEmptyConversation({ id: 'new-conversation' })
       );
-      conversationClient.delete.mockResolvedValue(true);
 
       mockAgentStream([makeRoundStartedEvent()], 'asyncShared', new Error('agent exploded'));
       stubResolveServices(conversationClient);
@@ -590,7 +588,8 @@ describe('handleAgentExecution', () => {
       await expect(lastValueFrom(events$.pipe(toArray()))).rejects.toThrow();
       await flushMicrotasks();
 
-      expect(conversationClient.delete).toHaveBeenCalledTimes(1);
+      // The conversation and its receipt-time user_message survive the failed round.
+      expect(conversationClient.delete).not.toHaveBeenCalled();
       expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
     });
 
