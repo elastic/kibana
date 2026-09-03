@@ -8,10 +8,11 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
-  ALERTING_V2_SECTION_ID,
-  ALERTING_V2_RULES_APP_ID,
-  ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_RULES_BASE_PATH,
+  ALERTING_V2_EPISODES_BASE_PATH,
 } from '@kbn/alerting-v2-constants';
+
+export { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_EPISODES_BASE_PATH };
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
@@ -55,11 +56,6 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export const FLYOUT_FOOTER_OFFSET = 80;
-
-// Ideally, these should be computed using the `paths` factory of the alerting-v2-plugin, which
-// shouldn't be imported in this package. Marking this for future improvement.
-export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
-export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 
 export const getAlertEpisodeDetailsPath = (episodeId: string) =>
   `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;

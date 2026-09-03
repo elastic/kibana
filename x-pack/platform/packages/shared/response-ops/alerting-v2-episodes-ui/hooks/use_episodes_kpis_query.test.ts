@@ -10,10 +10,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
+import type { EpisodeSourceKpis } from '../types/episode_data_source';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 
 jest.mock('../utils/execute_esql_query');
@@ -23,6 +27,9 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
 
+const sourceWithKpis = (fetchKpis: () => Promise<EpisodeSourceKpis>) =>
+  createTestEpisodeSource({ fetchKpis });
+
 const mockUserProfile = userProfileServiceMock.createStart();
 mockUserProfile.getCurrent.mockResolvedValue({ uid: 'user-123' } as GetUserProfileResponse);
 
@@ -30,6 +37,7 @@ const mockServices = {
   expressions: expressionsPluginMock.createStartContract(),
   spaces: spacesPluginMock.createStartContract(),
   userProfile: mockUserProfile,
+  http: httpServiceMock.createStartContract(),
 };
 
 const mockTimeRange = {
@@ -46,12 +54,16 @@ const mockKpisRow = {
   snoozed: 0,
 };
 
-const wrapper = () => {
+const createWrapper = (dataSource?: ReturnType<typeof createTestEpisodeSource>) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
+  return ({ children }: { children: React.ReactNode }) => {
+    const qcProvider = React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return dataSource
+      ? React.createElement(EpisodeDataSourceProvider, { dataSource }, qcProvider)
+      : qcProvider;
+  };
 };
 
 afterEach(() => {
@@ -70,7 +82,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -96,7 +108,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -115,7 +127,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -133,7 +145,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -156,7 +168,7 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(mockExecuteEsqlQuery).toHaveBeenCalled());
@@ -177,12 +189,104 @@ describe('useEpisodesKpisQuery', () => {
           filterState: {},
           timeRange: mockTimeRange,
         }),
-      { wrapper: wrapper() }
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual({
+      alertsCount: 5,
+      firingRules: 2,
+      assignedToMe: 1,
+      unassigned: 3,
+      acknowledged: 4,
+      snoozed: 0,
+    });
+  });
+
+  it('merges source KPI counts additively with v2 counts', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(
+            jest.fn().mockResolvedValue({
+              alerts_count: 10,
+              firing_rules: 3,
+              assigned_to_me: 0,
+              unassigned: 10,
+              acknowledged: 2,
+              snoozed: 1,
+            })
+          )
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toEqual({
+      alertsCount: 15, // 5 v2 + 10 source
+      firingRules: 5, // 2 v2 + 3 source
+      assignedToMe: 1, // 1 v2 + 0 source
+      unassigned: 13, // 3 v2 + 10 source
+      acknowledged: 6, // 4 v2 + 2 source
+      snoozed: 1, // 0 v2 + 1 source
+    });
+  });
+
+  it('returns v2-only KPIs when a source fetch fails', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      {
+        wrapper: createWrapper(
+          sourceWithKpis(jest.fn().mockRejectedValue(new Error('source fetch failed')))
+        ),
+      }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toEqual({
+      alertsCount: 5,
+      firingRules: 2,
+      assignedToMe: 1,
+      unassigned: 3,
+      acknowledged: 4,
+      snoozed: 0,
+    });
+  });
+
+  it('returns v2-only KPIs when a source does not implement KPIs', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([mockKpisRow]);
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesKpisQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+        }),
+      { wrapper: createWrapper(createTestEpisodeSource()) }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
     expect(result.current.data).toEqual({
       alertsCount: 5,
       firingRules: 2,

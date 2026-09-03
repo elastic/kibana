@@ -7994,6 +7994,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-alerting-plugin@link:x-pack/solutions/observability/plugins/observability_alerting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
@@ -8455,6 +8459,10 @@
   uid ""
 
 "@kbn/response-ops-rules-apis@link:x-pack/platform/packages/shared/response-ops/rules-apis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-rules-page-tabs@link:x-pack/platform/packages/shared/response-ops/rules-page-tabs":
   version "0.0.0"
   uid ""
 

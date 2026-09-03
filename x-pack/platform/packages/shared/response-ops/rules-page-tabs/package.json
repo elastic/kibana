@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/response-ops-rules-page-tabs",
+  "description": "Shared Rules page header tabs for the v1 (triggers_actions_ui) and v2 (alerting_v2) Rules pages.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false
+}

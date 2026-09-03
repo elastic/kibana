@@ -97,6 +97,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   uiActions?: UiActionsStart;
   cps?: CPSPluginStart;
   inspector?: InspectorStart;
+  tabHrefOverrides?: { v1Href?: string; v2Href?: string };
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

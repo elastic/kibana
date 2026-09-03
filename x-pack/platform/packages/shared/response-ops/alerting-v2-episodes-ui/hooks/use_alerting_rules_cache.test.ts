@@ -137,8 +137,9 @@ describe('useAlertingRulesCache', () => {
       },
     });
 
+    const callsAfterFirstFetch = mockHttp.get.mock.calls.length;
     rerender({ ruleIds: [presentRuleId, missingRuleId] });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
   });
 });

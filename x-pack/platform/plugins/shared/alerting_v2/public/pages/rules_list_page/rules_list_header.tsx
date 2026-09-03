@@ -9,8 +9,15 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
+import {
+  RULES_PAGE_TAB_IDS,
+  canReadV1Rules,
+  getRulesPageHeaderTabs,
+} from '@kbn/response-ops-rules-page-tabs';
+import { useTabHrefOverrides } from '../../application/tab_href_overrides_context';
 import { experimentalBadge } from '../../components/experimental_badge';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
@@ -115,6 +122,23 @@ export const RulesListHeader = ({
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
 
+  const application = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+
+  const { v1Href, v2Href } = useTabHrefOverrides();
+
+  const tabs = useMemo(
+    () =>
+      getRulesPageHeaderTabs({
+        selectedTab: RULES_PAGE_TAB_IDS.v2,
+        prepend: basePath.prepend,
+        showV1Tab: canReadV1Rules(application.capabilities),
+        v1Href,
+        v2Href,
+      }),
+    [basePath, application.capabilities, v1Href, v2Href]
+  );
+
   const headerMenu = useMemo(
     () =>
       showHeaderMenu
@@ -143,6 +167,7 @@ export const RulesListHeader = ({
       <AppHeader
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
+        tabs={tabs}
         badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
