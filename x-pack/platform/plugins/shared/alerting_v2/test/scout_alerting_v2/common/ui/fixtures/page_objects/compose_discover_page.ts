@@ -164,6 +164,16 @@ export class ComposeDiscoverPage {
     await this.codeEditor.setCodeEditorValue(query, 0);
   }
 
+  /** Reads the YAML editor buffer (the only Monaco model in YAML-only mode). */
+  async getYamlEditorValue(): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(0);
+  }
+
+  /** Replaces the YAML editor buffer. */
+  async setYamlEditorValue(value: string): Promise<string> {
+    return this.codeEditor.setCodeEditorValue(value, 0);
+  }
+
   async clickNext() {
     await this.nextButton.click();
   }
