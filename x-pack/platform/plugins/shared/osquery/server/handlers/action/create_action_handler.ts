@@ -123,7 +123,8 @@ export const createActionHandler = async (
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const replacedQuery = replacedQueries(packQuery.query, alertData);
+          // Pack SQL always comes from the stored pack saved object.
+          const replacedQuery = replacedQueries(packQuery.query, alertData, true);
 
           return pickBy(
             {

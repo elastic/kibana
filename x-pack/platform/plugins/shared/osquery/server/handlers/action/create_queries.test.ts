@@ -200,6 +200,29 @@ describe('create queries', () => {
       expect(queries[0].query).toBe('select 1;');
     });
 
+    it('flags a parameterized stored query dispatched without alert context', async () => {
+      const get = jest.fn().mockResolvedValue({
+        attributes: { query: 'SELECT * FROM processes where pid={{process.pid}};' },
+      });
+
+      // Rule-run decides fan-out from the rule's persisted params, but dispatches the current
+      // stored SQL. A saved query that gained parameters therefore arrives with no alertData.
+      const queries = await createDynamicQueries({
+        params: { saved_query_id: 'sq-1', agent_ids: [TEST_AGENT] },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+      });
+
+      // Flagged rather than dispatched: create_action_handler drops errored queries from
+      // fleetActions, so the agent never receives a literal `{{...}}` template.
+      expect(queries[0].error).toBe(PARAMETER_NOT_FOUND);
+    });
+
     it('keeps caller SQL when useStoredQuery is not set', async () => {
       const get = jest.fn().mockResolvedValue({
         attributes: { query: 'select 1;' },

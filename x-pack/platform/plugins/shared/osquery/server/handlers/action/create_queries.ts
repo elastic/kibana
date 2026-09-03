@@ -13,7 +13,10 @@ import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-inte
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
+import {
+  containsDynamicQuery,
+  replaceParamsQuery,
+} from '../../../common/utils/replace_params_query';
 import { isSavedQueryPrebuilt } from '../../routes/saved_query/utils';
 import { lookupSavedQuery, type ResolvedQueryReference } from '../../lib/resolve_query_reference';
 import { CustomHttpRequestError } from '../../common/error';
@@ -58,6 +61,8 @@ export const createDynamicQueries = async ({
   const query = useStoredQuery
     ? storedSavedQuery?.query ?? params.query
     : params.query ?? storedSavedQuery?.query;
+  // True when the SQL below came from the saved object rather than the caller.
+  const isStoredQueryDispatched = Boolean(useStoredQuery && storedSavedQuery?.query);
   const ecsMapping = useStoredQuery
     ? storedSavedQuery?.ecs_mapping ?? params.ecs_mapping
     : params.ecs_mapping ?? storedSavedQuery?.ecs_mapping;
@@ -86,7 +91,7 @@ export const createDynamicQueries = async ({
       {
         action_id: uuidv4(),
         id: uuidv4(),
-        ...replacedQueries(query, alertData),
+        ...replacedQueries(query, alertData, isStoredQueryDispatched),
         saved_query_id: params.saved_query_id,
         saved_query_prebuilt: prebuiltId
           ? await isSavedQueryPrebuilt(
@@ -109,7 +114,14 @@ export const createDynamicQueries = async ({
 
 export const replacedQueries = (
   query: string | undefined,
-  alertData?: ParsedTechnicalFields & { _index: string }
+  alertData?: ParsedTechnicalFields & { _index: string },
+  /**
+   * Set for stored (saved-query / pack) content. Rule-run resolves the stored SQL only after
+   * the caller already decided whether this run is parameterized, so a template can reach here
+   * with no alert context; flag it instead of dispatching literal `{{...}}` to the agent.
+   * Ad-hoc `writeLiveQueries` SQL is left as-is — sending a template there is the caller's call.
+   */
+  requireSubstitution = false
 ): { query: string | undefined; error?: string } => {
   if (alertData && query) {
     const { result, skipped } = replaceParamsQuery(query, alertData);
@@ -122,6 +134,10 @@ export const replacedQueries = (
           }
         : {}),
     };
+  }
+
+  if (requireSubstitution && query && containsDynamicQuery(query)) {
+    return { query, error: PARAMETER_NOT_FOUND };
   }
 
   return { query };

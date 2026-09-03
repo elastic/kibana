@@ -107,6 +107,12 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             return response.forbidden();
           }
 
+          // Recovery only ever vouches for the singular `query`. A `queries[]` alongside it
+          // would be dispatched unchecked by createDynamicQueries, so fail closed here.
+          if (request.body.queries?.length) {
+            return response.forbidden();
+          }
+
           try {
             const justifyingAlert = alertData;
             const investigationGuide = justifyingAlert?.['kibana.alert.rule.note'];

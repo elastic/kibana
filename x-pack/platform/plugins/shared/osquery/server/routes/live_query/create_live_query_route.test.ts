@@ -387,4 +387,27 @@ describe('createLiveQueryRoute', () => {
       expect.objectContaining({ useStoredQuery: false })
     );
   });
+
+  it('returns 403 when a guide-matching query smuggles a rogue queries[] alongside it', async () => {
+    const coreStart = createMockCoreStart({}, { writeLiveQueries: false, runSavedQueries: true });
+    const racGet = jest.fn().mockResolvedValue({
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.note': '!{osquery{"query":"select 1;","ecs_mapping":{}}}',
+    });
+
+    const response = await invokeRoute(
+      {
+        // `query` matches the investigation guide, so recovery would otherwise pass...
+        query: 'select 1;',
+        // ...but createDynamicQueries prefers queries[], which the guide never vouched for.
+        queries: [{ id: 'x', query: 'select * from shadow;' }],
+        alert_ids: ['alert-with-guide'],
+        agent_ids: ['agent-1'],
+      },
+      { coreStart, racGet }
+    );
+
+    expect(response.forbidden).toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
 });
