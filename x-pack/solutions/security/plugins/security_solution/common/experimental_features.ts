@@ -342,6 +342,13 @@ export const allowedExperimentalValues = Object.freeze({
   mitreAttackUpdatesUIEnabled: true,
 
   /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
+
+  /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,

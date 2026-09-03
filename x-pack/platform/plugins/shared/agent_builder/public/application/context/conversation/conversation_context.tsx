@@ -12,7 +12,6 @@ import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
   conversationId?: string;
-  shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
   sessionTag?: string;
   agentId?: string;
