@@ -89,6 +89,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
+      newRecentlyClosedTab.skipInitialFetch = false;
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -229,6 +230,9 @@ export const updateTabs: InternalStateThunkActionCreator<
         if (!currentQuery || !currentDataView) {
           return tab;
         }
+
+        const isAutoRefreshActive = !services.timefilter.getRefreshInterval().pause;
+        tab.skipInitialFetch = !isAutoRefreshActive;
 
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
