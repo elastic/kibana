@@ -42,6 +42,8 @@ export class ComposeDiscoverPage {
   /** Time field selector inside the query sandbox flyout. */
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
+  /** Tags combobox on the Details step. */
+  public readonly tagsInput: Locator;
   public readonly addRunbookButton: Locator;
   public readonly relatedDashboardsSelector: Locator;
   public readonly relatedDashboardsInput: Locator;
@@ -81,6 +83,7 @@ export class ComposeDiscoverPage {
     this.timeFieldError = this.page.testSubj.locator('composeDiscoverTimeFieldError');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
+    this.tagsInput = this.flyout.locator('[data-test-subj="ruleTagsInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
     this.relatedDashboardsInput = this.flyout.locator(
@@ -184,6 +187,11 @@ export class ComposeDiscoverPage {
 
   async setRuleName(name: string) {
     await this.ruleNameInput.fill(name);
+  }
+
+  /** Removes every selected tag via the combobox clear button. */
+  async clearAllTags() {
+    await this.tagsInput.locator('[data-test-subj="comboBoxClearButton"]').click();
   }
 
   /**
