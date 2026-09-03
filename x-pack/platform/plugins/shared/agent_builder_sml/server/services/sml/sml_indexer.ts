@@ -97,16 +97,12 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
-// Wraps a saved-objects client so reads (get/bulkGet/resolve/bulkResolve)
-// carry the given namespace. Every other method is delegated unchanged.
 const withNamespace = (
   client: SavedObjectsClientContract,
   namespace: string
 ): SavedObjectsClientContract => {
   const wrapped = Object.create(client) as SavedObjectsClientContract;
   wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
-  // Pass the namespace as the top-level option and drop any per-object
-  // `namespaces`, which core rejects for space-agnostic types.
   wrapped.bulkGet = (objects, opts) =>
     client.bulkGet(
       objects.map(({ namespaces: _namespaces, ...object }) => object),
@@ -117,9 +113,6 @@ const withNamespace = (
   return wrapped;
 };
 
-// Namespace an internal client must target to read an item in these spaces.
-// Undefined means no injection: the default space, an empty list, or the
-// "all spaces" marker ('*'), which is not a valid single namespace.
 const namespaceForSpaces = (spaces: string[]): string | undefined => {
   const [firstSpace] = spaces;
   return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
@@ -188,8 +181,7 @@ class SmlIndexerImpl implements SmlIndexer {
       }
     }
 
-    // Internal repos need an explicit namespace to access non-default spaces;
-    // scoped clients handle it themselves and throw if one is passed.
+    // Internal repos need an explicit namespace to access non-default spaces
     const internalNamespace = clientHasSpacesExtension ? undefined : namespaceForSpaces(spaces);
     const wrappedClient = internalNamespace
       ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)

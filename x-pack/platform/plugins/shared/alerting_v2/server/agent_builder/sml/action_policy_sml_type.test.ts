@@ -53,7 +53,6 @@ describe('createActionPolicySmlType', () => {
     logger,
   });
 
-  // `list` pages through a point-in-time finder opened on the shared client.
   const stubFinder = (find: () => AsyncGenerator<unknown>) => {
     const close = jest.fn().mockResolvedValue(undefined);
     soClient.createPointInTimeFinder.mockReturnValue({ find, close } as unknown as ReturnType<
@@ -167,7 +166,7 @@ describe('createActionPolicySmlType', () => {
       expect(close).toHaveBeenCalledTimes(1);
     });
 
-    it('yields nothing and never opens a finder when alerting v2 is disabled', async () => {
+    it('yields nothing and never opens a PIT finder when alerting v2 is disabled', async () => {
       getIsAlertingV2Enabled.mockResolvedValue(false);
 
       const items = await drainList();

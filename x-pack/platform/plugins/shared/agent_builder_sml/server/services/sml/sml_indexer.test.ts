@@ -65,8 +65,6 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   has: jest.fn().mockReturnValue(!!definition),
 });
 
-// A `getSmlEntry` hook that records the client the indexer passes in, so tests
-// can assert whether reads are namespaced.
 const captureSmlEntryClient = () => {
   const captured: { client?: SavedObjectsClientContract } = {};
   const getSmlEntry = jest.fn(async (_originId: string, context: SmlContext): Promise<SmlEntry> => {
@@ -356,9 +354,6 @@ describe('createSmlIndexer', () => {
       );
 
       expect(captured.client).toBeDefined();
-      // Namespace goes to the top-level option; per-object `namespaces` are
-      // dropped so a caller cannot override it (and to stay valid for
-      // space-agnostic types, which core rejects `namespaces` on).
       await captured.client?.bulkGet([{ type: 'lens', id: 'att-11', namespaces: ['wrong-space'] }]);
       expect(realBulkGet).toHaveBeenCalledWith([{ type: 'lens', id: 'att-11' }], {
         namespace: 'my-space',
