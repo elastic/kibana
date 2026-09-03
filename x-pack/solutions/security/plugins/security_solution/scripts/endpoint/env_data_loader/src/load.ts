@@ -11,6 +11,7 @@ import { fetchAllEndpointIntegrationPolicyListIds } from '../../common/fleet_ser
 import { ExecutionThrottler } from '../../common/execution_throttler';
 import {
   createBlocklists,
+  createCustomYaraSignatures,
   createEndpointExceptions,
   createEventFilters,
   createHostIsolationExceptions,
@@ -29,6 +30,7 @@ interface LoadOptions {
   trustedAppsCount: number;
   eventFiltersCount: number;
   blocklistsCount: number;
+  customYaraSignaturesCount: number;
   hostIsolationExceptionsCount: number;
   endpointExceptionsCount: number;
   globalArtifactRatio: number;
@@ -42,6 +44,7 @@ export const load = async ({
   trustedAppsCount,
   eventFiltersCount,
   blocklistsCount,
+  customYaraSignaturesCount,
   hostIsolationExceptionsCount,
   endpointExceptionsCount,
   globalArtifactRatio,
@@ -63,6 +66,10 @@ ${status}\nRequests pending: ${throttler.getStats().pending}
   const trustedAppsReporter = reportProgress.addCategory('trusted apps', trustedAppsCount);
   const eventFiltersReporter = reportProgress.addCategory('event filters', eventFiltersCount);
   const blocklistsReporter = reportProgress.addCategory('blocklists', blocklistsCount);
+  const customYaraSignaturesReporter = reportProgress.addCategory(
+    'custom yara signatures',
+    customYaraSignaturesCount
+  );
   const hostIsolationExceptionsReporter = reportProgress.addCategory(
     'host isolation exceptions',
     hostIsolationExceptionsCount
@@ -116,6 +123,17 @@ ${status}\nRequests pending: ${throttler.getStats().pending}
         log,
         reportProgress: blocklistsReporter,
         count: blocklistsCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
+
+    customYaraSignaturesCount &&
+      createCustomYaraSignatures({
+        kbnClient,
+        log,
+        reportProgress: customYaraSignaturesReporter,
+        count: customYaraSignaturesCount,
         policyIds: endpointPolicyIds,
         globalArtifactRatio,
         throttler,

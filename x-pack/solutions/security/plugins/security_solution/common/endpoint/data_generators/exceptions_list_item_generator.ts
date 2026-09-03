@@ -6,6 +6,8 @@
  */
 
 import {
+  type OsTypeArray,
+  type OsType,
   type ExportExceptionDetails,
   type ExceptionListItemSchema,
   type CreateExceptionListItemSchema,
@@ -421,37 +423,71 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
+  generateYaraRuleText(osMeta: ('Windows' | 'Linux' | 'MacOS')[]): string {
+    const metaArch = this.randomChoice(['x86', 'arm64', 'x86, arm64'] as const);
+
+    const condition = this.randomChoice([
+      'condition: true',
+      'condition: false',
+      'strings: $a = "test_string" condition: $a',
+      'strings: $bbb = /00 ae 53 ff/ condition: all of them',
+    ]);
+
+    return `
+      rule Generated_Yara_Rule_${this.randomString(5)} {
+        meta:
+          description = "Generated test YARA rule"
+          ${this.randomBoolean() ? 'scan_type = "Memory"' : ''}
+          ${this.randomBoolean() ? `architecture = "${metaArch}"` : ''}
+          ${this.randomBoolean() ? `os = "${osMeta.join(', ')}"` : ''}
+
+        ${condition}
+      }`;
+  }
+
+  generateMatchingOsTypesAndYaraOsMeta(): {
+    osTypes: OsTypeArray;
+    osMeta: ('Windows' | 'Linux' | 'MacOS')[];
+  } {
+    const possibleOsMetaVariations: ('Windows' | 'Linux' | 'MacOS')[][] = [
+      ['Windows'],
+      ['Linux'],
+      ['MacOS'],
+      ['Windows', 'Linux'],
+      ['Windows', 'MacOS'],
+      ['Linux', 'MacOS'],
+      ['Windows', 'Linux', 'MacOS'],
+    ];
+
+    const osMeta: ('Windows' | 'Linux' | 'MacOS')[] = this.randomChoice(possibleOsMetaVariations);
+    const osTypes: OsTypeArray = osMeta.map<OsType>((os) => os.toLowerCase() as OsType);
+
+    return { osTypes, osMeta };
+  }
+
   generateCustomYaraSignature(
     overrides: Partial<ExceptionListItemSchema> = {}
   ): ExceptionListItemSchema {
-    const os = this.randomChoice(['windows', 'linux', 'macos'] as const);
+    const { osTypes, osMeta } = this.generateMatchingOsTypesAndYaraOsMeta();
+
+    const numberOfRules = this.randomN(9) + 1;
+    const ruleText = Array.from({ length: numberOfRules }, () =>
+      this.generateYaraRuleText(osMeta)
+    ).join('\n\n');
 
     return this.generate({
       name: `YARA Signature ${this.randomString(5)}`,
       list_id: ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id,
       item_id: `generator_endpoint_yara_signature_${this.seededUUIDv4()}`,
-      tags: [
-        this.randomChoice([
-          `${BY_POLICY_ARTIFACT_TAG_PREFIX}${this.seededUUIDv4()}`,
-          GLOBAL_ARTIFACT_TAG,
-        ]),
-      ],
-      os_types: [os],
       entries: [
         {
           field: CUSTOM_YARA_SIGNATURE_FIELD_TYPE,
           operator: 'included',
           type: 'match',
-          value: `rule Generated_Yara_Rule_${this.randomString(5)} {
-  meta:
-    description = "Generated test YARA rule"
-  strings:
-    $a = "test_string"
-  condition:
-    $a
-}`,
+          value: ruleText,
         },
       ],
+      os_types: osTypes as ExceptionListItemSchema['os_types'],
       ...overrides,
     });
   }

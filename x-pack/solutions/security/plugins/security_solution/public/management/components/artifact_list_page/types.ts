@@ -20,6 +20,8 @@ export interface ArtifactListPageUrlParams {
   includedPolicies?: string;
   show?: 'create' | 'edit' | 'import';
   itemId?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ArtifactFormComponentProps {
