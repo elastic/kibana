@@ -8,7 +8,13 @@
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+} from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
@@ -68,6 +74,7 @@ import {
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
@@ -298,14 +305,43 @@ export const registerAiIndexRoutes = ({
   logger,
   getAiIndexService,
   getImprovementsService,
+  getScheduleService,
+  getSpaceId,
   getActions,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getScheduleService: () => FeedbackAnalysisScheduleService;
+  getSpaceId: (request: KibanaRequest) => string;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
+  /**
+   * Brings the AI index's schedule in line with the configuration that was just written.
+   *
+   * Best-effort and after the fact: the configuration is the record of intent and is already
+   * stored, so failing the write because Task Manager could not be told would leave the caller
+   * retrying a change that has in fact been made. A failure here means the schedule lags its
+   * configuration until the next write, which is visible and recoverable; losing the configuration
+   * is not.
+   */
+  const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
+    try {
+      const aiIndex = await getAiIndexService().get(aiIndexId);
+      await getScheduleService().reconcile({
+        aiIndexId,
+        ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
+        spaceId: getSpaceId(request),
+      });
+    } catch (error) {
+      logger.warn(
+        `Stored the feedback analysis configuration for AI index '${aiIndexId}', but failed to reconcile its schedule: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
   // Create an AI index
   router.versioned
     .post({
@@ -340,6 +376,7 @@ export const registerAiIndexRoutes = ({
           });
           await getAiIndexService().create(id, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
+          await reconcileSchedule(id, request);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -386,6 +423,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -583,6 +621,7 @@ export const registerAiIndexRoutes = ({
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          await reconcileSchedule(aiIndexId, request);
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -626,6 +665,18 @@ export const registerAiIndexRoutes = ({
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+
+          // Left scheduled, this would keep firing against an index that no longer exists and fail
+          // on its first request every interval. Best-effort for the same reason as below.
+          await getScheduleService()
+            .remove({ aiIndexId, spaceId: getSpaceId(request) })
+            .catch((error) => {
+              logger.warn(
+                `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            });
 
           // The improvements store is keyed by AI index id, so revisions left behind would
           // resurface if an AI index were later recreated under the same id. Best-effort: the store

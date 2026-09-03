@@ -24,7 +24,6 @@ import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
-import { FeedbackAgentSelector } from './feedback_agent_selector';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { SignalGroupRow } from './signal_group_row';
 import { SignalsErrorPrompt } from './signals_error_prompt';
@@ -102,36 +101,14 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
         )}
       </EuiFlexGroup>
 
-      {chatOpener && aiIndex && !aiIndex.managed && (
+      {chatOpener && aiIndex && !hasFeedbackAgent && (
         <>
           <EuiSpacer size="m" />
-          <FeedbackAgentSelector aiIndex={aiIndex} />
-          {!hasFeedbackAgent && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued" data-test-subj="contextSignalsFeedbackAgentPrompt">
-                <p>
-                  {i18n.translate(
-                    'xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt',
-                    {
-                      defaultMessage: 'Select an analysis agent to enable "Analyze & improve".',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            </>
-          )}
-        </>
-      )}
-
-      {chatOpener && aiIndex && aiIndex.managed && !hasFeedbackAgent && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiText size="xs" color="subdued" data-test-subj="contextSignalsManagedNoAgentPrompt">
+          <EuiText size="xs" color="subdued" data-test-subj="contextSignalsFeedbackAgentPrompt">
             <p>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt', {
+              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt', {
                 defaultMessage:
-                  'A feedback agent must be configured for this managed index to enable "Analyze & improve".',
+                  'Select an analysis agent in the Improvements panel to enable "Analyze & improve".',
               })}
             </p>
           </EuiText>
