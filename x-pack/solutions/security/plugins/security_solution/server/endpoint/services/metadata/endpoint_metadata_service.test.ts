@@ -218,8 +218,11 @@ describe('EndpointMetadataService', () => {
       // @ts-expect-error runtime_mappings is not typed
       unitedIndexQuery.runtime_mappings.status.script.source = expect.any(String);
 
-      expect(esClient.search).toBeCalledWith(unitedIndexQuery);
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), agentPolicyIds);
+      expect(esClient.search).toHaveBeenCalledWith(unitedIndexQuery);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        agentPolicyIds
+      );
       expect(metadataListResponse).toEqual({
         data: [
           {
@@ -308,7 +311,9 @@ describe('EndpointMetadataService', () => {
 
       await metadataService.getHostMetadataList(queryOptions);
 
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [basePolicyId]);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [
+        basePolicyId,
+      ]);
     });
 
     it('should return the stripped `policy_id` in the applied agent policy info.', async () => {
@@ -325,7 +330,7 @@ describe('EndpointMetadataService', () => {
 
       const response = await metadataService.getHostMetadataList(queryOptions);
 
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [policyId]);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [policyId]);
       expect(response.data[0].policy_info?.agent.applied.id).toEqual(policyId);
     });
 
@@ -335,7 +340,9 @@ describe('EndpointMetadataService', () => {
       await metadataService.getHostMetadataList(queryOptions);
 
       expect(basePolicyId).toEqual('test-agent-policy-id#blah');
-      expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [basePolicyId]);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [
+        basePolicyId,
+      ]);
     });
   });
 
@@ -843,7 +850,7 @@ describe('EndpointMetadataService', () => {
 
       await metadataService.getMetadataForEndpoints(agentIds);
 
-      expect(testMockedContext.esClient.search).toBeCalledWith({
+      expect(testMockedContext.esClient.search).toHaveBeenCalledWith({
         ...getESQueryHostMetadataByIDs(agentIds),
         size: agentIds.length,
       });

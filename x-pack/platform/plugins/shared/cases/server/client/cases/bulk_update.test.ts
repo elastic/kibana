@@ -19,6 +19,8 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
@@ -891,6 +893,447 @@ describe('update', () => {
           templateNamesByKey: new Map(),
         })
       );
+    });
+  });
+
+  describe('Template counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const caseWithTemplate = {
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, template: { id: 'tmpl-1', version: 3 } },
+    };
+
+    type PatchedCaseResult = Awaited<
+      ReturnType<
+        ReturnType<typeof createCasesClientMockArgs>['services']['caseService']['patchCases']
+      >
+    >['saved_objects'][number];
+
+    const setupArgs = ({
+      clientSource = 'rest_api',
+      originalCases = [mockCases[0]],
+      patchedCases,
+    }: {
+      clientSource?: 'rest_api' | 'connector';
+      originalCases?: CaseSavedObjectTransformed[];
+      patchedCases?: PatchedCaseResult[];
+    } = {}) => {
+      const args = { ...createCasesClientMockArgs(), usageCounter, clientSource };
+
+      args.services.caseService.getCases.mockResolvedValue({ saved_objects: originalCases });
+      args.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      args.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
+      args.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: patchedCases ?? originalCases,
+      });
+      args.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template' },
+      } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>);
+
+      return args;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts a template applied to an existing case', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts a template cleared from an existing case', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count clearing a template from a case that never had one', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: null,
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'clear_template' })
+      );
+    });
+
+    // The no-op filter drops an unchanged template before the update logic runs, so this counts
+    // effective changes rather than what the caller happened to send.
+    it('does not count re-sending the template a case already has', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'apply_template' })
+      );
+    });
+
+    it('counts cases, not update calls', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('splits one update across both buckets', async () => {
+      const secondCase = { ...caseWithTemplate, id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    });
+
+    it('counts a case once when the request repeats its id', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    // Matches how the adjacent updatedFieldsByCaseId reducer resolves a repeated id.
+    it('keeps the first template change when the request repeats an id with conflicting ones', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-2', version: 1 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const clientArgs = setupArgs({ clientSource: 'connector' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count a case whose update failed to persist', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({
+        originalCases: [mockCases[0], secondCase],
+        patchedCases: [
+          mockCases[0],
+          {
+            type: 'cases',
+            id: secondCase.id,
+            attributes: {},
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds one use per case to the applied template usage stats', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1',
+        2
+      );
+    });
+
+    it('does not touch usage stats when a template is only cleared', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the update when the template usage stats write fails', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
+    });
+
+    it('does not count an update that failed', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.caseService.patchCases.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -2851,7 +3294,9 @@ describe('update', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('are not global (isGlobal) field definitions');
+      ).rejects.toThrow(
+        'Unknown extended field key: "risk_score_as_keyword". No fields are available for this case'
+      );
     });
   });
 
@@ -3348,6 +3793,56 @@ describe('update', () => {
         priority: 'priority_as_keyword',
         count: 'count_as_integer',
       });
+    });
+
+    it('passes the mirrored extended_fields to emitCaseUpdated.extraInfo when updatedFields is [customFields]', async () => {
+      /*
+       * FAILURE SCENARIO: if patchCases echoes back the original SO (without mirrored
+       * extended_fields in attributes) then updatedCase.extended_fields stays pre-mirror,
+       * and the event bridge would compute an empty diff — never firing the trigger.
+       */
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      // Override patchCases to echo the post-mirror SO (as the real Elasticsearch response would).
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: {
+              ...mockCases[0].attributes,
+              extended_fields: { priority_as_keyword: 'high' },
+            },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ updatedFields: expect.arrayContaining(['customFields']) }),
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            extended_fields: expect.objectContaining({ priority_as_keyword: 'high' }),
+          }),
+        })
+      );
     });
   });
 

@@ -54,7 +54,7 @@ export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
     coverage: [],
     scopeSummary: '',
     scopes: [],
-    callables: [],
+    skills: [],
     metrics: { lastRun: null },
     recentRuns: [],
   };

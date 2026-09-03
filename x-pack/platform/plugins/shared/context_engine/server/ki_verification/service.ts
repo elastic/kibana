@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 import type { KiVerifierRegistry } from './registry';
 import type {
   KiVerificationContext,
@@ -20,8 +21,8 @@ export class KiVerificationService {
   /**
    * Runs all applicable verifiers and aggregates their results, stamping each
    * result with its verifier id. A verifier that throws from `applies` or
-   * `verify` is recorded as a failure and does not abort the run. No-op when the
-   * feature flag is off.
+   * `verify` is recorded as a failure and does not abort the run; cancellation
+   * errors rethrow. No-op when the feature flag is off.
    */
   async verifyKi(
     ki: KnowledgeIndicator,
@@ -38,6 +39,9 @@ export class KiVerificationService {
       try {
         applies = verifier.applies(ki);
       } catch (error) {
+        if (isAbortError(error)) {
+          throw error;
+        }
         results.push(this.toFailure(verifier.id, error, verifierContext));
         continue;
       }
@@ -49,6 +53,9 @@ export class KiVerificationService {
         const outcome = await verifier.verify(ki, verifierContext);
         results.push({ ...outcome, verifier: verifier.id });
       } catch (error) {
+        if (isAbortError(error)) {
+          throw error;
+        }
         results.push(this.toFailure(verifier.id, error, verifierContext));
       }
     }
@@ -58,7 +65,7 @@ export class KiVerificationService {
 
   private toFailure(id: string, error: unknown, { logger }: KiVerifierContext): KiVerifierResult {
     const reason = error instanceof Error ? error.message : String(error);
-    logger.warn(`KI verifier '${id}' threw: ${reason}`);
+    logger.warn(`KI verifier '${id}' threw: ${errorTypeForTelemetry(error)}`);
     return { verifier: id, passed: false, reason };
   }
 }

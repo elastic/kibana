@@ -55,7 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         // Mock prebuilt-rules setup uploads the bundled security_detection_engine package name.
-        `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
+        `--xpack.fleet.internal.skipUploadPackageValidation=true`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         // For testing Import flyout with Endpoint artifacts

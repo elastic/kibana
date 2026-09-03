@@ -12,8 +12,8 @@ import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
-import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import type { CountIndexPatternColumn } from '@kbn/lens-common';
+import { toEsqlRegistry, ofNameCount, countEsqlMeta } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
@@ -22,14 +22,9 @@ import {
   hasOperationType,
   getBooleanParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
-
-const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
-  defaultMessage: 'Count of records',
-});
 
 const supportedTypes = new Set([
   'string',
@@ -42,34 +37,6 @@ const supportedTypes = new Set([
   'date_range',
   'murmur3',
 ]);
-
-function ofName(
-  field: IndexPatternField | undefined,
-  timeShift: string | undefined,
-  timeScale: string | undefined,
-  reducedTimeRange: string | undefined
-) {
-  if (field?.customLabel && field?.type !== 'document') {
-    return field.customLabel;
-  }
-
-  return adjustTimeScaleLabelSuffix(
-    field?.type !== 'document'
-      ? i18n.translate('xpack.lens.indexPattern.valueCountOf', {
-          defaultMessage: 'Count of {name}',
-          values: {
-            name: field?.displayName || '-',
-          },
-        })
-      : countLabel,
-    undefined,
-    timeScale as TimeScaleUnit,
-    undefined,
-    timeShift,
-    undefined,
-    reducedTimeRange
-  );
-}
 
 const SCALE = 'ratio';
 const IS_BUCKETED = false;
@@ -87,7 +54,12 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field, oldColumn.timeShift, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: ofNameCount(
+        field,
+        oldColumn.timeShift,
+        oldColumn.timeShift,
+        oldColumn.reducedTimeRange
+      ),
       sourceField: field.name,
     };
   },
@@ -109,11 +81,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   },
   getDefaultLabel: (column, columns, indexPattern) => {
     const field = indexPattern?.getFieldByName(column.sourceField);
-    return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
+    return ofNameCount(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(
+      label: ofNameCount(
         field,
         previousColumn?.timeShift,
         previousColumn?.timeScale,
@@ -176,21 +148,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  getSerializedFormat: (column, columnId, indexPattern) => {
-    const field = indexPattern?.getFieldByName(column.sourceField);
-    return field?.format ?? { id: 'number' };
-  },
-  toESQL: (column, _columnId, indexPattern) => {
-    if (column.params?.emptyAsNull === false || column.timeShift) return;
-
-    const field = indexPattern.getFieldByName(column.sourceField);
-    if (!field || field?.type === 'document') {
-      return { template: 'COUNT(*)' };
-    }
-    return {
-      template: `COUNT(${esql.col(field.name)})`,
-    };
-  },
+  ...countEsqlMeta,
+  toESQL: toEsqlRegistry[COUNT_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {
@@ -234,8 +193,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     );
   },
   timeScalingMode: 'optional',
-  filterable: true,
-  canReduceTimeRange: true,
   quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
     defaultMessage: `
 The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.
