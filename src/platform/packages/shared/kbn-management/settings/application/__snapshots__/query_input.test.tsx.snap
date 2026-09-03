@@ -49,17 +49,19 @@ exports[`Search should render normally 1`] = `
     >
       <div
         class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+        data-display="regular"
+        data-dividers="true"
       >
         <div
           class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiFilterButton__wrapper css-xcxo9u-wrapper"
+            class="euiFilterButton__wrapper css-lcbovg-wrapper-hasDividers"
           >
             <button
               aria-expanded="false"
               aria-label="Category Selection"
-              class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-default"
+              class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton"
               type="button"
             >
               <span
