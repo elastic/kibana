@@ -28,6 +28,12 @@ const ESQL_RESPONSE_DELAY_MS = 1_000;
 const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOINT);
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
+  // Every test here drives several tabs through full data fetches, and creating a
+  // data view adds an index-sources lookup on top, so these do far more work than
+  // the default budget allows on a loaded CI worker. Same allowance as
+  // `sharing.spec.ts`.
+  spaceTest.setTimeout(90_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -138,12 +144,6 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
   // TODO should be removed/modified after empty canvas is implemented #255686
   spaceTest('should be able to complete all quickly opened tabs', async ({ page, pageObjects }) => {
     const { discover, unifiedTabs } = pageObjects;
-
-    // Eight tabs each run a full fetch, so this test does far more work than
-    // the default budget allows on a loaded CI worker: the burst alone takes
-    // ~28s there, before the per-tab walk starts. Same allowance as
-    // `sharing.spec.ts`.
-    spaceTest.setTimeout(90_000);
 
     // Each new tab clones the current one and refetches, so holding back the
     // start of every search keeps a fetch in flight whenever the next tab
