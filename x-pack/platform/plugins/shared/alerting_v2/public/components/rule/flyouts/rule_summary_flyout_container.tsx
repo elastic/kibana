@@ -17,6 +17,7 @@ import { UserCapabilities } from '../../../services/user_capabilities';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { DeleteConfirmationModal } from '../modals/delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../modals/update_api_key_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../modals/change_history';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
 import { LoadingFlyout } from '../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
@@ -38,6 +39,7 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   if (isLoading) {
     return <LoadingFlyout onClose={onClose} />;
@@ -72,7 +74,9 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
         onToggleEnabled={(r) => toggleRuleEnabled({ id: r.id, enabled: !r.enabled })}
         onRun={(r) => runRule({ id: r.id })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
+        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
       />
+      {changeHistoryModal}
       {ruleToDelete && (
         <DeleteConfirmationModal
           ruleName={ruleToDelete.metadata.name}
