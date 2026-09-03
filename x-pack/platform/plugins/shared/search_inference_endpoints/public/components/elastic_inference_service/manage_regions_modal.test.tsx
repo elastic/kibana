@@ -105,7 +105,7 @@ describe('ManageRegionsModal', () => {
   });
 
   describe('loading state', () => {
-    it('renders a loading spinner while region policy is fetching', () => {
+    it('disables the custom policy toggle while region policy is fetching', () => {
       mockUseRegionPolicy.mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -121,10 +121,10 @@ describe('ManageRegionsModal', () => {
       );
 
       expect(screen.getByTestId('manageRegionsCustomPolicyToggle')).toBeDisabled();
-      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('manageGeosLoading')).not.toBeInTheDocument();
     });
 
-    it('renders a loading spinner while eis models are fetching', () => {
+    it('disables the custom policy toggle while eis models are fetching', () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -139,12 +139,13 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsCustomPolicyToggle')).toBeDisabled();
+      expect(screen.queryByTestId('manageGeosLoading')).not.toBeInTheDocument();
     });
   });
 
   describe('empty state', () => {
-    it('shows a warning callout when no regions are available on Regions tab', async () => {
+    it('shows the empty message when no regions are available on Regions tab', async () => {
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
       >);
@@ -170,7 +171,7 @@ describe('ManageRegionsModal', () => {
       });
     });
 
-    it('shows a warning callout when no geos are available on Geo tab', async () => {
+    it('shows the empty message when no geos are available on Geo tab', async () => {
       mockGetAvailableGeos.mockReturnValue([]);
       mockUseRegionPolicy.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<
         typeof useRegionPolicy
@@ -345,8 +346,8 @@ describe('ManageRegionsModal', () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneRow-eu')).toBeInTheDocument();
-        expect(screen.getByTestId('geoZoneRow-us')).toBeInTheDocument();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeInTheDocument();
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toBeInTheDocument();
       });
     });
 
@@ -354,8 +355,8 @@ describe('ManageRegionsModal', () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).not.toBeChecked();
-        expect(screen.getByTestId('geoZoneCheckbox-us')).not.toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'false');
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toHaveAttribute('aria-checked', 'false');
       });
     });
 
@@ -373,8 +374,8 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeChecked();
-        expect(screen.getByTestId('geoZoneCheckbox-us')).not.toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'true');
+        expect(screen.getByTestId('geoZoneCheckbox-us')).toHaveAttribute('aria-checked', 'false');
       });
     });
 
@@ -386,11 +387,11 @@ describe('ManageRegionsModal', () => {
       });
 
       // No policy → starts unchecked. Click to check it.
-      expect(screen.getByTestId('geoZoneCheckbox-eu')).not.toBeChecked();
+      expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'false');
       fireEvent.click(screen.getByTestId('geoZoneCheckbox-eu'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeChecked();
+        expect(screen.getByTestId('geoZoneCheckbox-eu')).toHaveAttribute('aria-checked', 'true');
       });
     });
 
@@ -510,8 +511,14 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
-        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
 
@@ -535,8 +542,14 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
-        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+        expect(screen.getByTestId('manageRegionsCheckbox-gcp::europe-west1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
 
@@ -561,12 +574,18 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
     });
   });
@@ -702,11 +721,13 @@ describe('ManageRegionsModal', () => {
       );
 
       toggleCustomPolicyOn();
-      // Default tab is Geo — switch to Regions, expand US zone, check a region so Save is enabled.
       fireEvent.click(screen.getByTestId('manageRegionsLocationTypeRegions'));
       await waitFor(() => {
         // No policy → nothing selected; check us-east-1 so a selection exists.
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
@@ -756,12 +777,18 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         fireEvent.click(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1'));
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).not.toBeChecked();
+        expect(screen.getByTestId('manageRegionsCheckbox-aws::us-east-1')).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
       });
 
       // Click "Save preferences" → opens confirmation modal

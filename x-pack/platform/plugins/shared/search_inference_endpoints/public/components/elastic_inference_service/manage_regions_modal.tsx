@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,13 +16,13 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiSplitPanel,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseEuiTheme } from '@elastic/eui';
 import { regionKey } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
@@ -31,16 +30,17 @@ import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
 import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { RestrictTrafficToggle } from './restrict_traffic_toggle';
 import { LocationTypeSelector } from './location_type_selector';
-import { GeoTabContent } from './geo_tab_content';
-import { RegionsTabContent } from './regions_tab_content';
+import {
+  GEO_LOCATION_COPY,
+  LocationSelectionList,
+  REGIONS_LOCATION_COPY,
+  toGeoSelectableOptions,
+  toRegionSelectableOptions,
+} from './location_selection_list';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
 }
-
-const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
-  min-width: ${euiTheme.base * 45}px;
-`;
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
@@ -81,34 +81,41 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     ? handleCancelDeleteConfirmation
     : handleCancelConfirmation;
 
-  const showTabContent = useCustomPolicy || isLoading;
   const showCallOut = useCustomPolicy && !isCallOutDismissed;
 
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'geo' as const,
-        content: <GeoTabContent isLoading={isLoading} isError={isError} geoTab={geoTab} />,
-      },
-      {
-        id: 'regions' as const,
-        content: (
-          <RegionsTabContent isLoading={isLoading} isError={isError} regionTab={regionTab} />
-        ),
-      },
-    ],
-    [isLoading, isError, geoTab, regionTab]
+  const geoOptions = useMemo(
+    () => toGeoSelectableOptions(geoTab.availableGeos, geoTab.checkedGeos),
+    [geoTab.availableGeos, geoTab.checkedGeos]
+  );
+  const regionOptions = useMemo(
+    () => toRegionSelectableOptions(regionTab.zoneGroups, regionTab.checkedKeys),
+    [regionTab.zoneGroups, regionTab.checkedKeys]
   );
 
-  const selectedTab = useMemo(
-    () => tabs.find((tab) => tab.id === activeTab) ?? tabs[0],
-    [tabs, activeTab]
-  );
+  const locationSelection =
+    activeTab === 'geo'
+      ? {
+        options: geoOptions,
+        total: geoTab.totalGeos,
+        totalSelected: geoTab.totalGeosSelected,
+        allSelected: geoTab.allGeosSelected,
+        onSelectAll: geoTab.onSelectAll,
+        onToggle: geoTab.onToggleGeo,
+        ...GEO_LOCATION_COPY,
+      }
+      : {
+        options: regionOptions,
+        total: regionTab.totalRegions,
+        totalSelected: regionTab.totalSelected,
+        allSelected: regionTab.allSelected,
+        onSelectAll: regionTab.onSelectAll,
+        onToggle: regionTab.onToggleRegion,
+        ...REGIONS_LOCATION_COPY,
+      };
 
   return (
     <>
       <EuiModal
-        css={modalStyles}
         onClose={isAnyConfirmationOpen ? handleAnyCancelConfirmation : onClose}
         aria-labelledby={modalTitleId}
         data-test-subj="manageRegionsModal"
@@ -143,58 +150,70 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
           <EuiText size="s" data-test-subj="manageRegionsDescription">
             <p>
-              {useCustomPolicy ? (
-                <FormattedMessage
-                  id="xpack.searchInferenceEndpoints.manageRegions.descriptionOn"
-                  defaultMessage="Elastic's default policy routes traffic to any available location for best performance. Set a custom policy to restrict it to the geographies or regions you choose."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.searchInferenceEndpoints.manageRegions.descriptionOff"
-                  defaultMessage="Set a custom policy to restrict inference traffic to the geographies or regions you choose."
-                />
-              )}
+              <FormattedMessage
+                id="xpack.searchInferenceEndpoints.manageRegions.descriptionOff"
+                defaultMessage="Restrict inference traffic to the only the geographies or regions you choose. It's recommended to review model availability as not all models are available in all locations."
+              />
             </p>
           </EuiText>
 
           <EuiSpacer size="m" />
-
-          <RestrictTrafficToggle
-            isRestricted={useCustomPolicy}
-            isDisabled={isLoading || isSaving || isDeleting}
-            onChange={setUseCustomPolicy}
-          />
-
-          {showCallOut && <EuiSpacer size="m" />}
-          {showCallOut && (
-            <KbnWarningCallout
-              title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
-                defaultMessage: "Some models aren't available in every region.",
-              })}
-              announceOnMount={false}
-              onDismiss={handleDismissCallOut}
-              dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
-              data-test-subj="manageRegionsCallout"
-              text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
-                defaultMessage:
-                  "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
-              })}
-            />
-          )}
-
-          {showTabContent && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="m" />
-              <LocationTypeSelector
-                activeTab={activeTab}
+          <EuiSplitPanel.Outer
+            hasBorder
+            hasShadow={false}
+            data-test-subj="manageRegionsRestrictPanel"
+          >
+            <EuiSplitPanel.Inner paddingSize="m">
+              <RestrictTrafficToggle
+                isRestricted={useCustomPolicy}
                 isDisabled={isLoading || isSaving || isDeleting}
-                onChange={handleLocationTypeChange}
+                onChange={setUseCustomPolicy}
               />
-              {selectedTab.content}
-            </>
-          )}
+
+              {showCallOut && <EuiSpacer size="m" />}
+              {showCallOut && (
+                <KbnWarningCallout
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.manageRegions.callout.title',
+                    {
+                      defaultMessage:
+                        'Review model availability to verify support for selected regions',
+                    }
+                  )}
+                  announceOnMount={false}
+                  onDismiss={handleDismissCallOut}
+                  dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
+                  size="s"
+                  data-test-subj="manageRegionsCallout"
+                />
+              )}
+            </EuiSplitPanel.Inner>
+            <EuiHorizontalRule margin="none" />
+            <EuiSplitPanel.Inner paddingSize="m" color="subdued">
+              {useCustomPolicy ? (
+                <>
+                  <LocationTypeSelector
+                    activeTab={activeTab}
+                    isDisabled={isLoading || isSaving || isDeleting}
+                    onChange={handleLocationTypeChange}
+                  />
+                  <EuiSpacer size="s" />
+                  <LocationSelectionList
+                    isLoading={isLoading}
+                    isError={isError}
+                    {...locationSelection}
+                  />
+                </>
+              ) : (
+                <EuiText size="s">
+                  <p>
+                    Elastic Inference default policy routes traffic through any available location
+                    for best performance.
+                  </p>
+                </EuiText>
+              )}
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         </EuiModalBody>
 
         <EuiModalFooter>

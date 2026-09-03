@@ -180,8 +180,8 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await test.step('the just-saved geo is pre-selected', async () => {
       await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('eu')).toHaveAttribute('aria-checked', 'true');
+      await expect(eisModels.geoZoneCheckbox('apac')).toHaveAttribute('aria-checked', 'false');
     });
   });
 
@@ -219,9 +219,18 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     });
 
     await test.step('no region checkboxes are checked by default (new policy)', async () => {
-      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::eu-west-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::us-east-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::us-east-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
   });
 
@@ -262,9 +271,9 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     });
 
     await test.step('only eu is checked', async () => {
-      await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
-      await expect(eisModels.geoZoneCheckbox('us')).not.toBeChecked();
+      await expect(eisModels.geoZoneCheckbox('eu')).toHaveAttribute('aria-checked', 'true');
+      await expect(eisModels.geoZoneCheckbox('apac')).toHaveAttribute('aria-checked', 'false');
+      await expect(eisModels.geoZoneCheckbox('us')).toHaveAttribute('aria-checked', 'false');
     });
 
     await test.step('Save is disabled when policy is unchanged', async () => {
@@ -299,9 +308,18 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     });
 
     await test.step('eu-west-1 region is pre-selected', async () => {
-      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).not.toBeChecked();
-      await expect(eisModels.regionCheckbox('aws::us-east-1')).not.toBeChecked();
+      await expect(eisModels.regionCheckbox('aws::eu-west-1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+      await expect(eisModels.regionCheckbox('aws::ap-southeast-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+      await expect(eisModels.regionCheckbox('aws::us-east-1')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
     });
 
     await test.step('Save is disabled when policy is unchanged', async () => {

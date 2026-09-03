@@ -39,60 +39,44 @@ export const LocationTypeSelector: React.FC<LocationTypeSelectorProps> = ({
   isDisabled,
   onChange,
 }) => {
-  const { label, hint } =
+  const { hint } =
     activeTab === 'geo'
       ? {
-          label: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.geo',
-            { defaultMessage: 'Choose location type:' }
-          ),
-          hint: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo',
-            { defaultMessage: 'Switching location type will clear the current selection.' }
-          ),
-        }
-      : {
-          label: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeLabel.regions',
-            { defaultMessage: 'Choose locations:' }
-          ),
-          hint: i18n.translate(
-            'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions',
-            { defaultMessage: 'All regions within the zone will be allowed.' }
-          ),
-        };
+        hint: i18n.translate(
+          'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.geo',
+          { defaultMessage: 'Allows all current and future available regions within the zone.' }
+        ),
+      } : {
+        hint: i18n.translate(
+          'xpack.searchInferenceEndpoints.manageRegions.locationTypeHint.regions',
+          { defaultMessage: 'Only allows the selected regions.' }
+        ),
+      };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
+
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <strong>{label}</strong>
+        <EuiButtonGroup
+          type="single"
+          legend={i18n.translate(
+            'xpack.searchInferenceEndpoints.manageRegions.locationTypeLegend',
+            { defaultMessage: 'Location type' }
+          )}
+          buttonSize="compressed"
+          idSelected={activeTab}
+          options={LOCATION_TYPE_OPTIONS}
+          onChange={(id) => isPolicyMode(id) && onChange(id)}
+          isDisabled={isDisabled}
+          data-test-subj="manageRegionsLocationTypeGroup"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued" data-test-subj="manageRegionsLocationTypeHint">
+          {hint}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              type="single"
-              legend={i18n.translate(
-                'xpack.searchInferenceEndpoints.manageRegions.locationTypeLegend',
-                { defaultMessage: 'Location type' }
-              )}
-              buttonSize="compressed"
-              idSelected={activeTab}
-              options={LOCATION_TYPE_OPTIONS}
-              onChange={(id) => isPolicyMode(id) && onChange(id)}
-              isDisabled={isDisabled}
-              data-test-subj="manageRegionsLocationTypeGroup"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" data-test-subj="manageRegionsLocationTypeHint">
-              {hint}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
     </EuiFlexGroup>
+
   );
 };

@@ -191,28 +191,20 @@ export const useManageRegionsState = (onClose: () => void) => {
     () => ({
       zoneGroups: regionTab.zoneGroups,
       checkedKeys: regionTab.regionSelection.selected,
-      expandedZones: regionTab.expandedZones,
       totalRegions: regionTab.regionSelection.total,
       totalSelected: regionTab.regionSelection.totalSelected,
       allSelected: regionTab.regionSelection.allSelected,
-      isAllExpanded: regionTab.isAllExpanded,
       onSelectAll: regionTab.regionSelection.selectAll,
       onToggleRegion: regionTab.regionSelection.toggle,
-      onToggleExpand: regionTab.handleToggleExpand,
-      onExpandAll: regionTab.handleExpandAll,
     }),
     [
       regionTab.zoneGroups,
       regionTab.regionSelection.selected,
-      regionTab.expandedZones,
       regionTab.regionSelection.total,
       regionTab.regionSelection.totalSelected,
       regionTab.regionSelection.allSelected,
-      regionTab.isAllExpanded,
       regionTab.regionSelection.selectAll,
       regionTab.regionSelection.toggle,
-      regionTab.handleToggleExpand,
-      regionTab.handleExpandAll,
     ]
   );
 
