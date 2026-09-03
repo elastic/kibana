@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -37,7 +36,6 @@ import { performTimelinesInstallation } from '../../logic/perform_timelines_inst
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { PREBUILT_RULES_UPGRADE_BATCH_SIZE } from '../../constants';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
@@ -241,16 +239,12 @@ export const performRuleUpgradeHandler = async (
           },
         };
 
-        const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
-          detectionRulesClient,
-          modifiedPrebuiltRuleAssets,
+        const { results, errors } = await detectionRulesClient.bulkUpgradePrebuiltRules({
+          rules: modifiedPrebuiltRuleAssets,
           changeTracking,
-          logger
-        );
-        ruleErrors.push(...installationErrors);
-        updatedRules.push(
-          ...upgradeResults.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
-        );
+        });
+        ruleErrors.push(...errors);
+        updatedRules.push(...results);
       }
     }
 

@@ -160,7 +160,7 @@ describe.skip('Import rules route', () => {
 
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
-        clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce({ responses: [] });
         clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
           isRulesCustomizationEnabled: true,
         });

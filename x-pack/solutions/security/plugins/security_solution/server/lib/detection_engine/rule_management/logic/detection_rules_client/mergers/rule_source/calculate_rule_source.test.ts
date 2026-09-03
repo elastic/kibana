@@ -36,6 +36,10 @@ const getSampleRule = () => {
 };
 
 describe('calculateRuleSource', () => {
+  beforeEach(() => {
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockReset();
+  });
+
   it('returns an internal rule source when the rule is not prebuilt', async () => {
     const rule = getSampleRule();
     rule.immutable = false;
@@ -68,6 +72,47 @@ describe('calculateRuleSource', () => {
         is_customized: false,
         customized_fields: [],
         has_base_version: true,
+      })
+    );
+  });
+
+  it('uses a prefetched matchingAsset and does not fetch', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      nextRule: rule,
+      currentRule: undefined,
+      matchingAsset: getSampleRuleAsset(),
+    });
+
+    expect(prebuiltRuleAssetClient.fetchAssetsByVersion).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        is_customized: false,
+        has_base_version: true,
+      })
+    );
+  });
+
+  it('skips fetch when matchingAsset is null', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      nextRule: rule,
+      currentRule: undefined,
+      matchingAsset: null,
+    });
+
+    expect(prebuiltRuleAssetClient.fetchAssetsByVersion).not.toHaveBeenCalled();
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        has_base_version: false,
       })
     );
   });
