@@ -7,10 +7,8 @@
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import {
-  EMPTY_TOKENS,
   formatRawDocument,
   identifyFeatures,
-  sumTokens,
   toPreviouslyIdentifiedFeature,
   type InferenceDocument,
   type SearchSimilarFeaturesArguments,
@@ -26,6 +24,10 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import {
+  FEATURE_IDENTIFICATION_AGENT_ID,
+  buildFeatureIdentificationUserMessage,
+} from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -51,6 +53,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -227,10 +230,10 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            inferenceClient,
+            agentBuilderClient,
             evaluators,
             evaluationConnector,
-            logger,
+            inferenceClient,
             executorClient,
             traceEsClient,
             log,
@@ -304,9 +307,6 @@ evaluate.describe(
                   const accumulated = new FeatureAccumulator();
                   const mergeEvents = [];
                   const fingerprintOnlyMergeEvents = [];
-                  // Deduplication identifies once per iteration, so provider
-                  // token counts are summed to match the trace-derived totals.
-                  let tokensUsed = EMPTY_TOKENS;
 
                   for (let i = 0; i < input.iterations; i++) {
                     const sampledHits = await collectSampleDocuments({
@@ -323,18 +323,25 @@ evaluate.describe(
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const { features: identifiedFeatures, tokensUsed: iterationTokens } =
-                      await identifyFeatures({
-                        streamName: input.stream_name,
-                        sampleDocuments,
-                        systemPrompt: featuresPrompt,
-                        inferenceClient,
-                        logger,
-                        signal: new AbortController().signal,
-                        previouslyIdentifiedFeatures,
-                      });
+                    const userMessage = buildFeatureIdentificationUserMessage({
+                      sampleDocuments: JSON.stringify(sampleDocuments),
+                      previouslyIdentifiedFeatures:
+                        previouslyIdentifiedFeatures.length > 0
+                          ? JSON.stringify(previouslyIdentifiedFeatures)
+                          : '',
+                      knownFeatureIds: '',
+                      excludedFeatures: '',
+                    });
 
-                    tokensUsed = sumTokens({ accumulated: tokensUsed, added: iterationTokens });
+                    const converseResult = await agentBuilderClient.converse({
+                      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+                      input: userMessage,
+                    });
+
+                    const { features: identifiedFeatures } = parseFeaturesFromSteps(
+                      converseResult.steps,
+                      input.stream_name
+                    );
 
                     iterations.push({
                       features: identifiedFeatures,
@@ -364,7 +371,6 @@ evaluate.describe(
                     fingerprintOnlyMergeEvents,
                     finalFeatures: accumulated.getAll(),
                     traceId: getCurrentTraceId(),
-                    tokens_used: tokensUsed,
                   };
                 },
               },

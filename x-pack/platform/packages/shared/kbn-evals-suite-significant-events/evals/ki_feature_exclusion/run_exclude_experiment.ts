@@ -6,60 +6,60 @@
  */
 
 import { isDuplicateFeature } from '@kbn/significant-events-schema';
-import {
-  EMPTY_TOKENS,
-  identifyFeatures,
-  sumTokens,
-  type ExcludedFeatureSummary,
-} from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { type ExcludedFeatureSummary } from '@kbn/streams-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { AgentBuilderClient } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  FEATURE_IDENTIFICATION_AGENT_ID,
+  buildFeatureIdentificationUserMessage,
+} from '@kbn/significant-events-plugin/server';
 import { MANAGED_STREAM_NAME } from '../../src/datasets';
 import type { ExcludeExperimentOutput } from '../../src/evaluators/ki_feature_exclusion/evaluators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
+import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
 
 export async function runExcludeExperiment({
   esClient,
   excludeCount,
   followUpRuns,
-  inferenceClient,
-  logger,
+  agentBuilderClient,
+  logger: _logger,
   sampleSize,
   log,
 }: {
   esClient: Client;
   excludeCount: number;
   followUpRuns: number;
-  inferenceClient: BoundInferenceClient;
+  agentBuilderClient: AgentBuilderClient;
   logger: Logger;
   sampleSize: number;
   log: ToolingLog;
 }): Promise<ExcludeExperimentOutput> {
-  const abortController = new AbortController();
-
   const sampleDocuments = await fetchSampleDocuments({
     esClient,
     sampleSize,
     log,
   });
 
-  const { features: initialFeatures, tokensUsed: initialTokens } = await identifyFeatures({
-    streamName: MANAGED_STREAM_NAME,
-    sampleDocuments,
-    systemPrompt: featuresPrompt,
-    inferenceClient,
-    logger,
-    signal: abortController.signal,
+  const initialUserMessage = buildFeatureIdentificationUserMessage({
+    sampleDocuments: JSON.stringify(sampleDocuments),
+    previouslyIdentifiedFeatures: '',
+    knownFeatureIds: '',
+    excludedFeatures: '',
   });
 
-  // The exclusion flow runs identification several times, so provider token
-  // counts have to be summed across every run to be comparable with the
-  // trace-derived totals, which cover the whole task.
-  let tokensUsed = sumTokens({ accumulated: EMPTY_TOKENS, added: initialTokens });
+  const initialResult = await agentBuilderClient.converse({
+    agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+    input: initialUserMessage,
+  });
+
+  const { features: initialFeatures } = parseFeaturesFromSteps(
+    initialResult.steps,
+    MANAGED_STREAM_NAME
+  );
 
   log.info(`Initial identification returned ${initialFeatures.length} features`);
 
@@ -71,7 +71,7 @@ export async function runExcludeExperiment({
       initialFeatures,
       excludedFeatures: [],
       followUpRuns: [],
-      tokens_used: tokensUsed,
+      tokens_used: undefined,
     };
   }
 
@@ -90,21 +90,22 @@ export async function runExcludeExperiment({
   const outputs: ExcludeExperimentOutput['followUpRuns'] = [];
 
   for (let i = 0; i < followUpRuns; i++) {
-    const {
-      features: rawFeatures,
-      ignoredFeatures,
-      tokensUsed: followUpTokens,
-    } = await identifyFeatures({
-      streamName: MANAGED_STREAM_NAME,
-      sampleDocuments,
-      excludedFeatures,
-      systemPrompt: featuresPrompt,
-      inferenceClient,
-      logger,
-      signal: abortController.signal,
+    const followUpUserMessage = buildFeatureIdentificationUserMessage({
+      sampleDocuments: JSON.stringify(sampleDocuments),
+      previouslyIdentifiedFeatures: '',
+      knownFeatureIds: '',
+      excludedFeatures: JSON.stringify(excludedFeatures),
     });
 
-    tokensUsed = sumTokens({ accumulated: tokensUsed, added: followUpTokens });
+    const followUpResult = await agentBuilderClient.converse({
+      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+      input: followUpUserMessage,
+    });
+
+    const { features: rawFeatures, ignoredFeatures } = parseFeaturesFromSteps(
+      followUpResult.steps,
+      MANAGED_STREAM_NAME
+    );
 
     const features = rawFeatures.filter(
       (feature) =>
@@ -125,6 +126,6 @@ export async function runExcludeExperiment({
     initialFeatures,
     excludedFeatures,
     followUpRuns: outputs,
-    tokens_used: tokensUsed,
+    tokens_used: undefined,
   };
 }

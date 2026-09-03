@@ -94,6 +94,7 @@ evaluate.describe(
           async ({
             esClient,
             inferenceClient,
+            agentBuilderClient,
             evaluationConnector,
             evaluators,
             traceEsClient,
@@ -143,7 +144,7 @@ evaluate.describe(
                     esClient,
                     excludeCount: input.exclude_count,
                     followUpRuns: input.follow_up_runs,
-                    inferenceClient,
+                    agentBuilderClient,
                     logger,
                     sampleSize: input.sample_document_count,
                     log,

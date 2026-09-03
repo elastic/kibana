@@ -6,17 +6,12 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
-import type { ToolCall } from '@kbn/inference-common';
 import {
   buildKnownFeatureIds,
   buildTelemetry,
   findSimilarFeatures,
   selectPreviouslyIdentifiedFeatures,
 } from './identify_inferred_features';
-import {
-  buildFeatureSimilarityInferenceTools,
-  MAX_SEARCH_CANDIDATES,
-} from './feature_similarity_search';
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
@@ -199,33 +194,6 @@ describe('findSimilarFeatures', () => {
         },
       })
     ).rejects.toThrow('semantic unavailable');
-  });
-});
-
-describe('buildFeatureSimilarityInferenceTools', () => {
-  it('caps fallback searches at the runtime candidate limit', async () => {
-    const findFeatures = jest.fn().mockResolvedValue({ hits: [] });
-    const { callbacks } = buildFeatureSimilarityInferenceTools({
-      kiClient: { findFeatures },
-      streamName: 'logs.test',
-    });
-    const candidates = Array.from({ length: MAX_SEARCH_CANDIDATES + 1 }, (_, index) => ({
-      candidate_id: `candidate-${index}`,
-      title: `Candidate ${index}`,
-      description: `Candidate ${index} description`,
-      type: 'technology' as const,
-    }));
-    const toolCall: ToolCall = {
-      toolCallId: 'tool-call-1',
-      function: {
-        name: 'search_similar_features',
-        arguments: { candidates },
-      },
-    };
-
-    await callbacks.search_similar_features(toolCall);
-
-    expect(findFeatures).toHaveBeenCalledTimes(MAX_SEARCH_CANDIDATES);
   });
 });
 

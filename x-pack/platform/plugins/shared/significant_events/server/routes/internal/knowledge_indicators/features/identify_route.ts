@@ -12,7 +12,6 @@ import type { InferenceDocument } from '@kbn/streams-ai';
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
@@ -257,15 +256,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
         esClient: scopedClusterClient.asCurrentUser,
         kiClient,
         soClient,
-        inferenceClient: inferenceClient.bindTo({
-          connectorId,
-          metadata: {
-            connectorTelemetry: {
-              pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-            },
-          },
-        }),
+        agentBuilder: server.agentBuilder,
+        request,
         connectorId,
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
@@ -282,11 +274,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
-        // Expose prior Significant Events (read-only search) to feature
-        // extraction when Agent Builder tools are available.
-        ...(server.agentBuilder?.tools
-          ? { agentBuilderTools: server.agentBuilder.tools, request }
-          : {}),
       });
 
       await bootstrapSyncWorkflow({
