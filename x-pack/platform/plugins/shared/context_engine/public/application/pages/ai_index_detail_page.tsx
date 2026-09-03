@@ -67,6 +67,18 @@ export const AiIndexDetailPage = () => {
 
   const isManaged = aiIndex !== undefined && aiIndex.managed;
   const hideEditControls = isLoading || isManaged;
+
+  /**
+   * Automations read from an index's sources, so until there are sources there is nothing for one
+   * to do, and offering to write one only draws attention away from the setup that has to come
+   * first. Automations that already exist keep the panel visible however the index got that way:
+   * hiding them would leave them running with no way to see or remove them.
+   *
+   * Withheld until the index has loaded rather than shown as a skeleton, so an index that is about
+   * to be set up never flashes the step that comes after.
+   */
+  const showAutomations =
+    aiIndex !== undefined && (aiIndex.sources.length > 0 || aiIndex.automations.length > 0);
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -152,13 +164,17 @@ export const AiIndexDetailPage = () => {
             onSaved={refetch}
             isManaged={hideEditControls}
           />
-          <EuiSpacer size="m" />
-          <AutomationsPanel
-            isLoading={isLoading}
-            aiIndex={aiIndex}
-            onSaved={refetch}
-            isManaged={isManaged}
-          />
+          {showAutomations && (
+            <>
+              <EuiSpacer size="m" />
+              <AutomationsPanel
+                isLoading={isLoading}
+                aiIndex={aiIndex}
+                onSaved={refetch}
+                isManaged={isManaged}
+              />
+            </>
+          )}
           <EuiSpacer size="m" />
           <ImprovementsPanel isLoading={isLoading} aiIndex={aiIndex} />
           <EuiSpacer size="m" />

@@ -356,6 +356,33 @@ describe('AiIndexDetailPage', () => {
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
   });
 
+  describe('when the AI index has no sources yet', () => {
+    it('leaves automations out, so setting up sources is the only thing on offer', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+      expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextCreateAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows automations that are already attached, so they can be removed', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({
+        ...aiIndex,
+        sources: [],
+        automations: [{ type: 'workflow', value: 'wf-1' }],
+      });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+    });
+  });
+
   it('shows edit controls once the AI index has loaded', async () => {
     const services = createServices();
     services.http.get.mockResolvedValue(aiIndex);
