@@ -9,7 +9,7 @@
 
 export const PND_MANAGED_WORKFLOW_PLUGIN_ID = 'pnd';
 
-export const PND_WATCH_MANAGEMENT = {
+export const PND_WORKER_MANAGEMENT = {
   enablement: 'restorable',
   lifecycle: 'dynamic',
   versionStrategy: 'auto',

@@ -24,6 +24,7 @@ import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { buildRiskScoreServiceForRequest } from './helpers';
 import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export const riskScorePreviewRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -98,41 +99,54 @@ export const riskScorePreviewRoute = (
           if (v2PreviewEnabled && debug === true) {
             logger.warn('Risk score preview debug mode is unsupported in v2 preview path');
           }
-          const result = v2PreviewEnabled
-            ? await calculateScoresWithESQLV2({
-                afterKeys,
-                filter,
-                identifierType: identifierType as EntityType,
-                index,
-                pageSize,
-                range,
-                runtimeMappings,
-                weights,
-                alertSampleSizePerShard,
-                excludeAlertStatuses,
-                excludeAlertTags,
-                filters,
-                esClient: coreContext.elasticsearch.client.asCurrentUser,
-                logger,
-                crudClient: securityContext.getEntityStoreUpdateClient(),
-                soClient,
-                namespace: securityContext.getSpaceId(),
-              })
-            : await riskScoreService.calculateScores({
-                afterKeys,
-                debug,
-                filter,
-                identifierType: identifierType as EntityType,
-                index,
-                pageSize,
-                range,
-                runtimeMappings,
-                weights,
-                alertSampleSizePerShard,
-                excludeAlertStatuses,
-                excludeAlertTags,
-                filters,
-              });
+          const namespace = securityContext.getSpaceId();
+          const result = await runWithSpan({
+            name: ENTITY_ANALYTICS_SPAN_NAMES.riskScoreOndemandCalculate,
+            namespace,
+            attributes: {
+              'entity_analytics.operation': 'preview',
+              ...(identifierType !== undefined
+                ? { 'entity_analytics.entity_type': identifierType }
+                : {}),
+              'entity_analytics.v2_enabled': v2PreviewEnabled,
+            },
+            cb: () =>
+              v2PreviewEnabled
+                ? calculateScoresWithESQLV2({
+                    afterKeys,
+                    filter,
+                    identifierType: identifierType as EntityType,
+                    index,
+                    pageSize,
+                    range,
+                    runtimeMappings,
+                    weights,
+                    alertSampleSizePerShard,
+                    excludeAlertStatuses,
+                    excludeAlertTags,
+                    filters,
+                    esClient: coreContext.elasticsearch.client.asCurrentUser,
+                    logger,
+                    crudClient: securityContext.getEntityStoreUpdateClient(),
+                    soClient,
+                    namespace,
+                  })
+                : riskScoreService.calculateScores({
+                    afterKeys,
+                    debug,
+                    filter,
+                    identifierType: identifierType as EntityType,
+                    index,
+                    pageSize,
+                    range,
+                    runtimeMappings,
+                    weights,
+                    alertSampleSizePerShard,
+                    excludeAlertStatuses,
+                    excludeAlertTags,
+                    filters,
+                  }),
+          });
 
           securityContext.getAuditLogger()?.log({
             message: 'User triggered custom manual scoring',
