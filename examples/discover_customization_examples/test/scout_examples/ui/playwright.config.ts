@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Unified Field List Examples', () => {
-    loadTestFile(require.resolve('./field_stats'));
-    loadTestFile(require.resolve('./existing_fields'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+  runGlobalSetup: true,
+});

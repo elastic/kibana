@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+export const LOGSTASH_FUNCTIONAL_ARCHIVE =
+  'x-pack/platform/test/fixtures/es_archives/logstash_functional';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Unified Tabs Examples', () => {
-    loadTestFile(require.resolve('./manage_tabs'));
-  });
-}
+/** Includes `A Saved Search`. */
+export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
