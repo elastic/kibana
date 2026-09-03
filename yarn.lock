@@ -7558,6 +7558,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lens-test-helpers@link:src/platform/packages/shared/kbn-lens-test-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/license-api-guard-plugin@link:x-pack/platform/plugins/private/license_api_guard":
   version "0.0.0"
   uid ""
@@ -7751,6 +7755,10 @@
   uid ""
 
 "@kbn/migrator-test-kit@link:src/platform/packages/private/kbn-migrator-test-kit":
+  version "0.0.0"
+  uid ""
+
+"@kbn/mitre-attack-plugin@link:x-pack/solutions/security/plugins/mitre_attack":
   version "0.0.0"
   uid ""
 
