@@ -31,6 +31,7 @@ export class InteractiveSetupPage {
   private readonly passwordInput: Locator;
   private readonly trustCaCertCheckbox: Locator;
   private readonly submitConfigurationButton: Locator;
+  private readonly progressIndicator: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.enrollmentTokenInput = page.testSubj.locator('interactiveSetupEnrollmentTokenInput');
@@ -46,6 +47,7 @@ export class InteractiveSetupPage {
     this.submitConfigurationButton = page.testSubj.locator(
       'interactiveSetupSubmitConfigurationButton'
     );
+    this.progressIndicator = page.testSubj.locator('interactiveSetupProgressIndicator');
   }
 
   /**
@@ -96,17 +98,18 @@ export class InteractiveSetupPage {
   }
 
   /**
-   * Waits for Kibana to leave the wizard. On success interactive setup writes the Elasticsearch
-   * connection to disk and reboots, which takes well over a minute, so the timeout is explicit.
+   * Waits for the wizard to accept a submission and move to its completion screen.
    *
-   * Waits on the wizard's own submit button detaching rather than on a URL change: the FTR suite
-   * this replaced only checked that the URL differed from the initial one, which also passed if
-   * Kibana redirected to an error page.
+   * `app.tsx` keeps every form mounted and toggles them with `hidden`, so no form or button is ever
+   * detached and the submit buttons of two different screens coexist in the DOM. The unambiguous
+   * success signal is the progress indicator, which is only rendered once the app reaches
+   * `page === 'success'`; from there it polls until Kibana is past `preboot`.
+   *
+   * The timeout is explicit because interactive setup writes the Elasticsearch connection to disk
+   * and restarts Kibana, which takes well over a minute.
    */
   async waitForSetupToComplete(timeoutMs: number) {
-    await this.submitConfigurationButton
-      .or(this.submitEnrollmentTokenButton)
-      .waitFor({ state: 'detached', timeout: timeoutMs });
+    await this.progressIndicator.waitFor({ state: 'visible', timeout: timeoutMs });
   }
 
   /** True when the configuration screen is asking for Elasticsearch credentials. */

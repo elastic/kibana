@@ -68,7 +68,7 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
   }, [status.loading, status.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <EuiPanel color="transparent">
+    <EuiPanel color="transparent" data-test-subj="interactiveSetupProgressIndicator">
       <LoadingSteps
         currentStepId={status.value}
         steps={[

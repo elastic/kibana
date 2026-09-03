@@ -13,12 +13,9 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * Interactive setup consumes a one-shot server state: the "happy path" spec configures Kibana,
  * which reboots it out of the `preboot` stage for good. A Playwright retry would re-run that spec
  * against an already-booted Kibana and fail on the `204`, so retries are disabled here — Scout
- * otherwise defaults to 1 retry on CI. `createPlaywrightConfig` does not take `retries`, so it is
- * overridden on the resulting config.
+ * otherwise defaults to 1 retry on CI.
  */
-export default {
-  ...createPlaywrightConfig({
-    testDir: './tests',
-  }),
+export default createPlaywrightConfig({
+  testDir: './tests',
   retries: 0,
-};
+});
