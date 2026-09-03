@@ -61,6 +61,18 @@ steps:
       SERVICE_VERSION: ${SERVICE_VERSION:-""}
       TARGET_ENV: production-noncanary-ds-5
 
+  - label: ':memo: Notify documentation release-notes automation'
+    if: build.env("ENVIRONMENT") == "production-noncanary" && build.env("DEPLOYMENT_SLICES") =~ /(^|.*, *)production-noncanary-ds-5( *,.*|$$)/
+    soft_fail: true
+    trigger: docs-release-notes # https://buildkite.com/elastic/docs-release-notes
+    async: true
+    build:
+      message: '${BUILDKITE_MESSAGE} (triggered by pipeline.tests-production.yaml)'
+      env:
+        SERVICE: kibana
+        SERVICE_VERSION: ${SERVICE_VERSION:-""}
+        DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
+
   - input: 'Cancel bake time step early?'
     if: build.env("ENVIRONMENT") == "production-canary"
     fields:
