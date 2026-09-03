@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-visualizations'
   sourceRoot: src/platform/packages/shared/kbn-lens-common
 dependsOn:
+  - '@kbn/lens-test-helpers'
   - '@kbn/lens-formula-docs'
   - '@kbn/navigation-plugin'
   - '@kbn/expression-xy-plugin'

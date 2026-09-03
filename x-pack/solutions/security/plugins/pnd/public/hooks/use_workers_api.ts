@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@kbn/react-query';
+import { useRef } from 'react';
+import type { IToasts } from '@kbn/core/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, PND_WORKERS_URL, buildWorkerUrl } from '@kbn/pnd-common';
-import type { ListWorkersResponse, WatchWorker } from '@kbn/pnd-common';
+import type {
+  ListWorkersResponse,
+  UpdateWorkerRequestBody,
+  UpdateWorkerResponse,
+  Worker,
+} from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './use_watches_api';
 
@@ -26,54 +35,131 @@ export const useWorkers = () => {
   });
 };
 
-export interface ToggleWorkerVariables {
-  workerId: string;
-  enabled: boolean;
-}
+const WORKER_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
+  'xpack.pnd.workerSettingsConflictErrorMessage',
+  { defaultMessage: 'Worker settings changed; reload and try again' }
+);
+
+const WORKER_SETTINGS_FORBIDDEN_MESSAGE = i18n.translate(
+  'xpack.pnd.workerSettingsForbiddenErrorMessage',
+  { defaultMessage: 'You do not have permission to update this worker' }
+);
+
+const WORKER_UPDATE_ERROR_TITLE = i18n.translate('xpack.pnd.workerUpdateErrorMessage', {
+  defaultMessage: 'Unable to update the worker',
+});
+
+export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void => {
+  const status = isHttpFetchError(error) ? error.response?.status : undefined;
+  if (status === 409) {
+    toasts.addWarning(WORKER_SETTINGS_CONFLICT_MESSAGE);
+    return;
+  }
+  if (status === 403) {
+    toasts.addDanger(WORKER_SETTINGS_FORBIDDEN_MESSAGE);
+    return;
+  }
+  const cause = error instanceof Error ? error : new Error(String(error));
+  toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
+};
+
+const touchesSettings = ({ autonomyLevel }: UpdateWorkerRequestBody): boolean =>
+  autonomyLevel != null;
+
+const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worker => {
+  const enabled = patch.enabled ?? worker.enabled;
+  const autonomy = patch.autonomyLevel ?? worker.settings.autonomy;
+  return {
+    ...worker,
+    enabled,
+    state: worker.state === 'unavailable' ? 'unavailable' : enabled ? 'ok' : 'paused',
+    settings: {
+      ...worker.settings,
+      autonomy,
+    },
+  };
+};
+
+const replaceWorkerInList = (
+  queryClient: QueryClient,
+  queryKey: ReturnType<typeof queryKeys.workers.list>,
+  next: Worker
+): void => {
+  const current = queryClient.getQueryData<ListWorkersResponse>(queryKey);
+  if (!current) {
+    return;
+  }
+  queryClient.setQueryData<ListWorkersResponse>(queryKey, {
+    workers: current.workers.map((worker) => (worker.id === next.id ? next : worker)),
+  });
+};
 
 /**
- * Toggles a worker's global flag. Optimistic so the switch responds immediately.
- *
- * Also invalidates every watch detail, because a watch's Workers table greys out rows whose global
- * flag is off — effective enablement is global AND the per-watch attachment.
+ * Patches one Worker. Bound per mutation so callers pass only the fields that changed.
+ * Optimistic so switches and sliders respond immediately.
  */
-export const useToggleWorker = () => {
+export const useUpdateWorker = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
+  const queryKey = queryKeys.workers.list();
+  const mutationQueue = useRef<Promise<void>>(Promise.resolve());
 
   return useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       workerId,
-      enabled,
-    }: ToggleWorkerVariables): Promise<{
-      worker: WatchWorker;
-    }> =>
-      services.http!.patch<{ worker: WatchWorker }>(buildWorkerUrl(workerId), {
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify({ enabled }),
-      }),
-    onMutate: async ({ workerId, enabled }) => {
-      const queryKey = queryKeys.workers.list();
+      patch,
+    }: {
+      workerId: string;
+      patch: UpdateWorkerRequestBody;
+    }): Promise<UpdateWorkerResponse> => {
+      const execute = async (): Promise<UpdateWorkerResponse> => {
+        const current = queryClient
+          .getQueryData<ListWorkersResponse>(queryKey)
+          ?.workers.find((worker) => worker.id === workerId);
+        const body = touchesSettings(patch)
+          ? { ...patch, settingsRevision: current?.settingsRevision ?? null }
+          : patch;
+        const response = await services.http!.patch<UpdateWorkerResponse>(
+          buildWorkerUrl(workerId),
+          {
+            version: API_VERSIONS.internal.v1,
+            body: JSON.stringify(body),
+          }
+        );
+        // Reconcile inside the queued operation so the next request sees the new revision.
+        replaceWorkerInList(queryClient, queryKey, response.worker);
+        return response;
+      };
+      const operation = mutationQueue.current.then(execute, execute);
+      mutationQueue.current = operation.then(
+        () => undefined,
+        () => undefined
+      );
+      return operation;
+    },
+    onMutate: async ({ workerId, patch }) => {
       await queryClient.cancelQueries({ queryKey });
-
       const previous = queryClient.getQueryData<ListWorkersResponse>(queryKey);
       if (previous) {
         queryClient.setQueryData<ListWorkersResponse>(queryKey, {
           workers: previous.workers.map((worker) =>
-            worker.id === workerId ? { ...worker, enabled } : worker
+            worker.id === workerId ? applyWorkerPatch(worker, patch) : worker
           ),
         });
       }
       return { previous };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(queryKeys.workers.list(), context.previous);
+        queryClient.setQueryData(queryKey, context.previous);
       }
+      notifyWorkerUpdateError(services.notifications!.toasts, error);
+    },
+    onSuccess: (data) => {
+      replaceWorkerInList(queryClient, queryKey, data.worker);
     },
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
+      await queryClient.invalidateQueries({ queryKey });
     },
   });
 };
