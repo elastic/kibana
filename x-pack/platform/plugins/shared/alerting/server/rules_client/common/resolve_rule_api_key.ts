@@ -50,6 +50,17 @@ export const resolveRuleAPIKey = async (
   }
 
   if (isApiKeyAuth) {
+    // Only a *user-created* key may be persisted on the rule, where it is flagged
+    // `apiKeyCreatedByUser` and left alone: the user owns its rotation and revocation. An
+    // internal key belongs to an Elastic service instead (e.g. the key Task Manager grants for a
+    // background task, which it invalidates once that task completes), so a rule holding it would
+    // silently die when the service cleans up — and `apiKeyCreatedByUser` would then block
+    // rotation, invalidation, repair and provisioning alike. Mint a framework-owned key instead,
+    // making such rules indistinguishable from ones created from the UI.
+    if (context.isAuthenticationInternalAPIKey()) {
+      return cloneKey(context, name);
+    }
+
     return {
       createdAPIKey: context.getAuthenticationAPIKey(`${name}-user-created`),
       isAuthTypeApiKey: true,

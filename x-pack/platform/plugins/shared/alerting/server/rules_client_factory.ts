@@ -490,6 +490,18 @@ export class RulesClientFactory {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         return authorizationHeader?.scheme.toLowerCase() === 'apikey';
       },
+      isAuthenticationInternalAPIKey() {
+        if (!securityPluginStart) {
+          return false;
+        }
+        // UIAM's authoritative verdict, reported by the UIAM authentication provider on the
+        // current user: `internal === true` means the key was granted through the internal grant
+        // path, so it belongs to an Elastic service and is invalidated on that service's
+        // schedule. `false` marks a user-created Cloud key, and the flag is absent for session
+        // tokens and for keys managed by Elasticsearch itself — neither of which reaches the
+        // API-key branch in `resolveRuleAPIKey` with a borrowable credential.
+        return securityService.authc.getCurrentUser(request)?.api_key?.internal === true;
+      },
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {

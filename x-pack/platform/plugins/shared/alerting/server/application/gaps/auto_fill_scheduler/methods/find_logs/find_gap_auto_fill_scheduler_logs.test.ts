@@ -122,6 +122,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
       isAuthenticationTypeAPIKey: jest.fn(),
+      isAuthenticationInternalAPIKey: jest.fn(),
       getAuthenticationAPIKey: jest.fn(),
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,

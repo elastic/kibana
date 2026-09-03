@@ -50,6 +50,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const getAuthenticationApiKeyMock = jest.fn();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const isAuthenticationTypeApiKeyMock = jest.fn();
+const isAuthenticationInternalApiKeyMock = jest.fn();
 const kibanaVersion = 'v8.2.0';
 const logger = loggingSystemMock.create().get();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -78,6 +79,7 @@ const rulesClientContext: RulesClientContext = {
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
+  isAuthenticationInternalAPIKey: isAuthenticationInternalApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   isSystemAction: jest.fn(),
