@@ -99654,7 +99654,7 @@ components:
         - type
         - grid
         - config
-      title: Custom content
+      title: Custom panel
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
