@@ -263,6 +263,11 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 
 const ASYNC_DEPLOY_POLICIES_THRESHOLD = 100;
 
+// How long to wait before the deferred secret cleanup on async-deploy paths.
+// The deploy task runs at Date.now() + ~3s (deploy_agent_policies_task.ts). Give enough
+// headroom for the task to write the new .fleet-policies docs before we check references.
+const ASYNC_SECRET_DELETION_DELAY_MS = 5_000;
+
 function computeWillDeployAsync(asyncDeploy: boolean | undefined, policyCount: number): boolean {
   return (asyncDeploy ?? false) || policyCount > ASYNC_DEPLOY_POLICIES_THRESHOLD;
 }
@@ -2464,28 +2469,37 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // without sequencing, secrets can be deleted while old compiled docs still reference them.
     await Promise.all([bumpPromise, removeAssetPromise, installAssetsPromise]);
 
-    // When async, the new .fleet-policies docs are not yet written — skip deletion.
+    // When async, the new .fleet-policies docs are written by a deferred task — delay deletion.
     const willDeployAsync = computeWillDeployAsync(
       options?.asyncDeploy,
       [...associatedPolicyIds].length
     );
 
     if (allSecretsToDelete.length) {
-      if (willDeployAsync) {
-        logger.warn(
-          `[deleteSecretsIfNotReferenced] Agent policy revisions were deployed asynchronously — skipping secret deletion for [${allSecretsToDelete
-            .map((s) => s.id)
-            .join(
-              ', '
-            )}] to avoid removing secrets still referenced by in-flight compiled policies.`
-        );
-      } else {
-        await deleteSecrets({
+      const secretIdsToDelete = allSecretsToDelete.map((s) => s.id);
+      const agentPolicyIdsForDelete = [...associatedPolicyIds];
+
+      const runDelete = () =>
+        deleteSecrets({
           esClient,
           soClient,
-          ids: allSecretsToDelete.map((s) => s.id),
-          agentPolicyIds: [...associatedPolicyIds],
+          ids: secretIdsToDelete,
+          agentPolicyIds: agentPolicyIdsForDelete,
         });
+
+      if (willDeployAsync) {
+        // The new .fleet-policies docs are written by an async deploy task (min ~3s delay).
+        // Defer the deletion check so the task has time to run. findFleetPoliciesUsingSecrets
+        // inside deleteSecretsIfNotReferenced is the real safety gate — if the old compiled
+        // doc is still the latest when we check, deletion will be blocked (leaking the secret
+        // temporarily is acceptable; crashing fleet-server is not).
+        setTimeout(() => {
+          runDelete().catch((e) => {
+            logger.warn(`[bulkUpdate] Deferred secret deletion failed: ${e}`);
+          });
+        }, ASYNC_SECRET_DELETION_DELAY_MS);
+      } else {
+        await runDelete();
       }
     }
 

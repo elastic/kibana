@@ -6361,7 +6361,8 @@ describe('Package policy service', () => {
         mockedSecretsModule.deleteSecretsIfNotReferenced.mockReset();
       });
 
-      it('skips deleteSecretsIfNotReferenced when the bump deployed asynchronously', async () => {
+      it('defers deleteSecretsIfNotReferenced when the bump deployed asynchronously', async () => {
+        jest.useFakeTimers();
         const soClient = createSavedObjectClientMock();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const mockPackagePolicy = createPackagePolicyMock();
@@ -6397,9 +6398,10 @@ describe('Package policy service', () => {
             secretsToDelete: [{ id: 'old-secret' }],
           })
         );
+        mockedSecretsModule.deleteSecretsIfNotReferenced.mockResolvedValue(undefined);
 
-        // asyncDeploy: true means the new compiled policy doc is not yet written —
-        // deleting the secret now could crash fleet-server
+        // asyncDeploy: true — the .fleet-policies doc is written by a deferred task.
+        // bulkUpdate schedules deletion via setTimeout; it must not delete synchronously.
         await packagePolicyService.bulkUpdate(
           soClient,
           esClient,
@@ -6408,6 +6410,14 @@ describe('Package policy service', () => {
         );
 
         expect(mockedSecretsModule.deleteSecretsIfNotReferenced).not.toHaveBeenCalled();
+
+        // After the delay, the deferred deletion fires.
+        await jest.runAllTimersAsync();
+        expect(mockedSecretsModule.deleteSecretsIfNotReferenced).toHaveBeenCalledWith(
+          expect.objectContaining({ ids: ['old-secret'] })
+        );
+
+        jest.useRealTimers();
       });
 
       it('passes agentPolicyIds to deleteSecretsIfNotReferenced so the .fleet-policies check is scoped', async () => {
