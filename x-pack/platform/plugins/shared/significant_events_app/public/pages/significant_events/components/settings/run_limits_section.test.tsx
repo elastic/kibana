@@ -6,113 +6,60 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
-  RunBudgetGroupId,
-  RunBudgetGroupUsage,
+  RunQuotaSettingsUpdate,
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 import {
   useRunQuotas,
-  useRunQuotaStatus,
-  useSkippedRunQuotaInvestigations,
-  useUpdateRunQuotaEnforcement,
   useUpdateRunQuotas,
 } from '../../../../hooks/use_significant_events_run_quotas';
 import { RunLimitsSection } from './run_limits_section';
 
 jest.mock('../../../../hooks/use_significant_events_run_quotas');
-jest.mock('../../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ link: jest.fn().mockReturnValue('#event') }),
-}));
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
-const mockUseRunQuotaStatus = useRunQuotaStatus as jest.MockedFunction<typeof useRunQuotaStatus>;
 const mockUseUpdateRunQuotas = useUpdateRunQuotas as jest.MockedFunction<typeof useUpdateRunQuotas>;
-const mockUseUpdateRunQuotaEnforcement = useUpdateRunQuotaEnforcement as jest.MockedFunction<
-  typeof useUpdateRunQuotaEnforcement
->;
-const mockUseSkippedRunQuotaInvestigations =
-  useSkippedRunQuotaInvestigations as jest.MockedFunction<typeof useSkippedRunQuotaInvestigations>;
 
-const save = jest.fn().mockResolvedValue(undefined);
-const updateEnforcement = jest.fn().mockResolvedValue({ enabled: true });
+const save = jest.fn<Promise<RunQuotasResponse>, [RunQuotaSettingsUpdate]>();
 const refetch = jest.fn();
 
-const group = (
-  groupId: RunBudgetGroupId,
-  overrides: Partial<RunBudgetGroupUsage> = {}
-): RunBudgetGroupUsage => {
-  const limit = overrides.limit ?? { enabled: true, max: 10 };
-  const counted = overrides.counted ?? 0;
-  return {
-    group: groupId,
-    limit,
-    used: overrides.used ?? 0,
-    counted,
-    remaining: limit.enabled ? Math.max(0, limit.max - counted) : null,
-    withinLimitGrantCount: 0,
-    criticalPastLimitGrantCount: 0,
-    totalSkipped: 0,
-    decisionsEvicted: false,
-    ...overrides,
-  };
-};
-
-const quotas = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
-  settings: {
-    timezone: 'UTC',
-    limits: {
-      detection: { enabled: true, max: 100 },
-      investigation: { enabled: true, max: 30 },
-      ki_extraction: { enabled: true, max: 20 },
-      memory: { enabled: false, max: 0 },
-    },
+const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
+  enabled: true,
+  limits: {
+    detection: 100,
+    investigation: 30,
+    ki_extraction: 20,
+  },
+  counts: {
+    detection: 4,
+    investigation: 3,
+    ki_extraction: 2,
   },
   window: {
-    start: '2026-08-31T00:00:00.000Z',
-    resetsAt: '2026-09-01T00:00:00.000Z',
+    start: '2026-09-03T00:00:00.000Z',
+    resetsAt: '2026-09-04T00:00:00.000Z',
     timezone: 'UTC',
   },
-  groups: [
-    group('detection', { limit: { enabled: true, max: 100 } }),
-    group('investigation', { limit: { enabled: true, max: 30 } }),
-    group('ki_extraction', { limit: { enabled: true, max: 20 } }),
-    group('memory', { limit: { enabled: false, max: 0 } }),
-  ],
+  canManage: true,
   ...overrides,
 });
 
-const setup = ({
-  response = quotas(),
-  enabled = true,
-  canManageLimits = true,
-}: {
-  response?: RunQuotasResponse;
-  enabled?: boolean;
-  canManageLimits?: boolean;
-} = {}) => {
+const setQueryResponse = (data: RunQuotasResponse) => {
   mockUseRunQuotas.mockReturnValue({
-    data: response,
+    data,
     isLoading: false,
     isError: false,
     refetch,
   } as unknown as ReturnType<typeof useRunQuotas>);
-  mockUseRunQuotaStatus.mockReturnValue({
-    data: {
-      enabled,
-      canManageLimits,
-    },
-    isLoading: false,
-    isError: false,
-    refetch,
-  } as unknown as ReturnType<typeof useRunQuotaStatus>);
+};
+
+const setup = (data: RunQuotasResponse = response()) => {
+  setQueryResponse(data);
   mockUseUpdateRunQuotas.mockReturnValue({ save, isSaving: false });
-  mockUseUpdateRunQuotaEnforcement.mockReturnValue({
-    updateEnforcement,
-    isUpdating: false,
-  });
+  save.mockResolvedValue(data);
 
   return render(
     <I18nProvider>
@@ -124,74 +71,54 @@ const setup = ({
 describe('RunLimitsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSkippedRunQuotaInvestigations.mockReturnValue({
-      data: {
-        rows: [],
-        totalSkipped: 0,
-        truncated: false,
-        decisionsEvicted: false,
-      },
-      isLoading: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useSkippedRunQuotaInvestigations>);
   });
 
-  it('shows labelled execution and ledger totals, the investigation split, and count-only memory', () => {
-    setup({
-      response: quotas({
-        groups: [
-          group('detection', {
-            used: 84,
-            counted: 80,
-            limit: { enabled: true, max: 100 },
-          }),
-          group('investigation', {
-            used: 34,
-            counted: 31,
-            withinLimitGrantCount: 30,
-            criticalPastLimitGrantCount: 1,
-            limit: { enabled: true, max: 30 },
-          }),
-          group('ki_extraction', { limit: { enabled: true, max: 20 } }),
-          group('memory', { used: 5, limit: { enabled: false, max: 0 } }),
-        ],
-      }),
-    });
-
-    expect(screen.getByTestId('significantEventsRunLimitUsage-detection')).toHaveTextContent(
-      '84 runs today · 80 counted'
+  it('renders exactly three categories and keeps their counts visible while enforcement is off', () => {
+    setup(
+      response({
+        enabled: false,
+        limits: {
+          detection: 100,
+          investigation: 30,
+          ki_extraction: 0,
+        },
+        counts: {
+          detection: 14,
+          investigation: 6,
+          ki_extraction: 25,
+        },
+      })
     );
-    expect(screen.getByTestId('significantEventsRunLimitInvestigationSplit')).toHaveTextContent(
-      '30 regular grants · 1 critical override'
+
+    expect(screen.getAllByTestId(/^significantEventsRunLimitRow-/)).toHaveLength(3);
+    expect(screen.getByText('Discovery')).toBeInTheDocument();
+    expect(screen.getByText('Investigation')).toBeInTheDocument();
+    expect(screen.getByText('Knowledge indicator extraction')).toBeInTheDocument();
+    expect(screen.queryByText('Memory updates')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitCount-detection')).toHaveTextContent(
+      '14 counted scheduled admissions today'
     );
-    expect(screen.getByText('5 runs today')).toBeInTheDocument();
-    expect(screen.queryByTestId('significantEventsRunLimitInput-memory')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitCount-investigation')).toHaveTextContent(
+      '6 counted scheduled admissions today'
+    );
+    expect(screen.getByTestId('significantEventsRunLimitCount-ki_extraction')).toHaveTextContent(
+      '25 counted scheduled admissions today'
+    );
+    expect(screen.getByTestId('significantEventsRunLimitInput-ki_extraction')).toHaveValue(0);
+    expect(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch')).not.toBeChecked();
   });
 
-  it('shows earlier denials without claiming a raised limit is still reached', () => {
-    setup({
-      response: quotas({
-        groups: [
-          group('detection', { limit: { enabled: true, max: 100 } }),
-          group('investigation', {
-            counted: 31,
-            totalSkipped: 23,
-            limit: { enabled: true, max: 60 },
-          }),
-          group('ki_extraction', { limit: { enabled: true, max: 20 } }),
-          group('memory', { limit: { enabled: false, max: 0 } }),
-        ],
-      }),
-    });
+  it('prevents read-only users from editing the switch or limits', () => {
+    setup(response({ canManage: false }));
 
-    expect(screen.queryByText(/Limit reached/)).not.toBeInTheDocument();
-    expect(
-      screen.getByText('Earlier today, the gate denied 23 investigation requests.')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Review')).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch')).toBeDisabled();
+    for (const group of ['detection', 'investigation', 'ki_extraction']) {
+      expect(screen.getByTestId(`significantEventsRunLimitInput-${group}`)).toBeDisabled();
+    }
+    expect(screen.getByText('Deployment-wide privilege required')).toBeInTheDocument();
   });
 
-  it('saves only the dirty group as a patch and models zero as unlimited', async () => {
+  it('saves zero as unlimited and sends only the changed category', async () => {
     setup();
     fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
       target: { value: '0' },
@@ -200,133 +127,196 @@ describe('RunLimitsSection', () => {
 
     await waitFor(() =>
       expect(save).toHaveBeenCalledWith({
-        limits: { detection: { enabled: false, max: 0 } },
+        limits: { detection: 0 },
       })
     );
   });
 
-  it('disables saving while a numeric field is empty mid-edit', () => {
+  it('validates daily limits locally before saving', () => {
     setup();
     fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
       target: { value: '' },
     });
 
+    expect(screen.getByText(/Enter a whole number from 0 to/)).toBeInTheDocument();
     expect(screen.getByTestId('significantEventsSaveRunLimitsButton')).toBeDisabled();
     expect(save).not.toHaveBeenCalled();
   });
 
-  it('warns before lowering a limit below today’s ledger count', async () => {
-    setup({
-      response: quotas({
-        groups: [
-          group('detection', {
-            counted: 84,
-            limit: { enabled: true, max: 100 },
-          }),
-          group('investigation', { limit: { enabled: true, max: 30 } }),
-          group('ki_extraction', { limit: { enabled: true, max: 20 } }),
-          group('memory', { limit: { enabled: false, max: 0 } }),
-        ],
-      }),
-    });
+  it('warns before lowering a finite limit below the current count', async () => {
+    setup(
+      response({
+        counts: {
+          detection: 84,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
     fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
       target: { value: '5' },
     });
     fireEvent.click(screen.getByTestId('significantEventsSaveRunLimitsButton'));
 
-    expect(await screen.findByText('Lower limits below today’s usage?')).toBeInTheDocument();
-    expect(screen.getByText(/Work already admitted will finish/)).toBeInTheDocument();
+    expect(await screen.findByText('Lower limits below today’s count?')).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Save lower limits' }));
 
-    fireEvent.click(screen.getByText('Save lower limits'));
     await waitFor(() =>
       expect(save).toHaveBeenCalledWith({
-        limits: { detection: { enabled: true, max: 5 } },
+        limits: { detection: 5 },
       })
     );
   });
 
-  it('keeps limit rows absent while enforcement is off and enables with edited values', async () => {
-    setup({ enabled: false });
-
-    expect(
-      screen.queryByTestId('significantEventsRunLimitInput-detection')
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('significantEventsEnableRunLimitsButton'));
-    expect(screen.getByText('Enable daily run limits')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
-      target: { value: '75' },
-    });
-    fireEvent.click(
-      within(screen.getByRole('dialog')).getByRole('button', { name: 'Enable run limits' })
-    );
-
-    await waitFor(() =>
-      expect(updateEnforcement).toHaveBeenCalledWith({
-        enabled: true,
-        limits: {
-          detection: { enabled: true, max: 75 },
-          investigation: { enabled: true, max: 30 },
-          ki_extraction: { enabled: true, max: 20 },
+  it('warns when enabling enforcement would immediately deny a category', async () => {
+    setup(
+      response({
+        enabled: false,
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
         },
       })
     );
+    fireEvent.click(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch'));
+    fireEvent.click(screen.getByTestId('significantEventsSaveRunLimitsButton'));
+
+    expect(await screen.findByText('Enable enforcement with reached limits?')).toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Enable and save changes' }));
+
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith({
+        enabled: true,
+      })
+    );
   });
 
-  it('gates editing on the deployment-wide management result', () => {
-    setup({ canManageLimits: false });
+  it('warns before disabling enforcement', async () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toBeInTheDocument();
 
-    expect(screen.getByTestId('significantEventsRunLimitInput-detection')).toBeDisabled();
-    expect(screen.getByText('Deployment-wide privilege required')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('significantEventsRunLimitsEnforcementSwitch'));
+    expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('significantEventsSaveRunLimitsButton'));
+
+    expect(await screen.findByText('Disable daily run limits?')).toBeInTheDocument();
+    expect(save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Disable and save changes' }));
+
+    await waitFor(() =>
+      expect(save).toHaveBeenCalledWith({
+        enabled: false,
+      })
+    );
   });
 
-  it('describes gate denials and space-limited rows in the review flyout', async () => {
-    mockUseSkippedRunQuotaInvestigations.mockReturnValue({
-      data: {
-        rows: [
-          {
-            eventUuid: 'event-uuid',
-            eventId: 'event-id',
-            severity: '60-high',
-            decidedAt: '2026-08-31T10:00:00.000Z',
-          },
-        ],
-        totalSkipped: 23,
-        truncated: true,
-        decisionsEvicted: true,
-      },
-      isLoading: false,
-      isError: false,
-    } as unknown as ReturnType<typeof useSkippedRunQuotaInvestigations>);
-    setup({
-      response: quotas({
-        groups: [
-          group('detection', { limit: { enabled: true, max: 100 } }),
-          group('investigation', {
-            counted: 30,
-            totalSkipped: 23,
-            limit: { enabled: true, max: 30 },
-          }),
-          group('ki_extraction', { limit: { enabled: true, max: 20 } }),
-          group('memory', { limit: { enabled: false, max: 0 } }),
-        ],
-      }),
+  it('explains critical investigation continuation without claiming an exception count', () => {
+    setup(
+      response({
+        counts: {
+          detection: 4,
+          investigation: 45,
+          ki_extraction: 2,
+        },
+      })
+    );
+
+    expect(
+      screen.getByTestId('significantEventsInvestigationCriticalContinuation')
+    ).toHaveTextContent('Critical scheduled investigations continue beyond the daily limit.');
+    expect(screen.queryByText(/critical override/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/critical exception/i)).not.toBeInTheDocument();
+  });
+
+  it('clears the exhaustion banner immediately when a draft raises the reached limit', () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
+      target: { value: '101' },
     });
 
-    fireEvent.click(screen.getByText('Review'));
+    expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
+  });
 
-    expect(await screen.findByTestId('runLimitReviewFlyout')).toHaveTextContent(
-      'limited to the current space'
+  it('shows the UTC reset value supplied by the API window', () => {
+    setup(
+      response({
+        window: {
+          start: '2040-01-02T00:00:00.000Z',
+          resetsAt: '2040-01-03T00:00:00.000Z',
+          timezone: 'UTC',
+        },
+      })
     );
-    expect(screen.getByTestId('runLimitReviewFlyout')).toHaveTextContent(
-      'The gate denied the request'
+
+    expect(screen.getByTestId('significantEventsRunLimitsResetTime')).toHaveTextContent(
+      'The current UTC day resets at 2040-01-03T00:00:00.000Z.'
     );
-    expect(screen.getByTestId('runLimitReviewFlyout')).toHaveTextContent(
-      'Showing the newest 200 rows'
+  });
+
+  it('retains a dirty draft when the query receives a background update', () => {
+    const { rerender } = setup();
+    fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
+      target: { value: '80' },
+    });
+
+    setQueryResponse(
+      response({
+        limits: {
+          detection: 90,
+          investigation: 30,
+          ki_extraction: 20,
+        },
+        counts: {
+          detection: 8,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
     );
-    expect(screen.getByTestId('runLimitReviewFlyout')).toHaveTextContent(
-      'retries can appear more than once'
+    rerender(
+      <I18nProvider>
+        <RunLimitsSection />
+      </I18nProvider>
     );
+
+    expect(screen.getByTestId('significantEventsRunLimitInput-detection')).toHaveValue(80);
+    expect(screen.getByTestId('significantEventsRunLimitCount-detection')).toHaveTextContent(
+      '8 counted scheduled admissions today'
+    );
+  });
+
+  it('retains the draft and shows an actionable error after a failed write', async () => {
+    setup();
+    save.mockRejectedValueOnce(new Error('server unavailable'));
+    fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
+      target: { value: '80' },
+    });
+    fireEvent.click(screen.getByTestId('significantEventsSaveRunLimitsButton'));
+
+    expect(await screen.findByText('Could not save daily run limits')).toBeInTheDocument();
+    expect(screen.getByText(/server unavailable/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitInput-detection')).toHaveValue(80);
   });
 });

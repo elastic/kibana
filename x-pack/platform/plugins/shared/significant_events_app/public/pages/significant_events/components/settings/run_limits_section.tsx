@@ -17,182 +17,184 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  CONTROLLED_RUN_BUDGET_GROUP_IDS,
-  type ControlledRunBudgetGroupId,
-  type RunBudgetGroupId,
-  type RunBudgetGroupUsage,
-  type RunLimit,
-} from '@kbn/significant-events-plugin/common';
+import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import {
   useRunQuotas,
-  useRunQuotaStatus,
-  useUpdateRunQuotaEnforcement,
   useUpdateRunQuotas,
 } from '../../../../hooks/use_significant_events_run_quotas';
-import { EnableRunLimitsModal } from './enable_run_limits_modal';
+import { RunQuotaExhaustionCallout } from '../run_limits_banner';
 import {
-  createRunLimitDraftState,
-  editRunLimitDraft,
-  mergeRunLimitRefresh,
-  toDraft,
-  toRunLimit,
+  buildRunQuotaSettingsUpdate,
+  createRunQuotaDraftState,
+  hasRunQuotaDraftChanges,
+  isFiniteRunLimit,
+  isLowerFiniteLimit,
+  RUN_QUOTA_GROUPS,
   type RunLimitDraft,
-  type RunLimitDraftState,
+  type RunQuotaDraftState,
 } from './run_limit_draft';
-import { MemoryRunLimitRow, RunLimitRow } from './run_limit_row';
-import { SkippedInvestigationsFlyout } from './skipped_investigations_flyout';
+import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
 
-export const RUN_BUDGET_GROUP_LABELS: Record<RunBudgetGroupId, string> = {
-  detection: i18n.translate('xpack.significantEventsApp.settings.runLimits.discoveryRowTitle', {
-    defaultMessage: 'Discovery',
-  }),
-  investigation: i18n.translate(
-    'xpack.significantEventsApp.settings.runLimits.investigationRowTitle',
-    { defaultMessage: 'Investigation' }
-  ),
-  ki_extraction: i18n.translate(
-    'xpack.significantEventsApp.settings.runLimits.knowledgeIndicatorExtractionRowTitle',
-    { defaultMessage: 'Knowledge indicator extraction' }
-  ),
-  memory: i18n.translate('xpack.significantEventsApp.settings.runLimits.memoryUpdatesRowTitle', {
-    defaultMessage: 'Memory updates',
-  }),
-};
+interface SaveWarnings {
+  disabling: boolean;
+  enablingExhaustedGroups: RunQuotaGroup[];
+  loweringGroups: RunQuotaGroup[];
+}
 
-const GROUP_WORK_LABELS: Record<ControlledRunBudgetGroupId, string> = {
-  detection: i18n.translate('xpack.significantEventsApp.settings.runLimits.discoveryWorkDetail', {
-    defaultMessage: 'scheduled discovery work',
-  }),
-  investigation: i18n.translate(
-    'xpack.significantEventsApp.settings.runLimits.investigationWorkDetail',
-    { defaultMessage: 'scheduled investigation work' }
-  ),
-  ki_extraction: i18n.translate(
-    'xpack.significantEventsApp.settings.runLimits.knowledgeIndicatorWorkDetail',
-    { defaultMessage: 'scheduled knowledge indicator extraction work' }
-  ),
-};
-
-const toControlledLimits = (
-  groups: RunBudgetGroupUsage[]
-): Record<ControlledRunBudgetGroupId, RunLimit> =>
-  Object.fromEntries(
-    CONTROLLED_RUN_BUDGET_GROUP_IDS.map((group) => [
-      group,
-      groups.find((candidate) => candidate.group === group)?.limit,
-    ])
-  ) as Record<ControlledRunBudgetGroupId, RunLimit>;
-
-const formatResetTime = (resetsAt: string): string =>
-  i18n.translate('xpack.significantEventsApp.settings.runLimits.resetTimeLabel', {
-    defaultMessage: '{resetTime, date, medium} at {resetTime, time, short}',
-    values: { resetTime: new Date(resetsAt) },
-  });
+const hasSaveWarnings = ({
+  disabling,
+  enablingExhaustedGroups,
+  loweringGroups,
+}: SaveWarnings): boolean =>
+  disabling || enablingExhaustedGroups.length > 0 || loweringGroups.length > 0;
 
 export const RunLimitsSection = () => {
   const quotas = useRunQuotas();
-  const status = useRunQuotaStatus();
   const { save, isSaving } = useUpdateRunQuotas();
-  const { updateEnforcement, isUpdating } = useUpdateRunQuotaEnforcement();
-  const [draftState, setDraftState] = useState<RunLimitDraftState>();
-  const [enableDrafts, setEnableDrafts] =
-    useState<Record<ControlledRunBudgetGroupId, RunLimitDraft>>();
-  const [showDisableConfirmation, setShowDisableConfirmation] = useState(false);
-  const [showLoweringConfirmation, setShowLoweringConfirmation] = useState(false);
-  const [showReview, setShowReview] = useState(false);
-  const disableModalTitleId = useGeneratedHtmlId({ prefix: 'disableRunLimitsModalTitle' });
-  const loweringModalTitleId = useGeneratedHtmlId({ prefix: 'lowerRunLimitsModalTitle' });
-
-  const controlledLimits = useMemo(
-    () => (quotas.data ? toControlledLimits(quotas.data.groups) : undefined),
-    [quotas.data]
-  );
+  const [draftState, setDraftState] = useState<RunQuotaDraftState>();
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [saveError, setSaveError] = useState<Error>();
+  const confirmationModalTitleId = useGeneratedHtmlId({
+    prefix: 'saveRunLimitsConfirmationModalTitle',
+  });
 
   useEffect(() => {
-    if (!controlledLimits) {
+    if (!quotas.data) {
       return;
     }
     setDraftState((current) =>
-      current
-        ? mergeRunLimitRefresh(current, controlledLimits)
-        : createRunLimitDraftState(controlledLimits)
+      current && hasRunQuotaDraftChanges(current) ? current : createRunQuotaDraftState(quotas.data)
     );
-  }, [controlledLimits]);
+  }, [quotas.data]);
 
-  const dirtyPatch = useMemo(() => {
-    if (!draftState) {
-      return undefined;
-    }
-    const limits = Object.fromEntries(
-      draftState.dirtyGroups.flatMap((group) => {
-        const limit = toRunLimit(draftState.drafts[group]);
-        return limit ? [[group, limit]] : [];
-      })
-    ) as Partial<Record<ControlledRunBudgetGroupId, RunLimit>>;
-    return Object.keys(limits).length === draftState.dirtyGroups.length ? limits : undefined;
-  }, [draftState]);
+  const update = useMemo(
+    () => (draftState ? buildRunQuotaSettingsUpdate(draftState) : undefined),
+    [draftState]
+  );
 
-  const loweringGroups = useMemo(() => {
-    if (!dirtyPatch || !quotas.data) {
-      return [];
+  const warnings = useMemo<SaveWarnings>(() => {
+    if (!draftState || !quotas.data) {
+      return {
+        disabling: false,
+        enablingExhaustedGroups: [],
+        loweringGroups: [],
+      };
     }
-    return CONTROLLED_RUN_BUDGET_GROUP_IDS.filter((group) => {
-      const next = dirtyPatch[group];
-      const usage = quotas.data?.groups.find((candidate) => candidate.group === group);
-      return next?.enabled && usage !== undefined && next.max < usage.counted;
+    const response = quotas.data;
+
+    const enabling =
+      !draftState.saved.enabled && draftState.draft.enabled
+        ? RUN_QUOTA_GROUPS.filter((group) => {
+            const limit = draftState.draft.limits[group];
+            return isFiniteRunLimit(limit) && response.counts[group] >= limit;
+          })
+        : [];
+    const lowering = RUN_QUOTA_GROUPS.filter((group) => {
+      const next = draftState.draft.limits[group];
+      return (
+        next !== draftState.saved.limits[group] &&
+        isLowerFiniteLimit(draftState.saved.limits[group], next) &&
+        response.counts[group] > next
+      );
     });
-  }, [dirtyPatch, quotas.data]);
+
+    return {
+      disabling: draftState.saved.enabled && !draftState.draft.enabled,
+      enablingExhaustedGroups: enabling,
+      loweringGroups: lowering,
+    };
+  }, [draftState, quotas.data]);
 
   const performSave = useCallback(async () => {
-    if (!dirtyPatch || !draftState) {
+    if (!update) {
       return;
     }
-    await save({ limits: dirtyPatch });
-    setDraftState(
-      createRunLimitDraftState({
-        ...draftState.saved,
-        ...dirtyPatch,
-      })
-    );
-    setShowLoweringConfirmation(false);
-  }, [dirtyPatch, draftState, save]);
+
+    setSaveError(undefined);
+    try {
+      const response = await save(update);
+      setDraftState(createRunQuotaDraftState(response));
+      setShowConfirmation(false);
+    } catch (error) {
+      setShowConfirmation(false);
+      setSaveError(error instanceof Error ? error : new Error(String(error)));
+    }
+  }, [save, update]);
 
   const handleSave = useCallback(() => {
-    if (loweringGroups.length > 0) {
-      setShowLoweringConfirmation(true);
+    if (hasSaveWarnings(warnings)) {
+      setShowConfirmation(true);
       return;
     }
     void performSave();
-  }, [loweringGroups.length, performSave]);
+  }, [performSave, warnings]);
 
-  const handleEnable = useCallback(async () => {
-    if (!enableDrafts) {
-      return;
-    }
-    const limits = Object.fromEntries(
-      CONTROLLED_RUN_BUDGET_GROUP_IDS.flatMap((group) => {
-        const limit = toRunLimit(enableDrafts[group]);
-        return limit ? [[group, limit]] : [];
+  const updateEnabledDraft = useCallback((enabled: boolean) => {
+    setSaveError(undefined);
+    setDraftState((current) =>
+      current
+        ? {
+            ...current,
+            draft: {
+              ...current.draft,
+              enabled,
+            },
+          }
+        : current
+    );
+  }, []);
+
+  const updateLimitDraft = useCallback((group: RunQuotaGroup, limit: RunLimitDraft) => {
+    setSaveError(undefined);
+    setDraftState((current) =>
+      current
+        ? {
+            ...current,
+            draft: {
+              ...current.draft,
+              limits: {
+                ...current.draft.limits,
+                [group]: limit,
+              },
+            },
+          }
+        : current
+    );
+  }, []);
+
+  const canManage = quotas.data?.canManage === true;
+  const isDirty = draftState ? hasRunQuotaDraftChanges(draftState) : false;
+  const response = quotas.data;
+
+  const confirmationTitle = warnings.disabling
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.disableConfirmTitle', {
+        defaultMessage: 'Disable daily run limits?',
       })
-    ) as Record<ControlledRunBudgetGroupId, RunLimit>;
-    if (Object.keys(limits).length !== CONTROLLED_RUN_BUDGET_GROUP_IDS.length) {
-      return;
-    }
-    await updateEnforcement({ enabled: true, limits });
-    setEnableDrafts(undefined);
-  }, [enableDrafts, updateEnforcement]);
+    : warnings.enablingExhaustedGroups.length > 0
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableReachedConfirmTitle', {
+        defaultMessage: 'Enable enforcement with reached limits?',
+      })
+    : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmTitle', {
+        defaultMessage: 'Lower limits below today’s count?',
+      });
 
-  const isLoading = quotas.isLoading || status.isLoading;
-  const isError = quotas.isError || status.isError;
-  const canManageLimits = status.data?.canManageLimits === true;
-  const enabled = status.data?.enabled === true;
-  const isBusy = isSaving || isUpdating;
+  const confirmationButtonText = warnings.disabling
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.disableConfirmButtonLabel', {
+        defaultMessage: 'Disable and save changes',
+      })
+    : warnings.enablingExhaustedGroups.length > 0
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.enableConfirmButtonLabel', {
+        defaultMessage: 'Enable and save changes',
+      })
+    : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmButtonLabel', {
+        defaultMessage: 'Save lower limits',
+      });
 
   return (
     <>
@@ -208,45 +210,20 @@ export const RunLimitsSection = () => {
                 </h3>
               </EuiTitle>
             </EuiFlexItem>
-            {!isLoading && !isError && canManageLimits && quotas.data && (
+            {draftState && quotas.data && (
               <EuiFlexItem grow={false}>
-                {enabled ? (
-                  <EuiButtonEmpty
-                    color="danger"
-                    onClick={() => setShowDisableConfirmation(true)}
-                    isDisabled={isBusy}
-                    data-test-subj="significantEventsDisableRunLimitsButton"
-                  >
-                    {i18n.translate(
-                      'xpack.significantEventsApp.settings.runLimits.disableButtonLabel',
-                      {
-                        defaultMessage: 'Disable run limits',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                ) : (
-                  <EuiButton
-                    fill
-                    onClick={() =>
-                      setEnableDrafts(
-                        Object.fromEntries(
-                          CONTROLLED_RUN_BUDGET_GROUP_IDS.map((group) => [
-                            group,
-                            toDraft(toControlledLimits(quotas.data.groups)[group]),
-                          ])
-                        ) as Record<ControlledRunBudgetGroupId, RunLimitDraft>
-                      )
+                <EuiSwitch
+                  data-test-subj="significantEventsRunLimitsEnforcementSwitch"
+                  label={i18n.translate(
+                    'xpack.significantEventsApp.settings.runLimits.enforcementSwitchLabel',
+                    {
+                      defaultMessage: 'Enforce daily limits',
                     }
-                    data-test-subj="significantEventsEnableRunLimitsButton"
-                  >
-                    {i18n.translate(
-                      'xpack.significantEventsApp.settings.runLimits.enableButtonLabel',
-                      {
-                        defaultMessage: 'Enable run limits',
-                      }
-                    )}
-                  </EuiButton>
-                )}
+                  )}
+                  checked={draftState.draft.enabled}
+                  disabled={!canManage || isSaving}
+                  onChange={(event) => updateEnabledDraft(event.target.checked)}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -256,12 +233,14 @@ export const RunLimitsSection = () => {
             <p>
               {i18n.translate('xpack.significantEventsApp.settings.runLimits.sectionDescription', {
                 defaultMessage:
-                  'Daily run limits apply to Significant Events scheduled automation across the deployment and every space. Run limits do not apply to manual runs.',
+                  'These deployment-wide limits apply only to Significant Events scheduled automation. Manual runs are not limited.',
               })}
             </p>
           </EuiText>
-          {isLoading && <EuiLoadingSpinner size="m" />}
-          {isError && (
+
+          {quotas.isLoading && <EuiLoadingSpinner size="m" />}
+
+          {quotas.isError && (
             <EuiCallOut
               announceOnMount
               color="danger"
@@ -273,127 +252,74 @@ export const RunLimitsSection = () => {
                 }
               )}
             >
-              <EuiButton
-                size="s"
-                onClick={() => {
-                  void Promise.all([quotas.refetch(), status.refetch()]);
-                }}
-              >
+              <EuiButton size="s" onClick={() => void quotas.refetch()}>
                 {i18n.translate('xpack.significantEventsApp.settings.runLimits.retryButtonLabel', {
                   defaultMessage: 'Retry',
                 })}
               </EuiButton>
             </EuiCallOut>
           )}
-          {!isLoading && !isError && !enabled && (
+
+          {!quotas.isLoading && !quotas.isError && response && draftState && (
             <>
               <EuiText size="s" color="subdued">
-                <p data-test-subj="significantEventsRunLimitsDisabledDescription">
-                  {i18n.translate(
-                    'xpack.significantEventsApp.settings.runLimits.disabledDescription',
-                    {
-                      defaultMessage:
-                        'Run limits are off. Scheduled automation is not being charged against the daily grant ledger.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-              {!canManageLimits && (
-                <>
-                  <EuiSpacer />
-                  <EuiCallOut
-                    announceOnMount
-                    color="primary"
-                    iconType="lock"
-                    title={i18n.translate(
-                      'xpack.significantEventsApp.settings.runLimits.disabledReadOnlyTitle',
-                      {
-                        defaultMessage: 'Deployment-wide privilege required',
-                      }
-                    )}
-                  >
-                    <p>
-                      {i18n.translate(
-                        'xpack.significantEventsApp.settings.runLimits.disabledReadOnlyDescription',
+                <p data-test-subj="significantEventsRunLimitsEnforcementDescription">
+                  {draftState.draft.enabled
+                    ? i18n.translate(
+                        'xpack.significantEventsApp.settings.runLimits.enabledDescription',
                         {
                           defaultMessage:
-                            'Enabling run limits requires the Streams manage privilege in every space.',
+                            'Enforcement is on. Finite limits can deny new non-critical scheduled admissions after their count reaches the limit.',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.significantEventsApp.settings.runLimits.disabledDescription',
+                        {
+                          defaultMessage:
+                            'Enforcement is off. Successfully recorded scheduled admissions are still counted, but finite limits do not deny new work.',
                         }
                       )}
-                    </p>
-                  </EuiCallOut>
-                </>
-              )}
-            </>
-          )}
-          {!isLoading && !isError && enabled && quotas.data && draftState && (
-            <>
+                </p>
+              </EuiText>
+
+              <RunQuotaExhaustionCallout
+                enabled={draftState.draft.enabled}
+                limits={draftState.draft.limits}
+                counts={response.counts}
+              />
+
               <EuiSpacer />
-              {CONTROLLED_RUN_BUDGET_GROUP_IDS.map((group, index) => {
-                const usage = quotas.data.groups.find((candidate) => candidate.group === group);
-                if (!usage) {
-                  return null;
-                }
-                return (
-                  <React.Fragment key={group}>
-                    {index > 0 && <EuiHorizontalRule margin="l" />}
-                    <RunLimitRow
-                      group={group}
-                      usage={usage}
-                      draft={draftState.drafts[group]}
-                      disabled={!canManageLimits || isBusy}
-                      groupLabel={RUN_BUDGET_GROUP_LABELS[group]}
-                      groupWorkLabel={GROUP_WORK_LABELS[group]}
-                      onChange={(draft) =>
-                        setDraftState((current) =>
-                          current ? editRunLimitDraft(current, group, draft) : current
-                        )
-                      }
-                      onReview={() => setShowReview(true)}
-                    />
-                  </React.Fragment>
-                );
-              })}
-              <EuiHorizontalRule margin="l" />
-              {quotas.data.groups
-                .filter(({ group }) => group === 'memory')
-                .map((usage) => (
-                  <MemoryRunLimitRow
-                    key={usage.group}
-                    usage={usage}
-                    groupLabel={RUN_BUDGET_GROUP_LABELS.memory}
+              {RUN_QUOTA_GROUPS.map((group, index) => (
+                <React.Fragment key={group}>
+                  {index > 0 && <EuiHorizontalRule margin="l" />}
+                  <RunLimitRow
+                    group={group}
+                    count={response.counts[group]}
+                    limit={draftState.draft.limits[group]}
+                    enforcementEnabled={draftState.draft.enabled}
+                    disabled={!canManage || isSaving}
+                    onChange={(limit) => updateLimitDraft(group, limit)}
                   />
-                ))}
-              <EuiSpacer />
+                </React.Fragment>
+              ))}
+
+              <EuiHorizontalRule margin="l" />
               <EuiText size="xs" color="subdued">
                 <p data-test-subj="significantEventsRunLimitsResetTime">
                   {i18n.translate(
                     'xpack.significantEventsApp.settings.runLimits.counterResetDescription',
                     {
-                      defaultMessage: 'Counters reset at {resetTime}.',
-                      values: { resetTime: formatResetTime(quotas.data.window.resetsAt) },
+                      defaultMessage: 'The current {timezone} day resets at {resetsAt}.',
+                      values: {
+                        timezone: response.window.timezone,
+                        resetsAt: response.window.resetsAt,
+                      },
                     }
                   )}
                 </p>
               </EuiText>
-              {draftState.conflictingGroups.length > 0 && (
-                <>
-                  <EuiSpacer />
-                  <EuiCallOut
-                    announceOnMount
-                    color="warning"
-                    iconType="warning"
-                    title={i18n.translate(
-                      'xpack.significantEventsApp.settings.runLimits.editConflictDescription',
-                      {
-                        defaultMessage:
-                          'A limit you are editing changed on the server. Cancel your edits to load the latest values before saving.',
-                      }
-                    )}
-                  />
-                </>
-              )}
-              {!canManageLimits && (
+
+              {!canManage && (
                 <>
                   <EuiSpacer />
                   <EuiCallOut
@@ -412,24 +338,61 @@ export const RunLimitsSection = () => {
                         'xpack.significantEventsApp.settings.runLimits.readOnlyDescription',
                         {
                           defaultMessage:
-                            'You can view run limits, but changing them requires the Streams manage privilege in every space.',
+                            'You can view counts and limits, but changing them requires the Streams manage privilege in every space.',
                         }
                       )}
                     </p>
                   </EuiCallOut>
                 </>
               )}
-              {draftState.dirtyGroups.length > 0 && (
+
+              {saveError && (
+                <>
+                  <EuiSpacer />
+                  <EuiCallOut
+                    announceOnMount
+                    color="danger"
+                    iconType="error"
+                    title={i18n.translate(
+                      'xpack.significantEventsApp.settings.runLimits.saveErrorTitle',
+                      {
+                        defaultMessage: 'Could not save daily run limits',
+                      }
+                    )}
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.significantEventsApp.settings.runLimits.saveErrorDescription',
+                        {
+                          defaultMessage:
+                            'Your changes were kept. Review them and try again. Error: {error}',
+                          values: { error: saveError.message },
+                        }
+                      )}
+                    </p>
+                    <EuiButton color="danger" size="s" onClick={handleSave}>
+                      {i18n.translate(
+                        'xpack.significantEventsApp.settings.runLimits.saveRetryButtonLabel',
+                        {
+                          defaultMessage: 'Try again',
+                        }
+                      )}
+                    </EuiButton>
+                  </EuiCallOut>
+                </>
+              )}
+
+              {isDirty && (
                 <>
                   <EuiSpacer />
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        onClick={() =>
-                          controlledLimits &&
-                          setDraftState(createRunLimitDraftState(controlledLimits))
-                        }
-                        isDisabled={isBusy}
+                        onClick={() => {
+                          setDraftState(createRunQuotaDraftState(response));
+                          setSaveError(undefined);
+                        }}
+                        isDisabled={isSaving}
                       >
                         {i18n.translate(
                           'xpack.significantEventsApp.settings.runLimits.cancelButtonLabel',
@@ -444,9 +407,7 @@ export const RunLimitsSection = () => {
                         fill
                         onClick={handleSave}
                         isLoading={isSaving}
-                        isDisabled={
-                          !canManageLimits || !dirtyPatch || draftState.conflictingGroups.length > 0
-                        }
+                        isDisabled={!canManage || !update}
                         data-test-subj="significantEventsSaveRunLimitsButton"
                       >
                         {i18n.translate(
@@ -465,127 +426,97 @@ export const RunLimitsSection = () => {
         </EuiPanel>
       </EuiPanel>
 
-      {enableDrafts && quotas.data && (
-        <EnableRunLimitsModal
-          groups={quotas.data.groups}
-          drafts={enableDrafts}
-          groupLabels={RUN_BUDGET_GROUP_LABELS}
-          isSaving={isUpdating}
-          onChange={(group, draft) =>
-            setEnableDrafts((current) => (current ? { ...current, [group]: draft } : current))
-          }
-          onCancel={() => setEnableDrafts(undefined)}
-          onConfirm={() => void handleEnable()}
-        />
-      )}
-
-      {showDisableConfirmation && (
+      {showConfirmation && draftState && response && (
         <EuiConfirmModal
-          aria-labelledby={disableModalTitleId}
-          titleProps={{ id: disableModalTitleId }}
-          title={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.disableConfirmTitle',
-            {
-              defaultMessage: 'Disable daily run limits?',
-            }
-          )}
-          onCancel={() => setShowDisableConfirmation(false)}
-          onConfirm={() => {
-            void updateEnforcement({ enabled: false }).then(() =>
-              setShowDisableConfirmation(false)
-            );
-          }}
-          cancelButtonText={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.disableCancelButtonLabel',
-            {
-              defaultMessage: 'Keep limits enabled',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.disableConfirmButtonLabel',
-            {
-              defaultMessage: 'Disable run limits',
-            }
-          )}
-          buttonColor="danger"
-        >
-          <p>
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.runLimits.disableConfirmDescription',
-              {
-                defaultMessage:
-                  'New gate requests will stop using the limits. A gate request that already read the previous setting can still finish later, and work fails open if a gate is unavailable. The daily ledger is retained.',
-              }
-            )}
-          </p>
-        </EuiConfirmModal>
-      )}
-
-      {showLoweringConfirmation && quotas.data && dirtyPatch && (
-        <EuiConfirmModal
-          aria-labelledby={loweringModalTitleId}
-          titleProps={{ id: loweringModalTitleId }}
-          title={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.loweringConfirmTitle',
-            {
-              defaultMessage: 'Lower limits below today’s usage?',
-            }
-          )}
-          onCancel={() => setShowLoweringConfirmation(false)}
+          aria-labelledby={confirmationModalTitleId}
+          data-test-subj="significantEventsRunLimitsConfirmationModal"
+          titleProps={{ id: confirmationModalTitleId }}
+          title={confirmationTitle}
+          onCancel={() => setShowConfirmation(false)}
           onConfirm={() => void performSave()}
           cancelButtonText={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.loweringCancelButtonLabel',
+            'xpack.significantEventsApp.settings.runLimits.confirmCancelButtonLabel',
             {
               defaultMessage: 'Keep editing',
             }
           )}
-          confirmButtonText={i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.loweringConfirmButtonLabel',
-            {
-              defaultMessage: 'Save lower limits',
-            }
-          )}
-          buttonColor="warning"
+          confirmButtonText={confirmationButtonText}
+          buttonColor={warnings.disabling ? 'danger' : 'warning'}
         >
-          {loweringGroups.map((group) => {
-            const usage = quotas.data?.groups.find((candidate) => candidate.group === group);
-            const limit = dirtyPatch[group];
-            return usage && limit?.enabled ? (
+          {warnings.disabling && (
+            <p>
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.runLimits.disableConfirmDescription',
+                {
+                  defaultMessage:
+                    'Finite limits will stop denying new scheduled admissions. Successfully recorded scheduled admissions will continue to be counted.',
+                }
+              )}
+            </p>
+          )}
+          {warnings.enablingExhaustedGroups.length > 0 && (
+            <p>
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.runLimits.enableReachedConfirmDescription',
+                {
+                  defaultMessage:
+                    'Enabling enforcement will immediately allow these reached limits to deny new non-critical scheduled admissions: {groups}. Critical scheduled investigations will continue.',
+                  values: {
+                    groups: i18n.formatList(
+                      'conjunction',
+                      warnings.enablingExhaustedGroups.map((group) => RUN_QUOTA_GROUP_LABELS[group])
+                    ),
+                  },
+                }
+              )}
+            </p>
+          )}
+          {warnings.loweringGroups.map((group) => {
+            const limit = draftState.draft.limits[group];
+            return isFiniteRunLimit(limit) ? (
               <p key={group}>
-                {i18n.translate(
-                  'xpack.significantEventsApp.settings.runLimits.loweringGroupWarningDescription',
-                  {
-                    defaultMessage:
-                      '{group} has counted {counted} runs today. A limit of {limit} denies new {work} until the counter resets ({resetTime}).',
-                    values: {
-                      group: RUN_BUDGET_GROUP_LABELS[group],
-                      counted: usage.counted,
-                      limit: limit.max,
-                      work: GROUP_WORK_LABELS[group],
-                      resetTime: formatResetTime(quotas.data.window.resetsAt),
-                    },
-                  }
-                )}
+                {draftState.draft.enabled
+                  ? i18n.translate(
+                      'xpack.significantEventsApp.settings.runLimits.loweringEnabledGroupWarningDescription',
+                      {
+                        defaultMessage:
+                          '{group} has {count} counted scheduled admissions today. Saving the lower limit of {limit} can deny new scheduled admissions until {resetsAt}.',
+                        values: {
+                          group: RUN_QUOTA_GROUP_LABELS[group],
+                          count: response.counts[group],
+                          limit,
+                          resetsAt: response.window.resetsAt,
+                        },
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.significantEventsApp.settings.runLimits.loweringDisabledGroupWarningDescription',
+                      {
+                        defaultMessage:
+                          '{group} has {count} counted scheduled admissions today. If enforcement is enabled before {resetsAt}, the lower limit of {limit} can immediately deny new scheduled admissions.',
+                        values: {
+                          group: RUN_QUOTA_GROUP_LABELS[group],
+                          count: response.counts[group],
+                          limit,
+                          resetsAt: response.window.resetsAt,
+                        },
+                      }
+                    )}
               </p>
             ) : null;
           })}
-          <p>
-            {i18n.translate(
-              'xpack.significantEventsApp.settings.runLimits.loweringCommonWarningDescription',
-              {
-                defaultMessage:
-                  'Work already admitted will finish, and a gate request that already read the previous limit can finish later. If a gate is unavailable, work fails open and can continue uncounted. Run limits do not apply to manual runs.',
-              }
-            )}
-          </p>
+          {warnings.loweringGroups.includes('investigation') && (
+            <p>
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.runLimits.loweringInvestigationCriticalContinuationDescription',
+                {
+                  defaultMessage:
+                    'Critical scheduled investigations will continue beyond the lower limit.',
+                }
+              )}
+            </p>
+          )}
         </EuiConfirmModal>
-      )}
-
-      {showReview && quotas.data && (
-        <SkippedInvestigationsFlyout
-          date={quotas.data.window.start.slice(0, 10)}
-          onClose={() => setShowReview(false)}
-        />
       )}
     </>
   );

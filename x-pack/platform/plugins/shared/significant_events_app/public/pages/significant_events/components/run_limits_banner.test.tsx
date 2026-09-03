@@ -8,7 +8,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useRunQuotas, useRunQuotaStatus } from '../../../hooks/use_significant_events_run_quotas';
+import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
 import { RunLimitsBanner } from './run_limits_banner';
 
 jest.mock('../../../hooks/use_significant_events_run_quotas');
@@ -17,16 +18,37 @@ jest.mock('../../../hooks/use_significant_events_app_router', () => ({
 }));
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
-const mockUseRunQuotaStatus = useRunQuotaStatus as jest.MockedFunction<typeof useRunQuotaStatus>;
+
+const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
+  enabled: true,
+  limits: {
+    detection: 100,
+    investigation: 30,
+    ki_extraction: 0,
+  },
+  counts: {
+    detection: 100,
+    investigation: 5,
+    ki_extraction: 500,
+  },
+  window: {
+    start: '2026-09-03T00:00:00.000Z',
+    resetsAt: '2026-09-04T00:00:00.000Z',
+    timezone: 'UTC',
+  },
+  canManage: true,
+  ...overrides,
+});
+
+const setResponse = (data: RunQuotasResponse) => {
+  mockUseRunQuotas.mockReturnValue({
+    data,
+  } as ReturnType<typeof useRunQuotas>);
+};
 
 describe('RunLimitsBanner', () => {
-  it('stays absent while enforcement is off', () => {
-    mockUseRunQuotaStatus.mockReturnValue({
-      data: { enabled: false },
-    } as unknown as ReturnType<typeof useRunQuotaStatus>);
-    mockUseRunQuotas.mockReturnValue({
-      data: { groups: [] },
-    } as unknown as ReturnType<typeof useRunQuotas>);
+  it('shows only finite reached limits while enforcement is enabled', () => {
+    setResponse(response());
 
     render(
       <I18nProvider>
@@ -34,64 +56,44 @@ describe('RunLimitsBanner', () => {
       </I18nProvider>
     );
 
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toHaveTextContent(
+      'Discovery: 100 counted scheduled admissions, daily limit 100'
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).not.toHaveTextContent(
+      'Knowledge indicator extraction'
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toHaveTextContent(
+      'Critical scheduled investigations continue'
+    );
+  });
+
+  it('clears when the limit is raised or enforcement is disabled', () => {
+    setResponse(response());
+    const { rerender } = render(
+      <I18nProvider>
+        <RunLimitsBanner />
+      </I18nProvider>
+    );
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toBeInTheDocument();
+
+    setResponse(
+      response({
+        limits: { detection: 101, investigation: 30, ki_extraction: 0 },
+      })
+    );
+    rerender(
+      <I18nProvider>
+        <RunLimitsBanner />
+      </I18nProvider>
+    );
     expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
-  });
 
-  it('uses report numbers, explains manual runs, and offers management to authorized callers', () => {
-    mockUseRunQuotaStatus.mockReturnValue({
-      data: { enabled: true, canManageLimits: true },
-    } as unknown as ReturnType<typeof useRunQuotaStatus>);
-    mockUseRunQuotas.mockReturnValue({
-      data: {
-        groups: [
-          {
-            group: 'detection',
-            limit: { enabled: true, max: 100 },
-            counted: 100,
-            totalSkipped: 0,
-          },
-        ],
-      },
-    } as unknown as ReturnType<typeof useRunQuotas>);
-
-    render(
+    setResponse(response({ enabled: false }));
+    rerender(
       <I18nProvider>
         <RunLimitsBanner />
       </I18nProvider>
     );
-
-    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toHaveTextContent(
-      'Discovery (100 counted of 100)'
-    );
-    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toHaveTextContent(
-      'Run limits do not apply to manual runs'
-    );
-    expect(screen.getByText('Review run limits')).toBeInTheDocument();
-  });
-
-  it('stays absent after a raised limit reopens admission despite earlier denials', () => {
-    mockUseRunQuotaStatus.mockReturnValue({
-      data: { enabled: true, canManageLimits: true },
-    } as unknown as ReturnType<typeof useRunQuotaStatus>);
-    mockUseRunQuotas.mockReturnValue({
-      data: {
-        groups: [
-          {
-            group: 'investigation',
-            limit: { enabled: true, max: 60 },
-            counted: 31,
-            totalSkipped: 23,
-          },
-        ],
-      },
-    } as unknown as ReturnType<typeof useRunQuotas>);
-
-    render(
-      <I18nProvider>
-        <RunLimitsBanner />
-      </I18nProvider>
-    );
-
     expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
   });
 });

@@ -11,212 +11,158 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
-  type ControlledRunBudgetGroupId,
-  type RunBudgetGroupUsage,
-} from '@kbn/significant-events-plugin/common';
-import { toDraftFromInput, toRunLimit, type RunLimitDraft } from './run_limit_draft';
+  isFiniteRunLimit,
+  isValidRunLimitDraft,
+  parseRunLimitDraft,
+  type RunLimitDraft,
+} from './run_limit_draft';
 
-interface LimitInputProps {
-  group: ControlledRunBudgetGroupId;
-  draft: RunLimitDraft;
-  disabled: boolean;
-  onChange: (draft: RunLimitDraft) => void;
-}
-
-export const LimitInput = ({ group, draft, disabled, onChange }: LimitInputProps) => {
-  const invalid = toRunLimit(draft) === undefined;
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.significantEventsApp.settings.runLimits.dailyLimitInputLabel', {
-        defaultMessage: 'Daily limit',
-      })}
-      helpText={i18n.translate(
-        'xpack.significantEventsApp.settings.runLimits.unlimitedInputDescription',
-        {
-          defaultMessage: 'Set 0 for unlimited.',
-        }
-      )}
-      isInvalid={invalid}
-      error={
-        invalid
-          ? i18n.translate(
-              'xpack.significantEventsApp.settings.runLimits.invalidLimitErrorMessage',
-              {
-                defaultMessage: 'Enter 0 or a whole number from {minimum} to {maximum}.',
-                values: { minimum: MIN_RUN_LIMIT, maximum: MAX_RUN_LIMIT },
-              }
-            )
-          : undefined
-      }
-    >
-      <EuiFieldNumber
-        data-test-subj={`significantEventsRunLimitInput-${group}`}
-        value={draft.max}
-        min={0}
-        max={MAX_RUN_LIMIT}
-        step={1}
-        isInvalid={invalid}
-        disabled={disabled}
-        onChange={(event) => onChange(toDraftFromInput(event.target.value))}
-      />
-    </EuiFormRow>
-  );
+export const RUN_QUOTA_GROUP_LABELS: Record<RunQuotaGroup, string> = {
+  detection: i18n.translate('xpack.significantEventsApp.settings.runLimits.discoveryRowTitle', {
+    defaultMessage: 'Discovery',
+  }),
+  investigation: i18n.translate(
+    'xpack.significantEventsApp.settings.runLimits.investigationRowTitle',
+    { defaultMessage: 'Investigation' }
+  ),
+  ki_extraction: i18n.translate(
+    'xpack.significantEventsApp.settings.runLimits.knowledgeIndicatorExtractionRowTitle',
+    { defaultMessage: 'Knowledge indicator extraction' }
+  ),
 };
 
-export const UsageNumbers = ({ usage }: { usage: RunBudgetGroupUsage }) => (
-  <>
-    <EuiText size="s">
-      <p data-test-subj={`significantEventsRunLimitUsage-${usage.group}`}>
-        {i18n.translate('xpack.significantEventsApp.settings.runLimits.usageDescription', {
-          defaultMessage:
-            '{runs, plural, one {# run today} other {# runs today}} · {counted, plural, one {# counted} other {# counted}}',
-          values: { runs: usage.used, counted: usage.counted },
-        })}
-      </p>
-    </EuiText>
-    {usage.group === 'investigation' && (
-      <EuiText size="xs" color="subdued">
-        <p data-test-subj="significantEventsRunLimitInvestigationSplit">
-          {i18n.translate(
-            'xpack.significantEventsApp.settings.runLimits.investigationGrantSplitDescription',
-            {
-              defaultMessage:
-                '{regular, plural, one {# regular grant} other {# regular grants}} · {critical, plural, one {# critical override} other {# critical overrides}}',
-              values: {
-                regular: usage.withinLimitGrantCount,
-                critical: usage.criticalPastLimitGrantCount,
-              },
-            }
-          )}
-        </p>
-      </EuiText>
-    )}
-  </>
-);
-
 interface RunLimitRowProps {
-  group: ControlledRunBudgetGroupId;
-  usage: RunBudgetGroupUsage;
-  draft: RunLimitDraft;
+  group: RunQuotaGroup;
+  count: number;
+  limit: RunLimitDraft;
+  enforcementEnabled: boolean;
   disabled: boolean;
-  groupLabel: string;
-  groupWorkLabel: string;
-  onChange: (draft: RunLimitDraft) => void;
-  onReview: () => void;
+  onChange: (limit: RunLimitDraft) => void;
 }
 
 export const RunLimitRow = ({
   group,
-  usage,
-  draft,
+  count,
+  limit,
+  enforcementEnabled,
   disabled,
-  groupLabel,
-  groupWorkLabel,
   onChange,
-  onReview,
 }: RunLimitRowProps) => {
-  const reached = usage.limit.enabled && usage.counted >= usage.limit.max;
-  const hasEarlierInvestigationDenials =
-    group === 'investigation' && usage.totalSkipped > 0 && !reached;
+  const { euiTheme } = useEuiTheme();
+  const invalid = !isValidRunLimitDraft(limit);
+  const reached = enforcementEnabled && isFiniteRunLimit(limit) && count >= limit;
 
   return (
-    <EuiFlexGroup alignItems="flexStart">
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="l"
+      data-test-subj={`significantEventsRunLimitRow-${group}`}
+    >
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h4>{groupLabel}</h4>
+          <h4>{RUN_QUOTA_GROUP_LABELS[group]}</h4>
         </EuiTitle>
-        <UsageNumbers usage={usage} />
+        <EuiText size="s">
+          <p data-test-subj={`significantEventsRunLimitCount-${group}`}>
+            {i18n.translate('xpack.significantEventsApp.settings.runLimits.countDescription', {
+              defaultMessage:
+                '{count, plural, one {# counted scheduled admission today} other {# counted scheduled admissions today}}',
+              values: { count },
+            })}
+          </p>
+        </EuiText>
+        {group === 'investigation' && (
+          <EuiText size="xs" color="subdued">
+            <p data-test-subj="significantEventsInvestigationCriticalContinuation">
+              {i18n.translate(
+                'xpack.significantEventsApp.settings.runLimits.investigationCriticalContinuationDescription',
+                {
+                  defaultMessage:
+                    'Critical scheduled investigations continue beyond the daily limit.',
+                }
+              )}
+            </p>
+          </EuiText>
+        )}
         {reached && (
           <EuiText size="xs" color="warning">
-            <p>
+            <p data-test-subj={`significantEventsRunLimitReached-${group}`}>
               {group === 'investigation'
                 ? i18n.translate(
                     'xpack.significantEventsApp.settings.runLimits.investigationReachedDescription',
                     {
                       defaultMessage:
-                        'Limit reached: {count, plural, one {# gate denial} other {# gate denials}} today.',
-                      values: { count: usage.totalSkipped },
+                        'The limit is reached. New non-critical scheduled investigations can be denied until the UTC day resets.',
                     }
                   )
                 : i18n.translate(
                     'xpack.significantEventsApp.settings.runLimits.workerReachedDescription',
                     {
                       defaultMessage:
-                        'Limit reached. New {work} is denied until the counter resets.',
-                      values: { work: groupWorkLabel },
+                        'The limit is reached. New scheduled work in this category can be denied until the UTC day resets.',
                     }
-                  )}{' '}
-              {group === 'investigation' && (
-                <EuiLink onClick={onReview}>
-                  {i18n.translate('xpack.significantEventsApp.settings.runLimits.reviewLinkText', {
-                    defaultMessage: 'Review',
-                  })}
-                </EuiLink>
-              )}
-            </p>
-          </EuiText>
-        )}
-        {hasEarlierInvestigationDenials && (
-          <EuiText size="xs" color="subdued">
-            <p>
-              {i18n.translate(
-                'xpack.significantEventsApp.settings.runLimits.earlierInvestigationDenialsDescription',
-                {
-                  defaultMessage:
-                    'Earlier today, the gate denied {count, plural, one {# investigation request} other {# investigation requests}}.',
-                  values: { count: usage.totalSkipped },
-                }
-              )}{' '}
-              <EuiLink onClick={onReview}>
-                {i18n.translate('xpack.significantEventsApp.settings.runLimits.reviewLinkText', {
-                  defaultMessage: 'Review',
-                })}
-              </EuiLink>
+                  )}
             </p>
           </EuiText>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <LimitInput group={group} draft={draft} disabled={disabled} onChange={onChange} />
+      <EuiFlexItem grow={false} css={{ minWidth: `calc(${euiTheme.size.xxl} * 4)` }}>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.significantEventsApp.settings.runLimits.dailyLimitInputLabel',
+            {
+              defaultMessage: 'Daily limit',
+            }
+          )}
+          helpText={i18n.translate(
+            'xpack.significantEventsApp.settings.runLimits.unlimitedInputDescription',
+            {
+              defaultMessage: '0 means unlimited.',
+            }
+          )}
+          isInvalid={invalid}
+          error={
+            invalid
+              ? i18n.translate(
+                  'xpack.significantEventsApp.settings.runLimits.invalidLimitErrorMessage',
+                  {
+                    defaultMessage: 'Enter a whole number from {minimum} to {maximum}.',
+                    values: { minimum: MIN_RUN_LIMIT, maximum: MAX_RUN_LIMIT },
+                  }
+                )
+              : undefined
+          }
+        >
+          <EuiFieldNumber
+            fullWidth
+            aria-label={i18n.translate(
+              'xpack.significantEventsApp.settings.runLimits.dailyLimitInputAriaLabel',
+              {
+                defaultMessage: 'Daily limit for {group}',
+                values: { group: RUN_QUOTA_GROUP_LABELS[group] },
+              }
+            )}
+            data-test-subj={`significantEventsRunLimitInput-${group}`}
+            value={limit}
+            min={MIN_RUN_LIMIT}
+            max={MAX_RUN_LIMIT}
+            step={1}
+            isInvalid={invalid}
+            disabled={disabled}
+            onChange={(event) => onChange(parseRunLimitDraft(event.target.value))}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
-
-export const MemoryRunLimitRow = ({
-  usage,
-  groupLabel,
-}: {
-  usage: RunBudgetGroupUsage;
-  groupLabel: string;
-}) => (
-  <div>
-    <EuiTitle size="xs">
-      <h4>{groupLabel}</h4>
-    </EuiTitle>
-    <EuiText size="s">
-      <p>
-        {i18n.translate('xpack.significantEventsApp.settings.runLimits.memoryUsageDescription', {
-          defaultMessage: '{runs, plural, one {# run today} other {# runs today}}',
-          values: { runs: usage.used },
-        })}
-      </p>
-    </EuiText>
-    <EuiText size="xs" color="subdued">
-      <p>
-        {i18n.translate('xpack.significantEventsApp.settings.runLimits.memoryUncappedDescription', {
-          defaultMessage:
-            'No limit: memory automation is not capped because the same workflows power scheduled and manual updates.',
-        })}
-      </p>
-    </EuiText>
-  </div>
-);

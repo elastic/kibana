@@ -6,66 +6,48 @@
  */
 
 import {
-  createRunLimitDraftState,
-  editRunLimitDraft,
-  mergeRunLimitRefresh,
-  toDraft,
-  toDraftFromInput,
-  toRunLimit,
+  buildRunQuotaSettingsUpdate,
+  createRunQuotaDraftState,
+  isValidRunLimitDraft,
+  parseRunLimitDraft,
 } from './run_limit_draft';
 
-const limits = {
-  detection: { enabled: true, max: 100 } as const,
-  investigation: { enabled: true, max: 30 } as const,
-  ki_extraction: { enabled: false, max: 0 } as const,
+const response = {
+  enabled: false,
+  limits: {
+    detection: 100,
+    investigation: 30,
+    ki_extraction: 20,
+  },
 };
 
-describe('run limit drafts', () => {
-  it('round trips every canonical limit shape', () => {
-    for (const limit of Object.values(limits)) {
-      expect(toRunLimit(toDraft(limit))).toEqual(limit);
-    }
+describe('run quota drafts', () => {
+  it('treats zero as a valid unlimited value and rejects invalid limits', () => {
+    expect(parseRunLimitDraft('0')).toBe(0);
+    expect(isValidRunLimitDraft(0)).toBe(true);
+    expect(isValidRunLimitDraft(10_000)).toBe(true);
+    expect(isValidRunLimitDraft('')).toBe(false);
+    expect(isValidRunLimitDraft(1.5)).toBe(false);
+    expect(isValidRunLimitDraft(-1)).toBe(false);
+    expect(isValidRunLimitDraft(10_001)).toBe(false);
   });
 
-  it('models zero as unlimited and an empty value as an invalid mid-edit state', () => {
-    expect(toDraftFromInput('0')).toEqual({ enabled: false, max: 0 });
-    expect(toRunLimit(toDraftFromInput('0'))).toEqual({ enabled: false, max: 0 });
-    expect(toDraftFromInput('')).toEqual({ enabled: true, max: '' });
-    expect(toRunLimit(toDraftFromInput(''))).toBeUndefined();
-  });
+  it('builds a partial update with only settings changed by the user', () => {
+    const state = createRunQuotaDraftState(response);
+    state.draft.enabled = true;
+    state.draft.limits.investigation = 0;
 
-  it('preserves dirty groups during refresh and updates untouched groups', () => {
-    const dirty = editRunLimitDraft(
-      createRunLimitDraftState(limits),
-      'detection',
-      toDraftFromInput('80')
-    );
-
-    const refreshed = mergeRunLimitRefresh(dirty, {
-      detection: { enabled: true, max: 100 },
-      investigation: { enabled: true, max: 40 },
-      ki_extraction: { enabled: true, max: 20 },
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      enabled: true,
+      limits: { investigation: 0 },
     });
-
-    expect(refreshed.drafts.detection).toEqual({ enabled: true, max: 80 });
-    expect(refreshed.drafts.investigation).toEqual({ enabled: true, max: 40 });
-    expect(refreshed.drafts.ki_extraction).toEqual({ enabled: true, max: 20 });
-    expect(refreshed.conflictingGroups).toEqual([]);
   });
 
-  it('surfaces a server conflict without wiping the local edit', () => {
-    const dirty = editRunLimitDraft(
-      createRunLimitDraftState(limits),
-      'detection',
-      toDraftFromInput('80')
-    );
+  it('does not build an update for unchanged or invalid drafts', () => {
+    expect(buildRunQuotaSettingsUpdate(createRunQuotaDraftState(response))).toBeUndefined();
 
-    const refreshed = mergeRunLimitRefresh(dirty, {
-      ...limits,
-      detection: { enabled: true, max: 90 },
-    });
-
-    expect(refreshed.drafts.detection).toEqual({ enabled: true, max: 80 });
-    expect(refreshed.conflictingGroups).toEqual(['detection']);
+    const state = createRunQuotaDraftState(response);
+    state.draft.limits.detection = '';
+    expect(buildRunQuotaSettingsUpdate(state)).toBeUndefined();
   });
 });
