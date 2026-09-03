@@ -233,9 +233,22 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
         render: (name: string, action: ConnectorActionDef) => (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{name}</strong>
-              </EuiText>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>{name}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                {action.isTool === false && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="default">
+                      {i18n.translate('alertsUIShared.connectorActionSelector.workflowOnly', {
+                        defaultMessage: 'Workflow only',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             {action.description && (
               <EuiFlexItem grow={false}>

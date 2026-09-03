@@ -15,6 +15,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import {
   getConnectorSpec,
   isSelectedActionEnabled,
+  isToolAction,
   type SelectedActions,
 } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
@@ -125,6 +126,20 @@ export const createExecuteConnectorSubActionTool = ({
             message:
               `No connector spec found for type '${connectorType}' (connector '${connectorId}'). ` +
               'This connector type does not support sub-action execution via this tool.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
+    if (!isToolAction(spec, subAction)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],

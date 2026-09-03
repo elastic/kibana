@@ -276,7 +276,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     const result = await tool.handler(
       {
         connectorId: 'conn-123',
-        subAction: 'search',
+        subAction: 'searchMessages',
         params: {},
       },
       mockContext
@@ -288,7 +288,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     ).toContain('Connector execution failed');
     expect(
       ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
-    ).toContain("sub-action 'search'");
+    ).toContain("sub-action 'searchMessages'");
   });
 
   it('returns error result when connector returns error status', async () => {

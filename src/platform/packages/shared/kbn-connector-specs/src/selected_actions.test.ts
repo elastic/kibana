@@ -65,7 +65,6 @@ describe('selected_actions helpers', () => {
       expect(filterActionsBySelection(ACTIONS, undefined).map(([name]) => name)).toEqual([
         'search',
         'send',
-        'approve',
         'noDesc',
         'writeAction',
         'destroyAction',
@@ -76,24 +75,22 @@ describe('selected_actions helpers', () => {
       expect(filterActionsBySelection(ACTIONS, null).map(([name]) => name)).toEqual([
         'search',
         'send',
-        'approve',
         'noDesc',
         'writeAction',
         'destroyAction',
       ]);
     });
 
-    it('returns allowlisted actions in specific mode', () => {
+    it('excludes isTool:false actions even when explicitly listed in specific mode', () => {
       expect(filterActionsBySelection(ACTIONS, ['send', 'approve']).map(([name]) => name)).toEqual([
         'send',
-        'approve',
       ]);
     });
 
     it('can require descriptions', () => {
       expect(
         filterActionsBySelection(ACTIONS, null, { requireDescription: true }).map(([name]) => name)
-      ).toEqual(['search', 'send', 'approve', 'writeAction', 'destroyAction']);
+      ).toEqual(['search', 'send', 'writeAction', 'destroyAction']);
     });
   });
 

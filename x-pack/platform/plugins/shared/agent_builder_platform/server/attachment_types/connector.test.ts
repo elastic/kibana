@@ -172,6 +172,7 @@ describe('connector attachment type', () => {
             },
             internalAction: {
               isTool: false,
+              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
@@ -194,7 +195,7 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain('execute_connector_sub_action');
         expect(representation.value).toContain('searchMessages: Search Slack messages');
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
-        expect(representation.value).toContain('internalAction [DESTROY]: Internal only');
+        expect(representation.value).not.toContain('internalAction');
         expect(representation.value).toContain('Connector ID: connector-123');
         expect(representation.value).toContain('Required JSON shape for tool');
         expect(representation.value).toContain(
@@ -215,18 +216,21 @@ describe('connector attachment type', () => {
           actions: {
             searchMessages: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Search Slack messages',
               input: inputSchema,
               handler: jest.fn(),
             },
             sendMessage: {
               isTool: true,
+              scope: 'read' as const,
               description: 'Send a message to a channel',
               input: inputSchema,
               handler: jest.fn(),
             },
             internalAction: {
               isTool: false,
+              scope: 'read' as const,
               description: 'Internal only',
               input: inputSchema,
               handler: jest.fn(),
@@ -248,7 +252,7 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
-        expect(representation.value).toContain('internalAction [DESTROY]: Internal only');
+        expect(representation.value).not.toContain('internalAction');
         expect(representation.value).not.toContain('searchMessages');
       });
 

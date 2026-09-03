@@ -295,10 +295,10 @@ export const BigQuery: ConnectorSpec = {
     },
 
     executeQuery: {
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
-        'Run any GoogleSQL query in BigQuery from a workflow or direct connector execution. This action is intentionally hidden from agents because it can run DML, DDL, scripts, stored procedures, or expensive queries. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
+        'Run any GoogleSQL query in BigQuery. Unlike runQuery, this accepts DML, DDL, scripts, stored procedures, and expensive queries with no restrictions. HITL recommended before execution — confirm the statement and its potential side-effects with the user before running. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: ExecuteQueryInputSchema,
       handler: async (ctx, input: ExecuteQueryInput) => submitQuery(ctx, input),
     },

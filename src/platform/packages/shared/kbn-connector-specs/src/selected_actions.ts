@@ -52,7 +52,7 @@ export const filterActionsBySelection = <
   selectedActions: SelectedActions,
   options?: { requireDescription?: boolean }
 ): Array<[string, T]> => {
-  const entries = Object.entries(actions);
+  const entries = Object.entries(actions).filter(([, action]) => action.isTool !== false);
   const filtered = isSpecificActionsSelection(selectedActions)
     ? entries.filter(([name]) => selectedActions.includes(name))
     : entries;

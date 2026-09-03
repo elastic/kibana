@@ -17,7 +17,7 @@ import { ConnectorActionSelector } from './connector_action_selector';
 const ACTIONS: ConnectorActionDef[] = Array.from({ length: 12 }, (_, i) => ({
   name: `action${String(i + 1).padStart(2, '0')}`,
   description: `Description ${i + 1}`,
-  isTool: i < 2,
+  isTool: true,
 }));
 
 function Fixture({
