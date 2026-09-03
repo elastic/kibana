@@ -24,13 +24,14 @@ import type {
   RegistryPackage,
 } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
 import { errors } from '@elastic/elasticsearch';
 
 const mockCloudDefendPackageInfo: Installation = {
   verification_status: 'verified',
   installed_kibana: [],
-  installed_kibana_space_id: 'default',
+  installed_kibana_space_id: DEFAULT_SPACE_ID,
   installed_es: [],
   package_assets: [],
   es_index_patterns: { alerts: 'logs-cloud_defend.alerts-*' },
