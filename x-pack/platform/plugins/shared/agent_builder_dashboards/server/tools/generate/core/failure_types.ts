@@ -6,11 +6,10 @@
  */
 
 export const DASHBOARD_OPERATION_FAILURE_TYPES = {
-  addSection: 'add_section',
   addPanels: 'add_panels',
   addControls: 'add_controls',
   editPanels: 'edit_panels',
-  updatePanelLayouts: 'update_panel_layouts',
+  setLayout: 'set_layout',
 } as const;
 
 export type DashboardOperationFailureType =

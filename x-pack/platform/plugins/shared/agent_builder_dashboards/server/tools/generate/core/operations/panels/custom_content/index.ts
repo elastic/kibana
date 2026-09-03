@@ -50,7 +50,7 @@ export const customContentPanelConfigInputSchema = z.object({
     .max(256)
     .optional()
     .describe('(optional) Client reference for this panel, used to place it in a later set_layout.'),
-  grid: panelGridSchema,
+  grid: panelGridSchema.optional(),
   config: customContentPanelConfigSchema.describe('Custom content panel config.'),
 });
 

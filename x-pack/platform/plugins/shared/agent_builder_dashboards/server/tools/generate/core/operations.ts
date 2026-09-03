@@ -21,6 +21,9 @@ import {
   prepareOperationExecution,
   type DashboardOperation,
 } from './operations/registry';
+import { compileLayout, deriveRowsFromGrid } from './layout';
+import type { LayoutWarning } from './layout';
+import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
 
 export { dashboardOperationSchema };
 export type { DashboardOperation };
@@ -54,6 +57,8 @@ export const executeDashboardOperations = async ({
   panelKeys: Map<string, string>;
   normalizeChanges: NormalizePanelChange[];
   normalizeSkipped: NormalizePanelSkipped[];
+  layoutRows: string[][];
+  layoutWarnings: LayoutWarning[];
 }> => {
   let nextDashboardData = structuredClone(
     dashboardData ?? {
@@ -74,13 +79,51 @@ export const executeDashboardOperations = async ({
     panelAuthoringNotes,
   });
 
+  const setLayoutOps = operations.flatMap((operation, operationIndex) =>
+    operation.operation === 'set_layout' ? [{ operation, operationIndex }] : []
+  );
+
+  for (const extra of setLayoutOps.slice(0, -1)) {
+    failures.push({
+      type: DASHBOARD_OPERATION_FAILURE_TYPES.setLayout,
+      identifier: `operations[${extra.operationIndex}]`,
+      error: 'At most one set_layout operation is applied. Extra set_layout operations were ignored.',
+    });
+  }
+
   for (const [operationIndex, operation] of operations.entries()) {
+    if (operation.operation === 'set_layout') {
+      continue;
+    }
     nextDashboardData = await executeOperationHandler({
       dashboardData: nextDashboardData,
       operation,
       operationIndex,
       context,
     });
+  }
+
+  const lastLayout = setLayoutOps.at(-1);
+  if (lastLayout) {
+    nextDashboardData = await executeOperationHandler({
+      dashboardData: nextDashboardData,
+      operation: lastLayout.operation,
+      operationIndex: lastLayout.operationIndex,
+      context,
+    });
+  } else if (context.unspecifiedGridPanelIds.size > 0) {
+    const implicit = compileLayout({
+      dashboard: nextDashboardData,
+      spec: { implicitPanelIds: [...context.unspecifiedGridPanelIds] },
+      panelKeys: context.panelKeys,
+    });
+    nextDashboardData = implicit.dashboard;
+    context.layoutWarnings.push(...implicit.warnings);
+    context.layoutRows = implicit.rows;
+  }
+
+  if (context.layoutRows.length === 0) {
+    context.layoutRows = deriveRowsFromGrid(nextDashboardData).rows;
   }
 
   return {
@@ -91,5 +134,7 @@ export const executeDashboardOperations = async ({
     panelKeys: context.panelKeys,
     normalizeChanges: context.normalizeChanges,
     normalizeSkipped: context.normalizeSkipped,
+    layoutRows: context.layoutRows,
+    layoutWarnings: context.layoutWarnings,
   };
 };

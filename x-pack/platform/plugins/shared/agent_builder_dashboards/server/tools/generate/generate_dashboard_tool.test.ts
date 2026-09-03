@@ -75,6 +75,45 @@ describe('generateDashboardTool', () => {
     expect(parsed.success).toBe(true);
   });
 
+  it('accepts set_layout with auto or rows, but not both or neither', () => {
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'set_layout', auto: true }],
+      }).success
+    ).toBe(true);
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'set_layout', rows: [['kpi']] }],
+      }).success
+    ).toBe(true);
+    expect(tool.schema.safeParse({ operations: [{ operation: 'set_layout' }] }).success).toBe(
+      false
+    );
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'set_layout', auto: true, rows: [['kpi']] }],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects the retired layout operations', () => {
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'add_section', title: 'Overview', grid: { y: 0 } }],
+      }).success
+    ).toBe(false);
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'update_panel_layouts', panels: [] }],
+      }).success
+    ).toBe(false);
+    expect(
+      tool.schema.safeParse({
+        operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'promote' }],
+      }).success
+    ).toBe(false);
+  });
+
   const runHandler = async (operations: Array<{ operation: string } & Record<string, unknown>>) => {
     const attachments = {
       add: jest.fn(),
@@ -107,6 +146,8 @@ describe('generateDashboardTool', () => {
       panelKeys: new Map(),
       normalizeChanges: [],
       normalizeSkipped: [],
+      layoutRows: [],
+      layoutWarnings: [],
     });
 
     await runHandler([{ operation: 'add_panels', panels: [] }]);
@@ -123,6 +164,8 @@ describe('generateDashboardTool', () => {
       panelKeys: new Map(),
       normalizeChanges: [],
       normalizeSkipped: [],
+      layoutRows: [],
+      layoutWarnings: [],
     });
 
     await runHandler([{ operation: 'normalize_panels' }]);
@@ -166,6 +209,8 @@ describe('generateDashboardTool', () => {
       panelKeys: new Map([['requests', 'esql-1']]),
       normalizeChanges: [{ panelId: 'esql-1', id: 'T1' }],
       normalizeSkipped: [{ id: 'md-1', reason: 'not_lens' }],
+      layoutRows: [['esql-1', 'dsl-1'], ['md-1']],
+      layoutWarnings: [{ panelId: 'esql-1', message: 'lone metric/gauge/pie uses default width' }],
     });
 
     const { result } = await runHandler([{ operation: 'normalize_panels' }]);
@@ -188,7 +233,9 @@ describe('generateDashboardTool', () => {
                   source: 'esql',
                   hide_title: true,
                   grid: { x: 0, y: 0, w: 12, h: 5 },
+                  row: 0,
                   authoring_note: undefined,
+                  warnings: ['lone metric/gauge/pie uses default width'],
                 },
                 {
                   id: 'dsl-1',
@@ -196,6 +243,7 @@ describe('generateDashboardTool', () => {
                   chart_type: 'xy',
                   source: 'dsl',
                   grid: { x: 12, y: 0, w: 24, h: 10 },
+                  row: 0,
                   authoring_note: undefined,
                 },
                 {
@@ -204,10 +252,12 @@ describe('generateDashboardTool', () => {
                   chart_type: MARKDOWN_EMBEDDABLE_TYPE,
                   source: 'other',
                   grid: { x: 0, y: 10, w: 48, h: 4 },
+                  row: 1,
                   authoring_note: undefined,
                 },
               ],
             }),
+            rows: [['esql-1', 'dsl-1'], ['md-1']],
             changes: [{ panelId: 'esql-1', id: 'T1' }],
             skipped: [{ id: 'md-1', reason: 'not_lens' }],
           },

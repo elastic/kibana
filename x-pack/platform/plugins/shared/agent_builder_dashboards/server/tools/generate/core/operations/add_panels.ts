@@ -57,6 +57,9 @@ export const addPanelsOperation = defineOperation({
       if (item.key) {
         context.panelKeys.set(item.key, panelId);
       }
+      if (item.grid === undefined) {
+        context.unspecifiedGridPanelIds.add(panelId);
+      }
       if (item.source === 'request') {
         context.touchedRequestPanelData = true;
       }

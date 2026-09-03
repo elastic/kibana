@@ -114,7 +114,7 @@ export const visPanelConfigInputSchema = z.object({
     .max(256)
     .optional()
     .describe('(optional) Client reference for this panel, used to place it in a later set_layout.'),
-  grid: panelGridSchema,
+  grid: panelGridSchema.optional(),
   config: visPanelConfigSchema.describe(
     'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
   ),

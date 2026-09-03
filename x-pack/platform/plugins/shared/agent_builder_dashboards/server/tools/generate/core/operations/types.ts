@@ -12,6 +12,7 @@ import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
+import type { LayoutWarning } from '../layout';
 
 export type NormalizePanelSkipReason =
   | 'not_found'
@@ -50,6 +51,9 @@ export interface OperationExecutionContext {
   normalizeChanges: NormalizePanelChange[];
   normalizeSkipped: NormalizePanelSkipped[];
   touchedRequestPanelData: boolean;
+  unspecifiedGridPanelIds: Set<string>;
+  layoutWarnings: LayoutWarning[];
+  layoutRows: string[][];
 }
 
 export interface OperationHandlerParams<TOperation> {
@@ -63,7 +67,7 @@ type OperationHandler<TOperation> = (
   params: OperationHandlerParams<TOperation>
 ) => DashboardAttachmentData | Promise<DashboardAttachmentData>;
 
-type OperationSchema = z.ZodObject<{ operation: z.ZodLiteral<string> }>;
+type OperationSchema = z.ZodType<{ operation: string }>;
 
 export interface OperationDefinition<
   TSchema extends OperationSchema,

@@ -34,6 +34,7 @@ import {
 } from './core';
 import { getPanelQuerySource, type PanelQuerySource } from './core/lens_config';
 import type { NormalizePanelChange, NormalizePanelSkipped } from './core/operations/types';
+import { deriveRowsFromGrid } from './core/layout';
 import type { PanelFailure } from './core/utils';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -59,6 +60,7 @@ interface DashboardPanelSummary {
   source: PanelQuerySource;
   hide_title?: boolean;
   grid: AttachmentPanel['grid'];
+  row?: number;
   authoring_note?: string;
   warnings?: string[];
 }
@@ -82,6 +84,7 @@ interface GenerateDashboardResultData {
   attachment_id: string;
   version: number;
   dashboard: DashboardSummary;
+  rows?: string[][];
   failures?: PanelFailure[];
   changes?: NormalizePanelChange[];
   skipped?: NormalizePanelSkipped[];
@@ -99,13 +102,17 @@ const findPanelKey = (panelId: string, panelKeys: Map<string, string>): string |
 const summarizePanel = (
   panel: AttachmentPanel,
   authoringNotesByPanelId: Map<string, string>,
-  panelKeys: Map<string, string>
+  panelKeys: Map<string, string>,
+  rowByPanelId: Map<string, number>,
+  warningsByPanelId: Map<string, string[]>
 ): DashboardPanelSummary => {
   const config = panel.config;
   const title = typeof config.title === 'string' ? config.title : undefined;
   const chartType = typeof config.type === 'string' ? config.type : panel.type;
   const hideTitle = typeof config.hide_title === 'boolean' ? config.hide_title : undefined;
   const key = findPanelKey(panel.id, panelKeys);
+  const row = rowByPanelId.get(panel.id);
+  const warnings = warningsByPanelId.get(panel.id);
 
   return {
     id: panel.id,
@@ -115,7 +122,9 @@ const summarizePanel = (
     source: getPanelQuerySource(panel.type, config),
     ...(hideTitle !== undefined ? { hide_title: hideTitle } : {}),
     grid: panel.grid,
+    ...(row !== undefined ? { row } : {}),
     authoring_note: authoringNotesByPanelId.get(panel.id),
+    ...(warnings !== undefined ? { warnings } : {}),
   };
 };
 
@@ -130,32 +139,61 @@ const summarizePanel = (
  * authored in this run, keyed by panel id. Panels that were not authored now
  * (or whose engine returned no note) simply have no `authoring_note`.
  */
+const indexRows = (rows: string[][]): Map<string, number> => {
+  const index = new Map<string, number>();
+  rows.forEach((row, rowIndex) => {
+    for (const panelId of row) {
+      index.set(panelId, rowIndex);
+    }
+  });
+  return index;
+};
+
 const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
   authoringNotesByPanelId: Map<string, string>,
-  panelKeys: Map<string, string>
-): DashboardSummary => ({
-  title: dashboardData.title,
-  description: dashboardData.description,
-  panels: dashboardData.panels.map((widget) => {
-    if (isSection(widget)) {
-      return {
-        id: widget.id,
-        title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
-        panels: widget.panels.map((panel) =>
-          summarizePanel(panel, authoringNotesByPanelId, panelKeys)
-        ),
-      };
-    }
-    return summarizePanel(widget, authoringNotesByPanelId, panelKeys);
-  }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
-});
+  panelKeys: Map<string, string>,
+  layoutRows: string[][],
+  warningsByPanelId: Map<string, string[]>
+): DashboardSummary => {
+  const topRowByPanelId = indexRows(layoutRows);
+
+  return {
+    title: dashboardData.title,
+    description: dashboardData.description,
+    panels: dashboardData.panels.map((widget) => {
+      if (isSection(widget)) {
+        const sectionRows = indexRows(deriveRowsFromGrid({ title: '', panels: widget.panels }).rows);
+        return {
+          id: widget.id,
+          title: widget.title,
+          collapsed: widget.collapsed,
+          grid: widget.grid,
+          panels: widget.panels.map((panel) =>
+            summarizePanel(
+              panel,
+              authoringNotesByPanelId,
+              panelKeys,
+              sectionRows,
+              warningsByPanelId
+            )
+          ),
+        };
+      }
+      return summarizePanel(
+        widget,
+        authoringNotesByPanelId,
+        panelKeys,
+        topRowByPanelId,
+        warningsByPanelId
+      );
+    }),
+    controls: (dashboardData.pinned_panels ?? []).map((control) => {
+      const c = control as { id?: string; type?: string; config?: { title?: string } };
+      return { id: c.id, type: c.type, title: c.config?.title };
+    }),
+  };
+};
 
 /**
  * Kibana dashboard generation tool.
@@ -183,14 +221,13 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
-4. update panel layouts without changing content
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express
-9. normalize existing Lens panels (house-style defects or a full restyle)`,
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens). Use \`key\` to place them later. Omit \`grid\`.
+3. edit existing Lens, Vega, or markdown panel content (\`regenerate_query: true\` only for data edits)
+4. set_layout (rows/sections of panel refs, or \`auto: true\` to repack in place)
+5. remove panels
+6. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+7. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express
+8. normalize existing Lens panels (house-style defects or a full restyle)`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -215,6 +252,8 @@ Use operations[] to:
           panelKeys,
           normalizeChanges,
           normalizeSkipped,
+          layoutRows,
+          layoutWarnings,
         } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
@@ -264,6 +303,16 @@ Use operations[] to:
           (operation) => operation.operation === 'normalize_panels'
         );
 
+        const warningsByPanelId = new Map<string, string[]>();
+        for (const warning of layoutWarnings) {
+          if (!warning.panelId) {
+            continue;
+          }
+          const existing = warningsByPanelId.get(warning.panelId) ?? [];
+          existing.push(warning.message);
+          warningsByPanelId.set(warning.panelId, existing);
+        }
+
         const data: GenerateDashboardResultData = {
           attachment_id: attachment.id,
           version: attachment.current_version ?? 1,
@@ -272,8 +321,11 @@ Use operations[] to:
             new Map(
               panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
             ),
-            panelKeys
+            panelKeys,
+            layoutRows,
+            warningsByPanelId
           ),
+          rows: layoutRows,
           failures: failures.length > 0 ? failures : undefined,
           ...(ranNormalize ? { changes: normalizeChanges, skipped: normalizeSkipped } : {}),
         };

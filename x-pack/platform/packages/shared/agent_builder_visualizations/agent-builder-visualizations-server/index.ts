@@ -17,6 +17,8 @@ export { decompileConfig } from './lens/decompile/decompile_config';
 export { chartIntentSchema } from './lens/intent';
 export type { ChartIntent } from './lens/intent';
 export { probeColumns } from './lens/probe_columns';
+export { chartTypeLayouts } from './lens/chart_type_layouts';
+export type { ChartTypeLayout } from './lens/chart_type_layouts';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';
 export type {
   SelectDefaultTimeRangeParams,

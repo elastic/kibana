@@ -79,18 +79,11 @@ export const addPanelsItemSchema = z.discriminatedUnion('source', [
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
 
-/** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
-export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
-  configPanelInputSchema,
-  z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
-]);
-
 /**
  * A "create a new panel" input — either an already-resolved `source: 'config'`
- * panel or a `source: 'request'` to resolve. The common shape that `add_panels`
- * and `add_section` materialize into panel content.
+ * panel or a `source: 'request'` to resolve.
  */
-export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
+export type NewPanelInput = AddPanelsItemInput;
 
 /** A single panel item accepted by `edit_panels` (targets an existing panel by id). */
 export const editPanelItemSchema = z.discriminatedUnion('source', [

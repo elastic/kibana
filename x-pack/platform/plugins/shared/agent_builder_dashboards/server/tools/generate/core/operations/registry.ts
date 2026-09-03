@@ -9,15 +9,13 @@ import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-comm
 import { z } from '@kbn/zod/v4';
 import { addControlsOperation } from './add_controls';
 import { addPanelsOperation } from './add_panels';
-import { addSectionOperation } from './add_section';
 import { editPanelsOperation } from './edit_panels';
 import { normalizePanelsOperation } from './normalize_panels';
 import { removeControlsOperation } from './remove_controls';
 import { removePanelsOperation } from './remove_panels';
-import { removeSectionOperation } from './remove_section';
+import { setLayoutOperation } from './set_layout';
 import { setMetadataOperation } from './set_metadata';
 import type { OperationExecutionContext } from './types';
-import { updatePanelLayoutsOperation } from './update_panel_layouts';
 import { resolvePanelCreationRequests } from './panel_creation';
 
 const operationDefinitions = [
@@ -25,9 +23,7 @@ const operationDefinitions = [
   addPanelsOperation,
   editPanelsOperation,
   normalizePanelsOperation,
-  updatePanelLayoutsOperation,
-  addSectionOperation,
-  removeSectionOperation,
+  setLayoutOperation,
   removePanelsOperation,
   addControlsOperation,
   removeControlsOperation,
@@ -42,8 +38,16 @@ export const dashboardOperationSchema = z.discriminatedUnion(
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 
+const operationName = (schema: { shape?: { operation?: { value?: string } } }): string => {
+  const value = schema.shape?.operation?.value;
+  if (!value) {
+    throw new Error('Operation schema is missing an operation literal.');
+  }
+  return value;
+};
+
 const operationDefinitionByType = new Map(
-  operationDefinitions.map((definition) => [definition.schema.shape.operation.value, definition])
+  operationDefinitions.map((definition) => [operationName(definition.schema), definition])
 );
 
 interface PrepareOperationExecutionParams {
@@ -79,6 +83,9 @@ export const prepareOperationExecution = async ({
     normalizeChanges: [],
     normalizeSkipped: [],
     touchedRequestPanelData: false,
+    unspecifiedGridPanelIds: new Set(),
+    layoutWarnings: [],
+    layoutRows: [],
   };
 };
 
