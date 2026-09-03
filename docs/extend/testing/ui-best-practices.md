@@ -140,7 +140,7 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 ## Don't select elements by index [dont-select-elements-by-index]
 
-`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, part of [Playwright's recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of failures from clicking by index, and Scout raises the stakes: suites deliberately share a cluster and run without a server restart, so data from an earlier suite shifts the ordering under you.
+`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, part of [Playwright's recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of failures from clicking by index, and Scout raises the stakes: suites [share one Kibana/ES deployment](./parallelism.md) and run without a restart between them, so a saved object or index left behind by an earlier suite adds rows to the list you are indexing into — `.nth(0)` then clicks a row you never created.
 
 `.first()` is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug — scope the locator to a container, or add a `data-test-subj` to the component. If you added it because the collection was not ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that.
 
