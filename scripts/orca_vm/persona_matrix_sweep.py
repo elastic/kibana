@@ -702,10 +702,15 @@ def self_test() -> int:
         # last and both shards gated against one id (154 vs a 140 gate) --
         # every earlier check still passed while the sweep stayed broken.
         _gate_src = inspect.getsource(check_golden)
-        check("gate lookup filters by shard run id",
+        check("gate builds the shard's own execution id",
               'shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)' in _gate_src, True)
-        check("gate lookup uses an execution_id prefix",
-              'metadata.execution_id.keyword' in _gate_src, True)
+        # The field has no usable partial matching: a .keyword prefix and a
+        # match_phrase on the run id both returned 0 docs against golden while
+        # the full id returned 154. Never reintroduce a partial match here.
+        check("gate does not prefix-match execution_id",
+              'prefix": {"metadata.execution_id' not in _gate_src, True)
+        check("sharded gate skips the latest-execution lookup",
+              "if exec_id is None:" in _gate_src, True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
@@ -896,14 +901,20 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     # each writes its own execution_id. A "latest for this model" lookup then
     # returns whichever shard finished last, and every shard gates against that
     # one id -- shard 2/2 counted shard 1/2's 154 docs against its 140 gate.
-    # Pin the lookup to this shard's own run id prefix.
+    #
+    # execution_id is "<run id>::<suite>::<model>" and the field does NOT
+    # support partial matching: a prefix on .keyword and a match_phrase on the
+    # run id both return 0 docs (verified against golden). Only the full id
+    # matches, so build it rather than filtering the "latest" lookup.
+    if shard:
+        _run_id = shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)
+        exec_id = f"{_run_id}::{suite_profile()['gate_suite_id']}::{stored_id}"
+    else:
+        exec_id = None
     _latest_must = [
         {"term": {"task.model.id": stored_id}},
         {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
     ]
-    if shard:
-        _run_id = shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)
-        _latest_must.append({"prefix": {"metadata.execution_id.keyword": f"{_run_id}::"}})
     latest_cmd_q = json.dumps({
         "size": 1,
         "_source": ["metadata.execution_id"],
@@ -915,18 +926,22 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     # Backslash-escaped \" lands as a literal quote, splits the header on its
     # space, and curl then treats "ApiKey" as a URL (2026-08-22 v3 gate
     # failure: "Could not resolve host: ApiKey").
-    out = ssh(
-        ip,
-        f"source /tmp/golden-cluster-env.sh; printf '%s' '{latest_cmd_q}' > /tmp/q_latest.json; "
-        f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
-        f'"$GOLDEN_ES_URL/.evaluation-scores/_search" '
-        f"-H 'Content-Type: application/json' --data @/tmp/q_latest.json",
-    )
-    try:
-        hits = json.loads(out.splitlines()[-1])["hits"]["hits"]
-        exec_id = hits[0]["_source"]["metadata"]["execution_id"]
-    except Exception:
-        return {"count": -1, "error": f"cannot resolve latest execution id: {out[:200]}"}
+    # A sharded run already knows its exact execution_id, so skip the lookup
+    # entirely -- querying "latest for this model" would just re-introduce the
+    # cross-shard collision this function exists to avoid.
+    if exec_id is None:
+        out = ssh(
+            ip,
+            f"source /tmp/golden-cluster-env.sh; printf '%s' '{latest_cmd_q}' > /tmp/q_latest.json; "
+            f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+            f'"$GOLDEN_ES_URL/.evaluation-scores/_search" '
+            f"-H 'Content-Type: application/json' --data @/tmp/q_latest.json",
+        )
+        try:
+            hits = json.loads(out.splitlines()[-1])["hits"]["hits"]
+            exec_id = hits[0]["_source"]["metadata"]["execution_id"]
+        except Exception:
+            return {"count": -1, "error": f"cannot resolve latest execution id: {out[:200]}"}
 
     q = json.dumps({"query": {"term": {"metadata.execution_id.keyword": exec_id}}})
     out = ssh(
