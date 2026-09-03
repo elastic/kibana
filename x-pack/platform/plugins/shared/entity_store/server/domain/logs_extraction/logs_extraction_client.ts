@@ -19,7 +19,6 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import {
   type LogSlicePaginationParams,
   type PaginationParams,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
@@ -756,7 +755,6 @@ export class LogsExtractionClient {
         fromDateISO,
         toDateISO,
         pagination,
-        recoveryId: recoveryIdForBounded,
         logsPageCursorStart,
         logsPageCursorEnd,
       });
@@ -810,7 +808,6 @@ export class LogsExtractionClient {
         esClient: this.esClient,
         esqlResponse,
         esIdField: HASHED_ID_FIELD,
-        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
         targetIndex: latestIndex,
         logger: this.logger,
         signal: opts?.signal,

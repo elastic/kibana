@@ -16,7 +16,6 @@ import type {
 import { USER_ENTITY_NAMESPACE } from '../../../common/domain/definitions/user_entity_constants';
 import { getEuidEsqlDocumentsContainsIdFilter } from '../../../common/domain/euid/esql';
 import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
   ENGINE_METADATA_UNTYPED_ID_FIELD,
   ENTITY_NAME_FIELD,
@@ -39,9 +38,6 @@ import {
 
 describe('exported field name constants', () => {
   it('should expose stable engine metadata and entity field names', () => {
-    expect(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD).toBe(
-      'entity.EngineMetadata.FirstSeenLogInPage'
-    );
     expect(ENGINE_METADATA_UNTYPED_ID_FIELD).toBe('entity.EngineMetadata.UntypedId');
     expect(ENGINE_METADATA_TYPE_FIELD).toBe('entity.EngineMetadata.Type');
     expect(MAIN_ENTITY_ID_FIELD).toBe('entity.id');
@@ -243,7 +239,6 @@ describe('fieldsToKeep', () => {
 
 describe('extractPaginationParams', () => {
   const paginationFields: PaginationFields = {
-    timestampField: '@ts',
     idFieldInQuery: 'idInQuery',
     finalIdField: 'finalId',
   };
@@ -255,7 +250,7 @@ describe('extractPaginationParams', () => {
 
   it('should return undefined when there are no rows', () => {
     expect(
-      extractPaginationParams(makeResponse([{ name: '@ts' }], []), 10, paginationFields)
+      extractPaginationParams(makeResponse([{ name: 'finalId' }], []), 10, paginationFields)
     ).toBeUndefined();
   });
 
@@ -270,7 +265,7 @@ describe('extractPaginationParams', () => {
     expect(extractPaginationParams(response, 5, paginationFields)).toBeUndefined();
   });
 
-  it('should return cursors from the last row when row count reaches docs limit', () => {
+  it('should return the id cursor from the last row when row count reaches docs limit', () => {
     const response = makeResponse(
       [{ name: '@ts' }, { name: 'finalId' }],
       [
@@ -279,16 +274,8 @@ describe('extractPaginationParams', () => {
       ]
     );
     expect(extractPaginationParams(response, 2, paginationFields)).toEqual({
-      timestampCursor: '2024-01-02',
       idCursor: 'last',
     });
-  });
-
-  it('should throw when timestamp column is missing from the response', () => {
-    const response = makeResponse([{ name: 'finalId' }], [['only-id']]);
-    expect(() => extractPaginationParams(response, 1, paginationFields)).toThrow(
-      '@ts not found in esql response, internal logic error'
-    );
   });
 
   it('should throw when final id column is missing from the response', () => {
@@ -432,58 +419,38 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
 
 describe('buildPaginationSection', () => {
   const paginationFields: PaginationFields = {
-    timestampField: '@timestamp',
     idFieldInQuery: 'recent.id',
     finalIdField: 'final.id',
   };
 
   it('should emit SORT and LIMIT only when pagination is absent', () => {
-    expect(buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields)).toEqual([
-      '| SORT @timestamp ASC, recent.id ASC',
+    expect(buildPaginationSection(25, paginationFields)).toEqual([
+      '| SORT recent.id ASC',
       '| LIMIT 25',
     ]);
   });
 
-  it('should add a WHERE cursor clause when pagination is provided without recovery', () => {
-    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
-      timestampCursor: '2024-06-01T00:00:00.000Z',
-      idCursor: 'cursor-id',
-    });
-    expect(parts[0]).toBe('| SORT @timestamp ASC, recent.id ASC');
-    expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-06-01T00:00:00.000Z")');
-    expect(parts[1]).toContain('recent.id > "cursor-id"');
-    expect(parts[2]).toBe('| LIMIT 25');
+  it('should sort by the id field alone, never by a timestamp', () => {
+    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
+    expect(parts[0]).toBe('| SORT recent.id ASC');
+    expect(parts.join('\n')).not.toContain('@timestamp');
+    expect(parts.join('\n')).not.toContain('TO_DATETIME');
   });
 
-  it('should use recovery id and from date for the pagination WHERE when recoveryId is set', () => {
-    const parts = buildPaginationSection(
-      '2024-01-10T00:00:00.000Z',
-      10,
-      paginationFields,
-      { timestampCursor: 'ignored-ts', idCursor: 'ignored-id' },
-      'recovery-entity-id'
-    );
-    expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-01-10T00:00:00.000Z")');
-    expect(parts[1]).toContain('recent.id > "recovery-entity-id"');
+  it('should add an id-only WHERE cursor clause when pagination is provided', () => {
+    const parts = buildPaginationSection(25, paginationFields, { idCursor: 'cursor-id' });
+    expect(parts).toEqual([
+      '| SORT recent.id ASC',
+      '| WHERE recent.id > "cursor-id"',
+      '| LIMIT 25',
+    ]);
   });
 
   it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
-    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
-      timestampCursor: '2024-06-01T00:00:00.000Z',
+    const parts = buildPaginationSection(25, paginationFields, {
       idCursor: 'evil"id\\with"chars',
     });
-    expect(parts[1]).toContain('recent.id > "evil\\"id\\\\with\\"chars"');
-  });
-
-  it('should escape double quotes and backslashes in recoveryId', () => {
-    const parts = buildPaginationSection(
-      '2024-01-10T00:00:00.000Z',
-      10,
-      paginationFields,
-      { timestampCursor: 'ignored-ts', idCursor: 'ignored-id' },
-      'evil"recovery\\id'
-    );
-    expect(parts[1]).toContain('recent.id > "evil\\"recovery\\\\id"');
+    expect(parts[1]).toBe('| WHERE recent.id > "evil\\"id\\\\with\\"chars"');
   });
 });
 
