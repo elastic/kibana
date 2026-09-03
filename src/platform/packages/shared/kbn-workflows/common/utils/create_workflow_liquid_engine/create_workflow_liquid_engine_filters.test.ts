@@ -8,11 +8,11 @@
  */
 
 /**
- * B5 refactor: custom filters (json_parse, entries, pick) are now registered
+ * B5 refactor: custom filters (base64_decode_bytes, json_parse, entries, pick) are now registered
  * once inside createWorkflowLiquidEngine, not separately in each consumer.
  *
  * These tests verify:
- * 1. Every engine returned by the factory includes all three filters.
+ * 1. Every engine returned by the factory includes all custom filters.
  * 2. The `entries` filter is the *real* object-to-array implementation — not the
  *    no-op identity stub that previously existed in liquid_parse_cache.ts.
  * 3. The `json_parse` and `pick` filter behaviours are correct.
@@ -22,6 +22,28 @@
 import { createWorkflowLiquidEngine } from './create_workflow_liquid_engine';
 
 describe('createWorkflowLiquidEngine — built-in custom filters (B5)', () => {
+  describe('base64_decode_bytes filter', () => {
+    it('preserves arbitrary binary data', () => {
+      const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe]);
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+
+      const result = engine.evalValueSync('val | base64_decode_bytes', {
+        val: bytes.toString('base64'),
+      });
+
+      expect(Buffer.isBuffer(result)).toBe(true);
+      expect(result).toEqual(bytes);
+    });
+
+    it('checks the memory limit before decoding', () => {
+      const engine = createWorkflowLiquidEngine({ memoryLimit: 1 });
+
+      expect(() => engine.evalValueSync('"iVBORw==" | base64_decode_bytes')).toThrow(
+        'memory alloc limit exceeded'
+      );
+    });
+  });
+
   // -----------------------------------------------------------------------
   // json_parse
   // -----------------------------------------------------------------------

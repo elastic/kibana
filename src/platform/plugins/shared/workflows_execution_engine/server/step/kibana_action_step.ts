@@ -46,8 +46,8 @@ type FetcherOptions = NonNullable<z.infer<typeof FetcherConfigSchema>> & {
  * Used by the `form_data` param of `kibana.request` steps.
  */
 interface FormDataFieldSpec {
-  /** The field value / file content (string). */
-  content: string;
+  /** The field value or file content. */
+  content: string | Uint8Array;
   /** Optional filename hint (e.g. "export.ndjson"). */
   filename?: string;
   /** MIME type of the field value (e.g. "application/ndjson"). */
@@ -283,19 +283,23 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   private buildFormData(formData: Record<string, FormDataFieldSpec>): FormData {
     const fd = new FormData();
     for (const [fieldName, spec] of Object.entries(formData)) {
+      const content =
+        typeof spec.content === 'string' ? spec.content : new Uint8Array(spec.content);
       if (spec.filename !== undefined) {
         // File field: include filename so the server gets Content-Disposition: form-data; filename="..."
-        const blob = new Blob([spec.content], {
+        const blob = new Blob([content], {
           type: spec.content_type ?? 'application/octet-stream',
         });
         fd.append(fieldName, blob, spec.filename);
       } else if (spec.content_type !== undefined) {
         // Typed blob without a filename (e.g. application/json fragment)
-        const blob = new Blob([spec.content], { type: spec.content_type });
+        const blob = new Blob([content], { type: spec.content_type });
         fd.append(fieldName, blob);
+      } else if (typeof content !== 'string') {
+        fd.append(fieldName, new Blob([content]));
       } else {
         // Plain text field — serialize as a string so Content-Disposition has no filename
-        fd.append(fieldName, spec.content);
+        fd.append(fieldName, content);
       }
     }
     return fd;
