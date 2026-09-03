@@ -61,6 +61,36 @@ describe('FlyoutSection', () => {
     expect(section).not.toHaveAttribute('data-bordered');
   });
 
+  it('names the section by its own title', () => {
+    render(<FlyoutSection title="Summary">body</FlyoutSection>);
+    expect(screen.getByRole('region', { name: 'Summary' })).toBeInTheDocument();
+  });
+
+  it('uses an explicit id for the section and the title naming it', () => {
+    const { container } = render(
+      <FlyoutSection id="summary" title="Summary">
+        body
+      </FlyoutSection>
+    );
+    const section = container.querySelector('section');
+    expect(section).toHaveAttribute('id', 'summary');
+    expect(section).toHaveAttribute('aria-labelledby', 'summary_title');
+    expect(screen.getByRole('heading', { level: 4, name: 'Summary' })).toHaveAttribute(
+      'id',
+      'summary_title'
+    );
+  });
+
+  it('keeps data-bordered but adds no panel when the border is on the children', () => {
+    const { container } = render(
+      <FlyoutSection title="A" hasBorder borderOnChildren>
+        <span>body</span>
+      </FlyoutSection>
+    );
+    expect(container.querySelector('section')).toHaveAttribute('data-bordered');
+    expect(screen.getByText('body').closest('.euiPanel')).toBeNull();
+  });
+
   it('marks adjacent sections correctly for CSS dividers', () => {
     const { container } = render(
       <>
@@ -96,6 +126,15 @@ describe('FlyoutSubsection', () => {
       </FlyoutSubsection>
     );
     expect(screen.getByTestId('mySub')).toBeInTheDocument();
+  });
+
+  it('honours an explicit id on the wrapper', () => {
+    const { container } = render(
+      <FlyoutSubsection id="host" title="Host">
+        body
+      </FlyoutSubsection>
+    );
+    expect(container.firstChild).toHaveAttribute('id', 'host');
   });
 
   it('sets data-bordered when hasBorder is true', () => {

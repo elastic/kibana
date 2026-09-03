@@ -27,6 +27,11 @@ import {
 type Args = SharedStoryArgs & {
   headerIsCollapsed: boolean;
   numTabs: number;
+  numSections: number;
+  numSubsections: number;
+  sectionIcon: boolean;
+  sectionAction: boolean;
+  sectionHasBorder: boolean;
 };
 
 const meta: Meta<Args> = {
@@ -128,6 +133,156 @@ const meta: Meta<Args> = {
 export default meta;
 
 type Story = StoryObj<Args>;
+
+const SECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'summary', title: 'Summary', content: 'Summary section content.' },
+  { id: 'details', title: 'Details', content: 'Details section content.' },
+  { id: 'context', title: 'Context', content: 'Context section content.' },
+  { id: 'history', title: 'History', content: 'History section content.' },
+];
+
+const SUBSECTIONS: Array<{ id: string; title: string; content: string }> = [
+  { id: 'host', title: 'Host', content: 'Host subsection content.' },
+  { id: 'process', title: 'Process', content: 'Process subsection content.' },
+  { id: 'network', title: 'Network', content: 'Network subsection content.' },
+  { id: 'user', title: 'User', content: 'User subsection content.' },
+];
+
+const TABS: Array<{ id: string; label: string; detail: string }> = [
+  { id: 'overview', label: 'Overview', detail: 'Overview panel content.' },
+  { id: 'metadata', label: 'Metadata', detail: 'Metadata panel content.' },
+  { id: 'timeline', label: 'Timeline', detail: 'Timeline panel content.' },
+  { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
+];
+
+/** Strips the fixture-only fields the root `tabs` prop has no use for. */
+const tabsProp = (count: number) => TABS.slice(0, count).map(({ id, label }) => ({ id, label }));
+
+/**
+ * Section controls, declared per story rather than on the meta so the stories that render no
+ * sections keep their existing control set.
+ */
+const SECTION_ARG_TYPES: Story['argTypes'] = {
+  numSections: {
+    // Zero is allowed so a body of only unstructured content is reachable.
+    name: 'Sections',
+    control: { type: 'range', min: 0, max: SECTIONS.length, step: 1 },
+    table: { category: 'Body' },
+  },
+  numSubsections: {
+    name: 'Subsections per section',
+    control: { type: 'range', min: 0, max: SUBSECTIONS.length, step: 1 },
+    table: { category: 'Body' },
+  },
+  sectionIcon: { name: 'Title icon', control: { type: 'boolean' }, table: { category: 'Body' } },
+  sectionAction: {
+    name: 'Title action',
+    control: { type: 'boolean' },
+    table: { category: 'Body' },
+  },
+  sectionHasBorder: { name: 'Bordered', control: { type: 'boolean' }, table: { category: 'Body' } },
+  numTabs: { table: { disable: true } },
+};
+
+const SECTION_ARGS: Partial<Args> = {
+  numSections: 2,
+  numSubsections: 0,
+  sectionIcon: true,
+  sectionAction: true,
+  sectionHasBorder: false,
+};
+
+/** Title-row props shared by `Body.Section` and `Body.Accordion`. */
+const buildTitleAdornments = (args: Args) => ({
+  ...(args.sectionIcon
+    ? { icon: 'info' as const, tooltip: 'Additional context about this section.' }
+    : {}),
+  ...(args.sectionAction
+    ? { action: { label: 'Extra action', onClick: action('section action') } }
+    : {}),
+});
+
+/** `Subsection` is the same component under either parent, so one helper serves both stories. */
+const sectionContent = (args: Args, content: string) =>
+  args.numSubsections > 0
+    ? SUBSECTIONS.slice(0, args.numSubsections).map(({ id, title, content: subContent }) => (
+        <FlyoutTemplate.Body.Section.Subsection key={id} id={id} title={title}>
+          {bodyText(fillContent(subContent))}
+        </FlyoutTemplate.Body.Section.Subsection>
+      ))
+    : bodyText(fillContent(content));
+
+/** The run of `Body.Section` parts shared by the stories that render sections. */
+const sectionItems = (args: Args) =>
+  SECTIONS.slice(0, args.numSections).map(({ id, title, content }) => (
+    <FlyoutTemplate.Body.Section
+      key={id}
+      id={id}
+      title={title}
+      hasBorder={args.sectionHasBorder}
+      {...buildTitleAdornments(args)}
+    >
+      {sectionContent(args, content)}
+    </FlyoutTemplate.Body.Section>
+  ));
+
+const RegularSectionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZone(args, 'Service details')}
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {sectionItems(args)}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const RegularSections: Story = {
+  argTypes: SECTION_ARG_TYPES,
+  args: SECTION_ARGS,
+  render: RegularSectionsRender,
+};
+
+const AccordionSectionsRender = (args: Args): React.JSX.Element => {
+  const pagination = usePaginationProps(args);
+  return (
+    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+      {headerZone(args, 'Alert details')}
+      {bodyZone(
+        <>
+          {unstructuredBlocks(args.numUnstructuredBlocks)}
+          {SECTIONS.slice(0, args.numSections).map(({ id, title, content }, index) => (
+            <FlyoutTemplate.Body.Accordion
+              key={id}
+              id={id}
+              title={title}
+              initialIsOpen={index === 0}
+              {...buildTitleAdornments(args)}
+            >
+              {sectionContent(args, content)}
+            </FlyoutTemplate.Body.Accordion>
+          ))}
+        </>
+      )}
+      {footerZone(args)}
+    </FlyoutTemplate>
+  );
+};
+
+export const AccordionSections: Story = {
+  argTypes: {
+    ...SECTION_ARG_TYPES,
+    // Accordion content is always outlined, so the border toggle does not apply here.
+    sectionHasBorder: { table: { disable: true } },
+  },
+  args: SECTION_ARGS,
+  render: AccordionSectionsRender,
+};
 
 const MenuBarPaginationRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
@@ -251,13 +406,22 @@ export const MenuBarHistory: Story = {
   render: WithHistoryRender,
 };
 
-/** Long enough that the body overflows at any realistic viewport height, so collapse can engage. */
-const OVERFLOWING_PARAGRAPH_COUNT = 12;
-
 const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
   const pagination = usePaginationProps(args);
+  const body = (
+    <>
+      {unstructuredBlocks(args.numUnstructuredBlocks)}
+      {sectionItems(args)}
+    </>
+  );
+
   return (
-    <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args, pagination)}>
+    <FlyoutTemplate
+      onClose={action('onClose')}
+      size="m"
+      {...buildFlyoutProps(args, pagination)}
+      tabs={tabsProp(args.numTabs)}
+    >
       {headerZone(
         args,
         'Flyout title is quite long, so that it takes up 2 lines of text and then some',
@@ -265,15 +429,11 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
         { collapsed: args.headerIsCollapsed }
       )}
       {bodyZone(
-        <>
-          {unstructuredBlocks(args.numUnstructuredBlocks)}
-          {Array.from({ length: OVERFLOWING_PARAGRAPH_COUNT }, (_, index) => (
-            <React.Fragment key={index}>
-              {bodyText(fillContent(`Paragraph ${index + 1}.`))}
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          ))}
-        </>
+        TABS.slice(0, args.numTabs).map(({ id }) => (
+          <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+            {body}
+          </FlyoutTemplate.Body.TabPanel>
+        ))
       )}
       {footerZone(args)}
     </FlyoutTemplate>
@@ -282,8 +442,8 @@ const HeaderCollapseOnScrollRender = (args: Args): React.JSX.Element => {
 
 export const HeaderCollapseOnScroll: Story = {
   argTypes: {
+    ...SECTION_ARG_TYPES,
     numPages: { table: { disable: true } },
-    numTabs: { table: { disable: true } },
     headerIsCollapsed: {
       name: 'Force collapsed',
       control: { type: 'boolean' },
@@ -291,23 +451,20 @@ export const HeaderCollapseOnScroll: Story = {
     },
   },
   args: {
+    ...SECTION_ARGS,
     numLeadingActions: 0,
     numTrailingActions: 0,
-    numUnstructuredBlocks: 2,
-    titleIcon: true,
-    description: true,
-    footer: true,
+    numInfoBlocks: 10,
+    numSections: 4,
+    numSubsections: 2,
+    numUnstructuredBlocks: 1,
+    // Fixed, not a control: the tab bar sits in the header's always-visible region, so the story
+    // is partly about watching it survive the collapse.
+    numTabs: 3,
     headerIsCollapsed: false,
   },
   render: HeaderCollapseOnScrollRender,
 };
-
-const TABS: Array<{ id: string; label: string; detail: string }> = [
-  { id: 'overview', label: 'Overview', detail: 'Overview panel content.' },
-  { id: 'metadata', label: 'Metadata', detail: 'Metadata panel content.' },
-  { id: 'timeline', label: 'Timeline', detail: 'Timeline panel content.' },
-  { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
-];
 
 const TabsRender = (args: Args): React.JSX.Element => {
   const visibleTabs = TABS.slice(0, args.numTabs);
@@ -395,4 +552,49 @@ export const Tabs: StoryObj<Args> = {
     numUnstructuredBlocks: 1,
   },
   render: TabsRender,
+};
+
+const ThrowOnClick = () => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    throw new Error('This is an error to show the test user!');
+  }
+
+  return (
+    <EuiButton color="danger" size="s" onClick={() => setHasError(true)}>
+      Throw error
+    </EuiButton>
+  );
+};
+
+/** Header and body each sit behind their own error boundary, so a throw in one spares the other. */
+const ErrorInFlyoutRender = (args: Args): React.JSX.Element => (
+  <FlyoutTemplate onClose={action('onClose')} size="m" {...buildFlyoutProps(args)}>
+    {headerZone(
+      args,
+      'Error in flyout',
+      <FlyoutTemplate.Header.InfoBlock title="Bad component">
+        <ThrowOnClick />
+      </FlyoutTemplate.Header.InfoBlock>
+    )}
+    {bodyZone(
+      <>
+        <ThrowOnClick />
+        <EuiSpacer size="m" />
+        <FlyoutTemplate.Body.Section title="Summary">
+          {bodyText(fillContent('Summary section content.'))}
+        </FlyoutTemplate.Body.Section>
+      </>
+    )}
+    {footerZone(args)}
+  </FlyoutTemplate>
+);
+
+export const ErrorInFlyout: Story = {
+  argTypes: {
+    numPages: { table: { disable: true } },
+    numTabs: { table: { disable: true } },
+  },
+  render: ErrorInFlyoutRender,
 };
