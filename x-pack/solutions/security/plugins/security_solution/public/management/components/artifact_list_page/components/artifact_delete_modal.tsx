@@ -97,7 +97,10 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
     );
 
     const onConfirm = useCallback(() => {
-      deleteArtifactItem(item).then(() => onSuccess());
+      // mutateAsync rethrows after onError; swallow so failed deletes are not unhandled rejections.
+      deleteArtifactItem(item)
+        .then(() => onSuccess())
+        .catch(() => undefined);
     }, [deleteArtifactItem, item, onSuccess]);
 
     const handleOnCancel = useCallback(() => {

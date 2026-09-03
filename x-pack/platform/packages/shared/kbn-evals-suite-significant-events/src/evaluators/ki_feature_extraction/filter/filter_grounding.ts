@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import {
   isAndCondition,
@@ -17,7 +16,7 @@ import {
   type Condition,
   type StringOrNumberOrBoolean,
 } from '@kbn/streamlang';
-import type { KIFeatureExtractionEvaluator } from '../types';
+import type { KIFeatureExtractionDocument, KIFeatureExtractionEvaluator } from '../types';
 import { getFeaturesFromOutput } from '../types';
 
 /**
@@ -72,9 +71,7 @@ export const filterGroundingEvaluator = {
       output != null && !Array.isArray(output)
         ? (output as unknown as Record<string, unknown>)
         : undefined;
-    const taskDocs = taskOutput?.sample_documents as
-      | Array<SearchHit<Record<string, unknown>>>
-      | undefined;
+    const taskDocs = taskOutput?.sample_documents as KIFeatureExtractionDocument[] | undefined;
 
     const rawDocs = taskDocs ?? input.sample_documents ?? [];
     if (rawDocs.length === 0) {

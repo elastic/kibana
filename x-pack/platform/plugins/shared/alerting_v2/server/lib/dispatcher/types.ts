@@ -11,6 +11,8 @@ import type {
 } from '../../resources/datastreams/alert_events';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type {
+  DispatchOutcome,
+  DispatchPlan,
   EpisodeScan,
   EpisodeTriage,
   PolicyCatalog,
@@ -190,10 +192,10 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
-  readonly dispatch?: ActionGroup[];
-  readonly throttled?: ActionGroup[];
-  readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
-  readonly dispatchFailures?: DispatchFailure[];
+  /** Delivery decision: groups eligible to dispatch now vs groups held back. */
+  readonly plan?: DispatchPlan;
+  /** Dispatch results: workflow executions per group and failed attempts. */
+  readonly outcome?: DispatchOutcome;
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
