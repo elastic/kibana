@@ -32,9 +32,12 @@ the case where trusting the label rather than the evidence is most tempting.
 
 ## Preconditions
 
-The suite enables the Deep Watch (installation is lazy per space) but does
-**not** seed telemetry. The kill-chain events for `WKSTN-RECV01` and the
-Attack Discovery documents must exist before the run.
+The suite self-provisions its cell: it seeds the kill-chain events for
+`WKSTN-RECV01`/`SRV-DC01` and one Attack Discovery document per golden row
+(flat dotted keys -- the nested-object shape is silently dropped by
+`transformSearchResponseToAlerts`), then tears them down afterwards. The
+only external requirement is a running Kibana+ES eval cell with a configured
+LLM connector, since `triage_alerts` and `reconstruct_attack` call the model.
 
 ## Unit tests
 

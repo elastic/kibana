@@ -42,7 +42,13 @@ const KILL_CHAIN_EVENTS = [
 const attackDiscoveryDoc = (row: DeepWatchGoldenRow) => ({
   '@timestamp': new Date().toISOString(),
   'kibana.alert.attack_discovery.alert_ids': ['seeded-alert-1'],
-  'kibana.alert.attack_discovery.api_config': {},
+  // MUST be non-empty: the /api/attack_discovery/_find transformer silently drops docs
+  // whose api_config is {} -- total counts them but data stays []. Found live 2026-09-03.
+  'kibana.alert.attack_discovery.api_config': {
+    action_type_id: '.gen-ai',
+    connector_id: 'eval-seed-connector',
+    name: 'eval-seed-connector',
+  },
   'kibana.alert.attack_discovery.details_markdown': row.details,
   'kibana.alert.attack_discovery.summary_markdown': row.summary,
   'kibana.alert.attack_discovery.title': row.title,
