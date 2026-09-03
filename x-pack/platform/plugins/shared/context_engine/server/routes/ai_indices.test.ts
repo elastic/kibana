@@ -219,6 +219,7 @@ describe('ai indices routes', () => {
     getAgentBuilder = jest.fn().mockResolvedValue(undefined);
     scheduleService = {
       reconcile: jest.fn().mockResolvedValue(undefined),
+      run: jest.fn().mockResolvedValue('execution-1'),
       remove: jest.fn().mockResolvedValue(undefined),
     };
     readService = { query: jest.fn(), describe: jest.fn(), list: jest.fn() };

@@ -24,9 +24,19 @@ import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SignalsServiceApi } from './signals/service';
+import type { WorkflowProvider } from './workflows/provider';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
+  /**
+   * Supplies the workflow operations the apply engine needs.
+   *
+   * Inverted rather than depending on `workflowsManagement` directly, which is a cycle: that plugin
+   * reaches `agent_builder_sml`, which reaches this one. `contextEngineAgentBuilder` already
+   * depends on both, so it registers the adapter. Until it does, workflow improvements report that
+   * workflows are unavailable instead of failing obscurely.
+   */
+  registerWorkflowProvider: (provider: WorkflowProvider) => void;
 }
 
 export interface GetAiIndexDataReadServiceParams {
