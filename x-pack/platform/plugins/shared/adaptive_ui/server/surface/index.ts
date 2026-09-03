@@ -6,5 +6,5 @@
  */
 
 export { projectReplyToMarkdown } from './project_reply';
-export { toViewSpec } from './attachment_view_specs';
+export { toViewSpec, viewSpecAdapterTypes } from './attachment_view_specs';
 export { createSlackSurfaceProjector, registerSlackSurfaceProjector } from './slack_projector';
