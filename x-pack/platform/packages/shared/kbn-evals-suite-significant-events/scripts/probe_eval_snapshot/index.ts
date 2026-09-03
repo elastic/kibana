@@ -7,7 +7,9 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
+import { ensureGroundTruthDir } from '@kbn/evals';
 import {
+  SIGEVENTS_GROUND_TRUTH_SOURCE,
   SIGEVENTS_SNAPSHOT_RUN,
   replaySignificantEventsSnapshot,
   listAvailableSnapshots,
@@ -49,6 +51,7 @@ const flattenKeys = (doc: Record<string, unknown>, prefix = ''): string[] => {
 
 run(
   async ({ log, flags }) => {
+    await ensureGroundTruthDir({ source: SIGEVENTS_GROUND_TRUTH_SOURCE, log: (m) => log.info(m) });
     const datasetIds = getAllDatasetIds();
     const datasetId = String(flags.dataset || 'all');
 

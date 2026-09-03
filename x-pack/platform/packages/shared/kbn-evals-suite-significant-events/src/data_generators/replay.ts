@@ -6,7 +6,11 @@
  */
 
 export type { GcsConfig } from './snapshot_run_config';
-export { SIGEVENTS_SNAPSHOT_RUN, resolveBasePath } from './snapshot_run_config';
+export {
+  SIGEVENTS_SNAPSHOT_RUN,
+  SIGEVENTS_GROUND_TRUTH_SOURCE,
+  resolveBasePath,
+} from './snapshot_run_config';
 
 export { listAvailableSnapshots } from './list_snapshots';
 

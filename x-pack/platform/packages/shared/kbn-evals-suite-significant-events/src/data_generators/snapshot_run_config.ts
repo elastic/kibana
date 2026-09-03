@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { GroundTruthSource } from '@kbn/evals';
+import { GCS_BUCKET } from '../constants';
+
 export interface GcsConfig {
   bucket: string;
   basePathPrefix: string;
@@ -21,3 +24,12 @@ export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '202
 
 export const resolveBasePath = (gcs: GcsConfig) =>
   `${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`;
+
+/**
+ * Where this suite's ground truth lives: the same `<run-id>/` folder as the snapshots it describes.
+ * Layout: `<run-id>/<dataset-id>/dataset.json` and `<run-id>/<dataset-id>/<snapshot>/ground-truth.json`.
+ */
+export const SIGEVENTS_GROUND_TRUTH_SOURCE: GroundTruthSource = {
+  bucket: GCS_BUCKET,
+  prefix: `${SIGEVENTS_SNAPSHOT_RUN}/`,
+};

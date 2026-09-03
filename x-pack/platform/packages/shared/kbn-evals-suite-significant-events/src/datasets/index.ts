@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { readGroundTruthTreeSync } from '@kbn/evals';
 import type { GcsConfig } from '../data_generators/replay';
-import {
-  BANK_OF_ANTHOS_NAMESPACE,
-  OTEL_DEMO_NAMESPACE,
-  QUARKUS_SUPER_HEROES_NAMESPACE,
-} from '../constants';
-import { bankOfAnthosDataset } from './bank_of_anthos';
-import { otelDemoDataset } from './otel_demo';
-import { quarkusSuperHeroesDataset } from './quarkus_super_heroes';
+import { assembleDatasets } from './assemble_datasets';
 import type { DatasetConfig, SnapshotSourceOverride } from './types';
 
 export const MANAGED_STREAM_NAME = 'logs';
 export const MANAGED_STREAM_SEARCH_PATTERN = `${MANAGED_STREAM_NAME}*`;
 
-const DATASETS: Record<string, DatasetConfig> = {
-  [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
-  [BANK_OF_ANTHOS_NAMESPACE]: bankOfAnthosDataset,
-  [QUARKUS_SUPER_HEROES_NAMESPACE]: quarkusSuperHeroesDataset,
+let datasetsCache: Record<string, DatasetConfig> | undefined;
+
+/**
+ * Ground truth is read from `KBN_EVALS_GROUND_TRUTH_DIR` (populated by the @kbn/evals global setup
+ * from GCS, or set locally) on first access, so importing this module has no side effects.
+ */
+const loadDatasets = (): Record<string, DatasetConfig> => {
+  if (!datasetsCache) {
+    datasetsCache = assembleDatasets(readGroundTruthTreeSync());
+  }
+  return datasetsCache;
 };
 
 let cachedActiveDatasets: DatasetConfig[] | undefined;
@@ -30,7 +31,7 @@ let cachedActiveDatasets: DatasetConfig[] | undefined;
 const ALL_DATASETS_SELECTOR = 'all';
 
 const resolveRequestedDatasetIds = (selectedDatasetIds: string | undefined): string[] => {
-  const allIds = Object.keys(DATASETS);
+  const allIds = Object.keys(loadDatasets());
   const normalizedSelectedDatasetIds = selectedDatasetIds?.trim();
 
   if (!normalizedSelectedDatasetIds || normalizedSelectedDatasetIds === ALL_DATASETS_SELECTOR) {
@@ -53,18 +54,19 @@ export const getActiveDatasets = (): DatasetConfig[] => {
     return cachedActiveDatasets;
   }
 
+  const datasets = loadDatasets();
   const requestedDatasetIds = resolveRequestedDatasetIds(process.env.SIGEVENTS_DATASET);
 
-  const unknownDatasetIds = requestedDatasetIds.filter((id) => DATASETS[id] == null);
+  const unknownDatasetIds = requestedDatasetIds.filter((id) => datasets[id] == null);
   if (unknownDatasetIds.length > 0) {
-    const available = Object.keys(DATASETS).join(', ');
+    const available = Object.keys(datasets).join(', ');
     throw new Error(
       `Unknown dataset(s): ${unknownDatasetIds.join(', ')}. Available: ${available}. ` +
         `Set SIGEVENTS_DATASET to a dataset id, a comma-separated list, or "${ALL_DATASETS_SELECTOR}".`
     );
   }
 
-  cachedActiveDatasets = requestedDatasetIds.map((id) => DATASETS[id]);
+  cachedActiveDatasets = requestedDatasetIds.map((id) => datasets[id]);
   return cachedActiveDatasets;
 };
 
@@ -98,9 +100,9 @@ export const snapshotSourceKey = ({
   return `${gcs.bucket}/${gcs.basePathPrefix}::${snapshotName}`;
 };
 
-export const getAllDatasetIds = (): string[] => Object.keys(DATASETS);
+export const getAllDatasetIds = (): string[] => Object.keys(loadDatasets());
 
-export const getDatasetById = (id: string): DatasetConfig | undefined => DATASETS[id];
+export const getDatasetById = (id: string): DatasetConfig | undefined => loadDatasets()[id];
 
 export type {
   DatasetConfig,
