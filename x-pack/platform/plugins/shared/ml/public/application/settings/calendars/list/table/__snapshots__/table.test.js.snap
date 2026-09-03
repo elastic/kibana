@@ -51,6 +51,8 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
