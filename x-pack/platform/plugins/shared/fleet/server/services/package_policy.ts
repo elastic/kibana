@@ -1057,7 +1057,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         // eslint-disable-next-line prefer-const
-        let { id, ...pkgPolicyWithoutId } = packagePolicy;
+        let { id, spaceIds: _spaceIds, ...pkgPolicyWithoutId } = packagePolicy;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -2207,9 +2207,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         let secretReferences: SecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
-        // id and version are not part of the saved object attributes
+        // id, version, and spaceIds are not part of the saved object attributes
         // eslint-disable-next-line prefer-const
-        let { version: _version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+        let { version: _version, id: _id, spaceIds: _spaceIds, ...restOfPackagePolicy } = packagePolicy;
 
         if (restOfPackagePolicy.vars === undefined) {
           restOfPackagePolicy.vars = oldPackagePolicy.vars;
