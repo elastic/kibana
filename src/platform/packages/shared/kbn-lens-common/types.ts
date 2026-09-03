@@ -662,6 +662,9 @@ export interface GetDropPropsArgs<T = unknown> {
   source?: DraggingIdentifier;
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;
+  // Layer inspector tables. Lets datasources resolve column types against the
+  // Query Result Type overlay for drop decisions; datasources that don't need it can ignore it.
+  activeData?: TableInspectorAdapter;
 }
 
 export interface UserMessage {

@@ -52,6 +52,7 @@ import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import {
   canColumnBeUsedBeInMetricDimension,
+  hasNumericColumn,
   isNotNumeric,
   isNumeric,
   MAX_NUM_OF_COLUMNS,
@@ -85,7 +86,8 @@ const getUnchangedSuggestionTable = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
   id: string,
-  resolveType: (column: TextBasedLayerColumn) => DataType
+  resolveType: (column: TextBasedLayerColumn) => DataType,
+  hasNumberColumn: boolean
 ) => {
   return {
     state: {
@@ -98,7 +100,11 @@ const getUnchangedSuggestionTable = (
       columns:
         state.layers[id].columns?.map((f) => {
           const dataType = resolveType(f);
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, dataType);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+            hasNumberColumn,
+            allColumns.length,
+            dataType
+          );
           return {
             columnId: f.columnId,
             operation: {
@@ -121,7 +127,8 @@ const getSuggestionsByRules = (
   allColumns: TextBasedLayerColumn[],
   id: string,
   rules: Array<{ isBucketed: boolean; allowAll?: boolean }>,
-  resolveType: (column: TextBasedLayerColumn) => DataType
+  resolveType: (column: TextBasedLayerColumn) => DataType,
+  hasNumberColumn: boolean
 ) => {
   const columnsToKeep = rules.reduce<TextBasedLayerColumn[]>((acc, rule) => {
     const matchesRule = (col: TextBasedLayerColumn) =>
@@ -157,7 +164,11 @@ const getSuggestionsByRules = (
       columns:
         columnsToKeep?.map((f, i) => {
           const dataType = resolveType(f);
-          const inMetricDimension = canColumnBeUsedBeInMetricDimension(allColumns, dataType);
+          const inMetricDimension = canColumnBeUsedBeInMetricDimension(
+            hasNumberColumn,
+            allColumns.length,
+            dataType
+          );
           return {
             columnId: f.columnId,
             operation: {
@@ -207,18 +218,22 @@ export function getTextBasedDatasource({
         addColumnsToCache(layer.query, layerColumns);
       }
 
-      const activeTable = activeData?.[id];
+      const activeColumns = activeData?.[id]?.columns;
+      // Resolve column types against the Query Result Type overlay (activeData) once per layer,
+      // falling back to the persisted meta.type when the layer has no inspector table yet.
       const resolveType = (column: TextBasedLayerColumn) =>
         resolveTextBasedColumnType(
           column,
-          activeTable?.columns.find((col) => col.id === column.columnId)
+          activeColumns?.find((col) => col.id === column.columnId)
         );
+      const hasNumberColumn = hasNumericColumn(allColumns, activeColumns);
 
       const unchangedSuggestionTable = getUnchangedSuggestionTable(
         state,
         allColumns,
         id,
-        resolveType
+        resolveType,
+        hasNumberColumn
       );
 
       // we are trying here to cover the most common cases for the charts we offer
@@ -227,14 +242,16 @@ export function getTextBasedDatasource({
         allColumns,
         id,
         [{ isBucketed: false }],
-        resolveType
+        resolveType,
+        hasNumberColumn
       );
       const metricBucketTable = getSuggestionsByRules(
         state,
         allColumns,
         id,
         [{ isBucketed: false }, { isBucketed: true, allowAll: true }],
-        resolveType
+        resolveType,
+        hasNumberColumn
       );
       const metricBucketBucketTable = getSuggestionsByRules(
         state,
@@ -245,7 +262,8 @@ export function getTextBasedDatasource({
           { isBucketed: true, allowAll: true },
           { isBucketed: true, allowAll: true },
         ],
-        resolveType
+        resolveType,
+        hasNumberColumn
       );
 
       return [unchangedSuggestionTable, metricBucketBucketTable, metricBucketTable, metricTable]
@@ -275,7 +293,8 @@ export function getTextBasedDatasource({
       const hasNumberTypeColumns = textBasedQueryColumns?.some(isNumeric);
       const newColumns = textBasedQueryColumns.map((c) => {
         const inMetricDimension = canColumnBeUsedBeInMetricDimension(
-          textBasedQueryColumns,
+          Boolean(hasNumberTypeColumns),
+          textBasedQueryColumns.length,
           c?.meta?.type
         );
         return {
