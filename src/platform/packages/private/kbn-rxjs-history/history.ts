@@ -104,6 +104,7 @@ export function startTrackingHistory<T extends object = {}>({
       if (key === 'z' && canUndo$.getValue()) {
         // no need to await since undoPatch synchronously sets canUndo$ to false
         undoPatch();
+        event.preventDefault();
       } else if (key === 'y' && canRedo$.getValue()) {
         // no need to await since redoPatch synchronously sets canRedo$ to false
         redoPatch();
