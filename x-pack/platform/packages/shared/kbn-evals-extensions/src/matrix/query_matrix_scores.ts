@@ -8,6 +8,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@kbn/evals';
+import { mergeShardDatasets, pickShardExperiments } from './merge_shard_experiments';
 import { isEisBacked, describeJudge } from './judge_provenance';
 import { VERDICT_LADDERS, scoreVerdict } from './jury';
 
@@ -512,12 +513,29 @@ export const queryMatrixScores = async (
       // The experiments listing returns `execution_id` as its grouping key; the
       // detail/stats route must be filtered by execution_id (+ suite + model),
       // since a bare experiment_id path lookup targets a different field and 404s.
-      const stats = await evalsClient.getExperimentStats(latest.experiment_id, {
-        suiteId,
-        taskModelId: modelId,
-        executionId: latest.execution_id ?? latest.experiment_id,
-      });
-      if (!stats) {
+      // A sharded sweep splits one model's examples across VMs, each with its
+      // own execution_id. Selecting a single experiment would render one shard
+      // and blank every example the others covered, so gather the whole sweep.
+      const shardMembers = pickShardExperiments(
+        experiments.filter((candidate) => candidate.task_model?.id === modelId)
+      );
+      const shards = shardMembers.some(
+        (member) => member.execution_id === (latest.execution_id ?? latest.experiment_id)
+      )
+        ? shardMembers
+        : [latest];
+
+      const perShardStats = await Promise.all(
+        shards.map((shard) =>
+          evalsClient.getExperimentStats(shard.experiment_id, {
+            suiteId,
+            taskModelId: modelId,
+            executionId: shard.execution_id ?? shard.experiment_id,
+          })
+        )
+      );
+
+      if (!perShardStats.some((entry) => entry)) {
         log.warning(
           `No stats for experiment ${latest.experiment_id} (suite ${suiteId}, model ${modelId})`
         );
@@ -535,7 +553,11 @@ export const queryMatrixScores = async (
         byModel.set(modelId, model);
       }
 
-      const datasets = experimentStatsToDatasets(stats);
+      const datasets = mergeShardDatasets(
+        perShardStats
+          .filter((entry): entry is ExperimentStats => Boolean(entry))
+          .map((entry) => experimentStatsToDatasets(entry))
+      );
       // Per-prefix synthetic datasets: one extra stripped-scores fetch per
       // (suite, model). Cheap — unbounded fields are excluded server-side.
       const examplePrefixes = prefixesBySuite[suiteId] ?? [];

@@ -214,6 +214,61 @@ describe('queryMatrixScores', () => {
     return { client, listExperiments, getExperimentStats };
   };
 
+  it('merges every shard of a sharded sweep into one row', async () => {
+    // A sharded sweep splits one model's examples across VMs, each writing its
+    // own execution_id. Fetching only one of them renders a single shard and
+    // blanks the examples the others covered.
+    const shardStats = (datasetId: string, mean: number, count: number): ExperimentStats => ({
+      taskModel: { id: 'm1' },
+      evaluatorModel: { id: 'judge' },
+      totalRepetitions: 1,
+      stats: [
+        {
+          datasetId,
+          datasetName: datasetId.toUpperCase(),
+          evaluatorName: 'correctness',
+          stats: { mean, median: mean, stdDev: 0, min: mean, max: mean, count },
+        },
+      ],
+    });
+
+    const listExperiments = jest.fn().mockResolvedValue([
+      experiment({
+        experiment_id: 'exp-s1',
+        execution_id: 'sweep-9-s1of2::suite-a::m1',
+        modelId: 'm1',
+        timestamp: '2026-06-10T00:00:00.000Z',
+      }),
+      experiment({
+        experiment_id: 'exp-s2',
+        execution_id: 'sweep-9-s2of2::suite-a::m1',
+        modelId: 'm1',
+        timestamp: '2026-06-10T01:00:00.000Z',
+      }),
+    ]);
+    const getExperimentStats = jest
+      .fn()
+      .mockImplementation(
+        async (_experimentId: string, { executionId }: { executionId?: string }) =>
+          executionId === 'sweep-9-s1of2::suite-a::m1'
+            ? shardStats('d1', 0.9, 10)
+            : shardStats('d2', 0.5, 5)
+      );
+    const client = { listExperiments, getExperimentStats } as unknown as EvalsClient;
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      branch: 'main',
+    });
+
+    // Both shards fetched, not just the newest.
+    expect(getExperimentStats).toHaveBeenCalledTimes(2);
+
+    const datasets = result[0].suites[0].datasets;
+    expect(datasets.map((d) => d.datasetId).sort()).toEqual(['d1', 'd2']);
+  });
+
   it('queries each (suite, model) pair through the route model_id filter', async () => {
     const { client, listExperiments, getExperimentStats } = createClient({
       m1: [experiment({ experiment_id: 'exp-m1', modelId: 'm1' })],
