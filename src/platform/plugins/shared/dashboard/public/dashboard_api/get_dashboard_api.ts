@@ -221,6 +221,7 @@ export function getDashboardApi({
   });
 
   if (incomingEmbeddables?.length) {
+    // allow incoming embeddables to be undone
     initialState$.next(getState());
     layoutManager.api.addIncomingEmbeddables(incomingEmbeddables);
   }
