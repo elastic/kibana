@@ -21,6 +21,7 @@ import {
   type ConversationAccessControlEntry,
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_SCHEMA_VERSION,
   CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   isConversationAccessControlRole,
@@ -52,11 +53,13 @@ import {
 } from '../access_control';
 import type {
   AddAttachmentsToLastRoundRequest,
+  AppendEventsRequest,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
   NormalizedConversation,
+  ReplaceRoundEventsRequest,
   ConversationListResult,
   UpsertRoundRequest,
 } from './types';
@@ -113,6 +116,14 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   upsertRound(
     request: UpsertRoundRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  appendEvents(
+    request: AppendEventsRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
@@ -500,6 +511,92 @@ class ConversationClientImpl implements ConversationClient {
       }),
     });
     return result;
+  }
+
+  /** Appends timeline events onto a conversation.*/
+  async appendEvents(
+    request: AppendEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const { id: conversationId, events, title, status, state, attachments, workspaceId } = request;
+    const { access } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const existingIds = new Set(currentEvents.map((event) => event.id));
+        const newEvents = events.filter((event) => !existingIds.has(event.id));
+        const appended = [...currentEvents, ...newEvents];
+        return {
+          events: appended,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
+  }
+
+  async replaceRoundEvents(
+    request: ReplaceRoundEventsRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const {
+      id: conversationId,
+      roundId,
+      events,
+      title,
+      status,
+      state,
+      attachments,
+      workspaceId,
+    } = request;
+    const { access } = options;
+    const roundPrefix = `${roundId}::`;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        const currentEvents = current.events ?? [];
+        const nonRoundEvents = currentEvents.filter((event) => !event.id.startsWith(roundPrefix));
+        const replaced = [...nonRoundEvents, ...events];
+        return {
+          events: replaced,
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+          ...(title !== undefined ? { title } : {}),
+          ...(status ? { status } : {}),
+          ...(state ? { state } : {}),
+          ...(attachments
+            ? {
+                attachments: reconcileAttachments({
+                  snapshot: attachments.snapshot,
+                  stored: current.attachments ?? [],
+                  produced: attachments.produced,
+                }),
+              }
+            : {}),
+          ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+          read_by: [],
+          read: false,
+        };
+      },
+    });
   }
 
   async markRead(conversationId: string, read: boolean): Promise<Conversation> {

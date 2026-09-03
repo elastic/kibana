@@ -44,6 +44,7 @@ export const executeAgent$ = ({
   interactivity,
   parentExecutionId,
   projectRouting,
+  roundId,
 }: {
   agentId: string;
   executionId: string;
@@ -66,6 +67,7 @@ export const executeAgent$ = ({
   interactivity?: InteractivityConfigInput;
   parentExecutionId?: string;
   projectRouting?: string;
+  roundId?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -91,6 +93,7 @@ export const executeAgent$ = ({
         outputSchema,
         action,
         executionId,
+        roundId,
       },
       onEvent: (event) => {
         observer.next(event);
