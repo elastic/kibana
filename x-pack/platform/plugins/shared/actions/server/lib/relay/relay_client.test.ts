@@ -228,7 +228,6 @@ describe('RelayClient', () => {
 
       await expect(
         createClient().trigger({
-          surface: 'slack',
           tenantKey: 'team-A',
           channel: 'C123',
           message: 'hello',
@@ -237,30 +236,10 @@ describe('RelayClient', () => {
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          url: 'https://relay.test/v1/trigger',
+          url: 'https://relay.test/v1/slack/trigger',
           method: 'post',
-          data: { surface: 'slack', tenant_key: 'team-A', channel: 'C123', message: 'hello' },
+          data: { tenant_key: 'team-A', channel: 'C123', message: 'hello' },
           sslOverrides: relaySSLSettings,
-        })
-      );
-    });
-
-    it('sends the surface the caller asked for', async () => {
-      requestMock.mockResolvedValue({
-        status: 202,
-        data: { ref: '1700000000.000300', tenant_key: 'team-A' },
-      } as never);
-
-      await createClient().trigger({
-        surface: 'teams',
-        tenantKey: 'team-A',
-        channel: 'C123',
-        message: 'hello',
-      });
-
-      expect(requestMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ surface: 'teams' }),
         })
       );
     });
@@ -272,7 +251,6 @@ describe('RelayClient', () => {
       } as never);
 
       await createClient().trigger({
-        surface: 'slack',
         tenantKey: 'team-A',
         channel: 'C123',
         message: 'in thread',
@@ -292,7 +270,7 @@ describe('RelayClient', () => {
         requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
 
         const error = await createClient()
-          .trigger({ surface: 'slack', tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+          .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
           .then(() => undefined)
           .catch((cause) => cause);
 
@@ -310,7 +288,7 @@ describe('RelayClient', () => {
       requestMock.mockResolvedValue({ status: 202, data } as never);
 
       const error = await createClient()
-        .trigger({ surface: 'slack', tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
         .then(() => undefined)
         .catch((cause) => cause);
 
@@ -328,7 +306,6 @@ describe('RelayClient', () => {
 
       await expect(
         createClient().trigger({
-          surface: 'slack',
           tenantKey: 'team-A',
           channel: 'C123',
           message: 'hello',

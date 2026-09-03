@@ -84,7 +84,6 @@ describe('relaySendMessage', () => {
       ts: '1700.0001',
     });
     expect(trigger).toHaveBeenCalledWith({
-      surface: 'slack',
       tenantKey: 'team-A',
       channel: 'C123',
       message: 'hello',

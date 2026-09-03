@@ -1526,7 +1526,6 @@ describe('Slack', () => {
       });
 
       expect(relayTrigger).toHaveBeenCalledWith({
-        surface: 'slack',
         tenantKey: 'team-A',
         channel: 'C123',
         message: 'Hello from Kibana',

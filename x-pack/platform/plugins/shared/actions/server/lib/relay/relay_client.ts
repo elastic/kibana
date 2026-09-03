@@ -150,14 +150,12 @@ export class RelayClient implements RelayClientContract {
 
   /** Post to a bound channel. One this deployment does not own is rejected with a 403, not delivered. */
   async trigger({
-    surface,
     tenantKey,
     channel,
     message,
     threadTs,
   }: RelayTriggerInput): Promise<RelayTriggerResponse> {
-    const response = await this.post('/v1/trigger', {
-      surface,
+    const response = await this.post('/v1/slack/trigger', {
       tenant_key: tenantKey,
       channel,
       message,
@@ -167,7 +165,7 @@ export class RelayClient implements RelayClientContract {
     const body = response.data as RelayTriggerResponseBody | undefined;
     if (typeof body?.ref !== 'string' || body.ref.length === 0) {
       throw new RelayRequestError(
-        '/v1/trigger',
+        '/v1/slack/trigger',
         response.status,
         'Relay invalid response format missing expected `ref`'
       );

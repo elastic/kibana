@@ -98,7 +98,6 @@ export async function relaySendMessage(
 
   try {
     const { ref } = await client.trigger({
-      surface: 'slack',
       tenantKey,
       channel: input.channel,
       message: input.text,

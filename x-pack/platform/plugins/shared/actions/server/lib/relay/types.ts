@@ -67,7 +67,6 @@ export interface RelayBindingsPage {
  * *id* (a binding's `scope_id`), not a display name.
  */
 export interface RelayTriggerInput {
-  surface: string;
   tenantKey: string;
   channel: string;
   message: string;
