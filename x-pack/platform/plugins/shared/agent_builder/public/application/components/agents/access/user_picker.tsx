@@ -35,6 +35,19 @@ interface UserOption extends EuiComboBoxOptionOption<string> {
 }
 
 const SEARCH_DEBOUNCE_MS = 200;
+const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+
+/**
+ * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
+ * set, and renders it as an invisible `EuiIcon type="empty"` because an option is never kept
+ * selected here. Neither the column nor its flex gap is exposed as a prop, so the placeholder is
+ * hidden from the options panel to keep the user rows left aligned.
+ */
+const hiddenOptionIndicatorCss = css`
+  .euiListItemLayout__icon {
+    display: none;
+  }
+`;
 
 const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   label: getUserDisplayName(profile.user),
@@ -103,12 +116,15 @@ export const UserPicker: React.FC<UserPickerProps> = ({ excludedUsernames, onAdd
         onChange={onChange}
         onSearchChange={setSearchValue}
         singleSelection={{ asPlainText: true }}
+        inputPopoverProps={{
+          panelProps: { css: hiddenOptionIndicatorCss },
+        }}
         isLoading={isFetching}
         isDisabled={isDisabled}
         isClearable={false}
         compressed
         renderOption={renderOption}
-        rowHeight={48}
+        rowHeight={USER_SEARCH_OPTION_ROW_HEIGHT}
         async
         data-test-subj="agentBuilderAclUserPicker"
       />
