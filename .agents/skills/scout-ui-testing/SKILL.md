@@ -35,7 +35,6 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 | You need | Use |
 | --- | --- |
 | To confirm at least one item rendered | `await expect(items).not.toHaveCount(0)`, or assert the value you actually care about |
-| To assert the order of a list or table | `await expect(rows).toHaveText([...])` / `toContainText([...])` — an ordered array needs no index |
 | One row identified by its content | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })` |
 | To act on every item in a collection | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so the loop races the UI |
 | A genuinely positional element | Only through the escape hatch in **Don't select elements by index** (`docs/extend/testing/ui-best-practices.md`): a bounding `toHaveCount` plus a single-line disable stating why |
