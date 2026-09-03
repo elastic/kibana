@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -720,31 +721,45 @@ export function CodeIntelligenceTab() {
             )}
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiInMemoryTable<KnowledgeIndicator>
-            items={filteredKnowledgeIndicators}
-            columns={columns}
-            itemId={getKnowledgeIndicatorItemId}
-            loading={isLoading}
-            pagination={{
-              pageIndex: pagination.pageIndex,
-              pageSize: pagination.pageSize,
-              pageSizeOptions: [25, 50, 100],
-            }}
-            onTableChange={handleTableChange}
-            sorting={sorting}
-            selection={
-              canManage
-                ? {
-                    selected: selectedKnowledgeIndicators,
-                    onSelectionChange: setSelectedKnowledgeIndicators,
-                  }
-                : undefined
-            }
-            tableCaption={TABLE_CAPTION}
-            noItemsMessage={
-              isLoading || hasCodeKnowledgeIndicatorsError ? undefined : NO_ITEMS_MESSAGE
-            }
-          />
+          <EuiPanel
+            color="transparent"
+            hasShadow={false}
+            hasBorder={false}
+            paddingSize="none"
+            css={css`
+              overflow-x: auto;
+              min-width: 0;
+            `}
+          >
+            <EuiInMemoryTable<KnowledgeIndicator>
+              css={css`
+                min-width: 1000px;
+              `}
+              items={filteredKnowledgeIndicators}
+              columns={columns}
+              itemId={getKnowledgeIndicatorItemId}
+              loading={isLoading}
+              pagination={{
+                pageIndex: pagination.pageIndex,
+                pageSize: pagination.pageSize,
+                pageSizeOptions: [25, 50, 100],
+              }}
+              onTableChange={handleTableChange}
+              sorting={sorting}
+              selection={
+                canManage
+                  ? {
+                      selected: selectedKnowledgeIndicators,
+                      onSelectionChange: setSelectedKnowledgeIndicators,
+                    }
+                  : undefined
+              }
+              tableCaption={TABLE_CAPTION}
+              noItemsMessage={
+                isLoading || hasCodeKnowledgeIndicatorsError ? undefined : NO_ITEMS_MESSAGE
+              }
+            />
+          </EuiPanel>
           {selectedKnowledgeIndicator ? (
             <KnowledgeIndicatorDetailsFlyout
               knowledgeIndicator={selectedKnowledgeIndicator}
