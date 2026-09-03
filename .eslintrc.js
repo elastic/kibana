@@ -43,14 +43,6 @@ const scoutRestrictedFtrPatterns = {
     "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
 };
 
-/**
- * Every file in a Scout suite. Derived from the same root glob Scout's own config discovery uses
- * (`SCOUT_CONFIG_PATH_GLOB`), so lint coverage tracks what Scout considers a suite instead of
- * restating the roots here and drifting from it.
- *
- * The top-level `packages/` entry is additive: `packages/kbn-perf-page-load/test/scout_lighthouse/`
- * is laid out as a Scout suite but sits outside the roots that glob covers.
- */
 const SCOUT_TEST_FILE_GLOBS = [
   `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
   'packages/**/test/scout{_*,}/**/*.ts',
