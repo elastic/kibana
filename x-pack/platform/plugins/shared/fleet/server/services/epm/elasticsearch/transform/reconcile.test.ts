@@ -178,9 +178,15 @@ describe('reconcileTransforms', () => {
         // @ts-expect-error incomplete data
         { id: 'endpoint.metadata_current-default-0.1.0', _meta: { package: { name: 'endpoint' } } },
         // @ts-expect-error incomplete data
-        { id: 'endpoint.metadata_current-default-0.14.0', _meta: { package: { name: 'endpoint' } } },
+        {
+          id: 'endpoint.metadata_current-default-0.14.0',
+          _meta: { package: { name: 'endpoint' } },
+        },
         // @ts-expect-error incomplete data
-        { id: 'endpoint.metadata_current-default-0.15.0', _meta: { package: { name: 'endpoint' } } },
+        {
+          id: 'endpoint.metadata_current-default-0.15.0',
+          _meta: { package: { name: 'endpoint' } },
+        },
       ],
     });
 
@@ -190,7 +196,9 @@ describe('reconcileTransforms', () => {
     });
 
     await expect(
-      reconcileTransforms(esClient, logger, 'endpoint', ['endpoint.metadata_current-default-0.16.0'])
+      reconcileTransforms(esClient, logger, 'endpoint', [
+        'endpoint.metadata_current-default-0.16.0',
+      ])
     ).resolves.toBeUndefined();
 
     // First orphan's failure is logged as a warning, not thrown.
