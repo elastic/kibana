@@ -326,9 +326,7 @@ export interface RoundCompleteEventData {
   resumed?: boolean;
   /**
    * Present only on a resumed round. Carries the resume execution (`exec_k`) as its own round so the
-   * persistence layer can append it to the timeline append-only, without rewriting the pause. Its
-   * `steps` lead with the resolved copies of the paused tool calls (result filled), followed by the
-   * follow-up execution's own steps; its counters/trace are `exec_k`-only.
+   * persistence layer can append it to the timeline append-only, without rewriting the pause.
    */
   resume_execution?: {
     follow_up_round: ConversationRound;
