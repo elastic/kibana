@@ -22,7 +22,10 @@ interface ConnectorLifecycleHandlerDeps {
   getStartServices: () => Promise<
     [
       CoreStart,
-      { spaces?: SpacesPluginStart; agentBuilderSml: AgentBuilderSmlPluginStart },
+      {
+        spaces?: SpacesPluginStart;
+        agentBuilderSml: AgentBuilderSmlPluginStart;
+      },
       unknown
     ]
   >;
