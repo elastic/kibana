@@ -306,8 +306,7 @@ export type BeatsOutputSOAttributes =
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
 
-// TODO: add `| OutputSoOtlpAttributes` when service-layer OTLP CRUD is activated in the follow-up PR
-export type OutputSOAttributes = BeatsOutputSOAttributes;
+export type OutputSOAttributes = BeatsOutputSOAttributes | OutputSoOtlpAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
@@ -318,6 +317,7 @@ export interface SettingsSOAttributes {
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
   download_source_auth_secret_storage_requirements_met?: boolean;
+  otlp_output_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {

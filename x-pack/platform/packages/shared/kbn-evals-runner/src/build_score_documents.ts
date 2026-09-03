@@ -75,6 +75,7 @@ export const buildScoreDocuments = (params: BuildScoreDocumentsParams): IngestSc
         ...(score.traceId !== undefined ? { trace_id: score.traceId } : {}),
         ...(result.evaluator.kind ? { kind: result.evaluator.kind } : {}),
         ...(result.evaluator.model ? { model: result.evaluator.model } : {}),
+        ...(result.evaluator.direction ? { direction: result.evaluator.direction } : {}),
       },
     }))
   );

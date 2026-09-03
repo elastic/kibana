@@ -123,6 +123,7 @@ export const createExpectedRenderAttachmentEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedRenderAttachment',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const requiredTypes = requireNonEmptyStringList(
       expected?.expectRenderAttachment,
@@ -160,6 +161,7 @@ export const createExpectedAttachmentDataEvaluator = (): Evaluator<
 > => ({
   name: 'ExpectedAttachmentData',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const assertAttachmentData = requireAttachmentDataFn(expected?.expectAttachmentData);
     if (assertAttachmentData == null) {

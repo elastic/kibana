@@ -29,10 +29,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
-import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './console_snippets';
+import { DEFAULT_LANGUAGE, LANGUAGES } from '../constants/languages';
+import { fillPlaceholders } from '../utils/fill_placeholders';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
-import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
+import type {
+  DocsPanelProps,
+  Language,
+  OnboardingPill,
+  SnippetSet,
+  VectorPath,
+  WizardStep,
+} from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
 import { OnboardingPills } from './onboarding_pills';
 
@@ -64,7 +71,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
 
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
-  const { snippets, consoleRequest } = selectedTab;
+  const { snippets, consoleRequest, label: exampleType } = selectedTab;
 
   const selectedLanguage = LANGUAGES.find((l) => l.id === language);
   const syntax = selectedLanguage?.syntax ?? 'python';
@@ -98,9 +105,17 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
     </EuiContextMenuItem>
   ));
 
+  const commentWithExampleType =
+    tabs.length > 1
+      ? i18n.translate('vectordbOnboarding.apiStep.consoleCommentWithExampleType', {
+          defaultMessage: '{consoleComment} ({exampleType})',
+          values: { consoleComment, exampleType },
+        })
+      : consoleComment;
+
   const requestWithComment = `
 # ===============================================
-# 🚀 ${consoleComment}
+# 🚀 ${commentWithExampleType}
 # ===============================================
 \n${consoleRequest}`;
 
@@ -207,6 +222,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
             fontSize="m"
             paddingSize="m"
             overflowHeight={SNIPPET_OVERFLOW_HEIGHT}
+            whiteSpace="pre-wrap"
             transparentBackground
             data-test-subj="vectordbWizardSnippet"
           >

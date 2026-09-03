@@ -19,6 +19,8 @@ import {
   seedLogs,
   seedQueries,
   cleanSeedData,
+  runDiscovery,
+  verifyChangePoint,
 } from './seed_sigevents_env/steps';
 import type { SeedContext } from './seed_sigevents_env/types';
 import { getSynthtraceDefaultStream } from './seed_sigevents_env/types';
@@ -28,9 +30,16 @@ const FIXED_SEED = 42;
 
 export async function ensureStreamsEnabled(
   config: ConnectionConfig,
+  space: string,
   log: ToolingLog
 ): Promise<void> {
-  const { status, data } = await kibanaRequest(config, 'POST', '/api/streams/_enable');
+  const { status, data } = await kibanaRequest(
+    config,
+    'POST',
+    '/api/streams/_enable',
+    undefined,
+    space
+  );
   if (status === 200) {
     log.info('Streams enabled successfully');
   } else if (status === 400) {
@@ -73,7 +82,7 @@ run(
       throw new Error(`Unknown scenario "${scenarioName}". Available: ${available}`);
     }
 
-    await ensureStreamsEnabled(config, log);
+    await ensureStreamsEnabled(config, space, log);
 
     const ctx: SeedContext = {
       esUrl: config.esUrl,
@@ -102,17 +111,32 @@ run(
     //   queries    → must be promoted before rule_ids can be read (needed by alerts)
 
     log.info('Seeding logs…');
-    const { failureStartMs, failureEndMs, manifest } = await seedLogs(ctx, esClient, log);
+    const { seriesStartMs, seriesEndMs, manifest } = await seedLogs(ctx, esClient, log);
 
     log.info('Seeding features…');
     await seedFeatures(ctx, manifest, config, log);
 
     log.info('Seeding queries…');
 
-    const seededQueries = await seedQueries(ctx, scenario, config, esClient, log);
+    const seededQueries = await seedQueries(ctx, scenario, config, log);
 
     log.info('Seeding alerts…');
-    await seedAlerts(ctx, seededQueries, failureStartMs, failureEndMs, esClient, log);
+    const seededSeries = await seedAlerts(
+      ctx,
+      seededQueries,
+      seriesStartMs,
+      seriesEndMs,
+      esClient,
+      log
+    );
+
+    log.info('Verifying change-point detection…');
+    await verifyChangePoint(seededQueries, seededSeries, config, space, log);
+
+    if (flags['run-discovery'] === true) {
+      log.info('Running significant-events discovery…');
+      await runDiscovery(ctx, seededQueries, esClient, config, log);
+    }
 
     log.info('Done.');
   },
@@ -120,13 +144,15 @@ run(
     description: 'Synthetic sigevents seed for local Kibana + Elasticsearch.',
     flags: {
       string: ['scenario', 'space', 'es-url', 'es-username', 'es-password', 'kibana-url'],
-      boolean: ['clean'],
+      boolean: ['clean', 'run-discovery'],
       help: `
         --scenario <name>        Scenario key in CLAIMS_SEED (default: fraud_check_redis_herring)
                                  Available: fraud_check_redis_herring, healthy_baseline
         --space <name>           Kibana space for seeded assets (default: default)
         --clean                  Delete all previously seeded data (features, alerts, queries,
                                  and the data stream) before re-seeding
+        --run-discovery          Run detection, seed post-detection evidence, then run AI discovery
+                                 and verify an active event (requires a configured inference connector)
         --es-url <url>           Elasticsearch URL (default: from kibana.dev.yml)
         --es-username <user>     ES username (default: elastic)
         --es-password <pass>     ES password (default: changeme)

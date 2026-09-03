@@ -137,6 +137,10 @@ dependsOn:
   - '@kbn/zod-helpers'
   - '@kbn/core-spaces-common'
   - '@kbn/expect'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
+  - '@kbn/cps-server-utils'
+  - '@kbn/observability-utils-server'
 tags:
   - plugin
   - prod
@@ -151,6 +155,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
   jest-config:
