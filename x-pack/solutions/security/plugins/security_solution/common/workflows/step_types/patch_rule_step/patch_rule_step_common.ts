@@ -23,18 +23,28 @@ import {
 
 export const PatchRuleStepId = 'security.patchRule' as const;
 
-// "type" property is optional, but if you provide it in the editor,
-// it'll narrow the editor completion and validation to that rule type's fields.
+// "type" is optional, matching the Patch Rule API contract, but if you provide it in the editor
+// it narrows completion and validation to that rule type's fields.
+//
+// Every member is strict. Zod objects strip unknown keys by default, which would let a body with
+// no "type" match the first member (EQL) and have every field that member doesn't declare
+// silently deleted — the step would then patch nothing and return 200.
+//
+// This is a plain union rather than a discriminated one: a discriminated union makes the
+// editor pre-fill `type: ""`, and a required discriminator breaks template-string inputs
+// (https://github.com/elastic/kibana/issues/276711).
 export const patchRuleInputSchema = z.object({
   patch: z.union([
-    EqlRulePatchProps.extend({ type: z.literal('eql').optional() }),
-    QueryRulePatchProps.extend({ type: z.literal('query').optional() }),
-    SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }),
-    ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }),
-    ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }),
-    MachineLearningRulePatchProps.extend({ type: z.literal('machine_learning').optional() }),
-    NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }),
-    EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }),
+    EqlRulePatchProps.extend({ type: z.literal('eql').optional() }).strict(),
+    QueryRulePatchProps.extend({ type: z.literal('query').optional() }).strict(),
+    SavedQueryRulePatchProps.extend({ type: z.literal('saved_query').optional() }).strict(),
+    ThresholdRulePatchProps.extend({ type: z.literal('threshold').optional() }).strict(),
+    ThreatMatchRulePatchProps.extend({ type: z.literal('threat_match').optional() }).strict(),
+    MachineLearningRulePatchProps.extend({
+      type: z.literal('machine_learning').optional(),
+    }).strict(),
+    NewTermsRulePatchProps.extend({ type: z.literal('new_terms').optional() }).strict(),
+    EsqlRulePatchProps.extend({ type: z.literal('esql').optional() }).strict(),
   ]),
 });
 
@@ -60,7 +70,7 @@ export const patchRuleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.patchRule.documentation.details',
       {
         defaultMessage:
-          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The fields to patch are passed under the "patch" property and match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type.',
+          'Partially updates a detection rule in current space via the Patch Rule API endpoint. The fields to patch are passed under the "patch" property and match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-patchrule for the fields of each rule type. All fields in one patch must belong to the same rule type; setting "type" is optional but makes the editor validate against that type.',
       }
     ),
     examples: [
