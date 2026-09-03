@@ -45,7 +45,7 @@ const getExecutionHistoryTabs = ({
   {
     id: POLICIES_TAB_ID,
     label: i18n.translate('xpack.alertingV2.executionHistory.tabs.policiesLabel', {
-      defaultMessage: 'Policies',
+      defaultMessage: 'Action Policies',
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),

@@ -8,6 +8,7 @@
 import type {
   AppMountParameters,
   AppUpdater,
+  ChromeBreadcrumb,
   CoreSetup,
   CoreStart,
   Plugin as CorePlugin,
@@ -16,7 +17,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { from, map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
-import type { ReactElement } from 'react';
+import React from 'react';
+import type { ReactElement, ComponentType } from 'react';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -175,6 +177,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  getClassicRulesPage: () => ComponentType<any>;
 }
 
 interface PluginsSetup {
@@ -647,6 +650,43 @@ export class Plugin
           return undefined;
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
+      },
+      getClassicRulesPage: () => {
+        const actionTypeRegistry = this.actionTypeRegistry;
+        const ruleTypeRegistry = this.ruleTypeRegistry;
+        const isServerless = this.isServerless;
+        const actions = this.connectorServices
+          ? {
+              validateEmailAddresses: this.connectorServices.validateEmailAddresses,
+              enabledEmailServices: this.connectorServices.enabledEmailServices,
+            }
+          : { validateEmailAddresses: () => [], enabledEmailServices: [] };
+        const cloud = (this as any).cloud;
+
+        const LazyComposable = React.lazy(() =>
+          import('./application/composable_rules_page').then((m) => ({
+            default: m.ComposableClassicRulesPage,
+          }))
+        );
+
+        return (props: { coreStart: CoreStart; setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void }) => {
+          const internalDeps = {
+            actions: actions as any,
+            security: plugins.security,
+            cloud,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            kibanaFeatures: [],
+            isCloud: false,
+            isServerless,
+            pluginsStart: plugins as unknown as Record<string, unknown>,
+          };
+          return React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(LazyComposable, { ...props, internalDeps })
+          );
+        };
       },
     };
   }

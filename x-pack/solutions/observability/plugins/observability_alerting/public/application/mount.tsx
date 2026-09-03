@@ -11,16 +11,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import { createObservabilityAlertingSetBreadcrumbs } from './breadcrumbs';
 
 export const mountObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
+  triggersActionsUi,
   params,
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   params: AppMountParameters;
 }): AppUnmount => {
   const { element, history } = params;
@@ -38,6 +41,7 @@ export const mountObservabilityAlertingApp = ({
         <ObservabilityAlertingApp
           coreStart={coreStart}
           alertingVTwo={alertingVTwo}
+          triggersActionsUi={triggersActionsUi}
           setBreadcrumbs={setBreadcrumbs}
         />
       </Router>

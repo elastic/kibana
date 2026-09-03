@@ -7,8 +7,9 @@
 
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -18,8 +19,6 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
-
-const V1_RULES_APP_ID = 'rules';
 
 const RedirectToPath = ({ to }: { to: string }) => {
   const history = useHistory();
@@ -31,23 +30,17 @@ const RedirectToPath = ({ to }: { to: string }) => {
   return null;
 };
 
-const RedirectToV1Rules = ({ coreStart }: { coreStart: CoreStart }) => {
-  useEffect(() => {
-    void coreStart.application.navigateToApp(V1_RULES_APP_ID, { replace: true });
-  }, [coreStart]);
-
-  return null;
-};
-
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[], appHistory?: unknown) => void;
 }
 
 export const ObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
+  triggersActionsUi,
   setBreadcrumbs,
 }: ObservabilityAlertingAppProps) => {
   const {
@@ -58,13 +51,18 @@ export const ObservabilityAlertingApp = ({
     ExecutionHistoryPage,
   } = alertingVTwo;
 
+  const ClassicRulesPage = useMemo(
+    () => triggersActionsUi.getClassicRulesPage(),
+    [triggersActionsUi]
+  );
+
   return (
     <Routes>
       <Route exact path="/">
         <RedirectToPath to={OBSERVABILITY_ALERTING_INBOX_PATH} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
-        <RedirectToV1Rules coreStart={coreStart} />
+        <ClassicRulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />

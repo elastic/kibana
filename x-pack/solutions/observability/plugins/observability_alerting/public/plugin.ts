@@ -125,6 +125,7 @@ export class ObservabilityAlertingPlugin
         return mountObservabilityAlertingApp({
           coreStart,
           alertingVTwo: depsStart.alertingVTwo,
+          triggersActionsUi: depsStart.triggersActionsUi,
           params,
         });
       },
