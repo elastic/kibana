@@ -87,7 +87,7 @@ describe('useBulkAlertActionItems', () => {
       ) as BulkActionsConfig;
 
       await act(async () => {
-        await openItem.onClick([], true, jest.fn(), jest.fn(), jest.fn());
+        await openItem.onClick!([], true, jest.fn(), jest.fn(), jest.fn());
       });
     };
 

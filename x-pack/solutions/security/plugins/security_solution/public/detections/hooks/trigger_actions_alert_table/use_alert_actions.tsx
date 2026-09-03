@@ -16,8 +16,16 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { AlertClosingReason } from '../../../../common/types';
-import type { RuntimeFieldType } from '../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import {
+  RuntimeFieldTypeEnum,
+  type RuntimeFieldType,
+} from '../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
+
+// Derived from the server's Zod enum so this stays in sync if new types are added.
+// Filters out ES-only types ('composite', 'lookup') that the server schema does not accept,
+// preventing a Zod validation 400 from failing the entire bulk-close request.
+const SUPPORTED_RUNTIME_FIELD_TYPES = new Set<string>(Object.values(RuntimeFieldTypeEnum));
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
@@ -54,10 +62,10 @@ export const useBulkAlertActionItems = ({
 
   const runtimeFields = useMemo(() => {
     if (!runtimeMappings) return undefined;
-    const entries = Object.entries(runtimeMappings).map(([name, field]) => [name, field.type]);
-    return entries.length > 0
-      ? (Object.fromEntries(entries) as Record<string, RuntimeFieldType>)
-      : undefined;
+    const entries = Object.entries(runtimeMappings)
+      .filter(([, field]) => SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
+      .map(([name, field]) => [name, field.type] as [string, RuntimeFieldType]);
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
   }, [runtimeMappings]);
 
   const { addSuccess, addError, addWarning } = useAppToasts();
