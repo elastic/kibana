@@ -7,22 +7,22 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ScoutPrivateLocation } from '../../../../scout/common/services/synthetics_private_location_api_service';
+import type { ScoutPrivateLocation } from '../../../common/services/synthetics_private_location_api_service';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
   SYNTHETICS_MONITOR_SO_TYPES,
-} from '../../../../scout/common/fixtures';
-import { addMonitor, deleteMonitors } from '../../../../scout/common/fixtures/monitors';
+} from '../../../common/fixtures';
+import { addMonitor, deleteMonitors } from '../../../common/fixtures/monitors';
 import {
   getPackagePolicyForMonitor,
   getAgentPolicyRevision,
   indexFakeFleetAgent,
   setFleetAgentLastCheckin,
   deleteFleetAgents,
-} from '../../../../scout/common/fixtures/fleet';
-import { tryForTime } from '../../../../scout/common/fixtures/retry';
-import { httpMonitorFixture } from '../../../../scout/common/fixtures/data/http_monitor';
+} from '../../../common/fixtures/fleet';
+import { tryForTime } from '../../../common/fixtures/retry';
+import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { agentIdFromCondition } from '../../../../../server/synthetics_service/private_location/assign_by_condition';
 import { STALE_CHECKIN_MS } from '../../../../../server/synthetics_service/private_location/plan_rebalance';
 
@@ -41,11 +41,12 @@ const MONITOR_COUNT = 8;
  * production task -- not a mock of it -- performs failover with no drops and
  * a real Fleet agent-policy revision bump.
  *
- * Lives under `test/scout_synthetics_rebalance/` (a dedicated Scout config
- * set, see `synthetics_rebalance/stateful/classic.stateful.config.ts` in
- * `@kbn/scout`) because `RebalancePrivateLocationShardsTask` is disabled by
- * default and its config flag is only read once at Kibana boot -- it can't be
- * flipped on from within a test against the default config set.
+ * Runs under the default Scout config set: the plugin registers and starts
+ * `RebalancePrivateLocationShardsTask` unconditionally, and its kill-switch
+ * lives in task-manager state that defaults to enabled (see
+ * `isRebalancePrivateLocationShardsEnabled`), so no boot-time server arg is
+ * needed. A spec that wants the switch off should flip it at runtime with
+ * `setRebalancePrivateLocationShardsEnabled`.
  */
 apiTest.describe('ScalablePrivateLocationRebalance', { tag: ['@local-stateful-classic'] }, () => {
   let editorHeaders: Record<string, string>;

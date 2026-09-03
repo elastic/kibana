@@ -26,7 +26,7 @@ import {
  * this is evidence-gathering for documenting the scale envelope, not a test.
  *
  * Uses fake `.fleet-agents` documents (see `indexFakeAgent` below, the same
- * technique proven out in the `scout_synthetics_rebalance` Scout suite) so
+ * technique proven out in the scalable-private-location Scout specs) so
  * the run is reproducible without provisioning real Elastic Agent processes
  * at scale. Real Fleet Server / agent overhead (enrollment, check-in
  * polling, actual Heartbeat execution) is NOT modelled -- this measures
