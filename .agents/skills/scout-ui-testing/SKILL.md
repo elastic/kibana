@@ -30,14 +30,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
 - **Never suppress a lint rule to make it pass**: fix the code instead. A file-level `/* eslint-disable <rule> */` is never acceptable — it silences the rest of the file, including code written later. A single-line disable stating its reason is a last resort for a case the rule genuinely can't express, not a shortcut.
-- **No positional selectors**: `playwright/no-nth-methods` restricts `.first()`, `.nth()`, and `.last()`. `.first()` is a symptom, not a solution: either the selector matched more than one element (scope it to a container, or add a `data-test-subj`) or the collection wasn't rendered yet (wait on a `-loading` / `-loaded` subject). Use the replacement instead of an index:
-
-| You need | Use |
-| --- | --- |
-| To confirm at least one item rendered | `await expect(items).not.toHaveCount(0)`, or assert the value you actually care about |
-| One row identified by its content | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })` |
-| To act on every item in a collection | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so the loop races the UI |
-| A genuinely positional element | Only through the escape hatch in **Avoid selecting elements by index or position** (`docs/extend/testing/ui-best-practices.md`): a bounding `toHaveCount` plus a single-line disable stating why |
+- **No positional selectors**: `playwright/no-nth-methods` restricts `.first()`, `.nth()`, and `.last()`. `.first()` is a symptom, not a solution: either the selector matched more than one element (scope it to a container, or add a `data-test-subj`) or the collection wasn't rendered yet (wait on a `-loading` / `-loaded` subject). Identify the element instead (`filter({ hasText })`, `getByRole('row', { name })`), or iterate with `for (const item of await items.all())` — never `while ((await items.count()) > 0)`, which races the render. Escape hatch: **Avoid selecting elements by index or position** in `docs/extend/testing/ui-best-practices.md`.
 
 ## Auth (UI)
 
