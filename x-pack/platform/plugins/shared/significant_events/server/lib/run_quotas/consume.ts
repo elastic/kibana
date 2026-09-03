@@ -5,28 +5,30 @@
  * 2.0.
  */
 
-import type { RunQuotaConsumeRequest, RunQuotaConsumeResponse } from '../../../common/run_quotas';
+import type { RunQuotaConsumeResponse, RunQuotaGroup } from '../../../common/run_quotas';
 import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
 import { dayKey, resolveDailyWindow } from './window';
 import type { RunQuotaSavedObjectsRepository } from './repository';
 
 export const consumeRunQuota = async ({
   internalRepository,
-  ...request
+  group,
+  allowOverLimit = false,
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
-} & RunQuotaConsumeRequest): Promise<RunQuotaConsumeResponse> => {
+  group: RunQuotaGroup;
+  allowOverLimit?: boolean;
+}): Promise<RunQuotaConsumeResponse> => {
   const date = dayKey(resolveDailyWindow());
   const settings = await readRunQuotaSettings(internalRepository);
-  const limit = settings.limits[request.group];
-  const isCriticalInvestigation = request.group === 'investigation' && request.critical;
+  const limit = settings.limits[group];
 
   return mutateRunQuotaLedger<RunQuotaConsumeResponse>({
     internalRepository,
     date,
-    group: request.group,
+    group,
     mutation: (ledger) => {
-      if (settings.enabled && limit > 0 && ledger.count >= limit && !isCriticalInvestigation) {
+      if (settings.enabled && limit > 0 && ledger.count >= limit && !allowOverLimit) {
         return { result: { allowed: false } };
       }
 
