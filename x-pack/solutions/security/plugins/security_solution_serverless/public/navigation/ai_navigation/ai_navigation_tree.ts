@@ -7,7 +7,6 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -16,13 +15,6 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-import { AiNavigationIcon } from './icon';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'Elastic AI SOC Engine' }
-);
-
 export const createAiNavigationTree = (
   core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic,
@@ -30,13 +22,6 @@ export const createAiNavigationTree = (
   showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    {
-      id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: AiNavigationIcon,
-      renderAs: 'home',
-    },
     ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
       ? [
           {

@@ -60,8 +60,7 @@ const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): stri
     encodeURIComponent(entityEuid)
   );
 
-// Failing: See https://github.com/elastic/kibana/issues/287531
-apiTest.describe.skip(
+apiTest.describe(
   'Entity ML Anomaly Detection APIs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -196,6 +195,13 @@ apiTest.describe.skip(
               `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
             );
           }
+          // Log the datafeed query so we can see exactly which events it includes.
+          // If the datafeed excludes event codes 4672/4673 (privilege events), the
+          // New York baseline events would not be found, producing baselineValues=[].
+          log.info(
+            `[DIAG] PAD datafeed: indices=${JSON.stringify(padJob.datafeed_config?.indices)}, ` +
+              `query=${JSON.stringify(padJob.datafeed_config?.query)}`
+          );
         }
       } catch (err) {
         log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
@@ -539,7 +545,7 @@ apiTest.describe.skip(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient }) => {
+      async ({ apiClient, log }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
@@ -548,6 +554,8 @@ apiTest.describe.skip(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
+
+        log.info(`anomaly summary response body: ${JSON.stringify(body)}`);
 
         const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'

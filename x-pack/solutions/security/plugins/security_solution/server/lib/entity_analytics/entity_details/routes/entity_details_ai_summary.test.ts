@@ -335,17 +335,24 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   });
 
   it('returns 500 and does not report telemetry when the write is dropped (failed > 0)', async () => {
-    // A dropped doc resolves (does not throw) to { successful: 0, failed: 1 }. The route
-    // must surface this as an error so the client does not treat an unwritten summary as
-    // persisted (it would read back as null on reopen).
-    mockBulkAppendMetadata.mockResolvedValue({ successful: 0, failed: 1 });
+    // A dropped doc resolves (does not throw) to { successful: 0, failed: 1, dropsByType }.
+    // The route must surface this as an error so the client does not treat an unwritten
+    // summary as persisted (it would read back as null on reopen).
+    mockBulkAppendMetadata.mockResolvedValue({
+      successful: 0,
+      failed: 1,
+      dropsByType: [
+        { type: 'mapper_parsing_exception', count: 1, status: 400, sampleReason: 'bad mapping' },
+      ],
+    });
 
     const request = buildRequest();
     const response = await server.inject(request, context);
 
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({
-      message: 'AI summary document was dropped from the metadata bulk write',
+      message:
+        'AI summary document was dropped from the metadata bulk write: mapper_parsing_exception (1, status 400): bad mapping',
       status_code: 500,
     });
     expect(mockReportEvent).not.toHaveBeenCalled();

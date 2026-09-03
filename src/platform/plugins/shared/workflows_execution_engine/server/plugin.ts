@@ -1528,6 +1528,7 @@ export class WorkflowsExecutionEnginePlugin
       spaceId,
       workflowId,
       schedulingRequest,
+      onCancelled,
     }) => {
       await checkLicense(plugins.licensing);
 
@@ -1550,14 +1551,16 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         outcomes.forEach((outcome, index) => {
-          if (outcome.status === 'rejected') {
-            const executionId = page.results[index];
-            const message =
-              outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
-            this.logger.warn(
-              `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
-            );
+          const executionId = page.results[index];
+          if (outcome.status === 'fulfilled') {
+            onCancelled?.(executionId);
+            return;
           }
+          const message =
+            outcome.reason instanceof Error ? outcome.reason.message : String(outcome.reason);
+          this.logger.warn(
+            `cancelAllActiveWorkflowExecutions: failed to cancel execution ${executionId}: ${message}`
+          );
         });
 
         searchAfter = page.nextSearchAfter;

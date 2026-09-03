@@ -134,6 +134,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates buckets that are too large to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />
@@ -180,6 +185,11 @@ describe('useTimeRange', () => {
           <EuiIconTip
             color="warning"
             content="This interval creates too many buckets to show in the selected time range, so it has been scaled to 1 minute."
+            iconProps={
+              Object {
+                "data-test-subj": "unifiedHistogramIntervalWarning",
+              }
+            }
             title="Warning"
             type="warning"
           />

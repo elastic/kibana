@@ -8,21 +8,93 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { Header } from './header';
 
+const createUser = () => userEvent.setup({ pointerEventsCheck: 0, delay: null });
+
+const renderHeader = (
+  props: Partial<React.ComponentProps<typeof Header>> = {},
+  filteredCount = 2
+) => {
+  const onExportAll = props.onExportAll ?? jest.fn();
+  const onImport = props.onImport ?? jest.fn();
+  const onRefresh = props.onRefresh ?? jest.fn();
+
+  return {
+    onExportAll,
+    onImport,
+    onRefresh,
+    ...render(
+      <MockAppHeaderProvider>
+        <Header
+          onExportAll={onExportAll}
+          onImport={onImport}
+          onRefresh={onRefresh}
+          filteredCount={filteredCount}
+        />
+      </MockAppHeaderProvider>
+    ),
+  };
+};
+
 describe('Header', () => {
-  it('should render normally', () => {
-    const props = {
-      onExportAll: () => {},
-      onImport: () => {},
-      onRefresh: () => {},
-      totalCount: 4,
-      filteredCount: 2,
-    };
+  it('renders the title, description, and Export as the primary action', async () => {
+    renderHeader();
 
-    const component = shallow(<Header {...props} />);
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Saved Objects');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Manage and share your saved objects. To edit the underlying data of an object, go to its associated application.'
+    );
 
-    expect(component).toMatchSnapshot();
+    await waitFor(() => {
+      expect(screen.getByTestId('exportAllObjects')).toHaveTextContent('Export 2 objects');
+    });
+
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(getAppMenuItemTestSubj('refresh'))).toBeInTheDocument();
+    expect(screen.getByTestId('importObjects')).toBeInTheDocument();
+  });
+
+  it('calls onExportAll from the primary action', async () => {
+    const user = createUser();
+    const { onExportAll } = renderHeader();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('exportAllObjects')).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId('exportAllObjects'));
+
+    expect(onExportAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onImport from the Import menu item', async () => {
+    const user = createUser();
+    const { onImport } = renderHeader();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+    });
+    await openAppMenuOverflow(user);
+    await user.click(screen.getByTestId('importObjects'));
+
+    expect(onImport).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onRefresh from the Refresh menu item', async () => {
+    const user = createUser();
+    const { onRefresh } = renderHeader();
+
+    await waitFor(() => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+    });
+    await openAppMenuOverflow(user);
+    await user.click(screen.getByTestId(getAppMenuItemTestSubj('refresh')));
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 });
