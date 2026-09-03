@@ -128,6 +128,14 @@ x-pack/platform/plugins/shared/entity_store/
 
 A third, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
 
+A fourth gate — the platform Cloud feature flag `entityStore.entityProvenanceEnabled`
+(defaults to `false`) — controls the `entity.created_by` mapping migration and logs-extraction
+backfill. When enabled, Entity Store first adds the keyword mapping in place to the resolved
+latest index (legacy or solution-neutral), then emits the ES|QL provenance reference. If the
+mapping update fails, extraction proceeds without the provenance reference and retries the
+migration later. The create-if-missing gate remains independent; enable the platform provenance
+flag before rolling out create-if-missing so those writes use the explicit mapping.
+
 ## Risk Score Architecture (v2)
 
 The risk score maintainer (`id: 'risk-score'`) is registered by `security_solution` plugin (not `entity_store`) via `registerRiskScoreMaintainer()`. It **dual-writes** to both the risk score index AND the entity store in the same run.

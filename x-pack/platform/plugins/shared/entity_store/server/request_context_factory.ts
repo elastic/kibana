@@ -25,6 +25,7 @@ import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
+import { prepareLatestIndexProvenanceMapping } from './domain/asset_manager/ensure_latest_index_mappings';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: EntityStoreCoreSetup;
@@ -76,6 +77,12 @@ export async function createRequestHandlerContext({
   const cpsClient = coreStart.elasticsearch.client.asScoped(request, {
     projectRouting: 'space',
   }).asCurrentUser;
+  const provenanceEnabled = await prepareLatestIndexProvenanceMapping({
+    esClient: core.elasticsearch.client.asInternalUser,
+    featureFlags: coreStart.featureFlags,
+    namespace,
+    logger,
+  });
 
   const crudClient = new CRUDClient({
     logger,
@@ -95,6 +102,7 @@ export async function createRequestHandlerContext({
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
+    provenanceEnabled,
   });
 
   const historySnapshotClient = new HistorySnapshotClient({

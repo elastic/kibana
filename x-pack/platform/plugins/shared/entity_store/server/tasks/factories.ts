@@ -29,12 +29,14 @@ export async function createLogsExtractionClient({
   logger,
   namespace,
   isServerless,
+  provenanceEnabled = false,
 }: {
   core: EntityStoreCoreSetup;
   logger: Logger;
   namespace: string;
   fakeRequest: KibanaRequest;
   isServerless: boolean;
+  provenanceEnabled?: boolean;
 }): Promise<LogsExtractionClientFactoryResult> {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -59,6 +61,7 @@ export async function createLogsExtractionClient({
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
     globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
+    provenanceEnabled,
   });
 
   return { logsExtractionClient };

@@ -26,6 +26,7 @@ import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { prepareLatestIndexProvenanceMapping } from '../domain/asset_manager/ensure_latest_index_mappings';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -96,12 +97,20 @@ async function runTask({
   let remote = false;
 
   try {
+    const provenanceEnabled = await prepareLatestIndexProvenanceMapping({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      featureFlags: coreStart.featureFlags,
+      namespace,
+      logger,
+    });
+
     const { logsExtractionClient } = await createLogsExtractionClient({
       core,
       fakeRequest,
       logger,
       namespace,
       isServerless,
+      provenanceEnabled,
     });
 
     const extractionStart = Date.now();

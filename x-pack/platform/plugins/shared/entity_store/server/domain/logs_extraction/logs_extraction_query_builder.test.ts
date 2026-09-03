@@ -61,6 +61,22 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
+  it('records logs-extraction provenance only when enabled', async () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('host', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      provenanceEnabled: true,
+    });
+
+    expect(query).toContain('entity.created_by = COALESCE(entity.created_by, "logs_extraction")');
+    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
   it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
     const base = getEntityDefinition('host', 'default');
     // Inject a managed field alongside a normal log-derived field to verify orthogonality.

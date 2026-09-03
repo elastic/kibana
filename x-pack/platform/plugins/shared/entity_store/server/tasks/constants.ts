@@ -11,6 +11,7 @@ export type EntityStoreTaskType = z.infer<typeof EntityStoreTaskType>;
 export const EntityStoreTaskType = z.enum([
   'extractEntity',
   'entityMaintainer',
+  'entityProvenanceMappingMigration',
   'historySnapshot',
   'resilience',
   'statusReport',
