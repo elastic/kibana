@@ -489,7 +489,7 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
-        // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
+        // see {@link https://github.com/TanStack/virtual/blob/%40tanstack/react-virtual%403.13.23/packages/virtual-core/src/index.ts#L378}
         virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
 
         onStateChange?.(
