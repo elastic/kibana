@@ -7,7 +7,8 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ApmDataSourceWithSummary } from '@kbn/apm-data-access-plugin/common';
+import type { ApmDataSourceWithSummary } from '@kbn/apm-types';
+import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -36,8 +37,11 @@ export async function getServicesCounts({
     {}
   );
 
-  // TransactionEvent always has hasDocs: true, so this is guaranteed non-null.
-  const { documentType, rollupInterval } = sources.find((s) => s.hasDocs)!;
+  const { source } = getPreferredBucketSizeAndDataSource({
+    sources,
+    bucketSizeInSeconds: (end - start) / 1000,
+  });
+  const { documentType, rollupInterval } = source;
 
   const params = {
     apm: {

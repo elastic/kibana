@@ -8,6 +8,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { LookupServicesResponse } from '@kbn/apm-api-shared';
 import type { ApmDataSourceWithSummary } from '@kbn/apm-types';
+import { getPreferredBucketSizeAndDataSource } from '@kbn/apm-data-access-plugin/common';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -27,8 +28,11 @@ export async function lookupServices({
   maxNumberOfServices: number;
   sources: ApmDataSourceWithSummary[];
 }): Promise<LookupServicesResponse> {
-  // TransactionEvent always has hasDocs: true, so this is guaranteed non-null.
-  const { documentType, rollupInterval } = sources.find((s) => s.hasDocs)!;
+  const { source } = getPreferredBucketSizeAndDataSource({
+    sources,
+    bucketSizeInSeconds: (end - start) / 1000,
+  });
+  const { documentType, rollupInterval } = source;
   const response = await apmEventClient.search('lookup_services', {
     apm: {
       sources: [{ documentType, rollupInterval }],
