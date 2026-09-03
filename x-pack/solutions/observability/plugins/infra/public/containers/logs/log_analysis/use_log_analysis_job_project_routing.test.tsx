@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import { renderHook } from '@testing-library/react';
+import { MlCpsCapabilityContext } from '../../../hooks/use_infra_ml_cps';
 import { useLogAnalysisJobProjectRouting } from './use_log_analysis_job_project_routing';
 import type { JobSummary } from './api/ml_get_jobs_summary_api';
 
@@ -19,9 +22,19 @@ const mockCpsEnabled = (isCpsEnabled: boolean) => {
   mockUseKibanaContextForPlugin.mockReturnValue({
     services: {
       cps: isCpsEnabled ? { isTierEligible: true, cpsManager: {} } : undefined,
+      featureFlags: { getBooleanValue: jest.fn().mockReturnValue(true) },
     },
   });
 };
+
+const withMlCpsCapability: FC<PropsWithChildren> = ({ children }) => (
+  <MlCpsCapabilityContext.Provider value={true}>{children}</MlCpsCapabilityContext.Provider>
+);
+
+const renderRoutingHook = (jobSummary?: JobSummary) =>
+  renderHook(() => useLogAnalysisJobProjectRouting(jobSummary), {
+    wrapper: withMlCpsCapability,
+  });
 
 const createJobSummary = (projectScopeFields: Partial<JobSummary> = {}): JobSummary => ({
   id: 'test-job',
@@ -33,10 +46,8 @@ describe('useLogAnalysisJobProjectRouting', () => {
   it('returns the stored project routing of the job', () => {
     mockCpsEnabled(true);
 
-    const { result } = renderHook(() =>
-      useLogAnalysisJobProjectRouting(
-        createJobSummary({ projectRouting: '_alias:_origin', isUiamEnabled: true })
-      )
+    const { result } = renderRoutingHook(
+      createJobSummary({ projectRouting: '_alias:_origin', isUiamEnabled: true })
     );
 
     expect(result.current).toBe('_alias:_origin');
@@ -45,10 +56,8 @@ describe('useLogAnalysisJobProjectRouting', () => {
   it('falls back to all projects for unscoped jobs with a cloud API key', () => {
     mockCpsEnabled(true);
 
-    const { result } = renderHook(() =>
-      useLogAnalysisJobProjectRouting(
-        createJobSummary({ projectRouting: null, isUiamEnabled: true })
-      )
+    const { result } = renderRoutingHook(
+      createJobSummary({ projectRouting: null, isUiamEnabled: true })
     );
 
     expect(result.current).toBe('_alias:*');
@@ -57,10 +66,8 @@ describe('useLogAnalysisJobProjectRouting', () => {
   it('falls back to the origin project for unscoped jobs without a cloud API key', () => {
     mockCpsEnabled(true);
 
-    const { result } = renderHook(() =>
-      useLogAnalysisJobProjectRouting(
-        createJobSummary({ projectRouting: null, isUiamEnabled: false })
-      )
+    const { result } = renderRoutingHook(
+      createJobSummary({ projectRouting: null, isUiamEnabled: false })
     );
 
     expect(result.current).toBe('_alias:_origin');
@@ -69,7 +76,7 @@ describe('useLogAnalysisJobProjectRouting', () => {
   it('returns undefined for job summaries without project scope fields', () => {
     mockCpsEnabled(true);
 
-    const { result } = renderHook(() => useLogAnalysisJobProjectRouting(createJobSummary()));
+    const { result } = renderRoutingHook(createJobSummary());
 
     expect(result.current).toBeUndefined();
   });
@@ -77,13 +84,23 @@ describe('useLogAnalysisJobProjectRouting', () => {
   it('returns undefined when no job summary is available', () => {
     mockCpsEnabled(true);
 
-    const { result } = renderHook(() => useLogAnalysisJobProjectRouting(undefined));
+    const { result } = renderRoutingHook(undefined);
 
     expect(result.current).toBeUndefined();
   });
 
   it('returns undefined when CPS is unavailable', () => {
     mockCpsEnabled(false);
+
+    const { result } = renderRoutingHook(
+      createJobSummary({ projectRouting: '_alias:_origin', isUiamEnabled: true })
+    );
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it('returns undefined when the ML CPS capability is disabled', () => {
+    mockCpsEnabled(true);
 
     const { result } = renderHook(() =>
       useLogAnalysisJobProjectRouting(
