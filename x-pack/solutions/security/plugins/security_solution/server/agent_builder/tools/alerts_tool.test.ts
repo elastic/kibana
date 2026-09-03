@@ -173,7 +173,7 @@ describe('alertsTool', () => {
         nlQuery: expect.stringContaining('find all alerts'),
         index: `${DEFAULT_ALERTS_INDEX}-default`,
         esClient: mockEsClient.asCurrentUser,
-        modelProvider: mockModelProvider,
+        model: { model: 'test-model' },
         events: mockEvents,
         logger: mockLogger,
       });
