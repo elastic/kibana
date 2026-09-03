@@ -169,6 +169,15 @@ export class SavedObjectsManagementPage {
       .selectOption({ label: replacementTitle });
   }
 
+  /**
+   * The replacement control for a missing-reference conflict, so callers can
+   * assert its state (e.g. that it defaults to "Skip import" rather than
+   * silently preselecting an available data view).
+   */
+  replacementIndexPatternSelect(missingIndexPatternId: string): Locator {
+    return this.page.testSubj.locator(`managementChangeIndexSelection-${missingIndexPatternId}`);
+  }
+
   /** Confirms the resolved conflicts. Callers wait for the outcome themselves. */
   async confirmImportChanges(): Promise<void> {
     await this.importConfirmChanges.click();

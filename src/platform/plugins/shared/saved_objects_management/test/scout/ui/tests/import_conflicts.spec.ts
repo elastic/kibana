@@ -97,22 +97,30 @@ test.describe('Saved objects management - import conflicts', { tag: tags.statefu
   });
 
   test('drops a visualization whose saved search keeps an unresolvable data view', async ({
-    apiServices,
     pageObjects,
   }) => {
     const som = pageObjects.savedObjectsManagement;
 
-    // Remove the data view the bundled saved search points at, so the conflict
-    // cannot be resolved. Mirrors the FTR flow (delete `logstash-*`, import,
-    // Confirm Changes without a replacement) and asserts through the UI that the
-    // connected visualization does not land — the API-level outcome for this same
-    // payload lives in `api/tests/import_references.spec.ts`.
-    await apiServices.dataViews.deleteByTitle(IMPORT_FIXTURE_OBJECTS.INDEX_PATTERN_TITLE);
-
+    // WITH_SAVED_SEARCH's saved search references a data-view id that is not in
+    // KBN_ARCHIVES.MANAGEMENT (unlike the shared `logstash-*` / `f1e4c910-…`).
+    // Confirming the conflict without picking a replacement drops the saved
+    // search, and the visualization that depends on it does not land. The
+    // API-level outcome for this same payload lives in
+    // `api/tests/import_references.spec.ts`.
     await som.selectImportFile(ndjsonPath(NDJSON_EXPORTS.WITH_SAVED_SEARCH));
     await som.submitImport();
 
     await expect(som.importConflictsWarning).toBeVisible();
+
+    // The reference is left unresolved on purpose: assert the replacement
+    // control defaults to "Skip import" (empty value) so a future change to that
+    // default would fail here rather than silently resolve the conflict.
+    await expect(
+      som.replacementIndexPatternSelect(
+        IMPORT_FIXTURE_OBJECTS.WITH_SAVED_SEARCH_MISSING_INDEX_PATTERN_ID
+      )
+    ).toHaveValue('');
+
     await som.confirmImportChanges();
     await som.finishImport();
 
