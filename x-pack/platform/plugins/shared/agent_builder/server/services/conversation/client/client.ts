@@ -41,6 +41,7 @@ import type {
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
@@ -70,6 +71,7 @@ import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
+import { updatePinnedBy } from './pinned_by';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -114,6 +116,7 @@ export interface ConversationClient {
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   markRead(conversationId: string, read: boolean): Promise<Conversation>;
+  setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
@@ -215,14 +218,7 @@ class ConversationClientImpl implements ConversationClient {
 
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
-    const pinnedFilter =
-      pinned === undefined
-        ? []
-        : pinned
-        ? [{ term: { pinned: true } }]
-        : // `pinned` is absent on documents created before the field was added (pre-Aug 2026).
-          // A plain `term: { pinned: false }` would silently exclude them, so we negate instead.
-          [{ bool: { must_not: { term: { pinned: true } } } }];
+    const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
 
     const response = await this.storage.getClient().search({
       // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
@@ -242,6 +238,7 @@ class ConversationClientImpl implements ConversationClient {
         'read',
         'read_by',
         'pinned',
+        'pinned_by',
         'read_only',
         'access_control',
         'origin',
@@ -515,6 +512,20 @@ class ConversationClientImpl implements ConversationClient {
           readBy: current.read_by,
           currentRead: current.read ?? false,
           nextRead: read,
+        }),
+    });
+  }
+
+  async setPinned(conversationId: string, pinned: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updatePinnedBy({
+          userId: this.user.id,
+          pinnedBy: current.pinned_by,
+          currentPinned: current.pinned ?? false,
+          nextPinned: pinned,
         }),
     });
   }

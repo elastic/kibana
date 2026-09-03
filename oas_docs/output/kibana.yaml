@@ -5195,6 +5195,30 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                approvals:
+                  additionalProperties: false
+                  description: Actions the tool run may take that would otherwise need a live user to approve them. Applies to this run and any sub-agents it spawns.
+                  type: object
+                  properties:
+                    auto_approved_apis:
+                      additionalProperties: false
+                      description: Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.
+                      type: object
+                      properties:
+                        elasticsearch:
+                          description: Elasticsearch APIs pre-approved for this run. Each entry is an exact identifier formed from the namespace and name (for example `indices.create`), a namespace wildcard (for example `indices.*`), or `*` for every Elasticsearch API.
+                          items:
+                            maxLength: 256
+                            type: string
+                          maxItems: 100
+                          type: array
+                        kibana:
+                          description: Kibana APIs pre-approved for this run. Each entry is an exact identifier formed from the namespace and name (for example `alerting.delete-alerting-rule-id`), a namespace wildcard (for example `alerting.*`), or `*` for every Kibana API.
+                          items:
+                            maxLength: 256
+                            type: string
+                          maxItems: 100
+                          type: array
                 connector_id:
                   description: Optional connector ID for tools that require external integrations.
                   type: string
@@ -119961,12 +119985,7 @@ components:
           maxItems: 100
           type: array
         global:
-          anyOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
-            - items:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
-              maxItems: 1000
-              type: array
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
         indices:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_indices_privileges'

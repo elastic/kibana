@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common';
 import { useAccessibleSpaces } from '../hooks/use_spaces';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
 import { DeleteDatasetModal } from './delete_dataset_modal';
