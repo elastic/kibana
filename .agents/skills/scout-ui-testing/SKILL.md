@@ -29,12 +29,12 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
-- **Never suppress a lint rule**: no `eslint-disable` comments in Scout tests, page objects, or fixtures. A suppression makes CI green without fixing anything, so it is a review blocker rather than a fix. This applies doubly to file-level `/* eslint-disable <rule> */`, which silences the rest of the file including code written later.
-- **No positional selectors**: `playwright/no-nth-methods` forbids `.first()`, `.nth()`, and `.last()`. See below for the replacement to use in each situation.
+- **Never suppress a lint rule to make it pass**: fix the code instead. A file-level `/* eslint-disable <rule> */` is never acceptable — it silences the rest of the file, including code written later. A single-line disable stating its reason is a last resort for a case the rule genuinely can't express, not a shortcut.
+- **No positional selectors**: `playwright/no-nth-methods` restricts `.first()`, `.nth()`, and `.last()`. See below for the replacement to use in each situation.
 
 ### Replacing `.first()` / `.nth()` / `.last()`
 
-`.first()` is almost always a symptom, not a solution. If you reached for it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one. Scope the locator to a container (`page.testSubj.locator('panel').getByRole('button')`), or add a `data-test-subj` to the component.
+`.first()` is almost always a symptom, not a solution. If you reached for it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one. Scope the locator to a container (`page.testSubj.locator('panel').getByRole('button')`), or add a `data-test-subj` to the component. If you reached for it because the collection wasn't ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that.
 
 For the other cases, use the replacement instead of an index:
 
@@ -44,7 +44,7 @@ For the other cases, use the replacement instead of an index:
 | To assert the order of a list or table | `await expect(rows).toHaveText([...])` / `toContainText([...])` — an ordered array needs no index |
 | One row identified by its content | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })` |
 | To act on every item in a collection | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so the loop races the UI |
-| A genuinely positional element | The third legend entry, the failed step at the end of a run. `.nth()` / `.last()` is acceptable here, but only after ruling out the rows above, and only with a single-line justified disable: `// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one` |
+| A genuinely positional element | The third legend entry, the failed step at the end of a run. `.nth()` / `.last()` is acceptable here — and for elements that are genuinely indistinguishable, such as a duplicated `data-test-subj` in a component you don't own — but only after ruling out the rows above, and only bounded by a count assertion plus a single-line disable stating the reason: `await expect(stepButtons).toHaveCount(4);` then `// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one` |
 
 ## Auth (UI)
 

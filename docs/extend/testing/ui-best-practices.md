@@ -140,9 +140,9 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 ## Don't select elements by index [dont-select-elements-by-index]
 
-`.first()`, `.nth()`, and `.last()` are forbidden by the `playwright/no-nth-methods` ESLint rule. Positional selectors break on non-clean environments, where tests run without a server restart and extra data may exist.
+`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, which comes from [Playwright's own recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of test failures caused by clicking by index, and Scout raises the stakes: to keep CI cheap and closer to real usage, suites share a cluster and run without a server restart, so data left behind by an earlier suite shifts the ordering under you.
 
-`.first()` in particular is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one. Scope the locator to a container, or add a `data-test-subj` to the component.
+`.first()` in particular is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one — scope the locator to a container, or add a `data-test-subj` to the component. If the UI is genuinely rendering duplicates, that is worth reporting to the owning team rather than hiding. If you added it because the collection was not ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that instead.
 
 For every other case, there is a replacement that doesn't need an index:
 
@@ -152,11 +152,17 @@ For every other case, there is a replacement that doesn't need an index:
 | To assert the order of a list or table | `await expect(rows).toHaveText([...])` or `toContainText([...])` — an ordered array needs no index                                                                          |
 | One row identified by its content      | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })`                                                                                              |
 | To act on every item in a collection   | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so it races the UI |
-| A genuinely positional element         | The third legend entry, the last step of a run. `.nth()` / `.last()` is fine here, but only after ruling out the rows above, and only with a single-line justified disable  |
+| A genuinely positional element         | The third legend entry, the last step of a run — allowed only through the escape hatch below, once the rows above are ruled out                                             |
 
-**Never suppress the rule to get past it.** A file-level `/* eslint-disable playwright/no-nth-methods */` silences the rest of the file, including code added later, and turns CI green without fixing anything. Suppressions are a review blocker. The one exception is a genuinely ordered collection, which needs a scoped, justified disable:
+**Never reach for a file-level suppression.** `/* eslint-disable playwright/no-nth-methods */` silences the rest of the file, including code added later, and turns CI green without fixing anything.
+
+Two cases do survive review. Both need a single-line disable that states the reason, preceded by a `toHaveCount` assertion so the index is bounded rather than hopeful:
+
+- the collection is genuinely ordered — the last step of a run, the third legend entry;
+- the elements are genuinely indistinguishable, typically a duplicated `data-test-subj` inside a component you don't own. Say so in the reason, and raise it with the owning team.
 
 ```ts
+await expect(stepButtons).toHaveCount(4);
 // eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one
 const failedStep = stepButtons.last();
 ```
