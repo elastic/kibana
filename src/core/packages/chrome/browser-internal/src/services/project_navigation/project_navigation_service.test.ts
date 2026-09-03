@@ -1017,31 +1017,29 @@ describe('getActiveSolutionNavId$()', () => {
   });
 });
 
-describe('registerNavigationSection', () => {
-  it('registers a linkList and rejects a second list on the same target', async () => {
+describe('registerNavigationLinks', () => {
+  it('registers hover lists and rejects a second registration on the same target', async () => {
     const { projectNavigation } = setup();
 
-    projectNavigation.registerNavigationSection({
-      kind: 'linkList',
-      id: 'dashboardRecentlyViewed',
+    projectNavigation.registerNavigationLinks({
+      id: 'dashboardLinks',
       target: 'dashboards',
-      title: 'Recently viewed',
-      items$: of([]),
+      lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
     });
 
-    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationSections$());
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
     expect(afterFirst).toHaveLength(1);
 
-    projectNavigation.registerNavigationSection({
-      kind: 'linkList',
-      id: 'dashboardFavorites',
-      target: 'dashboards',
-      title: 'Favorites',
-      items$: of([]),
-    });
+    expect(() =>
+      projectNavigation.registerNavigationLinks({
+        id: 'otherDashboardLinks',
+        target: 'dashboards',
+        lists: [{ id: 'favorites', title: 'Favorites', items$: of([]) }],
+      })
+    ).toThrow('A second hover registration on target "dashboards" is not allowed.');
 
-    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationSections$());
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
     expect(afterSecond).toHaveLength(1);
-    expect(afterSecond[0].id).toBe('dashboardRecentlyViewed');
+    expect(afterSecond[0].id).toBe('dashboardLinks');
   });
 });

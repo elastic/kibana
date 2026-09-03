@@ -23,8 +23,8 @@ export type {
 } from './types';
 
 export type {
-  ProjectNavigationSection,
-  ProjectNavigationLinkListSection,
+  ProjectNavigationLinks,
+  ProjectNavigationLinkList,
   ProjectNavigationLinkItem,
 } from '@kbn/core-chrome-browser';
 

@@ -80,8 +80,8 @@ export function createChromeApi({
     getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
     registerCustomizeNavigationHandler: (handler) =>
       projectNavigation.registerCustomizeNavigationHandler(handler),
-    registerNavigationSection: (section) => projectNavigation.registerNavigationSection(section),
-    getRegisteredNavigationSections$: () => projectNavigation.getRegisteredNavigationSections$(),
+    registerNavigationLinks: (links) => projectNavigation.registerNavigationLinks(links),
+    getRegisteredNavigationLinks$: () => projectNavigation.getRegisteredNavigationLinks$(),
   };
 
   let appHeaderRegistrationId = 0;

@@ -63,19 +63,19 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
     const navigation$ = chrome.project.getNavigation$();
-    const registeredSections$ = chrome.project.getRegisteredNavigationSections$();
+    const registeredLinks$ = chrome.project.getRegisteredNavigationLinks$();
 
     const tree$ = navigation$.pipe(
       map(({ navigationTree }) => navigationTree),
       distinctUntilChanged()
     );
 
-    const resolvedSections$ = combineLatest([
+    const resolvedLinks$ = combineLatest([
       tree$,
-      registeredSections$.pipe(distinctUntilChanged()),
-    ]).pipe(switchMap(([tree, sections]) => resolveLinksContent(tree, sections)));
+      registeredLinks$.pipe(distinctUntilChanged()),
+    ]).pipe(switchMap(([tree, registrations]) => resolveLinksContent(tree, registrations)));
 
-    return combineLatest([navigation$, resolvedSections$]).pipe(
+    return combineLatest([navigation$, resolvedLinks$]).pipe(
       map(([nav, resolved]) => ({
         ...attachPopoverSections(
           toNavigationItems(

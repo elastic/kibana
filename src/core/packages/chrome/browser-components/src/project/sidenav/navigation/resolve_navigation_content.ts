@@ -12,18 +12,23 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
   ProjectNavigationLinkItem,
-  ProjectNavigationLinkListSection,
+  ProjectNavigationLinkList,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { MenuItem, SecondaryMenuItem } from '@kbn/ui-side-navigation/types';
 import { catchError, combineLatest, map, of, startWith, type Observable } from 'rxjs';
 import type { NavigationItems } from './to_navigation_items';
 
-export interface ResolvedLinksContent {
+export interface ResolvedLinkList {
   id: string;
-  nodeId: string;
   title: string;
   items: SecondaryMenuItem[];
+}
+
+export interface ResolvedLinksPlacement {
+  nodeId: string;
+  lists: ResolvedLinkList[];
   viewAll?: {
     href: string;
     label?: string;
@@ -31,10 +36,10 @@ export interface ResolvedLinksContent {
 }
 
 const toSecondaryMenuItem = (
-  sectionId: string,
+  listId: string,
   item: ProjectNavigationLinkItem
 ): SecondaryMenuItem => ({
-  id: `${sectionId}:${item.id}`,
+  id: `${listId}:${item.id}`,
   href: item.href,
   label: item.label,
   badgeType: item.badgeType,
@@ -74,15 +79,43 @@ const findMatchingNodeIds = (tree: NavigationTreeDefinitionUI, target: AppDeepLi
   return [...ids];
 };
 
+const resolveList = (list: ProjectNavigationLinkList): Observable<ResolvedLinkList> =>
+  list.items$.pipe(
+    startWith([] as readonly ProjectNavigationLinkItem[]),
+    catchError(() => of([] as readonly ProjectNavigationLinkItem[])),
+    map((items) => ({
+      id: list.id,
+      title: list.title,
+      items: items.map((item) => toSecondaryMenuItem(list.id, item)),
+    }))
+  );
+
+const resolvePlacement = (
+  registration: ProjectNavigationLinks,
+  nodeId: string
+): Observable<ResolvedLinksPlacement> => {
+  if (registration.lists.length === 0) {
+    return of({ nodeId, lists: [], viewAll: registration.viewAll });
+  }
+
+  return combineLatest(registration.lists.map(resolveList)).pipe(
+    map((lists) => ({
+      nodeId,
+      lists: lists.filter((list) => list.items.length > 0),
+      viewAll: registration.viewAll,
+    }))
+  );
+};
+
 export const resolveLinksContent = (
   tree: NavigationTreeDefinitionUI,
-  sections: readonly ProjectNavigationLinkListSection[]
-): Observable<readonly ResolvedLinksContent[]> => {
+  registrations: readonly ProjectNavigationLinks[]
+): Observable<readonly ResolvedLinksPlacement[]> => {
   if (!tree?.body) {
     return of([]);
   }
-  const placements = sections.flatMap((section) =>
-    findMatchingNodeIds(tree, section.target).map((nodeId) => ({ section, nodeId }))
+  const placements = registrations.flatMap((registration) =>
+    findMatchingNodeIds(tree, registration.target).map((nodeId) => ({ registration, nodeId }))
   );
 
   if (placements.length === 0) {
@@ -90,56 +123,38 @@ export const resolveLinksContent = (
   }
 
   return combineLatest(
-    placements.map(({ section, nodeId }) =>
-      section.items$.pipe(
-        startWith([] as readonly ProjectNavigationLinkItem[]),
-        catchError(() => of([] as readonly ProjectNavigationLinkItem[])),
-        map((items) => ({
-          id: section.id,
-          nodeId,
-          title: section.title,
-          items: items.map((item) => toSecondaryMenuItem(section.id, item)),
-          viewAll: section.viewAll,
-        }))
-      )
-    )
-  ).pipe(map((resolved) => resolved.filter((resolvedSection) => resolvedSection.items.length > 0)));
+    placements.map(({ registration, nodeId }) => resolvePlacement(registration, nodeId))
+  ).pipe(map((resolved) => resolved.filter((placement) => placement.lists.length > 0)));
 };
 
 export const attachPopoverSections = (
   navigationItems: NavigationItems,
-  resolved: readonly ResolvedLinksContent[]
+  resolved: readonly ResolvedLinksPlacement[]
 ): NavigationItems => {
   if (resolved.length === 0) {
     return navigationItems;
   }
 
-  const byNodeId = new Map<string, ResolvedLinksContent[]>();
-  for (const section of resolved) {
-    const sections = byNodeId.get(section.nodeId);
-    if (sections) {
-      sections.push(section);
-    } else {
-      byNodeId.set(section.nodeId, [section]);
-    }
+  const byNodeId = new Map<string, ResolvedLinksPlacement>();
+  for (const placement of resolved) {
+    byNodeId.set(placement.nodeId, placement);
   }
 
   const attach = (item: MenuItem): MenuItem => {
-    const sections = byNodeId.get(item.id);
-    if (!sections || (item.sections?.length ?? 0) > 0) {
+    const placement = byNodeId.get(item.id);
+    if (!placement || (item.sections?.length ?? 0) > 0) {
       return item;
     }
-    const listSections = sections.map((section) => ({
-      id: section.id,
-      label: section.title,
-      items: section.items,
+    const listSections = placement.lists.map((list) => ({
+      id: list.id,
+      label: list.title,
+      items: list.items,
     }));
-    const viewAll = sections.find((section) => section.viewAll)?.viewAll;
-    const viewAllSection = viewAll
+    const viewAllSection = placement.viewAll
       ? [
           {
             id: `${item.id}-viewAll`,
-            items: [toViewAllItem(item.id, viewAll)],
+            items: [toViewAllItem(item.id, placement.viewAll)],
           },
         ]
       : [];

@@ -163,8 +163,8 @@ export class NavigationPublicPlugin
           this.customizationService.enableUi({ core, chrome, security, solution: id });
         }
       },
-      registerNavigationSection: (section) => {
-        chrome.project.registerNavigationSection(section);
+      registerNavigationLinks: (links) => {
+        chrome.project.registerNavigationLinks(links);
       },
       isSolutionNavEnabled$: of(isUnauthenticated).pipe(
         switchMap((unauth) => {

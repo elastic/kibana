@@ -310,21 +310,25 @@ export interface ProjectNavigationLinkItem {
   isExternal?: boolean;
 }
 
-/** Popover-only list attached to an existing deep link. */
-export interface ProjectNavigationLinkListSection {
-  kind: 'linkList';
+/** One titled list inside a hover registration. */
+export interface ProjectNavigationLinkList {
+  /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
   id: string;
-  target: AppDeepLinkId;
   title: string;
   items$: Observable<readonly ProjectNavigationLinkItem[]>;
-  /** Chrome-owned listing/escape row. Label defaults to "View all". Omit to hide the row. */
+}
+
+/** Everything one feature contributes to an existing deep link's hover popover. One per target. */
+export interface ProjectNavigationLinks {
+  id: string;
+  target: AppDeepLinkId;
+  lists: readonly ProjectNavigationLinkList[];
+  /** Footer row. Label defaults to "View all". Shown only when at least one list has items. */
   viewAll?: {
     href: string;
     label?: string;
   };
 }
-
-export type ProjectNavigationSection = ProjectNavigationLinkListSection;
 
 /**
  * @public

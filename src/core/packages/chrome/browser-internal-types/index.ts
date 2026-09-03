@@ -31,7 +31,7 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
-  ProjectNavigationSection,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -148,13 +148,13 @@ export interface InternalChromeStart extends ChromeStart {
     registerCustomizeNavigationHandler(handler: () => void): void;
 
     /**
-     * Attach a typed section to an existing project-nav deep link.
+     * Attach hover lists to an existing project-nav deep link.
      * Does not require project chrome style; unused until project nav renders.
      */
-    registerNavigationSection(section: ProjectNavigationSection): void;
+    registerNavigationLinks(links: ProjectNavigationLinks): void;
 
-    /** Registered navigation sections. Live updates. */
-    getRegisteredNavigationSections$(): Observable<readonly ProjectNavigationSection[]>;
+    /** Registered hover lists. Live updates. */
+    getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

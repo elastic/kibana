@@ -9,7 +9,7 @@
 
 import type {
   NavigationTreeDefinitionUI,
-  ProjectNavigationLinkListSection,
+  ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 import { filter, firstValueFrom, of, throwError } from 'rxjs';
 import type { MenuItem } from '@kbn/ui-side-navigation/types';
@@ -28,14 +28,18 @@ const tree = {
   ],
 } as unknown as NavigationTreeDefinitionUI;
 
-const createSection = (
-  overrides: Partial<ProjectNavigationLinkListSection> = {}
-): ProjectNavigationLinkListSection => ({
-  kind: 'linkList',
-  id: 'dashboardRecentlyViewed',
+const createRegistration = (
+  overrides: Partial<ProjectNavigationLinks> = {}
+): ProjectNavigationLinks => ({
+  id: 'dashboardLinks',
   target: 'dashboards',
-  title: 'Recently viewed',
-  items$: of([{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }]),
+  lists: [
+    {
+      id: 'recentlyViewed',
+      title: 'Recently viewed',
+      items$: of([{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }]),
+    },
+  ],
   viewAll: { href: '/app/dashboards#/list' },
   ...overrides,
 });
@@ -57,12 +61,26 @@ const createNavigationItems = (item: MenuItem): NavigationItems => ({
 });
 
 describe('resolveLinksContent', () => {
-  it('omits empty and errored sections', async () => {
+  it('omits empty and errored lists', async () => {
     const empty = await firstValueFrom(
-      resolveLinksContent(tree, [createSection({ items$: of([]) })])
+      resolveLinksContent(tree, [
+        createRegistration({
+          lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
+        }),
+      ])
     );
     const errored = await firstValueFrom(
-      resolveLinksContent(tree, [createSection({ items$: throwError(() => new Error('fail')) })])
+      resolveLinksContent(tree, [
+        createRegistration({
+          lists: [
+            {
+              id: 'recentlyViewed',
+              title: 'Recently viewed',
+              items$: throwError(() => new Error('fail')),
+            },
+          ],
+        }),
+      ])
     );
 
     expect(empty).toEqual([]);
@@ -70,27 +88,27 @@ describe('resolveLinksContent', () => {
   });
 });
 
-const resolveNonEmpty = async (section: ProjectNavigationLinkListSection) => {
+const resolveNonEmpty = async (registration: ProjectNavigationLinks) => {
   const [resolved] = await firstValueFrom(
-    resolveLinksContent(tree, [section]).pipe(filter((sections) => sections.length > 0))
+    resolveLinksContent(tree, [registration]).pipe(filter((placements) => placements.length > 0))
   );
   return resolved;
 };
 
 describe('attachPopoverSections', () => {
   it('attaches recents and View all to the primary and More items', async () => {
-    const resolved = await resolveNonEmpty(createSection());
+    const resolved = await resolveNonEmpty(createRegistration());
     const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
       resolved,
     ]);
 
     expect(attached.navItems.primaryItems[0].popoverSections).toEqual([
       {
-        id: 'dashboardRecentlyViewed',
+        id: 'recentlyViewed',
         label: 'Recently viewed',
         items: [
           {
-            id: 'dashboardRecentlyViewed:dash-1',
+            id: 'recentlyViewed:dash-1',
             href: '/app/dashboards#/dash-1',
             label: 'One',
           },
@@ -112,32 +130,34 @@ describe('attachPopoverSections', () => {
     );
   });
 
-  it('stacks lists on the same node and keeps the first View all', () => {
+  it('attaches multiple lists and the registration View all', () => {
     const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
       {
-        id: 'dashboardRecentlyViewed',
         nodeId: 'dashboards',
-        title: 'Recently viewed',
-        items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
+        lists: [
+          {
+            id: 'recentlyViewed',
+            title: 'Recently viewed',
+            items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
+          },
+          {
+            id: 'favorites',
+            title: 'Favorites',
+            items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
+          },
+        ],
         viewAll: { href: '/app/dashboards#/list', label: 'Overview' },
-      },
-      {
-        id: 'dashboardFavorites',
-        nodeId: 'dashboards',
-        title: 'Favorites',
-        items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
-        viewAll: { href: '/app/dashboards#/other', label: 'All dashboards' },
       },
     ]);
 
     expect(attached.navItems.primaryItems[0].popoverSections).toEqual([
       {
-        id: 'dashboardRecentlyViewed',
+        id: 'recentlyViewed',
         label: 'Recently viewed',
         items: [{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }],
       },
       {
-        id: 'dashboardFavorites',
+        id: 'favorites',
         label: 'Favorites',
         items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
       },
@@ -155,7 +175,7 @@ describe('attachPopoverSections', () => {
   });
 
   it('does not attach onto a node that already has panel sections', async () => {
-    const resolved = await resolveNonEmpty(createSection());
+    const resolved = await resolveNonEmpty(createRegistration());
     const existing = [{ id: 'static', items: [{ id: 'child', label: 'Child', href: '/child' }] }];
     const attached = attachPopoverSections(
       createNavigationItems(createMenuItem('dashboards', existing)),

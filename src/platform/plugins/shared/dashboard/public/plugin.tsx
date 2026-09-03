@@ -341,29 +341,33 @@ export class DashboardPlugin
 
     registerActions(plugins);
 
-    plugins.navigation.registerNavigationSection({
-      kind: 'linkList',
-      id: 'dashboardRecentlyViewed',
+    plugins.navigation.registerNavigationLinks({
+      id: 'dashboardLinks',
       target: 'dashboards',
-      title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
-        defaultMessage: 'Recently viewed',
-      }),
+      lists: [
+        {
+          id: 'recentlyViewed',
+          title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
+            defaultMessage: 'Recently viewed',
+          }),
+          items$: getDashboardRecentlyAccessedService()
+            .get$()
+            .pipe(
+              map((items) =>
+                items.slice(0, 5).map((item) => ({
+                  id: item.id,
+                  href: core.http.basePath.prepend(item.link),
+                  label: item.label,
+                }))
+              )
+            ),
+        },
+      ],
       viewAll: {
         href: core.application.getUrlForApp(DASHBOARD_APP_ID, {
           path: `#${LANDING_PAGE_PATH}`,
         }),
       },
-      items$: getDashboardRecentlyAccessedService()
-        .get$()
-        .pipe(
-          map((items) =>
-            items.slice(0, 5).map((item) => ({
-              id: item.id,
-              href: core.http.basePath.prepend(item.link),
-              label: item.label,
-            }))
-          )
-        ),
     });
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
