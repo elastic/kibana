@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { Suspense, useRef, useState } from 'react';
-import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
@@ -38,7 +38,6 @@ export function ESQLMenu({
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
 } = {}) {
   const editorActions = useEsqlEditorActions();
-  const { euiTheme } = useEuiTheme();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const commandKey = isMac ? '⌘' : 'Ctrl';
   const visorTooltip = isNlToEsqlEnabled
@@ -61,85 +60,64 @@ export function ESQLMenu({
   wasStarredRef.current = isStarred;
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
-      css={css`
-        border-radius: ${euiTheme.border.radius.small};
-        border: ${euiTheme.border.thin};
-        background: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.xs};
-      `}
+    <EuiButtonGroup
+      variant="segmented"
+      legend={i18n.translate('esqlEditor.menu.legend', {
+        defaultMessage: 'ES|QL editor actions',
+      })}
+      buttonSize="s"
     >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+      <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
+          aria-label={searchPlaceholder}
+          onClick={onToggleVisor}
+          isDisabled={!onToggleVisor}
+          data-test-subj="esql-menu-button"
+        />
+      </EuiToolTip>
+      {!hideHistory && (
+        <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
+          <StardustWrapper active={showStardust}>
+            <EuiButtonIcon
+              iconType={isStarred ? 'starFill' : 'star'}
+              aria-label={starredQueryLabel}
+              className={!isStarred ? 'cm-favorite-button--empty' : ''}
+              onClick={onToggleStarredQuery}
+              isDisabled={!editorActions?.canToggleStarredQuery}
+              data-test-subj="ESQLEditor-toggle-starred-query-icon"
+            />
+          </StardustWrapper>
+        </EuiToolTip>
+      )}
+      {!hideHistory && (
+        <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'magnify'}
-            size="xs"
-            aria-label={searchPlaceholder}
-            onClick={onToggleVisor}
-            isDisabled={!onToggleVisor}
-            data-test-subj="esql-menu-button"
-            color="text"
+            iconType="clockCounter"
+            aria-label={historyLabel}
+            onClick={(e: React.MouseEvent) => {
+              onToggleHistory?.();
+              (e.currentTarget as HTMLElement).blur();
+            }}
+            isDisabled={!onToggleHistory}
+            data-test-subj="ESQLEditor-toggle-query-history-icon"
           />
         </EuiToolTip>
-      </EuiFlexItem>
-      {!hideHistory && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
-            <StardustWrapper active={showStardust}>
-              <EuiButtonIcon
-                iconType={isStarred ? 'starFill' : 'star'}
-                size="xs"
-                aria-label={starredQueryLabel}
-                className={!isStarred ? 'cm-favorite-button--empty' : ''}
-                onClick={onToggleStarredQuery}
-                isDisabled={!editorActions?.canToggleStarredQuery}
-                data-test-subj="ESQLEditor-toggle-starred-query-icon"
-                color="text"
-              />
-            </StardustWrapper>
-          </EuiToolTip>
-        </EuiFlexItem>
       )}
-      {!hideHistory && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={historyLabel} disableScreenReaderOutput>
+      <Suspense
+        fallback={
+          <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="clockCounter"
-              size="xs"
-              aria-label={historyLabel}
-              onClick={(e: React.MouseEvent) => {
-                onToggleHistory?.();
-                (e.currentTarget as HTMLElement).blur();
-              }}
-              isDisabled={!onToggleHistory}
-              data-test-subj="ESQLEditor-toggle-query-history-icon"
-              color="text"
+              iconType="question"
+              aria-label={helpLabel}
+              data-test-subj="esql-help-popover-button"
+              isDisabled
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <Suspense
-          fallback={
-            <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="question"
-                size="xs"
-                aria-label={helpLabel}
-                data-test-subj="esql-help-popover-button"
-                color="text"
-                isDisabled
-              />
-            </EuiToolTip>
-          }
-        >
-          <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
-        </Suspense>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        }
+      >
+        <LazyHelpPopover onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged} />
+      </Suspense>
+    </EuiButtonGroup>
   );
 }
