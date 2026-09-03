@@ -9,9 +9,9 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { termQuery } from '@kbn/observability-plugin/server';
 import { TRANSACTION_NAME } from '@kbn/observability-shared-plugin/common';
 import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 import { TRANSACTION_DURATION_HISTOGRAM, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { RollupInterval } from '@kbn/apm-types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation } from '../../../lib/helpers/latency_aggregation_type';
 import { fetchSeries } from './fetch_timeseries';
