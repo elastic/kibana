@@ -9,19 +9,21 @@
 
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { ObjectChange } from '@kbn/change-history';
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import type { SetupDeps } from '../plugin';
+import type { DashboardPluginStart } from '../types';
+import type { SetupDeps, StartDeps } from '../plugin';
 import { getChangeHistoryClient } from './change_history_service';
 
 export function registerChangeHistoryRoute(
   services: SetupDeps,
+  core: CoreSetup<StartDeps, DashboardPluginStart>,
   router: IRouter<RequestHandlerContext>
 ) {
   registerAddToHistoryRoute(services, router);
-  registerGetHistoryRoute(services, router);
+  registerGetHistoryRoute(services, core, router);
 }
 
 const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestHandlerContext>) => {
@@ -52,7 +54,6 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
       },
     },
     async (ctx, req, res) => {
-      console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
@@ -87,6 +88,7 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
       await client.log(change, {
         action: 'dashboard_save',
         username: user.username,
+        userProfileId: user.profile_uid,
         spaceId,
       });
       return res.ok();
@@ -94,7 +96,11 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
   );
 };
 
-const registerGetHistoryRoute = (services: SetupDeps, router: IRouter<RequestHandlerContext>) => {
+const registerGetHistoryRoute = (
+  services: SetupDeps,
+  coreSetup: CoreSetup<StartDeps, DashboardPluginStart>,
+  router: IRouter<RequestHandlerContext>
+) => {
   router.get(
     {
       path: '/internal/dashboard/change_history/{id}',
@@ -120,7 +126,7 @@ const registerGetHistoryRoute = (services: SetupDeps, router: IRouter<RequestHan
                   z.object({
                     id: z.string(),
                     timestamp: z.string(),
-                    actor: z.object({ name: z.string() }),
+                    actor: z.object({ name: z.string(), id: z.string().optional() }),
                     action: z.string(),
                     changes: z.record(z.string(), z.any()).optional(),
                     metadata: z.record(z.string(), z.any()).optional(),
@@ -140,7 +146,6 @@ const registerGetHistoryRoute = (services: SetupDeps, router: IRouter<RequestHan
       },
     },
     async (ctx, req, res) => {
-      console.log('123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       const core = await ctx.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
@@ -157,9 +162,6 @@ const registerGetHistoryRoute = (services: SetupDeps, router: IRouter<RequestHan
         return res.forbidden();
       }
 
-      const user = core.security.authc.getCurrentUser();
-      if (!user) throw new Error('User not authenticated');
-
       let client;
       try {
         client = getChangeHistoryClient();
@@ -169,17 +171,32 @@ const registerGetHistoryRoute = (services: SetupDeps, router: IRouter<RequestHan
       const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
 
       const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id);
-      console.log({ total, items, id: req.params.id });
+
+      const [coreStart] = await coreSetup.getStartServices();
+      const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
+
+      const profiles = await coreStart.userProfile.bulkGet({ uids });
+      const fullNameByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
+
+      console.log({ items, uids, profiles, fullNameByUid });
       return res.ok({
         body: {
           total,
-          items: items.map((item) => ({
-            id: item.event.id,
-            action: item.event.action,
-            timestamp: item['@timestamp'],
-            actor: { name: item.user.name },
-            changes: item.object.snapshot,
-          })),
+          items: items.map((item) => {
+            const user = item.user;
+            const profile = user.id ? fullNameByUid.get(user.id) : undefined;
+
+            return {
+              id: item.event.id,
+              action: item.event.action,
+              timestamp: item['@timestamp'],
+              actor: {
+                name: profile?.user.full_name || user.name,
+                id: user.id,
+              },
+              changes: item.object.snapshot,
+            };
+          }),
         },
       });
     }

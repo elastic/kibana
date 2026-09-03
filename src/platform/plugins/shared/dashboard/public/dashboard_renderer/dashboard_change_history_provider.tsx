@@ -42,12 +42,6 @@ export const DashboardChangeHistoryProvider = ({
     return createChangeHistoryHttpAdapter({
       http: coreServices.http as ChangeHistoryHttpClient,
       listPath: `/internal/dashboard/change_history/{objectId}`,
-      // detailPath: '/api/my_plugin/entity/{objectId}/history/{eventId}',
-      // restorePath: '/api/my_plugin/entity/{objectId}/history/{eventId}/_restore',
-      // pageIndexBase: 1,
-      // mapListItem: mapMyEntityHistoryListItem,
-      // mapDetail: mapMyEntityHistoryDetail,
-      // mapHttpError: mapChangeHistoryHttpError, // default
     });
   }, []);
 

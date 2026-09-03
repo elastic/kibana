@@ -46,7 +46,6 @@ export const saveDashboard = async ({
     }
     console.log({ dashboardState });
     await getDashboardChangeHistoryService().addToHistory(newId, dashboardState);
-
     return { id: newId };
   } catch (error) {
     coreServices.notifications.toasts.addDanger(
