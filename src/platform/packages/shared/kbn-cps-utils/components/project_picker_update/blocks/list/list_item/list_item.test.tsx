@@ -83,6 +83,18 @@ describe('ProjectPickerListItem', () => {
     expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
   });
 
+  it('should hide the tags badge when project tags are disabled', () => {
+    renderComponent({
+      project: {
+        ...defaultProject,
+        env: 'prod',
+      },
+      showProjectTags: false,
+    });
+
+    expect(screen.queryByTestId('projectPickerListItemTags')).not.toBeInTheDocument();
+  });
+
   describe('enabled controls state', () => {
     it('toggling the switch should invokes the onToggle function', async () => {
       const user = userEvent.setup();

@@ -143,6 +143,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Discovery ─────────────────────────────────────────────────────────────
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the current authenticated monday.com user, their account information, and a list ' +
         'of boards and workspaces they have access to. Use this as the first call to orient an agent: ' +
@@ -156,6 +157,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Search ────────────────────────────────────────────────────────────────
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Monday.com by keyword within a specific object type. Provide searchTerm and ' +
         'searchType (one of BOARD, DOCUMENTS, FOLDERS, WORKSPACES, UPDATES, ITEMS, ' +
@@ -172,6 +174,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Boards ────────────────────────────────────────────────────────────────
     getBoardInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed metadata for a Monday.com board, including its columns (with IDs and types), ' +
         'groups, views, and owners. Use this after search or whoAmI to inspect board structure ' +
@@ -186,6 +189,7 @@ export const MondayCom: ConnectorSpec = {
 
     getBoardItemsPage: {
       isTool: true,
+      scope: 'read',
       description:
         'Paginate through all items on a Monday.com board. Returns item names, column values, ' +
         'group membership, and a cursor for the next page. Use cursor from the previous response ' +
@@ -203,6 +207,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Items ─────────────────────────────────────────────────────────────────
     getItem: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a single Monday.com item by ID. Returns the item name, all column values, ' +
         'group membership, and parent board ID. Use this when you already know the item ID ' +
@@ -220,6 +225,7 @@ export const MondayCom: ConnectorSpec = {
 
     getItemsByColumnValue: {
       isTool: true,
+      scope: 'read',
       description:
         'Find items on a Monday.com board where a specific column matches a given value. ' +
         'Use getBoardInfo to discover column IDs and the expected value format for each column type. ' +
@@ -242,6 +248,7 @@ export const MondayCom: ConnectorSpec = {
 
     createItem: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new item (row) on a Monday.com board. Optionally assign it to a specific group ' +
         'and set initial column values. Use getBoardInfo to discover group IDs and column IDs and ' +
@@ -259,6 +266,7 @@ export const MondayCom: ConnectorSpec = {
 
     changeItemColumnValues: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Update one or more column values on an existing Monday.com item. Provide a map of column ' +
         'IDs to new values. Use getBoardInfo to discover column IDs and their expected value formats ' +
@@ -275,6 +283,7 @@ export const MondayCom: ConnectorSpec = {
 
     createSubitem: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a subitem under an existing Monday.com item. Subitems share the same column ' +
         "structure as the parent board's subitems board. Returns the created subitem with its ID.",
@@ -295,6 +304,7 @@ export const MondayCom: ConnectorSpec = {
 
     moveItemToGroup: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Move a Monday.com item to a different group within the same board. Use getBoardInfo to ' +
         'discover available group IDs. Returns the moved item with its updated group.',
@@ -311,6 +321,7 @@ export const MondayCom: ConnectorSpec = {
 
     archiveItem: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Archive a Monday.com item. Archived items are hidden from the board view but remain ' +
         'accessible via filters and are not permanently deleted. Returns the archived item.',
@@ -327,6 +338,7 @@ export const MondayCom: ConnectorSpec = {
 
     deleteItem: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a Monday.com item and all its subitems and updates. ' +
         'This action cannot be undone. Returns the deleted item ID.',
@@ -360,6 +372,7 @@ export const MondayCom: ConnectorSpec = {
 
     getUpdates: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve updates (comments) posted on a Monday.com item or board. Pass objectId (the item ' +
         'or board ID as a string) and objectType ("Item" or "Board"). Returns update text, author, ' +
@@ -411,6 +424,7 @@ export const MondayCom: ConnectorSpec = {
     // ── Escape hatches (always include) ───────────────────────────────────────
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tools available on the Monday.com MCP server. The server exposes over 60 tools ' +
         'covering boards, items, workspaces, docs, dashboards, automations, AI agents, and more. ' +
