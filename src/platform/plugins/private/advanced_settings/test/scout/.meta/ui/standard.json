@@ -1,5 +1,5 @@
 {
-  "sha1": "80da5957d977d36563bc941323f6002f3a2acb22",
+  "sha1": "ed7924abd2fb42ddccc8af9b1c028fb0cb6544c2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/advanced_settings_a11y.spec.ts",
-        "line": 27,
-        "column": 90
+        "line": 28,
+        "column": 64
       }
     },
     {
@@ -171,8 +171,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/state_store_in_session_storage.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 65,
+        "column": 10
       }
     }
   ]

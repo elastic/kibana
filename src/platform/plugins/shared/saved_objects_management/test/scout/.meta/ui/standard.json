@@ -1,8 +1,7 @@
 {
-  "sha1": "78718d8a737cc6d19eeefca7bad57e3d6be85990",
+  "sha1": "eca32b807f627a72a3a79e20fc984ebd0a8dd0bf",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 43,
+        "column": 8
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 50,
-        "column": 11
+        "line": 51,
+        "column": 23
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 56,
-        "column": 16
+        "line": 57,
+        "column": 5
       }
     },
     {
@@ -132,8 +131,8 @@
       }
     },
     {
-      "id": "919736241b0bdf7-b94d3db5345d8a2",
-      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "id": "919736241b0bdf7-1e96bcd7fbdc5cb",
+      "title": "Saved objects management - import conflicts drops a visualization whose saved search keeps an unresolvable data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -146,6 +145,20 @@
       }
     },
     {
+      "id": "919736241b0bdf7-b94d3db5345d8a2",
+      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
       "id": "9f7d4f477606ab1-10f2c4f8f00ccf4",
       "title": "Saved objects management - import objects imports a visualization and lists it as a child of its data view",
       "expectedStatus": "passed",
@@ -155,8 +168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
-        "line": 43,
-        "column": 23
+        "line": 36,
+        "column": 21
       }
     },
     {
@@ -169,8 +182,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
-        "line": 72,
-        "column": 10
+        "line": 65,
+        "column": 7
       }
     },
     {

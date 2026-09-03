@@ -1,8 +1,7 @@
 {
-  "sha1": "863260136a986cb40d490c182d1e6f89092becbb",
+  "sha1": "44e29f545cf44998ea4add005fc596aa1a078f5a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -465,7 +464,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
-        "line": 56,
+        "line": 55,
         "column": 48
       }
     },
@@ -479,13 +478,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
-        "line": 70,
+        "line": 69,
         "column": 43
       }
     },
     {
-      "id": "c7926343b0a1c4a-35d22c5bc77d01f",
-      "title": "Saved Objects Management - import references refuses a saved search whose data view is missing but still imports the visualization bundled with it",
+      "id": "c7926343b0a1c4a-4bdf1dafa49d8da",
+      "title": "Saved Objects Management - import references reports the bundled visualization as importable when its saved search has a missing data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -493,7 +492,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
-        "line": 97,
+        "line": 96,
         "column": 25
       }
     },
@@ -507,7 +506,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/import_references.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 66
       }
     },
