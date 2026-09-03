@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AuditLogger } from '@kbn/core/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -13,6 +14,7 @@ import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ImprovementsServiceApi } from '../improvements/service';
 import type { KiVerificationSummary } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
 import { errorTypeForTelemetry, isAbortError } from '../telemetry';
@@ -25,6 +27,19 @@ export interface KiStepDependencies {
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
   analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+}
+
+/** Dependencies injected into the feedback analysis step definition factories. */
+export interface FeedbackAnalysisStepDependencies {
+  getAiIndexService: () => AiIndexService;
+  /** Request-scoped: the store is user-owned, so a run reads and writes as the workflow owner. */
+  getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
+  getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger | undefined>;
+  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
+  /** Whether the feedback loop advanced setting is on. */
+  isFeedbackLoopEnabled: () => Promise<boolean>;
+  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
   logger: Logger;
 }
 
@@ -153,6 +168,19 @@ export const assertContextEngineEnabled = async (
     throw new ExecutionError({
       type: 'FeatureDisabledError',
       message: `Context Engine is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' advanced setting to use this step.`,
+    });
+  }
+};
+
+/** Fails the step when the feedback loop advanced setting is off. */
+export const assertFeedbackLoopEnabled = async (
+  isFeedbackLoopEnabled: () => Promise<boolean>
+): Promise<void> => {
+  if (!(await isFeedbackLoopEnabled())) {
+    throw new ExecutionError({
+      type: 'FeatureDisabledError',
+      message:
+        'The Context Engine feedback loop is disabled. Enable it in advanced settings to use this step.',
     });
   }
 };

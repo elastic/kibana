@@ -15,9 +15,9 @@ import {
   AiIndexManagedError,
 } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import { resolveAiIndexIdFromAttachments } from '../ai_index_attachment';
 import {
   parseWorkflowNameFromYaml,
-  resolveAiIndexIdFromAttachments,
   saveAutomationHandler,
   getSaveAutomationErrorMessage,
   tryResolveAiIndexDisplayLabelFromAttachments,

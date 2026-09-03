@@ -12,7 +12,6 @@ import type { AnalyzeAndImproveContext, AnalyzeChatOptions } from './types';
 
 const analyzeOptions = async (ctx: AnalyzeAndImproveContext): Promise<AnalyzeChatOptions> => ({
   agentId: ctx.aiIndex.feedback_analysis?.agent_id,
-  newConversation: true,
   sessionTag: `context-engine-feedback:${ctx.aiIndex.id}`,
   attachments: [
     {
@@ -82,7 +81,6 @@ describe('createAnalyzeChatOpener', () => {
 
     expect(agentBuilder.openChat).toHaveBeenCalledWith({
       agentId: 'agent-x',
-      newConversation: true,
       sessionTag: 'context-engine-feedback:idx-1',
       attachments: [
         {

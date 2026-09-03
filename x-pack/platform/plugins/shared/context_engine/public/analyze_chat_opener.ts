@@ -45,7 +45,10 @@ export const createAnalyzeChatOpener = ({
       return;
     }
     const options = await buildAnalyzeChat(ctx);
-    if (!options.agentId) {
+    // Starting a conversation needs an agent to start it with. Reopening one does not: the run
+    // that wrote it already chose, and it may have been the default agent rather than a configured
+    // one, which leaves nothing recorded on the index to name here.
+    if (!options.agentId && !options.conversationId) {
       return;
     }
     agentBuilder.openChat(options);

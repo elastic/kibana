@@ -18,6 +18,7 @@ import {
 import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
+  AiIndexFeedbackRun,
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
@@ -35,6 +36,7 @@ import { createAiIndexStorageClient } from './storage';
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
   ...(document.description !== undefined && { description: document.description }),
+  ...(document.feedback_run !== undefined && { feedback_run: document.feedback_run }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
   }),
@@ -153,13 +155,18 @@ export class AiIndexService {
   private async writeDocument(
     aiIndexId: string,
     document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
-    existing: Awaited<ReturnType<typeof this.findDocument>>
+    existing: Awaited<ReturnType<typeof this.findDocument>>,
+    /**
+     * Leaves `date_modified` alone. For writes the loop makes about itself, which would otherwise
+     * report the entry as edited every time an analysis ran.
+     */
+    { preserveModified = false }: { preserveModified?: boolean } = {}
   ): Promise<'created' | 'updated'> {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
       date_created: existing?.document.date_created ?? now,
-      date_modified: now,
+      date_modified: preserveModified && existing ? existing.document.date_modified : now,
     };
 
     try {
@@ -212,6 +219,82 @@ export class AiIndexService {
     );
 
     return feedbackAnalysis;
+  }
+
+  /**
+   * Records that an analysis run has started, and which conversation it is writing into.
+   *
+   * Overwrites whatever was there: a previous run that never marked itself finished is either done
+   * or abandoned, and either way the run starting now is the one worth watching.
+   */
+  async startFeedbackRun(
+    aiIndexId: string,
+    run: { conversationId: string; startedAt: string }
+  ): Promise<void> {
+    await this.updateFeedbackRun(aiIndexId, () => ({
+      conversation_id: run.conversationId,
+      started_at: run.startedAt,
+    }));
+  }
+
+  /**
+   * Marks the run finished, if it is still the run in flight.
+   *
+   * The conversation id is the guard: a slow run finishing after a newer one started would
+   * otherwise report the newer one as done, and the UI would stop showing it as running while it
+   * was still going.
+   */
+  async finishFeedbackRun(
+    aiIndexId: string,
+    { conversationId, recorded }: { conversationId: string; recorded: number }
+  ): Promise<'finished' | 'superseded'> {
+    let outcome: 'finished' | 'superseded' = 'superseded';
+
+    await this.updateFeedbackRun(aiIndexId, (current) => {
+      if (!current || current.conversation_id !== conversationId) {
+        return current;
+      }
+
+      outcome = 'finished';
+      return { ...current, finished_at: new Date().toISOString(), recorded };
+    });
+
+    return outcome;
+  }
+
+  /** Read-modify-write of the run marker alone, retried when it races another writer. */
+  private async updateFeedbackRun(
+    aiIndexId: string,
+    next: (current: AiIndexFeedbackRun | undefined) => AiIndexFeedbackRun | undefined
+  ): Promise<void> {
+    await pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+
+        const feedbackRun = next(existing.document.feedback_run);
+        if (feedbackRun === existing.document.feedback_run) {
+          return;
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          { ...existing.document, feedback_run: feedbackRun },
+          existing,
+          { preserveModified: true }
+        );
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
   }
 
   async get(aiIndexId: string): Promise<AiIndexHttpItem> {
@@ -270,6 +353,50 @@ export class AiIndexService {
         );
 
         return 'attached';
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
+  }
+
+  /**
+   * Detaches a workflow automation, retrying on concurrent writes. Detaching is not the same as
+   * disabling the workflow: the caller does both, so a re-attach later is a link away.
+   */
+  async removeAutomation(
+    aiIndexId: string,
+    automation: { type: 'workflow'; value: string }
+  ): Promise<'detached' | 'not_attached'> {
+    return pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+        if (existing.document.managed) {
+          throw new AiIndexManagedError(aiIndexId);
+        }
+
+        const remaining = existing.document.automations.filter(
+          (entry) => !(entry.type === automation.type && entry.value === automation.value)
+        );
+        if (remaining.length === existing.document.automations.length) {
+          return 'not_attached';
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          { ...existing.document, automations: remaining },
+          existing
+        );
+
+        return 'detached';
       },
       {
         retries: ADD_AUTOMATION_CONFLICT_RETRIES,

@@ -81,11 +81,52 @@ export interface AiIndexProperties {
   feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
+/**
+ * The analysis run in flight, or the last one to have finished.
+ *
+ * The conversation id is minted before the agent is started rather than read from its result, so
+ * the run can be opened while it is happening. It is also what identifies the run: a slow run
+ * finishing after a newer one began must not clear the newer one's marker.
+ */
+export interface AiIndexFeedbackRun {
+  /** Agent Builder conversation the run writes into. */
+  conversation_id: string;
+  started_at: string;
+  /** Absent while the run is in flight. */
+  finished_at?: string;
+  /** How many improvements the run recorded. Set when it finishes. */
+  recorded?: number;
+}
+
+/**
+ * How long a run may go without finishing before it is presumed dead.
+ *
+ * A run marks itself finished when it records what it proposed, so a run that errors or times out
+ * leaves its marker behind. Matches the analysis step's own timeout.
+ */
+export const FEEDBACK_RUN_STALE_AFTER_MS = 30 * 60 * 1000;
+
+/** Whether the run is still going, as opposed to finished or abandoned. */
+export const isFeedbackRunActive = (
+  run: AiIndexFeedbackRun | undefined,
+  now: number = Date.now()
+): boolean => {
+  if (!run || run.finished_at) {
+    return false;
+  }
+  return now - new Date(run.started_at).getTime() < FEEDBACK_RUN_STALE_AFTER_MS;
+};
+
 export interface AiIndexHttpItem extends AiIndexProperties {
   id: string;
   managed: boolean;
   date_created: string;
   date_modified: string;
+  /**
+   * Written by the analysis workflow, not by the API: it is a record of what the loop is doing,
+   * not something a caller configures. Read-only for that reason.
+   */
+  feedback_run?: AiIndexFeedbackRun;
 }
 
 export type GetAiIndexResponse = AiIndexHttpItem;

@@ -11,7 +11,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { GetAiIndexResponse } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
+import {
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
+} from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 
@@ -96,11 +100,10 @@ describe('createSuggestAutomationProvider', () => {
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
-        newConversation: true,
         autoSendInitialMessage: false,
         initialMessage: expect.stringMatching(
           new RegExp(
-            `\\[\\/${KI_AUTOMATION_GENERATION_SKILL_ID}\\]\\(skill://${KI_AUTOMATION_GENERATION_SKILL_ID}\\).*When an ai_index attachment is present`,
+            `\\[\\/${ANALYZE_AND_IMPROVE_SKILL_ID}\\]\\(skill://${ANALYZE_AND_IMPROVE_SKILL_ID}\\).*suggest an automation`,
             's'
           )
         ),
@@ -120,6 +123,68 @@ describe('createSuggestAutomationProvider', () => {
         ],
       })
     );
+  });
+
+  it('opens guided setup with the same attachment but a setup brief', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        autoSendInitialMessage: false,
+        initialMessage: expect.stringMatching(
+          new RegExp(
+            `\\[\\/${ANALYZE_AND_IMPROVE_SKILL_ID}\\]\\(skill://${ANALYZE_AND_IMPROVE_SKILL_ID}\\).*help me set up`,
+            's'
+          )
+        ),
+        sessionTag: 'context-engine-ai-index-my-ai-index',
+        attachments: [
+          expect.objectContaining({ id: 'my-ai-index', type: AI_INDEX_ATTACHMENT_TYPE }),
+        ],
+      })
+    );
+  });
+
+  it('resumes the thread already going about this index rather than starting a new one', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
+
+    for (const [options] of openChat.mock.calls) {
+      expect(options.newConversation).toBeUndefined();
+      expect(options.sessionTag).toBe('context-engine-ai-index-my-ai-index');
+    }
+  });
+
+  it.each([
+    ['suggestAutomation' as const, [AI_INDEX_AUTOMATIONS_SKILL_ID]],
+    ['startGuidedSetup' as const, [AI_INDEX_SOURCES_SKILL_ID, AI_INDEX_AUTOMATIONS_SKILL_ID]],
+  ])('asks %s for the skills that carry the tools it needs', (method, skillIds) => {
+    // `analyze-and-improve` is read-only. Both buttons exist to produce an automation, so the
+    // brief names the writing skills up front instead of leaving the agent to discover midway
+    // that it cannot author one.
+    const { provider, openChat } = createProvider();
+
+    provider[method]({ aiIndex, onSaved: jest.fn() });
+
+    const { initialMessage } = openChat.mock.calls[0][0];
+    for (const skillId of skillIds) {
+      expect(initialMessage).toContain(`skill://${skillId}`);
+    }
+  });
+
+  it('asks the agent to work out the sources rather than having the user name them', () => {
+    // Creation no longer collects sources, so the brief has to send the agent looking for them.
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+
+    const [{ initialMessage }] = openChat.mock.calls[0];
+    expect(initialMessage).toMatch(/no sources yet/i);
+    expect(initialMessage).toMatch(/indices or connectors/i);
   });
 
   it('refreshes the page when save automation succeeds for the current AI index', () => {

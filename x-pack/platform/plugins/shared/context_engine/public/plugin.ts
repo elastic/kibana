@@ -19,8 +19,9 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { from, map, switchMap } from 'rxjs';
+import { BehaviorSubject, from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import type { GetAiIndexResponse } from '../common/http_api/ai_indices';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 import { registerStepDefinitions } from './step_types';
 import type {
@@ -57,6 +58,9 @@ export class ContextEnginePlugin
   /** Registered suggest-automation hooks from context_engine_agent_builder. */
   private agentBuilderIntegration?: AgentBuilderIntegration;
 
+  /** The AI index detail page the user currently has open; `undefined` everywhere else. */
+  private readonly viewedAiIndex$ = new BehaviorSubject<GetAiIndexResponse | undefined>(undefined);
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(
@@ -81,6 +85,8 @@ export class ContextEnginePlugin
     const getAppChromeAdapter = () => this.appChromeAdapter;
     const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
       this.agentBuilderIntegration;
+    const setViewedAiIndex = (aiIndex: GetAiIndexResponse | undefined): void =>
+      this.viewedAiIndex$.next(aiIndex);
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -118,7 +124,7 @@ export class ContextEnginePlugin
         coreStart.chrome.docTitle.change(APP_TITLE);
         const appChrome = getAppChromeAdapter();
         await appChrome?.handleOnAppMount();
-        return mountApp({
+        const unmountApp = await mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
@@ -126,7 +132,15 @@ export class ContextEnginePlugin
           getChatOpener: () => chatOpener,
           appChrome,
           getAgentBuilderIntegration,
+          setViewedAiIndex,
         });
+
+        return () => {
+          // Leaving the app entirely can tear the tree down without the detail page's own cleanup
+          // running, which would leave a stale index attached to an open assistant.
+          setViewedAiIndex(undefined);
+          unmountApp();
+        };
       },
     });
 
@@ -153,8 +167,11 @@ export class ContextEnginePlugin
       registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => {
         this.agentBuilderIntegration = integration;
       },
+      viewedAiIndex$: this.viewedAiIndex$.asObservable(),
     };
   }
 
-  stop() {}
+  stop() {
+    this.viewedAiIndex$.complete();
+  }
 }

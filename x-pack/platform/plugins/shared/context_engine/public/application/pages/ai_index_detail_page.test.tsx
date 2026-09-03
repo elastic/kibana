@@ -155,6 +155,15 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
 
 const waitForAiIndexDetailLoaded = () => screen.findByTestId('contextAiIndexSourceRow');
 
+/**
+ * How many times the AI index itself was fetched. Counted by path rather than by total `http.get`
+ * calls, since panels on this page fetch their own data.
+ */
+const countAiIndexFetches = (services: ReturnType<typeof createServices>) =>
+  services.http.get.mock.calls.filter(
+    ([path]) => typeof path === 'string' && path === `/api/context_engine/ai_index/${aiIndex.id}`
+  ).length;
+
 describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
@@ -254,7 +263,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditDescriptionButton'));
 
@@ -280,7 +289,7 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextDescriptionTextArea')).not.toBeInTheDocument();
     });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('opens the edit sources flyout with the current sources selected', async () => {
@@ -305,7 +314,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await screen.findByTestId('contextEditSourcesButton');
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
@@ -332,7 +341,7 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
     });
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('renders an empty state when there are no automations', async () => {
@@ -345,6 +354,33 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
+  });
+
+  describe('when the AI index has no sources yet', () => {
+    it('leaves automations out, so setting up sources is the only thing on offer', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({ ...aiIndex, sources: [], automations: [] });
+
+      renderWithProviders(services);
+
+      await screen.findByTestId('contextAiIndexSourcesEmpty');
+
+      expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contextCreateAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows automations that are already attached, so they can be removed', async () => {
+      const services = createServices();
+      services.http.get.mockResolvedValue({
+        ...aiIndex,
+        sources: [],
+        automations: [{ type: 'workflow', value: 'wf-1' }],
+      });
+
+      renderWithProviders(services);
+
+      expect(await screen.findByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+    });
   });
 
   it('shows edit controls once the AI index has loaded', async () => {
@@ -522,7 +558,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     await waitForAiIndexDetailLoaded();
-    expect(services.http.get).toHaveBeenCalledTimes(1);
+    expect(countAiIndexFetches(services)).toBe(1);
 
     fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
     fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
@@ -541,7 +577,7 @@ describe('AiIndexDetailPage', () => {
       );
     });
 
-    expect(services.http.get).toHaveBeenCalledTimes(2);
+    expect(countAiIndexFetches(services)).toBe(2);
   });
 
   it('switches to the Knowledge Indicators tab', async () => {

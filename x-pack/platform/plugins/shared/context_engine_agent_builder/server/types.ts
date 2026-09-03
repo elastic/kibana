@@ -6,7 +6,10 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import type {
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+} from '@kbn/context-engine-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
@@ -18,6 +21,7 @@ export interface ContextEngineAgentBuilderPluginStart {}
 
 export interface ContextEngineAgentBuilderSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  contextEngine: ContextEnginePluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
 }
 

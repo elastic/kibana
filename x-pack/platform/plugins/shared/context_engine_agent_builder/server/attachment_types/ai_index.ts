@@ -12,10 +12,15 @@ import {
   type AiIndexAttachmentData,
 } from '../../common/agent_builder_attachment_schemas';
 import {
-  KI_AUTOMATION_GENERATION_SKILL_ID,
+  AI_INDEX_AUTOMATIONS_SKILL_ID,
+  AI_INDEX_SOURCES_SKILL_ID,
+  ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -44,23 +49,35 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       getRepresentation: () => ({ type: 'text', value: formatAiIndex(attachment.data) }),
     };
   },
+  // This attachment is what grants the conversation authority to write, so the interaction
+  // choreography lives here rather than in the skill. The skill decides *what* should change and
+  // is loaded by unattended runs too, where none of the steps below have anyone to answer them.
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
       'sources, and workflow automations). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
       `For querying KIs in this index, load the \`${KI_RETRIEVAL_SKILL_ID}\` skill.`,
-      `To draft or edit workflow automations, load \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` (or follow`,
-      "the user's initial message if it already references that skill).",
-      'When automations are listed and the user wants to edit one, use `ask_user_question` before',
-      '`generate_workflow`. When editing, ask what should change before calling `generate_workflow`.',
+      `To decide what this index should hold, load \`${ANALYZE_AND_IMPROVE_SKILL_ID}\`. That skill`,
+      `is read-only: also load \`${AI_INDEX_AUTOMATIONS_SKILL_ID}\` to draft, validate or run an`,
+      `automation, and \`${AI_INDEX_SOURCES_SKILL_ID}\` to choose or change the data it draws on.`,
+      "Follow the user's initial message where it already names the skills to load.",
+      'This attachment authorizes you to apply changes, not only to propose them. Work interactively:',
+      'confirm the strategy and the corpus filter with the user before drafting, and use',
+      '`ask_user_question` whenever the choice is a fixed set of options — which automation to edit,',
+      'which strategy to use, what should change — rather than paraphrasing the options as chat text.',
+      'Draft a pilot limited to 1–3 KIs, and inspect its output with the user before expanding.',
       `After \`generate_workflow\`, render the diff in chat first, then call \`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\``,
       'with the workflow attachment id — in the same assistant turn but a separate model step after',
       'the diff is visible. Do not batch save with generate_workflow. If save runs in a later turn,',
       're-render the diff first. Platform confirms before persisting.',
       'If the user saved manually from the diff card, pass `workflowId` instead.',
+      'Do not run a workflow until it has been saved and the user has approved it.',
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+    CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {

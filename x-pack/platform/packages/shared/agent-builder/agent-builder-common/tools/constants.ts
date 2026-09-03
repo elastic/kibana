@@ -167,6 +167,10 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  // Proposes a change to a Context Engine AI index for review; it writes a suggestion, never the
+  // change itself. Default rather than attachment-scoped so the agent can offer to record what it
+  // worked out wherever the conversation got to it, not only when an index was attached up front.
+  `${internalNamespaces.platformContextEngine}.propose_improvements`,
 ];
 
 /**

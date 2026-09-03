@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { GetAiIndexResponse } from '../../common/http_api/ai_indices';
 import type { ContextEngineAppChromeAdapter } from '../app_chrome_adapter';
 import type { AgentBuilderIntegration, ChatOpener, ContextEngineStartDependencies } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
@@ -30,6 +31,7 @@ export const mountApp = async ({
   getChatOpener,
   appChrome,
   getAgentBuilderIntegration,
+  setViewedAiIndex,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
@@ -38,6 +40,7 @@ export const mountApp = async ({
   getChatOpener?: () => ChatOpener | undefined;
   appChrome?: ContextEngineAppChromeAdapter;
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
+  setViewedAiIndex?: (aiIndex: GetAiIndexResponse | undefined) => void;
 }) => {
   const services: ContextEngineServices = {
     ...core,
@@ -50,6 +53,7 @@ export const mountApp = async ({
     appChrome,
     history,
     getAgentBuilderIntegration,
+    setViewedAiIndex,
   };
 
   ReactDOM.render(

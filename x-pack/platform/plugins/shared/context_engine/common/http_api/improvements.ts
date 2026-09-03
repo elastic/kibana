@@ -29,6 +29,23 @@ export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
  */
 export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
 
+export const IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = [
+  'suggested',
+  'applied',
+  'rejected',
+  'failed',
+];
+
+/**
+ * The statuses a reviewer has not settled. `failed` is open: the apply errored, so nothing was
+ * written and approving again after fixing the cause is the expected next step.
+ */
+export const OPEN_IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = ['suggested', 'failed'];
+
+/** Whether the improvement is still awaiting a decision, and so can be approved or rejected. */
+export const isOpenImprovement = (status: ImprovementStatus): boolean =>
+  OPEN_IMPROVEMENT_STATUSES.includes(status);
+
 /** The `add_*` actions create their target, so they carry no {@link ImprovementTarget}. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');
 
@@ -83,15 +100,28 @@ export interface ImprovementResolution {
   applied_target_id?: string;
 }
 
+/**
+ * How an improvement came to be proposed.
+ *
+ * - `analysis` — a scheduled run read signals and derived it. Carries the signal fields.
+ * - `conversation` — an agent proposed it while working with someone, so the evidence is the
+ *   conversation rather than a window of signals, and none of the signal fields apply.
+ *
+ * Absent on improvements written before conversations could propose them, which were all runs.
+ */
+export type ImprovementOrigin = 'analysis' | 'conversation';
+
 export interface ImprovementProvenance {
-  /** The analysis run that produced it. */
+  /** The analysis run, or the tool call, that produced it. */
   agent_run_id: string;
-  /** Signals it was derived from. */
-  signal_ids: string[];
+  /** Defaults to `analysis` when absent. */
+  origin?: ImprovementOrigin;
+  /** Signals it was derived from. Absent unless a run derived it. */
+  signal_ids?: string[];
   /** Spaces those signals came from; the analysis reads across all of them. */
-  signal_spaces: string[];
-  signal_window: { from: string; to: string };
-  signal_count: number;
+  signal_spaces?: string[];
+  signal_window?: { from: string; to: string };
+  signal_count?: number;
   /** Classifier tags that drove it (`query_error` / `empty_retrieval` / `coverage_gap`). */
   tags?: string[];
 }
@@ -141,4 +171,56 @@ export type ImprovementTransition = Extract<ImprovementStatus, 'applied' | 'reje
 export interface ListImprovementsResponse {
   items: Improvement[];
   total: number;
+}
+
+/** Response to approving or rejecting: the new head, so the caller need not re-list to redraw a row. */
+export interface MutateImprovementResponse {
+  improvement: Improvement;
+}
+
+/** Response to starting a run by hand. */
+export interface RunFeedbackAnalysisResponse {
+  /** The workflow execution that was started, for following the run. */
+  execution_id: string;
+}
+
+/** Body of a reject request. */
+export interface RejectImprovementRequest {
+  reason?: string;
+}
+
+/**
+ * What an analysis run posts when it finishes.
+ *
+ * The window and spaces are echoed from the selection the run was handed rather than recomputed
+ * here, because relative date math (`now-30d`) resolves differently between the two calls and
+ * provenance should record the window the signals were actually read from.
+ */
+export interface RecordImprovementsRequest {
+  ai_index_id: string;
+  /** The workflow execution that produced these, so a reviewer can open the run. */
+  agent_run_id: string;
+  signal_window: { from: string; to: string };
+  signal_spaces: string[];
+  improvements: unknown[];
+}
+
+/** Why a proposal was not recorded. */
+export type SkippedImprovementReason =
+  | 'action_not_allowed'
+  | 'invalid'
+  | 'duplicate'
+  | 'conflict'
+  | 'limit_exceeded';
+
+export interface RecordImprovementsResponse {
+  /** Lineages that gained a revision, in the order they were proposed. */
+  recorded: Array<{ improvement_id: string; action: ImprovementAction; title: string }>;
+  /** Proposals that were dropped, each with the reason — what the run should surface. */
+  skipped: Array<{
+    action?: string;
+    title?: string;
+    reason: SkippedImprovementReason;
+    detail: string;
+  }>;
 }

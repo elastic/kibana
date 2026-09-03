@@ -6,6 +6,7 @@
  */
 
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import { buildImprovement } from './application/components/ai_index_detail/improvement_test_fixtures';
 import { buildAnalyzeChat } from './analyze_chat';
 
 const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
@@ -28,7 +29,6 @@ describe('buildAnalyzeChat', () => {
     const options = buildAnalyzeChat({ aiIndex: aiIndex() });
 
     expect(options.agentId).toBe('agent-1');
-    expect(options.newConversation).toBe(true);
     expect(options.sessionTag).toBe('context-engine-feedback:my-index');
     expect(options.attachments).toHaveLength(1);
     expect(options.attachments[0]).toEqual({
@@ -74,5 +74,30 @@ describe('buildAnalyzeChat', () => {
       aiIndex: aiIndex({ feedback_analysis: undefined }),
     });
     expect(options.agentId).toBeUndefined();
+  });
+
+  describe('which conversation it opens', () => {
+    const improvement = buildImprovement({ improvement_id: 'imp-1' });
+
+    it('gives each improvement a thread of its own, separate from the index-wide one', () => {
+      expect(buildAnalyzeChat({ aiIndex: aiIndex(), improvement }).sessionTag).toBe(
+        'context-engine-feedback:my-index:imp-1'
+      );
+    });
+
+    it('reopens a scheduled run rather than briefing it again', () => {
+      const options = buildAnalyzeChat({ aiIndex: aiIndex(), conversationId: 'conv-1' });
+
+      expect(options.conversationId).toBe('conv-1');
+      expect(options.attachments).toEqual([]);
+      expect(options.initialMessage).toBeUndefined();
+    });
+
+    it('keeps a reopened run off the tag the interactive hand-off resumes', () => {
+      const run = buildAnalyzeChat({ aiIndex: aiIndex(), conversationId: 'conv-1' });
+      const interactive = buildAnalyzeChat({ aiIndex: aiIndex() });
+
+      expect(run.sessionTag).not.toBe(interactive.sessionTag);
+    });
   });
 });

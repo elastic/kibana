@@ -6,6 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type {
   AgentBuilderIntegration,
   ChatOpener,
@@ -31,6 +32,11 @@ export interface ContextEngineServices extends ContextEngineAppServices {
    * up on the next render.
    */
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
+  /**
+   * Publishes the AI index the user is currently viewing, so an assistant that is already open can
+   * pick it up. Pass `undefined` when leaving the page.
+   */
+  setViewedAiIndex?: (aiIndex: GetAiIndexResponse | undefined) => void;
 }
 
 const useTypedKibana = () => useKibana<ContextEngineServices>();

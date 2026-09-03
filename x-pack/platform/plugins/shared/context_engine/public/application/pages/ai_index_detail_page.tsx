@@ -20,17 +20,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { WORKFLOW_IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   AutomationsPanel,
   DescriptionPanel,
+  ImprovementsPanel,
   SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useScopedImprovements } from '../hooks/use_scoped_improvements';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
+import { usePublishViewedAiIndex } from '../hooks/use_publish_viewed_ai_index';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
@@ -61,8 +65,33 @@ export const AiIndexDetailPage = () => {
     enabled: aiIndex !== undefined,
   });
 
+  usePublishViewedAiIndex(aiIndex);
+
   const isManaged = aiIndex !== undefined && aiIndex.managed;
   const hideEditControls = isLoading || isManaged;
+
+  /**
+   * Automations read from an index's sources, so until there are sources there is nothing for one
+   * to do, and offering to write one only draws attention away from the setup that has to come
+   * first. Automations that already exist keep the panel visible however the index got that way:
+   * hiding them would leave them running with no way to see or remove them.
+   *
+   * Withheld until the index has loaded rather than shown as a skeleton, so an index that is about
+   * to be set up never flashes the step that comes after.
+   *
+   * A proposed automation also brings the panel back, whatever the index looks like otherwise: the
+   * assistant can suggest a source and the automation that would use it in one go, and a
+   * suggestion nobody can see is a suggestion nobody can approve.
+   */
+  const proposedAutomations = useScopedImprovements({
+    aiIndexId: aiIndex?.id,
+    actions: WORKFLOW_IMPROVEMENT_ACTIONS,
+  });
+  const showAutomations =
+    aiIndex !== undefined &&
+    (aiIndex.sources.length > 0 ||
+      aiIndex.automations.length > 0 ||
+      proposedAutomations.length > 0);
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
@@ -142,18 +171,25 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="m" />
           <SourcesPanel
             isLoading={isLoading}
-            sources={aiIndex?.sources ?? []}
+            aiIndex={aiIndex}
             canEdit={aiIndex !== undefined}
             onEditSources={() => setIsEditingSources(true)}
+            onSaved={refetch}
             isManaged={hideEditControls}
           />
+          {showAutomations && (
+            <>
+              <EuiSpacer size="m" />
+              <AutomationsPanel
+                isLoading={isLoading}
+                aiIndex={aiIndex}
+                onSaved={refetch}
+                isManaged={isManaged}
+              />
+            </>
+          )}
           <EuiSpacer size="m" />
-          <AutomationsPanel
-            isLoading={isLoading}
-            aiIndex={aiIndex}
-            onSaved={refetch}
-            isManaged={isManaged}
-          />
+          <ImprovementsPanel isLoading={isLoading} aiIndex={aiIndex} />
           <EuiSpacer size="m" />
           <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
         </>

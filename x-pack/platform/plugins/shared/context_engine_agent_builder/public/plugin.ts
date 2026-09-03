@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createAiIndexAutoAttach } from './create_ai_index_auto_attach';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 import type {
   ContextEngineAgentBuilderPublicSetup,
@@ -23,6 +24,8 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderPublicStartDependencies
     >
 {
+  private stopAiIndexAutoAttach: () => void = () => {};
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(
@@ -45,8 +48,12 @@ export class ContextEngineAgentBuilderPlugin
       }),
     });
 
+    this.stopAiIndexAutoAttach = createAiIndexAutoAttach({ agentBuilder, contextEngine });
+
     return {};
   }
 
-  stop() {}
+  stop() {
+    this.stopAiIndexAutoAttach();
+  }
 }

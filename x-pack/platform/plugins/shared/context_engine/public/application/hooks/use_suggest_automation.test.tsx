@@ -41,6 +41,7 @@ const renderSuggestHook = ({
 } = {}) => {
   const canSuggestMock = jest.fn().mockReturnValue(canSuggest);
   const suggestAutomationMock = jest.fn();
+  const startGuidedSetupMock = jest.fn();
   let automationSavedCallback: (() => void) | undefined;
   const subscribeToAutomationSavedMock = jest.fn((_aiIndexId: string, callback: () => void) => {
     automationSavedCallback = callback;
@@ -50,6 +51,7 @@ const renderSuggestHook = ({
   const provider: SuggestAutomationProvider = {
     canSuggest: canSuggestMock,
     suggestAutomation: suggestAutomationMock,
+    startGuidedSetup: startGuidedSetupMock,
     subscribeToAutomationSaved: subscribeToAutomationSavedMock,
   };
 
@@ -74,6 +76,7 @@ const renderSuggestHook = ({
     ...view,
     canSuggestMock,
     suggestAutomationMock,
+    startGuidedSetupMock,
     subscribeToAutomationSavedMock,
     triggerAutomationSaved: () => automationSavedCallback?.(),
     onSaved,
@@ -117,6 +120,25 @@ describe('useSuggestAutomation', () => {
     result.current.suggestAutomation();
 
     expect(suggestAutomationMock).not.toHaveBeenCalled();
+  });
+
+  it('delegates startGuidedSetup to the provider', () => {
+    const { result, startGuidedSetupMock } = renderSuggestHook();
+
+    result.current.startGuidedSetup();
+
+    expect(startGuidedSetupMock).toHaveBeenCalledWith({
+      aiIndex,
+      onSaved: expect.any(Function),
+    });
+  });
+
+  it('does not call startGuidedSetup when canSuggest is false', () => {
+    const { result, startGuidedSetupMock } = renderSuggestHook({ canSuggest: false });
+
+    result.current.startGuidedSetup();
+
+    expect(startGuidedSetupMock).not.toHaveBeenCalled();
   });
 
   it('subscribes to automation saved events via the provider', () => {

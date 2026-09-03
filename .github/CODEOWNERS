@@ -2730,7 +2730,11 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 # workplaceai
 /x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts @elastic/appex-qa
 /x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts @elastic/appex-qa
-x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automation_generation @elastic/context-eng
+x-pack/platform/plugins/shared/agent_builder_platform/server/skills/analyze_and_improve @elastic/context-eng
+x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_automations @elastic/context-eng
+x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_sources @elastic/context-eng
+x-pack/platform/plugins/shared/agent_builder_platform/server/skills/context_engine_signals @elastic/context-eng
+x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_retrieval @elastic/context-eng
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/group4/_import_objects.ts && test/functional/apps/management/group2/_scripted_fields_filter.ts

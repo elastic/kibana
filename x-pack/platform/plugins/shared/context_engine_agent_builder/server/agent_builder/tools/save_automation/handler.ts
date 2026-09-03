@@ -23,6 +23,7 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder_attachments';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import { flattenAiIndexAttachments, resolveAiIndexIdFromAttachments } from '../ai_index_attachment';
 
 export interface SaveAutomationParams {
   workflowAttachmentId?: string;
@@ -136,44 +137,6 @@ export const tryResolveWorkflowDisplayNameById = async ({
     return undefined;
   }
 };
-
-export const resolveAiIndexIdFromAttachments = (
-  attachments: Array<{ type: string; data: { id?: string } }>,
-  aiIndexId?: string
-): string => {
-  if (aiIndexId) {
-    return aiIndexId;
-  }
-
-  const attachment = attachments.find(
-    (entry) => entry.type === AI_INDEX_ATTACHMENT_TYPE && typeof entry.data.id === 'string'
-  );
-
-  if (!attachment?.data.id) {
-    throw new Error(
-      'No ai_index attachment found in this conversation. Provide aiIndexId explicitly or attach the AI index first.'
-    );
-  }
-
-  return attachment.data.id;
-};
-
-const flattenAiIndexAttachments = (
-  attachments: AttachmentStateManager
-): Array<{ type: string; data: { id?: string } }> =>
-  attachments.getAll().flatMap((attachment) => {
-    const latestVersion = getLatestVersion(attachment);
-    if (!latestVersion?.data || typeof latestVersion.data !== 'object') {
-      return [];
-    }
-
-    return [
-      {
-        type: attachment.type,
-        data: latestVersion.data as { id?: string },
-      },
-    ];
-  });
 
 export const resolveWorkflowYamlFromAttachments = (
   attachments: AttachmentStateManager,

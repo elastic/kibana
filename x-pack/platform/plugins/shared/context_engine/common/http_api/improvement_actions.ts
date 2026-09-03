@@ -29,3 +29,22 @@ export const IMPROVEMENT_ACTIONS = [
 ] as const;
 
 export type ImprovementAction = (typeof IMPROVEMENT_ACTIONS)[number];
+
+/**
+ * The actions that change what an index draws on, and the ones that change how it is filled.
+ *
+ * Grouped so a suggestion can be shown beside the thing it would change — a proposed source next
+ * to the sources — rather than only in a combined queue that gives no clue which part of the page
+ * it is about.
+ */
+export const SOURCE_IMPROVEMENT_ACTIONS = [
+  'add_source',
+  'edit_source',
+  'remove_source',
+] as const satisfies readonly ImprovementAction[];
+
+export const WORKFLOW_IMPROVEMENT_ACTIONS = [
+  'add_workflow',
+  'edit_workflow',
+  'remove_workflow',
+] as const satisfies readonly ImprovementAction[];

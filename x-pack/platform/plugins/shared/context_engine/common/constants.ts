@@ -37,9 +37,26 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/** Read and decision routes for the improvements a feedback analysis run proposed. */
+export const aiIndexImprovementsPath = `${internalApiPath}/ai_index/{aiIndexId}/improvements`;
+export const improvementApprovePath = `${aiIndexImprovementsPath}/{improvementId}/approve`;
+export const improvementRejectPath = `${aiIndexImprovementsPath}/{improvementId}/reject`;
+/** Triggers one analysis off-schedule. */
+export const aiIndexFeedbackAnalysisRunPath = `${aiIndexFeedbackAnalysisPath}/_run`;
+
+/** Version of the internal Improvements API, shared between route registration and the browser client. */
+export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
+
+export const MAX_IMPROVEMENT_ID_LENGTH = 512;
+
 /** Default and maximum page size when listing improvements (one entry per improvement lineage). */
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`.
+ */
+export const MAX_IMPROVEMENTS_RESULT_WINDOW = 10000;
 
 /**
  * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
@@ -98,6 +115,31 @@ export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
 export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
 
+/**
+ * Cap on the signal documents a single analysis run reads.
+ *
+ * Only the example query and the provenance ids attached to each pattern come from these, so the
+ * cap bounds evidence rather than the analysis: pattern counts, the spaces list and the run's
+ * signal total are aggregated over the whole window and do not depend on it.
+ */
+export const MAX_ANALYSIS_SIGNALS = 500;
+
+/** Cap on the ranked pattern groups handed to a run. */
+export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
+
+/**
+ * Cap on the signal ids recorded per group. Provenance needs enough ids to follow a proposal back
+ * to its evidence, not every id behind it — a busy group can carry thousands.
+ */
+export const MAX_GROUP_SIGNAL_IDS = 20;
+
+/** Cap on the proposals one run may record, so a runaway run cannot flood the review queue. */
+export const MAX_IMPROVEMENTS_PER_RUN = 25;
+
+/** Bounds on the free text a run may attach to a proposal. */
+export const MAX_IMPROVEMENT_TITLE_LENGTH = 512;
+export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
+
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
 
@@ -108,6 +150,14 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
 /** Agent id whose tool calls are left untagged. */
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+
+/**
+ * Skill id of the feedback loop's own analysis skill. A round that loads it is the loop
+ * diagnosing an AI index, so the whole round is excluded from signal generation: its reads
+ * target the index under analysis and are otherwise indistinguishable from an agent
+ * genuinely retrieving from it.
+ */
+export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept

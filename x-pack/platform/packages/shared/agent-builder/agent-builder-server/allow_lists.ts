@@ -113,6 +113,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  `${internalNamespaces.platformContextEngine}.propose_improvements`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -205,8 +206,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-gap-detection',
 
   // Platform – Context Engine
-  'ki-automation-generation',
   'ki-retrieval',
+  'analyze-and-improve',
+  'context-engine-signals',
+  'ai-index-sources',
+  'ai-index-automations',
 
   // Platform – Workflows
   'workflow-authoring',
