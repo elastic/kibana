@@ -6,14 +6,17 @@
  */
 
 import type { Feature } from '@kbn/significant-events-schema';
+import type { ToolCall } from '@kbn/inference-common';
 import {
-  applySemanticFeatureAliases,
   buildKnownFeatureIds,
   buildTelemetry,
   findSimilarFeatures,
   selectPreviouslyIdentifiedFeatures,
-  stripModelAssignedAliases,
 } from './identify_inferred_features';
+import {
+  buildFeatureSimilarityInferenceTools,
+  MAX_SEARCH_CANDIDATES,
+} from './feature_similarity_search';
 
 const createFeature = ({ id, ...overrides }: Partial<Feature> & Pick<Feature, 'id'>): Feature => ({
   id,
@@ -110,201 +113,6 @@ describe('buildKnownFeatureIds', () => {
   });
 });
 
-describe('stripModelAssignedAliases', () => {
-  it('drops model-written aliases and keeps the rest of meta', () => {
-    const feature = createFeature({
-      id: 'okta',
-      meta: { aliases: ['redis'], note: 'keep me' },
-    });
-
-    expect(stripModelAssignedAliases(feature).meta).toEqual({ note: 'keep me' });
-  });
-
-  it('removes meta entirely when aliases was its only key', () => {
-    const feature = createFeature({ id: 'okta', meta: { aliases: ['redis'] } });
-
-    expect(stripModelAssignedAliases(feature).meta).toBeUndefined();
-  });
-
-  it('returns the feature unchanged when no aliases are present', () => {
-    const feature = createFeature({ id: 'okta', meta: { note: 'keep me' } });
-
-    expect(stripModelAssignedAliases(feature)).toBe(feature);
-  });
-});
-
-describe('applySemanticFeatureAliases', () => {
-  it('captures a candidate id when the finalized feature reuses a search hit', () => {
-    const feature = createFeature({ id: 'opentelemetry' });
-    const result = applySemanticFeatureAliases(
-      [feature],
-      [
-        {
-          candidateId: 'go-opentelemetry',
-          type: 'technology',
-          hitIds: new Set(['opentelemetry']),
-        },
-      ]
-    );
-
-    expect(result.features[0].meta?.aliases).toEqual(['go-opentelemetry']);
-    expect(result.reuseCount).toBe(1);
-  });
-
-  it('captures a reuse when a versioned search hit resolves to the canonical finalized id', () => {
-    const result = applySemanticFeatureAliases(
-      [createFeature({ id: 'okta' })],
-      [
-        {
-          candidateId: 'okta-sdk',
-          type: 'technology',
-          hitIds: new Set(['okta-3.15.0']),
-        },
-      ]
-    );
-
-    expect(result.features[0].meta?.aliases).toEqual(['okta-sdk']);
-    expect(result.reuseCount).toBe(1);
-  });
-
-  it('does not capture an alias when no hit id was reused', () => {
-    const feature = createFeature({ id: 'opentelemetry' });
-    const result = applySemanticFeatureAliases(
-      [feature],
-      [
-        {
-          candidateId: 'go-opentelemetry',
-          type: 'technology',
-          hitIds: new Set(['different-feature']),
-        },
-      ]
-    );
-
-    expect(result.features[0]).toBe(feature);
-    expect(result.reuseCount).toBe(0);
-  });
-
-  it('does not count a candidate reusing its own id', () => {
-    const feature = createFeature({ id: 'okta' });
-    const result = applySemanticFeatureAliases(
-      [feature],
-      [
-        {
-          candidateId: 'okta',
-          type: 'technology',
-          hitIds: new Set(['okta']),
-        },
-      ]
-    );
-
-    expect(result.features[0]).toBe(feature);
-    expect(result.reuseCount).toBe(0);
-  });
-
-  it('does not record an alias when the model emits both the candidate and the hit', () => {
-    // The model searched with redis-cache, saw redis, and deliberately kept both.
-    // An alias here would silently merge them once redis-cache expires.
-    const result = applySemanticFeatureAliases(
-      [createFeature({ id: 'redis' }), createFeature({ id: 'redis-cache' })],
-      [
-        {
-          candidateId: 'redis-cache',
-          type: 'technology',
-          hitIds: new Set(['redis']),
-        },
-      ]
-    );
-
-    expect(result.features.every((feature) => feature.meta?.aliases === undefined)).toBe(true);
-    expect(result.reuseCount).toBe(0);
-  });
-
-  it('records an alias when the candidate was abandoned for a versioned form of the hit', () => {
-    // Searching with okta-3.14.1 and shipping okta still counts as abandoning the candidate.
-    const result = applySemanticFeatureAliases(
-      [createFeature({ id: 'okta' })],
-      [
-        {
-          candidateId: 'okta-3.14.1',
-          type: 'technology',
-          hitIds: new Set(['okta']),
-        },
-      ]
-    );
-
-    expect(result.features[0].meta?.aliases).toEqual(['okta-3.14.1']);
-    expect(result.reuseCount).toBe(1);
-  });
-
-  it('does not capture an ambiguous alias when multiple finalized features match the search hits', () => {
-    const result = applySemanticFeatureAliases(
-      [createFeature({ id: 'okta' }), createFeature({ id: 'auth0' })],
-      [
-        {
-          candidateId: 'identity-provider',
-          type: 'technology',
-          hitIds: new Set(['okta', 'auth0']),
-        },
-      ]
-    );
-
-    expect(result.features.every((feature) => feature.meta?.aliases === undefined)).toBe(true);
-    expect(result.reuseCount).toBe(0);
-  });
-
-  it('captures aliases only on the searched feature type', () => {
-    const result = applySemanticFeatureAliases(
-      [
-        createFeature({ id: 'gcp', type: 'technology' }),
-        createFeature({ id: 'gcp', type: 'entity' }),
-      ],
-      [
-        {
-          candidateId: 'google-cloud-sdk',
-          type: 'technology',
-          hitIds: new Set(['gcp']),
-        },
-      ]
-    );
-
-    expect(result.features[0].meta?.aliases).toEqual(['google-cloud-sdk']);
-    expect(result.features[1].meta?.aliases).toBeUndefined();
-    expect(result.reuseCount).toBe(1);
-  });
-
-  it('validates existing aliases, deduplicates them, and caps the newest ten', () => {
-    const existingAliases = Array.from({ length: 10 }, (_, index) => `alias-${index}`);
-    const feature = createFeature({
-      id: 'canonical',
-      meta: { aliases: [...existingAliases, 42, 'alias-9'] },
-    });
-    const result = applySemanticFeatureAliases(
-      [feature],
-      [
-        {
-          candidateId: 'candidate-new',
-          type: 'technology',
-          hitIds: new Set(['canonical']),
-        },
-      ]
-    );
-
-    expect(result.features[0].meta?.aliases).toEqual([
-      'alias-1',
-      'alias-2',
-      'alias-3',
-      'alias-4',
-      'alias-5',
-      'alias-6',
-      'alias-7',
-      'alias-8',
-      'alias-9',
-      'candidate-new',
-    ]);
-    expect(result.reuseCount).toBe(1);
-  });
-});
-
 describe('findSimilarFeatures', () => {
   it('uses semantic search and returns only hits with the candidate type', async () => {
     const findFeatures = jest.fn().mockResolvedValue({
@@ -328,10 +136,14 @@ describe('findSimilarFeatures', () => {
       },
     });
 
-    expect(findFeatures).toHaveBeenCalledWith('logs.test', 'Okta SDK Okta client technology', {
-      searchMode: 'semantic',
-      limit: 20,
-    });
+    expect(findFeatures).toHaveBeenCalledWith(
+      'logs.test',
+      'okta-sdk Okta SDK Okta client technology',
+      {
+        searchMode: 'semantic',
+        limit: 20,
+      }
+    );
     expect(result).toEqual([
       {
         id: 'okta',
@@ -390,6 +202,33 @@ describe('findSimilarFeatures', () => {
   });
 });
 
+describe('buildFeatureSimilarityInferenceTools', () => {
+  it('caps fallback searches at the runtime candidate limit', async () => {
+    const findFeatures = jest.fn().mockResolvedValue({ hits: [] });
+    const { callbacks } = buildFeatureSimilarityInferenceTools({
+      kiClient: { findFeatures },
+      streamName: 'logs.test',
+    });
+    const candidates = Array.from({ length: MAX_SEARCH_CANDIDATES + 1 }, (_, index) => ({
+      candidate_id: `candidate-${index}`,
+      title: `Candidate ${index}`,
+      description: `Candidate ${index} description`,
+      type: 'technology' as const,
+    }));
+    const toolCall: ToolCall = {
+      toolCallId: 'tool-call-1',
+      function: {
+        name: 'search_similar_features',
+        arguments: { candidates },
+      },
+    };
+
+    await callbacks.search_similar_features(toolCall);
+
+    expect(findFeatures).toHaveBeenCalledTimes(MAX_SEARCH_CANDIDATES);
+  });
+});
+
 describe('buildTelemetry', () => {
   const context = {
     run_id: 'run-1',
@@ -411,8 +250,6 @@ describe('buildTelemetry', () => {
         expect.objectContaining({
           state,
           features_remapped: 0,
-          semantic_verify_calls: 0,
-          semantic_verify_reuses: 0,
         })
       );
     }
@@ -428,14 +265,10 @@ describe('buildTelemetry', () => {
         llmIgnoredCount: 1,
         codeIgnoredCount: 1,
         remappedCount: 2,
-        semanticVerifyCalls: 3,
-        semanticVerifyReuses: 1,
       })
     ).toEqual(
       expect.objectContaining({
         features_remapped: 2,
-        semantic_verify_calls: 3,
-        semantic_verify_reuses: 1,
       })
     );
   });

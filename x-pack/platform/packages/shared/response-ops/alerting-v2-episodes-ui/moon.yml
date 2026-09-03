@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-query'
+  - '@kbn/router-utils'
   - '@kbn/response-ops-alert-snooze'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
@@ -64,6 +65,7 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
