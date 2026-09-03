@@ -29,6 +29,8 @@ import type {
 } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { ChangeHistoryClient } from '@kbn/change-history';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
@@ -52,14 +54,16 @@ import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
+import { startChangeHistoryClient } from './change_history/change_history_service';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
-interface SetupDeps {
+export interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface StartDeps {
@@ -76,9 +80,12 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
+  private readonly currentKibanaVersion: string;
+  private changeHistoryClient: ChangeHistoryClient | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.currentKibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup<StartDeps, DashboardPluginStart>, plugins: SetupDeps) {
@@ -147,8 +154,8 @@ export class DashboardPlugin
       },
     };
     core.uiSettings.register(dashboardUiSettings);
-
-    registerRoutes(core.http, this.apiUsageCounter, this.logger);
+    console.log({ plugins });
+    registerRoutes(core, plugins, this.apiUsageCounter, this.logger);
 
     void registerAccessControl({
       http: core.http,
@@ -160,6 +167,13 @@ export class DashboardPlugin
     });
 
     registerDashboardDrilldown(plugins.embeddable);
+
+    this.changeHistoryClient = new ChangeHistoryClient({
+      module: 'dashboard',
+      dataset: 'dashboards',
+      logger: this.logger,
+      kibanaVersion: this.currentKibanaVersion,
+    });
 
     return {};
   }
@@ -198,6 +212,10 @@ export class DashboardPlugin
     const getCachedDashboardStateSchema = once(() => {
       return getDashboardStateSchema(false);
     });
+
+    if (this.changeHistoryClient) {
+      startChangeHistoryClient(this.changeHistoryClient, core, this.logger);
+    }
 
     return {
       scanDashboards: (
