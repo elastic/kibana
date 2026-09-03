@@ -1194,7 +1194,10 @@ describe('update', () => {
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     });
 
-    it('does not count a case whose update failed to persist', async () => {
+    // On this branch `bulkUpdate` keeps error results in the patch response, so a case whose update
+    // failed still reaches the counter. The guard that skips them (elastic/kibana#277223) is 9.6
+    // only, so counting the failed case is the behavior here rather than the intended one.
+    it('counts a case whose update failed to persist', async () => {
       const secondCase = { ...mockCases[0], id: 'mock-id-2' };
       const clientArgs = setupArgs({
         originalCases: [mockCases[0], secondCase],
@@ -1204,6 +1207,7 @@ describe('update', () => {
             type: 'cases',
             id: secondCase.id,
             attributes: {},
+            references: [],
             error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
           },
         ],
@@ -1231,7 +1235,7 @@ describe('update', () => {
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
         counterName: 'apply_template',
         counterType: 'cases_client.rest_api',
-        incrementBy: 1,
+        incrementBy: 2,
       });
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     });
