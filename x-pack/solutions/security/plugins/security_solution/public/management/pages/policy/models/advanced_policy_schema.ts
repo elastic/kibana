@@ -1825,7 +1825,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
         defaultMessage: 'Mitigates vulnerable driver abuse by providing additional safeguards and enrichment for driver loads. Default: true.',
       }
     ),
-  },  
+  },
   {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
