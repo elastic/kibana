@@ -9,13 +9,13 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
-import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph } from './graph_lens';
-import { getSchemaForChartType } from './schemas';
+import type { ChartIntent } from './intent';
+import type { ProbedColumn } from './probe_columns';
 import type { VisualizationConfig } from './types';
 
 const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
+const DEFAULT_COMPILE_ALLOW_LIST = Object.values(SupportedChartType);
 
 const getExistingChartType = (
   existingConfig: VisualizationConfig | null
@@ -37,6 +37,12 @@ export interface BuildLensConfigParams {
   esql?: string;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
+  intent?: ChartIntent;
+  title?: string;
+  styleOverrides?: Record<string, unknown>;
+  styleRequest?: string;
+  pinnedQueries?: string[];
+  compileAllowList?: SupportedChartType[];
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -57,6 +63,12 @@ export const buildLensConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
+  intent,
+  title,
+  styleOverrides,
+  styleRequest,
+  pinnedQueries,
+  compileAllowList = DEFAULT_COMPILE_ALLOW_LIST,
   modelProvider,
   logger,
   events,
@@ -69,58 +81,37 @@ export const buildLensConfig = async ({
     );
   }
 
-  const schema = getSchemaForChartType(selectedChartType);
   const graph = await createVisualizationGraph(modelProvider, logger, events, esClient);
-
-  // If the user provides ES|QL, use it only when validation says it is safe.
-  // If validation cannot run, keep the query and let the next step handle it.
-  let providedEsql = esql;
-  if (providedEsql) {
-    let validationError: string | undefined;
-    try {
-      validationError = await validateEsqlQuery(
-        providedEsql,
-        buildServerESQLCallbacks({ client: esClient.asCurrentUser })
-      );
-    } catch {
-      // Couldn't validate, keep it.
-    }
-    if (validationError) {
-      logger.warn(
-        `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
-      );
-      providedEsql = undefined;
-    }
-  }
+  const esqlQuery = esql ?? pinnedQueries?.[0] ?? '';
 
   const finalState = await graph.invoke({
     nlQuery,
     index,
     chartType: selectedChartType,
-    schema,
     existingConfig,
     parsedExistingConfig,
-    esqlQuery: providedEsql || '',
-    currentAttempt: 0,
-    actions: [],
+    esqlQuery,
+    columns: [] as ProbedColumn[],
+    intent,
+    title,
+    styleOverrides,
+    styleRequest,
+    compileAllowList,
     validatedConfig: null,
+    authoringNote: null,
     error: null,
   });
 
-  const { validatedConfig, authoringNote, error, currentAttempt, esqlQuery } = finalState;
+  const { validatedConfig, authoringNote, error } = finalState;
 
   if (!validatedConfig) {
-    throw new Error(
-      `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-        error || 'Unknown error'
-      }`
-    );
+    throw new Error(error || 'Failed to generate a valid visualization configuration.');
   }
 
   return {
     selectedChartType,
     validatedConfig,
     ...(authoringNote ? { authoringNote } : {}),
-    esqlQuery,
+    esqlQuery: finalState.esqlQuery,
   };
 };

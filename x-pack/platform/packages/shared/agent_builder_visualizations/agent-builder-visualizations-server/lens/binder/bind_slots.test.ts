@@ -247,6 +247,22 @@ describe('bindSlots', () => {
     expect(isBindAmbiguous(result) && result.ambiguous).toBe('collapse');
   });
 
+  it('places a breakdown_field hint first in pie group_by and slices extras to the cap', () => {
+    const result = bindSlots(
+      SupportedChartType.Pie,
+      BY_FOUR_CATS,
+      probed(
+        ['count', 'long'],
+        ['host', 'keyword'],
+        ['service', 'keyword'],
+        ['env', 'keyword'],
+        ['region', 'keyword']
+      ),
+      { breakdown_field: 'region' }
+    );
+    expect(isBindOk(result) && result.bindings.groupBy).toEqual(['region', 'host', 'service']);
+  });
+
   it('errors when a partition chart has a temporal dimension', () => {
     const result = bindSlots(
       SupportedChartType.Pie,

@@ -16,7 +16,6 @@
     "@kbn/field-types",
     "@kbn/lens-embeddable-utils",
     "@kbn/logging",
-    "@kbn/palettes",
     "@kbn/zod"
   ]
 }

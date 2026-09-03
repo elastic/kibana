@@ -6,11 +6,7 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export {
-  getChartTypeReviewPromptContent,
-  getChartTypeSelectionPromptContent,
-} from './lens/chart_type_guidance';
-export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
+export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
 export { applyHouseStyle } from './lens/house_style';

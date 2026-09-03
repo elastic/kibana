@@ -20,6 +20,7 @@ import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/to
 import {
   buildLensConfig,
   buildVegaConfig,
+  chartIntentSchema,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -82,6 +83,25 @@ const createVisualizationSchema = z
       .describe(
         '(optional) An ES|QL query. If not provided, the tool will automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
       ),
+    title: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('(optional) Panel title written onto the Lens config.'),
+    intent: chartIntentSchema
+      .optional()
+      .describe(
+        '(optional) Typed presentation intent such as legend statistics, sparkline, secondary metric, units, or gauge bounds.'
+      ),
+    style_overrides: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('(optional) Partial Lens API config merged after intent.'),
+    style_request: z
+      .string()
+      .max(2048)
+      .optional()
+      .describe('(optional) Freeform styling request applied after compile.'),
     time_range: z
       .object({
         from: z
@@ -174,6 +194,10 @@ Ground first: make sure the target index exists and every field you reference is
         renderer: requestedRenderer,
         chartType,
         esql,
+        title,
+        intent,
+        style_overrides: styleOverrides,
+        style_request: styleRequest,
         attachment_id: attachmentId,
         time_range: requestedTimeRange,
       },
@@ -245,6 +269,10 @@ Ground first: make sure the target index exists and every field you reference is
             esql,
             existingConfig,
             parsedExistingConfig,
+            intent,
+            title,
+            styleOverrides,
+            styleRequest,
             modelProvider,
             logger,
             events,

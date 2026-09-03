@@ -339,7 +339,8 @@ const PARTITION_DIM_CAP: Partial<Record<SupportedChartType, number>> = {
 
 const bindPartition = (
   chartType: SupportedChartType,
-  classified: ClassifiedColumns
+  classified: ClassifiedColumns,
+  intent?: ChartIntent
 ): BindResult => {
   const { measures, dimensions } = classified;
   if (measures.length === 0) {
@@ -348,9 +349,17 @@ const bindPartition = (
   if (dimensions.some((dimension) => dimension.kind === 'temporal')) {
     return { error: `${chartType} cannot bind a temporal dimension` };
   }
+  const breakdownHint = hintOrAmbiguous(intent?.breakdown_field, classified);
+  if (breakdownHint && 'ambiguous' in breakdownHint) {
+    return breakdownHint;
+  }
   const categorical = dimensions.filter((dimension) => dimension.kind === 'categorical');
   const cap = PARTITION_DIM_CAP[chartType] ?? categorical.length;
-  if (categorical.length > cap) {
+  const remainder = breakdownHint
+    ? categorical.filter((dimension) => dimension.name !== breakdownHint.name)
+    : categorical;
+  const ordered = breakdownHint ? [breakdownHint, ...remainder] : categorical;
+  if (!breakdownHint && categorical.length > cap) {
     return { ambiguous: 'collapse', candidates: names(categorical) };
   }
   return {
@@ -359,7 +368,7 @@ const bindPartition = (
       measures: names(measures),
       dimensions: names(dimensions),
       metrics: [measures[0].name],
-      groupBy: names(categorical.slice(0, cap)),
+      groupBy: names(ordered.slice(0, cap)),
     },
   };
 };
@@ -409,7 +418,7 @@ export const bindSlots = (
     case SupportedChartType.Pie:
     case SupportedChartType.Treemap:
     case SupportedChartType.Waffle:
-      return bindPartition(chartType, classified);
+      return bindPartition(chartType, classified, intent);
     case SupportedChartType.Mosaic:
       return bindMosaic(classified);
     default: {

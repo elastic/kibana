@@ -30,8 +30,6 @@ describe('registerSkills', () => {
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
     expect(skill.content).toContain('Grid Packing Rules');
-    expect(skill.content).toContain('show avg/min/max in the legend');
-    expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {

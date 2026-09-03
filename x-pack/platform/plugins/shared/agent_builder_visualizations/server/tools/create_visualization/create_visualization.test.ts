@@ -15,11 +15,15 @@ import {
 } from '@kbn/agent-builder-visualizations-server';
 import { createVisualizationTool } from './create_visualization';
 
-jest.mock('@kbn/agent-builder-visualizations-server', () => ({
-  buildLensConfig: jest.fn(),
-  buildVegaConfig: jest.fn(),
-  selectDefaultTimeRange: jest.fn(),
-}));
+jest.mock('@kbn/agent-builder-visualizations-server', () => {
+  const actual = jest.requireActual('@kbn/agent-builder-visualizations-server');
+  return {
+    ...actual,
+    buildLensConfig: jest.fn(),
+    buildVegaConfig: jest.fn(),
+    selectDefaultTimeRange: jest.fn(),
+  };
+});
 
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
@@ -77,6 +81,25 @@ describe('createVisualizationTool schema', () => {
     ).toBe(true);
 
     expect(schema.safeParse({ query: 'errors over time' }).success).toBe(false);
+  });
+
+  it('accepts optional title, intent, style_overrides, and style_request', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        title: 'Errors',
+        intent: { x_field: '@timestamp', legend_statistics: ['avg', 'min', 'max'] },
+        style_overrides: { legend: { position: 'right' } },
+        style_request: 'put the legend on the right',
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects an overlong title or style_request', () => {
+    const base = { query: 'errors over time', chartType: SupportedChartType.XY };
+    expect(schema.safeParse({ ...base, title: 'x'.repeat(257) }).success).toBe(false);
+    expect(schema.safeParse({ ...base, style_request: 'x'.repeat(2049) }).success).toBe(false);
   });
 
   it('allows a new Vega visualization without chartType', () => {
@@ -180,6 +203,12 @@ describe('createVisualizationTool handler', () => {
     });
 
     expect(mockBuildLens).toHaveBeenCalledTimes(1);
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nlQuery: 'errors over time',
+        chartType: SupportedChartType.XY,
+      })
+    );
     expect(mockBuildVega).not.toHaveBeenCalled();
     expect(attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({ type: VISUALIZATION_ATTACHMENT_TYPE })
@@ -197,6 +226,26 @@ describe('createVisualizationTool handler', () => {
     expect(data.version).toBe(1);
     // The natural-language query is not echoed back in the result.
     expect(data.query).toBeUndefined();
+  });
+
+  it('forwards title, intent, style_overrides, and style_request to buildLensConfig', async () => {
+    await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+      title: 'Errors',
+      intent: { legend_statistics: ['avg'] },
+      style_overrides: { legend: { position: 'right' } },
+      style_request: 'put the legend on the right',
+    });
+
+    expect(mockBuildLens).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Errors',
+        intent: { legend_statistics: ['avg'] },
+        styleOverrides: { legend: { position: 'right' } },
+        styleRequest: 'put the legend on the right',
+      })
+    );
   });
 
   it('builds a Vega visualization when the renderer is "vega"', async () => {
