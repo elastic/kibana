@@ -21,6 +21,7 @@ import {
   MAX_OBSERVABLES_PER_CASE,
 } from '../../../common/constants';
 import type { ObservablePost } from '../../../common/types/api';
+import type { Observable } from '../../../common/types/domain';
 import { UserActionTypes } from '../../../common/types/domain/user_action/v1';
 
 const caseSO = mockCases[0];
@@ -620,7 +621,7 @@ describe('applyObservablesToCase', () => {
     );
   });
 
-  it('emits the observablesAdded event with only the ids of newly-added observables', async () => {
+  it('returns the newly-added observables so callers can emit with only the new ids', async () => {
     mockCaseService.getCase.mockResolvedValue({
       ...caseSO,
       attributes: { ...caseSO.attributes, observables: [mockObservable] },
@@ -632,26 +633,23 @@ describe('applyObservablesToCase', () => {
       description: null,
     };
 
-    await applyObservablesToCase(
+    const result = await applyObservablesToCase(
       caseSO.id,
       [mockObservablePost, newObservable], // mockObservablePost is a duplicate
       mockClientArgs
     );
 
-    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
-    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock
-      .calls;
     // Only the new observable id — not the existing one
-    expect(payload.observableIds).toHaveLength(1);
-    expect(payload.observableTypeKeys).toEqual([OBSERVABLE_TYPE_IPV4.key]);
-    // Values must not be present
-    expect(payload).not.toHaveProperty('observables');
+    expect(result?.newlyAddedObservables).toHaveLength(1);
+    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
+    // applyObservablesToCase no longer emits; callers are responsible for that
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
   });
 
-  it('still writes and emits when stored observables have duplicate typeKey+value entries', async () => {
+  it('still writes and returns correct result when stored observables have duplicate typeKey+value entries', async () => {
     // Reachable via SO import or data written before the dedupe path was added.
-    // The length delta (2 stored → 2 final) would be 0, but the id-diff correctly
-    // identifies the new entry and allows the write to proceed.
+    // Both stored rows must be preserved — the new observable is appended, not
+    // substituted for one of the duplicates.
     const dupA = { ...mockObservable, id: 'dup-a' };
     const dupB = { ...mockObservable, id: 'dup-b' }; // same typeKey+value as dupA
 
@@ -666,28 +664,63 @@ describe('applyObservablesToCase', () => {
       description: null,
     };
 
-    await applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs);
+    const result = await applyObservablesToCase(caseSO.id, [newObservable], mockClientArgs);
 
     expect(mockCaseService.patchCase).toHaveBeenCalledTimes(1);
     expect(mockUserActionService.creator.createUserAction).toHaveBeenCalledTimes(1);
-    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+
+    // Both dup-a and dup-b survive; the new observable is appended (3 total).
+    const writtenObservables = mockCaseService.patchCase.mock.calls[0][0].updatedAttributes
+      .observables as Observable[];
+    expect(writtenObservables).toHaveLength(3);
+    expect(writtenObservables.map(({ id }) => id)).toEqual(
+      expect.arrayContaining(['dup-a', 'dup-b'])
+    );
+    expect(writtenObservables.some(({ value }) => value === newObservable.value)).toBe(true);
+
+    expect(result?.newlyAddedObservables).toHaveLength(1);
+    expect(result?.newlyAddedObservables[0].value).toBe(newObservable.value);
   });
 
-  it('does not emit the observablesAdded event when all observables are duplicates', async () => {
+  it('returns undefined when all observables are duplicates', async () => {
     mockCaseService.getCase.mockResolvedValue({
       ...caseSO,
       attributes: { ...caseSO.attributes, observables: [mockObservable] },
     });
 
     // All duplicates — applyObservablesToCase returns early before the patch
-    await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
+    const result = await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
-    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
   });
 
-  it('does not emit the observablesAdded event when the input is empty', async () => {
-    await applyObservablesToCase(caseSO.id, [], mockClientArgs);
+  it('returns undefined when the input is empty', async () => {
+    const result = await applyObservablesToCase(caseSO.id, [], mockClientArgs);
 
-    expect(mockClientArgs.casesEventBus.emitObservablesAdded).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+  });
+
+  it('does not add any observable when the case is already at the cap', async () => {
+    const atCapObservables = Array.from({ length: MAX_OBSERVABLES_PER_CASE }, (_, i) => ({
+      ...mockObservable,
+      id: `obs-${i}`,
+      value: `10.0.0.${i}`,
+    }));
+
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: atCapObservables },
+    });
+
+    const result = await applyObservablesToCase(
+      caseSO.id,
+      [{ value: '192.168.99.1', typeKey: OBSERVABLE_TYPE_IPV4.key, description: null }],
+      mockClientArgs
+    );
+
+    expect(result).toBeUndefined();
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
+    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
 });

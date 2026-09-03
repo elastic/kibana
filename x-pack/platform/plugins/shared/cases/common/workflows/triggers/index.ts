@@ -347,16 +347,25 @@ export const ObservablesAddedTriggerId = 'cases.observablesAdded' as const;
 // Cases read access cannot observe case data through workflow triggers or through the
 // trigger-events data stream. Use a cases.getCase step to read the current observables
 // (including values) after the trigger fires.
-const observablesAddedEventSchema = baseCaseEventSchema.extend({
-  observableIds: z
-    .array(z.string().max(OBSERVABLE_ID_MAX_LENGTH))
-    .max(MAX_OBSERVABLES_PER_CASE)
-    .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION }),
-  observableTypeKeys: z
-    .array(z.string().max(MAX_OBSERVABLE_TYPE_KEY_LENGTH))
-    .max(MAX_OBSERVABLES_PER_CASE)
-    .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION }),
-});
+// .strict() makes the redaction guarantee fail-closed: an accidental extra key
+// (e.g. spreading the full Observable object) causes safeParse to fail loudly
+// rather than silently forwarding case data into the trigger-events data stream.
+// Safe because trigger_event_handler validates the raw payload, not the augmented
+// eventContextForResolution (which adds timestamp/spaceId/eventChainDepth).
+const observablesAddedEventSchema = baseCaseEventSchema
+  .extend({
+    observableIds: z
+      .array(z.string().max(OBSERVABLE_ID_MAX_LENGTH))
+      .max(MAX_OBSERVABLES_PER_CASE)
+      .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION }),
+    observableTypeKeys: z
+      .array(z.string().max(MAX_OBSERVABLE_TYPE_KEY_LENGTH))
+      .max(MAX_OBSERVABLES_PER_CASE)
+      .meta({
+        description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION,
+      }),
+  })
+  .strict();
 
 export type ObservablesAddedPayload = z.infer<typeof observablesAddedEventSchema>;
 

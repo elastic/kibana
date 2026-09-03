@@ -66,9 +66,8 @@ import {
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
 
-export const createCasesEventBusMock = (): CasesEventBus => {
-  return {
-    ...new CasesEventBus(),
+export const createCasesEventBusMock = (): CasesEventBus =>
+  Object.assign(new CasesEventBus(), {
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
@@ -80,8 +79,7 @@ export const createCasesEventBusMock = (): CasesEventBus => {
     onObservablesAdded: jest.fn(),
     onAlertStatusChanged: jest.fn(),
     hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
-  };
-};
+  });
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 

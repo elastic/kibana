@@ -82,23 +82,27 @@ export const applyObservablesToCase = async (
   const retrievedCase = prefetchedCase ?? (await caseService.getCase({ id: caseId }));
 
   const currentObservables = retrievedCase.attributes.observables ?? [];
-  const updatedObservablesMap = new Map<string, Observable>();
-  currentObservables.forEach((observable) => {
-    processObservables(updatedObservablesMap, observable);
-  });
-
-  observables.forEach((observable) => processObservables(updatedObservablesMap, observable));
-
-  const finalObservables = Array.from(updatedObservablesMap.values()).slice(
-    0,
-    MAX_OBSERVABLES_PER_CASE
+  // Build a key-set from existing observables so we never overwrite or collapse
+  // them — even when two stored rows share the same typeKey+value (reachable
+  // via SO import or data written before the dedupe path was added).
+  const existingKeys = new Set(
+    currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
   );
 
-  // Use the id-diff as the single source of truth for "what is new".
-  // processObservables preserves existing ids and mints new v4 ids for incoming
-  // ObservablePost entries, so this is exact even under truncation at the cap.
-  const existingIds = new Set(currentObservables.map(({ id }) => id));
-  const newlyAddedObservables = finalObservables.filter(({ id }) => !existingIds.has(id));
+  // Dedupe incoming entries against existing ones and against each other.
+  // processObservables mints ids/timestamps for ObservablePost entries and
+  // skips repeats, so it is safe to call for every incoming entry.
+  const incomingMap = new Map<string, Observable>();
+  observables.forEach((observable) => {
+    if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
+      return;
+    }
+    processObservables(incomingMap, observable);
+  });
+
+  // Respect the per-case cap: add as many new observables as fit.
+  const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
+  const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
 
   // Nothing new was added — skip both the patch write and the user action to
   // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
@@ -107,7 +111,7 @@ export const applyObservablesToCase = async (
     return;
   }
 
-  const newObservablesCount = newlyAddedObservables.length;
+  const finalObservables = [...currentObservables, ...newlyAddedObservables];
 
   const patchedCase = await caseService.patchCase({
     caseId: retrievedCase.id,
@@ -125,18 +129,22 @@ export const applyObservablesToCase = async (
       owner: retrievedCase.attributes.owner,
       user,
       payload: {
-        observables: { count: newObservablesCount, actionType: 'add' },
+        observables: { count: newlyAddedObservables.length, actionType: 'add' },
       },
     },
   });
 
-  emitObservablesAddedEvent(clientArgs, retrievedCase, newlyAddedObservables);
-
+  // Return the merged case and the new observables so the caller can emit the
+  // trigger after a successful decode — never emit from inside this function
+  // because bulk callers decode *after* calling applyObservablesToCase.
   return {
-    ...retrievedCase,
-    ...patchedCase,
-    attributes: { ...retrievedCase.attributes, ...patchedCase?.attributes },
-    references: retrievedCase.references,
+    caseWithPatch: {
+      ...retrievedCase,
+      ...patchedCase,
+      attributes: { ...retrievedCase.attributes, ...patchedCase?.attributes },
+      references: retrievedCase.references,
+    },
+    newlyAddedObservables,
   };
 };
 
@@ -162,7 +170,16 @@ export const addObservable = async (
 
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
-  try {
+  // Extract into an inner function so the emit can run outside the error-wrapping
+  // boundary. A throw from the event bus must not turn a fully-committed write into
+  // a 400 — and a decode failure (CaseRt) must not silently skip the emit for a
+  // write that the API reports as failed. Both invariants require the emit to sit
+  // after the try/catch, which `.catch` makes possible without `let` variables.
+  const {
+    result: decodedCase,
+    caseForEmit,
+    observableForEmit,
+  } = await (async () => {
     const paramArgs = decodeWithExcessOrThrow(AddObservableRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
@@ -226,12 +243,14 @@ export const addObservable = async (
     // Decode before emitting — if the SO fails CaseRt validation, we must not fire
     // the trigger for a request the API will report as failed. Matches the precedent
     // in create.ts where decodeOrThrow runs before the emit.
-    const decodedCase = decodeOrThrow(CaseRt)(res);
-    emitObservablesAddedEvent(clientArgs, retrievedCase, [newObservable]);
-    return decodedCase;
-  } catch (error) {
+    const result = decodeOrThrow(CaseRt)(res);
+    return { result, caseForEmit: retrievedCase, observableForEmit: newObservable };
+  })().catch((error) => {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
-  }
+  });
+
+  emitObservablesAddedEvent(clientArgs, caseForEmit, [observableForEmit]);
+  return decodedCase;
 };
 
 export const updateObservable = async (
@@ -403,7 +422,15 @@ export const bulkAddObservables = async (
 
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
-  try {
+  // Same inner-function pattern as addObservable: emit must run outside the
+  // error-wrapping boundary so bus errors cannot turn a committed write into a 400,
+  // and the decode must precede the emit so a CaseRt failure does not fire the
+  // trigger for a request the API will report as failed.
+  const {
+    result: decodedCase,
+    caseForEmit,
+    observablesForEmit,
+  } = await (async () => {
     const paramArgs = decodeWithExcessOrThrow(BulkAddObservablesRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
@@ -417,19 +444,26 @@ export const bulkAddObservables = async (
       )
     );
 
-    const theCase = await applyObservablesToCase(
+    const applied = await applyObservablesToCase(
       paramArgs.caseId,
       paramArgs.observables,
       clientArgs,
       retrievedCase
     );
-    if (theCase) {
-      const res = flattenCaseSavedObject({ savedObject: theCase });
-      return decodeOrThrow(CaseRt)(res);
-    } else {
+    if (!applied) {
       throw Boom.badRequest(`Failed to add observable`);
     }
-  } catch (error) {
+    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
+    const result = decodeOrThrow(CaseRt)(res);
+    return {
+      result,
+      caseForEmit: applied.caseWithPatch,
+      observablesForEmit: applied.newlyAddedObservables,
+    };
+  })().catch((error) => {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
-  }
+  });
+
+  emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
+  return decodedCase;
 };

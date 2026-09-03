@@ -70,21 +70,19 @@ export class CasesEventBus extends EventEmitter {
   }
 
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>) {
-    this.on(CASE_CREATED_EVENT, listener);
+    this.subscribeIsolated(CASE_CREATED_EVENT, listener);
   }
 
   onCaseUpdated(listener: CaseUpdatedEventBusListener<'caseUpdated'>) {
-    this.on(CASE_UPDATED_EVENT, listener);
+    this.subscribeIsolated(CASE_UPDATED_EVENT, listener);
   }
 
   onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {
-    this.on(ATTACHMENTS_ADDED_EVENT, listener);
+    this.subscribeIsolated(ATTACHMENTS_ADDED_EVENT, listener);
   }
 
   onObservablesAdded(listener: CasesEventBusListener<'observablesAdded'>) {
-    this.on(OBSERVABLES_ADDED_EVENT, (event: CasesEventPayload<'observablesAdded'>) => {
-      this.callListenerIsolated(listener, event);
-    });
+    this.subscribeIsolated(OBSERVABLES_ADDED_EVENT, listener);
   }
 
   emitAlertStatusChanged(request: KibanaRequest, payload: AlertStatusChangedEventPayload) {
@@ -92,30 +90,34 @@ export class CasesEventBus extends EventEmitter {
   }
 
   onAlertStatusChanged(listener: CasesEventBusListener<'alertStatusChanged'>) {
-    this.on(ALERT_STATUS_CHANGED_EVENT, (event: CasesEventPayload<'alertStatusChanged'>) => {
-      this.callListenerIsolated(listener, event);
-    });
+    this.subscribeIsolated(ALERT_STATUS_CHANGED_EVENT, listener);
   }
 
   /**
-   * Calls a listener in an isolated context so that synchronous exceptions do
-   * not propagate to the emitter and async rejections do not become unhandled
-   * rejections. Later subscribers still receive the event.
+   * Registers a listener in an isolated context so that synchronous exceptions
+   * do not propagate to the emitter and async rejections do not become
+   * unhandled rejections. Later subscribers still receive the event.
+   *
+   * The variadic signature covers both single-arg listeners (all `on*` methods
+   * except `onCaseUpdated`) and multi-arg listeners (`onCaseUpdated` passes
+   * both the event and `extraInfo`).
    */
-  private callListenerIsolated<TType extends CasesDomainEventType>(
-    listener: CasesEventBusListener<TType>,
-    event: CasesEventPayload<TType>
+  private subscribeIsolated<TArgs extends unknown[]>(
+    eventName: string,
+    listener: (...args: TArgs) => void | Promise<void>
   ): void {
-    try {
-      const result = listener(event);
-      if (result instanceof Promise) {
-        // Prevent async listener rejections from becoming unhandled rejections.
-        // The Cases mutation has already completed at this point.
-        result.catch(() => {});
+    this.on(eventName, (...args: TArgs) => {
+      try {
+        const result = listener(...args);
+        if (result instanceof Promise) {
+          // Prevent async listener rejections from becoming unhandled rejections.
+          // The Cases mutation has already completed at this point.
+          result.catch(() => {});
+        }
+      } catch {
+        // Isolate sync exceptions so later subscribers still receive the event.
       }
-    } catch {
-      // Isolate sync exceptions so later subscribers still receive the event.
-    }
+    });
   }
 
   hasAlertStatusChangedListeners(): boolean {

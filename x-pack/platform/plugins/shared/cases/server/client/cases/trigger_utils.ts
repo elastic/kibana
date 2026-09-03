@@ -7,7 +7,7 @@
 
 import type { Owner } from '../../../common/constants/types';
 import type { Observable } from '../../../common/types/domain';
-import type { ObservablesAddedPayload } from '../../../common/workflows/triggers';
+import type { ObservablesAddedEventPayload } from '../../events/types';
 import type { CasesClientArgs } from '..';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
@@ -17,7 +17,7 @@ export const emitObservablesAddedEvent = (
   theCase: CaseSavedObjectTransformed,
   observables: Observable[]
 ): void => {
-  const payload: ObservablesAddedPayload = {
+  const payload: ObservablesAddedEventPayload = {
     caseId: theCase.id,
     owner: theCase.attributes.owner as Owner,
     // Ids in insertion order; type keys deduplicated and sorted.

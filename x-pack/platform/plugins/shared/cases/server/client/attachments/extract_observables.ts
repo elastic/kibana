@@ -23,6 +23,7 @@ import {
   isUnifiedEventAttachment,
 } from '../../../common/utils/attachments/v2_type_guards';
 import { applyObservablesToCase } from '../cases/observables';
+import { emitObservablesAddedEvent } from '../cases/trigger_utils';
 import type { CasesClientArgs } from '../types';
 
 /**
@@ -150,7 +151,11 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    await applyObservablesToCase(caseId, observables, clientArgs);
+    const result = await applyObservablesToCase(caseId, observables, clientArgs);
+    if (result) {
+      // Best-effort path — a bus error here is caught by the outer try and logged.
+      emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
+    }
 
     logger.debug(
       `[extractAndAddObservables] Added ${observables.length} observable(s) to case ${caseId}`
