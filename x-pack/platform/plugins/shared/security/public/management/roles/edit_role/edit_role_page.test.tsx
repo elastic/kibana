@@ -307,7 +307,9 @@ describe('<EditRolePage />', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Edit role');
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          'Viewing role'
+        );
         expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
       });
       expect(screen.queryByTestId('roleFormNameInput')).not.toBeInTheDocument();

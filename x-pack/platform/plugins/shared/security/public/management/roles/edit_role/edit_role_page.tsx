@@ -104,7 +104,7 @@ const createRoleTitle = i18n.translate('xpack.security.management.editRole.creat
 });
 
 const editRoleDescriptionTraditional = i18n.translate(
-  'xpack.security.management.editRole.setPrivilegesAndKibanaSpacesDescription',
+  'xpack.security.management.editRole.setPrivilegesKibanaSpacesDescription',
   {
     defaultMessage:
       'Set privileges on your Elasticsearch data and control access to your Kibana spaces.',
@@ -112,7 +112,7 @@ const editRoleDescriptionTraditional = i18n.translate(
 );
 
 const editRoleDescriptionServerless = i18n.translate(
-  'xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription',
+  'xpack.security.management.editRole.setPrivilegesProjectSpacesDescription',
   {
     defaultMessage:
       'Set privileges on your Elasticsearch data and control access to your Project spaces.',
@@ -487,7 +487,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getPageTitle = () => {
     if (isPageLoading) {
-      return isEditingExistingRole ? editRoleTitle : createRoleTitle;
+      return isEditingExistingRole ? viewingRoleTitle : createRoleTitle;
     }
     if (isRoleReserved || isRoleReadOnly) {
       return viewingRoleTitle;
