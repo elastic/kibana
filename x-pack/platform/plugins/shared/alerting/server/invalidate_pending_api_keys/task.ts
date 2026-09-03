@@ -108,11 +108,20 @@ export function taskRunner(
                 type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
                 apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
               },
-              // `uiamApiKeyId` is persisted and mapped on both types in this release, but not
-              // queried yet. In-flight objects and objects written by older nodes during a
-              // Serverless rolling upgrade lack the field, so a miss would look like "unused"
-              // and revoke a live UIAM key. A follow-up should add the two `uiamApiKeyId`
-              // query paths after those jobs have aged out.
+              // A UIAM key is queued for invalidation under its own id in the pending SO's
+              // `apiKeyId`, but pending jobs record that id in `uiamApiKeyId`, so the paths above
+              // can never match it. Each path is queried separately and the in-use hits are
+              // unioned, so adding these can only move a key from "invalidate" to "in use":
+              // objects predating the field (or written by an older node mid-rolling-upgrade)
+              // simply keep today's behavior instead of becoming newly at risk.
+              {
+                type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
+              {
+                type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+                apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+              },
             ],
           });
           totalInvalidated = result.totalInvalidated;

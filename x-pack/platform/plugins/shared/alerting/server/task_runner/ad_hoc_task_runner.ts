@@ -42,6 +42,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { getFakeKibanaRequest } from './rule_loader';
+import type { CredentialType } from '../otel/uiam_telemetry';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
@@ -70,6 +71,7 @@ export interface AdHocTaskRunnerConstructorParams {
 interface RunParams {
   adHocRunData: AdHocRun;
   effectiveApiKey: string | null;
+  credentialType: CredentialType;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -189,6 +191,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private async runRule({
     adHocRunData,
     effectiveApiKey,
+    credentialType,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -320,8 +323,11 @@ export class AdHocTaskRunner implements CancellableTask {
       apiKey: effectiveApiKey,
       apiKeyId,
       // Carry the UIAM key id so the connector tasks are visible to the API key invalidation
-      // task's in-use guard, which cannot see the encrypted key material itself.
-      uiamApiKeyId,
+      // task's in-use guard, which cannot see the encrypted key material itself. Only when the
+      // run actually authenticates with the UIAM key: the fallbacks in `getFakeKibanaRequest`
+      // can pick the ES key even though the ad hoc run snapshotted a UIAM one, and recording an
+      // id for a credential the connector tasks do not present would keep an unused key alive.
+      uiamApiKeyId: credentialType === 'uiam_api_key' ? uiamApiKeyId : undefined,
       // Mirror the backfill run's own credential treatment onto the connector tasks: the request
       // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
       uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
@@ -539,7 +545,7 @@ export class AdHocTaskRunner implements CancellableTask {
       // Generate fake request with API key. Threading the UIAM key (and owner
       // metadata) mirrors the regular rule runner so backfills authenticate with
       // the UIAM key in UIAM deployments instead of falling back to the ES key.
-      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+      const { fakeRequest, effectiveApiKey, credentialType } = getFakeKibanaRequest(
         this.context,
         spaceId,
         apiKeyToUse,
@@ -558,6 +564,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return {
         adHocRunData,
         effectiveApiKey,
+        credentialType,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,

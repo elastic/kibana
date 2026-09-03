@@ -49,12 +49,11 @@ describe('alerts_invalidate_api_keys task runner', () => {
     runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
   });
 
-  it('does not query uiamApiKeyId until in-flight objects without the field have aged out', async () => {
+  it('queries uiamApiKeyId alongside apiKeyId so pending jobs holding a UIAM key count as in use', async () => {
     await getRunner().run();
 
-    // Writers persist `uiamApiKeyId` in this release; the in-use guard must not rely on it
-    // until a follow-up, or objects that predate the field (and objects written by older
-    // nodes during a Serverless rolling upgrade) are classified as unused and revoked.
+    // A UIAM key is queued for invalidation under its own id, which pending jobs record in
+    // `uiamApiKeyId` — without these paths the guard can never see them and revokes a live key.
     expect(runInvalidateMock).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjectTypesToQuery: [
@@ -65,6 +64,14 @@ describe('alerts_invalidate_api_keys task runner', () => {
           {
             type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
             apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
+          },
+          {
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            apiKeyAttributePath: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
+          },
+          {
+            type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            apiKeyAttributePath: `${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE}.attributes.uiamApiKeyId`,
           },
         ],
       })

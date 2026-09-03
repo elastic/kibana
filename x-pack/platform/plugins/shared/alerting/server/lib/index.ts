@@ -56,4 +56,3 @@ export {
   alertAuditSystemEvent,
 } from './alert_audit_events';
 export { wrapAsyncSearchClient } from './wrap_async_search_client';
-export { getUiamApiKeyId } from './uiam_api_key_id';

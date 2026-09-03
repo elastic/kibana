@@ -178,7 +178,9 @@ export async function getDecryptedRule(
  * enqueue scheduled connector tasks under the same key. `effectiveApiKey` is
  * the value that was placed after `ApiKey ` in the request's `Authorization`
  * header — the base64 `id:secret` for ES rules, or the decoded raw `essu_…`
- * UIAM secret for UIAM rules.
+ * UIAM secret for UIAM rules. `credentialType` says which of the two it is,
+ * since that cannot be recovered from a raw UIAM secret, and the fallbacks below
+ * mean it is not implied by the rule's persisted attributes either.
  */
 export interface GetFakeKibanaRequestOptions {
   uiamApiKey?: RawRule['uiamApiKey'];
@@ -193,7 +195,11 @@ export function getFakeKibanaRequest(
   spaceId: string,
   apiKey: RawRule['apiKey'],
   options: GetFakeKibanaRequestOptions = {}
-): { fakeRequest: KibanaRequest; effectiveApiKey: string | null } {
+): {
+  fakeRequest: KibanaRequest;
+  effectiveApiKey: string | null;
+  credentialType: CredentialType;
+} {
   const { uiamApiKey, uiamApiKeyExternal, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
   const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
@@ -301,7 +307,7 @@ export function getFakeKibanaRequest(
     markExternalUiamCredential(fakeRequest);
   }
 
-  return { fakeRequest, effectiveApiKey };
+  return { fakeRequest, effectiveApiKey, credentialType };
 }
 
 const isLikelyNonCloudUserApiKeyOwner = (apiKeyOwner?: string | null): boolean => {

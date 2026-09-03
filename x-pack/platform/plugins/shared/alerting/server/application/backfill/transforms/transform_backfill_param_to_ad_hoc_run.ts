@@ -6,10 +6,10 @@
  */
 
 import { isString } from 'lodash';
+import { getUiamApiKeyId } from '@kbn/task-manager-plugin/server';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
-import { getUiamApiKeyId } from '../../../lib';
 import { adHocRunStatus } from '../../../../common/constants';
 import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';

@@ -45,10 +45,10 @@ export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
   '4': {
     changes: [
       {
-        // Searchable so a follow-up can teach the alerting API key invalidation task that the
-        // key is still in use, exactly like `apiKeyId` in model version 2. This release only
-        // writes and maps the field; querying it immediately would revoke keys held by objects
-        // that predate it (and by objects written by older nodes during a rolling upgrade).
+        // Searchable so the alerting API key invalidation task can see that a pending connector
+        // execution still needs the key, exactly like `apiKeyId` in model version 2. Objects
+        // that predate the field keep today's behavior: the guard unions its per-attribute
+        // lookups, so a miss here is never worse than not querying the attribute at all.
         type: 'mappings_addition',
         addedMappings: {
           uiamApiKeyId: { type: 'keyword', ignore_above: 1024 },

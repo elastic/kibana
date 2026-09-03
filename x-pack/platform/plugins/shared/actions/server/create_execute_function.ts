@@ -39,6 +39,10 @@ export interface ExecuteOptions
    * Id of the UIAM API key in `apiKey`. Persisted so the alerting API key invalidation task can
    * see this pending execution still needs the key; `apiKeyId` only ever holds an Elasticsearch
    * key id, so a UIAM key stored there would be invisible to the in-use check.
+   *
+   * Callers must set this only when `apiKey` is that UIAM key. Setting it for an execution that
+   * authenticates with something else records a claim on a key the execution never presents,
+   * which keeps an otherwise unused key alive.
    */
   uiamApiKeyId?: string;
   /**
