@@ -50,9 +50,7 @@ export class WorkflowEditorPage {
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
     this.runAsButton = this.page.testSubj.locator('workflowRunAsButton');
-    this.appMenuMoreButton = this.page
-      .getByRole('navigation', { name: 'App menu' })
-      .getByRole('button', { name: 'More' });
+    this.appMenuMoreButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.runAsFlyout = this.page.testSubj.locator('workflowRunAsFlyout');
     this.runAsApplyButton = this.page.testSubj.locator('workflowRunAsApply');
   }
