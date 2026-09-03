@@ -19,7 +19,9 @@ export type {
   RunContextStackEntry,
   RunAgentStackEntry,
   RunToolStackEntry,
+  RunApprovals,
   RunToolParams,
+  RequestBoundRunToolParams,
   RunToolReturn,
 } from './runner';
 export { getAgentFromRunContext } from './run_context_utils';
