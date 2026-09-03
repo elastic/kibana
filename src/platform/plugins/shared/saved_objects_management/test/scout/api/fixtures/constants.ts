@@ -53,8 +53,9 @@ export const NDJSON_EXPORTS = {
   V_8_0_MULTISPACE: `${EXPORTS_DIR}/_8.0.0_multispace_import.ndjson`,
   // Single-object payloads exercising the import conflict/reference flows.
   // `OBJECTS` and `SAVED_SEARCH` reference the `f1e4c910-…` data view shipped in
-  // KBN_ARCHIVES.MANAGEMENT; `EXISTS` and `CONFLICTS` deliberately reference
-  // data view ids that do not exist so the UI prompts for a replacement.
+  // KBN_ARCHIVES.MANAGEMENT; `EXISTS`, `CONFLICTS`, `WITH_SAVED_SEARCH`, and
+  // `MGMT_OBJECTS` deliberately reference data view ids that do not exist so
+  // the import surfaces a missing-reference conflict.
   OBJECTS: `${EXPORTS_DIR}/_import_objects.ndjson`,
   CIRCULAR_REFS: `${EXPORTS_DIR}/_import_objects_circular_refs.ndjson`,
   CONFLICTS: `${EXPORTS_DIR}/_import_objects_conflicts.ndjson`,
@@ -83,6 +84,9 @@ export const IMPORT_FIXTURE_OBJECTS = {
   MGMT_SAVED_SEARCH_TITLE: 'mysavedsearch',
   MGMT_VIZ_TITLE: 'mysavedviz',
   CONNECTED_TO_SAVED_SEARCH_TITLE: 'saved object connected to saved search',
+  // Data view id referenced by WITH_SAVED_SEARCH, absent from the cluster
+  // (deliberately not `f1e4c910-…` / `logstash-*` from KBN_ARCHIVES.MANAGEMENT).
+  WITH_SAVED_SEARCH_MISSING_INDEX_PATTERN_ID: 'e1e4c910-a2e6-11e7-bb30-233be9be6a15',
   IMPORTED_WITH_INDEX_PATTERN_TITLE: 'saved object imported with index pattern',
 } as const;
 

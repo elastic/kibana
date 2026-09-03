@@ -29,7 +29,6 @@ const { COMMON_HEADERS, KBN_ARCHIVES, MANAGEMENT_API, NDJSON_EXPORTS, IMPORT_FIX
 // Ids the fixtures reference, needed to assert on `missing_references` errors.
 const SAVED_SEARCH_ID = 'c45e6c50-ba72-11e7-a8f9-ad70f02e633d';
 const CONNECTED_VIZ_ID = 'saved_object_connected_to_saved_search';
-const DATA_VIEW_ID = 'f1e4c910-a2e6-11e7-bb30-233be9be6a15';
 
 const importNdjson = (relativePath: string): { headers: Record<string, string>; body: Buffer } => {
   const form = new FormData();
@@ -117,18 +116,20 @@ apiTest.describe(
     );
 
     apiTest(
-      'refuses a saved search whose data view is missing but still imports the visualization bundled with it',
+      'reports the bundled visualization as importable when its saved search has a missing data view',
       async ({ apiClient }) => {
-        // No archive loaded, so the `logstash-*` data view the saved search
-        // references is absent.
+        // WITH_SAVED_SEARCH references a data-view id that is not on the
+        // cluster (and is not the shared `logstash-*` from MANAGEMENT).
         //
         // The visualization references the saved search, and a reference to an
-        // object in the same file counts as satisfied — so the raw `_import`
-        // API creates the visualization even though the saved search it points
-        // at was rejected, leaving a dangling reference. This asserts that API
-        // contract; the end-to-end UI flow (import via the flyout, Confirm
-        // Changes with the reference unresolved, and the visualization dropped
-        // from the table) is covered in `ui/tests/import_conflicts.spec.ts`.
+        // object in the same file counts as satisfied — so `_import` reports
+        // the visualization in `successResults` even though the saved search it
+        // points at was rejected. Because the response carries a resolvable
+        // `missing_references` error, this is a dry run: nothing is persisted.
+        // This asserts that API contract; the end-to-end UI flow (import via
+        // the flyout, Confirm Changes with the reference unresolved, and the
+        // visualization dropped from the table) is covered in
+        // `ui/tests/import_conflicts.spec.ts`.
         const response = await importFixture(apiClient, NDJSON_EXPORTS.WITH_SAVED_SEARCH);
 
         expect(response).toHaveStatusCode(200);
@@ -144,7 +145,12 @@ apiTest.describe(
               id: SAVED_SEARCH_ID,
               error: expect.objectContaining({
                 type: 'missing_references',
-                references: [{ type: 'index-pattern', id: DATA_VIEW_ID }],
+                references: [
+                  {
+                    type: 'index-pattern',
+                    id: IMPORT_FIXTURE_OBJECTS.WITH_SAVED_SEARCH_MISSING_INDEX_PATTERN_ID,
+                  },
+                ],
               }),
             }),
           ],
