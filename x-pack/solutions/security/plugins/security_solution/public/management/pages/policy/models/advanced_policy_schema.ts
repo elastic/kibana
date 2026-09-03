@@ -1818,7 +1818,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.kernel.enable_sync_driver_loads',
-    first_supported_version: '9.6',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.enable_sync_driver_loads',
       {
