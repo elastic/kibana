@@ -15,6 +15,7 @@ import type {
   WorkflowTriggerType,
 } from '@kbn/pnd-common';
 import { coverageFromSchedule } from '@kbn/pnd-common';
+import type { AgentLookup } from '../utils';
 
 /** Static watch policy bag from `consts.watch_policy`. */
 interface WatchPolicyAttrs {
@@ -36,9 +37,6 @@ const asString = (value: unknown, fallback = ''): string =>
 
 const asNumber = (value: unknown, fallback: number): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-
-const asBoolean = (value: unknown, fallback: boolean): boolean =>
-  typeof value === 'boolean' ? value : fallback;
 
 export const extractWatchPolicy = (
   definition: WorkflowYaml | null | undefined
@@ -134,33 +132,56 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
   }
 };
 
-/**
- * Derive executable capabilities from the workflow graph.
- * Policy `callables` are display overrides only (name/summary/gated/enabled).
- */
-export const projectCallablesFromDefinition = (
+export const projectSkillsFromDefinition = (
   definition: WorkflowYaml | null | undefined,
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchPolicyAttrs | undefined,
+  agentLookupCallback?: AgentLookup
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
-  const workflowIds = new Set<string>();
 
   walkSteps(definition?.steps, (step) => {
     const type = asString(step.type);
     if (type === 'ai.agent') {
       const withBlock = isRecord(step.with) ? step.with : {};
-      const message = asString(withBlock.message);
-      if (message) collectSkillIdsFromText(message, skillIds);
-      // Also scan the whole with-block for skill URIs in other string fields.
-      collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
-    }
-    if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
-      const withBlock = isRecord(step.with) ? step.with : {};
-      const workflowId =
-        asString(withBlock['workflow-id']) ||
-        asString(withBlock.workflowId) ||
-        asString(withBlock.workflow_id);
-      if (workflowId) workflowIds.add(workflowId);
+      const agentId = asString(step['agent-id']);
+
+      // Parse configuration_overrides.skill_ids unconditionally so they survive
+      // when the agent lookup is unavailable or the agent-id cannot be resolved.
+      const overridesBlock = isRecord(withBlock.configuration_overrides)
+        ? withBlock.configuration_overrides
+        : {};
+      const overrideSkillIds = Array.isArray(overridesBlock.skill_ids)
+        ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
+        : null;
+
+      if (agentId && agentLookupCallback) {
+        const agentDef = agentLookupCallback.getAgent(agentId);
+        if (agentDef) {
+          const agentTypeDef = agentDef.type
+            ? agentLookupCallback.getAgentType(agentDef.type)
+            : undefined;
+          const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
+          // When the step has no overrides, fall back to the agent's own skill list.
+          const agentSkills: readonly string[] =
+            overrideSkillIds === null ? agentDef.configuration.skill_ids ?? [] : [];
+          for (const id of [...baseSkills, ...(overrideSkillIds ?? agentSkills)]) {
+            if (id) skillIds.add(id);
+          }
+          return;
+        }
+      }
+
+      // No lookup or unresolved agent: use structured overrides when present so
+      // skills are not lost. Fall back to URI scanning only when no overrides exist.
+      if (overrideSkillIds !== null) {
+        for (const id of overrideSkillIds) {
+          if (id) skillIds.add(id);
+        }
+      } else {
+        const message = asString(withBlock.message);
+        if (message) collectSkillIdsFromText(message, skillIds);
+        collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
+      }
     }
   });
 
@@ -173,41 +194,26 @@ export const projectCallablesFromDefinition = (
       name: asString(c.name, id),
       kind: c.kind === 'workflow' ? 'workflow' : 'skill',
       summary: asString(c.summary, ''),
-      gated: asBoolean(c.gated, false),
-      enabled: asBoolean(c.enabled, true),
       lastRun: typeof c.lastRun === 'string' ? c.lastRun : null,
     });
   }
 
-  const callables: WatchCallableRef[] = [];
+  const skills: WatchCallableRef[] = [];
 
   for (const id of skillIds) {
     const override = overrides.get(id);
-    callables.push({
+    // Default to skill definition only if UI overrides are not defined
+    const skillDef = override ? undefined : agentLookupCallback?.getSkill(id);
+    skills.push({
       id,
-      name: override?.name ?? humanizeId(id),
+      name: override?.name ?? skillDef?.name ?? humanizeId(id),
       kind: 'skill',
-      summary: override?.summary ?? 'Invoked via ai.agent',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
+      summary: override?.summary ?? skillDef?.description ?? 'Invoked via ai.agent',
       lastRun: override?.lastRun ?? null,
     });
   }
 
-  for (const id of workflowIds) {
-    const override = overrides.get(id);
-    callables.push({
-      id,
-      name: override?.name ?? humanizeId(id.replace(/^system-/, '')),
-      kind: 'workflow',
-      summary: override?.summary ?? 'Nested workflow',
-      gated: override?.gated ?? false,
-      enabled: override?.enabled ?? true,
-      lastRun: override?.lastRun ?? null,
-    });
-  }
-
-  return callables;
+  return skills;
 };
 
 export const projectRecentRunsFromHistory = (
@@ -223,7 +229,10 @@ export const projectRecentRunsFromHistory = (
   }));
 };
 
-export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
+export const projectWorkflowToWatch = (
+  item: WorkflowListItemDto,
+  agentLookupCallback?: AgentLookup
+): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
@@ -251,7 +260,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     coverage,
     scopeSummary: '',
     scopes: [],
-    callables: projectCallablesFromDefinition(definition, policy),
+    skills: projectSkillsFromDefinition(definition, policy, agentLookupCallback),
     metrics: {
       lastRun,
     },
