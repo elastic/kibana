@@ -56,6 +56,15 @@ jest.mock('../components/field_definition_preview', () => ({
   FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
 }));
 
+const mockReportCreated = jest.fn();
+const mockReportUpdated = jest.fn();
+const mockReportDeleted = jest.fn();
+jest.mock('../../../analytics/field_library', () => ({
+  useFieldDefinitionCreatedEBT: () => mockReportCreated,
+  useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
+  useFieldDefinitionDeletedEBT: () => mockReportDeleted,
+}));
+
 const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinition => ({
   fieldDefinitionId: 'id-1',
   name: 'my_field',
@@ -291,6 +300,14 @@ describe('AllFieldDefinitionsPage', () => {
     expect(
       within(screen.getByTestId('fieldDefinitionRow-my_field')).getAllByText('my_field').length
     ).toBeGreaterThan(0);
+  });
+
+  it('does not report any field library analytics event on page load', () => {
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    expect(mockReportCreated).not.toHaveBeenCalled();
+    expect(mockReportUpdated).not.toHaveBeenCalled();
+    expect(mockReportDeleted).not.toHaveBeenCalled();
   });
 
   describe('Required column', () => {
