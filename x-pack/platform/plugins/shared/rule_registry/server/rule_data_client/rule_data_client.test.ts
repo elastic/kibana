@@ -6,7 +6,6 @@
  */
 
 import { left, right } from 'fp-ts/Either';
-import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
@@ -377,7 +376,7 @@ describe('RuleDataClient', () => {
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });
 
-        test('sanitizes error before logging', async () => {
+        test('sanitizes error and logs a concise summary of genuine failures', async () => {
           scopedClusterClient.bulk.mockResponseOnce({
             took: 486,
             errors: true,
@@ -491,10 +490,68 @@ describe('RuleDataClient', () => {
             warnings: [],
           });
 
+          // The genuine (non-409) failure is logged as a concise aggregated summary, not the
+          // full raw bulk-response body. The redacted reason (with the "Preview of field's value"
+          // text stripped) is used as the aggregation key.
           expect(logger.error).toHaveBeenNthCalledWith(
             1,
-            // @ts-expect-error
-            new errors.ResponseError(bulkWriteResponse)
+            `Error writing to index: ${JSON.stringify({
+              "failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.":
+                {
+                  count: 1,
+                  statusCode: 404,
+                },
+            })}`
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+        });
+
+        test('does not log at error when the only failures are benign 409 version conflicts', async () => {
+          scopedClusterClient.bulk.mockResponseOnce({
+            took: 486,
+            errors: true,
+            items: [
+              {
+                create: {
+                  _index: 'test',
+                  _id: '3',
+                  _version: 1,
+                  result: 'created',
+                  _shards: { total: 2, successful: 1, failed: 0 },
+                  status: 201,
+                  _seq_no: 2,
+                  _primary_term: 3,
+                },
+              },
+              {
+                create: {
+                  _index: 'test',
+                  _id: '4',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[4]: version conflict, document already exists (current version [1])',
+                  },
+                },
+              },
+            ],
+          });
+          const ruleDataClient = new RuleDataClient(
+            getRuleDataClientOptions({ isUsingDataStreams })
+          );
+          expect(ruleDataClient.isWriteEnabled()).toBe(true);
+          const writer = await ruleDataClient.getWriter();
+
+          // Previously, a delay between calling getWriter() and using a writer function
+          // would cause an Unhandled promise rejection if there were any errors getting a writer
+          // Adding this delay in the tests to ensure this does not pop up again.
+          await delay();
+
+          await writer.bulk({});
+
+          expect(logger.error).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Bulk write to index completed with ignored version conflicts (409).`
           );
           expect(ruleDataClient.isWriteEnabled()).toBe(true);
         });
