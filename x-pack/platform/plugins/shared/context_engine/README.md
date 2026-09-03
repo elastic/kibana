@@ -298,21 +298,32 @@ fact been made.
 
 ### Selecting an index's signals
 
-Signals record that an agent ran a query, not which AI index the query was meant
-to serve, so attribution is the whole problem. It runs in two passes:
+A run selects over everything `signal_time_range` and `signal_filter` admit;
+there is no restriction by signal type. What a signal's type governs is how it
+is *attributed* to an AI index, because signals record that an agent ran a query,
+not which AI index the query was meant to serve. A signal is admitted by any of
+three paths:
 
-1. **Retrieval.** A `ki_retrieval` signal names the KI index it read in
+1. **Retrieval.** A `ki_retrieval` tool call names the KI index it read in
    `data.target_index`, so it is matched against the AI index's `dest.value`.
    This is exact.
-2. **Fallback.** A `raw_access` signal is the `coverage_gap` case — the agent
+2. **Fallback.** A `raw_access` tool call is the `coverage_gap` case — the agent
    gave up on the KIs and read the underlying data — and names no KI index at
    all. These matter most for improving an index, so they are attributed two
    ways: by target, against the raw indices the index's own ES|QL sources read;
    and by conversation, against conversations already tied to the index by the
    first pass.
+3. **Everything else.** A signal that is not a tool call carries no
+   `query_kind` or `target_index` to attribute on, so the window and the index's
+   `signal_filter` are what scope it. Such a signal reaches the run's total but
+   forms no pattern, because patterns are keyed on fields it does not have —
+   how a second signal type should group is a decision for whoever adds one.
+   This path is inert until then; it is here so that adding a type does not
+   require teaching the run about it first.
 
 Management-agent signals are excluded: they describe Context Engine's own
-tooling rather than an agent failing to find context.
+tooling rather than an agent failing to find context. Signals carrying no
+`data.agent.class` at all are unaffected.
 
 **Every space is read.** Signals are per-space because conversations are, but an
 AI index is global and so is the pipeline it describes. Restricting to the
@@ -320,9 +331,21 @@ caller's space would analyze a fraction of the evidence and present it as the
 whole picture. The spaces a run actually drew from are recorded on each
 improvement's `provenance.signal_spaces`.
 
-Selected signals are then folded into ranked patterns — grouped by tag, target
-index and tool, and scored by frequency weighted by how much the tag means. The
-groups, not the raw signals, decide whether a run happens at all: a window full
+Signals are then folded into ranked patterns — grouped by tag, target index and
+tool, and scored by frequency weighted by how much the tag means. The grouping
+is an aggregation over the whole window, so a pattern's count is the number of
+signals that actually occurred, not the number a run happened to read. Only the
+example query and provenance ids attached to each pattern come from documents,
+of which a run reads at most `MAX_ANALYSIS_SIGNALS`; a pattern occurring only
+outside that sample still gets its true count, just no example.
+
+Bucketing on the multi-valued `tags` field is what gives the grouping its two
+useful properties for free: a signal tagged both `query_error` and
+`coverage_gap` counts in both patterns, because those are two different problems
+with two different fixes, and an untagged signal produces no bucket at all, so a
+retrieval that worked never becomes something to act on.
+
+The patterns, not the signal count, decide whether a run happens: a window full
 of healthy retrievals has signals but nothing to analyze, and spending an LLM
 call to be told so is a run's most common failure mode.
 

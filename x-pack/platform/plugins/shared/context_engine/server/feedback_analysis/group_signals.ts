@@ -5,9 +5,24 @@
  * 2.0.
  */
 
-import { MAX_ANALYSIS_SIGNAL_GROUPS, MAX_GROUP_SIGNAL_IDS } from '../../common/constants';
+import { MAX_ANALYSIS_SIGNAL_GROUPS } from '../../common/constants';
 import type { SignalPatternGroup } from '../../common/http_api/feedback_context';
-import type { Signal } from '../../common/http_api/signals';
+
+/**
+ * One (tag, target index, tool) combination found in the window, before ranking.
+ *
+ * {@link count} is the true number of signals in the window carrying that combination, taken from
+ * an aggregation rather than from the documents a run happened to read, so ranking does not depend
+ * on the sample size. The example and ids are best-effort evidence drawn from that sample.
+ */
+export interface SignalPatternCandidate {
+  tag: string;
+  target_index: string;
+  tool: string;
+  count: number;
+  signal_ids: string[];
+  example?: SignalPatternGroup['example'];
+}
 
 /**
  * How strongly each tag indicates something worth fixing.
@@ -29,70 +44,26 @@ const TAG_WEIGHT: Record<string, number> = {
 
 const DEFAULT_TAG_WEIGHT = 1;
 
-const GROUP_KEY_SEPARATOR = '\u0000';
-
-interface GroupAccumulator {
-  tag: string;
-  targetIndex: string;
-  tool: string;
-  signalIds: string[];
-  count: number;
-  example?: SignalPatternGroup['example'];
-}
-
-const toExample = (signal: Signal): SignalPatternGroup['example'] => ({
-  ...(signal.data.query !== undefined ? { query: signal.data.query } : {}),
-  ...(signal.data.error !== undefined ? { error: signal.data.error } : {}),
-  row_count: signal.data.returned.row_count,
-  ...(signal.data.conversation_id !== undefined
-    ? { conversation_id: signal.data.conversation_id }
-    : {}),
-});
-
 /**
- * Folds the selected signals into ranked patterns.
+ * Ranks the candidate patterns and keeps the ones worth a run's attention.
  *
- * A signal contributes to one group per tag it carries, because the tags are separate axes: a
+ * A signal contributes to one candidate per tag it carries, because the tags are separate axes: a
  * query that both errored and hit raw data is evidence of two different problems with two
- * different fixes. Untagged signals are counted nowhere — a retrieval that worked is not a pattern
- * to act on, and including it would dilute the ranking with the healthy case.
+ * different fixes. That fan-out happens in the aggregation, which buckets on the multi-valued
+ * `tags` field; untagged signals produce no bucket at all, so a retrieval that worked is never a
+ * pattern to act on.
  */
-export const groupSignals = (signals: Signal[]): SignalPatternGroup[] => {
-  const accumulators = new Map<string, GroupAccumulator>();
-
-  for (const signal of signals) {
-    for (const tag of signal.tags) {
-      const targetIndex = signal.data.target_index;
-      const { tool } = signal.data;
-      const key = [tag, targetIndex, tool].join(GROUP_KEY_SEPARATOR);
-
-      let accumulator = accumulators.get(key);
-      if (!accumulator) {
-        accumulator = { tag, targetIndex, tool, signalIds: [], count: 0 };
-        accumulators.set(key, accumulator);
-      }
-
-      accumulator.count += 1;
-      if (accumulator.signalIds.length < MAX_GROUP_SIGNAL_IDS) {
-        accumulator.signalIds.push(signal.signal_id);
-      }
-      // Prefer an example that carries an error message: for a `query_error` group the message is
-      // the finding, and the first signal in the group may not have one.
-      if (!accumulator.example || (!accumulator.example.error && signal.data.error)) {
-        accumulator.example = toExample(signal);
-      }
-    }
-  }
-
-  return [...accumulators.values()]
-    .map<SignalPatternGroup>((accumulator) => ({
-      tag: accumulator.tag,
-      target_index: accumulator.targetIndex,
-      tool: accumulator.tool,
-      count: accumulator.count,
-      score: accumulator.count * (TAG_WEIGHT[accumulator.tag] ?? DEFAULT_TAG_WEIGHT),
-      signal_ids: accumulator.signalIds,
-      ...(accumulator.example ? { example: accumulator.example } : {}),
+export const rankPatterns = (candidates: SignalPatternCandidate[]): SignalPatternGroup[] =>
+  candidates
+    .filter(({ count }) => count > 0)
+    .map<SignalPatternGroup>((candidate) => ({
+      tag: candidate.tag,
+      target_index: candidate.target_index,
+      tool: candidate.tool,
+      count: candidate.count,
+      score: candidate.count * (TAG_WEIGHT[candidate.tag] ?? DEFAULT_TAG_WEIGHT),
+      signal_ids: candidate.signal_ids,
+      ...(candidate.example ? { example: candidate.example } : {}),
     }))
     .sort(
       (a, b) =>
@@ -103,4 +74,3 @@ export const groupSignals = (signals: Signal[]): SignalPatternGroup[] => {
         a.tool.localeCompare(b.tool)
     )
     .slice(0, MAX_ANALYSIS_SIGNAL_GROUPS);
-};

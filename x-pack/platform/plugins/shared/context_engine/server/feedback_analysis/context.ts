@@ -20,7 +20,7 @@ import { getKis } from '../ai_indices/ki_list';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { renderBriefing } from './briefing';
-import { groupSignals } from './group_signals';
+import { rankPatterns } from './group_signals';
 import { selectSignals } from './select_signals';
 
 export interface BuildFeedbackContextDeps {
@@ -59,18 +59,18 @@ export const buildFeedbackContext = async (
       sources: aiIndex.sources,
       signalTimeRange: feedbackAnalysis?.signal_time_range,
       signalFilter: feedbackAnalysis?.signal_filter,
-      size: MAX_ANALYSIS_SIGNALS,
+      sampleSize: MAX_ANALYSIS_SIGNALS,
       ...(now ? { now } : {}),
     }),
     getKis(esClient, { destValue: aiIndex.dest.value, size: KI_SUMMARY_PAGE_SIZE }),
     improvementsService.historyFor(aiIndexId, { size: MAX_IMPROVEMENTS_HISTORY_SIZE }),
   ]);
 
-  const groups = groupSignals(selection.signals);
+  const groups = rankPatterns(selection.patterns);
   const run = {
     signal_window: selection.window,
     signal_spaces: selection.spaces,
-    signal_count: selection.signals.length,
+    signal_count: selection.signalCount,
   };
 
   return {

@@ -99,9 +99,11 @@ export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
 
 /**
- * Cap on the signals a single analysis run selects. The briefing shares the run's context window
- * with the agent's own tool output, so the selection is a sample of the window rather than all of
- * it; the groups carry the full counts, which is what the ranking is actually read from.
+ * Cap on the signal documents a single analysis run reads.
+ *
+ * Only the example query and the provenance ids attached to each pattern come from these, so the
+ * cap bounds evidence rather than the analysis: pattern counts, the spaces list and the run's
+ * signal total are aggregated over the whole window and do not depend on it.
  */
 export const MAX_ANALYSIS_SIGNALS = 500;
 

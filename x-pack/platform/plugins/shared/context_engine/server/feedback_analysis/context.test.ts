@@ -10,11 +10,11 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MAX_ANALYSIS_SIGNALS } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
-import type { Signal } from '../../common/http_api/signals';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import { buildFeedbackContext } from './context';
 import { getKis } from '../ai_indices/ki_list';
+import type { SignalPatternCandidate } from './group_signals';
 import { selectSignals } from './select_signals';
 
 jest.mock('./select_signals');
@@ -25,19 +25,13 @@ const getKisMock = getKis as jest.MockedFunction<typeof getKis>;
 
 const WINDOW = { from: '2026-08-25T12:00:00.000Z', to: '2026-09-01T12:00:00.000Z' };
 
-const buildSignal = (id: string, tags: string[]): Signal =>
-  ({
-    signal_id: id,
-    '@timestamp': '2026-09-01T11:00:00.000Z',
-    signal_type: 'tool_call',
-    tags,
-    data: {
-      tool: 'execute_esql',
-      query_kind: 'ki_retrieval',
-      target_index: 'ai-index-idx-orders',
-      returned: { row_count: 0 },
-    },
-  } as unknown as Signal);
+const buildPattern = (tag: string, count: number): SignalPatternCandidate => ({
+  tag,
+  target_index: 'ai-index-idx-orders',
+  tool: 'execute_esql',
+  count,
+  signal_ids: ['a'],
+});
 
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem =>
   ({
@@ -68,8 +62,9 @@ describe('buildFeedbackContext', () => {
     aiIndexService = { get: jest.fn() };
     improvementsService = { historyFor: jest.fn().mockResolvedValue([]) };
     selectSignalsMock.mockResolvedValue({
-      signals: [buildSignal('a', ['coverage_gap'])],
+      patterns: [buildPattern('coverage_gap', 12)],
       spaces: ['default'],
+      signalCount: 40,
       window: WINDOW,
     });
     getKisMock.mockResolvedValue({
@@ -83,7 +78,7 @@ describe('buildFeedbackContext', () => {
 
     expect(context).toMatchObject({
       agent_id: agentBuilderDefaultAgentId,
-      run: { signal_window: WINDOW, signal_spaces: ['default'], signal_count: 1 },
+      run: { signal_window: WINDOW, signal_spaces: ['default'], signal_count: 40 },
       has_signals: true,
     });
     expect(context.briefing).toContain('# Feedback analysis for AI index `orders`');
@@ -118,7 +113,7 @@ describe('buildFeedbackContext', () => {
       sources: [{ type: 'esql', value: 'FROM logs-orders' }],
       signalTimeRange: { type: 'relative', from: 'now-2d' },
       signalFilter: 'tags: coverage_gap',
-      size: MAX_ANALYSIS_SIGNALS,
+      sampleSize: MAX_ANALYSIS_SIGNALS,
     });
   });
 
@@ -161,20 +156,28 @@ describe('buildFeedbackContext', () => {
   });
 
   it('reports no signals when nothing was classified as a problem, so no LLM call is made', async () => {
+    // Retrievals ran — the run still records how many it looked at — but none were tagged, so the
+    // aggregation produced no pattern and there is nothing for an agent to work from.
     selectSignalsMock.mockResolvedValue({
-      signals: [buildSignal('a', [])],
+      patterns: [],
       spaces: ['default'],
+      signalCount: 31,
       window: WINDOW,
     });
 
     const context = await build();
 
-    expect(context.run.signal_count).toBe(1);
+    expect(context.run.signal_count).toBe(31);
     expect(context.has_signals).toBe(false);
   });
 
   it('reports no signals when the window was empty', async () => {
-    selectSignalsMock.mockResolvedValue({ signals: [], spaces: [], window: WINDOW });
+    selectSignalsMock.mockResolvedValue({
+      patterns: [],
+      spaces: [],
+      signalCount: 0,
+      window: WINDOW,
+    });
 
     expect((await build()).has_signals).toBe(false);
   });
