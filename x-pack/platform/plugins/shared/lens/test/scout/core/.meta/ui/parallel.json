@@ -601,6 +601,32 @@
       }
     },
     {
+      "id": "f16a953afdc8a35-78f10f03c229085",
+      "title": "Lens legacy dual-written ES|QL slot self-heal (by-value inline editing) renders the layer query, self-heals the stale slot on save, and survives re-open",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql/legacy_slot_self_heal.spec.ts",
+        "line": 137,
+        "column": 33
+      }
+    },
+    {
+      "id": "d8893df3b2e499c-4a06fba5d01e02d",
+      "title": "Lens Convert to ES|QL button hides Convert to ES|QL when the conversion flag is off (default)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_conversion/button_hidden.spec.ts",
+        "line": 62,
+        "column": 33
+      }
+    },
+    {
       "id": "7d8101c6e65d69b-a2f17ede9b95bc3",
       "title": "Lens ESQL dashboard inline editing should keep the table type when the user adds a limit via Try ESQL",
       "expectedStatus": "passed",
@@ -1040,19 +1066,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
         "line": 118,
         "column": 30
-      }
-    },
-    {
-      "id": "a16fbb825b008d7-ebf2b94c7596db4",
-      "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
-        "line": 75,
-        "column": 24
       }
     },
     {

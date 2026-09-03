@@ -14,7 +14,7 @@ import {
   openInlineEditorAndWaitVisible,
   test,
   testData,
-} from '../fixtures';
+} from '../../fixtures';
 
 test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings, apiServices }) => {
