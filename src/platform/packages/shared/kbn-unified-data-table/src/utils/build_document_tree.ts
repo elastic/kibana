@@ -33,13 +33,20 @@ interface ValueBudget {
 interface FormatContext {
   dataView: DataView;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  hideNulls: boolean;
 }
+
+// Returned by processFieldValue when, with `hideNulls` on, a field has no non-null value left and
+// should be dropped entirely rather than added to the document.
+const OMIT_FIELD = Symbol('omitField');
 
 export interface NestedDocument {
   tree: JsonValue;
   truncated: boolean;
 }
 
+// Cached per raw hit and per (hideNulls, field-filter) signature, since each combination
+// produces a different document.
 const documentTreeCache = new WeakMap<EsHitRecord, Map<string, NestedDocument>>();
 
 /**
@@ -49,23 +56,27 @@ export const flattenedToNestedDocument = ({
   row,
   dataView,
   shouldShowFieldHandler,
+  hideNulls = false,
   selectedColumns,
 }: {
   row: DataTableRecord;
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  hideNulls?: boolean;
   selectedColumns?: string[];
 }): NestedDocument => {
-  // The tree depends on the active field filter, so cache per row and filter signature.
+  // The tree depends on hideNulls and the active field filter, so cache per row and per signature.
   const filterSignature = selectedColumns?.length ? [...selectedColumns].sort().join('\n') : '';
+  const cacheKey = `${hideNulls ? '1' : '0'}:${filterSignature}`;
   let rowCache = documentTreeCache.get(row.raw);
-  const cached = rowCache?.get(filterSignature);
+  const cached = rowCache?.get(cacheKey);
   if (cached) return cached;
 
   const ctx: FormatContext = {
     dataView,
     shouldShowFieldHandler,
+    hideNulls,
   };
   const budget: ValueBudget = { remaining: MAX_TREE_VALUES, truncated: false };
   const metaFields = new Set(dataView.metaFields);
@@ -91,7 +102,10 @@ export const flattenedToNestedDocument = ({
       break;
     }
 
-    documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
+    const value = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
+    if (value !== OMIT_FIELD) {
+      documentFlat[fieldName] = value;
+    }
   }
 
   // Step 2. Unflatten the object based on the dotted-key map.
@@ -102,7 +116,7 @@ export const flattenedToNestedDocument = ({
     rowCache = new Map<string, NestedDocument>();
     documentTreeCache.set(row.raw, rowCache);
   }
-  rowCache.set(filterSignature, result);
+  rowCache.set(cacheKey, result);
   return result;
 };
 
@@ -154,7 +168,10 @@ const processFieldValue = (
           budget.truncated = true;
           break;
         }
-        inner[key] = processFieldValue(object[key], qualifiedName, ctx, budget);
+        const value = processFieldValue(object[key], qualifiedName, ctx, budget);
+        if (value !== OMIT_FIELD) {
+          inner[key] = value;
+        }
       }
       nested.push(unflattenKeys(inner));
     }
@@ -163,10 +180,16 @@ const processFieldValue = (
 
   // CASE 2: a scalar value (or a genuine multi-value array). Each element is one value, so a single
   // huge field is sliced down to the remaining budget rather than materialised in full.
+  // With `hideNulls`, null entries are dropped up front so they never reach the budget;
+  // a field left without any value is omitted entirely.
+  const visibleValues = ctx.hideNulls ? values.filter((value) => value != null) : values;
+  if (ctx.hideNulls && visibleValues.length === 0) {
+    return OMIT_FIELD;
+  }
   // String values that are perfect JSON (an object or array) are expanded; inner nodes count
   // against the same budget.
   const leaves: unknown[] = [];
-  for (const value of values) {
+  for (const value of visibleValues) {
     if (budget.remaining <= 0) {
       budget.truncated = true;
       break;

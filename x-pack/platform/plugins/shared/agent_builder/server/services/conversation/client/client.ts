@@ -6,9 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin } from '@kbn/agent-builder-common';
+import type {
+  ConversationOrigin,
+  ConversationRoundFeedback,
+  FeedbackChipId,
+} from '@kbn/agent-builder-common';
 import {
   type CurrentUser,
   type Conversation,
@@ -29,18 +34,14 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type {
-  ConversationTemplate,
-  SerializedMetadataValue,
-  MetadataFieldValue,
-} from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
+  buildPinnedFilter,
   buildReadAccessFilter,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
@@ -55,78 +56,47 @@ import type {
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
+  NormalizedConversation,
+  ConversationListResult,
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { MAX_CONVERSATIONS_PER_PAGE, MAX_RESULT_WINDOW } from '../../../../common/constants';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
-import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
+import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import { updateReadBy } from './read_by';
+import { updatePinnedBy } from './pinned_by';
 import {
   fromEs,
   fromEsWithoutRounds,
   toEs,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
+  isConversationDocument,
+  toResponseConversation,
+  toResponseConversationWithoutRounds,
   updateConversation,
-  withPermissions,
   type Document,
 } from './converters';
-import { roundsToEvents } from './rounds_to_events';
-import { eventsToRounds } from './events_to_rounds';
+import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 
-/** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
-const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
-  conversation: T
-): T => {
-  if (!conversation.template_id || !conversation.metadata) return conversation;
-  const template = getTemplate(conversation.template_id);
-  if (!template) return conversation;
-  return {
-    ...conversation,
-    metadata: deserializeMetadata(
-      conversation.metadata as Record<string, SerializedMetadataValue>,
-      template
-    ),
-  };
-};
-
-const buildMetadataFromTemplate = (
-  template: ConversationTemplate
-): Record<string, SerializedMetadataValue> =>
-  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
-    (acc, [fieldName, def]) => {
-      if (def.default_value !== undefined) {
-        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
-      }
-      return acc;
-    },
-    {}
+// Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
+// This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
+function computeChangedFields(
+  updates: Record<string, SerializedMetadataValue>,
+  stored: Record<string, SerializedMetadataValue>
+): string[] {
+  return Object.keys(updates).filter(
+    (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
   );
-
-/**
- * Read-path round-trip verification. When on, a conversation's rounds are replaced by
- * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
- * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
- * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
- * persist the real rounds.
- *
- * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
- * via `CI=true`. Always OFF in production: a deployed Kibana never sets
- * `CI`, so real reads return the stored rounds untouched.
- */
-const shouldVerifyRoundTrip = process.env.CI === 'true';
-
-const verifyRoundTrip = (conversation: Conversation): Conversation =>
-  shouldVerifyRoundTrip
-    ? {
-        ...conversation,
-        rounds: eventsToRounds(roundsToEvents(conversation)),
-      }
-    : conversation;
+}
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -145,14 +115,24 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
+  markRead(conversationId: string, read: boolean): Promise<Conversation>;
+  setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
+  updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
     update: UpdateConversationAccessControlRequestBody
   ): Promise<ConversationAccessControl>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
-  patchMetadata(conversationId: string, updates: Record<string, unknown>): Promise<Conversation>;
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
 /**
@@ -170,12 +150,14 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  onMetadataPatched,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -184,6 +166,7 @@ export const createClient = ({
     space,
     agentRegistry,
     logger,
+    onMetadataPatched,
   });
 };
 
@@ -193,6 +176,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
+  private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 
   constructor({
     storage,
@@ -200,35 +184,49 @@ class ConversationClientImpl implements ConversationClient {
     space,
     agentRegistry,
     logger,
+    onMetadataPatched,
   }: {
     storage: ConversationStorage;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
+    onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
     this.storage = storage;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
+    this.onMetadataPatched = onMetadataPatched;
   }
 
-  async list(
-    options: ConversationListOptions = {}
-  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
-    const { agentId } = options;
+  async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
+    const {
+      agentId,
+      page = 1,
+      perPage = MAX_CONVERSATIONS_PER_PAGE,
+      sortOrder = 'desc',
+      pinned,
+    } = options;
+
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
     if (accessibleAgentIds.length === 0 || (agentId && !accessibleAgentIds.includes(agentId))) {
-      return [];
+      return { results: [], total: 0 };
     }
 
     const agentIds = agentId ? [agentId] : accessibleAgentIds;
 
+    const pinnedFilter = buildPinnedFilter({ user: this.user, pinned });
+
     const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1000,
+      // Cap at MAX_RESULT_WINDOW: anything beyond is unreachable via offset pagination.
+      track_total_hits: MAX_RESULT_WINDOW,
+      from: (page - 1) * perPage,
+      size: perPage,
+      sort: [{ updated_at: { order: sortOrder } }, { created_at: { order: sortOrder } }],
+      seq_no_primary_term: true,
       _source: [
         'agent_id',
         'user_id',
@@ -238,7 +236,9 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'read_by',
         'pinned',
+        'pinned_by',
         'read_only',
         'access_control',
         'origin',
@@ -252,20 +252,43 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             buildReadAccessFilter({ user: this.user, agentIds }),
+            // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
+            { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
+            ...pinnedFilter,
           ],
         },
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.toResponseConversationWithoutRounds(hit as Document)
+    const hitsTotal = response.hits.total;
+    const total = Math.min(
+      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      MAX_RESULT_WINDOW
     );
+
+    const results = response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
+
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
+    });
+
+    return { results, total };
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.toResponseConversation(document);
+    return toResponseConversation({
+      document,
+      user: this.user,
+      resolveTemplate: getTemplate,
+    });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -279,6 +302,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -289,18 +313,27 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
-    if (!hit || !hit._id) {
+    if (!hit) {
       return undefined;
     }
 
+    if (!isConversationDocument(hit)) {
+      throw createInternalError('Conversation origin search returned an incomplete hit');
+    }
+
     try {
-      return withDeserializedMetadata(
-        verifyRoundTrip(
-          fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
-        )
-      );
+      const document = await this.getDocumentWithAccess({
+        conversationId: hit._id,
+        access: 'converse',
+      });
+
+      return toConversationResponseFromDocument({
+        document,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -404,7 +437,7 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => withBoundedTitle(fields),
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async addAttachmentsToLastRound(
@@ -435,7 +468,7 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async upsertRound(
@@ -462,14 +495,111 @@ class ConversationClientImpl implements ConversationClient {
             }
           : {}),
         ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+        read_by: [],
         read: false,
       }),
     });
-    return withDeserializedMetadata(result);
+    return result;
+  }
+
+  async markRead(conversationId: string, read: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updateReadBy({
+          userId: this.user.id,
+          readBy: current.read_by,
+          currentRead: current.read ?? false,
+          nextRead: read,
+        }),
+    });
+  }
+
+  async setPinned(conversationId: string, pinned: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updatePinnedBy({
+          userId: this.user.id,
+          pinnedBy: current.pinned_by,
+          currentPinned: current.pinned ?? false,
+          nextPinned: pinned,
+        }),
+    });
+  }
+
+  async updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      fields: (current) => {
+        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+
+        if (roundIndex === -1) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+
+        const round = current.rounds[roundIndex];
+        const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+        const updatedRound =
+          feedback.vote === null
+            ? roundWithoutFeedback
+            : {
+                ...round,
+                feedback: {
+                  vote: feedback.vote,
+                  chips: feedback.chips ?? [],
+                  comment: feedback.comment ?? '',
+                  submitted_at: new Date().toISOString(),
+                  connector_id: round.model_usage?.connector_id,
+                  model: round.model_usage?.model,
+                } satisfies ConversationRoundFeedback,
+              };
+
+        return {
+          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        };
+      },
+    });
   }
 
   async delete(conversationId: string): Promise<boolean> {
+    return this.deleteWithCascade(conversationId, new Set<string>());
+  }
+
+  private async deleteWithCascade(conversationId: string, visited: Set<string>): Promise<boolean> {
+    // Guard against cycles / self-referential loops
+    if (visited.has(conversationId)) {
+      return true;
+    }
+    visited.add(conversationId);
+
     await this.getDocumentWithAccess({ conversationId, access: 'delete' });
+
+    // Cascade — find children (persistent sub-agent conversations), delete them
+    // concurrently (best-effort per child; the `visited` guard is race-free
+    // because its has/add pair runs synchronously with no `await` between).
+    const childIds = (await this.findChildConversationIds(conversationId)).filter(
+      (id) => id !== conversationId && !visited.has(id)
+    );
+    await Promise.all(
+      childIds.map((childId) =>
+        this.deleteWithCascade(childId, visited).catch((err) => {
+          this.logger.warn(
+            `Failed to cascade-delete child conversation ${childId} of ${conversationId}: ${
+              (err as Error)?.message ?? String(err)
+            }`
+          );
+        })
+      )
+    );
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
@@ -535,13 +665,15 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>
-  ): Promise<Conversation> {
+  ): Promise<{ conversation: Conversation; changedFields: string[] }> {
+    let changedFields: string[] = [];
+
     const result = await this.writeConversation({
       conversationId,
       access: 'owner',
@@ -570,25 +702,24 @@ class ConversationClientImpl implements ConversationClient {
         );
 
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+
+        // Track which fields actually changed to suppress no-op trigger events.
+        changedFields = computeChangedFields(serialized, storedMetadata);
+
         return { metadata: { ...storedMetadata, ...serialized } };
       },
     });
 
-    return withDeserializedMetadata(result);
-  }
+    if (changedFields.length > 0 && this.onMetadataPatched) {
+      this.onMetadataPatched({
+        conversationId: result.id,
+        templateId: result.template_id,
+        parentId: result.parent_conversation?.id,
+        changedFields,
+      });
+    }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata(
-      withPermissions({ conversation: verifyRoundTrip(fromEs(document)), user: this.user })
-    );
-  }
-
-  private toResponseConversationWithoutRounds(
-    document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata(
-      withPermissions({ conversation: fromEsWithoutRounds(document), user: this.user })
-    );
+    return { conversation: result, changedFields };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -610,11 +741,47 @@ class ConversationClientImpl implements ConversationClient {
       return undefined;
     }
 
-    if (hit._seq_no === undefined || hit._primary_term === undefined) {
+    if (!isConversationDocument(hit)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return hit as Document;
+    return hit;
+  }
+
+  private async findChildConversationIds(parentId: string): Promise<string[]> {
+    // Paginate through all children
+    const PAGE_SIZE = 500;
+    const ids: string[] = [];
+    let searchAfter: SortResults | undefined;
+
+    while (true) {
+      const response = await this.storage.getClient().search({
+        size: PAGE_SIZE,
+        track_total_hits: false,
+        _source: false,
+        // `_doc` sort is the cheapest ES sort — no scoring, no field access and stable for search_after paging.
+        sort: ['_doc'],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { 'parent_conversation.id': parentId } },
+              createSpaceDslFilter(this.space),
+            ],
+          },
+        },
+      });
+
+      const hits = response.hits.hits;
+      for (const hit of hits) {
+        if (hit._id) ids.push(hit._id);
+      }
+
+      if (hits.length < PAGE_SIZE) break;
+      searchAfter = hits[hits.length - 1].sort;
+    }
+
+    return ids;
   }
 
   /**
@@ -637,7 +804,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = fromEsWithoutRounds(document);
+    const conversation = fromEsWithoutRounds(document, this.user);
 
     switch (access) {
       case 'converse':
@@ -695,7 +862,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-    fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
+    fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
   }): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries });
@@ -712,7 +879,7 @@ class ConversationClientImpl implements ConversationClient {
           }),
       });
 
-      return document;
+      return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
@@ -733,14 +900,14 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     access: ConversationAccess;
     maxRetries: number;
-  }): OccWriter<Conversation> {
-    return new OccWriter<Conversation>({
+  }): OccWriter<NormalizedConversation> {
+    return new OccWriter<NormalizedConversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
 
         return {
           id,
-          source: fromEs(document),
+          source: fromEs(document, this.user),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

@@ -15,6 +15,7 @@
     "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/task-manager-plugin",
     "@kbn/features-plugin",
@@ -129,6 +130,7 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/alerts-ui-shared",
     "@kbn/es-types",
+    "@kbn/announcement-banner",
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/change-history",

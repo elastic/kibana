@@ -88,7 +88,10 @@ export function validateWorkflowFields(
           ? (fieldSchema as { type?: string }).type
           : undefined;
 
-      if (issue.code === 'invalid_type' && message.includes('received undefined') && isRequired) {
+      // A required field with nothing supplied, decided from the parsed values
+      // rather than from the rendered message text (Zod does not reliably
+      // populate `issue.input`, so it cannot tell "absent" from "wrong type").
+      if (issue.code === 'invalid_type' && isRequired && values[fieldName] === undefined) {
         message = 'this field is required';
       } else if (issue.code === 'invalid_union') {
         if (fieldType === 'array' && values) {

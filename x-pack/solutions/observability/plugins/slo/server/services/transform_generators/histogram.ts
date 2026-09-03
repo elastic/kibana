@@ -35,7 +35,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
       await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo,
-      this.isServerless && this.isCpsEnabled
+      this.getProjectRouting(slo)
     );
   }
 

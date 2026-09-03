@@ -20,11 +20,13 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getServices } from '../services';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
@@ -35,21 +37,29 @@ interface EsqlPreviewSectionProps {
   esqlData: EsqlDataResult | null;
   esqlDataError: string | null;
   onFetchData: () => void;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const MAX_PREVIEW_ROWS = 5;
 
+/** `isPending` keeps the "no time field" hint hidden until detection actually resolves. */
+interface TimeFieldDetection {
+  isPending: boolean;
+  field: string | undefined;
+}
+
 const detectTimeField = (
   query: string,
-  setState: React.Dispatch<React.SetStateAction<string | undefined>>
+  setState: React.Dispatch<React.SetStateAction<TimeFieldDetection>>
 ) => {
   let cancelled = false;
+  setState({ isPending: true, field: undefined });
   getESQLTimeField({ query, http: getServices().core.http })
     .then((field) => {
-      if (!cancelled) setState(field);
+      if (!cancelled) setState({ isPending: false, field });
     })
     .catch(() => {
-      if (!cancelled) setState(undefined);
+      if (!cancelled) setState({ isPending: false, field: undefined });
     });
   return () => {
     cancelled = true;
@@ -63,26 +73,31 @@ export const EsqlPreviewSection = ({
   esqlData,
   esqlDataError,
   onFetchData,
+  esqlVariables,
 }: EsqlPreviewSectionProps) => {
   const previewRows = esqlData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
   const columns = esqlData?.columns ?? [];
 
-  const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
+  const [timeFieldDetection, setTimeFieldDetection] = useState<TimeFieldDetection>({
+    isPending: Boolean(esqlQuery.trim()),
+    field: undefined,
+  });
   const initialQueryRef = useRef(esqlQuery);
+  const accordionId = useGeneratedHtmlId({ prefix: 'customContentEsql' });
 
   useEffect(() => {
     const query = initialQueryRef.current;
-    return query.trim() ? detectTimeField(query, setDetectedTimeField) : undefined;
+    return query.trim() ? detectTimeField(query, setTimeFieldDetection) : undefined;
   }, []);
 
   const handleFetchData = () => {
-    if (esqlQuery.trim()) detectTimeField(esqlQuery, setDetectedTimeField);
+    if (esqlQuery.trim()) detectTimeField(esqlQuery, setTimeFieldDetection);
     onFetchData();
   };
 
   return (
     <EuiAccordion
-      id="custom-content-esql-accordion"
+      id={accordionId}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -120,8 +135,9 @@ export const EsqlPreviewSection = ({
         disableAutoFocus
         initialState={{ editorHeight: 120 }}
         errors={[]}
+        esqlVariables={esqlVariables}
       />
-      {esqlQuery.trim() && detectedTimeField === undefined && (
+      {esqlQuery.trim() && !timeFieldDetection.isPending && !timeFieldDetection.field && (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
@@ -146,6 +162,7 @@ export const EsqlPreviewSection = ({
         onClick={handleFetchData}
         disabled={!esqlQuery.trim()}
         iconType="play"
+        data-test-subj="customContentPreviewDataButton"
       >
         {i18n.translate('xpack.customContent.editFlyout.esqlSection.previewButton', {
           defaultMessage: 'Preview data',

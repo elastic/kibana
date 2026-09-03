@@ -18,7 +18,7 @@ const SET_PINNED_PATH = `${internalApiPath}/conversations/{conversation_id}/_set
 
 describe('registerInternalConversationRoutes - _mark_read', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let update: jest.Mock;
+  let markRead: jest.Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
@@ -39,11 +39,11 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    update = jest.fn().mockResolvedValue({ id: 'conv-1', read: true });
+    markRead = jest.fn().mockResolvedValue({ id: 'conv-1', read: true });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ update }),
+        getScopedClient: jest.fn().mockResolvedValue({ markRead }),
       },
     });
 
@@ -76,10 +76,7 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith(
-      { id: 'conv-1', read: true },
-      { access: 'converse', retryOnConflict: true }
-    );
+    expect(markRead).toHaveBeenCalledWith('conv-1', true);
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', read: true });
   });
@@ -207,7 +204,10 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    patchMetadata = jest.fn().mockResolvedValue({ id: 'conv-1', metadata: { severity: 'high' } });
+    patchMetadata = jest.fn().mockResolvedValue({
+      conversation: { id: 'conv-1', metadata: { severity: 'high' } },
+      changedFields: [],
+    });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
@@ -287,7 +287,7 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
 
 describe('registerInternalConversationRoutes - _set_pinned', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
-  let update: jest.Mock;
+  let setPinned: jest.Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
@@ -308,11 +308,11 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    update = jest.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
+    setPinned = jest.fn().mockResolvedValue({ id: 'conv-1', pinned: true });
 
     const getInternalServices = jest.fn().mockReturnValue({
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ update }),
+        getScopedClient: jest.fn().mockResolvedValue({ setPinned }),
       },
     });
 
@@ -338,17 +338,14 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
     routeHandler = routeHandlers[SET_PINNED_PATH];
   });
 
-  it('updates pinned state using conversation accessor permissions', async () => {
+  it('updates pinned state for the calling user only', async () => {
     const response = await routeHandler(
       createMockContext() as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith(
-      { id: 'conv-1', pinned: true },
-      { access: 'converse', retryOnConflict: true }
-    );
+    expect(setPinned).toHaveBeenCalledWith('conv-1', true);
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', pinned: true });
   });

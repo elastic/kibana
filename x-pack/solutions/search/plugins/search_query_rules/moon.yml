@@ -42,6 +42,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/react-query'
   - '@kbn/core-chrome-browser'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
 tags:
   - plugin

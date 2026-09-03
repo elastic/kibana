@@ -8,6 +8,7 @@
  */
 
 export {
+  LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   ProfileStateRegistry,
   ProfileStateType,
   type ProfileStateDefaultsHandling,

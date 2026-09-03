@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getLatestEntityIndexPattern } from '@kbn/entity-store/common/domain/entity_index';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
 import type { EntityRelationshipKey } from '@kbn/entity-store/common/domain/definitions/common_fields';
 
 import { COMPOSITE_PAGE_SIZE } from './constants';
@@ -80,7 +80,7 @@ export function buildRawIdentifiersEsqlQuery({
   /** When set, restricts the query to entities produced by this integration source (entity.source term). */
   entitySource?: string;
 }): string {
-  const entityIndex = getLatestEntityIndexPattern(namespace);
+  const entityIndex = getEntitiesAlias(ENTITY_LATEST, namespace);
   const rawIdentifiersPrefix = `entity.relationships.${relationshipKey}.raw_identifiers`;
 
   const entitySourceClause = entitySource ? `\n    AND entity.source == "${entitySource}"` : '';

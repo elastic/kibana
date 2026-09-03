@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
-import { strings } from '../../../../../strings';
 
 interface HeaderContextMenuClickActionContext {
   state: ProjectPickerState;
@@ -33,6 +32,7 @@ interface HeaderContextMenuClickActionContext {
 export interface HeaderContextMenuItemProps
   extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'href' | 'external' | 'disabled'> {
   label: string;
+  testSubj: string;
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
 }
 
@@ -44,6 +44,7 @@ const getContextMenuItems = (
     label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
       defaultMessage: 'Clear project tag filters',
     }),
+    testSubj: 'projectPickerClearFiltersMenuItem',
     onClick: () => {
       actions.clearProjectFilters();
     },
@@ -60,6 +61,7 @@ const getContextMenuItems = (
     label: i18n.translate('cpsUtils.projectPicker.frameHeader.revertToSpaceDefaults', {
       defaultMessage: 'Revert to space defaults',
     }),
+    testSubj: 'projectPickerRevertToSpaceDefaultsMenuItem',
     onClick: () => {
       actions.revertToSpaceDefaults();
     },
@@ -73,7 +75,7 @@ const getContextMenuItems = (
   },
 ];
 
-interface ProjectPickerFrameHeaderActionsProps {
+export interface ProjectPickerFrameHeaderActionsProps {
   customContextMenuItems?: HeaderContextMenuItemProps[];
 }
 
@@ -105,13 +107,11 @@ export function ProjectPickerFrameHeaderActions({
       <EuiFlexGroup responsive={false} alignItems="center">
         {state.isUsingSpaceDefaults && (
           <EuiFlexItem>
-            <EuiToolTip content={strings.getProjectPickerReadonlyCallout()}>
-              <EuiBadge tabIndex={0} color="primary">
-                {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
-                  defaultMessage: 'Using space defaults',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
+            <EuiBadge color="primary">
+              {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
+                defaultMessage: 'Using space defaults',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem>
@@ -127,10 +127,10 @@ export function ProjectPickerFrameHeaderActions({
               >
                 <EuiButtonIcon
                   aria-labelledby={contextMenuTooltipId}
-                  data-test-subj="projectPickerHeaderActionsButton"
                   iconType="ellipsis"
                   onClick={() => setIsOpen(true)}
                   color="text"
+                  data-test-subj="projectPickerGlobalActionsButton"
                 />
               </EuiToolTip>
             }
@@ -146,6 +146,7 @@ export function ProjectPickerFrameHeaderActions({
                       icon={item.icon}
                       href={item.href}
                       external={item.external}
+                      data-test-subj={item.testSubj}
                       onClick={(event) => {
                         item.onClick?.(event);
                         closePopover();
@@ -180,13 +181,13 @@ export function ProjectPickerFrameHeader({
   customHeaderText,
 }: ProjectPickerFrameHeaderProps) {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow>
         {customHeaderText ?? (
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('cpsUtils.projectPicker.frameHeader.title', {
-                defaultMessage: 'Cross-project search',
+                defaultMessage: 'Change project scope',
               })}
             </h3>
           </EuiTitle>

@@ -23,11 +23,23 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type {
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from './repositories/data_access_layer';
+import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+
+export type {
+  DataClient,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from './repositories/data_access_layer';
 
 export interface ExecuteWorkflowResponse {
   workflowExecutionId: string;
@@ -58,6 +70,10 @@ export interface TriggerEventsContract {
 }
 
 export interface WorkflowsExecutionEnginePluginStart {
+  __internalStorage: {
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    stepExecutionsDataClient: StepExecutionsDataClient;
+  };
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
@@ -109,6 +125,12 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
   schedulingRequest: KibanaRequest;
+  /**
+   * Invoked for each successfully cancelled execution as paging proceeds.
+   * Prefer this over accumulating ids so callers (e.g. per-execution audit)
+   * never retain an unbounded list in memory.
+   */
+  onCancelled?: (executionId: string) => void;
 }) => Promise<void>;
 
 export type ResumeWorkflowExecution = (

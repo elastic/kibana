@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import {
@@ -44,10 +50,15 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   if (isLoadingEpisode || (ruleId && isRuleLoading(ruleState))) {
     return (
-      <EuiLoadingSpinner
-        size="m"
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionLoading"
-      />
+      >
+        <EuiSkeletonTitle size="xs" />
+        <EuiSpacer size="s" />
+        <EuiSkeletonText lines={3} size="s" />
+      </EuiPanel>
     );
   }
   if (isEpisodeError || isRuleError(ruleState)) {

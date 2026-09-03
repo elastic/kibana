@@ -421,10 +421,10 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   /**
-   * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
-   * normal priority.
+   * Task priority allowing rule type tasks to be claimed at a lower priority
+   * (`Deferrable` vs `Standard`), defaults to `TaskPriority.Standard`.
    */
-  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  priority?: TaskPriority.Standard | TaskPriority.Deferrable;
   /**
    * Indicates that the rule type is managed internally by a Kibana plugin.
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
@@ -508,7 +508,12 @@ export interface CpsLinkedProject {
 
 export interface CpsData {
   resolvedExpression?: string;
-  linkedProjects: CpsLinkedProject[];
+  /**
+   * Linked projects visible to the rule's execution principal. `undefined` means resolution
+   * failed (unknown scope), while an empty array means the resolved scope genuinely contains
+   * no linked projects.
+   */
+  linkedProjects?: CpsLinkedProject[];
 }
 
 export interface ConsumerExecutionMetrics {
