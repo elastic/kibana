@@ -126,13 +126,19 @@ const installLegacyTransformsAssets = async (
       return acc;
     }, []);
 
-    // get and save transform refs before installing transforms
+    // Pre-register new refs and remove old refs in one atomic call BEFORE installing.
+    // Doing this before the installs means that if handleTransformInstall throws mid-batch,
+    // the new ids are already in installed_es and cleanupTransformsStep can find and delete
+    // them on retry. Passing both lists together means ids present in both (same-version
+    // reinstall) survive, because updateEsAssetReferences applies removals before additions
+    // within a single write.
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,
       esReferences,
       {
         assetsToAdd: transformRefs,
+        assetsToRemove: previousInstalledTransformEsAssets,
       }
     );
 
@@ -155,9 +161,8 @@ const installLegacyTransformsAssets = async (
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
-  }
-
-  if (previousInstalledTransformEsAssets.length > 0) {
+  } else if (previousInstalledTransformEsAssets.length > 0) {
+    // Package ships no transforms in this version — prune the stale refs.
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,
