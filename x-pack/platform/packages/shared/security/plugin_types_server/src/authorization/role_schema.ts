@@ -364,12 +364,7 @@ export const elasticsearchRoleSchema = schema.object(
      * An optional object defining global privileges. A global privilege is a form of cluster privilege
      * that is request-aware.
      */
-    global: schema.maybe(
-      schema.oneOf([
-        globalPrivilegeEntrySchema,
-        schema.arrayOf(globalPrivilegeEntrySchema, { maxSize: 1000 }),
-      ])
-    ),
+    global: schema.maybe(globalPrivilegeEntrySchema),
   },
   {
     meta: {

@@ -59,7 +59,7 @@ export interface Role {
     indices: RoleIndexPrivilege[];
     remote_indices?: RoleRemoteIndexPrivilege[];
     run_as: string[];
-    global?: estypes.SecurityRoleDescriptor['global'];
+    global?: estypes.SecurityGlobalPrivilege;
   };
   kibana: RoleKibanaPrivilege[];
   metadata?: {

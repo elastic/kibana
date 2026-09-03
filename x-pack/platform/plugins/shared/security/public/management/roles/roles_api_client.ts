@@ -102,26 +102,13 @@ export class RolesAPIClient {
     };
 
     const global = role.elasticsearch.global;
-    if (global) {
-      role.elasticsearch.global = Array.isArray(global)
-        ? global.map((entry) =>
-            entry.data_source
-              ? {
-                  ...entry,
-                  data_source: entry.data_source.filter(
-                    (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
-                  ),
-                }
-              : entry
-          )
-        : global.data_source
-        ? {
-            ...global,
-            data_source: global.data_source.filter(
-              (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
-            ),
-          }
-        : global;
+    if (global?.data_source) {
+      role.elasticsearch.global = {
+        ...global,
+        data_source: global.data_source.filter(
+          (privilege) => !isPlaceholderDataSourcePrivilege(privilege)
+        ),
+      };
     }
 
     // Remove any placeholder query entries

@@ -65,7 +65,7 @@ describe('DataSourcePrivileges', () => {
     expect(baseProps.onAdd).toHaveBeenCalledTimes(1);
   });
 
-  test('updates global.data_source when global is an object', () => {
+  test('updates global.data_source', () => {
     const role = createRole({
       elasticsearch: {
         global: {
@@ -106,7 +106,7 @@ describe('DataSourcePrivileges', () => {
     });
   });
 
-  test('deletes global.data_source entry when global is an object', () => {
+  test('deletes global.data_source entry', () => {
     const role = createRole({
       elasticsearch: {
         global: {
@@ -135,86 +135,6 @@ describe('DataSourcePrivileges', () => {
           ...(role.elasticsearch.global as any),
           data_source: [{ names: ['b*'], privileges: ['manage'] }],
         },
-      },
-    });
-  });
-
-  test('updates global.data_source when global is an array (writes to the entry that already has data_source)', () => {
-    const role = createRole({
-      elasticsearch: {
-        global: [
-          {
-            application: { manage: { applications: ['kibana-*'] } },
-          },
-          {
-            application: { manage: { applications: [] } },
-            data_source: [{ names: ['acme_*'], privileges: ['read'] }],
-          },
-        ],
-      },
-    });
-
-    const wrapper = shallowWithIntl(<DataSourcePrivileges {...baseProps} role={role} />);
-    const form = wrapper.find('DataSourcePrivilegeForm').at(0);
-    const onFormChange = form.prop('onChange') as unknown as (p: unknown) => void;
-    onFormChange({
-      names: ['acme_*'],
-      privileges: ['manage'],
-    } as any);
-
-    expect(baseProps.onChange).toHaveBeenCalledTimes(1);
-    expect(baseProps.onChange).toHaveBeenCalledWith({
-      ...role,
-      elasticsearch: {
-        ...role.elasticsearch,
-        global: [
-          (role.elasticsearch.global as any)[0],
-          {
-            ...(role.elasticsearch.global as any)[1],
-            data_source: [{ names: ['acme_*'], privileges: ['manage'] }],
-          },
-        ],
-      },
-    });
-  });
-
-  test('deletes global.data_source entry when global is an array (writes to the entry that already has data_source)', () => {
-    const role = createRole({
-      elasticsearch: {
-        global: [
-          {
-            application: { manage: { applications: ['kibana-*'] } },
-          },
-          {
-            application: { manage: { applications: [] } },
-            data_source: [
-              { names: ['a*'], privileges: ['read'] },
-              { names: ['b*'], privileges: ['manage'] },
-            ],
-          },
-        ],
-      },
-    });
-
-    const wrapper = shallowWithIntl(<DataSourcePrivileges {...baseProps} role={role} />);
-    const onDelete = wrapper
-      .find('DataSourcePrivilegeForm')
-      .at(0)
-      .prop('onDelete') as unknown as () => void;
-    onDelete();
-
-    expect(baseProps.onChange).toHaveBeenCalledTimes(1);
-    expect(baseProps.onChange).toHaveBeenCalledWith({
-      ...role,
-      elasticsearch: {
-        ...role.elasticsearch,
-        global: [
-          (role.elasticsearch.global as any)[0],
-          {
-            ...(role.elasticsearch.global as any)[1],
-            data_source: [{ names: ['b*'], privileges: ['manage'] }],
-          },
-        ],
       },
     });
   });

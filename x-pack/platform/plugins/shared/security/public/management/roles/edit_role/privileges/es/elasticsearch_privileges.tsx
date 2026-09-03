@@ -58,12 +58,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
 
   private ensureGlobalPrivilege = (): estypes.SecurityGlobalPrivilege => {
     // @ts-expect-error SecurityGlobalPrivilege expects application attribute but it should be optional
-    return (
-      (Array.isArray(this.props.role.elasticsearch.global)
-        ? this.props.role.elasticsearch.global.find((entry) => entry.data_source != null) ??
-          this.props.role.elasticsearch.global[0]
-        : this.props.role.elasticsearch.global) ?? {}
-    );
+    return this.props.role.elasticsearch.global ?? {};
   };
 
   public render() {
@@ -328,30 +323,14 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
   );
 
   public addDataSourcePrivilege = () => {
-    const { role } = this.props;
-
-    const globalValue = role.elasticsearch.global;
-    const writeIndex = Array.isArray(globalValue)
-      ? Math.max(
-          0,
-          globalValue.findIndex((entry) => entry.data_source != null)
-        )
-      : 0;
-    const current = Array.isArray(globalValue)
-      ? globalValue[writeIndex]?.data_source ?? []
-      : globalValue?.data_source ?? [];
-    const next = [...current, { names: [], privileges: [] }];
-
     const global = this.ensureGlobalPrivilege();
+    const current = global.data_source ?? [];
+    const next = [...current, { names: [], privileges: [] }];
     this.props.onChange({
       ...this.props.role,
       elasticsearch: {
         ...this.props.role.elasticsearch,
-        global: Array.isArray(globalValue)
-          ? globalValue.map((entry, index) =>
-              index === writeIndex ? { ...entry, data_source: next } : entry
-            )
-          : { ...global, data_source: next },
+        global: { ...global, data_source: next },
       },
     });
   };

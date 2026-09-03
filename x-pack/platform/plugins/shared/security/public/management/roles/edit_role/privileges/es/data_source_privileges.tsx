@@ -34,18 +34,8 @@ const AVAILABLE_DATA_SOURCE_PRIVILEGES: RoleDataSourcePrivilege['privileges'] = 
   'manage',
 ];
 
-const getGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege | undefined => {
-  const { global } = role.elasticsearch;
-  if (!global) {
-    return undefined;
-  }
-
-  if (Array.isArray(global)) {
-    return global.find((entry) => entry.data_source != null) ?? global[0];
-  }
-
-  return global;
-};
+const getGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege | undefined =>
+  role.elasticsearch.global;
 
 const ensureGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege => {
   return (
@@ -67,20 +57,7 @@ const updateGlobalWithDataSourcePrivileges = (
   if (!currentGlobal) {
     return { ...fallbackGlobal, data_source: nextDataSourcePrivileges };
   }
-
-  if (!Array.isArray(currentGlobal)) {
-    return { ...currentGlobal, data_source: nextDataSourcePrivileges };
-  }
-
-  const existingIndex = currentGlobal.findIndex((entry) => entry.data_source != null);
-  const writeIndex = existingIndex >= 0 ? existingIndex : 0;
-
-  return currentGlobal.map((entry, index) => {
-    if (index !== writeIndex) {
-      return entry;
-    }
-    return { ...entry, data_source: nextDataSourcePrivileges };
-  });
+  return { ...currentGlobal, data_source: nextDataSourcePrivileges };
 };
 
 export const DataSourcePrivileges = ({
@@ -102,7 +79,7 @@ export const DataSourcePrivileges = ({
   const onDataSourcePrivilegeChange = useCallback(
     (privilegeIndex: number) => {
       return (updatedPrivilege: RoleDataSourcePrivilege) => {
-        const current = getGlobalPrivilege(role)?.data_source ?? [];
+        const current = role.elasticsearch.global?.data_source ?? [];
         const next = [...current];
         next[privilegeIndex] = updatedPrivilege;
 
@@ -127,7 +104,7 @@ export const DataSourcePrivileges = ({
   const onDataSourcePrivilegeDelete = useCallback(
     (privilegeIndex: number) => {
       return () => {
-        const current = getGlobalPrivilege(role)?.data_source ?? [];
+        const current = role.elasticsearch.global?.data_source ?? [];
         const next = [...current];
         next.splice(privilegeIndex, 1);
 

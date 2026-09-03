@@ -410,29 +410,6 @@ describe('validateDataSourcePrivileges', () => {
 
     expect(validator.validateDataSourcePrivileges(role as Role)).toEqual({ isInvalid: true });
   });
-
-  test('it validates data sources when global is an array (scans all entries)', () => {
-    const role = {
-      name: '',
-      elasticsearch: {
-        cluster: [],
-        indices: [],
-        run_as: [],
-        global: [
-          {
-            application: { manage: { applications: ['kibana-*'] } },
-          },
-          {
-            application: { manage: { applications: [] } },
-            data_source: [{ names: ['acme_*'], privileges: [] }],
-          },
-        ],
-      },
-      kibana: [],
-    };
-
-    expect(validator.validateDataSourcePrivileges(role as Role)).toEqual({ isInvalid: true });
-  });
 });
 
 describe('validateSpacePrivileges', () => {

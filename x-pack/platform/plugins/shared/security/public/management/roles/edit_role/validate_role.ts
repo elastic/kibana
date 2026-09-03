@@ -285,10 +285,7 @@ export class RoleValidator {
       return valid();
     }
 
-    const global = role.elasticsearch.global;
-    const dataSourcePrivileges = Array.isArray(global)
-      ? global.flatMap((entry) => entry.data_source ?? [])
-      : global?.data_source ?? [];
+    const dataSourcePrivileges = role.elasticsearch.global?.data_source ?? [];
 
     if (!Array.isArray(dataSourcePrivileges)) {
       throw new TypeError(
