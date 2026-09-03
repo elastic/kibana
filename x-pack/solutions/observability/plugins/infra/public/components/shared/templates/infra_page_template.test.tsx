@@ -9,7 +9,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { InfraPageTemplate } from './infra_page_template';
+import { OnboardingFlow } from './no_data_config';
+
+const HOSTS_ONBOARDING_HREF = '/app/observabilityOnboarding?category=host';
+const PAGE_TEST_SUBJ = 'hostsViewPage';
+
+type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
+
+const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
+  hasData: true,
+  status: 'success',
+};
 
 const mockSourceState: {
   source:
@@ -31,6 +43,13 @@ const mockSourceState: {
   loadSource: jest.fn(),
 };
 
+const mockGetRedirectUrl = jest.fn().mockReturnValue(HOSTS_ONBOARDING_HREF);
+
+let mockLastPageTemplateProps: {
+  'data-test-subj'?: string;
+  noDataConfig?: NoDataConfig;
+} = {};
+
 jest.mock('../../../containers/metrics_source', () => ({
   useSourceContext: () => mockSourceState,
   useMetricsDataViewContext: () => ({ error: undefined, refetch: jest.fn() }),
@@ -42,55 +61,130 @@ jest.mock('../../../hooks/use_kibana', () => ({
       observabilityAIAssistant: undefined,
       observabilityShared: {
         navigation: {
-          PageTemplate: ({ children }: { children: React.ReactNode }) => (
-            <div data-test-subj="observabilityPageTemplate">{children}</div>
-          ),
+          PageTemplate: (props: {
+            'data-test-subj'?: string;
+            noDataConfig?: NoDataConfig;
+            children?: React.ReactNode;
+          }) => {
+            mockLastPageTemplateProps = {
+              'data-test-subj': props['data-test-subj'],
+              noDataConfig: props.noDataConfig,
+            };
+            return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
+          },
         },
       },
       share: {
         url: {
           locators: {
-            get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
+            get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
           },
         },
       },
-      docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
+      docLinks: { links: { observability: { guide: 'https://docs.example' } } },
     },
   }),
 }));
 
 jest.mock('../../../hooks/use_fetcher', () => ({
-  isPending: () => false,
-  useFetcher: () => ({ data: undefined, status: 'success' }),
+  isPending: (status: string) =>
+    status === 'loading' || status === 'not_initiated' || status === 'pending',
+  useFetcher: () => ({
+    data: { hasData: mockFetcherState.hasData },
+    status: mockFetcherState.status,
+  }),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useLinkProps: () => ({ href: '/app/metrics/settings' }),
 }));
 
-const renderTemplate = (header?: React.ReactNode) =>
+const resetSharedMocks = () => {
+  jest.clearAllMocks();
+  mockGetRedirectUrl.mockReturnValue(HOSTS_ONBOARDING_HREF);
+  mockFetcherState.hasData = true;
+  mockFetcherState.status = 'success';
+  mockLastPageTemplateProps = {};
+  mockSourceState.source = {
+    status: { remoteClustersExist: true },
+    configuration: { metricAlias: 'metrics-*' },
+  };
+  mockSourceState.error = undefined;
+  mockSourceState.isLoading = false;
+};
+
+const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
-      <EuiProvider>
-        <InfraPageTemplate header={header} hasDataOverride={true}>
-          <div data-test-subj="pageBody">body</div>
-        </InfraPageTemplate>
-      </EuiProvider>
+      <EuiProvider>{ui}</EuiProvider>
     </I18nProvider>
   );
 
-describe('InfraPageTemplate header', () => {
+describe('InfraPageTemplate', () => {
   beforeEach(() => {
-    mockSourceState.source = {
-      status: { remoteClustersExist: true },
-      configuration: { metricAlias: 'metrics-*' },
-    };
-    mockSourceState.error = undefined;
-    mockSourceState.isLoading = false;
+    resetSharedMocks();
   });
 
+  const renderHostsTemplate = () =>
+    renderWithProviders(
+      <InfraPageTemplate
+        data-test-subj={PAGE_TEST_SUBJ}
+        dataSourceAvailability="host"
+        onboardingFlow={OnboardingFlow.Hosts}
+      >
+        <div data-test-subj="hostsPageBody">body</div>
+      </InfraPageTemplate>
+    );
+
+  it('keeps the original test subject and omits no-data config when there is data', () => {
+    renderHostsTemplate();
+
+    expect(mockLastPageTemplateProps['data-test-subj']).toBe(PAGE_TEST_SUBJ);
+    expect(mockLastPageTemplateProps.noDataConfig).toBeUndefined();
+  });
+
+  it('renders the hosts onboarding card when there is no data', () => {
+    mockFetcherState.hasData = false;
+
+    renderHostsTemplate();
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({ category: OnboardingFlow.Hosts });
+    expect(mockLastPageTemplateProps['data-test-subj']).toBe('noDataPage');
+    expect(mockLastPageTemplateProps.noDataConfig).toEqual({
+      action: {
+        beats: expect.objectContaining({
+          href: HOSTS_ONBOARDING_HREF,
+          buttonText: 'Add data',
+          docsLink: 'https://docs.example',
+        }),
+      },
+    });
+  });
+
+  it('does not show the onboarding card while has-data is loading', () => {
+    mockFetcherState.hasData = false;
+    mockFetcherState.status = 'loading';
+
+    renderHostsTemplate();
+
+    expect(mockLastPageTemplateProps.noDataConfig).toBeUndefined();
+  });
+});
+
+describe('InfraPageTemplate header', () => {
+  beforeEach(() => {
+    resetSharedMocks();
+  });
+
+  const renderHeaderTemplate = (header?: React.ReactNode) =>
+    renderWithProviders(
+      <InfraPageTemplate header={header} hasDataOverride={true}>
+        <div data-test-subj="pageBody">body</div>
+      </InfraPageTemplate>
+    );
+
   it('keeps header and body when the source loads', () => {
-    renderTemplate(<div data-test-subj="pageHeader">header</div>);
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
 
     expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
     expect(screen.getByTestId('pageBody')).toBeInTheDocument();
@@ -99,7 +193,7 @@ describe('InfraPageTemplate header', () => {
   it('keeps header on source-error and does not render page body', () => {
     mockSourceState.error = 'source failed';
 
-    renderTemplate(<div data-test-subj="pageHeader">header</div>);
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
 
     expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
     expect(screen.getByTestId('infraErrorPageTryAgainButton')).toBeInTheDocument();
@@ -112,7 +206,7 @@ describe('InfraPageTemplate header', () => {
       configuration: { metricAlias: 'missing:metrics-*' },
     };
 
-    renderTemplate(<div data-test-subj="pageHeader">header</div>);
+    renderHeaderTemplate(<div data-test-subj="pageHeader">header</div>);
 
     expect(screen.getByTestId('pageHeader')).toBeInTheDocument();
     expect(screen.getByTestId('infraHostsNoRemoteCluster')).toBeInTheDocument();
