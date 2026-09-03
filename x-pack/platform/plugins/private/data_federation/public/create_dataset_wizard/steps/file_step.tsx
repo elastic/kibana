@@ -194,7 +194,11 @@ export const FileStep: FunctionComponent<FileStepProps> = ({ control, setValue, 
             />
           </EuiFormRow>
 
-          <EuiFormRow label={datasetWizardStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={datasetWizardStrings.descriptionLabel()}
+            helpText={datasetWizardStrings.descriptionHelp()}
+            fullWidth
+          >
             <EuiFieldText
               data-test-subj="datasetWizardDescription"
               fullWidth

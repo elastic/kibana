@@ -76,6 +76,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Description',
     }),
 
+  descriptionHelp: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.descriptionHelp', {
+      defaultMessage: 'A brief description to identify this dataset',
+    }),
+
   dataSourceLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.dataSourceLabel', {
       defaultMessage: 'Data source',

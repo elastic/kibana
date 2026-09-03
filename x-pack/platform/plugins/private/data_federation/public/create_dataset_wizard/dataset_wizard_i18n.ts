@@ -245,6 +245,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Description (optional)',
     }),
 
+  descriptionHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.descriptionHelp', {
+      defaultMessage: 'A brief description to identify this dataset',
+    }),
+
   descriptionPlaceholder: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.descriptionPlaceholder', {
       defaultMessage: 'Type text',

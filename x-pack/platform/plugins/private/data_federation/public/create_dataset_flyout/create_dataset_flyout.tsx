@@ -288,7 +288,11 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               inputRef={nameField.ref}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDatasetFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDatasetFlyoutStrings.descriptionLabel()}
+            helpText={createDatasetFlyoutStrings.descriptionHelp()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDatasetFlyoutDescription"
               fullWidth

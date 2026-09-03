@@ -26,7 +26,8 @@ export const federatedIdentityManualSetupJwtIssuerAnnotation = () =>
   i18n.translate(
     'xpack.dataFederation.createFlyout.federated.manual.codeBlock.jwtIssuerPrefilledAnnotation',
     {
-      defaultMessage: "Your deployment's issuer URL, filled in for you.",
+      defaultMessage:
+        "Your deployment's issuer URL, filled in for you. Leave this value unchanged, otherwise your cloud provider cannot verify the token Elasticsearch presents.",
     }
   );
 
@@ -34,14 +35,25 @@ export const federatedIdentityManualSetupSubjectAnnotation = () =>
   i18n.translate(
     'xpack.dataFederation.createFlyout.federated.manual.codeBlock.subjectPrefilledAnnotation',
     {
-      defaultMessage: 'Your deployment ID, filled in for you.',
+      defaultMessage:
+        'Your deployment ID, filled in for you. Leave this value unchanged, otherwise the trust policy will not match your deployment.',
     }
   );
 
 export const federatedIdentityManualSetupBucketAnnotation = () =>
   i18n.translate('xpack.dataFederation.createFlyout.federated.manual.codeBlock.bucketAnnotation', {
-    defaultMessage: 'Replace with your bucket name.',
+    defaultMessage:
+      'Replace with the name of the bucket that holds the data you want to query from Elastic. Read access is granted to this bucket only, so repeat these steps for any other bucket you need.',
   });
+
+export const federatedIdentityManualSetupRoleNameAnnotation = () =>
+  i18n.translate(
+    'xpack.dataFederation.createFlyout.federated.manual.codeBlock.roleNameAnnotation',
+    {
+      defaultMessage:
+        'Replace with a name for the IAM role Elasticsearch assumes, for example elastic-data-federation. A role with this name must not already exist in your AWS account.',
+    }
+  );
 
 export const federatedIdentityManualSetupProjectIdAnnotation = () =>
   i18n.translate(

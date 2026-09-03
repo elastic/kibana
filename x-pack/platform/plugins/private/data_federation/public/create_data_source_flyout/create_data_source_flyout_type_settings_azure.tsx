@@ -57,6 +57,10 @@ export function CreateDataSourceFlyoutTypeSettingsAzure({
           defaultMessage: 'Endpoint',
         })
       )}
+      helpText={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.endpointHelp', {
+        defaultMessage:
+          'Leave empty to use the default Azure Blob Storage endpoint for the account. Set it only to reach storage through a custom or private endpoint.',
+      })}
       fullWidth
     >
       <EuiFieldText

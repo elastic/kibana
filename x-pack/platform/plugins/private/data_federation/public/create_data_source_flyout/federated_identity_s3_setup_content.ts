@@ -12,6 +12,7 @@ import {
   buildClusterValuePrefilledLines,
   buildFederatedIdentityManualSetupLineNumbers,
   federatedIdentityManualSetupBucketAnnotation,
+  federatedIdentityManualSetupRoleNameAnnotation,
 } from './federated_identity_manual_setup_code_block';
 import type { FederatedIdentitySetupValues } from './federated_identity_setup_values';
 
@@ -112,7 +113,7 @@ EOF
           'Only your identity provider can assume the role, and only for your token audience and subject. The command prints the role ARN you need below.',
       }
     ),
-    command: `export ROLE_NAME="elastic-data-federation"
+    command: `export ROLE_NAME="<your-role-name>"
 
 ROLE_ARN=$(aws iam create-role \\
   --role-name "\${ROLE_NAME}" \\
@@ -142,6 +143,9 @@ aws iam attach-role-policy \\
   --policy-arn "\${POLICY_ARN}"
 
 echo "\${ROLE_ARN}"`,
+    lineNumbers: buildFederatedIdentityManualSetupLineNumbers([
+      { line: 1, annotation: federatedIdentityManualSetupRoleNameAnnotation() },
+    ]),
   },
 ];
 
@@ -178,10 +182,6 @@ export const getS3FederatedIdentityDeployConfig = () => ({
     i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.policy', {
       defaultMessage:
         'S3 read policy — s3:GetObject, s3:ListBucket, s3:GetBucketLocation permissions.',
-    }),
-    i18n.translate('xpack.dataFederation.createFlyout.s3.federated.deploy.creates.output', {
-      defaultMessage:
-        'Stack output RoleArn — copy this from the CloudFormation Outputs tab after deployment.',
     }),
   ],
 });

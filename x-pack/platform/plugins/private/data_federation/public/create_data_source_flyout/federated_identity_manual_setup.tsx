@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -25,6 +25,8 @@ import {
 const CODE_BLOCK_VISIBLE_LINES = 10;
 /** Row height EUI gives a small code block, which these steps use. */
 const CODE_BLOCK_LINE_HEIGHT = 18;
+/** EUI sizes the annotation popover to its content, which stretches long annotations across the flyout. */
+const CODE_BLOCK_ANNOTATION_MAX_WIDTH = 250;
 
 export interface FederatedIdentityManualSetupStep {
   id: string;
@@ -48,6 +50,12 @@ export function FederatedIdentityManualSetup({
   steps: FederatedIdentityManualSetupStep[];
   testSubjPrefix: string;
 }) {
+  /**
+   * The steps run in order, so only one command is open at a time: opening one collapses
+   * whichever was open before, keeping the whole sequence visible without scrolling.
+   */
+  const [openStepId, setOpenStepId] = useState<string>();
+
   return (
     <>
       <EuiText size="s" color="subdued">
@@ -60,6 +68,8 @@ export function FederatedIdentityManualSetup({
           step={step}
           testSubjPrefix={testSubjPrefix}
           isLastStep={index === steps.length - 1}
+          isCommandOpen={openStepId === step.id}
+          onCommandToggle={(isOpen) => setOpenStepId(isOpen ? step.id : undefined)}
         />
       ))}
     </>
@@ -98,16 +108,36 @@ function FederatedIdentityManualSetupStepRow({
   step,
   testSubjPrefix,
   isLastStep,
+  isCommandOpen,
+  onCommandToggle,
 }: {
   step: FederatedIdentityManualSetupStep;
   testSubjPrefix: string;
   isLastStep: boolean;
+  isCommandOpen: boolean;
+  onCommandToggle: (isOpen: boolean) => void;
 }) {
   const commandAccordionId = useGeneratedHtmlId({
     prefix: `${testSubjPrefix}ManualStepCommand-${step.id}`,
   });
-  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
+  const lineNumbers = useMemo(() => {
+    if (!step.lineNumbers) {
+      return true;
+    }
+
+    const { highlight, annotations } = step.lineNumbers;
+
+    return {
+      highlight,
+      annotations: Object.fromEntries(
+        Object.entries(annotations).map(([line, annotation]) => [
+          line,
+          <div css={{ maxInlineSize: CODE_BLOCK_ANNOTATION_MAX_WIDTH }}>{annotation}</div>,
+        ])
+      ),
+    };
+  }, [step.lineNumbers]);
   /**
    * Long commands scroll instead of pushing the following steps out of view.
    * Capping the block ourselves keeps EUI from offering a full screen view,
@@ -170,7 +200,8 @@ function FederatedIdentityManualSetupStepRow({
           id={commandAccordionId}
           arrowDisplay="none"
           buttonContent={<CommandToggleLabel isOpen={isCommandOpen} />}
-          onToggle={setIsCommandOpen}
+          forceState={isCommandOpen ? 'open' : 'closed'}
+          onToggle={onCommandToggle}
           paddingSize="none"
           data-test-subj={`${testSubjPrefix}ManualStepCommandToggle-${step.id}`}
         >
@@ -178,7 +209,7 @@ function FederatedIdentityManualSetupStepRow({
           <EuiCodeBlock
             language={step.language ?? 'shell'}
             isCopyable
-            lineNumbers={step.lineNumbers ?? true}
+            lineNumbers={lineNumbers}
             css={{ '.euiCodeBlock__pre': { maxBlockSize: codeBlockMaxHeight } }}
             data-test-subj={`${testSubjPrefix}ManualStepCommand-${step.id}`}
           >

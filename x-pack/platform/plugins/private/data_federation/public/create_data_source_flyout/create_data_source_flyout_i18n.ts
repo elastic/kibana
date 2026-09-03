@@ -55,9 +55,26 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Name',
     }),
 
+  /** Reflects the name rules Elasticsearch applies to the data source id (see validateIndexNameRules). */
+  nameHelp: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.nameHelp', {
+      defaultMessage:
+        'Unique name for use in datasets. All lowercase, dash, underscore, and numbers are supported.',
+    }),
+
+  nameReadOnlyHelp: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.nameReadOnlyHelp', {
+      defaultMessage: 'The name of an existing data source cannot be changed.',
+    }),
+
   descriptionLabel: () =>
     i18n.translate('xpack.dataFederation.createFlyout.descriptionLabel', {
       defaultMessage: 'Description',
+    }),
+
+  descriptionHelp: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.descriptionHelp', {
+      defaultMessage: 'A brief description to identify this data source.',
     }),
 
   cancelButton: () =>

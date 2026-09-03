@@ -43,4 +43,9 @@ describe('federated identity manual setup code block helpers', () => {
     expect(federatedIdentityManualSetupJwtIssuerAnnotation()).not.toMatch(/replace/i);
     expect(federatedIdentityManualSetupSubjectAnnotation()).not.toMatch(/replace/i);
   });
+
+  it('tells the user to leave the prefilled values alone', () => {
+    expect(federatedIdentityManualSetupJwtIssuerAnnotation()).toMatch(/unchanged/i);
+    expect(federatedIdentityManualSetupSubjectAnnotation()).toMatch(/unchanged/i);
+  });
 });

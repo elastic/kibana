@@ -52,6 +52,10 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
           defaultMessage: 'Endpoint',
         })
       )}
+      helpText={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.endpointHelp', {
+        defaultMessage:
+          'Override the default Amazon S3 endpoint to connect through a proxy or an S3-compatible service.',
+      })}
       fullWidth
     >
       <EuiFieldText

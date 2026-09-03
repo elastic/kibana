@@ -246,7 +246,11 @@ const LogisticsStepFieldsContent: FunctionComponent<LogisticsStepFieldsContentPr
             />
           </EuiFormRow>
 
-          <EuiFormRow label={datasetWizardStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={datasetWizardStrings.descriptionLabel()}
+            helpText={datasetWizardStrings.descriptionHelp()}
+            fullWidth
+          >
             <EuiFieldText
               data-test-subj="datasetWizardDescription"
               fullWidth

@@ -85,6 +85,10 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
             defaultMessage: 'Endpoint',
           })
         )}
+        helpText={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.endpointHelp', {
+          defaultMessage:
+            'Leave empty to use the default Google Cloud Storage endpoint. Set it only to reach storage through a custom or private endpoint.',
+        })}
         fullWidth
       >
         <EuiFieldText
