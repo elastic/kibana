@@ -94,8 +94,8 @@ describe('triggerInvestigationWorkflow', () => {
     expect(request.concurrency_key).toBe('my-slug');
   });
 
-  it('sets subject.id to event_uuid and includes event_uuid in the context', async () => {
-    const event = createEvent({ event_uuid: 'event-42' });
+  it('sets subject.id to event_id and includes event_uuid in the context', async () => {
+    const event = createEvent({ event_uuid: 'event-42', event_id: 'my-stable-id' });
     const nightshiftInvestigations = createNightshiftInvestigations();
 
     await triggerInvestigationWorkflow({
@@ -106,7 +106,11 @@ describe('triggerInvestigationWorkflow', () => {
     });
 
     const [request] = getStartMock(nightshiftInvestigations).mock.calls[0];
-    expect(request.subject).toEqual({ type: 'significant_event', id: 'event-42' });
+    expect(request.subject).toEqual({
+      type: 'significant_event',
+      id: 'my-stable-id',
+      summary: 'P99 latency climbed above 2s.',
+    });
     expect(request.trigger_type).toBe('manual');
     expect(request.context.event_uuid).toBe('event-42');
   });

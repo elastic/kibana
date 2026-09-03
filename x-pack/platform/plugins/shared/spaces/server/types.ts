@@ -47,4 +47,6 @@ export type SpacesRouter = IRouter<SpacesRequestHandlerContext>;
 /**
  * @internal
  */
-export type SpaceSavedObjectAttributes = Partial<Omit<v1.Space, 'id' | 'projectRouting'>>;
+export type SpaceSavedObjectAttributes = Partial<Omit<v1.Space, 'id' | 'projectRouting'>> & {
+  solutionSetupRequired?: boolean;
+};

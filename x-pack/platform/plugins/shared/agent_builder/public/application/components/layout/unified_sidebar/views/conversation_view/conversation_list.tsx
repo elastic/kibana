@@ -22,6 +22,7 @@ import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
+import { useInfiniteScroll } from '../../../../../hooks/use_infinite_scroll';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
@@ -39,7 +40,6 @@ interface ConversationListProps {
   currentConversationId: string | undefined;
   isNewConversationRoute: boolean;
   onItemClick?: (conversationId: string) => void;
-  pinnedConversationIds?: Set<string>;
   isDropDisabled?: boolean;
   backgroundColor?: string;
 }
@@ -49,27 +49,31 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   currentConversationId,
   isNewConversationRoute,
   onItemClick,
-  pinnedConversationIds,
   isDropDisabled,
   backgroundColor = 'transparent',
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { conversations = [], isLoading } = useConversationList({ agentId });
+  const {
+    conversations = [],
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationList({ agentId, pinned: false });
+  const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
   const { activeStreams } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
-      [...conversations]
-        .sort((a, b) => {
-          const aInProgress =
-            activeStreams.has(a.id) || a.status === ConversationRoundStatus.inProgress;
-          const bInProgress =
-            activeStreams.has(b.id) || b.status === ConversationRoundStatus.inProgress;
-          if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
-          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-        })
-        .filter((c) => !pinnedConversationIds?.has(c.id)),
-    [conversations, activeStreams, pinnedConversationIds]
+      [...conversations].sort((a, b) => {
+        const aInProgress =
+          activeStreams.has(a.id) || a.status === ConversationRoundStatus.inProgress;
+        const bInProgress =
+          activeStreams.has(b.id) || b.status === ConversationRoundStatus.inProgress;
+        if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      }),
+    [conversations, activeStreams]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
@@ -113,31 +117,42 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   }
 
   return (
-    <EuiDroppable
-      droppableId={DROPPABLE_IDS.CHATS}
-      spacing="none"
-      grow={false}
-      isDropDisabled={isDropDisabled}
-      css={css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.xs};
-        border-radius: ${euiTheme.border.radius.small};
-        background-color: ${backgroundColor};
-        transition: background-color 0.15s;
-      `}
-    >
-      {sortedConversations.map((conversation, index) => (
-        <DraggableConversationItem
-          key={conversation.id}
-          agentId={agentId}
-          conversation={conversation}
-          index={index}
-          isActive={currentConversationId === conversation.id}
-          routeConversationId={currentConversationId}
-          onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
-        />
-      ))}
-    </EuiDroppable>
+    <>
+      <EuiDroppable
+        droppableId={DROPPABLE_IDS.CHATS}
+        spacing="none"
+        grow={false}
+        isDropDisabled={isDropDisabled}
+        css={css`
+          display: flex;
+          flex-direction: column;
+          gap: ${euiTheme.size.xs};
+          border-radius: ${euiTheme.border.radius.small};
+          background-color: ${backgroundColor};
+          transition: background-color 0.15s;
+        `}
+      >
+        {sortedConversations.map((conversation, index) => (
+          <DraggableConversationItem
+            key={conversation.id}
+            agentId={agentId}
+            conversation={conversation}
+            index={index}
+            isActive={currentConversationId === conversation.id}
+            routeConversationId={currentConversationId}
+            onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
+          />
+        ))}
+      </EuiDroppable>
+
+      <div ref={sentinelRef} data-test-subj="agentBuilderSidebarConversationsScrollSentinel" />
+      {isFetchingNextPage && (
+        <EuiFlexGroup justifyContent="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 };
