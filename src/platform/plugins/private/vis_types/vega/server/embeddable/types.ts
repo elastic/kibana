@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
-import type { VegaByValueState } from './schema';
+import type { VegaByReferenceState, VegaByValueState } from './schema';
 
-type StoredVegaByReferenceState = SerializedTitles;
-type StoredVegaByValueState = VegaByValueState & SerializedTitles;
+type StoredVegaByReferenceState = Omit<VegaByReferenceState, 'ref_id'>;
+type StoredVegaByValueState = VegaByValueState;
 
 export type StoredVegaEmbeddableState = StoredVegaByReferenceState | StoredVegaByValueState;

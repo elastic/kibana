@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
-export const getTransforms = () => ({
-  transformIn: getTransformIn(),
-  transformOut: getTransformOut(),
+export const getTransforms = (drilldownTransforms: DrilldownTransforms) => ({
+  transformIn: getTransformIn(drilldownTransforms.transformIn),
+  transformOut: getTransformOut(drilldownTransforms.transformOut),
 });
