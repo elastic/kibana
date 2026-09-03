@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -265,6 +266,15 @@ describe('Reporting tabs', () => {
       expect(await screen.findByTestId('screenshotDiagnosticLink')).toHaveTextContent(
         'Run diagnosis'
       );
+    });
+
+    it('opens the diagnosis flyout from the header primary action', async () => {
+      const user = userEvent.setup();
+      render(renderComponent(props));
+
+      await user.click(await screen.findByTestId('screenshotDiagnosticLink'));
+
+      expect(await screen.findByTestId('reportDiagnosisFlyout')).toBeInTheDocument();
     });
 
     it('does not show when image reporting not set in config', async () => {
