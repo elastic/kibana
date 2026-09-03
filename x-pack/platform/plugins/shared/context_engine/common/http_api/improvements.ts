@@ -100,15 +100,28 @@ export interface ImprovementResolution {
   applied_target_id?: string;
 }
 
+/**
+ * How an improvement came to be proposed.
+ *
+ * - `analysis` — a scheduled run read signals and derived it. Carries the signal fields.
+ * - `conversation` — an agent proposed it while working with someone, so the evidence is the
+ *   conversation rather than a window of signals, and none of the signal fields apply.
+ *
+ * Absent on improvements written before conversations could propose them, which were all runs.
+ */
+export type ImprovementOrigin = 'analysis' | 'conversation';
+
 export interface ImprovementProvenance {
-  /** The analysis run that produced it. */
+  /** The analysis run, or the tool call, that produced it. */
   agent_run_id: string;
-  /** Signals it was derived from. */
-  signal_ids: string[];
+  /** Defaults to `analysis` when absent. */
+  origin?: ImprovementOrigin;
+  /** Signals it was derived from. Absent unless a run derived it. */
+  signal_ids?: string[];
   /** Spaces those signals came from; the analysis reads across all of them. */
-  signal_spaces: string[];
-  signal_window: { from: string; to: string };
-  signal_count: number;
+  signal_spaces?: string[];
+  signal_window?: { from: string; to: string };
+  signal_count?: number;
   /** Classifier tags that drove it (`query_error` / `empty_retrieval` / `coverage_gap`). */
   tags?: string[];
 }

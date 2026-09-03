@@ -8,20 +8,46 @@
 import { MAX_IMPROVEMENTS_PER_RUN } from '../../common/constants';
 import type { ImprovementAction } from '../../common/http_api/improvement_actions';
 import type {
+  ImprovementProvenance,
   ImprovementRevisionInput,
   RecordImprovementsResponse,
 } from '../../common/http_api/improvements';
-import type { ProposedImprovement } from '../../common/http_api/improvements_output_schema';
-import { proposedImprovementSchema } from '../../common/http_api/improvements_output_schema';
+import type {
+  ConversationProposal,
+  ProposedImprovement,
+} from '../../common/http_api/improvements_output_schema';
+import {
+  conversationProposalSchema,
+  proposedImprovementSchema,
+} from '../../common/http_api/improvements_output_schema';
 import { InvalidImprovementError } from '../improvements/errors';
 import { buildImprovementId } from '../improvements/identity';
 import type { ImprovementsServiceApi } from '../improvements/service';
 
+/**
+ * Where the proposals came from.
+ *
+ * Decides both the shape a proposal must have and the provenance recorded for it: a run cites the
+ * signals it read over a window, while an agent asked for a change in conversation cites the call
+ * that made it and has no signals to point at.
+ */
+export type RecordImprovementsSource =
+  | {
+      origin: 'analysis';
+      /** The workflow execution that produced them. */
+      agentRunId: string;
+      signalWindow: { from: string; to: string };
+      signalSpaces: string[];
+    }
+  | {
+      origin: 'conversation';
+      /** The tool call that produced them, which is as much as a tool handler can know. */
+      agentRunId: string;
+    };
+
 export interface RecordImprovementsOptions {
   aiIndexId: string;
-  agentRunId: string;
-  signalWindow: { from: string; to: string };
-  signalSpaces: string[];
+  source: RecordImprovementsSource;
   /** The AI index's policy. An empty list is observe-only and rejects everything. */
   allowedActions: ImprovementAction[];
   /** Straight off the agent, unvalidated. */
@@ -32,9 +58,32 @@ export interface RecordImprovementsOptions {
 
 interface Candidate {
   improvementId: string;
-  proposal: ProposedImprovement;
+  proposal: ProposedImprovement | ConversationProposal;
   input: ImprovementRevisionInput;
 }
+
+const buildProvenance = (
+  source: RecordImprovementsSource,
+  proposal: ProposedImprovement | ConversationProposal
+): ImprovementProvenance => {
+  if (source.origin === 'conversation') {
+    return { agent_run_id: source.agentRunId, origin: 'conversation' };
+  }
+
+  const { signal_ids: signalIds, signal_tags: signalTags } = proposal as ProposedImprovement;
+
+  return {
+    agent_run_id: source.agentRunId,
+    origin: 'analysis',
+    signal_ids: signalIds,
+    signal_spaces: source.signalSpaces,
+    signal_window: source.signalWindow,
+    // The signals the proposal cites, not the size of the group behind it: the run is handed a
+    // capped sample of ids per group, so this is the evidence that can actually be opened.
+    signal_count: signalIds.length,
+    ...(signalTags ? { tags: signalTags } : {}),
+  };
+};
 
 const describe = (proposal: unknown): { action?: string; title?: string } => {
   if (typeof proposal !== 'object' || proposal === null) {
@@ -61,9 +110,7 @@ const describe = (proposal: unknown): { action?: string; title?: string } => {
  */
 export const recordImprovements = async ({
   aiIndexId,
-  agentRunId,
-  signalWindow,
-  signalSpaces,
+  source,
   allowedActions,
   proposals,
   improvementsService,
@@ -73,6 +120,8 @@ export const recordImprovements = async ({
   const candidates: Candidate[] = [];
   const seen = new Set<string>();
   const allowed = new Set<ImprovementAction>(allowedActions);
+  const proposalSchema =
+    source.origin === 'analysis' ? proposedImprovementSchema : conversationProposalSchema;
 
   for (const raw of proposals) {
     // Bounded by what has been accepted, not by position in the input: a run that proposed thirty
@@ -86,7 +135,7 @@ export const recordImprovements = async ({
       continue;
     }
 
-    const parsed = proposedImprovementSchema.safeParse(raw);
+    const parsed = proposalSchema.safeParse(raw);
     if (!parsed.success) {
       skipped.push({
         ...describe(raw),
@@ -162,16 +211,7 @@ export const recordImprovements = async ({
         action: proposal.action,
         ...(proposal.target ? { target: proposal.target } : {}),
         payload: proposal.payload ?? {},
-        provenance: {
-          agent_run_id: agentRunId,
-          signal_ids: proposal.signal_ids,
-          signal_spaces: signalSpaces,
-          signal_window: signalWindow,
-          // The signals the proposal cites, not the size of the group behind it: the run is handed
-          // a capped sample of ids per group, so this is the evidence that can actually be opened.
-          signal_count: proposal.signal_ids.length,
-          ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
-        },
+        provenance: buildProvenance(source, proposal),
       },
     });
   }

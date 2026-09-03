@@ -17,7 +17,10 @@ import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -71,7 +74,10 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       'If the user saved manually from the diff card, pass `workflowId` instead.',
       'Do not run a workflow until it has been saved and the user has approved it.',
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+    CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {

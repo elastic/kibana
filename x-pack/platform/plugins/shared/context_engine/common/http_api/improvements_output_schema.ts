@@ -106,6 +106,26 @@ export const proposedImprovementSchema = z.object({
 
 export type ProposedImprovement = z.infer<typeof proposedImprovementSchema>;
 
+const {
+  signal_ids: signalIdsField,
+  signal_tags: signalTagsField,
+  ...conversationProposalShape
+} = proposedImprovementShape;
+
+/**
+ * What an agent may propose from a conversation rather than from an analysis run.
+ *
+ * The signal fields are dropped rather than made optional: they exist so a reviewer can open the
+ * evidence, and an agent that was asked for a change in conversation has none to cite. Leaving
+ * them in the schema would invite a model to invent ids that resolve to nothing.
+ */
+export const conversationProposalSchema = z.object({
+  action: z.enum(IMPROVEMENT_ACTIONS).describe('The kind of change being proposed.'),
+  ...conversationProposalShape,
+});
+
+export type ConversationProposal = z.infer<typeof conversationProposalSchema>;
+
 const summaryField = z
   .string()
   .max(MAX_IMPROVEMENT_RATIONALE_LENGTH)

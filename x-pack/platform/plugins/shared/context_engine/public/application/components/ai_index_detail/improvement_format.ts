@@ -269,6 +269,14 @@ export const getProposedChangeFields = (improvement: Improvement): ProposedChang
 export const getProvenanceSummary = ({ provenance }: Improvement): string => {
   const { signal_count: signalCount, tags, signal_window: window } = provenance;
 
+  // Proposed by an agent working with someone rather than derived from signals, so there is no
+  // window or count to cite — the conversation is the evidence.
+  if (!window || signalCount === undefined) {
+    return i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.provenanceConversation', {
+      defaultMessage: 'Proposed by the assistant in a conversation',
+    });
+  }
+
   return tags && tags.length > 0
     ? i18n.translate('xpack.contextEngine.aiIndexDetail.improvements.provenanceWithTags', {
         defaultMessage:

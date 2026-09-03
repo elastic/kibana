@@ -66,9 +66,7 @@ export const getRecordImprovementsStepDefinition = ({
 
         const result = await recordImprovements({
           aiIndexId,
-          agentRunId,
-          signalWindow,
-          signalSpaces,
+          source: { origin: 'analysis', agentRunId, signalWindow, signalSpaces },
           allowedActions,
           proposals: improvements,
           improvementsService: getImprovementsService(esClient),

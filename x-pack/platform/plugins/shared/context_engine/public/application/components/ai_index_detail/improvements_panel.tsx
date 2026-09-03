@@ -86,7 +86,7 @@ export const ImprovementsPanel = ({ isLoading, aiIndex }: ImprovementsPanelProps
   const handleViewProvenance = (improvement: Improvement) => {
     const [tag] = improvement.provenance.tags ?? [];
     if (tag) {
-      setProvenanceGroup({ tag, count: improvement.provenance.signal_count });
+      setProvenanceGroup({ tag, count: improvement.provenance.signal_count ?? 0 });
     }
   };
 

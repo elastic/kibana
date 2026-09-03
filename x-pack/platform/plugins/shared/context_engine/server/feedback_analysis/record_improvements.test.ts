@@ -28,9 +28,12 @@ describe('recordImprovements', () => {
   const run = (overrides: Partial<Parameters<typeof recordImprovements>[0]> = {}) =>
     recordImprovements({
       aiIndexId: 'orders',
-      agentRunId: 'run-1',
-      signalWindow: SIGNAL_WINDOW,
-      signalSpaces: ['default'],
+      source: {
+        origin: 'analysis',
+        agentRunId: 'run-1',
+        signalWindow: SIGNAL_WINDOW,
+        signalSpaces: ['default'],
+      },
       allowedActions: [...IMPROVEMENT_ACTIONS],
       proposals: [buildProposal()],
       improvementsService: improvementsService as unknown as ImprovementsServiceApi,
@@ -67,6 +70,7 @@ describe('recordImprovements', () => {
         suggested_at: '2026-09-01T12:00:00.000Z',
         provenance: {
           agent_run_id: 'run-1',
+          origin: 'analysis',
           signal_ids: ['trace-1:span-1'],
           signal_spaces: ['default'],
           signal_window: SIGNAL_WINDOW,
@@ -86,7 +90,14 @@ describe('recordImprovements', () => {
 
   it('gives the same id to the same change proposed in two different runs', async () => {
     const first = await run();
-    const second = await run({ agentRunId: 'run-2' });
+    const second = await run({
+      source: {
+        origin: 'analysis',
+        agentRunId: 'run-2',
+        signalWindow: SIGNAL_WINDOW,
+        signalSpaces: ['default'],
+      },
+    });
 
     expect(second.recorded[0].improvement_id).toBe(first.recorded[0].improvement_id);
   });
@@ -185,5 +196,46 @@ describe('recordImprovements', () => {
     expect(result.recorded).toEqual([]);
     expect(result.skipped).toHaveLength(2);
     expect(result.skipped.every(({ reason }) => reason === 'invalid')).toBe(true);
+  });
+
+  describe('proposed from a conversation', () => {
+    const conversation = (overrides: Partial<Parameters<typeof recordImprovements>[0]> = {}) =>
+      run({ source: { origin: 'conversation', agentRunId: 'call-1' }, ...overrides });
+
+    it('records a proposal that cites no signals', async () => {
+      const { signal_ids: signalIds, ...withoutSignals } = buildProposal();
+
+      const result = await conversation({ proposals: [withoutSignals] });
+
+      expect(result.skipped).toEqual([]);
+      expect(result.recorded).toHaveLength(1);
+    });
+
+    it('marks provenance as a conversation and records no signal window', async () => {
+      const { signal_ids: signalIds, ...withoutSignals } = buildProposal();
+
+      await conversation({ proposals: [withoutSignals] });
+
+      const [[[written]]] = improvementsService.write.mock.calls;
+      expect(written.provenance).toEqual({ agent_run_id: 'call-1', origin: 'conversation' });
+    });
+
+    it('gives a change the same id however it was proposed', async () => {
+      const { signal_ids: signalIds, ...withoutSignals } = buildProposal();
+
+      const fromRun = await run();
+      const fromConversation = await conversation({ proposals: [withoutSignals] });
+
+      expect(fromConversation.recorded[0].improvement_id).toBe(fromRun.recorded[0].improvement_id);
+    });
+
+    it('still refuses an action the index does not permit', async () => {
+      const { signal_ids: signalIds, ...withoutSignals } = buildProposal();
+
+      const result = await conversation({ allowedActions: [], proposals: [withoutSignals] });
+
+      expect(result.recorded).toEqual([]);
+      expect(result.skipped[0]).toMatchObject({ reason: 'action_not_allowed' });
+    });
   });
 });

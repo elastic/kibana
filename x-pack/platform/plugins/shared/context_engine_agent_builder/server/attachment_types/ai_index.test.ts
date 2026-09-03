@@ -12,7 +12,10 @@ import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
 } from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 import { createAiIndexAttachmentType } from './ai_index';
 
 describe('createAiIndexAttachmentType', () => {
@@ -33,7 +36,10 @@ describe('createAiIndexAttachmentType', () => {
   it('registers the expected attachment type id', () => {
     expect(attachmentType.id).toBe('platform.context_engine.ai_index');
     expect(attachmentType.isReadonly).toBe(true);
-    expect(attachmentType.getTools?.()).toEqual([CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID]);
+    expect(attachmentType.getTools?.()).toEqual([
+      CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+      CONTEXT_ENGINE_PROPOSE_IMPROVEMENTS_TOOL_ID,
+    ]);
   });
 
   it('validates attachment data', async () => {

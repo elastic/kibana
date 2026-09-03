@@ -24,12 +24,14 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { WORKFLOW_IMPROVEMENT_ACTIONS } from '../../../../common/http_api/improvement_actions';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
 import { AutomationRow } from './automation_row';
+import { ScopedImprovements } from './scoped_improvements';
 
 /**
  * Builds the query string that tells the Workflows app to send its back button
@@ -245,6 +247,12 @@ export const AutomationsPanel = ({
           )}
         </>
       )}
+
+      <ScopedImprovements
+        aiIndex={aiIndex}
+        actions={WORKFLOW_IMPROVEMENT_ACTIONS}
+        data-test-subj="contextAutomationsImprovements"
+      />
     </EuiPanel>
   );
 };

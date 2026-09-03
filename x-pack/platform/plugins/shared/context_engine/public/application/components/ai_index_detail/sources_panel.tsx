@@ -21,11 +21,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import React, { useMemo } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { SOURCE_IMPROVEMENT_ACTIONS } from '../../../../common/http_api/improvement_actions';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { toSourceType } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
+import { ScopedImprovements } from './scoped_improvements';
 
 interface SourcesPanelProps {
   isLoading: boolean;
@@ -181,6 +183,12 @@ export const SourcesPanel = ({
           })}
         </EuiFlexGroup>
       )}
+
+      <ScopedImprovements
+        aiIndex={aiIndex}
+        actions={SOURCE_IMPROVEMENT_ACTIONS}
+        data-test-subj="contextSourcesImprovements"
+      />
     </EuiPanel>
   );
 };

@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
+import { WORKFLOW_IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   AutomationsPanel,
   DescriptionPanel,
@@ -30,6 +31,7 @@ import {
 import { KiListPanel } from '../components/ki';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
+import { useScopedImprovements } from '../hooks/use_scoped_improvements';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
 import { usePublishViewedAiIndex } from '../hooks/use_publish_viewed_ai_index';
@@ -76,9 +78,20 @@ export const AiIndexDetailPage = () => {
    *
    * Withheld until the index has loaded rather than shown as a skeleton, so an index that is about
    * to be set up never flashes the step that comes after.
+   *
+   * A proposed automation also brings the panel back, whatever the index looks like otherwise: the
+   * assistant can suggest a source and the automation that would use it in one go, and a
+   * suggestion nobody can see is a suggestion nobody can approve.
    */
+  const proposedAutomations = useScopedImprovements({
+    aiIndexId: aiIndex?.id,
+    actions: WORKFLOW_IMPROVEMENT_ACTIONS,
+  });
   const showAutomations =
-    aiIndex !== undefined && (aiIndex.sources.length > 0 || aiIndex.automations.length > 0);
+    aiIndex !== undefined &&
+    (aiIndex.sources.length > 0 ||
+      aiIndex.automations.length > 0 ||
+      proposedAutomations.length > 0);
   const pageTitle = aiIndex?.id ?? id ?? '';
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 

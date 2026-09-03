@@ -38,6 +38,13 @@ jest.mock('../../hooks/use_data_connectors', () => ({
 
 jest.mock('../../hooks/use_suggest_automation');
 
+// Needs a react-query client and improvement fixtures of its own; covered by its own tests.
+jest.mock('./scoped_improvements', () => ({
+  ScopedImprovements: ({ actions }: { actions: readonly string[] }) => (
+    <div data-test-subj="contextScopedImprovements">{actions.join(',')}</div>
+  ),
+}));
+
 const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
 
 const suggestResult = (
@@ -220,5 +227,13 @@ describe('SourcesPanel', () => {
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
     expect(onEditSources).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the suggestions that would change the sources, and no others', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('contextScopedImprovements')).toHaveTextContent(
+      'add_source,edit_source,remove_source'
+    );
   });
 });

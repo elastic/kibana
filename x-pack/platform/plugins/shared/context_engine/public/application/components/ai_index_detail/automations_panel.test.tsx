@@ -25,6 +25,13 @@ jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
 }));
 
+// Needs a react-query client and improvement fixtures of its own; covered by its own tests.
+jest.mock('./scoped_improvements', () => ({
+  ScopedImprovements: ({ actions }: { actions: readonly string[] }) => (
+    <div data-test-subj="contextScopedImprovements">{actions.join(',')}</div>
+  ),
+}));
+
 jest.mock('../../hooks/use_suggest_automation', () => ({
   useSuggestAutomation: jest.fn(),
 }));
@@ -363,5 +370,13 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextRemoveAutomationButton')).toBeDisabled();
+  });
+
+  it('shows the suggestions that would change the automations, and no others', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('contextScopedImprovements')).toHaveTextContent(
+      'add_workflow,edit_workflow,remove_workflow'
+    );
   });
 });

@@ -58,9 +58,13 @@ const buildImprovementBriefing = (improvement: Improvement): string => {
       : undefined,
     payload.workflow_yaml ? `Proposed workflow:\n${payload.workflow_yaml}` : undefined,
     payload.source ? `Proposed source: ${payload.source.type} ${payload.source.value}` : undefined,
-    `Derived from ${provenance.signal_count} signal(s) between ${provenance.signal_window.from} and ${provenance.signal_window.to}`,
+    provenance.signal_window
+      ? `Derived from ${provenance.signal_count ?? 0} signal(s) between ${
+          provenance.signal_window.from
+        } and ${provenance.signal_window.to}`
+      : 'Proposed by the assistant in a conversation, not derived from signals',
     provenance.tags?.length ? `Signal tags: ${provenance.tags.join(', ')}` : undefined,
-    provenance.signal_ids.length ? `Signal IDs:\n${provenance.signal_ids.join('\n')}` : undefined,
+    provenance.signal_ids?.length ? `Signal IDs:\n${provenance.signal_ids.join('\n')}` : undefined,
     resolution?.error ? `Previous apply error: ${resolution.error}` : undefined,
     resolution?.reason ? `Previously rejected because: ${resolution.reason}` : undefined,
   ];

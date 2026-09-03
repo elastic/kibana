@@ -74,5 +74,9 @@ export const registerContextEngineAgentBuilderIntegration = ({
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.contextEngine.getAiIndexService();
     },
+    getImprovementsService: async (esClient) => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.contextEngine.getImprovementsService(esClient);
+    },
   });
 };

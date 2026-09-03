@@ -113,6 +113,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Platform – Context Engine
   `${internalNamespaces.platformContextEngine}.save_automation`,
+  `${internalNamespaces.platformContextEngine}.propose_improvements`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
