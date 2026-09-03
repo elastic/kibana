@@ -16,11 +16,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import {
-  type LogSlicePaginationParams,
-  type PaginationParams,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-} from './query_builder_commons';
+import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
 import {
   buildLogPaginationCursorProbeEsql,
   interpretLogPaginationCursorRows,
@@ -66,6 +62,7 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   checkpointTimestamp: null,
   paginationId: null,
   lastExecutionTimestamp: null,
+  sliceEndTimestamp: null,
 };
 
 interface LogsExtractionOptions {
@@ -193,9 +190,18 @@ export class LogsExtractionClient {
             checkpointTimestamp: null,
             paginationId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+            sliceEndTimestamp: null,
           },
           error: null,
         });
+        // TODO CURSOR-TEST temporary local instrumentation, do not commit
+        if (type === 'user') {
+          this.logger.info(
+            `==================== [CURSOR-TEST] run COMPLETE (success): all cursors cleared, lastExecutionTimestamp=${
+              lastSearchTimestamp || 'now'
+            }, entities this run=${count}`
+          );
+        }
       }
 
       return operationResult;
@@ -514,69 +520,94 @@ export class LogsExtractionClient {
     };
     opts?.signal?.addEventListener('abort', onAbort);
 
-    /** One-shot `paginationId` from a prior run: consumed by the first bounded extraction batch for entity-level pagination. */
-    let recoveryId = initialEngineState.paginationId ?? undefined;
-    if (recoveryId) {
-      this.logger.warn(
-        `Resuming with paginationId ${recoveryId} and extraction window from ${fromDateISO} (checkpoint at ${
-          state.checkpointTimestamp ?? 'n/a'
-        }).`
-      );
-    }
+    // Mid-slice resume cursors from a prior interrupted run; consumed by the first outer
+    // iteration only, which re-enters the interrupted slice with its exact persisted bounds.
+    const { resumeEntityPagination, resumeSliceEnd } = this.resolveMidSliceResume(
+      initialEngineState,
+      fromDateISO
+    );
 
     try {
       let lastLogsPages = false;
       /** First outer iteration of this `extractLogs` run: run the boundary probe from the time window only, not the persisted log-slice start. */
       let isFirstRunInThisCycle = true;
       do {
-        const entityPagination: PaginationParams | undefined =
-          state.checkpointTimestamp && state.paginationId
-            ? { timestampCursor: state.checkpointTimestamp, idCursor: state.paginationId }
-            : undefined;
         // always find a new cursor via probe on first run
         const logsPageCursorStart = isFirstRunInThisCycle
           ? undefined
           : paginationFromOptionalFields(state.checkpointTimestamp);
 
-        const probe = await this.runLogPaginationCursorProbeForNextPage({
-          indexPatterns,
-          type,
-          fromDateISO,
-          toDateISO,
-          logsPageCursorStart,
-          maxLogsPerPage: effectiveMaxLogsPerPage,
-          sampleProbability: effectiveSampleProbability,
-          opts,
-        });
-
-        if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
-          // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
-          // pickSampleProbability), so an empty, exact result is definitive: no real docs
-          // remain. Stop immediately rather than running a redundant sweep extraction.
-          break;
-        }
-
-        lastLogsPages = probe.isLastLogsPage;
-
         let logsPageCursorEnd: LogSlicePaginationParams;
-        if (probe.hasLogsToProcess && !probe.isLastLogsPage) {
-          logsPageCursorEnd = probe.logsPaginationCursor;
+        let entityPagination: PaginationParams | undefined;
+        let bumpedCursorEnd: LogSlicePaginationParams | null = null;
+        let sliceLogCount = 0;
+
+        if (isFirstRunInThisCycle && resumeSliceEnd) {
+          // Re-enter the interrupted slice with its exact persisted bounds, skipping the probe:
+          // the sampled probe is not deterministic, so a re-drawn boundary would strand logs of
+          // already-paged entities between the old and new slice end. The slice's log volume was
+          // counted by the interrupted run, so it does not count against this run's cap.
+          logsPageCursorEnd = resumeSliceEnd;
+          entityPagination = resumeEntityPagination;
+          lastLogsPages = false;
+          // TODO CURSOR-TEST temporary local instrumentation, do not commit
+          if (type === 'user') {
+            this.logger.info(
+              `==================== [CURSOR-TEST] probe SKIPPED (resume): reusing pinned sliceEnd=${resumeSliceEnd.timestampCursor} idCursor=${resumeEntityPagination?.idCursor} windowFrom=${fromDateISO}`
+            );
+          }
         } else {
-          // if the probe doesn't have more pages to process
-          // we keep the natural end of the window as the end cursor
-          // This is important because on low document count
-          // a sampled probe may return 0 documents. We need to still
-          // do a final extraction with the effective end of the window
-          // to ensure we don't miss any documents that may have been missed by the probe.
-          logsPageCursorEnd = { timestampCursor: toDateISO };
+          // TODO CURSOR-TEST temporary local instrumentation, do not commit
+          if (type === 'user') {
+            this.logger.info(
+              `==================== [CURSOR-TEST] probe EXECUTED: sliceStart=${
+                logsPageCursorStart?.timestampCursor ?? fromDateISO
+              } windowTo=${toDateISO}`
+            );
+          }
+          const probe = await this.runLogPaginationCursorProbeForNextPage({
+            indexPatterns,
+            type,
+            fromDateISO,
+            toDateISO,
+            logsPageCursorStart,
+            maxLogsPerPage: effectiveMaxLogsPerPage,
+            sampleProbability: effectiveSampleProbability,
+            opts,
+          });
+
+          if (!probe.hasLogsToProcess && effectiveSampleProbability >= 1) {
+            // Sampling wasn't active for this probe (maxLogsPerPage was too small — see
+            // pickSampleProbability), so an empty, exact result is definitive: no real docs
+            // remain. Stop immediately rather than running a redundant sweep extraction.
+            break;
+          }
+
+          lastLogsPages = probe.isLastLogsPage;
+
+          if (probe.hasLogsToProcess && !probe.isLastLogsPage) {
+            logsPageCursorEnd = probe.logsPaginationCursor;
+          } else {
+            // if the probe doesn't have more pages to process
+            // we keep the natural end of the window as the end cursor
+            // This is important because on low document count
+            // a sampled probe may return 0 documents. We need to still
+            // do a final extraction with the effective end of the window
+            // to ensure we don't miss any documents that may have been missed by the probe.
+            logsPageCursorEnd = { timestampCursor: toDateISO };
+          }
+
+          bumpedCursorEnd = this.detectLogSliceStall(
+            logsPageCursorStart,
+            logsPageCursorEnd,
+            !lastLogsPages,
+            effectiveMaxLogsPerPage
+          );
+          // Only read on the non-bumped path below: a stalled (bumped) slice is dropped, so it
+          // never counts against the volume cap.
+          sliceLogCount = probe.sliceLogCount;
         }
 
-        const bumpedCursorEnd = this.detectLogSliceStall(
-          logsPageCursorStart,
-          logsPageCursorEnd,
-          !lastLogsPages,
-          effectiveMaxLogsPerPage
-        );
         if (bumpedCursorEnd) {
           logsPageCursorEnd = bumpedCursorEnd;
           entityStoreMetrics.extractionLogsPerPageDropped.add(1, {
@@ -585,7 +616,7 @@ export class LogsExtractionClient {
             remote: false,
           });
         } else {
-          totalLogs += probe.sliceLogCount;
+          totalLogs += sliceLogCount;
 
           const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
             type,
@@ -599,19 +630,22 @@ export class LogsExtractionClient {
             logsPageCursorStart,
             logsPageCursorEnd,
             entityPagination,
-            recoveryId,
             state,
           });
 
           totalCount += sliceIngestOutcome.addedToTotalCount;
           pages += sliceIngestOutcome.addedToPageCount;
           state = sliceIngestOutcome.state;
-
-          recoveryId = undefined;
         }
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        // TODO CURSOR-TEST temporary local instrumentation, do not commit
+        if (type === 'user') {
+          this.logger.info(
+            `==================== [CURSOR-TEST] slice COMPLETE: checkpoint advanced to ${state.checkpointTimestamp}, paginationId=${state.paginationId}, sliceEnd=${state.sliceEndTimestamp}`
+          );
+        }
         isFirstRunInThisCycle = false;
 
         const windowLogCapEnabled = maxLogsPerWindow > 0;
@@ -719,7 +753,6 @@ export class LogsExtractionClient {
     logsPageCursorStart,
     logsPageCursorEnd,
     entityPagination,
-    recoveryId,
     state: initialSliceState,
   }: {
     type: EntityType;
@@ -733,7 +766,6 @@ export class LogsExtractionClient {
     logsPageCursorStart: LogSlicePaginationParams | undefined;
     logsPageCursorEnd: LogSlicePaginationParams;
     entityPagination: PaginationParams | undefined;
-    recoveryId: string | undefined;
     state: EngineLogExtractionState;
   }): Promise<{
     addedToTotalCount: number;
@@ -745,7 +777,6 @@ export class LogsExtractionClient {
     let addedToPageCount = 0;
 
     let pagination = entityPagination;
-    let recoveryIdForBounded = recoveryId;
 
     do {
       const query = buildLogsExtractionEsqlQuery({
@@ -756,18 +787,13 @@ export class LogsExtractionClient {
         fromDateISO,
         toDateISO,
         pagination,
-        recoveryId: recoveryIdForBounded,
         logsPageCursorStart,
         logsPageCursorEnd,
       });
 
-      recoveryIdForBounded = undefined;
-
       this.logger.debug(
         `Running query to extract logs from ${fromDateISO} to ${toDateISO} ${
-          pagination
-            ? `with pagination: ${pagination.timestampCursor} | ${pagination.idCursor}`
-            : ''
+          pagination ? `with entity page cursor: ${pagination.idCursor}` : ''
         }`
       );
 
@@ -810,7 +836,6 @@ export class LogsExtractionClient {
         esClient: this.esClient,
         esqlResponse,
         esIdField: HASHED_ID_FIELD,
-        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
         targetIndex: latestIndex,
         logger: this.logger,
         signal: opts?.signal,
@@ -834,12 +859,27 @@ export class LogsExtractionClient {
       });
 
       if (pagination) {
+        // checkpointTimestamp is intentionally untouched: it stays at the slice start so a
+        // resumed run re-enters this slice; the pinned end + id cursor make the resume
+        // deterministic regardless of what the sampled probe would return on a re-run.
         state = {
           ...state,
-          checkpointTimestamp: pagination.timestampCursor,
           paginationId: pagination.idCursor,
+          sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
+        // TODO CURSOR-TEST temporary local instrumentation, do not commit
+        if (type === 'user') {
+          this.logger.info(
+            `==================== [CURSOR-TEST] mid-slice persist: checkpoint=${state.checkpointTimestamp} paginationId=${state.paginationId} sliceEnd=${state.sliceEndTimestamp} (entities ingested so far this slice: ${addedToTotalCount})`
+          );
+          if (!opts?.specificWindow && Math.random() < 0.5) {
+            this.logger.error(
+              `==================== [CURSOR-TEST] FAKE ABORT: simulated crash AFTER ${addedToTotalCount} entities were ingested and the cursor above was persisted. Next run must resume from paginationId=${state.paginationId} sliceEnd=${state.sliceEndTimestamp}`
+            );
+            throw new Error('[CURSOR-TEST] simulated mid-slice crash');
+          }
+        }
       }
     } while (pagination);
 
@@ -847,7 +887,8 @@ export class LogsExtractionClient {
   }
 
   /**
-   * After all entity pages for a slice: drop entity + slice-end fields and advance the log-slice cursor to the slice end.
+   * After all entity pages for a slice: clear the entity cursor and pinned slice end, and
+   * advance the log-slice cursor to the slice end.
    */
   private advanceEngineStateAfterLogPageCompletes(
     state: EngineLogExtractionState,
@@ -857,6 +898,43 @@ export class LogsExtractionClient {
       ...state,
       checkpointTimestamp: logsPageCursorEnd.timestampCursor,
       paginationId: null,
+      sliceEndTimestamp: null,
+    };
+  }
+
+  /**
+   * Resolves mid-slice resume cursors from persisted state. Both cursors are returned only when
+   * the pinned slice end is present: the sampled boundary probe is not deterministic, so resuming
+   * an id cursor against a re-drawn slice end would strand the logs of already-paged entities
+   * that fall between the old and new boundary.
+   */
+  private resolveMidSliceResume(
+    initialEngineState: EngineLogExtractionState,
+    fromDateISO: string
+  ): {
+    resumeEntityPagination?: PaginationParams;
+    resumeSliceEnd?: LogSlicePaginationParams;
+  } {
+    const { paginationId, sliceEndTimestamp } = initialEngineState;
+    if (!paginationId) {
+      return {};
+    }
+    if (!sliceEndTimestamp) {
+      // An id cursor is only meaningful together with the exact slice bounds it was created
+      // under. Without a pinned slice end those bounds cannot be reproduced (the probe is
+      // sampled), so discard the cursor and re-process the slice from the checkpoint; upserts
+      // are idempotent, so re-processing is safe.
+      this.logger.warn(
+        `Found a mid-slice entity cursor (${paginationId}) without a pinned slice end. Discarding the cursor and re-processing the slice from ${fromDateISO}.`
+      );
+      return {};
+    }
+    this.logger.warn(
+      `Resuming mid-slice with entity cursor ${paginationId} and pinned slice end ${sliceEndTimestamp} (window from ${fromDateISO}).`
+    );
+    return {
+      resumeEntityPagination: { idCursor: paginationId },
+      resumeSliceEnd: { timestampCursor: sliceEndTimestamp },
     };
   }
 

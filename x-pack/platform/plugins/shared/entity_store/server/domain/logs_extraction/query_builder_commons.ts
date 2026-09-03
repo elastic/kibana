@@ -36,8 +36,6 @@ import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/f
 
 export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
-export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
-  'entity.EngineMetadata.FirstSeenLogInPage';
 export const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 export const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 
@@ -48,8 +46,9 @@ export const TIMESTAMP_FIELD = '@timestamp';
 
 export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
+/** Entity-page cursor within a log slice. The entity id is derived purely from identity fields,
+ * so it is stable across query re-executions; the slice time bounds are owned by the probe. */
 export interface PaginationParams {
-  timestampCursor: string;
   idCursor: string;
 }
 
@@ -59,8 +58,6 @@ export interface LogSlicePaginationParams {
 }
 
 export interface PaginationFields {
-  // Timestamp to sort and paginate on
-  timestampField: string;
   // Intermediate id field used in the query for pagination
   idFieldInQuery: string;
   // Final id field kept in the result
@@ -169,25 +166,14 @@ export function extractPaginationParams(
     return undefined;
   }
 
-  const { timestampField, finalIdField: idField } = paginationFields;
-  const columns = esqlResponse.columns;
-  const timestampFieldIdx = columns.findIndex(({ name }) => name === timestampField);
-  if (timestampFieldIdx === -1) {
-    throw new Error(`${timestampField} not found in esql response, internal logic error`);
-  }
-
-  const idFieldIdx = columns.findIndex(({ name }) => name === idField);
+  const { finalIdField: idField } = paginationFields;
+  const idFieldIdx = esqlResponse.columns.findIndex(({ name }) => name === idField);
   if (idFieldIdx === -1) {
     throw new Error(`${idField} not found in esql response, internal logic error`);
   }
 
   const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
-  const timestampCursor = lastResult[timestampFieldIdx] as string;
-  const idCursor = lastResult[idFieldIdx] as string;
-  return {
-    timestampCursor,
-    idCursor,
-  };
+  return { idCursor: lastResult[idFieldIdx] as string };
 }
 
 /**
@@ -417,54 +403,20 @@ function fieldValueToEsqlExpressionAfterStats(
 }
 
 export function buildPaginationSection(
-  fromDateISO: string,
   docsLimit: number,
   paginationFields: PaginationFields,
-  pagination?: PaginationParams,
-  recoveryId?: string
+  pagination?: PaginationParams
 ): string[] {
   const parts = [];
-  parts.push(
-    `| SORT ${paginationFields.timestampField} ASC, ${paginationFields.idFieldInQuery} ASC`
-  );
+  parts.push(`| SORT ${paginationFields.idFieldInQuery} ASC`);
 
   if (pagination) {
-    if (!recoveryId) {
-      parts.push(getPaginationWhereClause(paginationFields, pagination));
-    } else {
-      parts.push(
-        getPaginationWhereClause(paginationFields, pagination, { fromDateISO, recoveryId })
-      );
-    }
+    const escapedId = escapeEsqlStringLiteral(pagination.idCursor);
+    parts.push(`| WHERE ${paginationFields.idFieldInQuery} > "${escapedId}"`);
   }
 
   parts.push(`| LIMIT ${docsLimit}`);
   return parts;
-}
-
-function getPaginationWhereClause(
-  paginationFields: PaginationFields,
-  pagination: PaginationParams,
-  paginationRecovery?: { fromDateISO: string; recoveryId: string }
-): string {
-  if (paginationRecovery) {
-    return buildPaginationWhereClause(
-      { timestampCursor: paginationRecovery.fromDateISO, idCursor: paginationRecovery.recoveryId },
-      paginationFields
-    );
-  }
-
-  return buildPaginationWhereClause(pagination, paginationFields);
-}
-
-function buildPaginationWhereClause(
-  { timestampCursor, idCursor }: PaginationParams,
-  { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
-): string {
-  const escapedId = escapeEsqlStringLiteral(idCursor);
-  return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
-            OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${escapedId}")`;
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
