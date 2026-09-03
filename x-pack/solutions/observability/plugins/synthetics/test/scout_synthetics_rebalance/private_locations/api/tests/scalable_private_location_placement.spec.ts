@@ -57,62 +57,85 @@ const MONITOR_COUNT = 10;
  * default and its config flag is only read once at Kibana boot -- it can't be
  * flipped on from within a test against the default config set.
  */
-apiTest.describe(
-  'ScalablePrivateLocationPlacement',
-  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
-  () => {
-    let editorHeaders: Record<string, string>;
-    let adminHeaders: Record<string, string>;
-    let privateLocation: ScoutPrivateLocation;
-    let highCapacityAgentId: string | undefined;
-    let lowCapacityAgentId: string | undefined;
-    const monitorIds: string[] = [];
+apiTest.describe('ScalablePrivateLocationPlacement', { tag: ['@local-stateful-classic'] }, () => {
+  let editorHeaders: Record<string, string>;
+  let adminHeaders: Record<string, string>;
+  let privateLocation: ScoutPrivateLocation;
+  let highCapacityAgentId: string | undefined;
+  let lowCapacityAgentId: string | undefined;
+  const monitorIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
-      const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
-      editorHeaders = mergeSyntheticsApiHeaders(editorKey);
-      const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
-      adminHeaders = mergeSyntheticsApiHeaders(adminKey);
+  apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
+    const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
+    editorHeaders = mergeSyntheticsApiHeaders(editorKey);
+    const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
+    adminHeaders = mergeSyntheticsApiHeaders(adminKey);
 
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-      privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-        'default',
-        { isAgentSharding: true }
-      );
-    });
+    await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+    await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
+    privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
+      'default',
+      { isAgentSharding: true }
+    );
+  });
 
-    apiTest.afterAll(async ({ apiClient, apiServices, kbnClient, esClient }) => {
-      if (monitorIds.length > 0) {
-        await deleteMonitors(apiClient, editorHeaders, monitorIds).catch(() => undefined);
+  apiTest.afterAll(async ({ apiClient, apiServices, kbnClient, esClient }) => {
+    if (monitorIds.length > 0) {
+      await deleteMonitors(apiClient, editorHeaders, monitorIds).catch(() => undefined);
+    }
+    await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
+    await deleteFleetAgents(
+      esClient,
+      [highCapacityAgentId, lowCapacityAgentId].filter((id): id is string => Boolean(id))
+    );
+    await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+  });
+
+  apiTest(
+    'places proportionally more monitors on the higher-capacity agent',
+    async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(TEST_TIMEOUT);
+
+      for (let i = 0; i < MONITOR_COUNT; i++) {
+        const res = await addMonitor(apiClient, editorHeaders, {
+          ...httpMonitorFixture,
+          locations: [privateLocation],
+          name: `Placement test monitor ${i} ${uuidv4()}`,
+          namespace: 'default',
+        });
+        monitorIds.push((res.body as { id: string }).id);
       }
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
-      await deleteFleetAgents(
-        esClient,
-        [highCapacityAgentId, lowCapacityAgentId].filter((id): id is string => Boolean(id))
-      );
-      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
-    });
 
-    apiTest(
-      'places proportionally more monitors on the higher-capacity agent',
-      async ({ apiClient, esClient }) => {
-        apiTest.setTimeout(TEST_TIMEOUT);
-
-        for (let i = 0; i < MONITOR_COUNT; i++) {
-          const res = await addMonitor(apiClient, editorHeaders, {
-            ...httpMonitorFixture,
-            locations: [privateLocation],
-            name: `Placement test monitor ${i} ${uuidv4()}`,
-            namespace: 'default',
-          });
-          monitorIds.push((res.body as { id: string }).id);
+      // Confirm they start unplaced (no agents enrolled yet) before adding
+      // agents -- otherwise a false pass here wouldn't prove anything about
+      // which placement phase actually ran.
+      await tryForTime(30_000, async () => {
+        for (const monitorId of monitorIds) {
+          const policy = await getPackagePolicyForMonitor(
+            apiClient,
+            adminHeaders,
+            monitorId,
+            privateLocation.id
+          );
+          expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
         }
+      });
 
-        // Confirm they start unplaced (no agents enrolled yet) before adding
-        // agents -- otherwise a false pass here wouldn't prove anything about
-        // which placement phase actually ran.
-        await tryForTime(30_000, async () => {
+      highCapacityAgentId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
+        memoryMib: 4096,
+        hostname: 'high-capacity-host',
+      });
+      lowCapacityAgentId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
+        memoryMib: 1024,
+        hostname: 'low-capacity-host',
+      });
+
+      await tryForTime(
+        3 * 60_000,
+        async () => {
+          let onHighCapacity = 0;
+          let onLowCapacity = 0;
+
           for (const monitorId of monitorIds) {
             const policy = await getPackagePolicyForMonitor(
               apiClient,
@@ -120,55 +143,28 @@ apiTest.describe(
               monitorId,
               privateLocation.id
             );
-            expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
-          }
-        });
-
-        highCapacityAgentId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
-          memoryMib: 4096,
-          hostname: 'high-capacity-host',
-        });
-        lowCapacityAgentId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
-          memoryMib: 1024,
-          hostname: 'low-capacity-host',
-        });
-
-        await tryForTime(
-          3 * 60_000,
-          async () => {
-            let onHighCapacity = 0;
-            let onLowCapacity = 0;
-
-            for (const monitorId of monitorIds) {
-              const policy = await getPackagePolicyForMonitor(
-                apiClient,
-                adminHeaders,
-                monitorId,
-                privateLocation.id
-              );
-              const agentId = agentIdFromCondition(policy?.condition);
-              expect(
-                agentId,
-                `monitor ${monitorId} has an assigned (non-sentinel) agent`
-              ).toBeDefined();
-              expect([highCapacityAgentId, lowCapacityAgentId]).toContain(agentId);
-
-              if (agentId === highCapacityAgentId) {
-                onHighCapacity++;
-              } else if (agentId === lowCapacityAgentId) {
-                onLowCapacity++;
-              }
-            }
-
-            expect(onHighCapacity + onLowCapacity).toBe(MONITOR_COUNT);
+            const agentId = agentIdFromCondition(policy?.condition);
             expect(
-              onHighCapacity,
-              `expected the 4x-RAM agent to host more monitors (high=${onHighCapacity}, low=${onLowCapacity})`
-            ).toBeGreaterThan(onLowCapacity);
-          },
-          { intervalMs: 10_000 }
-        );
-      }
-    );
-  }
-);
+              agentId,
+              `monitor ${monitorId} has an assigned (non-sentinel) agent`
+            ).toBeDefined();
+            expect([highCapacityAgentId, lowCapacityAgentId]).toContain(agentId);
+
+            if (agentId === highCapacityAgentId) {
+              onHighCapacity++;
+            } else if (agentId === lowCapacityAgentId) {
+              onLowCapacity++;
+            }
+          }
+
+          expect(onHighCapacity + onLowCapacity).toBe(MONITOR_COUNT);
+          expect(
+            onHighCapacity,
+            `expected the 4x-RAM agent to host more monitors (high=${onHighCapacity}, low=${onLowCapacity})`
+          ).toBeGreaterThan(onLowCapacity);
+        },
+        { intervalMs: 10_000 }
+      );
+    }
+  );
+});

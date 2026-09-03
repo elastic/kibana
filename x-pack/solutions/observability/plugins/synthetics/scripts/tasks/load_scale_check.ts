@@ -195,6 +195,19 @@ const getAgentWriterClient = async (esClient: Client): Promise<Client> => {
   return esClient.child({ headers: { authorization: `Basic ${basicAuth}` } });
 };
 
+/** Best-effort teardown of the credentials {@link getAgentWriterClient} provisions. */
+const removeAgentWriterCredentials = async (esClient: Client): Promise<void> => {
+  try {
+    await esClient.security.deleteUser({ username: AGENTS_WRITER_ROLE });
+    await esClient.security.deleteRole({ name: AGENTS_WRITER_ROLE });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.log(
+      `  ! Failed to remove the '${AGENTS_WRITER_ROLE}' role/user -- remove it by hand: ${reason}`
+    );
+  }
+};
+
 const indexFakeAgent = async (
   writerClient: Client,
   agentPolicyId: string,
@@ -407,6 +420,15 @@ export const checkLoadScale = async () => {
   } else {
     console.log('\n=== 6. --keep set: leaving monitors, agents, and location in place ===');
   }
+
+  // Always drop the `.fleet-agents` writer credentials, even under `--keep`
+  // (which only preserves the monitors/agents/location for inspection).
+  // Unlike the Scout fixture's equivalent role, which lives on an ephemeral
+  // test cluster, this one is created on the developer's own long-lived
+  // cluster -- leaving behind a native-realm user holding `all` on a
+  // restricted index, with a password hardcoded in this file, is not
+  // something a harness run should persist.
+  await removeAgentWriterCredentials(esClient);
 
   console.log('\n=== Summary ===');
   console.log(

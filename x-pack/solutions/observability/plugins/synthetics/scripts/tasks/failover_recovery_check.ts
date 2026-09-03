@@ -17,6 +17,7 @@ import {
   STALE_CHECKIN_MS,
   STALE_DATA_MS,
 } from '../../server/synthetics_service/private_location/plan_rebalance';
+import type { AtMostOnceCheckWindow } from '../../server/synthetics_service/private_location/at_most_once_check';
 import { findAtMostOnceViolations } from '../../server/synthetics_service/private_location/at_most_once_check';
 
 /**
@@ -291,6 +292,10 @@ export const checkFailoverRecovery = async () => {
     `  ✓ Initial placement observed. ${onKillTarget.length}/${monitorIds.length} monitors on ${args.agentId}.`
   );
 
+  // Set once the moved monitors are all confirmed running on a survivor, which
+  // marks the start of the post-failover steady state (see step 5).
+  let failoverSettledAt: string | undefined;
+
   console.log(`\n=== 3. Killing agent (docker stop ${args.container}) ===`);
   execSync(`docker stop ${args.container}`, { stdio: 'inherit' });
   const killedAt = new Date().toISOString();
@@ -315,29 +320,48 @@ export const checkFailoverRecovery = async () => {
         timeoutMs: STALE_DATA_MS + 3 * 60_000,
         label: 'moved monitors to reappear on a survivor agent',
       }
-    ).catch((e) => {
-      if (e instanceof TimeoutError) {
-        console.log(`  ✗ ${e.message} — treating as a DROPPED monitor.`);
-        violationsFound = true;
-        return undefined;
+    ).then(
+      () => {
+        failoverSettledAt = new Date().toISOString();
+        console.log('  ✓ All moved monitors reappeared on a survivor.');
+      },
+      (e) => {
+        if (e instanceof TimeoutError) {
+          console.log(`  ✗ ${e.message} — treating as a DROPPED monitor.`);
+          violationsFound = true;
+          return;
+        }
+        throw e;
       }
-      throw e;
-    });
-    console.log('  ✓ All moved monitors reappeared on a survivor.');
+    );
   } else {
     console.log('\n=== 4. No monitors were on the killed agent — skipping failover wait ===');
   }
 
-  console.log('\n=== 5. Checking at-most-once invariant across the whole run ===');
-  const violations = await findAtMostOnceViolations(esClient, { from: testStart });
-  if (violations.length > 0) {
-    violationsFound = true;
-    console.log(`  ✗ ${violations.length} monitor(s) ran on more than one agent:`);
-    for (const v of violations) {
-      console.log(`    - ${v.monitorId}: [${v.agentIds.join(', ')}]`);
+  console.log('\n=== 5. Checking at-most-once invariant in steady-state windows ===');
+  // A *successful* failover legitimately re-runs a monitor under a different
+  // `agent.id`, and the ES|QL invariant cannot tell that apart from a genuine
+  // duplicate (see `at_most_once_check.ts`) -- so a single window spanning the
+  // kill would flag every correctly-moved monitor and report FAILED on a
+  // healthy run. Check the steady-state windows either side of the transition
+  // instead, where two distinct agents for one monitor really is a duplicate.
+  const steadyStateWindows: Array<{ label: string; window: AtMostOnceCheckWindow }> = [
+    { label: 'before the kill', window: { from: testStart, to: killedAt } },
+    failoverSettledAt
+      ? { label: 'after failover settled', window: { from: failoverSettledAt } }
+      : { label: 'after the kill', window: { from: killedAt } },
+  ];
+  for (const { label, window } of steadyStateWindows) {
+    const violations = await findAtMostOnceViolations(esClient, window);
+    if (violations.length > 0) {
+      violationsFound = true;
+      console.log(`  ✗ ${label}: ${violations.length} monitor(s) ran on more than one agent:`);
+      for (const v of violations) {
+        console.log(`    - ${v.monitorId}: [${v.agentIds.join(', ')}]`);
+      }
+    } else {
+      console.log(`  ✓ ${label}: no monitor ran on more than one agent.`);
     }
-  } else {
-    console.log('  ✓ No monitor ran on more than one agent.');
   }
 
   console.log(`\n=== 6. Restarting agent (docker start ${args.container}) ===`);

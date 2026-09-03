@@ -71,6 +71,20 @@
       }
     },
     {
+      "id": "22912baa484e96f-8f09e233a3b358a",
+      "title": "ClassicPrivateLocationNoCondition never stamps a condition on a classic private location, on create or edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/classic_private_location_no_condition.spec.ts",
+        "line": 45,
+        "column": 25
+      }
+    },
+    {
       "id": "a5c3f83be276d2a-6771baf1db2b03d",
       "title": "CleanUpExtraPackagePolicies cleans up orphaned package policies",
       "expectedStatus": "passed",
