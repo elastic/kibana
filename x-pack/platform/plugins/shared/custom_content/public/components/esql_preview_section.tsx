@@ -22,10 +22,12 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getServices } from '../services';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
@@ -36,9 +38,33 @@ interface EsqlPreviewSectionProps {
   esqlData: EsqlDataResult | null;
   esqlDataError: string | null;
   onFetchData: () => void;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const MAX_PREVIEW_ROWS = 5;
+/**
+ * This table shows the shape of the data, not its content — a markdown or multivalue column can
+ * carry kilobytes per cell, which stretches the table in both axes and buries the column names.
+ */
+const MAX_PREVIEW_CELL_CHARS = 120;
+
+// Fixed layout gives every column an equal share, so one long column cannot starve the rest.
+// Values are clipped to one line — they are only a sample of the shape — but names are what the
+// template references as row["name"], so headers wrap rather than hide behind a hover.
+const previewTableCss = css({
+  // `anywhere`, not `break-word`: only `anywhere` shrinks the flex item EUI wraps cell text in.
+  th: {
+    overflowWrap: 'anywhere',
+  },
+});
+
+const formatCell = (value: unknown): { text: string; full: string } => {
+  const full = Array.isArray(value) ? value.join(', ') : String(value ?? '');
+  return {
+    text: full.length > MAX_PREVIEW_CELL_CHARS ? `${full.slice(0, MAX_PREVIEW_CELL_CHARS)}…` : full,
+    full,
+  };
+};
 
 /** `isPending` keeps the "no time field" hint hidden until detection actually resolves. */
 interface TimeFieldDetection {
@@ -71,6 +97,7 @@ export const EsqlPreviewSection = ({
   esqlData,
   esqlDataError,
   onFetchData,
+  esqlVariables,
 }: EsqlPreviewSectionProps) => {
   const previewRows = esqlData?.values?.slice(0, MAX_PREVIEW_ROWS) ?? [];
   const columns = esqlData?.columns ?? [];
@@ -132,6 +159,7 @@ export const EsqlPreviewSection = ({
         disableAutoFocus
         initialState={{ editorHeight: 120 }}
         errors={[]}
+        esqlVariables={esqlVariables}
       />
       {esqlQuery.trim() && !timeFieldDetection.isPending && !timeFieldDetection.field && (
         <>
@@ -144,7 +172,7 @@ export const EsqlPreviewSection = ({
               <EuiText size="xs" color="subdued">
                 {i18n.translate('xpack.customContent.editFlyout.esqlSection.timePickerHint', {
                   defaultMessage:
-                    'To connect to the dashboard time picker, add a WHERE clause with named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
+                    'To connect the query to the dashboard time filter, add a WHERE clause with the named time parameters. Example: WHERE dateField >= ?_tstart AND dateField < ?_tend',
                 })}
               </EuiText>
             </EuiFlexItem>
@@ -181,18 +209,25 @@ export const EsqlPreviewSection = ({
       {esqlData && columns.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiTable tableLayout="auto" compressed>
+          <EuiTable tableLayout="fixed" compressed css={previewTableCss}>
             <EuiTableHeader>
               {columns.map((col) => (
-                <EuiTableHeaderCell key={col.name}>{col.name}</EuiTableHeaderCell>
+                <EuiTableHeaderCell key={col.name} title={col.name}>
+                  {col.name}
+                </EuiTableHeaderCell>
               ))}
             </EuiTableHeader>
             <EuiTableBody>
               {previewRows.map((row, rowIdx) => (
                 <EuiTableRow key={rowIdx}>
-                  {columns.map((col, colIdx) => (
-                    <EuiTableRowCell key={col.name}>{String(row[colIdx] ?? '')}</EuiTableRowCell>
-                  ))}
+                  {columns.map((col, colIdx) => {
+                    const { text, full } = formatCell(row[colIdx]);
+                    return (
+                      <EuiTableRowCell key={col.name} title={full} truncateText>
+                        {text}
+                      </EuiTableRowCell>
+                    );
+                  })}
                 </EuiTableRow>
               ))}
             </EuiTableBody>

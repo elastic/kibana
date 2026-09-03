@@ -48,6 +48,7 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { AiIndexResolver } from './ai_index_resolver';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -55,6 +56,11 @@ import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<{ changedFields: string[] }>;
 }
 
 export type AgentHandlerFn = (
@@ -320,6 +326,11 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Resolves AI index details. Absent when no resolver is registered, in which case
+   * non-default AI indices are omitted from the prompt.
+   */
+  aiIndexResolver?: AiIndexResolver;
 }
 
 /**
@@ -338,6 +349,10 @@ export interface AgentParams {
    * Current conversation
    */
   conversation?: Conversation;
+  /**
+   * Pre-minted id for the round the agent is about to run.
+   */
+  roundId?: string;
   /**
    * The input triggering this round.
    */

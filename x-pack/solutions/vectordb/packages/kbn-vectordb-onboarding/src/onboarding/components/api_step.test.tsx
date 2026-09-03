@@ -11,8 +11,8 @@ import { EuiCopy } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { ApiStep, type ApiStepTab } from './api_step';
-import { LANGUAGES } from './languages';
-import { API_KEY_PLACEHOLDER, URL_PLACEHOLDER } from './console_snippets';
+import { LANGUAGES } from '../constants/languages';
+import { API_KEY_PLACEHOLDER, URL_PLACEHOLDER } from '../constants/console_snippets';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
 import type { OnboardingServices } from '../../services';
 
@@ -186,6 +186,24 @@ describe('ApiStep', () => {
 
       expect(getLastTryInConsoleRequest()).toContain(hybridTab.consoleRequest);
       expect(getLastTryInConsoleRequest()).not.toContain(semanticTab.consoleRequest);
+    });
+
+    it('names the example type in the comment when there are several examples', () => {
+      renderComponent();
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment (Semantic)');
+
+      fireEvent.click(screen.getByTestId('vectordbWizardSnippetTab-hybrid'));
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment (Hybrid)');
+      expect(getLastTryInConsoleRequest()).not.toContain('(Semantic)');
+    });
+
+    it('omits the example type when there is only one example', () => {
+      renderComponent({ tabs: [semanticTab] });
+
+      expect(getLastTryInConsoleRequest()).toContain('Test console comment');
+      expect(getLastTryInConsoleRequest()).not.toContain('(Semantic)');
     });
   });
 
