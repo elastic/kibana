@@ -506,14 +506,12 @@ describe('Put payload schema', () => {
         })
       // todo not sure this makes sense
     ).toThrowErrorMatchingInlineSnapshot(`
-      "[elasticsearch.global]: types that failed validation:
-      - [elasticsearch.global.0.data_source.0.privileges.0]: types that failed validation:
-       - [elasticsearch.global.data_source.0.privileges.0.0]: expected value to equal [create]
-       - [elasticsearch.global.data_source.0.privileges.0.1]: expected value to equal [read_metadata]
-       - [elasticsearch.global.data_source.0.privileges.0.2]: expected value to equal [delete]
-       - [elasticsearch.global.data_source.0.privileges.0.3]: expected value to equal [read]
-       - [elasticsearch.global.data_source.0.privileges.0.4]: expected value to equal [manage]
-      - [elasticsearch.global.1]: expected value of type [array] but got [Object]"
+      "[elasticsearch.global.data_source.0.privileges.0]: types that failed validation:
+      - [elasticsearch.global.data_source.0.privileges.0.0]: expected value to equal [create]
+      - [elasticsearch.global.data_source.0.privileges.0.1]: expected value to equal [read_metadata]
+      - [elasticsearch.global.data_source.0.privileges.0.2]: expected value to equal [delete]
+      - [elasticsearch.global.data_source.0.privileges.0.3]: expected value to equal [read]
+      - [elasticsearch.global.data_source.0.privileges.0.4]: expected value to equal [manage]"
     `);
   });
 
