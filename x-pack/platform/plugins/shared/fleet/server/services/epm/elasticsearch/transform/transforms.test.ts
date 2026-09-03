@@ -1493,9 +1493,7 @@ _meta:
     const unchangedId = 'logs-endpoint.metadata_current-default-0.1.0';
 
     const previousInstallation: Installation = {
-      installed_es: [
-        { id: unchangedId, type: ElasticsearchAssetType.transform },
-      ],
+      installed_es: [{ id: unchangedId, type: ElasticsearchAssetType.transform }],
     } as unknown as Installation;
 
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReturnValueOnce(
