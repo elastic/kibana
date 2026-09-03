@@ -280,7 +280,7 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 - **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
 - the comment is **absent**, or offers no actionable root cause.
 
-To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, also follow the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` the same way. Use the doctor for Cypress-specific analysis; keep this workflow's steps, PR format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "CI is private" guidance.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
 

@@ -163,6 +163,8 @@ This run is killed at a hard timeout and posts a single, write-once comment that
 
 Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
 
+If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, also read the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). Use it for Cypress-specific analysis — environment tags, intercepts, skip/unskip, duplicate coverage, and whether to fix, delete, or migrate. Keep this workflow's classification, labels, comment format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "CI is private" guidance.
+
 Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
