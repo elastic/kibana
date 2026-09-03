@@ -37,8 +37,9 @@ with where it sits. `schema_version` is the version of the whole format and is i
 file of a run; the loader refuses a version it does not know or a slice that disagrees with its
 manifest.
 
-Ground truth is deliberately not in this repository: the expected answers would be public, and
-changing a criterion would need a Kibana PR. The schema is [`src/datasets/schema.ts`](src/datasets/schema.ts)
+The bucket is the source of record. The TypeScript datasets still present under `src/datasets/`
+are a transitional fallback (see "Transitional fallback" below) and are scheduled for removal; edit
+the JSON in the bucket, not the TypeScript. The schema is [`src/datasets/schema.ts`](src/datasets/schema.ts)
 (zod). Fields typed as Elasticsearch query DSL, `Detection` or `SignificantEvent` are validated as
 plain objects only.
 
@@ -170,6 +171,7 @@ node scripts/evals run \
 | `KI_QUERY_GENERATION_MAX_STEPS`         | Optional max reasoning steps override for KI query generation (integer 2-20) | suite default               |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot and ground-truth access               | —                          |
 | `KBN_EVALS_GROUND_TRUTH_DIR`            | Local directory with the ground-truth tree (`<dataset-id>/dataset.json`, `<dataset-id>/<snapshot>/ground-truth.json`). When set, GCS is not consulted for ground truth. Set automatically by the global setup for normal runs. | unset (download from GCS)  |
+| `SIGEVENTS_GROUND_TRUTH_MODE`           | `gcs` reads ground truth from the bucket; `ts` uses the transitional TypeScript fallback in `src/datasets/` and skips the download. | `gcs`                      |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
 | `TRACING_ES_API_KEY`                    | API key for the trace Elasticsearch cluster                                 | —                          |
@@ -305,6 +307,24 @@ Capturing into a new `<run-id>/` does not carry ground truth along. Copy it befo
 ```bash
 gcloud storage rsync -r gs://significant-events-datasets/<old-run>/ gs://significant-events-datasets/<new-run>/ --exclude '^(?!.*\.json$).*'
 ```
+
+### Transitional fallback
+
+The TypeScript datasets (`src/datasets/otel_demo.ts`, `quarkus_super_heroes.ts`, `bank_of_anthos/`)
+stay in the repo until evals on `main` have run from the bucket, then get removed in a follow-up PR.
+Until then:
+
+- `SIGEVENTS_GROUND_TRUTH_MODE=ts` runs the suite from the TypeScript copy with no GCS access, for
+  example when `--list`, an IDE runner, or an offline machine cannot run the global setup.
+- The TypeScript copy is frozen. Criterion edits go to the bucket; do not edit both.
+- `src/datasets/parity.test.ts` compares the two copies. It is skipped unless
+  `KBN_EVALS_GROUND_TRUTH_DIR` points at a downloaded tree, which any `evals run` leaves under
+  `target/evals/ground-truth/significant-events-datasets/<run-id>`:
+
+  ```bash
+  KBN_EVALS_GROUND_TRUTH_DIR=$PWD/target/evals/ground-truth/significant-events-datasets/2026-03-27 \
+    node scripts/jest x-pack/platform/packages/shared/kbn-evals-suite-significant-events/src/datasets/parity.test.ts
+  ```
 
 ### Notes
 
