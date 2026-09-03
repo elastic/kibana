@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { InvestigationState, Severity } from '@kbn/significant-events-schema';
+import type {
+  InvestigationBlindSpot,
+  InvestigationHypothesis,
+  InvestigationImpact,
+  InvestigationRecommendation,
+  Severity,
+  TriggerFeedback,
+} from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
 /**
@@ -79,6 +86,9 @@ export interface StartInvestigationResponse {
   investigation_id: string;
 }
 
+/** Bound for investigation ids, concurrency keys, and other keyword-sized strings. */
+export const MAX_KEYWORD_LENGTH = 500;
+
 export const INVESTIGATION_STATUSES = [
   'pending',
   'running',
@@ -88,41 +98,45 @@ export const INVESTIGATION_STATUSES = [
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
-export interface GetInvestigationResponse {
+export const UPDATABLE_INVESTIGATION_STATUSES = [
+  'running',
+  'completed',
+  'failed',
+  'cancelled',
+] as const;
+export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
+
+export interface InvestigationStructuredOutput {
+  summary?: string;
+  conclusion?: string;
+  severity?: Severity;
+  hypotheses?: InvestigationHypothesis[];
+  recommendations?: InvestigationRecommendation[];
+  blind_spots?: InvestigationBlindSpot[];
+  trigger_feedback?: TriggerFeedback[];
+  impact?: InvestigationImpact;
+}
+
+/** Body of PATCH /internal/nightshift/investigations/{id}. */
+export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
+  status: UpdatableInvestigationStatus;
+  error?: string;
+  conversation_id?: string;
+}
+
+export interface GetInvestigationResponse extends InvestigationStructuredOutput {
   investigation_id: string;
-  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
-  subject?: InvestigationSubject;
+  subject: InvestigationSubject;
   trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
+  created_at: string;
+  /** Unset until the run leaves `pending`, so it can lag `created_at` by minutes. */
   started_at?: string;
   completed_at?: string;
-  /**
-   * The conclusion narrative on its own, for a caller that wants the answer and nothing else.
-   * Falls back to the summary while no hypothesis is confirmed yet. Also the only output a caller
-   * gets when `result` had to be dropped for failing validation.
-   */
-  conclusion?: string;
-  /**
-   * The investigation's own severity verdict for the situation it investigated. Absent for runs
-   * that are still going, failed, predate the field, or completed without the agent rating one —
-   * an absent severity means unrated, never low.
-   *
-   * Also present inside `result`. It is lifted out for the same reason `conclusion` is: it is read
-   * straight off the raw payload, so it survives `result` being dropped for failing validation,
-   * and it is the one field the list endpoint carries per row.
-   */
-  severity?: Severity;
-  /**
-   * Everything the investigation produced: the hypotheses it considered with the evidence and
-   * ES|QL behind each verdict, the gaps it could not see past, and what it recommends doing.
-   *
-   * This is the same `InvestigationState` the progress-report tool streams while the run is live,
-   * so one renderer serves a finished investigation and a running one. Only the list endpoint
-   * stays narrow — it omits step runs entirely, because this payload runs to several kilobytes
-   * and no list view needs it per row.
-   */
-  result?: InvestigationState;
+  concurrency_key?: string;
+  executed_by?: string;
   error?: string;
+  conversation_id?: string;
 }
 
 export interface InvestigationStatusEvent {
@@ -133,33 +147,39 @@ export interface InvestigationStatusEvent {
 
 export interface ListInvestigationsRequest {
   statuses?: InvestigationStatus[];
+  created_after?: string;
+  created_before?: string;
   started_after?: string;
   started_before?: string;
-  finished_after?: string;
-  finished_before?: string;
-  sort_field?: 'created_at' | 'finished_at';
+  completed_after?: string;
+  completed_before?: string;
+  sort_field?: 'created_at' | 'completed_at';
   sort_order?: 'asc' | 'desc';
   page?: number;
   size?: number;
 }
 
-export interface ListInvestigationItem {
-  investigation_id: string;
-  status: InvestigationStatus;
-  started_at?: string;
-  completed_at?: string;
-  /** See {@link GetInvestigationResponse.severity}. */
-  severity?: Severity;
-  concurrency_key?: string;
-  executed_by?: string;
-}
+export type ListInvestigationItem = Pick<
+  GetInvestigationResponse,
+  | 'investigation_id'
+  | 'status'
+  | 'created_at'
+  | 'started_at'
+  | 'completed_at'
+  | 'severity'
+  | 'concurrency_key'
+  | 'executed_by'
+  | 'subject'
+>;
 
-export interface ListInvestigationsResponse {
-  results: ListInvestigationItem[];
+export interface PaginatedResponse<T> {
+  results: T[];
   page: number;
   size: number;
   total: number;
 }
+
+export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
 
 export {
   INVESTIGATION_STARTED_TRIGGER_ID,

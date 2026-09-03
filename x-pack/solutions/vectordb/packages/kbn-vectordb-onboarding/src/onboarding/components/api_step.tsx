@@ -71,7 +71,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
 
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
-  const { snippets, consoleRequest } = selectedTab;
+  const { snippets, consoleRequest, label: exampleType } = selectedTab;
 
   const selectedLanguage = LANGUAGES.find((l) => l.id === language);
   const syntax = selectedLanguage?.syntax ?? 'python';
@@ -105,9 +105,17 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
     </EuiContextMenuItem>
   ));
 
+  const commentWithExampleType =
+    tabs.length > 1
+      ? i18n.translate('vectordbOnboarding.apiStep.consoleCommentWithExampleType', {
+          defaultMessage: '{consoleComment} ({exampleType})',
+          values: { consoleComment, exampleType },
+        })
+      : consoleComment;
+
   const requestWithComment = `
 # ===============================================
-# 🚀 ${consoleComment}
+# 🚀 ${commentWithExampleType}
 # ===============================================
 \n${consoleRequest}`;
 
