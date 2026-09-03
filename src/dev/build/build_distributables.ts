@@ -11,7 +11,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner } from './lib';
+import { Config, createRunner, runTaskGroupsInParallel } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -75,11 +75,20 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.initialize) {
     await globalRun(Tasks.VerifyEnv);
     await globalRun(Tasks.Clean);
-    await globalRun(
-      options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
-    );
-    await globalRun(Tasks.ExtractNodeBuilds);
   }
+
+  const nodeTasks = options.initialize
+    ? [
+        options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds,
+        Tasks.ExtractNodeBuilds,
+      ]
+    : [];
+  const webpackTasks = options.createGenericFolders ? [Tasks.BuildPackageWebpackBundles] : [];
+  await runTaskGroupsInParallel({
+    config,
+    log,
+    taskGroups: [webpackTasks, nodeTasks].filter((tasks) => tasks.length > 0),
+  });
 
   /**
    * run platform-generic build tasks
@@ -129,9 +138,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
 
-    await globalRun(Tasks.AssertFileTime);
-    await globalRun(Tasks.AssertPathLength);
-    await globalRun(Tasks.AssertNoUUID);
+    await runTaskGroupsInParallel({
+      config,
+      log,
+      taskGroups: [[Tasks.AssertFileTime], [Tasks.AssertPathLength], [Tasks.AssertNoUUID]],
+    });
   }
   // control w/ --skip-cdn-assets
   if (options.createCdnAssets) {
