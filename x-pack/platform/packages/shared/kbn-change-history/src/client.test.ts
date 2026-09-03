@@ -185,6 +185,145 @@ describe('ChangeHistoryClient', () => {
     });
   });
 
+  describe('logBulk user activity dual write', () => {
+    const userActivity = {
+      message: 'User updated rule "after" (id: rule-1).',
+      event: {
+        action: 'alerting_rule_update' as const,
+        type: 'change' as const,
+        outcome: 'success' as const,
+      },
+      object: { id: 'rule-1', name: 'after', type: 'rule', tags: ['tag-1'] },
+    };
+    const changeWithBlock: ObjectChange = {
+      objectType: 'alert',
+      objectId: 'rule-1',
+      snapshot: { name: 'after' },
+      userActivity,
+    };
+    const changeWithoutBlock: ObjectChange = {
+      objectType: 'alert',
+      objectId: 'rule-2',
+      snapshot: { name: 'after' },
+    };
+    const logOpts = { action: 'rule_update', username: 'alice', spaceId: 'default' };
+
+    const createClientWithTracker = async (trackUserAction: jest.Mock) => {
+      const client = new ChangeHistoryClient({ ...defaultConstructorOpts, trackUserAction });
+      await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+      return client;
+    };
+
+    it('emits one user-activity entry per change carrying a userActivity block after a successful write', async () => {
+      const trackUserAction = jest.fn();
+      const client = await createClientWithTracker(trackUserAction);
+
+      await client.logBulk([changeWithBlock, changeWithoutBlock], logOpts);
+
+      expect(trackUserAction).toHaveBeenCalledTimes(1);
+      expect(trackUserAction).toHaveBeenCalledWith(userActivity);
+    });
+
+    it('does not emit anything when no change carries a userActivity block', async () => {
+      const trackUserAction = jest.fn();
+      const client = await createClientWithTracker(trackUserAction);
+
+      await client.logBulk([changeWithoutBlock], logOpts);
+
+      expect(trackUserAction).not.toHaveBeenCalled();
+      expect(dataStreamClientMock.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('writes change history normally when no tracker was injected even if a block is present', async () => {
+      const client = await createInitializedClient();
+
+      await expect(client.logBulk([changeWithBlock], logOpts)).resolves.toBeUndefined();
+
+      expect(dataStreamClientMock.create).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('emits only after the ES bulk create has resolved', async () => {
+      const order: string[] = [];
+      dataStreamClientMock.create.mockImplementationOnce(async () => {
+        order.push('es_create');
+      });
+      const trackUserAction = jest.fn(() => {
+        order.push('track_user_action');
+      });
+      const client = await createClientWithTracker(trackUserAction);
+
+      await client.logBulk([changeWithBlock], logOpts);
+
+      expect(order).toEqual(['es_create', 'track_user_action']);
+    });
+
+    it('does not emit when the ES bulk create fails', async () => {
+      dataStreamClientMock.create.mockRejectedValueOnce(new Error('es down'));
+      const trackUserAction = jest.fn();
+      const client = await createClientWithTracker(trackUserAction);
+
+      await expect(client.logBulk([changeWithBlock], logOpts)).rejects.toThrow('es down');
+
+      expect(trackUserAction).not.toHaveBeenCalled();
+    });
+
+    it('swallows tracker errors, warns, and keeps emitting the remaining entries', async () => {
+      const trackUserAction = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('tracker exploded');
+        })
+        .mockImplementationOnce(() => undefined);
+      const client = await createClientWithTracker(trackUserAction);
+      const secondChangeWithBlock: ObjectChange = {
+        ...changeWithoutBlock,
+        userActivity: {
+          ...userActivity,
+          object: { ...userActivity.object, id: 'rule-2' },
+        },
+      };
+
+      await expect(
+        client.logBulk([changeWithBlock, secondChangeWithBlock], logOpts)
+      ).resolves.toBeUndefined();
+
+      expect(trackUserAction).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to track user action "alerting_rule_update": Error: tracker exploded'
+        )
+      );
+    });
+
+    it('never persists the userActivity block in the stored document', async () => {
+      const trackUserAction = jest.fn();
+      const client = await createClientWithTracker(trackUserAction);
+
+      await client.logBulk([changeWithBlock], logOpts);
+
+      const request = dataStreamClientMock.create.mock.calls[0]![0] as {
+        documents: Array<Record<string, unknown>>;
+      };
+      expect(request.documents).toHaveLength(1);
+      expect(JSON.stringify(request.documents[0])).not.toContain('userActivity');
+      expect(JSON.stringify(request.documents[0])).not.toContain('alerting_rule_update');
+    });
+
+    it('computes the same object.hash regardless of the presence of a userActivity block', async () => {
+      const trackUserAction = jest.fn();
+      const client = await createClientWithTracker(trackUserAction);
+
+      await client.logBulk([changeWithBlock, changeWithoutBlock], logOpts);
+
+      const request = dataStreamClientMock.create.mock.calls[0]![0] as {
+        documents: Array<{ object: { hash: string } }>;
+      };
+      expect(request.documents).toHaveLength(2);
+      expect(request.documents[0]!.object.hash).toBe(request.documents[1]!.object.hash);
+    });
+  });
+
   describe('getHistory', () => {
     it('emits the es_search span with the supplied labels and calls client.search with the built query', async () => {
       const client = await createInitializedClient();

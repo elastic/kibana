@@ -10,6 +10,29 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TrackUserActionParams } from '@kbn/core-user-activity-server';
+
+/**
+ * Callback used to emit a Kibana user-activity log entry. Matches
+ * `coreSetup.userActivity.trackUserAction` from `@kbn/core-user-activity-server`.
+ */
+export type TrackUserAction = (params: TrackUserActionParams) => void;
+
+/**
+ * Optional user-activity payload attached to an {@link ObjectChange}.
+ *
+ * Presence of this block opts the change into the Kibana user activity log: when the
+ * {@link ChangeHistoryClient} was constructed with a `trackUserAction` callback, one
+ * activity entry is emitted per change **after** the change-history bulk write succeeds.
+ * Absence means change-history-only — system-initiated writes simply don't attach it.
+ *
+ * This block is NEVER persisted to the change history document and does not affect
+ * `object.hash` (the hash covers the snapshot only).
+ */
+export type ObjectChangeUserActivity = Pick<
+  TrackUserActionParams,
+  'message' | 'event' | 'object' | 'metadata'
+>;
 
 /**
  * Mapped keyword fields that support terms aggregations in change history.
@@ -166,6 +189,8 @@ export interface ObjectChange {
    * `object.snapshot`.
    */
   snapshot: Record<string, any>;
+  /** @see {@link ObjectChangeUserActivity} */
+  userActivity?: ObjectChangeUserActivity;
 }
 
 /** Optional overrides merged into a logged change document. */
