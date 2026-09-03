@@ -13,6 +13,7 @@ import {
   PACKAGES,
   PRODUCTION_NAMESPACE,
   datasetNames,
+  ensurePackageInstalled,
   getInitialTestLogs,
   getLogsForDataset,
   indexLogs,
@@ -38,10 +39,13 @@ test.describe(
   'Dataset quality table filters',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let uninstallApache: () => Promise<void>;
+
     // Read-only data, seeded once. Filter state needs no reset — each test gets a
     // fresh browser context.
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.fleet.integration.installPackage(
+      uninstallApache = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.apache.name,
         PACKAGES.apache.version
       );
@@ -69,9 +73,9 @@ test.describe(
       await pageObjects.datasetQuality.goto();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.fleet.integration.delete(PACKAGES.apache.name);
+      await uninstallApache();
     });
 
     test('shows full data set names when toggled', async ({ pageObjects }) => {

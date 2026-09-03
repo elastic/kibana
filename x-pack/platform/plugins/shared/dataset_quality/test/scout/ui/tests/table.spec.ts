@@ -14,6 +14,7 @@ import {
   PACKAGES,
   PRODUCTION_NAMESPACE,
   datasetNames,
+  ensurePackageInstalled,
   getInitialTestLogs,
   getLogsForDataset,
   indexLogs,
@@ -29,10 +30,13 @@ test.describe(
   'Dataset quality table',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let uninstallApache: () => Promise<void>;
+
     // Read-only data, so it is seeded once for the whole file. Failure-store
     // scenarios live in failure_store.spec.ts, which owns that cluster state.
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.fleet.integration.installPackage(
+      uninstallApache = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.apache.name,
         PACKAGES.apache.version
       );
@@ -60,9 +64,9 @@ test.describe(
       await pageObjects.datasetQuality.goto();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.fleet.integration.delete(PACKAGES.apache.name);
+      await uninstallApache();
     });
 
     test('sorts by data set name and shows the namespace', async ({ pageObjects }) => {

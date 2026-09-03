@@ -25,6 +25,7 @@ import {
   deleteComponentTemplateIfExists,
   deleteDataStreamIfExists,
   deleteIndexTemplateIfExists,
+  ensurePackageInstalled,
   getWriteBackingIndexName,
   indexLogs,
   logsApmAppMappings,
@@ -179,6 +180,8 @@ test.describe(
   'Dataset quality details - field limit root cause',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    let uninstallNginx: () => Promise<void>;
+
     test.beforeAll(async ({ apiServices, esClient, logsSynthtraceEsClient }) => {
       await createComponentTemplate(esClient, {
         name: SYNTH_COMPONENT_TEMPLATE,
@@ -191,7 +194,8 @@ test.describe(
         composedOf: [SYNTH_COMPONENT_TEMPLATE, 'logs@mappings', 'logs@settings', 'ecs@mappings'],
       });
 
-      await apiServices.fleet.integration.installPackage(
+      uninstallNginx = await ensurePackageInstalled(
+        apiServices.fleet.integration,
         PACKAGES.nginx.name,
         PACKAGES.nginx.version
       );
@@ -272,7 +276,7 @@ test.describe(
     // One chain per data set; a failure in one still tears the others down. Each chain
     // stays ordered internally: a component template cannot be deleted while an index
     // template — or an installed package's template — composes it.
-    test.afterAll(async ({ apiServices, esClient, log }) => {
+    test.afterAll(async ({ esClient, log }) => {
       await cleanUpAll([
         async () => {
           await deleteDataStreamIfExists(esClient, SYNTH_DATA_STREAM, log);
@@ -281,7 +285,7 @@ test.describe(
         },
         async () => {
           await deleteDataStreamIfExists(esClient, NGINX_DATA_STREAM, log);
-          await apiServices.fleet.integration.delete(PACKAGES.nginx.name);
+          await uninstallNginx();
           await deleteComponentTemplateIfExists(esClient, NGINX_COMPONENT_TEMPLATE, log);
         },
         async () => {
