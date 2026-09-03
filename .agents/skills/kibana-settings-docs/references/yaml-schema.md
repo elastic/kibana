@@ -86,7 +86,7 @@ This is a settings-YAML particularity. Do not apply the usual `docs-applies-to-t
 |---|---|---|
 | `stack` | Lifecycle and optional version history for Elastic Stack | No version means all versions: `ga`, `preview`. A new setting should include a version: `ga 9.4+`. Multiple values are allowed: `preview 9.0-9.2, ga 9.3+`, `ga 9.0-9.3, removed 9.4+` |
 | `ech`, `ece`, `eck`, `self` | Supported on that deployment, or not | Always list all four. `ga` if supported. `unavailable` if not. Never a version. Never `preview`, `experimental`, `deprecated`, or `removed` |
-| `serverless` | Supported on serverless, or not | Always list it. `ga` if every serverless project supports it. `unavailable` if none do. Never a version. For Advanced Settings, check `src/platform/packages/shared/serverless/settings/`. If the ID is only on some projects, nest `elasticsearch`, `observability`, or `security` under `serverless` |
+| `serverless` | Supported on serverless, or not | Always list it. `ga` if every serverless project supports it. `unavailable` if none do. Never a version. For Advanced Settings, check `src/platform/packages/shared/serverless/settings/`. If the ID is only on some projects, nest `elasticsearch`, `observability`, `security`, or `vectordb` under `serverless`. Do not nest `workplace_ai` |
 
 `ga` on a deployment key is a support flag. It does not mean the setting is generally available. If `stack` is `preview` and the Elastic Cloud Hosted user-settings allowlist includes the key, write `ech: ga`.
 
@@ -100,6 +100,20 @@ applies_to:
   eck: ga
   self: ga
   serverless: ga
+```
+
+Only some serverless projects. Nest the docs-builder keys that match the allowlist. `search_project` maps to `elasticsearch`. `vectordb_project` maps to `vectordb`. Do not nest `workplace_ai`:
+
+```yaml
+applies_to:
+  stack: ga
+  ech: ga
+  ece: ga
+  eck: ga
+  self: ga
+  serverless:
+    elasticsearch: ga
+    vectordb: ga
 ```
 
 Self-managed only. `unavailable` keys are not rendered as badges. They also hide the setting from a `:deployment:` filter:

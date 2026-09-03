@@ -135,10 +135,10 @@ This YAML does **not** follow the usual `docs-applies-to-tagging` lifecycle-symm
   - Do not write a version on those keys.
 - **`serverless`:** write `serverless: ga` when the setting exists on every serverless project. Write `serverless: unavailable` when it exists on none. Do not put a version on `serverless`.
   - For Advanced Settings, check `src/platform/packages/shared/serverless/settings/common/index.ts`. That file lists settings on every serverless project. If the ID is there, write `serverless: ga`.
-  - If the ID is not in `common`, grep the project files in that folder: `observability_project`, `security_project`, `search_project`, `vectordb_project`, `workplace_ai_project`.
+  - If the ID is not in `common`, grep the project files in that folder: `observability_project`, `security_project`, `search_project`, and `vectordb_project`. Ignore `workplace_ai_project`. That project type never shipped, and docs-builder has no `workplace_ai` key.
   - Those files use ID constants such as `DATE_FORMAT_ID`, not the YAML key. Resolve the constant in `src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts`.
-  - If the ID is only on some projects, nest those project keys under `serverless`. Map `observability_project` to `observability`, `security_project` to `security`, and `search_project` to `elasticsearch`. Write `ga` on the keys that match. Do not write a scalar `serverless: ga`.
-  - If the ID is not on any of those lists, write `serverless: unavailable`.
+  - If the ID is only on some projects, nest those project keys under `serverless`. Map `observability_project` to `observability`, `security_project` to `security`, `search_project` to `elasticsearch`, and `vectordb_project` to `vectordb`. Write `ga` on the keys that match. Do not write a scalar `serverless: ga`.
+  - If the ID is not on any of those four lists, write `serverless: unavailable`.
   - For `kibana.yml`, keep using `offeringBasedSchema` or `schema.contextRef('serverless')`. Write a scalar `serverless: ga` or `serverless: unavailable`.
 - **Gated notes:** To scope a `note`, `tip`, `warning`, or `important` to a version or deployment, put `:applies_to:` on the first line of that field. Do not wrap the field in `:::{note}`.
 

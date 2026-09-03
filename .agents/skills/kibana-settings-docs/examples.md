@@ -91,6 +91,26 @@ Set `ech: ga` if the Elastic Cloud Hosted user-settings allowlist includes the k
 
 `ech: ga` is correct here even though `stack` is `preview`. Deployment keys are support flags. They are not lifecycle.
 
+If the ID is only on some serverless project allowlists, nest those keys. Do not write a scalar `serverless: ga`:
+
+```yaml
+      - setting: "example:searchOnly"
+        id: example-search-only
+        description: |
+          Controls the example search-only behavior in this space.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            vectordb: ga
+```
+
 ## New global Advanced Settings entry
 
 Use `advanced-settings-global.yml`. Write `serverless: unavailable` when the setting is not available on serverless.
