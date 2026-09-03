@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 type AddRuleFlyoutStep = 'definition' | 'actions' | 'details';
 
@@ -37,11 +38,15 @@ export class AddRuleFlyout {
   }
 
   public async waitForErrorCountToLoad() {
-    await this.flyout.getByRole('heading', { name: 'Error count threshold' }).waitFor();
+    await this.flyout
+      .getByRole('heading', { name: 'Error count threshold' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   public async waitForLatencyToLoad() {
-    await this.flyout.getByRole('heading', { name: 'Latency threshold' }).waitFor();
+    await this.flyout
+      .getByRole('heading', { name: 'Latency threshold' })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   public async fillName(name: string) {

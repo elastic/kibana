@@ -7,6 +7,7 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { AddRuleFlyout } from './add_rule_flyout';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 export class AlertsControls {
   public readonly addRuleFlyout: AddRuleFlyout;
@@ -27,8 +28,8 @@ export class AlertsControls {
 
     this.errorCountItem = this.contextMenu.getByTestId('apmAlertsMenuItemErrorCount');
     this.manageRulesItem = this.contextMenu.getByTestId('apmAlertsMenuItemManageRules');
-    this.createThresholdItem = this.contextMenu.getByTestId('apmAlertsMenuItemCreateThreshold');
-    this.latencyItem = this.contextMenu.getByTestId('apmAlertsMenuItemLatency');
+    this.createThresholdItem = this.page.getByTestId('apmAlertsMenuItemCreateThreshold');
+    this.latencyItem = this.page.getByTestId('apmAlertsMenuItemLatency');
   }
 
   public async openContextMenu() {
@@ -42,12 +43,10 @@ export class AlertsControls {
   }
 
   public async openLatencyFlyout() {
-    await this.createThresholdItem.click();
-    await this.contextMenu
-      .getByTestId('contextMenuPanelTitle')
-      .getByText('Create threshold rule')
-      .waitFor();
-    await this.latencyItem.click();
+    await this.createThresholdItem.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.createThresholdItem.dispatchEvent('click');
+    await this.latencyItem.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.latencyItem.dispatchEvent('click');
     await this.addRuleFlyout.waitForLatencyToLoad();
   }
 
