@@ -213,6 +213,7 @@ export const getLinksEmbeddableFactory = () => {
             },
             flyoutProps: {
               'data-test-subj': 'links--panelEditor--flyout',
+              hideCloseButton: true,
             },
           });
         },

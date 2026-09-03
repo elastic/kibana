@@ -85,6 +85,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       flyoutProps: {
         'data-test-subj': 'links--panelEditor--flyout',
         isResizable: false,
+        hideCloseButton: true,
       },
     });
   },

@@ -122,6 +122,7 @@ export const PanelEditorHeader = ({
                 max-width: 100%;
                 .euiInlineEditText {
                   font-weight: ${euiTheme.font.weight.medium};
+                  ${!currentTitle ? `color: ${euiTheme.colors.textSubdued};` : ''}
                 }
               `}
             />

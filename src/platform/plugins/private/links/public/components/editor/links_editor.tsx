@@ -174,9 +174,7 @@ export const LinksEditor = ({
             <PanelEditorHeader
               api={panelSettingsApi}
               onOpenSettings={() => setIsPanelSettingsOpen(true)}
-              titleSize="s"
               titleTestSubj="links--panelEditor--title"
-              untitledTitle={LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
             />
           )
         ) : (
@@ -186,7 +184,7 @@ export const LinksEditor = ({
                 <h2>
                   {isEditingExisting
                     ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
-                    : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
+                    : LinksStrings.editor.panelEditor.getUntitledPanelTitle()}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
