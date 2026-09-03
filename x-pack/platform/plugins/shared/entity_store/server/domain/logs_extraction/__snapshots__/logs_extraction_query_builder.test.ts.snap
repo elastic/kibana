@@ -244,7 +244,8 @@ FROM test-index-*
               @timestamp = recent.timestamp,
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"generic\\",
- entity.hashedId = HASH(\\"sha256\\", recent.entity.id)
+ entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\")
 | RENAME
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
@@ -541,6 +542,7 @@ FROM test-index-*
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\"),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -843,6 +845,7 @@ FROM test-index-*
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\"),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -1145,6 +1148,7 @@ FROM test-index-*
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"host\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\"),
  entity.type = COALESCE(entity.type, \\"Host\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -1376,6 +1380,7 @@ FROM test-index-*
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"service\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\"),
  entity.type = COALESCE(entity.type, \\"Service\\")
 | RENAME
     recent.entity.id AS entity.id,
@@ -1648,6 +1653,7 @@ TRUE, _euid_branch_1_formula, NULL)
  entity.name = CASE(TO_STRING(entity.name) IS NOT NULL AND TO_STRING(entity.name) != \\"\\", entity.name, recent.entity.EngineMetadata.UntypedId),
  entity.EngineMetadata.Type = \\"user\\",
  entity.hashedId = HASH(\\"sha256\\", recent.entity.id),
+ entity.created_by = COALESCE(entity.created_by, \\"logs_extraction\\"),
  entity.type = COALESCE(entity.type, \\"Identity\\")
 | RENAME
     recent.entity.id AS entity.id,
