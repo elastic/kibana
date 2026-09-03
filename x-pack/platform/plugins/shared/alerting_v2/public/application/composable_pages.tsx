@@ -76,8 +76,16 @@ const StandardProviders = ({
   );
 };
 
-export const AlertingV2RulesPage = ({ container, setBreadcrumbs, tabHrefOverrides }: InternalPageProps) => (
-  <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs} tabHrefOverrides={tabHrefOverrides}>
+export const AlertingV2RulesPage = ({
+  container,
+  setBreadcrumbs,
+  tabHrefOverrides,
+}: InternalPageProps) => (
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    tabHrefOverrides={tabHrefOverrides}
+  >
     <RulesApp />
   </StandardProviders>
 );
