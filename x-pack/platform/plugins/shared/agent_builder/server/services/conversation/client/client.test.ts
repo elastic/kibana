@@ -534,7 +534,26 @@ describe.skip('ConversationClient', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             bool: expect.objectContaining({
-              must: [{ match_bool_prefix: { title: { query: 'sales rep', operator: 'and' } } }],
+              must: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      { match_bool_prefix: { title: { query: 'sales rep', operator: 'and' } } },
+                      {
+                        prefix: {
+                          'title.keyword': { value: 'sales rep', boost: 2, case_insensitive: true },
+                        },
+                      },
+                      {
+                        term: {
+                          'title.keyword': { value: 'sales rep', boost: 5, case_insensitive: true },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
             }),
           }),
         })
