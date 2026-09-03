@@ -524,6 +524,192 @@ describe.skip('ConversationClient', () => {
     });
   });
 
+  describe('search', () => {
+    it('sends a match_bool_prefix on title as a must clause', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'sales rep' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      { match_bool_prefix: { title: { query: 'sales rep', operator: 'and' } } },
+                      {
+                        prefix: {
+                          'title.keyword': { value: 'sales rep', boost: 2, case_insensitive: true },
+                        },
+                      },
+                      {
+                        prefix: {
+                          'title.keyword': {
+                            value: 'sales rep ',
+                            boost: 5,
+                            case_insensitive: true,
+                          },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('omits the must clause for a whitespace-only query', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: '   ' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({ must: [] }),
+          }),
+        })
+      );
+    });
+
+    it('shares the same space, read-access, and sub-agent filters as list', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list();
+      const listFilter = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+
+      mockEsClient.search.mockClear();
+      await client.search({ query: 'anything' });
+      const searchFilter = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+
+      expect(searchFilter).toEqual(listFilter);
+    });
+
+    it('never sends a pinned filter', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray).not.toContainEqual({ term: { pinned: true } });
+      expect(filterArray).not.toContainEqual({ bool: { must_not: { term: { pinned: true } } } });
+    });
+
+    it('sorts by _score, then updated_at, then created_at, all descending', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: [
+            { _score: { order: 'desc' } },
+            { updated_at: { order: 'desc' } },
+            { created_at: { order: 'desc' } },
+          ],
+        })
+      );
+    });
+
+    it('sends from=0, size=50, and track_total_hits=10000 by default', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.search({ query: 'anything' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: 0,
+          size: 50,
+          track_total_hits: 10_000,
+          seq_no_primary_term: true,
+        })
+      );
+    });
+
+    it('computes from = (page - 1) * perPage', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      await client.search({ query: 'anything', page: 3, perPage: 10 });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ from: 20, size: 10 })
+      );
+    });
+
+    it('returns total when hits.total is a plain number', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: 7 } });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(7);
+    });
+
+    it('returns total from hits.total.value when ES returns the object form', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 42, relation: 'eq' } },
+      });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(42);
+    });
+
+    it('caps total at 10000 when ES reports more via track_total_hits', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 99_999, relation: 'gte' } },
+      });
+
+      const result = await client.search({ query: 'anything' });
+
+      expect(result.total).toBe(10_000);
+    });
+
+    it('returns an empty result without querying conversations when the requested agent is inaccessible', async () => {
+      agentRegistry.getIds.mockResolvedValue(['agent-1']);
+
+      await expect(client.search({ query: 'anything', agentId: 'agent-2' })).resolves.toEqual({
+        results: [],
+        total: 0,
+      });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty result when the user cannot access any underlying agents', async () => {
+      agentRegistry.getIds.mockResolvedValue([]);
+
+      await expect(client.search({ query: 'anything' })).resolves.toEqual({
+        results: [],
+        total: 0,
+      });
+
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('maps hits to conversations with permissions, and no rounds or read_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()], total: { value: 1, relation: 'eq' } },
+      });
+
+      const { results } = await client.search({ query: 'anything' });
+
+      expectNoReadByInList(results);
+      expectOwnerPermissionsInList(results);
+      expectNoRoundsInList(results);
+    });
+  });
+
   describe('get', () => {
     it('returns a public non-owner conversation when the user can use the agent', async () => {
       mockGetDocumentResponse(
@@ -1062,18 +1248,15 @@ describe.skip('ConversationClient', () => {
 
   describe('setPinned', () => {
     it('adds only the calling user to pinned_by', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-              pinnedBy: [],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          pinnedBy: [],
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       const result = await client.setPinned('conversation-1', true);
 
@@ -1084,19 +1267,14 @@ describe.skip('ConversationClient', () => {
     });
 
     it('does not clobber pinned_by entries written by another user', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
-        // another user pinned it concurrently
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                pinnedBy: [{ userId: 'other-user-id' }],
-              }),
-            ],
-          },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument({ pinnedBy: [] }));
+      // another user pinned it concurrently
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          pinnedBy: [{ userId: 'other-user-id' }],
+        })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -1109,15 +1287,12 @@ describe.skip('ConversationClient', () => {
     });
 
     it('removes only the calling user when unpinning', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       await client.setPinned('conversation-1', false);
 
@@ -1126,21 +1301,18 @@ describe.skip('ConversationClient', () => {
     });
 
     it('is a no-op when the calling user has no stable id', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [],
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       client = createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: {} as never,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { username: 'no-profile-user', isAdmin: false },
       });
@@ -2729,21 +2901,12 @@ describe.skip('ConversationClient', () => {
       const step0 = stepTimelineEvent('round-1', 0);
       const step1 = stepTimelineEvent('round-1', 1);
 
-      mockEsClient.search
-        // First OCC read: only the start events are stored.
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [createConversationDocument({ schemaVersion: 1, events: start })],
-          },
-        })
-        // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] }),
-            ],
-          },
-        });
+      // First OCC read: only the start events are stored.
+      mockGetDocumentResponseOnce(createConversationDocument({ schemaVersion: 1, events: start }));
+      // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -2799,24 +2962,20 @@ describe.skip('ConversationClient', () => {
         data: { message: 'round two input' },
       } as TimelineEvent;
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              schemaVersion: 1,
-              events: [
-                storedRound1UserMessage,
-                storedRound1ExecutionStarted,
-                storedRound1Step0,
-                storedRound1Step1,
-                staleRound1Step2,
-                additiveEvent,
-                round2UserMessage,
-              ],
-            }),
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [
+            storedRound1UserMessage,
+            storedRound1ExecutionStarted,
+            storedRound1Step0,
+            storedRound1Step1,
+            staleRound1Step2,
+            additiveEvent,
+            round2UserMessage,
           ],
-        },
-      });
+        })
+      );
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       const canonicalUserMessage = {

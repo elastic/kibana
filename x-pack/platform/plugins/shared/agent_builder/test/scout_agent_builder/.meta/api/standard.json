@@ -1427,6 +1427,198 @@
       }
     },
     {
+      "id": "6c038a293723f6d-aaebf189d533036",
+      "title": "Agent Builder — conversations search API a single-token query matches only titles containing that word",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 98,
+        "column": 27
+      }
+    },
+    {
+      "id": "6c038a293723f6d-ff1df06e28c05c7",
+      "title": "Agent Builder — conversations search API a multi-token query requires every token to match (AND), not just any of them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 124,
+        "column": 21
+      }
+    },
+    {
+      "id": "6c038a293723f6d-ad0bd8b56423306",
+      "title": "Agent Builder — conversations search API the last token matches as a prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 135,
+        "column": 63
+      }
+    },
+    {
+      "id": "6c038a293723f6d-f1d168e1c648391",
+      "title": "Agent Builder — conversations search API matching is case-insensitive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 143,
+        "column": 83
+      }
+    },
+    {
+      "id": "6c038a293723f6d-99898562488c404",
+      "title": "Agent Builder — conversations search API does not match mid-word: \"port\" does not match \"Airport\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 152,
+        "column": 68
+      }
+    },
+    {
+      "id": "6c038a293723f6d-d5ca68ec6668f1b",
+      "title": "Agent Builder — conversations search API agent_id scopes results to that agent only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 161,
+        "column": 25
+      }
+    },
+    {
+      "id": "6c038a293723f6d-f27a09f34e169d1",
+      "title": "Agent Builder — conversations search API a different agent_id excludes the first agent's matching conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 170,
+        "column": 5
+      }
+    },
+    {
+      "id": "6c038a293723f6d-6ed79bbe7b7f547",
+      "title": "Agent Builder — conversations search API pages are non-overlapping and together cover all matches, with a correct pagination envelope",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 180,
+        "column": 7
+      }
+    },
+    {
+      "id": "6c038a293723f6d-779176800886f1a",
+      "title": "Agent Builder — conversations search API missing query returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 224,
+        "column": 21
+      }
+    },
+    {
+      "id": "6c038a293723f6d-1073300c423055b",
+      "title": "Agent Builder — conversations search API empty query returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 231,
+        "column": 30
+      }
+    },
+    {
+      "id": "6c038a293723f6d-95c73fd86372389",
+      "title": "Agent Builder — conversations search API per_page exceeding the search maximum returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 239,
+        "column": 9
+      }
+    },
+    {
+      "id": "6c038a293723f6d-9b145c2c97e0b1e",
+      "title": "Agent Builder — conversations search API page * per_page exceeding MAX_RESULT_WINDOW returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_search_api.spec.ts",
+        "line": 247,
+        "column": 13
+      }
+    },
+    {
       "id": "2182526e4be1def-80b2570c588b8a3",
       "title": "Agent Builder — converse attachments API [local] rejects unknown attachment type",
       "expectedStatus": "passed",

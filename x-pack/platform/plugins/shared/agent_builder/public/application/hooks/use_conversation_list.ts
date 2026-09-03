@@ -5,56 +5,93 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useInfiniteQuery } from '@kbn/react-query';
-import { MAX_RESULT_WINDOW } from '../../../common/constants';
-import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { i18n } from '@kbn/i18n';
 import { queryKeys } from '../query_keys';
+import { dedupeById, getNextConversationPageParam } from '../utils/conversation_pagination';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useKibana } from './use_kibana';
 
 const DEFAULT_CONVERSATIONS_PAGE_SIZE = 50;
+const SEARCH_DEBOUNCE_MS = 250;
+const SEARCH_PAGE_SIZE = 25;
 
-/**
- * Deduplicates an array of conversations by id, keeping the first occurrence.
- * Offset pagination can return a duplicate if a document's sort position shifts
- * between two page fetches; keeping the lower-page copy is the safe tie-break.
- */
-const dedupeById = (
-  conversations: ListConversationsResponseItem[]
-): ListConversationsResponseItem[] => {
-  const seen = new Set<string>();
-  return conversations.filter((c) => {
-    if (seen.has(c.id)) return false;
-    seen.add(c.id);
-    return true;
-  });
-};
+const searchErrorToastTitle = i18n.translate('xpack.agentBuilder.conversationSearch.errorTitle', {
+  defaultMessage: 'Unable to search conversations',
+});
 
 export const useConversationList = ({
   agentId,
   pinned,
   perPage,
+  query,
 }: {
   agentId?: string;
   pinned?: boolean;
   perPage?: number;
+  /**
+   * When provided, the hook switches into server-side search mode (debounced, relevance-ranked).
+   * An empty or whitespace-only string keeps the hook in list mode with no extra request.
+   */
+  query?: string;
 } = {}) => {
+  const { services } = useKibana();
   const { conversationsService } = useAgentBuilderServices();
 
-  const queryKey = agentId
+  // --- search mode -------------------------------------------------------
+  const debouncedQuery = useDebouncedValue(query ?? '', SEARCH_DEBOUNCE_MS);
+  const trimmedQuery = debouncedQuery.trim();
+  const isSearching = trimmedQuery.length > 0;
+
+  const {
+    data: searchData,
+    isLoading: searchIsLoading,
+    isError,
+    error,
+    hasNextPage: searchHasNextPage,
+    fetchNextPage: searchFetchNextPage,
+    isFetchingNextPage: searchIsFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: queryKeys.conversations.search(trimmedQuery, { agentId }),
+    // React Query v4: first call receives `pageParam: undefined`; default inside queryFn.
+    queryFn: ({ pageParam }: { pageParam?: number }) =>
+      conversationsService.search({
+        query: trimmedQuery,
+        agentId,
+        page: pageParam ?? 1,
+        perPage: SEARCH_PAGE_SIZE,
+      }),
+    getNextPageParam: getNextConversationPageParam,
+    enabled: isSearching,
+    // Avoids `conversations` flashing empty on every debounce tick mid-keystroke.
+    keepPreviousData: true,
+  });
+
+  useEffect(() => {
+    if (!isError || searchIsLoading) return;
+    services.notifications.toasts.addError(
+      error instanceof Error ? error : new Error(formatAgentBuilderErrorMessage(error)),
+      { title: searchErrorToastTitle }
+    );
+  }, [isError, searchIsLoading, error, services.notifications.toasts]);
+
+  // --- list mode ---------------------------------------------------------
+  const listQueryKey = agentId
     ? queryKeys.conversations.byAgent(agentId, { pinned })
     : queryKeys.conversations.all;
 
   const {
-    data,
-    isLoading,
+    data: listData,
+    isLoading: listIsLoading,
     refetch: refresh,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
+    hasNextPage: listHasNextPage,
+    fetchNextPage: listFetchNextPage,
+    isFetchingNextPage: listIsFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey,
-    // React Query v4: first call receives `pageParam: undefined`; default inside queryFn.
+    queryKey: listQueryKey,
     queryFn: ({ pageParam }: { pageParam?: number }) =>
       conversationsService.list({
         agentId,
@@ -62,14 +99,11 @@ export const useConversationList = ({
         page: pageParam ?? 1,
         perPage: perPage ?? DEFAULT_CONVERSATIONS_PAGE_SIZE,
       }),
-    getNextPageParam: (lastPage) => {
-      const { page, per_page: pp, total } = lastPage.pagination;
-      const next = page + 1;
-      // No more pages if we've fetched all results, or the next offset would exceed the ES window.
-      return page * pp < total && next * pp <= MAX_RESULT_WINDOW ? next : undefined;
-    },
+    getNextPageParam: getNextConversationPageParam,
   });
 
+  // --- unified output ----------------------------------------------------
+  const data = isSearching ? searchData : listData;
   const conversations = useMemo(
     () => dedupeById(data?.pages.flatMap((p) => p.results) ?? []),
     [data]
@@ -79,10 +113,11 @@ export const useConversationList = ({
   return {
     conversations,
     total,
-    isLoading,
+    isLoading: isSearching ? searchIsLoading : listIsLoading,
+    isSearching,
     refresh,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
+    hasNextPage: isSearching ? searchHasNextPage : listHasNextPage,
+    fetchNextPage: isSearching ? searchFetchNextPage : listFetchNextPage,
+    isFetchingNextPage: isSearching ? searchIsFetchingNextPage : listIsFetchingNextPage,
   };
 };
