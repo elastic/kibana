@@ -19,7 +19,6 @@ interface ContextSwitcherTriggerButtonProps {
   readonly label: string;
   readonly onClick: () => void;
   readonly isSelected?: boolean;
-  readonly title?: string;
 }
 
 /**
@@ -31,7 +30,6 @@ export const ContextSwitcherTriggerButton = ({
   label,
   onClick,
   isSelected,
-  title,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
   const { euiTheme } = useEuiTheme();
 
@@ -43,7 +41,6 @@ export const ContextSwitcherTriggerButton = ({
       iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isSelected}
-      title={title}
       data-test-subj="contextSwitcherTriggerButton"
       css={css`
         color: ${euiTheme.colors.textSubdued};
