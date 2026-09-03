@@ -1701,6 +1701,8 @@
       "@kbn/lens-inline-editing-example-plugin/*": ["./x-pack/examples/lens_embeddable_inline_editing_example/*"],
       "@kbn/lens-plugin": ["./x-pack/platform/plugins/shared/lens"],
       "@kbn/lens-plugin/*": ["./x-pack/platform/plugins/shared/lens/*"],
+      "@kbn/lens-test-helpers": ["./src/platform/packages/shared/kbn-lens-test-helpers"],
+      "@kbn/lens-test-helpers/*": ["./src/platform/packages/shared/kbn-lens-test-helpers/*"],
       "@kbn/license-api-guard-plugin": ["./x-pack/platform/plugins/private/license_api_guard"],
       "@kbn/license-api-guard-plugin/*": ["./x-pack/platform/plugins/private/license_api_guard/*"],
       "@kbn/license-management-plugin": ["./x-pack/platform/plugins/shared/license_management"],

@@ -628,6 +628,7 @@ src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-lens-test-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-licensing-types @elastic/kibana-core
 src/platform/packages/shared/kbn-lock-manager @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
