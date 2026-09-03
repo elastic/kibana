@@ -34,7 +34,7 @@ export interface ListBindingsOptions {
 }
 
 /** Service account name used for the UIAM (M2) relay credential path. */
-const RELAY_SERVICE_ACCOUNT_NAME = 'relay-kibana-sa-1';
+const RELAY_SERVICE_ACCOUNT_NAME = 'relay-kibana-sa-2';
 
 // TODO check if needed to make it configurable
 const RELAY_SERVICE_ACCOUNT_ID = 'relay-service';
@@ -168,13 +168,6 @@ export class SlackAppService {
             ],
           });
           serviceAccountId = account.id;
-
-          console.log('serviceAccountId', serviceAccountId);
-
-          const token = await this.server.core.security.serviceAccounts.exchangeToken(
-            serviceAccountId
-          );
-          bearerToken = token.token;
         } catch (error) {
           this.logger.error(`Failed to create UIAM service account: ${this.toErrorMessage(error)}`);
           throw error;
@@ -182,7 +175,6 @@ export class SlackAppService {
       }
 
       try {
-        console.log(bearerToken);
         installResponse = await relayClient.startInstall(
           {
             uiam_service_account_id: serviceAccountId,

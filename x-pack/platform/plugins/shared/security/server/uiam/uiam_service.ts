@@ -248,7 +248,7 @@ export interface UiamServicePublic {
    * @param accessToken The OAuth access token.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string, clientSans?: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID.
@@ -554,7 +554,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string, clientSans?: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
     const expectedAudience = this.#kibanaServerResourceURL;
@@ -571,6 +571,7 @@ export class UiamService implements UiamServicePublic {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
             Authorization: `Bearer ${accessToken}`,
+            ...(clientSans ? { 'x-client-sans': clientSans } : {}),
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
           dispatcher: this.#dispatcher,

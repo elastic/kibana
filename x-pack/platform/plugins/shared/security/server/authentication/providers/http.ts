@@ -217,13 +217,22 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     authorizationHeader: HTTPAuthorizationHeader
   ): Promise<AuthenticationResult> {
     try {
+      const clientSans = request.headers['x-client-sans'];
+      console.log('clientSans', clientSans);
       const ephemeralToken = await this.options.uiam!.exchangeOAuthToken(
-        authorizationHeader.credentials
+        authorizationHeader.credentials,
+        Array.isArray(clientSans) ? clientSans.join(',') : clientSans
       );
+
+      console.log('ephemeralToken', ephemeralToken);
 
       const authHeaders = this.options.uiam!.getAuthenticationHeaders(ephemeralToken);
 
+      console.log('authHeaders', authHeaders);
+
       const user = await this.getUser(request, authHeaders);
+
+      console.log('user', user);
 
       this.logger.debug('Request authenticated via UIAM OAuth token exchange.');
 

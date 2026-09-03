@@ -32,6 +32,7 @@ jest.mock('@kbn/dev-utils', () => {
     CA_CERT_PATH: '/some/path/ca.crt',
     KBN_CERT_PATH: '/some/path/kibana.crt',
     KBN_KEY_PATH: '/some/path/kibana.key',
+    RELAY_CA_CERT_PATH: '/some/path/relay_ca.crt',
   };
 });
 
@@ -166,6 +167,8 @@ describe(`#runUiamContainer()`, () => {
             "--volume",
             "/some/path/ca.crt:/tmp/ca.crt:z",
             "--volume",
+            "/some/path/relay_ca.crt:/tmp/relay_service_ca.crt:z",
+            "--volume",
             "/some/path/kibana.key:/tmp/server.key:z",
             "--volume",
             "/some/path/kibana.crt:/tmp/server.crt:z",
@@ -182,7 +185,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.tls.https.key-store.pem.0.key=/tmp/server.key",
             "--env",
-            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt",
+            "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt",
             "--env",
             "quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt",
             "--env",

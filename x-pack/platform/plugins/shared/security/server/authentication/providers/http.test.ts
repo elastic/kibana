@@ -350,7 +350,8 @@ describe('HTTPAuthenticationProvider', () => {
       );
 
       expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
-        'essu_oauth_access_token'
+        'essu_oauth_access_token',
+        undefined
       );
 
       expect(mockOptionsWithUiam.client.asScoped).toHaveBeenCalledWith({
@@ -360,6 +361,47 @@ describe('HTTPAuthenticationProvider', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
         },
       });
+    });
+
+    it('forwards x-client-sans header to UIAM token exchange when present.', async () => {
+      const header = 'Bearer essu_oauth_access_token';
+      const user = mockAuthenticatedUser();
+
+      mockOptionsWithUiam.uiam!.exchangeOAuthToken.mockResolvedValue('essu_ephemeral_token');
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: header, 'x-client-sans': 'relay.example.com' },
+        routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
+          {
+            authHeaders: {
+              authorization: 'Bearer essu_ephemeral_token',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            },
+          }
+        )
+      );
+
+      expect(mockOptionsWithUiam.uiam!.exchangeOAuthToken).toHaveBeenCalledWith(
+        'essu_oauth_access_token',
+        'relay.example.com'
+      );
     });
 
     it('fails authentication when UIAM token exchange fails.', async () => {

@@ -184,8 +184,22 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       await this.options.client
         // Use original request if no additional auth headers are provided, otherwise fall back to
         // the "fake" request with combined headers.
-        .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
+        .asScoped(
+          authHeaders
+            ? {
+                headers: {
+                  ...request.headers,
+                  'X-Client-Sans': 'URI=spiffe://relay.elastic.co',
+                  ...authHeaders,
+                },
+              }
+            : request
+        )
         .asCurrentUser.security.authenticate()
+        .catch((error) => {
+          console.log(error);
+          throw error;
+        })
     );
   }
 

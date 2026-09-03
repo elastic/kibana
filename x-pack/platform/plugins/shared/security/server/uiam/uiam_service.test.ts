@@ -486,6 +486,35 @@ describe('UiamService', () => {
       );
     });
 
+    it('forwards x-client-sans header to UIAM when provided', async () => {
+      const mockResponse = {
+        token: 'essu_ephemeral_token_value',
+        credentials: {
+          oauth: {
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+          },
+        },
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        uiamService.exchangeOAuthToken('essu_oauth_access_token', 'relay.example.com')
+      ).resolves.toBe('essu_ephemeral_token_value');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'x-client-sans': 'relay.example.com',
+          }),
+        })
+      );
+    });
+
     it('throws when audience in response does not match expected audience', async () => {
       fetchSpy.mockResolvedValue({
         ok: true,

@@ -32,7 +32,7 @@ import execa from 'execa';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { Agent } from 'undici';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, RELAY_CA_CERT_PATH } from '@kbn/dev-utils';
 import {
   SERVERLESS_UIAM_ENTRYPOINT_PATH,
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
@@ -149,6 +149,8 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${CA_CERT_PATH}:/tmp/ca.crt:z`,
       '--volume',
+      `${RELAY_CA_CERT_PATH}:/tmp/relay_service_ca.crt:z`,
+      '--volume',
       `${KBN_KEY_PATH}:/tmp/server.key:z`,
       '--volume',
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
@@ -169,7 +171,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--env',
       'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
       '--env',
-      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+      'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt',
 
       '--env',
       'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
@@ -267,6 +269,8 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--volume',
     `${CA_CERT_PATH}:/tmp/ca.crt:z`,
     '--volume',
+    `${RELAY_CA_CERT_PATH}:/tmp/relay_service_ca.crt:z`,
+    '--volume',
     `${KBN_KEY_PATH}:/tmp/server.key:z`,
     '--volume',
     `${KBN_CERT_PATH}:/tmp/server.crt:z`,
@@ -287,7 +291,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--env',
     'quarkus.tls.https.key-store.pem.0.key=/tmp/server.key',
     '--env',
-    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
+    'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt,/tmp/relay_service_ca.crt',
 
     '--env',
     'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',

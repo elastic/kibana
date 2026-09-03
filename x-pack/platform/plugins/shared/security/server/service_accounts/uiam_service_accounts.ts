@@ -162,13 +162,20 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         // POC: use the caller's `assumable_by` when provided; otherwise default to the current
         // Kibana project. This lets an out-of-process assumer (e.g. the Nightshift Relay) be
         // named by the caller. See CreateServiceAccountParams.assumable_by for the full caveat.
-        assumable_by:
-          params.assumable_by ??
-          buildAssumableBy({
-            organizationId: this.organizationId,
-            projectId: this.projectId,
-            projectType: this.projectType,
-          }),
+        assumable_by: params.assumable_by
+          ? [
+              ...params.assumable_by,
+              ...buildAssumableBy({
+                organizationId: this.organizationId,
+                projectId: this.projectId,
+                projectType: this.projectType,
+              }),
+            ]
+          : buildAssumableBy({
+              organizationId: this.organizationId,
+              projectId: this.projectId,
+              projectType: this.projectType,
+            }),
       });
 
       const parsed = serviceAccountSchema.safeParse(result);

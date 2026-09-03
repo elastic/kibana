@@ -71,3 +71,31 @@ openssl pkcs12 -in fleet_server.p12 -nocerts -passin pass:"storepass" -passout p
 # Extract the PEM-formatted X.509 certificate for Fleet Server
 openssl pkcs12 -in fleet_server.p12 -out fleet_server.crt -clcerts -passin pass:"storepass" -passout pass:
 ```
+
+## Relay service certificates
+
+These certificates are used for mTLS between the local Relay service and UIAM. Unlike the
+certificates above they have their **own CA** (`relay_ca.crt`/`relay_ca.key`) — the shared dev
+CA private key is intentionally unavailable (see note above), so a separate trust anchor is used.
+`relay_ca.crt` is added to the UIAM container's trust store in `kbn-es/src/utils/docker_uiam.ts`.
+
+```
+# Generate the relay CA (50 years)
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 18250 \
+  -keyout relay_ca.key -out relay_ca.crt \
+  -subj "/CN=Relay Dev CA, O=Elastic" \
+  -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign"
+
+# Generate the relay service client key and CSR
+openssl req -new -newkey rsa:2048 -nodes \
+  -keyout relay_service.key -out relay_service.csr \
+  -subj "/CN=relay-service, O=Elastic"
+
+# Sign the CSR with the relay CA
+openssl x509 -req -in relay_service.csr -CA relay_ca.crt -CAkey relay_ca.key -CAcreateserial \
+  -out relay_service.crt -days 18250 -sha256 \
+  -extfile <(printf "subjectAltName=URI:spiffe://relay-service.elastic.co\nextendedKeyUsage=clientAuth\nbasicConstraints=critical,CA:FALSE")
+
+rm relay_service.csr relay_ca.srl
+```
