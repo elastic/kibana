@@ -175,24 +175,27 @@ describe('fromStoredFields', () => {
         expectValidFormat(result);
       });
 
-      describe.each([undefined, null])('when width and height are %s', (optional) => {
-        it('should omit them', () => {
-          const result = fromStoredFields(
-            {},
-            {
-              'field-name': {
-                id: 'url',
-                params: { type: 'img', width: optional, height: optional },
+      describe.each([undefined, null, '', 'not-a-number'])(
+        'when width and height are %s',
+        (optional) => {
+          it('should omit them', () => {
+            const result = fromStoredFields(
+              {},
+              {
+                'field-name': {
+                  id: 'url',
+                  params: { type: 'img', width: optional, height: optional },
+                },
               },
-            },
-            {}
-          );
-          expect(result).toEqual({
-            'field-name': { format: { type: 'url', params: { type: 'img' } } },
+              {}
+            );
+            expect(result).toEqual({
+              'field-name': { format: { type: 'url', params: { type: 'img' } } },
+            });
+            expectValidFormat(result);
           });
-          expectValidFormat(result);
-        });
-      });
+        }
+      );
     });
 
     describe('when the type is audio', () => {

@@ -369,7 +369,6 @@ describe('fromStoredFields', () => {
               lookupEntries: [
                 null,
                 'not-an-object',
-                { key: 'pending' },
                 { value: 'Done' },
                 { key: '', value: 'Empty' },
                 { key: 'pending', value: 'Pending' },
@@ -388,6 +387,32 @@ describe('fromStoredFields', () => {
         },
       });
       expectValidFormat(result);
+    });
+
+    describe.each([undefined, null, ''])('when the lookup value is %s', (value) => {
+      it('should coerce it to an empty string', () => {
+        const result = fromStoredFields(
+          {},
+          {
+            'field-name': {
+              id: 'static_lookup',
+              params: {
+                lookupEntries: [{ key: 'pending', value }],
+              },
+            },
+          },
+          {}
+        );
+        expect(result).toEqual({
+          'field-name': {
+            format: {
+              type: 'static_lookup',
+              params: { lookup_entries: [{ key: 'pending', value: '' }] },
+            },
+          },
+        });
+        expectValidFormat(result);
+      });
     });
 
     it('should coerce lookup keys and values to strings', () => {

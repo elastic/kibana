@@ -128,6 +128,12 @@ function parseBooleanValue(value: Serializable) {
   return COLOR_FORMAT_DEFAULT_PARAMS.boolean;
 }
 
+function parseUrlDimension(value: Serializable) {
+  if (value == null || value === '') return undefined;
+  const dimension = Number(value);
+  return Number.isNaN(dimension) ? undefined : dimension;
+}
+
 function fromStoredFieldFormatParams(
   format: NonNullable<DataViewSpec['fieldFormats']>[string] | undefined
 ) {
@@ -215,11 +221,11 @@ function fromStoredFieldFormatParams(
     const lookupEntries = ((params.lookupEntries ?? []) as SerializableArray)
       .filter((entry) => {
         if (!isPlainObject(entry)) return false;
-        return !!(entry as SerializableRecord).key && !!(entry as SerializableRecord).value;
+        return !!(entry as SerializableRecord).key;
       })
       .map((entry) => ({
         key: (entry as SerializableRecord).key?.toString(),
-        value: (entry as SerializableRecord).value?.toString(),
+        value: ((entry as SerializableRecord).value || '').toString(),
       }));
 
     return {
@@ -253,8 +259,8 @@ function fromStoredFieldFormatParams(
     if (type === 'img') {
       return {
         ...base,
-        width: params.width != null ? Number(params.width) : undefined,
-        height: params.height != null ? Number(params.height) : undefined,
+        width: parseUrlDimension(params.width),
+        height: parseUrlDimension(params.height),
       };
     }
 
