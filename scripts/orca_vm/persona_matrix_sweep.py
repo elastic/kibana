@@ -30,6 +30,7 @@ Usage:
   python3 persona_matrix_sweep.py --teardown            # delete orca-sweep-* VMs
 """
 import argparse
+import inspect
 import json
 import sys
 import os
@@ -121,7 +122,8 @@ MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATR
 # default — a judge-panel sweep would then grade with the incumbent judge and still
 # pass its doc-count gate.
 FORWARDED_ENV_VARS = ("EVAL_REPETITIONS", "PERSONA_MATRIX_TIMEOUT_MINUTES", "EVAL_CONNECTOR_ID",
-                      "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE", "PERSONA_MATRIX_SHARD")
+                      "KBN_EVALS_HTTP_RETRIES", "EVAL_SUITE", "PERSONA_MATRIX_SHARD",
+                      "TEST_RUN_ID")
 # Prefer the durable copy in ~/.elastic: /tmp is cleared by macOS and by
 # routine cleanup, and a missing file here fails per-VM inside scp (every
 # deploy dies, observed 2026-09-03) rather than once, up front.
@@ -675,6 +677,26 @@ def self_test() -> int:
             _missing = {f"{i}.ts" for i in _imports} - _overlaid
             check("every ./datasets import is in the VM overlay", sorted(_missing), [])
             check("overlay actually parsed some imports", len(_imports) > 0, True)
+
+        # Shards must not share a TEST_RUN_ID: execution_id derives from it,
+        # and a shared id made shard 2/2 count shard 1/2's docs (154 vs a 140
+        # gate) instead of only its own slice.
+        check("shard run ids differ",
+              shard_run_id("sweep-1", "1/2") != shard_run_id("sweep-1", "2/2"), True)
+        check("shard run id keeps the sweep base",
+              shard_run_id("sweep-1", "1/2").startswith("sweep-1"), True)
+        check("unsharded run id untouched", shard_run_id("sweep-1", None), "sweep-1")
+        check("shard run id has no slash",
+              "/" not in shard_run_id("sweep-1", "2/4"), True)
+        # Testing shard_run_id alone is a false green: deleting launch()'s
+        # assignment left every check passing while both VMs shared an id.
+        # Assert the wiring by reading launch()'s own source.
+        _launch_src = inspect.getsource(launch)
+        check("launch assigns a per-shard TEST_RUN_ID",
+              'env["TEST_RUN_ID"] = shard_run_id(' in _launch_src, True)
+        check("TEST_RUN_ID reaches the VM",
+              "export TEST_RUN_ID=sweep-1-s1of2 && " in
+              build_env_prefix("m", {"TEST_RUN_ID": shard_run_id("sweep-1", "1/2")}), True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
@@ -704,6 +726,19 @@ def self_test() -> int:
     return 1 if failures else 0
 
 
+def shard_run_id(base: str, shard: Optional[str]) -> str:
+    """Per-shard TEST_RUN_ID.
+
+    execution_id is derived from TEST_RUN_ID. Shards that share one id also
+    share an execution_id, so each shard's golden gate counts every other
+    shard's docs (shard 2/2 read 154 against a 140 gate). Suffixing keeps the
+    slices independently countable while staying traceable to one sweep.
+    """
+    if not shard:
+        return base
+    return f"{base}-s{shard.replace('/', 'of')}"
+
+
 def launch(ip: str, model: str, shard: Optional[str] = None) -> subprocess.Popen:
     log = model_dir(model, shard=shard) / "run.log"
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -712,6 +747,13 @@ def launch(ip: str, model: str, shard: Optional[str] = None) -> subprocess.Popen
     # Suite reads PERSONA_MATRIX_SHARD for its example stride; per-VM value.
     if shard:
         env["PERSONA_MATRIX_SHARD"] = shard
+        # execution_id derives from TEST_RUN_ID. Left unset, every shard VM
+        # computes the SAME id, so each shard's golden gate counts all the
+        # other shards' docs too (observed: shard 2/2 read 154 docs against a
+        # 140 gate because shard 1/2's 154 landed under one id). A per-shard
+        # run id keeps the slices independently countable.
+        base = env.get("TEST_RUN_ID") or f"sweep-{int(time.time())}"
+        env["TEST_RUN_ID"] = shard_run_id(base, shard)
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
@@ -1080,6 +1122,11 @@ def main() -> int:
         return 2
     if args.shards > 1:
         print(f"sharding: {args.shards} VMs/model -> {len(units)} VMs total", flush=True)
+        # One base per sweep, suffixed per shard in launch(). Computing the
+        # base inside launch() would stamp each shard with a different base
+        # and leave the slices unrelatable after the fact.
+        os.environ.setdefault("TEST_RUN_ID", f"sweep-{int(time.time())}")
+        print(f"run id base: {os.environ['TEST_RUN_ID']}", flush=True)
 
     # Provision + deploy in parallel (independent per VM); launches stay serial.
     ips: dict[tuple, str] = {}
