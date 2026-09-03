@@ -138,12 +138,73 @@ export async function seedPersonaMatrixEnvironment({
   const markerId = 'persona-matrix-env-seed-v1';
 
   // A2: endpoint process telemetry with the log.dll side-load evidence.
+  //
+  // Fixture density matters here: a bare 3-doc evidence-only index made every
+  // model's legitimate first move (a 30d baseline / 24h window ESQL query)
+  // return empty, burning 6+ diagnostic tool calls rediscovering what data
+  // exists (observed on every model in the matrix, worst on slow ones).
+  // Seeded shape:
+  //   - ~40 benign baseline process events spread over the last 30 days for
+  //     HOST and two neighbors, timestamps computed relative to seed time so
+  //     the fixture never rots.
+  //   - The malicious chain stamped ~50 minutes ago, i.e. inside any sane
+  //     recent-activity window, and anomalous against the baseline by
+  //     construction (SYSTEM user, Users\Public path, unsigned DLL).
+  const now = Date.now();
+  const minutesAgo = (m: number) => new Date(now - m * 60_000).toISOString();
+  const daysAgo = (d: number, jitterMin = 0) =>
+    new Date(now - d * 86_400_000 - jitterMin * 60_000).toISOString();
+
+  const benignExecutables = [
+    { name: 'svchost.exe', exe: 'C:\\Windows\\System32\\svchost.exe', user: 'SYSTEM' },
+    {
+      name: 'MsMpEng.exe',
+      exe: 'C:\\Program Files\\Windows Defender\\MsMpEng.exe',
+      user: 'SYSTEM',
+    },
+    { name: 'RuntimeBroker.exe', exe: 'C:\\Windows\\System32\\RuntimeBroker.exe', user: 'DANEL' },
+    {
+      name: 'chrome.exe',
+      exe: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      user: 'DANEL',
+    },
+    {
+      name: 'powershell.exe',
+      exe: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+      user: 'DANEL',
+    },
+  ];
+  const baselineHosts = [HOST, 'srv-linux-web-02', 'srv-mac-dev-03'];
+  const baselineDocs: Array<Record<string, unknown>> = [];
+  benignExecutables.forEach((bin, i) => {
+    baselineHosts.forEach((host, j) => {
+      // ~13 events per host over 30 days: enough for COUNT/STATS baselines,
+      // small enough to keep the seed bulk cheap.
+      for (let k = 0; k < 3; k++) {
+        const day = 1 + ((i * 7 + j * 3 + k * 5) % 29); // deterministic spread 1..29 days ago
+        baselineDocs.push({
+          '@timestamp': daysAgo(day, i * 10 + j * 5 + k),
+          'event.category': ['process'],
+          'event.type': ['start'],
+          'event.dataset': 'endpoint.events.process',
+          'host.name': host,
+          'user.name': bin.user,
+          'process.name': bin.name,
+          'process.executable': bin.exe,
+          'process.parent.name': host === HOST ? 'services.exe' : 'init',
+          'process.command_line': `"${bin.exe}"`,
+        });
+      }
+    });
+  });
+
   await ensureIndexWithDocs(
     esClient,
     ENDPOINT_INDEX,
     [
+      ...baselineDocs,
       {
-        '@timestamp': '2026-07-21T07:58:11.320Z',
+        '@timestamp': minutesAgo(50),
         'event.category': ['process'],
         'event.type': ['start'],
         'event.dataset': 'endpoint.events.process',
@@ -155,7 +216,7 @@ export async function seedPersonaMatrixEnvironment({
         'process.command_line': 'C:\\Windows\\BluetoothService.exe -embed',
       },
       {
-        '@timestamp': '2026-07-21T07:58:11.900Z',
+        '@timestamp': minutesAgo(49),
         'event.category': ['file'],
         'event.type': ['creation'],
         'event.dataset': 'endpoint.events.file',
@@ -168,7 +229,7 @@ export async function seedPersonaMatrixEnvironment({
         'file.code_signature.status': 'unsigned',
       },
       {
-        '@timestamp': '2026-07-21T07:58:12.100Z',
+        '@timestamp': minutesAgo(48),
         'event.category': ['dll'],
         'event.type': ['start'],
         'event.action': 'dll_loaded',
@@ -284,7 +345,7 @@ export async function seedPersonaMatrixEnvironment({
     log.info(`[env-seed] entity store v2 running`);
 
     const latestAlias = 'entities-latest-default';
-    const now = new Date().toISOString();
+    const seededAt = new Date().toISOString();
     const seedEntities = [
       {
         euid: `host-default-${HOST}`,
@@ -321,7 +382,7 @@ export async function seedPersonaMatrixEnvironment({
     ];
     const operations = seedEntities.flatMap((e) => {
       const doc: Record<string, unknown> = {
-        '@timestamp': now,
+        '@timestamp': seededAt,
         entity: {
           id: e.euid,
           EngineMetadata: { Type: e.type },
