@@ -46488,9 +46488,9 @@ paths:
                         type: logfile
                         vars:
                           - name: paths
+                            type: text
                             required: true
                             title: Paths
-                            type: text
               schema:
                 anyOf:
                   - type: string
@@ -86482,6 +86482,8 @@ components:
       title: Related case
       type: object
     Cases_response_4xx:
+      title: Unsuccessful cases API response
+      type: object
       properties:
         error:
           example: Unauthorized
@@ -86491,8 +86493,6 @@ components:
         statusCode:
           example: 401
           type: integer
-      title: Unsuccessful cases API response
-      type: object
     Cases_rule:
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -87506,24 +87506,25 @@ components:
         - data_view
     Kibana_HTTP_APIs_action_id_response:
       additionalProperties: false
+      type: object
       properties:
         actionId:
           type: string
       required:
         - actionId
       title: action_id_response
-      type: object
     Kibana_HTTP_APIs_action_message_response:
       additionalProperties: false
+      type: object
       properties:
         message:
           type: string
       required:
         - message
       title: action_message_response
-      type: object
     Kibana_HTTP_APIs_agent_policy_response:
       additionalProperties: false
+      type: object
       properties:
         advanced_settings:
           additionalProperties: false
@@ -87833,7 +87834,6 @@ components:
         - updated_by
         - revision
       title: agent_policy_response
-      type: object
     Kibana_HTTP_APIs_aiops_change_point_chart:
       additionalProperties: false
       description: Change point detection chart embeddable schema
@@ -89716,6 +89716,7 @@ components:
         - id
     Kibana_HTTP_APIs_alerts_filter_query:
       additionalProperties: false
+      type: object
       properties:
         dsl:
           description: A filter written in Elasticsearch Query Domain Specific Language (DSL).
@@ -89758,9 +89759,9 @@ components:
         - kql
         - filters
       title: alerts_filter_query
-      type: object
     Kibana_HTTP_APIs_apm-anomaly-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -89827,6 +89828,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.anomaly"`.
+          type: object
           properties:
             anomalyDetectorTypes:
               description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.
@@ -89868,7 +89870,6 @@ components:
             - environment
             - anomalySeverityType
           title: APM Anomaly Rule Params
-          type: object
         rule_type_id:
           enum:
             - apm.anomaly
@@ -89904,9 +89905,9 @@ components:
         - rule_type_id
         - params
       title: APM anomaly
-      type: object
     Kibana_HTTP_APIs_apm-error-rate-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -89973,6 +89974,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+          type: object
           properties:
             environment:
               description: Filter the errors coming from your application to apply the rule to a specific environment.
@@ -90027,7 +90029,6 @@ components:
             - threshold
             - environment
           title: Error Count Rule Params
-          type: object
         rule_type_id:
           enum:
             - apm.error_rate
@@ -90063,7 +90064,6 @@ components:
         - rule_type_id
         - params
       title: Error rate
-      type: object
     Kibana_HTTP_APIs_apm-service-map-embeddable:
       additionalProperties: false
       description: APM service map embeddable schema
@@ -90151,6 +90151,7 @@ components:
           type: string
     Kibana_HTTP_APIs_apm-transaction-duration-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -90217,6 +90218,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the transaction duration rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+          type: object
           properties:
             aggregationType:
               description: The type of aggregation to perform.
@@ -90282,7 +90284,6 @@ components:
             - aggregationType
             - environment
           title: Transaction Duration Rule Params
-          type: object
         rule_type_id:
           enum:
             - apm.transaction_duration
@@ -90318,9 +90319,9 @@ components:
         - rule_type_id
         - params
       title: Transaction duration
-      type: object
     Kibana_HTTP_APIs_apm-transaction-error-rate-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -90387,6 +90388,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+          type: object
           properties:
             environment:
               type: string
@@ -90435,7 +90437,6 @@ components:
             - threshold
             - environment
           title: Transaction Error Rate Rule Params
-          type: object
         rule_type_id:
           enum:
             - apm.transaction_error_rate
@@ -90471,10 +90472,10 @@ components:
         - rule_type_id
         - params
       title: Transaction error rate
-      type: object
     Kibana_HTTP_APIs_autoColor:
       additionalProperties: false
       description: Coloring determined at runtime based on chart defaults
+      type: object
       properties:
         type:
           enum:
@@ -90483,9 +90484,9 @@ components:
       required:
         - type
       title: Auto Color
-      type: object
     Kibana_HTTP_APIs_backfill_error_response:
       additionalProperties: false
+      type: object
       properties:
         error:
           additionalProperties: false
@@ -90511,9 +90512,9 @@ components:
       required:
         - error
       title: backfill_error_response
-      type: object
     Kibana_HTTP_APIs_backfill_response:
       additionalProperties: false
+      type: object
       properties:
         created_at:
           type: string
@@ -90642,9 +90643,9 @@ components:
         - status
         - schedule
       title: backfill_response
-      type: object
     Kibana_HTTP_APIs_bulk_delete_enrollment_api_keys_request:
       additionalProperties: false
+      type: object
       properties:
         forceDelete:
           default: false
@@ -90664,9 +90665,9 @@ components:
           maxItems: 10000
           type: array
       title: bulk_delete_enrollment_api_keys_request
-      type: object
     Kibana_HTTP_APIs_bulk_delete_enrollment_api_keys_response:
       additionalProperties: false
+      type: object
       properties:
         action:
           type: string
@@ -90682,9 +90683,9 @@ components:
         - successCount
         - errorCount
       title: bulk_delete_enrollment_api_keys_response
-      type: object
     Kibana_HTTP_APIs_bulk_get_agent_policies_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -90694,9 +90695,9 @@ components:
       required:
         - items
       title: bulk_get_agent_policies_response
-      type: object
     Kibana_HTTP_APIs_bulk_get_package_policies_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -90706,9 +90707,9 @@ components:
       required:
         - items
       title: bulk_get_package_policies_response
-      type: object
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
+      type: object
       properties:
         allow_outdated_version:
           default: false
@@ -90739,9 +90740,9 @@ components:
       required:
         - packages
       title: bulk_install_packages_from_registry_request
-      type: object
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -90753,9 +90754,9 @@ components:
       required:
         - items
       title: bulk_install_packages_from_registry_response
-      type: object
     Kibana_HTTP_APIs_bulk_install_packages_response_item_error:
       additionalProperties: false
+      type: object
       properties:
         error:
           anyOf:
@@ -90769,9 +90770,9 @@ components:
         - name
         - statusCode
       title: bulk_install_packages_response_item_error
-      type: object
     Kibana_HTTP_APIs_bulk_install_packages_response_item_success:
       additionalProperties: false
+      type: object
       properties:
         name:
           type: string
@@ -90807,9 +90808,9 @@ components:
         - version
         - result
       title: bulk_install_packages_response_item_success
-      type: object
     Kibana_HTTP_APIs_bulk_namespace_customization_request:
       additionalProperties: false
+      type: object
       properties:
         disable:
           description: Namespaces to disable namespace-level customization for on each package.
@@ -90833,9 +90834,9 @@ components:
       required:
         - packages
       title: bulk_namespace_customization_request
-      type: object
     Kibana_HTTP_APIs_bulk_namespace_customization_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -90909,9 +90910,9 @@ components:
       required:
         - items
       title: bulk_namespace_customization_response
-      type: object
     Kibana_HTTP_APIs_bulk_rollback_packages_request:
       additionalProperties: false
+      type: object
       properties:
         packages:
           items:
@@ -90929,18 +90930,18 @@ components:
       required:
         - packages
       title: bulk_rollback_packages_request
-      type: object
     Kibana_HTTP_APIs_bulk_rollback_packages_response:
       additionalProperties: false
+      type: object
       properties:
         taskId:
           type: string
       required:
         - taskId
       title: bulk_rollback_packages_response
-      type: object
     Kibana_HTTP_APIs_bulk_uninstall_packages_request:
       additionalProperties: false
+      type: object
       properties:
         force:
           default: false
@@ -90963,9 +90964,9 @@ components:
       required:
         - packages
       title: bulk_uninstall_packages_request
-      type: object
     Kibana_HTTP_APIs_bulk_upgrade_managed_integration_result:
       additionalProperties: false
+      type: object
       properties:
         body:
           additionalProperties: false
@@ -90995,9 +90996,9 @@ components:
         - id
         - success
       title: bulk_upgrade_managed_integration_result
-      type: object
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
+      type: object
       properties:
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
@@ -91009,9 +91010,9 @@ components:
       required:
         - policyIds
       title: bulk_upgrade_managed_integrations_request
-      type: object
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
+      type: object
       properties:
         force:
           default: false
@@ -91038,19 +91039,19 @@ components:
       required:
         - packages
       title: bulk_upgrade_packages_request
-      type: object
     Kibana_HTTP_APIs_bulk_upgrade_packages_response:
       additionalProperties: false
+      type: object
       properties:
         taskId:
           type: string
       required:
         - taskId
       title: bulk_upgrade_packages_response
-      type: object
     Kibana_HTTP_APIs_byteFormat:
       additionalProperties: false
       description: Data size format in bits or bytes, with optional decimal places and suffix.
+      type: object
       properties:
         decimals:
           default: 2
@@ -91071,10 +91072,10 @@ components:
       required:
         - type
       title: Byte Format
-      type: object
     Kibana_HTTP_APIs_categoricalColorMapping:
       additionalProperties: false
       description: Palette color assignment for specific categorical values. Unmapped values receive the unassigned color.
+      type: object
       properties:
         mapping:
           items:
@@ -91113,9 +91114,9 @@ components:
         - palette
         - mapping
       title: Categorical Color Mapping
-      type: object
     Kibana_HTTP_APIs_category_summary_item:
       additionalProperties: false
+      type: object
       properties:
         count:
           type: number
@@ -91132,7 +91133,6 @@ components:
         - title
         - count
       title: category_summary_item
-      type: object
     Kibana_HTTP_APIs_ClassicFieldDefinition:
       additionalProperties:
         $ref: '#/components/schemas/Kibana_HTTP_APIs_ClassicFieldDefinitionConfig'
@@ -91314,6 +91314,7 @@ components:
     Kibana_HTTP_APIs_color_code:
       additionalProperties: false
       description: A color specified as a hex or CSS color code string.
+      type: object
       properties:
         type:
           enum:
@@ -91326,7 +91327,6 @@ components:
         - type
         - value
       title: Color Code
-      type: object
     Kibana_HTTP_APIs_colorByValue:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
@@ -91338,6 +91338,7 @@ components:
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
       description: Color by absolute value configuration
+      type: object
       properties:
         range:
           enum:
@@ -91378,10 +91379,10 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
-      type: object
     Kibana_HTTP_APIs_colorByValuePalette:
       additionalProperties: false
       description: Color by value using a palette, with colors distributed across the range of values.
+      type: object
       properties:
         palette:
           anyOf:
@@ -91418,10 +91419,10 @@ components:
         - type
         - palette
       title: Color By Value (Palette)
-      type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
       description: Color by percentage value configuration
+      type: object
       properties:
         range:
           enum:
@@ -91462,10 +91463,10 @@ components:
         - range
         - steps
       title: Color By Value (Percentage)
-      type: object
     Kibana_HTTP_APIs_colorFromPalette:
       additionalProperties: false
       description: Color at a fixed index position in a named palette.
+      type: object
       properties:
         index:
           description: The index of the color in the palette.
@@ -91481,7 +91482,6 @@ components:
         - type
         - index
       title: Color From Palette
-      type: object
     Kibana_HTTP_APIs_colorMapping:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_categoricalColorMapping'
@@ -91567,6 +91567,7 @@ components:
             - steps
     Kibana_HTTP_APIs_connector_execute_request:
       additionalProperties: false
+      type: object
       properties:
         params:
           additionalProperties: {}
@@ -91596,9 +91597,9 @@ components:
       required:
         - params
       title: connector_execute_request
-      type: object
     Kibana_HTTP_APIs_connector_response:
       additionalProperties: false
+      type: object
       properties:
         auth_mode:
           description: The authentication mode used for the connector.
@@ -91643,9 +91644,9 @@ components:
         - is_system_action
         - is_connector_type_deprecated
       title: connector_response
-      type: object
     Kibana_HTTP_APIs_connector_response_with_references_count:
       additionalProperties: false
+      type: object
       properties:
         auth_mode:
           description: The authentication mode used for the connector.
@@ -91694,9 +91695,9 @@ components:
         - is_connector_type_deprecated
         - referenced_by_count
       title: connector_response_with_references_count
-      type: object
     Kibana_HTTP_APIs_connector_type_response:
       additionalProperties: false
+      type: object
       properties:
         allow_multiple_system_actions:
           description: Indicates whether multiple instances of the same system action connector can be used in a single rule.
@@ -91771,7 +91772,6 @@ components:
         - source
         - is_testable
       title: connector_type_response
-      type: object
     Kibana_HTTP_APIs_ContentPackIncludedObjects:
       anyOf:
         - additionalProperties: false
@@ -91816,6 +91816,7 @@ components:
             - objects
     Kibana_HTTP_APIs_copy_agent_policy_request:
       additionalProperties: false
+      type: object
       properties:
         description:
           type: string
@@ -91825,10 +91826,10 @@ components:
       required:
         - name
       title: copy_agent_policy_request
-      type: object
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
       description: A minimal representation of Kibana's operational status. Returned when the caller is unauthenticated or lacks the `monitor` cluster privilege.
+      type: object
       properties:
         status:
           additionalProperties: false
@@ -91853,10 +91854,10 @@ components:
       required:
         - status
       title: core_status_redactedResponse
-      type: object
     Kibana_HTTP_APIs_core_status_response:
       additionalProperties: false
       description: Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.
+      type: object
       properties:
         metrics:
           additionalProperties: false
@@ -92105,9 +92106,9 @@ components:
         - status
         - metrics
       title: core_status_response
-      type: object
     Kibana_HTTP_APIs_counterRateOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the metric
@@ -92133,9 +92134,9 @@ components:
         - field
         - operation
       title: Counter Rate Operation
-      type: object
     Kibana_HTTP_APIs_countMetricOperation:
       additionalProperties: false
+      type: object
       properties:
         empty_as_null:
           default: false
@@ -92164,9 +92165,9 @@ components:
       required:
         - operation
       title: Count Metric Operation
-      type: object
     Kibana_HTTP_APIs_create_custom_integration_request:
       additionalProperties: false
+      type: object
       properties:
         datasets:
           items:
@@ -92196,9 +92197,9 @@ components:
         - integrationName
         - datasets
       title: create_custom_integration_request
-      type: object
     Kibana_HTTP_APIs_create_enrollment_api_key_response:
       additionalProperties: false
+      type: object
       properties:
         action:
           enum:
@@ -92210,9 +92211,9 @@ components:
         - item
         - action
       title: create_enrollment_api_key_response
-      type: object
     Kibana_HTTP_APIs_create_managed_integration_request:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -92438,9 +92439,9 @@ components:
         - name
         - package
       title: create_managed_integration_request
-      type: object
     Kibana_HTTP_APIs_create_package_policy_request:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -92737,18 +92738,18 @@ components:
         - name
         - inputs
       title: create_package_policy_request
-      type: object
     Kibana_HTTP_APIs_create_package_policy_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_response'
       required:
         - item
       title: create_package_policy_response
-      type: object
     Kibana_HTTP_APIs_cumulativeSumOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
@@ -92773,10 +92774,10 @@ components:
       required:
         - operation
       title: Cumulative Sum Operation
-      type: object
     Kibana_HTTP_APIs_customFormat:
       additionalProperties: false
       description: Custom format using a Kibana field format pattern string.
+      type: object
       properties:
         pattern:
           description: Kibana field format pattern string.
@@ -92789,7 +92790,6 @@ components:
         - type
         - pattern
       title: Custom Format
-      type: object
     Kibana_HTTP_APIs_data_visualizer_field_stats:
       description: Field statistics table embeddable schema
       discriminator:
@@ -92869,6 +92869,7 @@ components:
             - query
     Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -92935,6 +92936,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the degraded docs rule. These parameters are appropriate when `rule_type_id` is `datasetQuality.degradedDocs`.
+          type: object
           properties:
             comparator:
               type: string
@@ -92965,7 +92967,6 @@ components:
             - comparator
             - searchConfiguration
           title: Degraded Docs Rule Params
-          type: object
         rule_type_id:
           enum:
             - datasetQuality.degradedDocs
@@ -93001,7 +93002,6 @@ components:
         - rule_type_id
         - params
       title: Degraded docs
-      type: object
     Kibana_HTTP_APIs_datatableChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableNoESQL'
@@ -93085,6 +93085,7 @@ components:
     Kibana_HTTP_APIs_datatableESQL:
       additionalProperties: false
       description: Datatable state configuration for ES|QL queries
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -93200,9 +93201,9 @@ components:
         - type
         - data_source
       title: Datatable (ES|QL)
-      type: object
     Kibana_HTTP_APIs_datatableESQLMetric:
       additionalProperties: false
+      type: object
       properties:
         alignment:
           default: right
@@ -93278,7 +93279,6 @@ components:
       required:
         - column
       title: Datatable Metric (ES|QL)
-      type: object
     Kibana_HTTP_APIs_datatableMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_datatableMetricCountMetric:
@@ -93306,6 +93306,7 @@ components:
     Kibana_HTTP_APIs_datatableNoESQL:
       additionalProperties: false
       description: Datatable state configuration for standard queries
+      type: object
       properties:
         data_source:
           discriminator:
@@ -93504,7 +93505,6 @@ components:
         - data_source
         - metrics
       title: Datatable (DSL)
-      type: object
     Kibana_HTTP_APIs_datatableRowDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_datatableRowFilters:
@@ -93518,6 +93518,7 @@ components:
     Kibana_HTTP_APIs_datatableStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         density:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableDensity'
@@ -93604,9 +93605,9 @@ components:
                 - direction
           description: Sorting configuration. Only one column can be sorted at a time. Use "column_type" to specify the column type.
       title: Datatable styling
-      type: object
     Kibana_HTTP_APIs_dateHistogramOperation:
       additionalProperties: false
+      type: object
       properties:
         drop_partial_intervals:
           default: false
@@ -93638,9 +93639,9 @@ components:
         - operation
         - field
       title: Date Histogram Operation
-      type: object
     Kibana_HTTP_APIs_delete_agent_policy_request:
       additionalProperties: false
+      type: object
       properties:
         agentPolicyId:
           description: The ID of the agent policy
@@ -93651,9 +93652,9 @@ components:
       required:
         - agentPolicyId
       title: delete_agent_policy_request
-      type: object
     Kibana_HTTP_APIs_delete_agent_policy_response:
       additionalProperties: false
+      type: object
       properties:
         id:
           type: string
@@ -93663,9 +93664,9 @@ components:
         - id
         - name
       title: delete_agent_policy_response
-      type: object
     Kibana_HTTP_APIs_delete_enrollment_api_key_response:
       additionalProperties: false
+      type: object
       properties:
         action:
           enum:
@@ -93674,27 +93675,27 @@ components:
       required:
         - action
       title: delete_enrollment_api_key_response
-      type: object
     Kibana_HTTP_APIs_delete_one_package_policy_response:
       additionalProperties: false
+      type: object
       properties:
         id:
           type: string
       required:
         - id
       title: delete_one_package_policy_response
-      type: object
     Kibana_HTTP_APIs_delete_package_datastream_assets_response:
       additionalProperties: false
+      type: object
       properties:
         success:
           type: boolean
       required:
         - success
       title: delete_package_datastream_assets_response
-      type: object
     Kibana_HTTP_APIs_delete_package_policies_request:
       additionalProperties: false
+      type: object
       properties:
         force:
           type: boolean
@@ -93706,9 +93707,9 @@ components:
       required:
         - packagePolicyIds
       title: delete_package_policies_request
-      type: object
     Kibana_HTTP_APIs_delete_package_policies_response_item:
       additionalProperties: false
+      type: object
       properties:
         body:
           additionalProperties: false
@@ -93747,9 +93748,9 @@ components:
         - policy_ids
         - package
       title: delete_package_policies_response_item
-      type: object
     Kibana_HTTP_APIs_delete_package_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -93761,9 +93762,9 @@ components:
       required:
         - items
       title: delete_package_response
-      type: object
     Kibana_HTTP_APIs_differencesOperation:
       additionalProperties: false
+      type: object
       properties:
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -93788,9 +93789,9 @@ components:
         - operation
         - of
       title: Differences Operation
-      type: object
     Kibana_HTTP_APIs_dry_run_package_policies_request:
       additionalProperties: false
+      type: object
       properties:
         packagePolicyIds:
           items:
@@ -93802,9 +93803,9 @@ components:
       required:
         - packagePolicyIds
       title: dry_run_package_policies_request
-      type: object
     Kibana_HTTP_APIs_dry_run_package_policy:
       additionalProperties: true
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -94151,9 +94152,9 @@ components:
         - enabled
         - inputs
       title: dry_run_package_policy
-      type: object
     Kibana_HTTP_APIs_dry_run_package_policy_response:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -94628,10 +94629,10 @@ components:
         - created_at
         - created_by
       title: dry_run_package_policy_response
-      type: object
     Kibana_HTTP_APIs_durationFormat:
       additionalProperties: false
       description: Duration format between time units.
+      type: object
       properties:
         compact:
           description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
@@ -94680,9 +94681,9 @@ components:
         - from
         - to
       title: Duration Format
-      type: object
     Kibana_HTTP_APIs_enrollment_api_key:
       additionalProperties: false
+      type: object
       properties:
         active:
           description: When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.
@@ -94715,18 +94716,18 @@ components:
         - active
         - created_at
       title: enrollment_api_key
-      type: object
     Kibana_HTTP_APIs_enrollment_api_key_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_enrollment_api_key'
       required:
         - item
       title: enrollment_api_key_response
-      type: object
     Kibana_HTTP_APIs_es_asset_reference:
       additionalProperties: false
+      type: object
       properties:
         customDataStreamOriginDataset:
           type: string
@@ -94755,9 +94756,9 @@ components:
         - id
         - type
       title: es_asset_reference
-      type: object
     Kibana_HTTP_APIs_es-query-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -94824,6 +94825,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the ES query rule. These parameters are appropriate when `rule_type_id` is `.es-query`.
+          type: object
           properties:
             aggField:
               description: The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
@@ -94999,7 +95001,6 @@ components:
             - index
             - esqlQuery
           title: ES Query Rule Params
-          type: object
         rule_type_id:
           enum:
             - .es-query
@@ -95035,10 +95036,10 @@ components:
         - rule_type_id
         - params
       title: ES query
-      type: object
     Kibana_HTTP_APIs_esqlDataSource:
       additionalProperties: false
       description: Uses an ES|QL query as the data source. The query is executed at render time; resulting columns are available as fields.
+      type: object
       properties:
         query:
           description: 'An ES|QL query that drives the data source. The query must produce a tabular result set; column names are used as field references. Example: "FROM logs-* | STATS count = COUNT(*) BY host.name".'
@@ -95051,7 +95052,6 @@ components:
         - type
         - query
       title: ES|QL Data Source
-      type: object
     Kibana_HTTP_APIs_FailureStore:
       anyOf:
         - additionalProperties: false
@@ -95296,6 +95296,7 @@ components:
     Kibana_HTTP_APIs_filterSimple:
       additionalProperties: false
       description: A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.
+      type: object
       properties:
         expression:
           description: A query expression in KQL or Lucene syntax
@@ -95313,9 +95314,9 @@ components:
       required:
         - expression
       title: Filter
-      type: object
     Kibana_HTTP_APIs_filtersOperation:
       additionalProperties: false
+      type: object
       properties:
         filters:
           items:
@@ -95333,10 +95334,10 @@ components:
         - operation
         - filters
       title: Filters Operation
-      type: object
     Kibana_HTTP_APIs_filterWithLabel:
       additionalProperties: false
       description: A KQL or Lucene filter with an optional display label.
+      type: object
       properties:
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -95346,9 +95347,9 @@ components:
       required:
         - filter
       title: Filter with Label
-      type: object
     Kibana_HTTP_APIs_find_backfill_response:
       additionalProperties: false
+      type: object
       properties:
         data:
           items:
@@ -95366,9 +95367,9 @@ components:
         - total
         - data
       title: find_backfill_response
-      type: object
     Kibana_HTTP_APIs_find_maintenance_windows_response:
       additionalProperties: false
+      type: object
       properties:
         maintenanceWindows:
           description: The list of maintenance windows.
@@ -95390,7 +95391,6 @@ components:
         - total
         - maintenanceWindows
       title: find_maintenance_windows_response
-      type: object
     Kibana_HTTP_APIs_formatType:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
@@ -95401,6 +95401,7 @@ components:
       title: Format Type
     Kibana_HTTP_APIs_formulaOperation:
       additionalProperties: false
+      type: object
       properties:
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -95437,9 +95438,9 @@ components:
         - operation
         - formula
       title: Formula Operation
-      type: object
     Kibana_HTTP_APIs_full_agent_policy:
       additionalProperties: false
+      type: object
       properties:
         agent:
           additionalProperties: false
@@ -95943,7 +95944,6 @@ components:
         - outputs
         - inputs
       title: full_agent_policy
-      type: object
     Kibana_HTTP_APIs_gaugeChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeNoESQL'
@@ -95953,6 +95953,7 @@ components:
     Kibana_HTTP_APIs_gaugeESQL:
       additionalProperties: false
       description: Gauge configuration using an ES|QL query.
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -96077,7 +96078,6 @@ components:
         - data_source
         - metric
       title: Gauge Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_gaugeMetricCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_countMetricOperation'
     Kibana_HTTP_APIs_gaugeMetricFormula:
@@ -96097,6 +96097,7 @@ components:
     Kibana_HTTP_APIs_gaugeNoESQL:
       additionalProperties: false
       description: Gauge configuration using a data view.
+      type: object
       properties:
         data_source:
           discriminator:
@@ -96216,10 +96217,10 @@ components:
         - data_source
         - metric
       title: Gauge Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_gaugeShapeBullet:
       additionalProperties: false
       description: Bullet gauge shape.
+      type: object
       properties:
         orientation:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_simple_orientation'
@@ -96231,10 +96232,10 @@ components:
       required:
         - type
       title: Shape (Bullet)
-      type: object
     Kibana_HTTP_APIs_gaugeShapeCircular:
       additionalProperties: false
       description: Circular gauge shape.
+      type: object
       properties:
         type:
           enum:
@@ -96245,10 +96246,10 @@ components:
       required:
         - type
       title: Shape (Circular)
-      type: object
     Kibana_HTTP_APIs_gaugeStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         shape:
           anyOf:
@@ -96258,9 +96259,9 @@ components:
             orientation: horizontal
             type: bullet
       title: Gauge styling
-      type: object
     Kibana_HTTP_APIs_geo-containment-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -96327,6 +96328,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the geo containment rule. These parameters are appropriate when `rule_type_id` is `.geo-containment`.
+          type: object
           properties:
             boundaryGeoField:
               minLength: 1
@@ -96375,7 +96377,6 @@ components:
             - indexQuery
             - boundaryIndexQuery
           title: Geo Containment Rule Params
-          type: object
         rule_type_id:
           enum:
             - .geo-containment
@@ -96411,9 +96412,9 @@ components:
         - rule_type_id
         - params
       title: Geo containment
-      type: object
     Kibana_HTTP_APIs_get_agent_policy_outputs_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           additionalProperties: false
@@ -96476,18 +96477,18 @@ components:
       required:
         - item
       title: get_agent_policy_outputs_response
-      type: object
     Kibana_HTTP_APIs_get_agent_policy_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_agent_policy_response'
       required:
         - item
       title: get_agent_policy_response
-      type: object
     Kibana_HTTP_APIs_get_bulk_assets_request:
       additionalProperties: false
+      type: object
       properties:
         assetIds:
           items:
@@ -96506,9 +96507,9 @@ components:
       required:
         - assetIds
       title: get_bulk_assets_request
-      type: object
     Kibana_HTTP_APIs_get_bulk_assets_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96547,9 +96548,9 @@ components:
       required:
         - items
       title: get_bulk_assets_response
-      type: object
     Kibana_HTTP_APIs_get_categories_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96559,9 +96560,9 @@ components:
       required:
         - items
       title: get_categories_response
-      type: object
     Kibana_HTTP_APIs_get_data_streams_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96577,9 +96578,9 @@ components:
       required:
         - items
       title: get_data_streams_response
-      type: object
     Kibana_HTTP_APIs_get_dependencies_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96601,9 +96602,9 @@ components:
       required:
         - items
       title: get_dependencies_response
-      type: object
     Kibana_HTTP_APIs_get_enrollment_api_keys_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96629,9 +96630,9 @@ components:
         - perPage
         - list
       title: get_enrollment_api_keys_response
-      type: object
     Kibana_HTTP_APIs_get_full_agent_policy_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           anyOf:
@@ -96640,9 +96641,9 @@ components:
       required:
         - item
       title: get_full_agent_policy_response
-      type: object
     Kibana_HTTP_APIs_get_info_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
@@ -96651,9 +96652,9 @@ components:
       required:
         - item
       title: get_info_response
-      type: object
     Kibana_HTTP_APIs_get_inputs_response:
       additionalProperties: false
+      type: object
       properties:
         connectors:
           additionalProperties:
@@ -96744,9 +96745,9 @@ components:
       required:
         - inputs
       title: get_inputs_response
-      type: object
     Kibana_HTTP_APIs_get_installed_packages_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96769,18 +96770,18 @@ components:
         - items
         - total
       title: get_installed_packages_response
-      type: object
     Kibana_HTTP_APIs_get_k8s_manifest_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           type: string
       required:
         - item
       title: get_k8s_manifest_response
-      type: object
     Kibana_HTTP_APIs_get_limited_packages_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96790,9 +96791,9 @@ components:
       required:
         - items
       title: get_limited_packages_response
-      type: object
     Kibana_HTTP_APIs_get_list_agent_policy_outputs_request:
       additionalProperties: false
+      type: object
       properties:
         ids:
           description: list of package policy ids
@@ -96803,9 +96804,9 @@ components:
       required:
         - ids
       title: get_list_agent_policy_outputs_request
-      type: object
     Kibana_HTTP_APIs_get_list_agent_policy_outputs_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -96871,9 +96872,9 @@ components:
       required:
         - items
       title: get_list_agent_policy_outputs_response
-      type: object
     Kibana_HTTP_APIs_get_one_bulk_operation_packages_response:
       additionalProperties: false
+      type: object
       properties:
         error:
           additionalProperties: false
@@ -96910,9 +96911,9 @@ components:
       required:
         - status
       title: get_one_bulk_operation_packages_response
-      type: object
     Kibana_HTTP_APIs_get_package_info:
       additionalProperties: true
+      type: object
       properties:
         agent:
           additionalProperties: false
@@ -97168,9 +97169,9 @@ components:
         - title
         - assets
       title: get_package_info
-      type: object
     Kibana_HTTP_APIs_get_packages_response:
       additionalProperties: false
+      type: object
       properties:
         items:
           items:
@@ -97180,9 +97181,9 @@ components:
       required:
         - items
       title: get_packages_response
-      type: object
     Kibana_HTTP_APIs_get_stats_response:
       additionalProperties: false
+      type: object
       properties:
         response:
           additionalProperties: false
@@ -97198,9 +97199,9 @@ components:
       required:
         - response
       title: get_stats_response
-      type: object
     Kibana_HTTP_APIs_get_verification_key_id_response:
       additionalProperties: false
+      type: object
       properties:
         id:
           nullable: true
@@ -97208,10 +97209,10 @@ components:
       required:
         - id
       title: get_verification_key_id_response
-      type: object
     Kibana_HTTP_APIs_gradientColorMapping:
       additionalProperties: false
       description: Gradient color mapping across categorical values.
+      type: object
       properties:
         gradient:
           items:
@@ -97260,20 +97261,20 @@ components:
         - mode
         - palette
       title: Gradient Color Mapping
-      type: object
     Kibana_HTTP_APIs_heatmapAxes:
       additionalProperties: false
       description: Axis configuration for X and Y axes
+      type: object
       properties:
         x:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapXAxis'
         'y':
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapYAxis'
       title: Axes
-      type: object
     Kibana_HTTP_APIs_heatmapCells:
       additionalProperties: false
       description: Cells configuration
+      type: object
       properties:
         labels:
           additionalProperties: false
@@ -97284,7 +97285,6 @@ components:
               description: Show cell labels
               type: boolean
       title: Cells
-      type: object
     Kibana_HTTP_APIs_heatmapChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapNoESQL'
@@ -97294,6 +97294,7 @@ components:
     Kibana_HTTP_APIs_heatmapESQL:
       additionalProperties: false
       description: Heatmap configuration using an ES|QL query.
+      type: object
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapAxes'
@@ -97380,10 +97381,10 @@ components:
         - data_source
         - metric
       title: Heatmap Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_heatmapLegend:
       additionalProperties: false
       description: Legend configuration
+      type: object
       properties:
         position:
           enum:
@@ -97406,7 +97407,6 @@ components:
               type: string
           description: Legend visibility.
       title: Legend
-      type: object
     Kibana_HTTP_APIs_heatmapMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_heatmapMetricCountMetric:
@@ -97434,6 +97434,7 @@ components:
     Kibana_HTTP_APIs_heatmapNoESQL:
       additionalProperties: false
       description: Heatmap configuration using a data view.
+      type: object
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapAxes'
@@ -97525,18 +97526,18 @@ components:
         - data_source
         - metric
       title: Heatmap Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_heatmapStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         cells:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapCells'
       title: Heatmap styling
-      type: object
     Kibana_HTTP_APIs_heatmapXAxis:
       additionalProperties: false
       description: X axis configuration
+      type: object
       properties:
         labels:
           additionalProperties: false
@@ -97585,10 +97586,10 @@ components:
       required:
         - scale
       title: X Axis
-      type: object
     Kibana_HTTP_APIs_heatmapYAxis:
       additionalProperties: false
       description: Y axis configuration
+      type: object
       properties:
         labels:
           additionalProperties: false
@@ -97619,9 +97620,9 @@ components:
               description: When `true`, displays the title.
               type: boolean
       title: Y Axis
-      type: object
     Kibana_HTTP_APIs_histogramOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the histogram.
@@ -97652,9 +97653,9 @@ components:
         - operation
         - field
       title: Histogram Operation
-      type: object
     Kibana_HTTP_APIs_index-threshold-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -97721,6 +97722,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the index threshold rule. These parameters are appropriate when `rule_type_id` is `.index-threshold`.
+          type: object
           properties:
             aggField:
               description: The name of the numeric field that is used in the aggregation. This property is required when `aggType` is `avg`, `max`, `min` or `sum`.
@@ -97790,7 +97792,6 @@ components:
             - thresholdComparator
             - threshold
           title: Index Threshold Rule Params
-          type: object
         rule_type_id:
           enum:
             - .index-threshold
@@ -97826,7 +97827,6 @@ components:
         - rule_type_id
         - params
       title: Index threshold
-      type: object
     Kibana_HTTP_APIs_IngestStreamLifecycle:
       anyOf:
         - additionalProperties: false
@@ -97888,6 +97888,7 @@ components:
             - inherit
     Kibana_HTTP_APIs_install_kibana_assets_request:
       additionalProperties: false
+      type: object
       properties:
         force:
           type: boolean
@@ -97899,18 +97900,18 @@ components:
           minItems: 1
           type: array
       title: install_kibana_assets_request
-      type: object
     Kibana_HTTP_APIs_install_kibana_assets_response:
       additionalProperties: false
+      type: object
       properties:
         success:
           type: boolean
       required:
         - success
       title: install_kibana_assets_response
-      type: object
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
+      type: object
       properties:
         allow_outdated_version:
           default: false
@@ -97923,9 +97924,9 @@ components:
           default: false
           type: boolean
       title: install_package_from_registry_request
-      type: object
     Kibana_HTTP_APIs_install_package_response:
       additionalProperties: false
+      type: object
       properties:
         _meta:
           additionalProperties: false
@@ -97949,16 +97950,16 @@ components:
         - items
         - _meta
       title: install_package_response
-      type: object
     Kibana_HTTP_APIs_install_rule_assets_request:
       additionalProperties: false
+      type: object
       properties:
         force:
           type: boolean
       title: install_rule_assets_request
-      type: object
     Kibana_HTTP_APIs_installed_package:
       additionalProperties: false
+      type: object
       properties:
         dataStreams:
           items:
@@ -97997,10 +97998,10 @@ components:
         - status
         - dataStreams
       title: installed_package
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeConditionFilterSchema:
       additionalProperties: false
       description: A filter that evaluates a single field condition such as equality, range, or existence.
+      type: object
       properties:
         condition:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_conditionSchema'
@@ -98030,10 +98031,10 @@ components:
         - type
         - condition
       title: condition
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeDSLFilterSchema:
       additionalProperties: false
       description: A filter expressed as a raw [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl) object, used for queries that cannot be represented by condition or group filters.
+      type: object
       properties:
         controlled_by:
           description: Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.
@@ -98070,7 +98071,6 @@ components:
         - type
         - dsl
       title: dsl
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema:
       description: A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).
       discriminator:
@@ -98088,6 +98088,7 @@ components:
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeGroupFilterSchema:
       additionalProperties: false
       description: A filter that combines multiple conditions or nested groups using a logical `and` or `or` operator.
+      type: object
       properties:
         controlled_by:
           description: Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.
@@ -98117,10 +98118,10 @@ components:
         - type
         - group
       title: group
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeSpatialFilterSchema:
       additionalProperties: false
       description: A filter that applies an Elasticsearch geo query, used for geographic boundary and shape matching.
+      type: object
       properties:
         controlled_by:
           description: Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.
@@ -98152,10 +98153,10 @@ components:
         - type
         - dsl
       title: spatial
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_condition_exists:
       additionalProperties: false
       description: Matches documents where `field` exists and contains a non-null value.
+      type: object
       properties:
         field:
           description: Name of the document field the condition evaluates.
@@ -98171,10 +98172,10 @@ components:
         - field
         - operator
       title: exists
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_condition_is:
       additionalProperties: false
       description: Matches documents where `field` equals a single specified value.
+      type: object
       properties:
         field:
           description: Name of the document field the condition evaluates.
@@ -98200,10 +98201,10 @@ components:
         - operator
         - value
       title: is
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_condition_is_one_of:
       additionalProperties: false
       description: Matches documents where `field` equals any value in a provided list.
+      type: object
       properties:
         field:
           description: Name of the document field the condition evaluates.
@@ -98235,10 +98236,10 @@ components:
         - operator
         - value
       title: is_one_of
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_condition_range:
       additionalProperties: false
       description: Matches documents where `field` falls within a specified numeric or date range.
+      type: object
       properties:
         field:
           description: Name of the document field the condition evaluates.
@@ -98283,7 +98284,6 @@ components:
         - operator
         - value
       title: range
-      type: object
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_conditionSchema:
       description: A filter condition with strict operator/value type matching.
       discriminator:
@@ -98350,6 +98350,7 @@ components:
     Kibana_HTTP_APIs_kbn-as-code-query:
       additionalProperties: false
       description: A search query consisting of an expression and its language. Supports KQL and Lucene syntax.
+      type: object
       properties:
         expression:
           description: A query expression in KQL or Lucene syntax.
@@ -98364,9 +98365,9 @@ components:
         - expression
         - language
       title: Query
-      type: object
     Kibana_HTTP_APIs_kbn-composite-runtime-field-schema:
       additionalProperties: false
+      type: object
       properties:
         fields:
           additionalProperties:
@@ -98382,7 +98383,6 @@ components:
         - type
         - fields
       title: Composite runtime field
-      type: object
     Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema:
       additionalProperties: false
       type: object
@@ -98400,6 +98400,7 @@ components:
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-esql-control:
       additionalProperties: false
       description: An ES|QL variable control whose selected value is injected into ES|QL visualizations using the `?variable_name` syntax. Options can come from a fixed list or an ES|QL query. Define the options source in `config`.
+      type: object
       properties:
         config:
           discriminator:
@@ -98438,10 +98439,10 @@ components:
         - type
         - config
       title: esql_control
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-options-list-control:
       additionalProperties: false
       description: A dropdown control that filters data by selecting field values from a data view. Define the data view, field, and selection settings in `config`.
+      type: object
       properties:
         config:
           discriminator:
@@ -98478,10 +98479,10 @@ components:
       required:
         - type
       title: options_list_control
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-range-slider-control:
       additionalProperties: false
       description: A slider control that filters data by selecting a numeric range for the configured field. Define the data view, field, and selection settings in `config`.
+      type: object
       properties:
         config:
           discriminator:
@@ -98518,10 +98519,10 @@ components:
       required:
         - type
       title: range_slider_control
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-time-slider-control:
       additionalProperties: false
       description: A control panel that filters a time field to a selected sub-range of the global time range. Define the start and end positions in `config` as fractions of the global range (0 to 1).
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -98571,10 +98572,10 @@ components:
         - type
         - config
       title: time_slider_control
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql:
       additionalProperties: false
       description: An options list control whose available options come from an ES|QL query's results.
+      type: object
       properties:
         display_settings:
           additionalProperties: false
@@ -98680,10 +98681,10 @@ components:
         - values_source
         - esql_query
       title: EsqlOptionsListControl
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field:
       additionalProperties: false
       description: An options list control whose available options come from a data view field.
+      type: object
       properties:
         data_view_id:
           description: The ID of the data view that provides field options for this control.
@@ -98796,10 +98797,10 @@ components:
         - data_view_id
         - field_name
       title: FieldOptionsListControl
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values:
       additionalProperties: false
       description: An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.
+      type: object
       properties:
         available_options:
           description: A fixed list of option strings displayed in the control.
@@ -98871,10 +98872,10 @@ components:
         - control_type
         - available_options
       title: STATIC_VALUES
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query:
       additionalProperties: false
       description: An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.
+      type: object
       properties:
         control_type:
           enum:
@@ -98943,10 +98944,10 @@ components:
         - control_type
         - esql_query
       title: VALUES_FROM_QUERY
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql:
       additionalProperties: false
       description: A range slider control whose values come from an ES|QL query's results.
+      type: object
       properties:
         esql_query:
           description: The ES|QL query that provides field options for this control
@@ -98983,10 +98984,10 @@ components:
         - values_source
         - esql_query
       title: EsqlRangeSliderControl
-      type: object
     Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field:
       additionalProperties: false
       description: A range slider control whose values come from a numeric data view field.
+      type: object
       properties:
         data_view_id:
           description: The ID of the data view that provides field options for this control.
@@ -99030,10 +99031,10 @@ components:
         - data_view_id
         - field_name
       title: FieldRangeSliderControl
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-access-control:
       additionalProperties: false
       description: Access control settings for the dashboard.
+      type: object
       properties:
         access_mode:
           anyOf:
@@ -99045,7 +99046,6 @@ components:
               type: string
           description: Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).
       title: Access control
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-data:
       additionalProperties: false
       type: object
@@ -99168,6 +99168,7 @@ components:
     Kibana_HTTP_APIs_kbn-dashboard-dropped-panel-warning:
       additionalProperties: false
       description: A panel that was excluded from the response because its type is not supported by the API.
+      type: object
       properties:
         message:
           description: Human-readable explanation of why the panel was dropped.
@@ -99196,10 +99197,10 @@ components:
         - panel_type
         - panel_config
       title: Dropped panel
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-dropped-property-warning:
       additionalProperties: false
       description: A property that was excluded from the response because it failed validation.
+      type: object
       properties:
         key:
           description: The name of the property that was dropped.
@@ -99218,7 +99219,6 @@ components:
         - message
         - key
       title: Dropped property
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-options:
       additionalProperties: false
       default:
@@ -99264,6 +99264,7 @@ components:
     Kibana_HTTP_APIs_kbn-dashboard-panel-grid:
       additionalProperties: false
       description: The position and size of the panel on the dashboard grid.
+      type: object
       properties:
         h:
           default: 15
@@ -99286,9 +99287,9 @@ components:
         - x
         - 'y'
       title: Panel grid
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_change_point_chart'
@@ -99306,9 +99307,9 @@ components:
         - grid
         - config
       title: Change point detection chart
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_log_rate_analysis'
@@ -99326,9 +99327,9 @@ components:
         - grid
         - config
       title: Log rate analysis
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_pattern_analysis'
@@ -99346,9 +99347,9 @@ components:
         - grid
         - config
       title: Pattern analysis
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_apm-service-map-embeddable'
@@ -99366,9 +99367,9 @@ components:
         - grid
         - config
       title: APM Service map
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
       additionalProperties: false
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -99409,14 +99410,15 @@ components:
         - grid
         - config
       title: Custom content
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
+      type: object
       properties:
         config:
           anyOf:
             - additionalProperties: false
               description: Panel configuration stored inline
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -99723,9 +99725,9 @@ components:
               required:
                 - tabs
               title: By value
-              type: object
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -99891,7 +99893,6 @@ components:
               required:
                 - ref_id
               title: By reference
-              type: object
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -99906,9 +99907,9 @@ components:
         - grid
         - config
       title: Discover session
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control:
       additionalProperties: false
+      type: object
       properties:
         config:
           discriminator:
@@ -99933,9 +99934,9 @@ components:
         - grid
         - config
       title: ES|QL variable control
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-field_stats_table:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_data_visualizer_field_stats'
@@ -99953,9 +99954,9 @@ components:
         - grid
         - config
       title: Field statistics table
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-image:
       additionalProperties: false
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -100084,6 +100085,7 @@ components:
                 src:
                   anyOf:
                     - additionalProperties: false
+                      type: object
                       properties:
                         file_id:
                           type: string
@@ -100095,8 +100097,8 @@ components:
                         - type
                         - file_id
                       title: file
-                      type: object
                     - additionalProperties: false
+                      type: object
                       properties:
                         type:
                           enum:
@@ -100109,7 +100111,6 @@ components:
                         - type
                         - url
                       title: url
-                      type: object
                   description: Image source
               required:
                 - src
@@ -100132,14 +100133,15 @@ components:
         - grid
         - config
       title: Image
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-links:
       additionalProperties: false
+      type: object
       properties:
         config:
           anyOf:
             - additionalProperties: false
               description: Panel configuration stored inline
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -100175,9 +100177,9 @@ components:
               required:
                 - links
               title: By value
-              type: object
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -100198,7 +100200,6 @@ components:
               required:
                 - ref_id
               title: By reference
-              type: object
           description: Links embeddable schema
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
@@ -100214,14 +100215,15 @@ components:
         - grid
         - config
       title: Links
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown:
       additionalProperties: false
+      type: object
       properties:
         config:
           anyOf:
             - additionalProperties: false
               description: Panel configuration stored inline
+              type: object
               properties:
                 content:
                   description: The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\n` for line breaks within JSON strings.
@@ -100252,9 +100254,9 @@ components:
               required:
                 - content
               title: By value
-              type: object
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -100274,7 +100276,6 @@ components:
               required:
                 - ref_id
               title: By reference
-              type: object
           description: Markdown panel config
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
@@ -100290,9 +100291,9 @@ components:
         - grid
         - config
       title: Markdown
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_charts'
@@ -100310,9 +100311,9 @@ components:
         - grid
         - config
       title: Anomaly charts
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_swimlane'
@@ -100330,9 +100331,9 @@ components:
         - grid
         - config
       title: Anomaly swim lane
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_single_metric_viewer'
@@ -100350,9 +100351,9 @@ components:
         - grid
         - config
       title: Single metric viewer
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control:
       additionalProperties: false
+      type: object
       properties:
         config:
           discriminator:
@@ -100375,9 +100376,9 @@ components:
         - type
         - grid
       title: Options list control
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control:
       additionalProperties: false
+      type: object
       properties:
         config:
           discriminator:
@@ -100400,9 +100401,9 @@ components:
         - type
         - grid
       title: Range slider control
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_slo-alerts-embeddable'
@@ -100420,9 +100421,9 @@ components:
         - grid
         - config
       title: SLO alerts
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_slo-burn-rate-embeddable'
@@ -100440,9 +100441,9 @@ components:
         - grid
         - config
       title: SLO burn rate
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_error_budget:
       additionalProperties: false
+      type: object
       properties:
         config:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_slo-error-budget-embeddable'
@@ -100460,9 +100461,9 @@ components:
         - grid
         - config
       title: SLO error budget
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_overview:
       additionalProperties: false
+      type: object
       properties:
         config:
           description: SLO Overview embeddable schema
@@ -100488,9 +100489,9 @@ components:
         - grid
         - config
       title: SLO overview
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_monitors:
       additionalProperties: false
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -100621,9 +100622,9 @@ components:
         - grid
         - config
       title: Synthetics monitors
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview:
       additionalProperties: false
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -100784,9 +100785,9 @@ components:
         - grid
         - config
       title: Synthetics stats overview
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control:
       additionalProperties: false
+      type: object
       properties:
         config:
           additionalProperties: false
@@ -100822,9 +100823,9 @@ components:
         - grid
         - config
       title: Time slider control
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis:
       additionalProperties: false
+      type: object
       properties:
         config:
           anyOf:
@@ -100972,6 +100973,7 @@ components:
               title: By value
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
+              type: object
               properties:
                 description:
                   description: A short description of the panel.
@@ -101113,7 +101115,6 @@ components:
               required:
                 - ref_id
               title: By reference
-              type: object
           description: Lens embeddable schema
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
@@ -101129,10 +101130,10 @@ components:
         - grid
         - config
       title: Visualization
-      type: object
     Kibana_HTTP_APIs_kbn-dashboard-section:
       additionalProperties: false
       description: A collapsible group of panels.
+      type: object
       properties:
         collapsed:
           default: false
@@ -101214,10 +101215,10 @@ components:
         - title
         - grid
       title: Section
-      type: object
     Kibana_HTTP_APIs_kbn-data-service-server-refreshIntervalSchema:
       additionalProperties: false
       description: Specifies the auto-refresh interval for the object.
+      type: object
       properties:
         pause:
           description: When `true`, auto-refresh is paused.
@@ -101229,10 +101230,10 @@ components:
         - pause
         - value
       title: Refresh interval
-      type: object
     Kibana_HTTP_APIs_kbn-data-view-field-setting:
       additionalProperties: false
       description: Display overrides for a field. These settings can define a custom label, description, and format.
+      type: object
       properties:
         custom_description:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
@@ -101241,9 +101242,9 @@ components:
         format:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
       title: Field settings
-      type: object
     Kibana_HTTP_APIs_kbn-data-view-reference-schema:
       additionalProperties: false
+      type: object
       properties:
         ref_id:
           description: 'The id of the Kibana data view to use as the data source. Example: "my-data-view".'
@@ -101256,9 +101257,9 @@ components:
         - type
         - ref_id
       title: Data view reference
-      type: object
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
+      type: object
       properties:
         allow_hidden_indices:
           description: When `true`, allows the data view to match hidden indices.
@@ -101286,10 +101287,10 @@ components:
         - type
         - index_pattern
       title: Data view inline spec
-      type: object
     Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema:
       additionalProperties: false
       description: Specifies the time range for a query.
+      type: object
       properties:
         from:
           description: The start of the time range. Accepts Elasticsearch [date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) expressions (for example, `now-7d`) or ISO 8601 timestamps.
@@ -101310,7 +101311,6 @@ components:
         - from
         - to
       title: Time range
-      type: object
     Kibana_HTTP_APIs_kbn-field-custom-description:
       description: Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.
       minLength: 1
@@ -101324,6 +101324,7 @@ components:
     Kibana_HTTP_APIs_kbn-field-format:
       additionalProperties: false
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
+      type: object
       properties:
         params: {}
         type:
@@ -101331,7 +101332,6 @@ components:
       required:
         - type
       title: Format
-      type: object
     Kibana_HTTP_APIs_kbn-field-settings-entry:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-composite-runtime-field-schema'
@@ -101417,6 +101417,7 @@ components:
         - destination
     Kibana_HTTP_APIs_kbn-runtime-field-base-schema:
       additionalProperties: false
+      type: object
       properties:
         custom_description:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
@@ -101429,9 +101430,9 @@ components:
       required:
         - type
       title: Runtime field base
-      type: object
     Kibana_HTTP_APIs_kbn-runtime-field-schema:
       additionalProperties: false
+      type: object
       properties:
         custom_description:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
@@ -101446,7 +101447,6 @@ components:
       required:
         - type
       title: Runtime field
-      type: object
     Kibana_HTTP_APIs_kbn-runtime-field-script:
       description: The script that defines the runtime field. This should be a painless script that computes the field value at query time. Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value.
       minLength: 1
@@ -101511,6 +101511,7 @@ components:
       type: string
     Kibana_HTTP_APIs_kibana_asset_reference:
       additionalProperties: false
+      type: object
       properties:
         deferred:
           type: boolean
@@ -101539,9 +101540,9 @@ components:
         - id
         - type
       title: kibana_asset_reference
-      type: object
     Kibana_HTTP_APIs_lastValueOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the metric
@@ -101575,11 +101576,11 @@ components:
         - operation
         - time_field
       title: Last Value Operation
-      type: object
     Kibana_HTTP_APIs_legacyColorByValue:
       additionalProperties: false
       deprecated: true
       description: Legacy color by value configuration
+      type: object
       properties:
         palette:
           description: The legacy palette name.
@@ -101630,11 +101631,11 @@ components:
         - palette
         - shift
       title: Legacy color by value
-      type: object
     Kibana_HTTP_APIs_legacyColorByValueAbsolute:
       additionalProperties: false
       deprecated: true
       description: Legacy color by absolute value configuration
+      type: object
       properties:
         palette:
           description: The legacy palette name.
@@ -101683,7 +101684,6 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
-      type: object
     Kibana_HTTP_APIs_legacyMetricChart:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQL'
       description: A single metric value with optional coloring and formatting. Superseded by the Metric chart type.
@@ -101697,6 +101697,7 @@ components:
     Kibana_HTTP_APIs_legacyMetricNoESQL:
       additionalProperties: false
       description: Legacy Metric configuration using a data view. Superseded by the Metric chart type.
+      type: object
       properties:
         data_source:
           discriminator:
@@ -101813,7 +101814,6 @@ components:
         - data_source
         - metric
       title: Legacy Metric Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_legacyMetricPercentile:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_percentileOperation'
     Kibana_HTTP_APIs_legacyMetricPercentileRanks:
@@ -101898,6 +101898,7 @@ components:
       type: array
     Kibana_HTTP_APIs_lensResponseItem:
       additionalProperties: false
+      type: object
       properties:
         data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensApiConfigNoESQL'
@@ -101910,7 +101911,6 @@ components:
         - data
         - meta
       title: Visualization Response
-      type: object
     Kibana_HTTP_APIs_LinksItemResponse:
       additionalProperties: false
       description: Response containing a links library item with metadata.
@@ -101966,6 +101966,7 @@ components:
         - meta
     Kibana_HTTP_APIs_logs-alert-document-count-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -102244,9 +102245,9 @@ components:
         - rule_type_id
         - params
       title: Log threshold
-      type: object
     Kibana_HTTP_APIs_maintenance_window_response:
       additionalProperties: false
+      type: object
       properties:
         created_at:
           description: The date and time when the maintenance window was created.
@@ -102301,9 +102302,9 @@ components:
         - status
         - schedule
       title: maintenance_window_response
-      type: object
     Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request:
       additionalProperties: false
+      type: object
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
@@ -102344,9 +102345,9 @@ components:
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
-      type: object
     Kibana_HTTP_APIs_maintenance_window_schedule_recurring_response:
       additionalProperties: false
+      type: object
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
@@ -102377,9 +102378,9 @@ components:
           maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
-      type: object
     Kibana_HTTP_APIs_maintenance_window_schedule_request:
       additionalProperties: false
+      type: object
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
@@ -102399,9 +102400,9 @@ components:
         - start
         - duration
       title: maintenance_window_schedule_request
-      type: object
     Kibana_HTTP_APIs_maintenance_window_schedule_response:
       additionalProperties: false
+      type: object
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
@@ -102418,9 +102419,9 @@ components:
         - start
         - duration
       title: maintenance_window_schedule_response
-      type: object
     Kibana_HTTP_APIs_maintenance_window_scope:
       additionalProperties: false
+      type: object
       properties:
         alerting:
           additionalProperties: false
@@ -102440,9 +102441,9 @@ components:
       required:
         - alerting
       title: maintenance_window_scope
-      type: object
     Kibana_HTTP_APIs_managed_integration:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions granted to the managed integration.
@@ -102659,9 +102660,9 @@ components:
         - updated_at
         - updated_by
       title: managed_integration
-      type: object
     Kibana_HTTP_APIs_managed_integration_cloud_connector:
       additionalProperties: false
+      type: object
       properties:
         cloud_connector_id:
           description: The ID of the cloud connector.
@@ -102674,9 +102675,9 @@ components:
         - enabled
         - cloud_connector_id
       title: managed_integration_cloud_connector
-      type: object
     Kibana_HTTP_APIs_managed_integration_package:
       additionalProperties: false
+      type: object
       properties:
         name:
           description: Integration package name.
@@ -102695,18 +102696,18 @@ components:
         - title
         - version
       title: managed_integration_package
-      type: object
     Kibana_HTTP_APIs_managed_integration_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration'
       required:
         - item
       title: managed_integration_response
-      type: object
     Kibana_HTTP_APIs_managed_integration_upgrade_dry_run_request:
       additionalProperties: false
+      type: object
       properties:
         pkgVersion:
           description: Target package version to preview the upgrade against. Defaults to the installed package version.
@@ -102722,9 +102723,9 @@ components:
       required:
         - policyIds
       title: managed_integration_upgrade_dry_run_request
-      type: object
     Kibana_HTTP_APIs_managed_integration_upgrade_dry_run_result:
       additionalProperties: false
+      type: object
       properties:
         body:
           additionalProperties: false
@@ -102778,7 +102779,6 @@ components:
         - id
         - hasErrors
       title: managed_integration_upgrade_dry_run_result
-      type: object
     Kibana_HTTP_APIs_metricBreakdownDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_metricBreakdownFilters:
@@ -102797,6 +102797,7 @@ components:
       title: Metric Chart
     Kibana_HTTP_APIs_metricCompareToBaseline:
       additionalProperties: false
+      type: object
       properties:
         baseline:
           default: 0
@@ -102821,9 +102822,9 @@ components:
       required:
         - to
       title: Compare To Baseline
-      type: object
     Kibana_HTTP_APIs_metricCompareToPrimary:
       additionalProperties: false
+      type: object
       properties:
         icon:
           default: true
@@ -102844,9 +102845,9 @@ components:
       required:
         - to
       title: Compare To Primary
-      type: object
     Kibana_HTTP_APIs_metricComplementaryBar:
       additionalProperties: false
+      type: object
       properties:
         max_value:
           additionalProperties: false
@@ -102870,9 +102871,9 @@ components:
         - type
         - max_value
       title: Complementary Bar
-      type: object
     Kibana_HTTP_APIs_metricComplementaryTrend:
       additionalProperties: false
+      type: object
       properties:
         type:
           enum:
@@ -102881,7 +102882,6 @@ components:
       required:
         - type
       title: Complementary Trend
-      type: object
     Kibana_HTTP_APIs_metricComplementaryViz:
       anyOf:
         - additionalProperties: false
@@ -102932,6 +102932,7 @@ components:
     Kibana_HTTP_APIs_metricESQL:
       additionalProperties: false
       description: Metric chart configuration for ES|QL queries
+      type: object
       properties:
         breakdown_by:
           additionalProperties: false
@@ -103055,10 +103056,10 @@ components:
         - data_source
         - metrics
       title: Metric Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_metricIconConfig:
       additionalProperties: false
       description: Icon configuration for the metric chart
+      type: object
       properties:
         alignment:
           default: right
@@ -103124,10 +103125,10 @@ components:
       required:
         - name
       title: Icon Configuration
-      type: object
     Kibana_HTTP_APIs_metricNoESQL:
       additionalProperties: false
       description: Metric chart configuration for standard queries
+      type: object
       properties:
         breakdown_by:
           allOf:
@@ -103271,7 +103272,6 @@ components:
         - data_source
         - metrics
       title: Metric Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_metricPrimaryCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_metricPrimaryCountMetric:
@@ -103298,6 +103298,7 @@ components:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_uniqueCountMetricOperation'
     Kibana_HTTP_APIs_metrics-alert-inventory-threshold-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -103364,6 +103365,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the metric inventory threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+          type: object
           properties:
             alertOnNoData:
               type: boolean
@@ -103431,7 +103433,6 @@ components:
             - nodeType
             - sourceId
           title: Metric Inventory Threshold Rule Params
-          type: object
         rule_type_id:
           enum:
             - metrics.alert.inventory.threshold
@@ -103467,9 +103468,9 @@ components:
         - rule_type_id
         - params
       title: Metric inventory threshold
-      type: object
     Kibana_HTTP_APIs_metrics-alert-threshold-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -103536,6 +103537,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+          type: object
           properties:
             alertOnGroupDisappear:
               description: If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
@@ -103699,7 +103701,6 @@ components:
             - criteria
             - sourceId
           title: Metric Threshold Rule Params
-          type: object
         rule_type_id:
           enum:
             - metrics.alert.threshold
@@ -103735,7 +103736,6 @@ components:
         - rule_type_id
         - params
       title: Metric threshold
-      type: object
     Kibana_HTTP_APIs_metricSecondaryCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_metricSecondaryCountMetric:
@@ -103859,6 +103859,7 @@ components:
                   type: string
     Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the metric
@@ -103888,7 +103889,6 @@ components:
         - field
         - operation
       title: Stats Metric Operation
-      type: object
     Kibana_HTTP_APIs_ml_anomaly_charts:
       additionalProperties: false
       description: Anomaly Charts embeddable
@@ -104131,6 +104131,7 @@ components:
         - job_ids
     Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104197,6 +104198,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the cluster health rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_cluster_health`.
+          type: object
           properties:
             duration:
               type: string
@@ -104211,7 +104213,6 @@ components:
           required:
             - duration
           title: Cluster Health Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_cluster_health
@@ -104247,9 +104248,9 @@ components:
         - rule_type_id
         - params
       title: Cluster health
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-cpu-usage-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104316,6 +104317,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the CPU usage rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_cpu_usage`.
+          type: object
           properties:
             duration:
               type: string
@@ -104330,7 +104332,6 @@ components:
           required:
             - duration
           title: CPU Usage Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_cpu_usage
@@ -104366,9 +104367,9 @@ components:
         - rule_type_id
         - params
       title: CPU usage
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-disk-usage-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104435,6 +104436,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the disk usage rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_disk_usage`.
+          type: object
           properties:
             duration:
               type: string
@@ -104449,7 +104451,6 @@ components:
           required:
             - duration
           title: Disk Usage Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_disk_usage
@@ -104485,9 +104486,9 @@ components:
         - rule_type_id
         - params
       title: Disk usage
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-elasticsearch-version-mismatch-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104554,6 +104555,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the ES version mismatch rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_elasticsearch_version_mismatch`.
+          type: object
           properties:
             duration:
               type: string
@@ -104568,7 +104570,6 @@ components:
           required:
             - duration
           title: ES Version Mismatch Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_elasticsearch_version_mismatch
@@ -104604,9 +104605,9 @@ components:
         - rule_type_id
         - params
       title: Elasticsearch version mismatch
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-jvm-memory-usage-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104673,6 +104674,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the memory usage rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_jvm_memory_usage`.
+          type: object
           properties:
             duration:
               type: string
@@ -104687,7 +104689,6 @@ components:
           required:
             - duration
           title: Memory Usage Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_jvm_memory_usage
@@ -104723,9 +104724,9 @@ components:
         - rule_type_id
         - params
       title: JVM memory usage
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-kibana-version-mismatch-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104792,6 +104793,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the Kibana version mismatch rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_kibana_version_mismatch`.
+          type: object
           properties:
             duration:
               type: string
@@ -104806,7 +104808,6 @@ components:
           required:
             - duration
           title: Kibana Version Mismatch Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_kibana_version_mismatch
@@ -104842,9 +104843,9 @@ components:
         - rule_type_id
         - params
       title: Kibana version mismatch
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-license-expiration-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -104911,6 +104912,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the license expiration rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_license_expiration`.
+          type: object
           properties:
             duration:
               type: string
@@ -104925,7 +104927,6 @@ components:
           required:
             - duration
           title: License Expiration Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_license_expiration
@@ -104961,9 +104962,9 @@ components:
         - rule_type_id
         - params
       title: License expiration
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-logstash-version-mismatch-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105030,6 +105031,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the logstash version mismatch rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_logstash_version_mismatch`.
+          type: object
           properties:
             duration:
               type: string
@@ -105044,7 +105046,6 @@ components:
           required:
             - duration
           title: Logstash Version Mismatch Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_logstash_version_mismatch
@@ -105080,9 +105081,9 @@ components:
         - rule_type_id
         - params
       title: Logstash version mismatch
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-missing-monitoring-data-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105149,6 +105150,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the missing monitoring data rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_missing_monitoring_data`.
+          type: object
           properties:
             duration:
               type: string
@@ -105163,7 +105165,6 @@ components:
           required:
             - duration
           title: Missing Monitoring Data Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_missing_monitoring_data
@@ -105199,9 +105200,9 @@ components:
         - rule_type_id
         - params
       title: Missing monitoring data
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-nodes-changed-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105268,6 +105269,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the nodes changed rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_nodes_changed`.
+          type: object
           properties:
             duration:
               type: string
@@ -105282,7 +105284,6 @@ components:
           required:
             - duration
           title: Nodes Changed Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_nodes_changed
@@ -105318,9 +105319,9 @@ components:
         - rule_type_id
         - params
       title: Nodes changed
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-thread-pool-search-rejections-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105387,6 +105388,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the thread pool search rejections rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_thread_pool_search_rejections`.
+          type: object
           properties:
             duration:
               type: string
@@ -105399,7 +105401,6 @@ components:
           required:
             - duration
           title: Thread Pool Search Rejections Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_thread_pool_search_rejections
@@ -105435,9 +105436,9 @@ components:
         - rule_type_id
         - params
       title: Thread pool search rejections
-      type: object
     Kibana_HTTP_APIs_monitoring-alert-thread-pool-write-rejections-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105504,6 +105505,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the thread pool write rejections rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_thread_pool_write_rejections`.
+          type: object
           properties:
             duration:
               type: string
@@ -105516,7 +105518,6 @@ components:
           required:
             - duration
           title: Thread Pool Write Rejections Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_alert_thread_pool_write_rejections
@@ -105552,9 +105553,9 @@ components:
         - rule_type_id
         - params
       title: Thread pool write rejections
-      type: object
     Kibana_HTTP_APIs_monitoring-ccr-read-exceptions-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105621,6 +105622,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the CCR read exceptions rule. These parameters are appropriate when `rule_type_id` is `monitoring_ccr_read_exceptions`.
+          type: object
           properties:
             duration:
               type: string
@@ -105635,7 +105637,6 @@ components:
           required:
             - duration
           title: CCR Read Exceptions Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_ccr_read_exceptions
@@ -105671,9 +105672,9 @@ components:
         - rule_type_id
         - params
       title: CCR read exceptions
-      type: object
     Kibana_HTTP_APIs_monitoring-shard-size-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -105740,6 +105741,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the large shard size rule. These parameters are appropriate when `rule_type_id` is `monitoring_shard_size`.
+          type: object
           properties:
             duration:
               type: string
@@ -105757,7 +105759,6 @@ components:
             - duration
             - indexPattern
           title: Large Shard Size Rule Params
-          type: object
         rule_type_id:
           enum:
             - monitoring_shard_size
@@ -105793,7 +105794,6 @@ components:
         - rule_type_id
         - params
       title: Large shard size
-      type: object
     Kibana_HTTP_APIs_mosaicChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicNoESQL'
@@ -105803,6 +105803,7 @@ components:
     Kibana_HTTP_APIs_mosaicESQL:
       additionalProperties: false
       description: Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -105896,7 +105897,6 @@ components:
         - data_source
         - metric
       title: Mosaic Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_mosaicGroupBreakdownByFilters:
@@ -105920,6 +105920,7 @@ components:
     Kibana_HTTP_APIs_mosaicLegend:
       additionalProperties: false
       description: Legend configuration for mosaic chart appearance and behavior
+      type: object
       properties:
         nested:
           default: false
@@ -105944,7 +105945,6 @@ components:
               type: string
           description: Legend visibility.
       title: Legend
-      type: object
     Kibana_HTTP_APIs_mosaicMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_mosaicMetricCountMetric:
@@ -105972,6 +105972,7 @@ components:
     Kibana_HTTP_APIs_mosaicNoESQL:
       additionalProperties: false
       description: Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions
+      type: object
       properties:
         data_source:
           discriminator:
@@ -106068,17 +106069,17 @@ components:
         - data_source
         - metric
       title: Mosaic Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_mosaicStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
       title: Mosaic styling
-      type: object
     Kibana_HTTP_APIs_movingAverageOperation:
       additionalProperties: false
+      type: object
       properties:
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
@@ -106107,9 +106108,9 @@ components:
         - operation
         - of
       title: Moving Average Operation
-      type: object
     Kibana_HTTP_APIs_multi_field_key:
       additionalProperties: false
+      type: object
       properties:
         keys:
           items:
@@ -106124,9 +106125,9 @@ components:
         - type
         - keys
       title: Multi Field Key
-      type: object
     Kibana_HTTP_APIs_new_agent_policy:
       additionalProperties: false
+      type: object
       properties:
         advanced_settings:
           additionalProperties: false
@@ -106382,9 +106383,9 @@ components:
         - name
         - namespace
       title: new_agent_policy
-      type: object
     Kibana_HTTP_APIs_new_connector:
       additionalProperties: false
+      type: object
       properties:
         connector_type_id:
           description: The type of connector.
@@ -106451,9 +106452,9 @@ components:
         - name
         - connector_type_id
       title: new_connector
-      type: object
     Kibana_HTTP_APIs_new_enrollment_api_key:
       additionalProperties: false
+      type: object
       properties:
         expiration:
           description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
@@ -106466,9 +106467,9 @@ components:
       required:
         - policy_id
       title: new_enrollment_api_key
-      type: object
     Kibana_HTTP_APIs_new_maintenance_window:
       additionalProperties: false
+      type: object
       properties:
         enabled:
           description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
@@ -106490,9 +106491,9 @@ components:
         - title
         - schedule
       title: new_maintenance_window
-      type: object
     Kibana_HTTP_APIs_new_output_elasticsearch:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -106586,9 +106587,9 @@ components:
         - type
         - hosts
       title: new_output_elasticsearch
-      type: object
     Kibana_HTTP_APIs_new_output_kafka:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -106784,9 +106785,9 @@ components:
         - hosts
         - auth_type
       title: new_output_kafka
-      type: object
     Kibana_HTTP_APIs_new_output_logstash:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -106868,9 +106869,9 @@ components:
         - type
         - hosts
       title: new_output_logstash
-      type: object
     Kibana_HTTP_APIs_new_output_remote_elasticsearch:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -106989,9 +106990,9 @@ components:
         - type
         - hosts
       title: new_output_remote_elasticsearch
-      type: object
     Kibana_HTTP_APIs_new_rule:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -107094,10 +107095,10 @@ components:
         - schedule
         - rule_type_id
       title: new_rule
-      type: object
     Kibana_HTTP_APIs_new_rule_action:
       additionalProperties: false
       description: An action that runs under defined conditions.
+      type: object
       properties:
         alerts_filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_new_rule_action_alerts_filter'
@@ -107124,10 +107125,10 @@ components:
       required:
         - id
       title: new_rule_action
-      type: object
     Kibana_HTTP_APIs_new_rule_action_alerts_filter:
       additionalProperties: false
       description: Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.
+      type: object
       properties:
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerts_filter_query'
@@ -107171,9 +107172,9 @@ components:
             - hours
             - timezone
       title: new_rule_action_alerts_filter
-      type: object
     Kibana_HTTP_APIs_new_rule_action_frequency:
       additionalProperties: false
+      type: object
       properties:
         notify_when:
           description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
@@ -107194,10 +107195,10 @@ components:
         - summary
         - notify_when
       title: new_rule_action_frequency
-      type: object
     Kibana_HTTP_APIs_noColor:
       additionalProperties: false
       description: Explicitly disables coloring
+      type: object
       properties:
         type:
           enum:
@@ -107206,10 +107207,10 @@ components:
       required:
         - type
       title: No Color
-      type: object
     Kibana_HTTP_APIs_numericFormat:
       additionalProperties: false
       description: Number or percentage format with optional decimal places, suffix, and compact notation.
+      type: object
       properties:
         compact:
           default: false
@@ -107231,9 +107232,9 @@ components:
       required:
         - type
       title: Numeric Format
-      type: object
     Kibana_HTTP_APIs_observability-rules-custom-threshold-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -107300,6 +107301,7 @@ components:
         params:
           additionalProperties: true
           description: The parameters for the custom threshold rule. These parameters are appropriate when `rule_type_id` is `observability.rules.custom_threshold`.
+          type: object
           properties:
             alertOnGroupDisappear:
               type: boolean
@@ -107763,7 +107765,6 @@ components:
             - criteria
             - searchConfiguration
           title: Custom Threshold Rule Params
-          type: object
         rule_type_id:
           enum:
             - observability.rules.custom_threshold
@@ -107799,7 +107800,6 @@ components:
         - rule_type_id
         - params
       title: Custom threshold
-      type: object
     Kibana_HTTP_APIs_operationReducedTimeRangeSetting:
       description: Reduced time range
       title: Operation Reduced Time Range Setting
@@ -107826,6 +107826,7 @@ components:
       type: string
     Kibana_HTTP_APIs_output_response_elasticsearch:
       additionalProperties: true
+      type: object
       properties:
         allow_edit:
           items:
@@ -107919,9 +107920,9 @@ components:
         - type
         - hosts
       title: output_response_elasticsearch
-      type: object
     Kibana_HTTP_APIs_output_response_kafka:
       additionalProperties: true
+      type: object
       properties:
         allow_edit:
           items:
@@ -108117,9 +108118,9 @@ components:
         - hosts
         - auth_type
       title: output_response_kafka
-      type: object
     Kibana_HTTP_APIs_output_response_logstash:
       additionalProperties: true
+      type: object
       properties:
         allow_edit:
           items:
@@ -108201,9 +108202,9 @@ components:
         - type
         - hosts
       title: output_response_logstash
-      type: object
     Kibana_HTTP_APIs_output_response_remote_elasticsearch:
       additionalProperties: true
+      type: object
       properties:
         allow_edit:
           items:
@@ -108322,9 +108323,9 @@ components:
         - type
         - hosts
       title: output_response_remote_elasticsearch
-      type: object
     Kibana_HTTP_APIs_output_response_shipper:
       additionalProperties: true
+      type: object
       properties:
         compression_level:
           default: null
@@ -108367,9 +108368,9 @@ components:
           nullable: true
           type: number
       title: output_response_shipper
-      type: object
     Kibana_HTTP_APIs_output_response_ssl:
       additionalProperties: true
+      type: object
       properties:
         certificate:
           type: string
@@ -108388,9 +108389,9 @@ components:
             - strict
           type: string
       title: output_response_ssl
-      type: object
     Kibana_HTTP_APIs_output_shipper:
       additionalProperties: false
+      type: object
       properties:
         compression_level:
           default: null
@@ -108433,9 +108434,9 @@ components:
           nullable: true
           type: number
       title: output_shipper
-      type: object
     Kibana_HTTP_APIs_output_ssl:
       additionalProperties: false
+      type: object
       properties:
         certificate:
           type: string
@@ -108454,9 +108455,9 @@ components:
             - strict
           type: string
       title: output_ssl
-      type: object
     Kibana_HTTP_APIs_package_icon:
       additionalProperties: false
+      type: object
       properties:
         dark_mode:
           type: boolean
@@ -108473,9 +108474,9 @@ components:
       required:
         - src
       title: package_icon
-      type: object
     Kibana_HTTP_APIs_package_info_conditions_deprecation_info:
       additionalProperties: true
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -108491,9 +108492,9 @@ components:
       required:
         - description
       title: package_info_conditions_deprecation_info
-      type: object
     Kibana_HTTP_APIs_package_info_deprecation_info:
       additionalProperties: true
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -108509,9 +108510,9 @@ components:
       required:
         - description
       title: package_info_deprecation_info
-      type: object
     Kibana_HTTP_APIs_package_info_es_asset_reference:
       additionalProperties: true
+      type: object
       properties:
         customDataStreamOriginDataset:
           type: string
@@ -108540,9 +108541,9 @@ components:
         - id
         - type
       title: package_info_es_asset_reference
-      type: object
     Kibana_HTTP_APIs_package_info_icon:
       additionalProperties: true
+      type: object
       properties:
         dark_mode:
           type: boolean
@@ -108559,9 +108560,9 @@ components:
       required:
         - src
       title: package_info_icon
-      type: object
     Kibana_HTTP_APIs_package_info_installation_info:
       additionalProperties: true
+      type: object
       properties:
         additional_spaces_installed_kibana:
           additionalProperties:
@@ -108715,9 +108716,9 @@ components:
         - install_source
         - verification_status
       title: package_info_installation_info
-      type: object
     Kibana_HTTP_APIs_package_info_kibana_asset_reference:
       additionalProperties: true
+      type: object
       properties:
         deferred:
           type: boolean
@@ -108746,9 +108747,9 @@ components:
         - id
         - type
       title: package_info_kibana_asset_reference
-      type: object
     Kibana_HTTP_APIs_package_list_item:
       additionalProperties: true
+      type: object
       properties:
         categories:
           items:
@@ -108956,18 +108957,18 @@ components:
         - title
         - id
       title: package_list_item
-      type: object
     Kibana_HTTP_APIs_package_metadata:
       additionalProperties: false
+      type: object
       properties:
         has_policies:
           type: boolean
       required:
         - has_policies
       title: package_metadata
-      type: object
     Kibana_HTTP_APIs_package_policy_input_deprecation_info:
       additionalProperties: false
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -108983,9 +108984,9 @@ components:
       required:
         - description
       title: package_policy_input_deprecation_info
-      type: object
     Kibana_HTTP_APIs_package_policy_package:
       additionalProperties: false
+      type: object
       properties:
         experimental_data_stream_features:
           items:
@@ -109031,9 +109032,9 @@ components:
         - name
         - version
       title: package_policy_package
-      type: object
     Kibana_HTTP_APIs_package_policy_response:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -109509,9 +109510,9 @@ components:
         - created_at
         - created_by
       title: package_policy_response
-      type: object
     Kibana_HTTP_APIs_package_policy_status_response:
       additionalProperties: false
+      type: object
       properties:
         body:
           additionalProperties: false
@@ -109533,9 +109534,9 @@ components:
         - id
         - success
       title: package_policy_status_response
-      type: object
     Kibana_HTTP_APIs_package_policy_stream_deprecation_info:
       additionalProperties: false
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -109551,9 +109552,9 @@ components:
       required:
         - description
       title: package_policy_stream_deprecation_info
-      type: object
     Kibana_HTTP_APIs_percentileOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the metric
@@ -109583,9 +109584,9 @@ components:
         - field
         - operation
       title: Percentile Operation
-      type: object
     Kibana_HTTP_APIs_percentileRanksOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the metric
@@ -109615,7 +109616,6 @@ components:
         - field
         - operation
       title: Percentile Ranks Operation
-      type: object
     Kibana_HTTP_APIs_pieChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_pieNoESQL'
@@ -109625,6 +109625,7 @@ components:
     Kibana_HTTP_APIs_pieESQL:
       additionalProperties: false
       description: Pie chart configuration for ES|QL queries
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -109706,7 +109707,6 @@ components:
         - data_source
         - metrics
       title: Pie Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_pieGroupByDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_pieGroupByFilters:
@@ -109720,6 +109720,7 @@ components:
     Kibana_HTTP_APIs_pieLegend:
       additionalProperties: false
       description: Legend configuration for pie chart
+      type: object
       properties:
         nested:
           default: false
@@ -109744,7 +109745,6 @@ components:
               type: string
           description: Legend visibility.
       title: Legend
-      type: object
     Kibana_HTTP_APIs_pieMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_pieMetricCountMetric:
@@ -109772,6 +109772,7 @@ components:
     Kibana_HTTP_APIs_pieNoESQL:
       additionalProperties: false
       description: Pie chart configuration for standard queries
+      type: object
       properties:
         data_source:
           discriminator:
@@ -109864,10 +109865,10 @@ components:
         - data_source
         - metrics
       title: Pie Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_pieStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         donut_hole:
           anyOf:
@@ -109904,7 +109905,6 @@ components:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
       title: Pie chart styling
-      type: object
     Kibana_HTTP_APIs_QueryStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -109961,6 +109961,7 @@ components:
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
+      type: object
       properties:
         from:
           anyOf:
@@ -110001,9 +110002,9 @@ components:
         - to
         - ranges
       title: Range Key
-      type: object
     Kibana_HTTP_APIs_rangesOperation:
       additionalProperties: false
+      type: object
       properties:
         field:
           description: Field to be used for the range.
@@ -110037,9 +110038,9 @@ components:
         - field
         - ranges
       title: Ranges Operation
-      type: object
     Kibana_HTTP_APIs_reauthorize_transform_request:
       additionalProperties: false
+      type: object
       properties:
         transforms:
           items:
@@ -110055,7 +110056,6 @@ components:
       required:
         - transforms
       title: reauthorize_transform_request
-      type: object
     Kibana_HTTP_APIs_RecursiveRecord:
       additionalProperties:
         anyOf:
@@ -110086,6 +110086,7 @@ components:
     Kibana_HTTP_APIs_regionMapESQL:
       additionalProperties: false
       description: Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -110156,10 +110157,10 @@ components:
         - metric
         - region
       title: Region Map (ES|QL)
-      type: object
     Kibana_HTTP_APIs_regionMapNoESQL:
       additionalProperties: false
       description: Region Map configuration using a data view, mapping metric values to geographic regions by color.
+      type: object
       properties:
         data_source:
           discriminator:
@@ -110230,7 +110231,6 @@ components:
         - metric
         - region
       title: Region Map (DSL)
-      type: object
     Kibana_HTTP_APIs_regionMapRegionDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_regionMapRegionFilters:
@@ -110243,6 +110243,7 @@ components:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_termsOperation'
     Kibana_HTTP_APIs_review_upgrade_request:
       additionalProperties: false
+      type: object
       properties:
         action:
           enum:
@@ -110256,18 +110257,18 @@ components:
         - action
         - target_version
       title: review_upgrade_request
-      type: object
     Kibana_HTTP_APIs_review_upgrade_response:
       additionalProperties: false
+      type: object
       properties:
         success:
           type: boolean
       required:
         - success
       title: review_upgrade_response
-      type: object
     Kibana_HTTP_APIs_rollback_package_response:
       additionalProperties: false
+      type: object
       properties:
         success:
           type: boolean
@@ -110277,10 +110278,10 @@ components:
         - version
         - success
       title: rollback_package_response
-      type: object
     Kibana_HTTP_APIs_rule_flapping:
       additionalProperties: false
       description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
+      type: object
       properties:
         enabled:
           description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
@@ -110299,9 +110300,9 @@ components:
         - look_back_window
         - status_change_threshold
       title: rule_flapping
-      type: object
     Kibana_HTTP_APIs_rule_response:
       additionalProperties: false
+      type: object
       properties:
         actions:
           items:
@@ -110677,9 +110678,9 @@ components:
         - execution_status
         - revision
       title: rule_response
-      type: object
     Kibana_HTTP_APIs_schedule_request:
       additionalProperties: false
+      type: object
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
@@ -110739,10 +110740,10 @@ components:
         - start
         - duration
       title: schedule_request
-      type: object
     Kibana_HTTP_APIs_security_bulk_create_or_update_roles_response:
       additionalProperties: false
       description: The response payload for the bulk create-or-update roles API.
+      type: object
       properties:
         created:
           items:
@@ -110764,10 +110765,10 @@ components:
             type: string
           type: array
       title: security_bulk_create_or_update_roles_response
-      type: object
     Kibana_HTTP_APIs_security_bulk_roles_error_detail:
       additionalProperties: false
       description: Error information for a single role in a bulk create-or-update request.
+      type: object
       properties:
         reason:
           description: A human readable error reason.
@@ -110779,10 +110780,10 @@ components:
         - type
         - reason
       title: security_bulk_roles_error_detail
-      type: object
     Kibana_HTTP_APIs_security_query_roles_body:
       additionalProperties: false
       description: The request body for querying roles.
+      type: object
       properties:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_query_roles_filters'
@@ -110795,18 +110796,18 @@ components:
         sort:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_query_roles_sort'
       title: security_query_roles_body
-      type: object
     Kibana_HTTP_APIs_security_query_roles_filters:
       additionalProperties: false
       description: The filter criteria for the query.
+      type: object
       properties:
         showReservedRoles:
           type: boolean
       title: security_query_roles_filters
-      type: object
     Kibana_HTTP_APIs_security_query_roles_response:
       additionalProperties: false
       description: The response payload for a roles query.
+      type: object
       properties:
         count:
           description: The number of roles returned in this response page.
@@ -110823,10 +110824,10 @@ components:
         - count
         - total
       title: security_query_roles_response
-      type: object
     Kibana_HTTP_APIs_security_query_roles_sort:
       additionalProperties: false
       description: The sort criteria for the query.
+      type: object
       properties:
         direction:
           enum:
@@ -110839,10 +110840,10 @@ components:
         - field
         - direction
       title: security_query_roles_sort
-      type: object
     Kibana_HTTP_APIs_security_role_elasticsearch:
       additionalProperties: false
       description: The Elasticsearch cluster, index, and remote cluster security privileges for the role.
+      type: object
       properties:
         cluster:
           items:
@@ -110872,10 +110873,10 @@ components:
           maxItems: 100
           type: array
       title: security_role_elasticsearch
-      type: object
     Kibana_HTTP_APIs_security_role_indices_privileges:
       additionalProperties: false
       description: The indices privileges entry.
+      type: object
       properties:
         allow_restricted_indices:
           description: Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field covers the restricted indices too.
@@ -110909,10 +110910,10 @@ components:
         - names
         - privileges
       title: security_role_indices_privileges
-      type: object
     Kibana_HTTP_APIs_security_role_kibana_application:
       additionalProperties: false
       description: A raw Elasticsearch application privilege entry tied to Kibana.
+      type: object
       properties:
         application:
           type: string
@@ -110929,10 +110930,10 @@ components:
         - privileges
         - resources
       title: security_role_kibana_application
-      type: object
     Kibana_HTTP_APIs_security_role_kibana_privilege:
       additionalProperties: false
       description: The Kibana privilege entry for the role.
+      type: object
       properties:
         base:
           anyOf:
@@ -110981,10 +110982,10 @@ components:
       required:
         - base
       title: security_role_kibana_privilege
-      type: object
     Kibana_HTTP_APIs_security_role_kibana_privilege_response:
       additionalProperties: false
       description: A Kibana privilege entry returned for a role.
+      type: object
       properties:
         _reserved:
           items:
@@ -111013,10 +111014,10 @@ components:
         - base
         - feature
       title: security_role_kibana_privilege_response
-      type: object
     Kibana_HTTP_APIs_security_role_put_payload:
       additionalProperties: false
       description: The role definition to create or update.
+      type: object
       properties:
         description:
           description: A description for the role.
@@ -111035,10 +111036,10 @@ components:
       required:
         - elasticsearch
       title: security_role_put_payload
-      type: object
     Kibana_HTTP_APIs_security_role_remote_cluster_privileges:
       additionalProperties: false
       description: The remote cluster privileges entry.
+      type: object
       properties:
         clusters:
           items:
@@ -111058,10 +111059,10 @@ components:
         - privileges
         - clusters
       title: security_role_remote_cluster_privileges
-      type: object
     Kibana_HTTP_APIs_security_role_remote_indices_privileges:
       additionalProperties: false
       description: The remote indices privileges entry.
+      type: object
       properties:
         allow_restricted_indices:
           description: Restricted indices are a special category of indices that are used internally to store configuration data and should not be directly accessed. Only internal system roles should normally grant privileges over the restricted indices. Toggling this flag is very strongly discouraged because it could effectively grant unrestricted operations on critical data, making the entire system unstable or leaking sensitive information. If for administrative purposes you need to create a role with privileges covering restricted indices, however, you can set this property to true. In that case, the names field will cover the restricted indices too.
@@ -111103,10 +111104,10 @@ components:
         - names
         - privileges
       title: security_role_remote_indices_privileges
-      type: object
     Kibana_HTTP_APIs_security_role_response:
       additionalProperties: false
       description: A Kibana role definition returned by the Roles API.
+      type: object
       properties:
         _transform_error:
           items:
@@ -111142,10 +111143,10 @@ components:
         - elasticsearch
         - kibana
       title: security_role_response
-      type: object
     Kibana_HTTP_APIs_security_role_transform_error:
       additionalProperties: false
       description: Diagnostic information about a role whose Kibana privileges could not be transformed.
+      type: object
       properties:
         reason:
           description: The reason the role could not be fully transformed.
@@ -111157,10 +111158,10 @@ components:
       required:
         - reason
       title: security_role_transform_error
-      type: object
     Kibana_HTTP_APIs_security_roles_bulk_create_or_update_payload:
       additionalProperties: false
       description: The request body for bulk creating or updating roles.
+      type: object
       properties:
         roles:
           additionalProperties:
@@ -111169,9 +111170,9 @@ components:
       required:
         - roles
       title: security_roles_bulk_create_or_update_payload
-      type: object
     Kibana_HTTP_APIs_simplified_create_package_policy_request:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -111375,9 +111376,9 @@ components:
         - name
         - package
       title: simplified_create_package_policy_request
-      type: object
     Kibana_HTTP_APIs_simplified_package_policy_input_deprecation_info:
       additionalProperties: false
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -111393,9 +111394,9 @@ components:
       required:
         - description
       title: simplified_package_policy_input_deprecation_info
-      type: object
     Kibana_HTTP_APIs_simplified_package_policy_stream_deprecation_info:
       additionalProperties: false
+      type: object
       properties:
         description:
           maxLength: 4096
@@ -111411,7 +111412,6 @@ components:
       required:
         - description
       title: simplified_package_policy_stream_deprecation_info
-      type: object
     Kibana_HTTP_APIs_slo-alerts-embeddable:
       additionalProperties: false
       description: SLO Alerts embeddable schema
@@ -111726,6 +111726,7 @@ components:
         - overview_mode
     Kibana_HTTP_APIs_slo-rules-burnrate-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -111792,6 +111793,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the slo burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+          type: object
           properties:
             dependencies:
               items:
@@ -111858,7 +111860,6 @@ components:
             - sloId
             - windows
           title: SLO Burn Rate Rule Params
-          type: object
         rule_type_id:
           enum:
             - slo.rules.burnRate
@@ -111894,7 +111895,6 @@ components:
         - rule_type_id
         - params
       title: SLO burn rate
-      type: object
     Kibana_HTTP_APIs_slo-single-overview-embeddable:
       additionalProperties: false
       description: SLO Single Overview embeddable schema
@@ -111974,6 +111974,7 @@ components:
     Kibana_HTTP_APIs_staticColor:
       additionalProperties: false
       description: Fixed color for all values in the dimension.
+      type: object
       properties:
         color:
           description: The static color to be used for all values.
@@ -111986,9 +111987,9 @@ components:
         - type
         - color
       title: Static Color
-      type: object
     Kibana_HTTP_APIs_staticOperationDefinition:
       additionalProperties: false
+      type: object
       properties:
         format:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
@@ -112006,7 +112007,6 @@ components:
       required:
         - operation
       title: Static Operation Definition
-      type: object
     Kibana_HTTP_APIs_StreamlangConditionBlock:
       additionalProperties: false
       type: object
@@ -113112,6 +113112,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_QueryStreamUpsertRequest'
     Kibana_HTTP_APIs_sumMetricOperation:
       additionalProperties: false
+      type: object
       properties:
         empty_as_null:
           default: false
@@ -113141,7 +113142,6 @@ components:
         - field
         - operation
       title: Sum Metric Operation
-      type: object
     Kibana_HTTP_APIs_tagcloudChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_tagcloudNoESQL'
@@ -113151,6 +113151,7 @@ components:
     Kibana_HTTP_APIs_tagcloudESQL:
       additionalProperties: false
       description: Tag Cloud configuration using an ES|QL query.
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -113214,7 +113215,6 @@ components:
         - metric
         - tag_by
       title: Tag Cloud Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_tagcloudMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_tagcloudMetricCountMetric:
@@ -113242,6 +113242,7 @@ components:
     Kibana_HTTP_APIs_tagcloudNoESQL:
       additionalProperties: false
       description: Tag Cloud configuration using a data view.
+      type: object
       properties:
         data_source:
           discriminator:
@@ -113313,10 +113314,10 @@ components:
         - metric
         - tag_by
       title: Tag Cloud Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_tagcloudStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         caption:
           additionalProperties: false
@@ -113347,7 +113348,6 @@ components:
           default: horizontal
           description: Orientation of the tagcloud.
       title: Tag cloud styling
-      type: object
     Kibana_HTTP_APIs_tagcloudTagDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_tagcloudTagFilters:
@@ -113360,6 +113360,7 @@ components:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_termsOperation'
     Kibana_HTTP_APIs_termsOperation:
       additionalProperties: false
+      type: object
       properties:
         excludes:
           additionalProperties: false
@@ -113447,10 +113448,10 @@ components:
         - operation
         - fields
       title: Terms Operation
-      type: object
     Kibana_HTTP_APIs_termsRankByAlphabetical:
       additionalProperties: false
       description: Terms ranked alphabetically.
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113462,13 +113463,13 @@ components:
         - type
         - direction
       title: Terms Rank By Alphabetical
-      type: object
     Kibana_HTTP_APIs_termsRankByAlphabeticalDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
       description: Sort direction for alphabetical ranking.
     Kibana_HTTP_APIs_termsRankByCustomCountOperation:
       additionalProperties: false
       description: Terms ranked by count, either of all documents or of a specific field.
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113488,13 +113489,13 @@ components:
         - direction
         - operation
       title: Terms Rank By Custom Count Operation
-      type: object
     Kibana_HTTP_APIs_termsRankByCustomDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
       description: Sort direction for custom ranking.
     Kibana_HTTP_APIs_termsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113522,10 +113523,10 @@ components:
         - direction
         - operation
       title: Terms Rank By Custom Operation
-      type: object
     Kibana_HTTP_APIs_termsRankByMetric:
       additionalProperties: false
       description: Terms ranked by a linked metric.
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113542,13 +113543,13 @@ components:
         - type
         - direction
       title: Terms Rank By Metric
-      type: object
     Kibana_HTTP_APIs_termsRankByMetricDirection:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
       description: Sort direction for metric-based ranking.
     Kibana_HTTP_APIs_termsRankByPercentileOperation:
       additionalProperties: false
       description: Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113573,10 +113574,10 @@ components:
         - direction
         - operation
       title: Terms Rank By Percentile Operation
-      type: object
     Kibana_HTTP_APIs_termsRankByPercentileRankOperation:
       additionalProperties: false
       description: 'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.'
+      type: object
       properties:
         direction:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_direction'
@@ -113601,10 +113602,10 @@ components:
         - direction
         - operation
       title: Terms Rank By Percentile Rank Operation
-      type: object
     Kibana_HTTP_APIs_termsRankByRare:
       additionalProperties: false
       description: Terms ranked by rarity.
+      type: object
       properties:
         max:
           description: Maximum number of rare terms to include.
@@ -113617,10 +113618,10 @@ components:
         - type
         - max
       title: Terms Rank By Rarity
-      type: object
     Kibana_HTTP_APIs_termsRankBySignificant:
       additionalProperties: false
       description: Terms ranked by significance.
+      type: object
       properties:
         type:
           enum:
@@ -113629,9 +113630,9 @@ components:
       required:
         - type
       title: Terms Rank By Significance
-      type: object
     Kibana_HTTP_APIs_transform-health-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -113698,6 +113699,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the transform health rule. These parameters are appropriate when `rule_type_id` is `transform_health`.
+          type: object
           properties:
             excludeTransforms:
               default: null
@@ -113745,7 +113747,6 @@ components:
           required:
             - includeTransforms
           title: Transform Health Rule Params
-          type: object
         rule_type_id:
           enum:
             - transform_health
@@ -113781,7 +113782,6 @@ components:
         - rule_type_id
         - params
       title: Transform health
-      type: object
     Kibana_HTTP_APIs_treemapChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapNoESQL'
@@ -113791,6 +113791,7 @@ components:
     Kibana_HTTP_APIs_treemapESQL:
       additionalProperties: false
       description: Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -113871,7 +113872,6 @@ components:
         - data_source
         - metrics
       title: Treemap Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_treemapGroupByDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_treemapGroupByFilters:
@@ -113885,6 +113885,7 @@ components:
     Kibana_HTTP_APIs_treemapLegend:
       additionalProperties: false
       description: Configuration for the treemap chart legend appearance and behavior
+      type: object
       properties:
         nested:
           default: false
@@ -113909,7 +113910,6 @@ components:
               type: string
           description: Legend visibility.
       title: Legend
-      type: object
     Kibana_HTTP_APIs_treemapMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_treemapMetricCountMetric:
@@ -113937,6 +113937,7 @@ components:
     Kibana_HTTP_APIs_treemapNoESQL:
       additionalProperties: false
       description: Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions
+      type: object
       properties:
         data_source:
           discriminator:
@@ -114029,10 +114030,10 @@ components:
         - data_source
         - metrics
       title: Treemap Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_treemapStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         labels:
           additionalProperties: false
@@ -114045,7 +114046,6 @@ components:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
       title: Treemap styling
-      type: object
     Kibana_HTTP_APIs_unassignedColorSchema:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorFromPalette'
@@ -114053,6 +114053,7 @@ components:
       description: The color to use for unassigned values.
     Kibana_HTTP_APIs_uniqueCountMetricOperation:
       additionalProperties: false
+      type: object
       properties:
         empty_as_null:
           default: false
@@ -114082,9 +114083,9 @@ components:
         - field
         - operation
       title: Unique Count Metric Operation
-      type: object
     Kibana_HTTP_APIs_update_agent_policy_request_body:
       additionalProperties: false
+      type: object
       properties:
         advanced_settings:
           additionalProperties: false
@@ -114342,9 +114343,9 @@ components:
         - name
         - namespace
       title: update_agent_policy_request_body
-      type: object
     Kibana_HTTP_APIs_update_connector:
       additionalProperties: false
+      type: object
       properties:
         name:
           description: The display name for the connector.
@@ -114406,9 +114407,9 @@ components:
       required:
         - name
       title: update_connector
-      type: object
     Kibana_HTTP_APIs_update_maintenance_window:
       additionalProperties: false
+      type: object
       properties:
         enabled:
           description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
@@ -114427,9 +114428,9 @@ components:
           description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
           type: string
       title: update_maintenance_window
-      type: object
     Kibana_HTTP_APIs_update_output_elasticsearch:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -114517,9 +114518,9 @@ components:
           nullable: true
           type: boolean
       title: update_output_elasticsearch
-      type: object
     Kibana_HTTP_APIs_update_output_kafka:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -114712,9 +114713,9 @@ components:
       required:
         - name
       title: update_output_kafka
-      type: object
     Kibana_HTTP_APIs_update_output_logstash:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -114790,9 +114791,9 @@ components:
             - logstash
           type: string
       title: update_output_logstash
-      type: object
     Kibana_HTTP_APIs_update_output_remote_elasticsearch:
       additionalProperties: false
+      type: object
       properties:
         allow_edit:
           items:
@@ -114905,9 +114906,9 @@ components:
           nullable: true
           type: boolean
       title: update_output_remote_elasticsearch
-      type: object
     Kibana_HTTP_APIs_update_package_policy_request:
       additionalProperties: false
+      type: object
       properties:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
@@ -115194,9 +115195,9 @@ components:
         version:
           type: string
       title: update_package_policy_request
-      type: object
     Kibana_HTTP_APIs_update_package_request:
       additionalProperties: false
+      type: object
       properties:
         keepPoliciesUpToDate:
           type: boolean
@@ -115219,9 +115220,9 @@ components:
           description: Per-namespace managed settings (for example, ILM policy) for this package. Keyed by namespace name.
           type: object
       title: update_package_request
-      type: object
     Kibana_HTTP_APIs_update_package_response:
       additionalProperties: false
+      type: object
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
@@ -115275,9 +115276,9 @@ components:
       required:
         - item
       title: update_package_response
-      type: object
     Kibana_HTTP_APIs_update_rule:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -115363,10 +115364,10 @@ components:
         - name
         - schedule
       title: update_rule
-      type: object
     Kibana_HTTP_APIs_update_rule_action:
       additionalProperties: false
       description: An action that runs under defined conditions.
+      type: object
       properties:
         alerts_filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_update_rule_action_alerts_filter'
@@ -115393,9 +115394,9 @@ components:
       required:
         - id
       title: update_rule_action
-      type: object
     Kibana_HTTP_APIs_update_rule_action_alerts_filter:
       additionalProperties: false
+      type: object
       properties:
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerts_filter_query'
@@ -115439,9 +115440,9 @@ components:
             - hours
             - timezone
       title: update_rule_action_alerts_filter
-      type: object
     Kibana_HTTP_APIs_update_rule_action_frequency:
       additionalProperties: false
+      type: object
       properties:
         notify_when:
           description: 'Indicates how frequently rule actions are triggered. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. You cannot specify `notify_when` at both the rule and action level. The recommended approach is to set it for each action individually. If you set `notify_when` at the rule level and then edit the rule, it will automatically be converted to action-specific values.'
@@ -115462,9 +115463,9 @@ components:
         - summary
         - notify_when
       title: update_rule_action_frequency
-      type: object
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
+      type: object
       properties:
         packagePolicyIds:
           items:
@@ -115474,7 +115475,6 @@ components:
       required:
         - packagePolicyIds
       title: upgrade_package_policies_request
-      type: object
     Kibana_HTTP_APIs_valueDisplay:
       additionalProperties: false
       description: Configure the visibility and the format of the values rendered on each chart partition section
@@ -115571,6 +115571,7 @@ components:
     Kibana_HTTP_APIs_vis_api_xy_axis_config:
       additionalProperties: false
       description: Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.
+      type: object
       properties:
         x:
           additionalProperties: false
@@ -115779,7 +115780,6 @@ components:
                   description: When `true`, displays the title.
                   type: boolean
       title: Axis
-      type: object
     Kibana_HTTP_APIs_waffleChart:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleNoESQL'
@@ -115789,6 +115789,7 @@ components:
     Kibana_HTTP_APIs_waffleESQL:
       additionalProperties: false
       description: Waffle chart configuration for ES|QL queries
+      type: object
       properties:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
@@ -115869,7 +115870,6 @@ components:
         - data_source
         - metrics
       title: Waffle Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_waffleGroupByDateHistogram:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_dateHistogramOperation'
     Kibana_HTTP_APIs_waffleGroupByFilters:
@@ -115883,6 +115883,7 @@ components:
     Kibana_HTTP_APIs_waffleLegend:
       additionalProperties: false
       description: Legend configuration for waffle chart
+      type: object
       properties:
         position:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
@@ -115912,7 +115913,6 @@ components:
               type: string
           description: Legend visibility.
       title: Legend
-      type: object
     Kibana_HTTP_APIs_waffleMetricCounterRate:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_counterRateOperation'
     Kibana_HTTP_APIs_waffleMetricCountMetric:
@@ -115940,6 +115940,7 @@ components:
     Kibana_HTTP_APIs_waffleNoESQL:
       additionalProperties: false
       description: Waffle chart configuration for standard queries
+      type: object
       properties:
         data_source:
           discriminator:
@@ -116032,15 +116033,14 @@ components:
         - data_source
         - metrics
       title: Waffle Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_waffleStyling:
       additionalProperties: false
       description: Visual chart styling options
+      type: object
       properties:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
       title: Waffle styling
-      type: object
     Kibana_HTTP_APIs_WiredStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -116170,6 +116170,7 @@ components:
         - stream
     Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -116236,6 +116237,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the anomaly detection rule. These parameters are appropriate when `rule_type_id` is `xpack.ml.anomaly_detection_alert"`.
+          type: object
           properties:
             includeInterim:
               default: true
@@ -116282,7 +116284,6 @@ components:
             - severity
             - resultType
           title: Anomaly Detection Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.ml.anomaly_detection_alert
@@ -116318,9 +116319,9 @@ components:
         - rule_type_id
         - params
       title: Anomaly detection
-      type: object
     Kibana_HTTP_APIs_xpack-ml-anomaly-detection-jobs-health-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -116387,6 +116388,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the anomaly detection jobs health rule. These parameters are appropriate when `rule_type_id` is `xpack.ml.anomaly_detection_jobs_health"`.
+          type: object
           properties:
             excludeJobs:
               additionalProperties: false
@@ -116496,7 +116498,6 @@ components:
           required:
             - includeJobs
           title: Anomaly Detection Jobs Health Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.ml.anomaly_detection_jobs_health
@@ -116532,9 +116533,9 @@ components:
         - rule_type_id
         - params
       title: Anomaly detection jobs health
-      type: object
     Kibana_HTTP_APIs_xpack-synthetics-alerts-monitorstatus-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -116601,6 +116602,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.monitorStatus`.
+          type: object
           properties:
             condition:
               additionalProperties: false
@@ -116676,7 +116678,6 @@ components:
                 type: string
               type: array
           title: Synthetics Monitor Status Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.synthetics.alerts.monitorStatus
@@ -116712,9 +116713,9 @@ components:
         - rule_type_id
         - params
       title: Synthetics monitor status
-      type: object
     Kibana_HTTP_APIs_xpack-synthetics-alerts-tls-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -116781,6 +116782,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the synthetics tls rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.tls`.
+          type: object
           properties:
             browserResourceTypes:
               items:
@@ -116831,7 +116833,6 @@ components:
                 type: string
               type: array
           title: Synthetics TLS Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.synthetics.alerts.tls
@@ -116867,9 +116868,9 @@ components:
         - rule_type_id
         - params
       title: Synthetics TLS
-      type: object
     Kibana_HTTP_APIs_xpack-uptime-alerts-durationanomaly-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -116936,6 +116937,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the uptime duration anomaly rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.durationAnomaly`.
+          type: object
           properties:
             monitorId:
               type: string
@@ -116947,7 +116949,6 @@ components:
             - monitorId
             - severity
           title: Uptime Duration Anomaly Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.uptime.alerts.durationAnomaly
@@ -116983,9 +116984,9 @@ components:
         - rule_type_id
         - params
       title: Uptime duration anomaly
-      type: object
     Kibana_HTTP_APIs_xpack-uptime-alerts-monitorstatus-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -117052,6 +117053,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the uptime monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+          type: object
           properties:
             availability:
               additionalProperties: false
@@ -117127,7 +117129,6 @@ components:
             - shouldCheckStatus
             - shouldCheckAvailability
           title: Uptime Monitor Status Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.uptime.alerts.monitorStatus
@@ -117163,9 +117164,9 @@ components:
         - rule_type_id
         - params
       title: Uptime monitor status
-      type: object
     Kibana_HTTP_APIs_xpack-uptime-alerts-tlscertificate-create-rule-body-alerting:
       additionalProperties: false
+      type: object
       properties:
         actions:
           default: []
@@ -117232,6 +117233,7 @@ components:
         params:
           additionalProperties: false
           description: The parameters for the uptime tls rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tlsCertificate`.
+          type: object
           properties:
             certAgeThreshold:
               type: number
@@ -117242,7 +117244,6 @@ components:
             stackVersion:
               type: string
           title: Uptime TLS Rule Params
-          type: object
         rule_type_id:
           enum:
             - xpack.uptime.alerts.tlsCertificate
@@ -117278,10 +117279,10 @@ components:
         - rule_type_id
         - params
       title: Uptime TLS certificate
-      type: object
     Kibana_HTTP_APIs_xyAnnotationByRefLayer:
       additionalProperties: false
       description: Reference to a library annotation group
+      type: object
       properties:
         group_id:
           description: ID of the linked annotation group from the library
@@ -117294,10 +117295,10 @@ components:
         - type
         - group_id
       title: Annotation Layer (By Reference)
-      type: object
     Kibana_HTTP_APIs_xyAnnotationLayerNoESQL:
       additionalProperties: false
       description: Layer containing annotations (query-based, points, and ranges)
+      type: object
       properties:
         data_source:
           discriminator:
@@ -117330,7 +117331,6 @@ components:
         - type
         - events
       title: Annotation Layer (DSL)
-      type: object
     Kibana_HTTP_APIs_xyAnnotationManualEvent:
       additionalProperties: false
       description: Manual point annotation at specific timestamp
@@ -117640,6 +117640,7 @@ components:
     Kibana_HTTP_APIs_xyChartESQL:
       additionalProperties: false
       description: XY chart configuration for ES|QL queries
+      type: object
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
@@ -117670,10 +117671,10 @@ components:
         - type
         - layers
       title: XY Chart (ES|QL)
-      type: object
     Kibana_HTTP_APIs_xyChartNoESQL:
       additionalProperties: false
       description: XY chart configuration for DSL queries
+      type: object
       properties:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
@@ -117706,7 +117707,6 @@ components:
         - type
         - layers
       title: XY Chart (DSL)
-      type: object
     Kibana_HTTP_APIs_xyFitting:
       additionalProperties: false
       description: Missing data interpolation configuration for line and area series
@@ -117756,6 +117756,7 @@ components:
     Kibana_HTTP_APIs_xyLayerESQL:
       additionalProperties: false
       description: Data layer for ES|QL queries with column references
+      type: object
       properties:
         breakdown_by:
           additionalProperties: false
@@ -117875,10 +117876,10 @@ components:
         - type
         - 'y'
       title: Layer (ES|QL)
-      type: object
     Kibana_HTTP_APIs_xyLayerNoESQL:
       additionalProperties: false
       description: Data layer for standard queries with metrics and buckets
+      type: object
       properties:
         breakdown_by:
           allOf:
@@ -118001,7 +118002,6 @@ components:
         - type
         - 'y'
       title: Layer (DSL)
-      type: object
     Kibana_HTTP_APIs_xyLayersESQL:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLayerESQL'
       description: XY chart layer types for ES|QL queries
@@ -118022,6 +118022,7 @@ components:
     Kibana_HTTP_APIs_xyLegendInside:
       additionalProperties: false
       description: Inside legend
+      type: object
       properties:
         columns:
           description: Number of legend columns
@@ -118134,10 +118135,10 @@ components:
       required:
         - placement
       title: Inside
-      type: object
     Kibana_HTTP_APIs_xyLegendOutsideHorizontal:
       additionalProperties: false
       description: Outside legend positioned horizontal (top/bottom) of the chart
+      type: object
       properties:
         layout:
           anyOf:
@@ -118250,10 +118251,10 @@ components:
               type: string
           description: Legend visibility.
       title: Outside horizontal
-      type: object
     Kibana_HTTP_APIs_xyLegendOutsideVertical:
       additionalProperties: false
       description: Outside legend positioned vertical (left/right) of the chart
+      type: object
       properties:
         layout:
           additionalProperties: false
@@ -118358,7 +118359,6 @@ components:
               type: string
           description: Legend visibility.
       title: Outside vertical
-      type: object
     Kibana_HTTP_APIs_xyLegendSeriesHeader:
       additionalProperties: false
       description: Legend table series header configuration.
@@ -118373,6 +118373,7 @@ components:
     Kibana_HTTP_APIs_xyReferenceLineLayerNoESQL:
       additionalProperties: false
       description: Reference line layer for standard queries
+      type: object
       properties:
         data_source:
           discriminator:
@@ -118537,7 +118538,6 @@ components:
         - type
         - thresholds
       title: Reference Line Layer (DSL)
-      type: object
     Kibana_HTTP_APIs_xyRefLineCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_countMetricOperation'
     Kibana_HTTP_APIs_xyRefLineFormula:
@@ -118698,6 +118698,8 @@ components:
     Kibana_HTTP_APIs_xyYUniqueCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_uniqueCountMetricOperation'
     Machine_learning_APIs_mlSync200Response:
+      title: Successful sync API response
+      type: object
       properties:
         datafeedsAdded:
           additionalProperties:
@@ -118713,9 +118715,9 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSavedObjectsCreated'
         savedObjectsDeleted:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSavedObjectsDeleted'
-      title: Successful sync API response
-      type: object
     Machine_learning_APIs_mlSync4xxResponse:
+      title: Unsuccessful sync API response
+      type: object
       properties:
         error:
           example: Unauthorized
@@ -118725,8 +118727,6 @@ components:
         statusCode:
           example: 401
           type: integer
-      title: Unsuccessful sync API response
-      type: object
     Machine_learning_APIs_mlSyncResponseAnomalyDetectors:
       description: The sync machine learning saved objects API response contains this object when there are anomaly detection jobs affected by the synchronization. There is an object for each relevant job, which contains the synchronization status.
       properties:
@@ -118847,6 +118847,8 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
+      title: Message
+      type: object
       properties:
         '@timestamp':
           description: The timestamp when the message was created.
@@ -118876,8 +118878,6 @@ components:
       required:
         - '@timestamp'
         - message
-      title: Message
-      type: object
     Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:
@@ -128544,6 +128544,7 @@ components:
           type: string
     Security_Endpoint_Management_API_ElasticDefendCancelParameters:
       description: Elastic Defend agent type
+      type: object
       properties:
         force:
           description: Forcefully cancel the response action even when it is already running
@@ -128558,7 +128559,6 @@ components:
       required:
         - id
       title: ElasticDefendCancelParameters
-      type: object
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -128671,6 +128671,7 @@ components:
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
           scriptInput: --some-parameter some-value
+      type: object
       properties:
         scriptId:
           description: The script ID from the scripts library that will be executed.
@@ -128685,7 +128686,6 @@ components:
       required:
         - scriptId
       title: Elastic Defend Run Script Parameters
-      type: object
     Security_Endpoint_Management_API_EndpointScript:
       type: object
       properties:
@@ -129281,6 +129281,7 @@ components:
       type: string
     Security_Endpoint_Management_API_MDECancelParameters:
       description: Microsoft Defender for Endpoint agent type
+      type: object
       properties:
         id:
           description: ID of the response action to cancel
@@ -129291,7 +129292,6 @@ components:
       required:
         - id
       title: MDECancelParameters
-      type: object
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
       example:
@@ -129301,6 +129301,7 @@ components:
         parameters:
           args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
+      type: object
       properties:
         args:
           description: Optional command line arguments for the script.
@@ -129315,7 +129316,6 @@ components:
       required:
         - scriptName
       title: Microsoft Defender Endpoint Run Script Parameters
-      type: object
     Security_Endpoint_Management_API_MemoryDump:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
@@ -129326,6 +129326,8 @@ components:
                 type: object
                 properties:
                   content:
+                    title: Memory dump output
+                    type: object
                     properties:
                       code:
                         type: string
@@ -129338,12 +129340,12 @@ components:
                       path:
                         description: The path to the memory dump compressed file on the host machine
                         type: string
-                    title: Memory dump output
-                    type: object
               type: object
             parameters:
               oneOf:
-                - properties:
+                - title: Kernel memory dump
+                  type: object
+                  properties:
                     type:
                       description: Kernel-level memory dump
                       enum:
@@ -129351,9 +129353,9 @@ components:
                       type: string
                   required:
                     - type
-                  title: Kernel memory dump
+                - title: Process memory dump with PID
                   type: object
-                - properties:
+                  properties:
                     pid:
                       description: The process ID (PID)
                       type: number
@@ -129365,9 +129367,9 @@ components:
                   required:
                     - type
                     - pid
-                  title: Process memory dump with PID
+                - title: Process memory dump with entity ID
                   type: object
-                - properties:
+                  properties:
                     entity_id:
                       description: The process entity ID
                       type: string
@@ -129379,8 +129381,6 @@ components:
                   required:
                     - type
                     - entity_id
-                  title: Process memory dump with entity ID
-                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MemoryDumpRouteRequestBody:
@@ -129848,6 +129848,7 @@ components:
           additionalProperties:
             description: The agent id
             format: uuid
+            type: object
             properties:
               content:
                 description: The response action output content for the agent ID. Exact format depends on the response action command.
@@ -129863,7 +129864,6 @@ components:
               - type
               - content
             title: Agent ID
-            type: object
           description: |
             The outputs of the response action for each agent ID that it was sent to. Content different depending on the
             response action command and will only be present for agents that have responded to the response action
@@ -130139,6 +130139,7 @@ components:
         parameters:
           scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
           scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
+      type: object
       properties:
         scriptId:
           description: The script ID from SentinelOne scripts library that will be executed.
@@ -130153,7 +130154,6 @@ components:
       required:
         - scriptId
       title: SentinelOne Run Script Parameters
-      type: object
     Security_Endpoint_Management_API_SortDirection:
       description: Determines the sort order.
       enum:
@@ -137698,7 +137698,6 @@ components:
         - type
       title: Time window
     SLOs_timeslice_metric_basic_metric_with_field:
-      type: object
       properties:
         aggregation:
           description: The aggregation type of the metric.
@@ -137730,8 +137729,8 @@ components:
         - aggregation
         - field
       title: Timeslice Metric Basic Metric with Field
-    SLOs_timeslice_metric_doc_count_metric:
       type: object
+    SLOs_timeslice_metric_doc_count_metric:
       properties:
         aggregation:
           description: The aggregation type of the metric. Only valid option is "doc_count"
@@ -137752,8 +137751,8 @@ components:
         - name
         - aggregation
       title: Timeslice Metric Doc Count Metric
-    SLOs_timeslice_metric_percentile_metric:
       type: object
+    SLOs_timeslice_metric_percentile_metric:
       properties:
         aggregation:
           description: The aggregation type of the metric. Only valid option is "percentile"
@@ -137784,6 +137783,7 @@ components:
         - field
         - percentile
       title: Timeslice Metric Percentile Metric
+      type: object
     SLOs_update_slo_request:
       description: |
         The update SLO API request body varies depending on the type of indicator, time window and budgeting method. Partial update is handled.
