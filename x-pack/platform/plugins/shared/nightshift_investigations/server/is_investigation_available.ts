@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
@@ -18,6 +18,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 export const isInvestigationAvailable = async ({
   request,
   agentBuilder,
+  logger,
   searchInferenceEndpoints,
   spaceId,
   spaces,
@@ -26,6 +27,7 @@ export const isInvestigationAvailable = async ({
 }: {
   request: KibanaRequest;
   agentBuilder?: AgentBuilderPluginStart;
+  logger: Logger;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaceId?: string;
   spaces?: SpacesPluginStart;
@@ -50,10 +52,9 @@ export const isInvestigationAvailable = async ({
       ),
     ]);
 
-    return Boolean(
-      workflow?.enabled && workflow.valid && workflow.definition && endpoints.length > 0
-    );
-  } catch {
+    return Boolean(workflow?.definition && endpoints.length > 0);
+  } catch (error) {
+    logger.warn(`Failed to check investigation availability: ${String(error)}`);
     return false;
   }
 };

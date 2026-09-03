@@ -1172,14 +1172,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     ).rejects.toThrow(InvestigationUnavailableError);
   });
 
-  it('throws InvestigationUnavailableError when the workflow cannot execute', async () => {
-    mockManagement.getWorkflow.mockResolvedValue({ ...mockWorkflow, enabled: false });
-
-    await expect(
-      makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
-    ).rejects.toThrow(InvestigationUnavailableError);
-  });
-
   it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
     const client = new NightshiftInvestigationsClient({
       request: mockRequest,

@@ -156,6 +156,7 @@ export class NightshiftInvestigationsPlugin
         isInvestigationAvailable({
           request,
           agentBuilder: this.agentBuilder,
+          logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
@@ -180,6 +181,7 @@ export class NightshiftInvestigationsPlugin
         isInvestigationAvailable({
           request,
           agentBuilder: this.agentBuilder,
+          logger: this.logger,
           searchInferenceEndpoints: this.searchInferenceEndpoints,
           spaceId: resolvedSpaceId,
           spaces: this.spaces,

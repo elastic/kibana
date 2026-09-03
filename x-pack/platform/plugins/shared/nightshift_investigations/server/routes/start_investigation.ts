@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
-import { InvestigationUnavailableError, InvalidInvestigationContextError } from '../client/errors';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
 const subjectIdAndSummary = {
   id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
@@ -71,16 +70,8 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         ...params.body,
         trigger_type: 'manual',
       });
-    } catch (err) {
-      // Route validation rejects a bad context before this, so reaching here means the client
-      // found something the route schema let through. A 500 would be the wrong answer.
-      if (err instanceof InvalidInvestigationContextError) {
-        throw badRequest(err.message);
-      }
-      if (err instanceof InvestigationUnavailableError) {
-        throw serverUnavailable(err.message);
-      }
-      throw err;
+    } catch (error) {
+      rethrowInvestigationClientError(error);
     }
   },
 });

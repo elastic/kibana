@@ -420,7 +420,7 @@ export class NightshiftInvestigationsClient {
       spaceId
     );
 
-    if (!workflow?.enabled || !workflow.valid || !workflow.definition) {
+    if (!workflow?.definition) {
       this.logger.error(
         `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
       );
