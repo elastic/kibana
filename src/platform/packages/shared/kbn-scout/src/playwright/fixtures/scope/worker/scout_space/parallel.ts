@@ -25,9 +25,22 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         name: spaceId,
         disabledFeatures: [],
       };
-      await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
-        return kbnClient.spaces.create(spacePayload);
-      });
+      const createSpace = () =>
+        measurePerformanceAsync(log, `spaces.create('${spaceId}')`, () =>
+          kbnClient.spaces.create(spacePayload)
+        );
+      try {
+        await createSpace();
+      } catch (createError) {
+        // `test-space-N` is owned solely by this worker slot, so a pre-existing one is this fixture's own stale leftover: delete it and recreate a clean space (the setup-side analog of idempotent teardown).
+        const spaces = (await kbnClient.spaces.list()) as Array<{ id: string }>;
+        if (!spaces.some((space) => space.id === spaceId)) {
+          throw createError;
+        }
+        log.warning(`Space '${spaceId}' already existed; recreating it from a clean state`);
+        await kbnClient.spaces.delete(spaceId);
+        await createSpace();
+      }
 
       // cache saved objects ids in space
       const savedObjectsCache = new Map<string, string>();
