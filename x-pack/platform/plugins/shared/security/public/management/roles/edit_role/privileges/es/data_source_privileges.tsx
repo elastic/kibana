@@ -50,14 +50,12 @@ const ensureGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege => {
 };
 
 const updateGlobalWithDataSourcePrivileges = (
-  currentGlobal: Role['elasticsearch']['global'],
-  nextDataSourcePrivileges: RoleDataSourcePrivilege[],
-  fallbackGlobal: estypes.SecurityGlobalPrivilege
+  role: Role,
+  nextDataSourcePrivileges: RoleDataSourcePrivilege[]
 ): Role['elasticsearch']['global'] => {
-  if (!currentGlobal) {
-    return { ...fallbackGlobal, data_source: nextDataSourcePrivileges };
-  }
-  return { ...currentGlobal, data_source: nextDataSourcePrivileges };
+  const currentGlobal = role.elasticsearch.global;
+  const fallbackGlobal = ensureGlobalPrivilege(role);
+  return { ...(currentGlobal || fallbackGlobal), data_source: nextDataSourcePrivileges };
 };
 
 export const DataSourcePrivileges = ({
@@ -83,11 +81,7 @@ export const DataSourcePrivileges = ({
         const next = [...current];
         next[privilegeIndex] = updatedPrivilege;
 
-        const nextGlobal = updateGlobalWithDataSourcePrivileges(
-          role.elasticsearch.global,
-          next,
-          ensureGlobalPrivilege(role)
-        );
+        const nextGlobal = updateGlobalWithDataSourcePrivileges(role, next);
 
         onChange({
           ...role,
@@ -108,11 +102,7 @@ export const DataSourcePrivileges = ({
         const next = [...current];
         next.splice(privilegeIndex, 1);
 
-        const nextGlobal = updateGlobalWithDataSourcePrivileges(
-          role.elasticsearch.global,
-          next,
-          ensureGlobalPrivilege(role)
-        );
+        const nextGlobal = updateGlobalWithDataSourcePrivileges(role, next);
 
         onChange({
           ...role,
