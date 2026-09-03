@@ -89,6 +89,24 @@ describe('PresentationPanelTitle', () => {
     });
   });
 
+  describe('description tooltip', () => {
+    it('keeps line breaks in the panel description', async () => {
+      renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          panelTitle="CPU Usage"
+          panelDescription={'What it counts: CPU time.\nDiagnostic use: spot busy hosts.'}
+        />
+      );
+
+      fireEvent.mouseOver(screen.getByTestId('embeddablePanelTooltipAnchor'));
+
+      const description = await screen.findByTestId('embeddablePanelDescription');
+      expect(description).toHaveStyle('white-space: pre-line');
+      expect(description.textContent).toContain('\n');
+    });
+  });
+
   describe('keyboard accessibility in edit mode', () => {
     beforeEach(() => {
       jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(true);

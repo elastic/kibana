@@ -154,7 +154,17 @@ export const PresentationPanelTitle = ({
     return (
       <EuiToolTip
         title={panelTitle}
-        content={panelDescription}
+        content={
+          // pre-line keeps newlines
+          <span
+            data-test-subj="embeddablePanelDescription"
+            css={css`
+              white-space: pre-line;
+            `}
+          >
+            {panelDescription}
+          </span>
+        }
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
