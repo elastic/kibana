@@ -20,6 +20,10 @@ overrides:
   '@babel/runtime': 7.29.7
   '@babel/traverse': 7.29.8
   '@babel/types': 7.29.8
+  '@elastic/charts>@reduxjs/toolkit': npm:@reduxjs/toolkit@1.9.7
+  '@elastic/charts>immer': npm:immer@9.0.21
+  '@elastic/charts>react-redux': npm:react-redux@7.2.8
+  '@elastic/charts>redux': npm:redux@4.2.1
   '@emotion/sheet': npm:@elastic/emotion-sheet@1.4.1
   '@hapi/mimos>mime-db': 1.53.0
   '@hello-pangea/dnd': 18.0.1
@@ -47,7 +51,6 @@ overrides:
   lodash: 4.18.1
   pixelmatch: 5.3.0
   qs: 6.16.0
-  redux-thunk-v2>redux: npm:redux@4.2.1
   remark-parse>trim: 1.0.1
   serialize-javascript: 7.0.5
   sharp: 0.35.2
@@ -148,8 +151,8 @@ importers:
         specifier: 2.0.11
         version: 2.0.11(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
-        specifier: 73.0.0
-        version: 73.0.0(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
+        specifier: 72.0.1
+        version: 72.0.1(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0)(reselect@5.1.0)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.30.1)
@@ -166,8 +169,8 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.22.0
-        version: 4.22.0
+        specifier: 4.23.0
+        version: 4.23.0
       '@elastic/eui':
         specifier: 119.1.0
         version: 119.1.0(@elastic/datemath@5.0.3(moment@2.30.1))(@elastic/eui-theme-borealis@8.0.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@8.1.1))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -5173,6 +5176,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-agent-builder':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder
+      '@kbn/evals-suite-detection-watch-rule-creation':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
       '@kbn/evals-suite-endpoint':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint
@@ -9333,6 +9339,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics: {}
@@ -10551,13 +10559,13 @@ packages:
   '@elastic/app-search-javascript@8.13.0':
     resolution: {integrity: sha512-E1oV7eqHz0jbSd7mtbFDoP7aeosNORziCr3RLuIt2G2/ex/EnMLnL7Xz7yHzMHa0K9cvdRPW2458BR0JXYmKZQ==}
 
-  '@elastic/charts@73.0.0':
-    resolution: {integrity: sha512-EKciZkUxAIKkrlm2SSNBQ+nVMPlf5HTon9ovgfCte+fd0IZel+SIIRSwhoxMZ9GYA4fttp1c7DJ8Z0uJXarnYw==}
+  '@elastic/charts@72.0.1':
+    resolution: {integrity: sha512-+MZ0HvY4iop5T0eATek98PG8AQLL5S20SOp3k8cOkwGBFD83F6ctdXJCgDNgM93NOPHQSq3v4i/vvtKoLDP+NQ==}
     peerDependencies:
       moment: ^2.29.1
       moment-timezone: ^0.5.32
-      react: ^18.0
-      react-dom: ^18.0
+      react: ^16.12 || ^17.0 || ^18.0
+      react-dom: ^16.12 || ^17.0 || ^18.0
 
   '@elastic/datemath@5.0.3':
     resolution: {integrity: sha512-8Hbr1Uyjm5OcYBfEB60K7sCP6U3IXuWDaLaQmYv3UxgI4jqBWbakoemwWvsqPVUvnwEjuX6z7ghPZbefs8xiaA==}
@@ -10604,29 +10612,32 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.22.0':
-    resolution: {integrity: sha512-lOORm+GHyR/kEhhYmzggtQi9f47y/ADPGok8TnithNawjPJ+rTyrU29xQN1BO3FOWQDQSwu3l0Zo4q4/eOQXag==}
+  '@elastic/esql-ast@4.23.0':
+    resolution: {integrity: sha512-wQDsBEnu4xw7V4LOIQfoaJpbm9x9j9WlY4l7a3sjmZ2fhS8pT9uvJqKs2KUEHSiEfjnkPjwfSvs3hEmrOzyetA==}
 
   '@elastic/esql-definitions@4.22.0':
     resolution: {integrity: sha512-RwXgNKDH8T+2is5fR5KAKHbcyHIg6J1VFV4LNaYzS1IjgwsOTdo9H02JxQgpupxrd0wRwuuqDTq11u6ixzvwcQ==}
 
+  '@elastic/esql-definitions@4.23.0':
+    resolution: {integrity: sha512-EJacEr+WVbmgi1IUZTt8UGEzLYeR1wlg/wb6LJj+QfCicXeSajoSkoyDO5Msu7aj3L1spGcYJVDUqR5I2FErdA==}
+
   '@elastic/esql-grammar@4.21.1':
     resolution: {integrity: sha512-MqbeD2G8DVxgsj2+8nWwcOSwqrWcqu7hywJ6KSsVI5LrIdC/uQG99x+RoxMTnIBwKrZDbeMlS1OhnDxdcp4j6w==}
 
-  '@elastic/esql-parser@4.22.0':
-    resolution: {integrity: sha512-UY29BFFzwOp5z6VDmlkkeOatPG4d4OMNrvsLiM06TskHpCVWL0vyjLNYUcPBHwvDPT67m3FSv+i6r3IA9fugRA==}
+  '@elastic/esql-parser@4.23.0':
+    resolution: {integrity: sha512-cU82kL2FY1uQI782rGaydcCDZJYOV/DHk+y6X+L5y1sdEmCBmft/qivLLuToHq/Uv+2lLK/JocmjVi2QS8tA3A==}
 
   '@elastic/esql-promql-grammar@4.21.1':
     resolution: {integrity: sha512-3ZXOh+FclCzSU13oo4w/L5VXLuji2HGzJtPu+MpY9NBaf/py5eXiy8d44vb9uwVZbJP+yXMVTP8Sv0Jz2Y76PQ==}
 
-  '@elastic/esql-traversal@4.22.0':
-    resolution: {integrity: sha512-9ExuTakFcvZiJI1jz1nVaVFfwxWpXhYfdCRB6gsJeUOqke0JgV1Wt5Os4kVdMdrEJWUkNPtxW+6O78XRO6GObA==}
+  '@elastic/esql-traversal@4.23.0':
+    resolution: {integrity: sha512-ENl8uaSQcVM/0vn3fznsyCNhzaH2PSTpJBxQpFS6DHN2oTzsy9qFZUpppUfaD7nyI8iKwUiSqQt8Vk9VStmUGA==}
 
   '@elastic/esql-types@4.21.1':
     resolution: {integrity: sha512-eahE+yNMK/mDBIKP4Akt2ywQF+gbniAquFdAO2tDefk/psXaWadUnKy7MtmALA4kUYPJaCYk74xFdcgIbQ/mGQ==}
 
-  '@elastic/esql@4.22.0':
-    resolution: {integrity: sha512-zYMAvSB1zHjgm4BxUhHoaO5cEo4x08IT4KTCZN2Lf4iYUTWjvUZEm6G31tOnNb9qJuL3EK2uW//gCBzQQinStw==}
+  '@elastic/esql@4.23.0':
+    resolution: {integrity: sha512-J1+hn2s6O5xb+1x+wpVMe1InbSS2mvR0znjIlLPOIQe7IaKy8e4NGpSRZr5bmWE2alAm/+oJyrl4tdpH7vlL9Q==}
 
   '@elastic/eui-illustrations@1.0.1':
     resolution: {integrity: sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==}
@@ -27630,10 +27641,10 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@73.0.0(@types/react@18.2.79)(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
+  '@elastic/charts@72.0.1(moment-timezone@0.6.1)(moment@2.30.1)(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0)(reselect@5.1.0)':
     dependencies:
       '@popperjs/core': 2.11.8
-      '@reduxjs/toolkit': 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
+      '@reduxjs/toolkit': 1.9.7(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0))(react@18.2.0)
       bezier-easing: 2.1.0
       chroma-js: 2.4.2
       classnames: 2.5.1
@@ -27643,7 +27654,7 @@ snapshots:
       d3-interpolate: 3.0.1
       d3-scale: 3.3.0
       d3-shape: 2.1.0
-      immer: 11.1.8
+      immer: 9.0.21
       luxon: 1.28.1
       moment: 2.30.1
       moment-timezone: 0.6.1
@@ -27651,13 +27662,13 @@ snapshots:
       re-reselect: 4.0.1(reselect@5.1.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
+      react-redux: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0)
+      redux: 4.2.1
       ts-debounce: 4.0.0
       utility-types: 3.11.0
       uuid: 14.0.1
     transitivePeerDependencies:
-      - '@types/react'
-      - redux
+      - react-native
       - reselect
 
   '@elastic/datemath@5.0.3(moment@2.30.1)':
@@ -27729,9 +27740,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.22.0':
+  '@elastic/esql-ast@4.23.0':
     dependencies:
-      '@elastic/esql-definitions': 4.22.0
+      '@elastic/esql-definitions': 4.23.0
       '@elastic/esql-grammar': 4.21.1
       '@elastic/esql-promql-grammar': 4.21.1
       '@elastic/esql-types': 4.21.1
@@ -27739,17 +27750,19 @@ snapshots:
 
   '@elastic/esql-definitions@4.22.0': {}
 
+  '@elastic/esql-definitions@4.23.0': {}
+
   '@elastic/esql-grammar@4.21.1':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.22.0':
+  '@elastic/esql-parser@4.23.0':
     dependencies:
-      '@elastic/esql-ast': 4.22.0
-      '@elastic/esql-definitions': 4.22.0
+      '@elastic/esql-ast': 4.23.0
+      '@elastic/esql-definitions': 4.23.0
       '@elastic/esql-promql-grammar': 4.21.1
-      '@elastic/esql-traversal': 4.22.0
+      '@elastic/esql-traversal': 4.23.0
       '@elastic/esql-types': 4.21.1
       antlr4: 4.13.2
       tslib: 2.8.1
@@ -27759,23 +27772,23 @@ snapshots:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.22.0':
+  '@elastic/esql-traversal@4.23.0':
     dependencies:
-      '@elastic/esql-ast': 4.22.0
+      '@elastic/esql-ast': 4.23.0
       '@elastic/esql-types': 4.21.1
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/esql-types@4.21.1': {}
 
-  '@elastic/esql@4.22.0':
+  '@elastic/esql@4.23.0':
     dependencies:
-      '@elastic/esql-ast': 4.22.0
-      '@elastic/esql-definitions': 4.22.0
+      '@elastic/esql-ast': 4.23.0
+      '@elastic/esql-definitions': 4.23.0
       '@elastic/esql-grammar': 4.21.1
-      '@elastic/esql-parser': 4.22.0
+      '@elastic/esql-parser': 4.23.0
       '@elastic/esql-promql-grammar': 4.21.1
-      '@elastic/esql-traversal': 4.22.0
+      '@elastic/esql-traversal': 4.23.0
       '@elastic/esql-types': 4.21.1
       '@elastic/pretty-printer': 4.21.1
       antlr4: 4.13.2
@@ -31187,6 +31200,16 @@ snapshots:
   '@redux-saga/symbols@1.2.1': {}
 
   '@redux-saga/types@1.4.0': {}
+
+  '@reduxjs/toolkit@1.9.7(react-redux@7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      immer: 9.0.21
+      redux: 4.2.1
+      redux-thunk: 2.4.2
+      reselect: 4.1.8
+    optionalDependencies:
+      react: 18.2.0
+      react-redux: 7.2.8(react-dom@18.2.0(react@18.2.0))(react-native@0.86.0(@babel/core@7.29.7(supports-color@8.1.1))(@types/react@18.2.79)(react@18.2.0)(supports-color@8.1.1))(react@18.2.0)
 
   '@reduxjs/toolkit@1.9.7(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)':
     dependencies:

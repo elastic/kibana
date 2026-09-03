@@ -4,7 +4,29 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# Dual-cache agent images (elastic/ci-agent-images) bake one tree per package manager:
+#   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules}
+#   yarn -> ~/.kibana/{node_modules,.yarn-local-mirror}   (legacy layout, unchanged)
+# Detect the checkout's package manager so the same bootstrap (and VM image) works on
+# main (pnpm) and legacy release branches (yarn).
+CACHES_ROOT="${HOME}/.cache/kibana"
+mkdir -p "${CACHES_ROOT}"
+
+PNPM_IMAGE_CACHE="${CACHES_ROOT}/pnpm"
+YARN_IMAGE_CACHE="${HOME}/.kibana"
+
+USE_PNPM=false
+if [[ -f pnpm-lock.yaml ]]; then
+  USE_PNPM=true
+fi
+
+# Let's remove the irrelevant cache for the variant:
+echo "--- Removing irrelevant yarn cache"
+rm -rf "${HOME}/.cache/yarn"
+
 echo "--- pnpm install and bootstrap"
+BOOTSTRAP_CMD=(pnpm kbn bootstrap)
+BOOTSTRAP_LABEL='pnpm kbn bootstrap'
 
 BOOTSTRAP_PARAMS=()
 if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
@@ -63,7 +85,7 @@ fi
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo "--- Clearing cache leftovers"
   # We no longer use this cache
-  (echo 'Removing ~/.kibana and ./.yarn-local-mirror' && \
-    rm -rf ~/.kibana ./.yarn-local-mirror && \
+  (echo 'Removing ~/.kibana and ./.yarn-local-mirror' "${HOME}/.cache/yarn" && \
+    rm -rf ~/.kibana ./.yarn-local-mirror "${HOME}/.cache/yarn" && \
     df -h .) &
 fi
