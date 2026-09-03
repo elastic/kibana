@@ -7,7 +7,7 @@
 
 # Security domain knowledge
 
-## Security Solution Codebase Structure
+### Security Solution Codebase Structure
 
 All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 
