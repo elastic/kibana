@@ -11,6 +11,7 @@ import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
@@ -60,7 +61,7 @@ describe('createEntityStoreEnrichment', () => {
     expect(result).toEqual({});
   });
 
-  it('returns empty object when listEntities finds no matching entities', async () => {
+  it('returns only the EUID stamp when listEntities finds no matching entities', async () => {
     mockGetEuidFromObject.mockReturnValue('host:server1');
     const crudClient = makeEntityStoreCrudClient();
 
@@ -81,7 +82,7 @@ describe('createEntityStoreEnrichment', () => {
         fields: ['entity.id', 'entity.risk.calculated_level'],
       })
     );
-    expect(result).toEqual({});
+    expect(result).toEqual({ '1': [expect.any(Function)] });
   });
 
   it('returns enriched map for events whose EUID matches an entity', async () => {
@@ -113,7 +114,12 @@ describe('createEntityStoreEnrichment', () => {
         fields: ['entity.id', 'entity.risk.calculated_level'],
       })
     );
-    expect(result).toEqual({ '1': [enrichFn] });
+    // Event '2' has a derivable EUID (host:no-match) that is not in the store, so it still
+    // receives the EUID stamp function even though no risk enrichment is appended.
+    expect(result).toEqual({
+      '1': [expect.any(Function), enrichFn],
+      '2': [expect.any(Function)],
+    });
   });
 
   it('enriches all events sharing the same EUID', async () => {
@@ -143,7 +149,11 @@ describe('createEntityStoreEnrichment', () => {
       })
     );
 
-    expect(result).toEqual({ '1': [enrichFn], '2': [enrichFn], '3': [enrichFn] });
+    expect(result).toEqual({
+      '1': [expect.any(Function), enrichFn],
+      '2': [expect.any(Function), enrichFn],
+      '3': [expect.any(Function), enrichFn],
+    });
   });
 
   it('enriches multiple events sharing the EUIDs', async () => {
@@ -183,11 +193,11 @@ describe('createEntityStoreEnrichment', () => {
     );
 
     expect(result).toEqual({
-      '1': [enrichFn],
-      '2': [enrichFn],
-      '3': [enrichFn],
-      '4': [enrichFn],
-      '5': [enrichFn],
+      '1': [expect.any(Function), enrichFn],
+      '2': [expect.any(Function), enrichFn],
+      '3': [expect.any(Function), enrichFn],
+      '4': [expect.any(Function), enrichFn],
+      '5': [expect.any(Function), enrichFn],
     });
   });
 
@@ -229,7 +239,7 @@ describe('createEntityStoreEnrichment', () => {
     expect(Object.keys(result).length).toBe(totalEvents);
   });
 
-  it('returns empty object and does not throw when listEntities throws', async () => {
+  it('returns only the EUID stamp and does not throw when listEntities throws', async () => {
     mockGetEuidFromObject.mockReturnValue('host:server1');
 
     const crudClient = {
@@ -246,7 +256,9 @@ describe('createEntityStoreEnrichment', () => {
       createEnrichmentFunction: () => enrichFn,
     });
 
-    expect(result).toEqual({});
+    // The stamp is pre-populated before the listEntities call; the error is swallowed by
+    // listEntitiesForEuidChunk so enrichment is skipped but the stamp survives.
+    expect(result).toEqual({ '1': [expect.any(Function)] });
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -270,5 +282,82 @@ describe('createEntityStoreEnrichment', () => {
 
     expect(result).toEqual({});
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
+  });
+
+  describe('EUID stamping', () => {
+    const runHostEnrichment = async (events: Array<ReturnType<typeof createAlert>>) => {
+      mockGetEuidFromObject.mockImplementation((_, doc) =>
+        doc?.host?.name ? `host:${doc.host.name}` : undefined
+      );
+      const crudClient = makeEntityStoreCrudClient([makeEntity('host:server1')]);
+
+      return createEntityStoreEnrichment({
+        name: 'Host Risk',
+        entityType: 'host',
+        entityStoreCrudClient: crudClient,
+        logger,
+        events,
+        enrichmentFields: ['entity.risk.calculated_level'],
+        createEnrichmentFunction: () => enrichFn,
+      });
+    };
+
+    const applyAll = (
+      event: ReturnType<typeof createAlert>,
+      fns: EnrichmentFunction[] = []
+    ): ReturnType<typeof createAlert> => fns.reduce((acc, fn) => fn(acc), event);
+
+    it('writes the matched EUID under the flat dotted key', async () => {
+      const event = createAlert('1', { host: { name: 'server1' } });
+      const result = await runHostEnrichment([event]);
+
+      const enriched = applyAll(event, result['1']);
+
+      expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:server1']);
+    });
+
+    it('leaves the original event untouched', async () => {
+      const event = createAlert('1', { host: { name: 'server1' } });
+      const result = await runHostEnrichment([event]);
+
+      applyAll(event, result['1']);
+
+      expect(event._source[ALERT_ENTITY_ID]).toBeUndefined();
+    });
+
+    it('appends a second entity type rather than overwriting', async () => {
+      const event = createAlert('1', { host: { name: 'server1' } });
+      const result = await runHostEnrichment([event]);
+
+      // Simulates the user enrichment having already stamped its own EUID for this alert.
+      const alreadyStamped = applyAll(
+        { ...event, _source: { ...event._source, [ALERT_ENTITY_ID]: ['user:alice@h1@local'] } },
+        result['1']
+      );
+
+      expect(alreadyStamped._source[ALERT_ENTITY_ID]).toEqual([
+        'user:alice@h1@local',
+        'host:server1',
+      ]);
+    });
+
+    it('does not duplicate when the same EUID is stamped twice', async () => {
+      const event = createAlert('1', { host: { name: 'server1' } });
+      const result = await runHostEnrichment([event]);
+
+      // The risk and asset-criticality enrichments both run for `host`, so the same stamp can be
+      // applied more than once to one alert.
+      const stamped = applyAll(event, [...(result['1'] ?? []), ...(result['1'] ?? [])]);
+
+      expect(stamped._source[ALERT_ENTITY_ID]).toEqual(['host:server1']);
+    });
+
+    it('stamps events even when entity was not found in the store', async () => {
+      const event = createAlert('2', { host: { name: 'not-in-store' } });
+      const result = await runHostEnrichment([event]);
+
+      const enriched = applyAll(event, result['2']);
+      expect(enriched._source[ALERT_ENTITY_ID]).toEqual(['host:not-in-store']);
+    });
   });
 });
