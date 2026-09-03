@@ -313,14 +313,20 @@ def is_sweep_resource(name: str) -> bool:
     return any(name.startswith(pf["vm_prefix"] + "-") for pf in SUITE_PROFILES.values())
 
 
-def model_dir(model: str, suite: Optional[str] = None) -> Path:
-    """Per-suite, per-model run directory.
+def model_dir(model: str, suite: Optional[str] = None, shard: Optional[str] = None) -> Path:
+    """Per-suite, per-model (per-shard) run directory.
 
     Namespaced by suite: the same model is swept for persona-matrix, AD and
     migrations, and a flat layout would let the second sweep overwrite the
     first one's run.log and status.json.
+
+    Sharded runs get their own leaf for the same reason -- shard 2 would
+    otherwise clobber shard 1's log and status. The "/" in a shard spec is
+    replaced, not kept: a raw "2/4" would nest a directory (or escape the
+    model dir) instead of naming one.
     """
-    return SWEEP_DIR / (suite or SUITE) / model
+    leaf = model if not shard else f"{model}-s{shard.replace('/', 'of')}"
+    return SWEEP_DIR / (suite or SUITE) / leaf
 
 
 def ssh(ip: str, cmd: str, timeout: int = 30) -> str:
@@ -346,18 +352,27 @@ def az(*args: str) -> str:
     return r.stdout.strip()
 
 
-def vm_name(model: str) -> str:
+def vm_name(model: str, shard: Optional[str] = None) -> str:
     # Azure Linux VM names allow 64 chars. Do NOT truncate harder than that —
     # a [:24] truncation collided gemini-2-5-flash-lite onto gemini-2-5-flash's
     # VM (dirty ES → 409 dataset conflict).
     prefix = suite_profile()["vm_prefix"]
     slug = model.replace("eis-", "").replace(".", "-").replace("_", "-")
+    # Shard suffix keeps each slice on its own box. Two eval stacks on one VM
+    # OOM each other and corrupt local ES, so the suffix is load-bearing.
+    # Truncate the MODEL slug, never the suffix: appending first and clamping
+    # to 64 silently merges two shards onto one name (verified: a 64-char model
+    # made s1of4 and s2of4 identical).
+    if shard:
+        suffix = f"-s{shard.replace('/', 'of')}"
+        budget = 64 - len(prefix) - 1 - len(suffix)
+        slug = f"{slug[:budget].rstrip('-')}{suffix}"
     return f"{prefix}-{slug}"[:64].rstrip("-")
 
 
-def provision(model: str) -> str:
+def provision(model: str, shard: Optional[str] = None) -> str:
     """Create a D8s_v5 spot VM; return its public IP."""
-    name = vm_name(model)
+    name = vm_name(model, shard)
     print(f"[provision] {name}", flush=True)
     az("vm", "create", "-g", RG, "-n", name, "--image", IMAGE, "--size", VM_SIZE,
        "--eviction-policy", "Deallocate", "--priority", "Spot",
@@ -578,6 +593,49 @@ def self_test() -> int:
         check("shard sizes stride 21/4", shard_sizes, [6, 5, 5, 5])
         check("shard sizes sum to dataset", sum(shard_sizes), 21)
         check("shard sizes balanced", max(shard_sizes) - min(shard_sizes) <= 1, True)
+
+        # Shard fanout: each (model, shard) needs its OWN VM name and run dir.
+        # A shared name would put two eval stacks on one box (they OOM each
+        # other and corrupt local ES) or overwrite the sibling's run.log.
+        check("shard vm names differ",
+              vm_name("eis-openai-gpt-5-4", "1/4") != vm_name("eis-openai-gpt-5-4", "2/4"), True)
+        check("unsharded vm name unchanged",
+              vm_name("eis-openai-gpt-5-4"), vm_name("eis-openai-gpt-5-4", None))
+        check("shard vm name within azure 64-char limit",
+              len(vm_name("openrouter-qwen-qwen3-8-27b-longer-name-here", "10/16")) <= 64, True)
+        # A model slug long enough to fill the 64-char budget must still yield
+        # distinct per-shard names -- appending the suffix before clamping made
+        # s1of4 and s2of4 identical and put two stacks on one VM.
+        _long = "openrouter-some-really-long-vendor-name-with-many-segments-here-x"
+        check("long model name still shards distinctly",
+              vm_name(_long, "1/4") != vm_name(_long, "2/4"), True)
+        check("long sharded name still within limit", len(vm_name(_long, "1/4")) <= 64, True)
+        check("shard run dirs differ",
+              model_dir("m", shard="1/4") != model_dir("m", shard="2/4"), True)
+        check("unsharded run dir unchanged", model_dir("m"), model_dir("m", shard=None))
+        # "/" in a shard spec must not create a nested path or escape the dir.
+        check("shard dir has no slash from spec",
+              "/" not in model_dir("m", shard="2/4").name, True)
+
+        # --shards fanout: unit expansion decides how many VMs boot.
+        def _units(models, shards):
+            if shards == 1:
+                return [(m, None) for m in models]
+            return [(m, f"{i}/{shards}") for m in models for i in range(1, shards + 1)]
+
+        check("shards=1 keeps one unit per model", _units(["a", "b"], 1),
+              [("a", None), ("b", None)])
+        check("shards=1 leaves shard None (back-compat vm names)",
+              vm_name("a", _units(["a"], 1)[0][1]), vm_name("a"))
+        check("shards=4 expands to 4 VMs per model", len(_units(["a", "b"], 4)), 8)
+        check("every expanded unit is unique", len(set(_units(["a", "b"], 4))), 8)
+        check("expanded shards cover 1..N", sorted(str(s) for _, s in _units(["a"], 3)),
+              ["1/3", "2/3", "3/3"])
+        # Slices must partition the dataset exactly: a stride that dropped or
+        # double-counted an example silently changes what the matrix measures.
+        _n = SUITE_PROFILES["security-persona-matrix"]["n_examples"]
+        _covered = sorted(i for idx in range(1, 5) for i in range(idx - 1, _n, 4))
+        check("4 shards partition all 21 examples exactly", _covered, list(range(_n)))
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
@@ -607,11 +665,14 @@ def self_test() -> int:
     return 1 if failures else 0
 
 
-def launch(ip: str, model: str) -> subprocess.Popen:
-    log = model_dir(model) / "run.log"
+def launch(ip: str, model: str, shard: Optional[str] = None) -> subprocess.Popen:
+    log = model_dir(model, shard=shard) / "run.log"
     log.parent.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ)
     env["EVAL_SUITE"] = suite_profile()["cli_suite"]
+    # Suite reads PERSONA_MATRIX_SHARD for its example stride; per-VM value.
+    if shard:
+        env["PERSONA_MATRIX_SHARD"] = shard
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
@@ -673,7 +734,7 @@ def _resolve_from_golden(model: str, ip: str) -> dict:
         return {"error": f"golden fallback failed: {exc}"}
 
 
-def check_golden(model: str, ip: str) -> dict:
+def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     """Completeness gate: docs on golden for this model's LATEST execution.
 
     Connector IDs use hyphens for semantic versions while score docs use dots,
@@ -808,7 +869,6 @@ def check_golden(model: str, ip: str) -> dict:
         # Shard sizes follow the suite's stride assignment (index k -> shard
         # k % total), so shard i holds ceil((n - (i-1)) / total) examples.
         n_examples = prof["n_examples"]
-        shard = os.environ.get("PERSONA_MATRIX_SHARD", "").strip()
         if shard:
             idx, total = (int(x) for x in shard.split("/"))
             n_examples = len(range(idx - 1, n_examples, total))
@@ -828,9 +888,9 @@ def status() -> None:
             print(f"  {model:45} {s.get('state', '?'):10} docs={s.get('docs', '?')}")
 
 
-def prepare(model: str) -> tuple[str, str]:
+def prepare(model: str, shard: Optional[str] = None) -> tuple[str, str]:
     """Provision + deploy one model's VM. Returns (model, ip)."""
-    ip = provision(model)
+    ip = provision(model, shard)
     if not wait_ssh(ip):
         raise RuntimeError(f"ssh never ready: {model} @ {ip}")
     # A VM whose sshd accepts TCP before it accepts auth, or that hits a
@@ -845,10 +905,15 @@ def prepare(model: str) -> tuple[str, str]:
     return model, ip
 
 
-def _model_state(model: str) -> str:
+def _label(model: str, shard: Optional[str] = None) -> str:
+    """Human label for one sweep unit; shard suffix only when sharding."""
+    return f"{model} [shard {shard}]" if shard else model
+
+
+def _model_state(model: str, shard: Optional[str] = None) -> str:
     """Read the state a model last wrote, so skips count as failures too."""
     try:
-        with open(model_dir(model) / "status.json") as fh:
+        with open(model_dir(model, shard=shard) / "status.json") as fh:
             return json.load(fh).get("state", "UNKNOWN")
     except Exception:
         return "UNKNOWN"
@@ -866,6 +931,11 @@ def main() -> int:
                          "5/15 VMs lost the CCM/.inference readiness race "
                          "(fetch failed -> enable_eis_ccm exit 1). run_model.sh "
                          "now retries that step 3x, but 5 is the tested default.")
+    ap.add_argument("--shards", type=int, default=1,
+                    help="split the dataset across N VMs per model. Each VM "
+                         "runs a stride slice (PERSONA_MATRIX_SHARD=i/N). Use "
+                         "for slow models: GLM-5.3 needs ~174min on one VM, "
+                         "~45min at --shards 4. Frontier models need 1.")
     ap.add_argument("--suite", default="security-persona-matrix",
                     choices=sorted(SUITE_PROFILES),
                     help="eval suite to sweep; selects overlays, VM prefix and doc gate")
@@ -949,50 +1019,67 @@ def main() -> int:
         return
 
     models = MODELS if args.models == "all" else [m.strip() for m in args.models.split(",")]
+    if args.shards < 1:
+        print("--shards must be >= 1", flush=True)
+        return 2
+    # A "unit" is one VM's worth of work: (model, shard). shard is None at
+    # --shards 1 so unsharded run dirs and VM names stay byte-identical to
+    # every sweep before this flag existed.
+    if args.shards == 1:
+        units = [(m, None) for m in models]
+    else:
+        units = [(m, f"{i}/{args.shards}")
+                 for m in models for i in range(1, args.shards + 1)]
     print(f"sweep models ({len(models)}): {', '.join(models)}", flush=True)
+    if args.shards > 1:
+        print(f"sharding: {args.shards} VMs/model -> {len(units)} VMs total", flush=True)
 
     # Provision + deploy in parallel (independent per VM); launches stay serial.
-    ips: dict[str, str] = {}
+    ips: dict[tuple, str] = {}
     with ThreadPoolExecutor(max_workers=args.provision_workers) as pool:
         # as_completed + try/except so one dead VM (eviction, sshd race)
         # loses its cell instead of killing the whole sweep before launch.
-        futures = {pool.submit(prepare, model): model for model in models}
+        futures = {pool.submit(prepare, model, shard): (model, shard)
+                   for model, shard in units}
         for fut in as_completed(futures):
-            model = futures[fut]
+            unit = futures[fut]
+            model, shard = unit
             try:
                 _, ip = fut.result()
             except Exception as exc:
-                print(f"[skip] {model}: prepare failed ({exc})", flush=True)
-                model_dir(model).mkdir(parents=True, exist_ok=True)
-                json.dump({"model": model, "state": "FAIL", "error": f"prepare: {exc}"},
-                          open(model_dir(model) / "status.json", "w"))
+                print(f"[skip] {_label(model, shard)}: prepare failed ({exc})", flush=True)
+                model_dir(model, shard=shard).mkdir(parents=True, exist_ok=True)
+                json.dump({"model": model, "shard": shard, "state": "FAIL",
+                           "error": f"prepare: {exc}"},
+                          open(model_dir(model, shard=shard) / "status.json", "w"))
                 continue
-            ips[model] = ip
-            model_dir(model).mkdir(parents=True, exist_ok=True)
-            json.dump({"ip": ip, "model": model, "state": "booting"},
-                      open(model_dir(model) / "status.json", "w"))
+            ips[unit] = ip
+            model_dir(model, shard=shard).mkdir(parents=True, exist_ok=True)
+            json.dump({"ip": ip, "model": model, "shard": shard, "state": "booting"},
+                      open(model_dir(model, shard=shard) / "status.json", "w"))
 
     reused = {}
-    for model, ip in ips.items():
+    for unit, ip in ips.items():
         if ip in reused:
             raise RuntimeError(
-                f"VM collision: {model} and {reused[ip]} both mapped to {ip}. "
-                "Every model must own its VM stack — two eval stacks on one box "
-                "OOM each other, corrupt local ES, and wedge SSH."
+                f"VM collision: {_label(*unit)} and {_label(*reused[ip])} both "
+                f"mapped to {ip}. Every unit must own its VM stack — two eval "
+                "stacks on one box OOM each other, corrupt local ES, and wedge SSH."
             )
-        reused[ip] = model
+        reused[ip] = unit
 
     procs = []
-    for model in models:
-        if model not in ips:
+    for model, shard in units:
+        if (model, shard) not in ips:
             continue
-        procs.append((model, ips[model], launch(ips[model], model)))
-        print(f"[launch] {model} @ {ips[model]}", flush=True)
+        ip = ips[(model, shard)]
+        procs.append((model, shard, ip, launch(ip, model, shard)))
+        print(f"[launch] {_label(model, shard)} @ {ip}", flush=True)
 
     print("\nAll launches issued. Waiting for completion + golden gate.", flush=True)
-    for model, ip, p in procs:
+    for model, shard, ip, p in procs:
         rc = p.wait()
-        result = check_golden(model, ip)
+        result = check_golden(model, ip, shard)
         # Expected size is derived inside check_golden from the live evaluator
         # count on the VM (21 examples x (evaluators + 1 task doc) x reps).
         expected_docs = result.get("expected", -1)
@@ -1014,20 +1101,24 @@ def main() -> int:
             and meets
             else "FAIL"
         )
-        json.dump({"ip": ip, "model": model, "state": state,
+        json.dump({"ip": ip, "model": model, "shard": shard, "state": state,
                    "docs": result.get("count", -1), "rc": rc,
                    "execution_id": result.get("execution_id"),
                    "error": result.get("error")},
-                  open(model_dir(model) / "status.json", "w"), indent=2)
-        print(f"[done] {model}: {state} docs={result.get('count', -1)}/{expected_docs}"
+                  open(model_dir(model, shard=shard) / "status.json", "w"), indent=2)
+        print(f"[done] {_label(model, shard)}: {state} docs={result.get('count', -1)}/{expected_docs}"
               + (f" ({result['error']})" if result.get("error") else ""), flush=True)
 
 
     # A sweep that skipped or failed every model must not look like a green
     # run to its caller: report the count so CI and shell wrappers can gate.
-    failed = [m for m in models if _model_state(m) != "PASS"]
+    # A sweep that skipped or failed any UNIT must not look green: with
+    # sharding a model is only complete when every one of its shards passed,
+    # so tally units. Tallying models here would let a dead shard — a missing
+    # third of the dataset — report success.
+    failed = [_label(m, s) for m, s in units if _model_state(m, s) != "PASS"]
     if failed:
-        print(f"SWEEP FAILED: {len(failed)}/{len(models)} models did not pass: {failed}", flush=True)
+        print(f"SWEEP FAILED: {len(failed)}/{len(units)} units did not pass: {failed}", flush=True)
         return 1
     return 0
 
