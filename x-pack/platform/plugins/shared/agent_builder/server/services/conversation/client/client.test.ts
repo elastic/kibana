@@ -655,8 +655,6 @@ describe('ConversationClient', () => {
     });
 
     it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
-      // Regression for: caller passes boolean/number, raw value lands in ES, and
-      // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
       const template: ConversationTemplate = {
         id: 'tmpl-serialize',
         version: 1,
@@ -2848,6 +2846,196 @@ describe('ConversationClient', () => {
         'round-crash::execution_started',
         'round-crash::execution_terminated',
       ]);
+    });
+
+    // Minimal round-derived timeline events for concurrency tests. The runs are unfinished
+    // (no terminal event), matching what step flushes append mid-round.
+    const startTimelineEvents = (roundId: string): TimelineEvent[] => [
+      {
+        id: `${roundId}::user_message`,
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'hello' },
+      },
+      {
+        id: `${roundId}::execution_started`,
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      },
+    ];
+
+    const stepTimelineEvent = (roundId: string, sequence: number): TimelineEvent =>
+      ({
+        id: `${roundId}::step::${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2025-08-04T07:42:20.789Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: `${roundId}::execution`,
+        trigger_event_id: `${roundId}::user_message`,
+        data: { step: { type: 'reasoning', reasoning: `step ${sequence}` }, sequence },
+      } as TimelineEvent);
+
+    it('merges concurrent appendEvents flushes on OCC conflict so no events are lost and none duplicate', async () => {
+      const start = startTimelineEvents('round-1');
+      const step0 = stepTimelineEvent('round-1', 0);
+      const step1 = stepTimelineEvent('round-1', 1);
+
+      mockEsClient.search
+        // First OCC read: only the start events are stored.
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [createConversationDocument({ schemaVersion: 1, events: start })],
+          },
+        })
+        // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      // This flush carries step::0 (already persisted concurrently) and step::1 (new).
+      await client.appendEvents({ id: 'conversation-1', events: [step0, step1] });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      const { document: indexed } = mockEsClient.index.mock.calls[1][0] as {
+        document: { events?: Array<{ id: string }> };
+      };
+      // The concurrent writer's step::0 is kept exactly once, and step::1 is appended.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+      ]);
+    });
+
+    it('replaceRoundEvents drops every stored event for the round (including stale live-streamed steps) and appends the fresh batch, leaving other rounds and additive events untouched', async () => {
+      const storedRound1UserMessage = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:42:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'raw input' },
+      } as TimelineEvent;
+      const storedRound1ExecutionStarted = {
+        id: 'round-1::execution_started',
+        type: TimelineEventType.executionStarted,
+        created_at: '2025-08-04T07:42:01.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: { trigger_type: 'user_message' },
+      } as TimelineEvent;
+      const storedRound1Step0 = stepTimelineEvent('round-1', 0);
+      const storedRound1Step1 = stepTimelineEvent('round-1', 1);
+      // Stale live-streamed step that is NOT in the canonical projection — must be dropped.
+      const staleRound1Step2 = stepTimelineEvent('round-1', 2);
+      const additiveEvent = {
+        id: 'additive-error-1',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:02.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        data: {},
+      } as TimelineEvent;
+      const round2UserMessage = {
+        id: 'round-2::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-08-04T07:43:00.000Z',
+        actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+        data: { message: 'round two input' },
+      } as TimelineEvent;
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              events: [
+                storedRound1UserMessage,
+                storedRound1ExecutionStarted,
+                storedRound1Step0,
+                storedRound1Step1,
+                staleRound1Step2,
+                additiveEvent,
+                round2UserMessage,
+              ],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+
+      const canonicalUserMessage = {
+        ...storedRound1UserMessage,
+        data: { message: 'processed input', attachment_refs: [] },
+      } as TimelineEvent;
+      const canonicalStep0: TimelineEvent = {
+        ...storedRound1Step0,
+        created_at: 'CANONICAL_TS_0',
+      };
+      const canonicalStep1: TimelineEvent = {
+        ...storedRound1Step1,
+        created_at: 'CANONICAL_TS_1',
+      };
+      const terminated = {
+        id: 'round-1::execution_terminated',
+        type: TimelineEventType.executionTerminated,
+        created_at: '2025-08-04T07:42:10.000Z',
+        actor: { type: EventActorType.agent, id: 'agent-1' },
+        execution_id: 'round-1::execution',
+        trigger_event_id: 'round-1::user_message',
+        data: {
+          outcome: { type: 'responded', response: { message: 'done' } },
+          model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+          time_to_first_token: 1,
+          time_to_last_token: 2,
+        },
+      } as TimelineEvent;
+
+      await client.replaceRoundEvents({
+        id: 'conversation-1',
+        roundId: 'round-1',
+        events: [
+          canonicalUserMessage,
+          storedRound1ExecutionStarted,
+          canonicalStep0,
+          canonicalStep1,
+          terminated,
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          events?: Array<{ id: string; created_at?: string; data?: { message?: string } }>;
+        };
+      };
+      // Round-1 events replaced wholesale; stale step::2 dropped; additive event and round-2
+      // event survive untouched.
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'additive-error-1',
+        'round-2::user_message',
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::step::0',
+        'round-1::step::1',
+        'round-1::execution_terminated',
+      ]);
+      const replacedUserMessage = indexed.events?.find(
+        (event) => event.id === 'round-1::user_message'
+      );
+      expect(replacedUserMessage?.data?.message).toBe('processed input');
+      const replacedStep0 = indexed.events?.find((event) => event.id === 'round-1::step::0');
+      expect(replacedStep0?.created_at).toBe('CANONICAL_TS_0');
     });
 
     it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
