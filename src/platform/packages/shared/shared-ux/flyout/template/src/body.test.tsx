@@ -117,8 +117,8 @@ describe('FlyoutTemplate body', () => {
     const { container } = renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
-          <div>filter bar</div>
           <FlyoutTemplate.Body.Section title="One">one</FlyoutTemplate.Body.Section>
+          <div>filter bar</div>
           <FlyoutTemplate.Body.Section title="Two">two</FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
@@ -127,6 +127,8 @@ describe('FlyoutTemplate body', () => {
     expect(screen.getByRole('heading', { level: 4, name: 'One' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 4, name: 'Two' })).toBeInTheDocument();
     expect(screen.getByText('filter bar')).toBeInTheDocument();
+    // The div between the sections breaks the CSS adjacent-sibling selector, so only one
+    // data-flyout-section follows another directly — Two has no preceding section sibling.
     expect(container.querySelectorAll('[data-flyout-section]')).toHaveLength(2);
   });
 
