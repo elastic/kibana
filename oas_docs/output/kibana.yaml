@@ -63488,13 +63488,6 @@ paths:
           schema:
             maxLength: 10000
             type: string
-        - description: Aggregations as a JSON string.
-          in: query
-          name: aggs
-          required: false
-          schema:
-            maxLength: 100000
-            type: string
         - description: The namespaces (spaces) to search in.
           in: query
           name: namespaces

@@ -115,6 +115,21 @@ describe('GET /api/saved_objects/_find', () => {
     expect(result.body).toEqual(findResponse);
   });
 
+  it('returns with status 400 when the aggs query parameter is provided', async () => {
+    const aggs = querystring.escape(
+      JSON.stringify({ types: { terms: { field: 'type', size: 50 } } })
+    );
+    const result = await supertest(server.listener)
+      .get(`/api/saved_objects/_find?type=foo&aggs=${aggs}`)
+      .set('x-elastic-internal-origin', 'kibana')
+      .expect(400);
+
+    expect(result.body.message).toContain(
+      "Additional properties are not allowed ('aggs' was unexpected)"
+    );
+    expect(savedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
   it('returns with status 200 when type is hidden', async () => {
     const findResponse = {
       total: 0,
