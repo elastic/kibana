@@ -607,4 +607,58 @@ describe('TriggerEventHandler', () => {
     );
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
   });
+
+  it('skips schedule for a connector-sourced event without Authorization', async () => {
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'c1' },
+      request: { headers: {} } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('request has no Authorization header')
+    );
+  });
+
+  it('schedules a connector-sourced event when Authorization is present', async () => {
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'c1' },
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('still schedules Manual Run events that have no Authorization header', async () => {
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { caseId: 'case-1' },
+      request: mockRequest,
+    });
+
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
+  });
 });

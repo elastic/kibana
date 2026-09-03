@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { buildEventScheduleRequest } from './build_event_fake_request';
+export {
+  buildEventScheduleRequest,
+  resolveConnectorEventScheduleRequest,
+} from './build_event_fake_request';
 export {
   invalidateInboundConnectorEventIdentity,
   invalidateStoredConnectorEventIdentity,
