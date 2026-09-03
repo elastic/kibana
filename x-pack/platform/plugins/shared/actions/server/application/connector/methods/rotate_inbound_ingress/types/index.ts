@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { RotateInboundIngressParams } from './types';
+export type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';

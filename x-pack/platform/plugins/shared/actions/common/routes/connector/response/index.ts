@@ -8,7 +8,6 @@
 // Latest
 export type {
   ConnectorResponse,
-  ConnectorResponseWithMintedSecrets,
   GetAllConnectorsResponse,
   ConnectorExecuteResponse,
   ConnectorAuthStatusResponse,
@@ -17,7 +16,6 @@ export type {
 
 export {
   connectorResponseSchema,
-  connectorResponseWithMintedSecretsSchema,
   getAllConnectorsResponseSchema,
   connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
@@ -27,7 +25,6 @@ export {
 
 export type {
   ConnectorResponse as ConnectorResponseV1,
-  ConnectorResponseWithMintedSecrets as ConnectorResponseWithMintedSecretsV1,
   GetAllConnectorsResponse as GetAllConnectorsResponseV1,
   ConnectorTypeResponse as ConnectorTypeResponseV1,
   GetAllConnectorTypesResponse as GetAllConnectorTypesResponseV1,
@@ -38,7 +35,6 @@ export type {
 
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
-  connectorResponseWithMintedSecretsSchema as connectorResponseWithMintedSecretsSchemaV1,
   getAllConnectorsResponseSchema as getAllConnectorsResponseSchemaV1,
   connectorTypeResponseSchema as connectorTypeResponseSchemaV1,
   getAllConnectorTypesResponseSchema as getAllConnectorTypesResponseSchemaV1,

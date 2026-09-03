@@ -28,7 +28,6 @@ interface Props {
   disabled: boolean;
   onSubmit: () => Promise<void>;
   isTestable?: boolean;
-  isCreated?: boolean;
 }
 
 const FlyoutFooterComponent: React.FC<Props> = ({
@@ -42,14 +41,17 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   disabled,
   onSubmit,
   isTestable,
-  isCreated = false,
 }) => {
   return (
     <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          {hasConnectorTypeSelected && !isUsingInitialConnector && !isCreated ? (
-            <EuiButtonEmpty onClick={onBack} data-test-subj="create-connector-flyout-back-btn">
+          {hasConnectorTypeSelected && !isUsingInitialConnector ? (
+            <EuiButtonEmpty
+              onClick={onBack}
+              disabled={isSaving}
+              data-test-subj="create-connector-flyout-back-btn"
+            >
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
                 {
@@ -68,7 +70,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
-        {hasConnectorTypeSelected && !isCreated && (
+        {hasConnectorTypeSelected && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
               <>

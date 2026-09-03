@@ -72,7 +72,7 @@ Mints a new token, invalidates the previous one immediately (if any), and return
 
 ```bash
 curl -u elastic:changeme -X POST \
-  "$KIBANA_URL/internal/actions/connector/$CONNECTOR_ID/_rotate_ingress" \
+  "$KIBANA_URL/internal/actions/connector/$CONNECTOR_ID/_rotate_event_token" \
   -H 'kbn-xsrf: true' \
   -H 'x-elastic-internal-origin: kibana'
 ```

@@ -20,7 +20,7 @@ describe('rotateInboundIngress', () => {
 
     expect(result).toEqual({ ingestToken: 'rotated-token' });
     expect(http.post).toHaveBeenCalledWith(
-      '/internal/actions/connector/sales%2Fingress/_rotate_ingress'
+      '/internal/actions/connector/sales%2Fingress/_rotate_event_token'
     );
   });
 

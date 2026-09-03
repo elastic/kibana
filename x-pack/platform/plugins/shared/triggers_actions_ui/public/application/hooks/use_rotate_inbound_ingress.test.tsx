@@ -72,7 +72,7 @@ describe('useRotateInboundIngress', () => {
     expect(mockAddDanger).not.toHaveBeenCalled();
   });
 
-  it('shows an error toast and returns undefined when rotate fails', async () => {
+  it('shows an error toast and rejects when rotate fails', async () => {
     mockRotateInboundIngress.mockRejectedValueOnce({
       name: 'Error',
       body: { message: 'Cannot rotate' },
@@ -80,12 +80,13 @@ describe('useRotateInboundIngress', () => {
 
     const { result } = renderHook(() => useRotateInboundIngress(), { wrapper });
 
-    let rotated: { ingestToken: string } | undefined = { ingestToken: 'sentinel' };
     await act(async () => {
-      rotated = await result.current.rotateIngress('sales-ingress');
+      await expect(result.current.rotateIngress('sales-ingress')).rejects.toEqual({
+        name: 'Error',
+        body: { message: 'Cannot rotate' },
+      });
     });
 
-    expect(rotated).toBeUndefined();
     await waitFor(() => expect(mockAddDanger).toHaveBeenCalledWith('Cannot rotate'));
     expect(mockAddSuccess).not.toHaveBeenCalled();
   });

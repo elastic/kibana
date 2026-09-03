@@ -205,14 +205,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       if (isInboundIngressConnector(createdConnector)) {
         const rotated = await rotateIngress(createdConnector.id);
-        setCreatedInboundConnector(
-          rotated
-            ? ({
-                ...createdConnector,
-                secrets: { ingestToken: rotated.ingestToken },
-              } as ActionConnector)
-            : createdConnector
-        );
+        setCreatedInboundConnector({
+          ...createdConnector,
+          secrets: { ingestToken: rotated.ingestToken },
+        } as ActionConnector);
         return;
       }
 
@@ -541,7 +537,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         onSubmit={onSubmit}
         testConnector={testConnector}
         isTestable={isTestable}
-        isCreated={createdInboundConnector != null}
       />
     </EuiFlyout>
   );

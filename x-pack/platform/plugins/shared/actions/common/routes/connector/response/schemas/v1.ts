@@ -7,8 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../../../inbound_events';
-
 export const connectorResponseSchema = schema.object(
   {
     id: schema.string({
@@ -54,33 +52,6 @@ export const connectorResponseSchema = schema.object(
     ),
   },
   { meta: { id: 'connector_response' } }
-);
-
-export const connectorResponseWithMintedSecretsSchema = connectorResponseSchema.extends(
-  {
-    secrets: schema.maybe(
-      schema.object(
-        {
-          ingest_token: schema.maybe(
-            schema.string({
-              maxLength: INBOUND_EVENTS_TOKEN_MAX_LENGTH,
-              meta: {
-                description:
-                  'One-time ingest token for inbound connector events. Returned on rotate only. Store it; it cannot be retrieved again. Authenticate hub requests with `Authorization: Bearer` or the `token` query parameter.',
-              },
-            })
-          ),
-        },
-        {
-          meta: {
-            description:
-              'Secrets returned once after rotate. Never contains the stored ingest-token hash.',
-          },
-        }
-      )
-    ),
-  },
-  { meta: { id: 'connector_response_with_minted_secrets' } }
 );
 
 const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends(

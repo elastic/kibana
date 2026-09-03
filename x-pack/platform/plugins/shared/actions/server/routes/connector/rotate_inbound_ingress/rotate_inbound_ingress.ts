@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { IRouter } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ILicenseState } from '../../../lib';
@@ -26,7 +25,7 @@ export const rotateInboundIngressRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{id}/_rotate_ingress`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{id}/_rotate_event_token`,
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'internal',
@@ -73,15 +72,7 @@ export const rotateInboundIngressRoute = (
         try {
           const actionsClient = (await context.actions).getActionsClient();
           const { id }: RotateInboundIngressParamsV1 = req.params;
-          const connector = await actionsClient.rotateInboundIngress({ id });
-          const ingestToken = connector.secrets?.ingestToken;
-          if (ingestToken === undefined) {
-            throw Boom.badImplementation(
-              i18n.translate('xpack.actions.rotateInboundIngress.missingMintedToken', {
-                defaultMessage: 'Rotate did not return an ingest token.',
-              })
-            );
-          }
+          const { ingestToken } = await actionsClient.rotateInboundIngress({ id });
 
           return res.ok({
             body: { ingest_token: ingestToken },

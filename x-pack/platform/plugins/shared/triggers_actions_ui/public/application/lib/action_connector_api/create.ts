@@ -12,8 +12,6 @@ import type {
   ActionConnectorProps,
   ActionConnectorWithoutId,
 } from '../../../types';
-import { rewriteConnectorSecrets } from './rewrite_connector_secrets';
-
 const rewriteBodyRequest: RewriteResponseCase<
   Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>
 > = ({ actionTypeId, ...res }) => ({
@@ -42,7 +40,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isSystemAction,
   isConnectorTypeDeprecated,
   ...(authMode !== undefined ? { authMode } : {}),
-  secrets: rewriteConnectorSecrets(secrets ?? {}),
+  secrets: secrets ?? {},
 });
 
 export async function createActionConnector({

@@ -20,7 +20,7 @@ export async function rotateInboundIngress({
   id: string;
 }): Promise<RotateInboundIngressResult> {
   const res = await http.post<{ ingest_token?: string }>(
-    `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_rotate_ingress`
+    `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}/_rotate_event_token`
   );
   if (typeof res.ingest_token !== 'string' || res.ingest_token.length === 0) {
     throw new Error('Rotate did not return an ingest token.');

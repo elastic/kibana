@@ -25,11 +25,8 @@ import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
-import type {
-  Connector,
-  ConnectorWithExtraFindData,
-  ConnectorWithMintedSecrets,
-} from '../application/connector/types';
+import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
+import type { RotateInboundIngressResult } from '../application/connector/methods/rotate_inbound_ingress/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
@@ -242,7 +239,7 @@ export class ActionsClient {
    * Rotate inbound ingest credentials for a connector. Invalidates the previous
    * token immediately and returns the new token once.
    */
-  public async rotateInboundIngress({ id }: { id: string }): Promise<ConnectorWithMintedSecrets> {
+  public async rotateInboundIngress({ id }: { id: string }): Promise<RotateInboundIngressResult> {
     return rotateInboundIngress({ context: this.context, id });
   }
 

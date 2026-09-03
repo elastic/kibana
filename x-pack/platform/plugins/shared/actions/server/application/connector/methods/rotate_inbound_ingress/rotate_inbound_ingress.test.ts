@@ -145,7 +145,7 @@ describe('rotateInboundIngress', () => {
       id: 'connector-id',
     });
 
-    expect(result.secrets?.ingestToken).toEqual(expect.any(String));
+    expect(result.ingestToken).toEqual(expect.any(String));
     const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
       config: { ingestTokenHash: string };
     };
@@ -154,7 +154,7 @@ describe('rotateInboundIngress', () => {
       computeIngestTokenHash({
         connectorId: 'connector-id',
         spaceId: 'default',
-        token: result.secrets!.ingestToken!,
+        token: result.ingestToken,
       })
     );
   });
@@ -202,7 +202,7 @@ describe('rotateInboundIngress', () => {
       id: 'connector-id',
     });
 
-    expect(result.secrets?.ingestToken).toEqual(expect.any(String));
+    expect(result.ingestToken).toEqual(expect.any(String));
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 });

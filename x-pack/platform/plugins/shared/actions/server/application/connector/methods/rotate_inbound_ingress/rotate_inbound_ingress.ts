@@ -11,21 +11,19 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import { isUndefined, omitBy } from 'lodash';
 
-import type { ConnectorWithMintedSecrets } from '../../types';
 import type { RawAction } from '../../../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { tryCatch } from '../../../../lib';
-import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import {
   applyInboundIngressCredentialsIfNeeded,
   resolveInboundEventsSpaceId,
 } from '../../../../inbound/ensure_connector_ingress_credentials';
-import type { RotateInboundIngressParams } from './types';
+import type { RotateInboundIngressParams, RotateInboundIngressResult } from './types';
 
 export async function rotateInboundIngress({
   context,
   id,
-}: RotateInboundIngressParams): Promise<ConnectorWithMintedSecrets> {
+}: RotateInboundIngressParams): Promise<RotateInboundIngressResult> {
   await context.authorization.ensureAuthorized({ operation: 'update' });
 
   const spaceId = resolveInboundEventsSpaceId(context);
@@ -105,21 +103,5 @@ export async function rotateInboundIngress({
 
   await context.evictClientPool?.(id);
 
-  const resolvedAuthMode = getAuthMode(
-    result.attributes.authMode as ConnectorWithMintedSecrets['authMode'] | undefined
-  );
-
-  return {
-    id,
-    actionTypeId: result.attributes.actionTypeId as string,
-    isMissingSecrets: result.attributes.isMissingSecrets as boolean,
-    name: result.attributes.name as string,
-    config: result.attributes.config as Record<string, unknown>,
-    isPreconfigured: false,
-    isSystemAction: false,
-    isDeprecated: isConnectorDeprecated(result.attributes),
-    isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    authMode: resolvedAuthMode,
-    secrets: { ingestToken },
-  };
+  return { ingestToken };
 }

@@ -24,13 +24,6 @@ export interface Connector {
   authMode?: ConnectorSchemaType['authMode'];
 }
 
-/** One-time secrets returned on rotate only; never persisted and omitted from GET/list/create/update. */
-export interface ConnectorWithMintedSecrets extends Connector {
-  secrets?: {
-    ingestToken?: string;
-  };
-}
-
 export interface ConnectorWithExtraFindData extends Connector {
   referencedByCount: ConnectorWithExtraFindDataSchema['referencedByCount'];
 }
