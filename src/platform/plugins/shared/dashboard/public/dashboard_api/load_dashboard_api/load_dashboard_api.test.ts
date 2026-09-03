@@ -150,7 +150,7 @@ describe('loadDashboardApi', () => {
           useSessionStorageIntegration: false,
         }),
       });
-      expect(nextSpy).toBeCalledTimes(0);
+      expect(nextSpy).toHaveBeenCalledTimes(0);
     });
 
     test('should track view on load of saved object', async () => {
@@ -161,8 +161,8 @@ describe('loadDashboardApi', () => {
         }),
         savedObjectId: '12345',
       });
-      expect(nextSpy).toBeCalledTimes(1);
-      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
+      expect(nextSpy).toHaveBeenCalledTimes(1);
+      expect(nextSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });

@@ -34,8 +34,17 @@ export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
-export type { InteractivityConfig } from './interactivity';
-export { normalizeInteractive } from './interactivity';
+export type {
+  AutoApprovedApi,
+  InteractivityConfig,
+  InteractivityConfigInput,
+} from './interactivity';
+export {
+  createNonInteractiveConfig,
+  isApiAutoApproved,
+  normalizeInteractive,
+  toAutoApprovedApis,
+} from './interactivity';
 export { SubagentMode } from './subagent_mode';
 export type {
   AgentListOptions,
