@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/kibana-react-plugin'
   - '@kbn/shared-ux-router'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod
