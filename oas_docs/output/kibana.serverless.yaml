@@ -89843,6 +89843,7 @@ components:
               maxLength: 256
               type: string
             tags:
+              description: Tags for categorization, e.g. ["production", "infra"].
               items:
                 maxLength: 128
                 minLength: 1
