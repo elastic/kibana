@@ -1355,6 +1355,7 @@ x-pack/solutions/observability/plugins/nightshift @elastic/nightshift-context-an
 x-pack/solutions/observability/plugins/observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/observability_agent_builder @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/nightshift-context-and-research-team
+x-pack/solutions/observability/plugins/observability_alerting @elastic/rna-project-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/streams-ui
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
