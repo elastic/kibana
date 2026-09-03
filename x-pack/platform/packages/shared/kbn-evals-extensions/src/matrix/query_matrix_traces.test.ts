@@ -409,6 +409,65 @@ describe('queryMatrixTraces example fetching', () => {
     expect(client.getExampleScores).toHaveBeenCalledTimes(1);
   });
 
+  it('fans out over every execution id of a sharded suite row', async () => {
+    // A sharded sweep splits one model's examples across executions. Trace
+    // enumeration that reads only experimentId sees ONE shard's examples and
+    // the other shard's cells render "trace unavailable" forever.
+    const shardedDoc = (executionId: string, exampleId: string): EvaluationScoreDocument =>
+      ({
+        example: { id: exampleId },
+        metadata: { execution_id: executionId },
+        evaluator: { name: 'Correctness', score: 1 },
+        task: {
+          model: { id: 'model-x' },
+          output: { messages: [{ message: 'done' }] },
+          repetition_index: 0,
+        },
+      } as unknown as EvaluationScoreDocument);
+
+    const getExperimentScores = jest.fn(
+      async (_experimentId: string, { executionId }: { executionId?: string }) =>
+        executionId === 'sweep-9-s1of2::suite::model-x'
+          ? [shardedDoc('sweep-9-s1of2::suite::model-x', 'example-1')]
+          : [shardedDoc('sweep-9-s2of2::suite::model-x', 'example-2')]
+    );
+    const getExampleScores = jest.fn(
+      async (_exampleId: string, { executionId }: { executionId?: string }) => [
+        shardedDoc(executionId ?? '?', _exampleId),
+      ]
+    );
+    const client = { getExperimentScores, getExampleScores };
+    const log = { debug: jest.fn(), warning: jest.fn() };
+
+    const aggregated = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-1',
+            experimentId: 'sweep-9-s1of2::suite::model-x',
+            executionIds: ['sweep-9-s1of2::suite::model-x', 'sweep-9-s2of2::suite::model-x'],
+            datasets: [],
+          },
+        ],
+      },
+    ];
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    // Both shards enumerated: each contributed its own example.
+    expect(getExperimentScores).toHaveBeenCalledTimes(2);
+    const enumeratedExecs = getExperimentScores.mock.calls.map((c) => c[1]?.executionId).sort();
+    expect(enumeratedExecs).toEqual([
+      'sweep-9-s1of2::suite::model-x',
+      'sweep-9-s2of2::suite::model-x',
+    ]);
+    // No "trace unavailable" for the second shard's example.
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('No complete score documents found')
+    );
+  });
+
   it('fetches each (run, example) pair on a filtered server with no cross-run aliasing', async () => {
     const client = makeClient({ filtered: true });
     await queryMatrixTraces(

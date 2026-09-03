@@ -397,29 +397,34 @@ export const queryMatrixTraces = async (
   }
   const runRefs: RunRef[] = [];
 
-  const modelSuites: Array<{ modelId: string; suiteId: string; experimentId: string }> = [];
+  const modelSuites: Array<{ modelId: string; suiteId: string; executionId: string }> = [];
   for (const modelScores of aggregated) {
     for (const suite of modelScores.suites) {
-      modelSuites.push({
-        modelId: modelScores.modelId,
-        suiteId: suite.suiteId,
-        experimentId: suite.experimentId,
-      });
+      // A sharded suite row carries every shard's execution id; each shard
+      // owns a disjoint stride of examples and must be enumerated separately.
+      // Unsharded rows carry only experimentId.
+      const executionIds =
+        suite.executionIds && suite.executionIds.length > 0
+          ? suite.executionIds
+          : [suite.experimentId];
+      for (const executionId of executionIds) {
+        modelSuites.push({ modelId: modelScores.modelId, suiteId: suite.suiteId, executionId });
+      }
     }
   }
 
   const enumerated = await mapWithConcurrency(
     modelSuites,
     6,
-    async ({ modelId, suiteId, experimentId }) => {
+    async ({ modelId, suiteId, executionId }) => {
       log.debug(
-        `Enumerating examples for experiment ${experimentId} (model ${modelId}, suite ${suiteId})`
+        `Enumerating examples for experiment ${executionId} (model ${modelId}, suite ${suiteId})`
       );
 
-      const stripped = await evalsClient.getExperimentScores(experimentId, {
+      const stripped = await evalsClient.getExperimentScores(executionId, {
         suiteId,
         taskModelId: modelId,
-        executionId: experimentId,
+        executionId,
       });
 
       const exampleIds = new Set<string>();
@@ -434,7 +439,7 @@ export const queryMatrixTraces = async (
         return null;
       }
 
-      return { suiteId, modelId, executionId: experimentId, exampleIds };
+      return { suiteId, modelId, executionId, exampleIds };
     }
   );
 
