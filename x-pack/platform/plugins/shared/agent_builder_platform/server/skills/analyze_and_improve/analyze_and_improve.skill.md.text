@@ -119,6 +119,24 @@ on the trace, not on the signal.
 
 This is worth doing for the handful of signals a finding rests on, not for every signal in a group.
 
+For the traces index itself — how spans are named (`chat *`, `execute_tool *`, `invoke_agent *`),
+what the `attributes.gen_ai.*` fields hold, and that `duration` is nanoseconds — load
+`agent-builder-traces` rather than rediscovering it here. Two things it tells you that change how
+you read a trace:
+
+- **Message content is off by default.** User prompts, LLM responses and the system prompt are each
+  gated behind a separate `agentBuilder:tracing:*` privacy setting. A trace can therefore hold the
+  tool call and none of the conversation around it. When that happens the reasoning was not
+  captured, which is not the same as the agent having had none — report the former and do not
+  infer intent from an empty attribute.
+- **Its ES|QL helper resolves the *current* space's traces index.** Signals here span every space,
+  so for a signal from another space that helper points at the wrong index and the join comes back
+  empty rather than failing. Keep deriving the traces index from the signal's own `_index`, as
+  above, and use the skill for the vocabulary rather than for the index name.
+
+That skill needs `agentBuilder:tracing:enabled`. If traces are not enabled, signals are all the
+evidence there is: say so rather than reporting the conversation as unavailable.
+
 ## Reading what the index does today
 
 Before proposing a change to something, read it.
@@ -128,7 +146,10 @@ Before proposing a change to something, read it.
   step, so read for one: what it samples and how much, what it asks the model for, how many
   indicators it can emit, and what it writes into which fields. A pipeline's *shape* often bounds
   what it could ever produce, however well its prompts are worded. A proposal that misquotes what a
-  workflow does will be rejected on sight.
+  workflow does will be rejected on sight. When a definition uses syntax you are unsure of — step
+  types, Liquid templating, trigger event schemas, `on-failure` handling — load `workflow-authoring`
+  rather than inferring the semantics from the YAML. Misreading what a step *does* is the most
+  expensive mistake available here: every downstream claim inherits it.
 - **The KIs themselves.** `platform.core.list_indices` finds the `ai-index-*` indices;
   `platform.core.execute_esql` samples them. Aggregating by `type` and `tags` tells you what the
   index actually holds, which is what determines whether an `empty_retrieval` means "missing
@@ -141,6 +162,33 @@ Before proposing a change to something, read it.
   proposing: an `esql` source is a query you can run, so run it and see whether the data is
   genuinely absent or merely filtered out. A `connector` source you cannot inspect — say so and
   describe what you would need to check, rather than proposing a change to contents you never saw.
+
+## Validate any workflow YAML before you propose it
+
+When a proposal carries workflow YAML — an edited step, a rewritten query, a new field mapping —
+**it must pass `platform.workflows.validate_workflow` before you propose it.** A proposal that does
+not parse, or that names a step type which does not exist, costs a reviewer the entire round trip
+and teaches them to distrust the next one.
+
+- **Validate the whole definition, not the fragment you changed.** Validation is defined over a
+  complete workflow. A step in isolation cannot tell you whether its references resolve or whether
+  the name it depends on still exists after your edit.
+- **Read the failure rather than working around it.** When validation fails it returns the step
+  definitions for every step type the workflow references. That is usually enough to see whether
+  you misremembered a parameter or the step type is genuinely wrong. Never resolve a failure by
+  swapping in a step type you did not verify.
+- **Say that it validated.** A reviewer has no way to tell a checked proposal from an unchecked one.
+  If you could not validate — the tool was unavailable, or the change is prose rather than YAML —
+  say that instead. Do not imply a check you did not run.
+
+Validation establishes that the workflow parses, that its step types exist and that its references
+resolve. It does not establish that a query inside it returns anything. Where the change is to an
+ES|QL step, check the query itself with `platform.core.execute_esql`, which reads and writes
+nothing.
+
+That is as far as you go. **Do not execute the workflow or any step of it.** *Propose, never apply*
+is not suspended by a desire to be sure, and a step with side effects would prompt for a
+confirmation that, in an unattended run, has nobody to answer it.
 
 ## Prefer the signals you were given
 

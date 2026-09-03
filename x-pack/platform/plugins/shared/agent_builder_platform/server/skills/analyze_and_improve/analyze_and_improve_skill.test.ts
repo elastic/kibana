@@ -54,6 +54,7 @@ describe('analyzeAndImproveSkill', () => {
       platformCoreTools.executeEsql,
       platformCoreTools.listIndices,
       `${internalNamespaces.workflows}.get_workflow`,
+      `${internalNamespaces.workflows}.validate_workflow`,
     ]);
   });
 
@@ -94,6 +95,23 @@ describe('analyzeAndImproveSkill', () => {
 
     it('warns against re-proposing rejected improvements', () => {
       expect(content).toContain('already rejected');
+    });
+
+    it('points at the traces skill rather than restating how the traces index is shaped', () => {
+      expect(content).toContain('agent-builder-traces');
+    });
+
+    it('points at the workflow authoring skill for definition syntax', () => {
+      expect(content).toContain('workflow-authoring');
+    });
+
+    it('requires workflow YAML to be validated before it is proposed', () => {
+      expect(content).toContain('Validate any workflow YAML before you propose it');
+      expect(content).toContain(`${internalNamespaces.workflows}.validate_workflow`);
+    });
+
+    it('still forbids running a workflow, which validation must not be read as licence for', () => {
+      expect(content).toContain('Do not execute the workflow');
     });
   });
 });

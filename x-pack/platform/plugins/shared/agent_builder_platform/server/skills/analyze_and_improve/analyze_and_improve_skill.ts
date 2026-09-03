@@ -23,5 +23,8 @@ export const analyzeAndImproveSkill = defineSkillType({
     platformCoreTools.executeEsql,
     platformCoreTools.listIndices,
     `${internalNamespaces.workflows}.get_workflow`,
+    // Read-only despite the verb: it parses a candidate definition and reports what is wrong with
+    // it, saving a reviewer a proposal whose YAML was never going to load.
+    `${internalNamespaces.workflows}.validate_workflow`,
   ],
 });
