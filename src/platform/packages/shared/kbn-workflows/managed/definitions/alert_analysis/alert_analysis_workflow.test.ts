@@ -255,6 +255,35 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(withTechniques).toEqual(techniques);
   });
 
+  it('guards build_threat_technique_lines foreach against rules with no threat mapping', () => {
+    // Rules that have no threat mapping at all (threats field is nil) crashed the workflow with
+    // "Foreach expression resolved to undefined" because `nil | json` returns undefined.
+    // The foreach must use `| default: "[]" | json_parse` so it safely yields zero iterations.
+    const outerForeachStep = findStepByName(workflow.steps, 'build_threat_technique_lines') as {
+      foreach: string;
+    };
+    expect(outerForeachStep).toBeDefined();
+
+    const expression = outerForeachStep.foreach;
+    expect(expression.startsWith('{{') && expression.endsWith('}}')).toBe(true);
+    const innerExpr = expression.slice(2, -2).trim();
+
+    const engine = createWorkflowLiquidEngine();
+
+    // No threat mapping at all (threats is nil): must resolve to [] instead of crashing.
+    const noThreats = engine.evalValueSync(innerExpr, {
+      steps: { get_rule_metadata: { output: { metadata: { threats: null } } } },
+    });
+    expect(noThreats).toEqual([]);
+
+    // Rule with a threat array: must pass it through unchanged.
+    const threats = [{ tactic: { id: 'TA0007', name: 'Discovery' }, technique: [] }];
+    const withThreats = engine.evalValueSync(innerExpr, {
+      steps: { get_rule_metadata: { output: { metadata: { threats } } } },
+    });
+    expect(withThreats).toEqual(threats);
+  });
+
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
     const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
       condition: string;

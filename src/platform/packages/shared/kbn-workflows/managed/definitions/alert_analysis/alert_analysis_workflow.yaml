@@ -568,7 +568,7 @@ steps:
 
           - name: build_threat_technique_lines
             type: foreach
-            foreach: '{{ steps.get_rule_metadata.output.metadata.threats | json }}'
+            foreach: '{{ steps.get_rule_metadata.output.metadata.threats | default: "[]" | json_parse }}'
             steps:
               - name: set_current_threat_tactic
                 type: data.set
