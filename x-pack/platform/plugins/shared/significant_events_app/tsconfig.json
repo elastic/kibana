@@ -49,7 +49,6 @@
     "@kbn/react-hooks",
     "@kbn/react-query",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-utility",
     "@kbn/scout",
     "@kbn/significant-events-plugin",
     "@kbn/significant-events-schema",
