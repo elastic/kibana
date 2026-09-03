@@ -190,7 +190,7 @@ describe('accessesFrequentlyMaintainer', () => {
           totalWriteErrors: 0,
           totalMetadataDocsApplied: 3,
           totalMetadataDocsFailed: 2,
-          totalDroppedTargets: 0,
+          totalTargetIdsNotInStore: 0,
           totalIterations: 1,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
