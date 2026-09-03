@@ -17,16 +17,63 @@ import type {
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { InstanceTaskCost, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
+export const taskToScheduleSchema = schema.object({
+  taskType: schema.string({ minLength: 1, maxLength: 200 }),
+  id: schema.maybe(schema.string({ maxLength: 200 })),
+  enabled: schema.boolean({ defaultValue: true }),
+  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  scope: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 200 }), { maxSize: 10 })
+  ),
+  schedule: schema.maybe(
+    schema.oneOf([
+      schema.object({
+        interval: schema.string(),
+      }),
+      schema.object({
+        rrule: schema.object({
+          dtstart: schema.maybe(schema.string()),
+          freq: schema.number({ min: 0, max: 3 }),
+          interval: schema.number({ min: 1 }),
+          tzid: schema.string({ defaultValue: 'UTC' }),
+          byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }), { maxSize: 24 })),
+          byminute: schema.maybe(
+            schema.arrayOf(schema.number({ min: 0, max: 59 }), { maxSize: 60 })
+          ),
+          byweekday: schema.maybe(
+            schema.arrayOf(schema.number({ min: 1, max: 7 }), { maxSize: 7 })
+          ),
+          bymonthday: schema.maybe(
+            schema.arrayOf(schema.number({ min: 1, max: 31 }), { maxSize: 31 })
+          ),
+        }),
+      }),
+    ])
+  ),
+  timeoutOverride: schema.maybe(schema.string({ maxLength: 50 })),
+  cost: schema.maybe(
+    schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
+  ),
+});
+
+export interface TaskToSchedule {
+  taskType: string;
+  id?: string;
+  enabled?: boolean;
+  params: Record<string, unknown>;
+  state: Record<string, unknown>;
+  scope?: string[];
+  schedule?: IntervalSchedule | RruleSchedule;
+  timeoutOverride?: string;
+  cost?: InstanceTaskCost;
+}
+
 const scheduleBodySchema = schema.object({
-  task: schema.object({
-    taskType: schema.string({ minLength: 1, maxLength: 200 }),
-    id: schema.maybe(schema.string({ maxLength: 200 })),
-    enabled: schema.boolean({ defaultValue: true }),
-    params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    scope: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1, maxLength: 200 }), { maxSize: 10 })
-    ),
+  // Extended rather than added to `taskToScheduleSchema`, which `bulk_schedule` also uses: only
+  // this route converts `runAt` to a Date, so accepting it there would pass a string to
+  // `bulkSchedule`.
+  task: taskToScheduleSchema.extends({
     /**
      * ISO date string. Lets tests create a task that regular polling will not claim for a known
      * amount of time, which is otherwise impossible without writing to the task index directly.
@@ -37,37 +84,6 @@ const scheduleBodySchema = schema.object({
         validate: (value) =>
           Number.isNaN(Date.parse(value)) ? 'must be an ISO 8601 date string' : undefined,
       })
-    ),
-    schedule: schema.maybe(
-      schema.oneOf([
-        schema.object({
-          interval: schema.string(),
-        }),
-        schema.object({
-          rrule: schema.object({
-            dtstart: schema.maybe(schema.string()),
-            freq: schema.number({ min: 0, max: 3 }),
-            interval: schema.number({ min: 1 }),
-            tzid: schema.string({ defaultValue: 'UTC' }),
-            byhour: schema.maybe(
-              schema.arrayOf(schema.number({ min: 0, max: 23 }), { maxSize: 24 })
-            ),
-            byminute: schema.maybe(
-              schema.arrayOf(schema.number({ min: 0, max: 59 }), { maxSize: 60 })
-            ),
-            byweekday: schema.maybe(
-              schema.arrayOf(schema.number({ min: 1, max: 7 }), { maxSize: 7 })
-            ),
-            bymonthday: schema.maybe(
-              schema.arrayOf(schema.number({ min: 1, max: 31 }), { maxSize: 31 })
-            ),
-          }),
-        }),
-      ])
-    ),
-    timeoutOverride: schema.maybe(schema.string({ maxLength: 50 })),
-    cost: schema.maybe(
-      schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
     ),
   }),
   /**
@@ -80,6 +96,11 @@ const scheduleBodySchema = schema.object({
    * FTR/Scout only (`ftrApis`).
    */
   onEsKey: schema.maybe(schema.boolean()),
+  /**
+   * When true, use `ensureScheduled` instead of `schedule`, so the call is idempotent for a task id
+   * that already exists. Requires `task.id`. FTR/Scout only (`ftrApis`).
+   */
+  ensureScheduled: schema.maybe(schema.boolean()),
 });
 
 export const registerTaskManagerScheduleRoute = (
@@ -107,21 +128,11 @@ export const registerTaskManagerScheduleRoute = (
         });
       }
 
-      const { task, skipRequestForScheduling, onEsKey } = req.body as {
-        task: {
-          taskType: string;
-          id?: string;
-          enabled?: boolean;
-          params: Record<string, unknown>;
-          state: Record<string, unknown>;
-          scope?: string[];
-          schedule?: IntervalSchedule | RruleSchedule;
-          timeoutOverride?: string;
-          cost?: InstanceTaskCost;
-          runAt?: string;
-        };
+      const { task, skipRequestForScheduling, onEsKey, ensureScheduled } = req.body as {
+        task: TaskToSchedule & { runAt?: string };
         skipRequestForScheduling?: boolean;
         onEsKey?: boolean;
+        ensureScheduled?: boolean;
       };
 
       const { runAt, ...taskFields } = task;
@@ -130,13 +141,26 @@ export const registerTaskManagerScheduleRoute = (
         ...(runAt ? { runAt: new Date(runAt) } : {}),
       };
 
+      const options = {
+        ...(skipRequestForScheduling === true ? {} : { request: req }),
+        ...(onEsKey === true ? { onEsKey: true } : {}),
+      };
+
+      if (ensureScheduled === true) {
+        const { id } = taskInstance;
+        if (!id) {
+          return res.badRequest({ body: { message: 'ensureScheduled requires task.id' } });
+        }
+
+        return res.ok({
+          body: await startContract.ensureScheduled({ ...taskInstance, id }, options),
+        });
+      }
+
       const taskResult =
         skipRequestForScheduling === true
           ? await startContract.schedule(taskInstance)
-          : await startContract.schedule(taskInstance, {
-              request: req,
-              ...(onEsKey === true ? { onEsKey: true } : {}),
-            });
+          : await startContract.schedule(taskInstance, options);
 
       return res.ok({ body: taskResult });
     }

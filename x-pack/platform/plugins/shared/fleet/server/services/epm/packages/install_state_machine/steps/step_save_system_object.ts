@@ -5,6 +5,7 @@
  * 2.0.
  */
 import semverLt from 'semver/functions/lt';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import pRetry from 'p-retry';
 
@@ -16,7 +17,7 @@ import {
 } from '../../../../../constants';
 import { GENERIC_DATASET_NAME } from '../../../../../../common/constants';
 import { handleNamespaceTemplateRestoreAfterPackageInstall } from '../..';
-import type { Installation, RegistryDataStream } from '../../../../../types';
+import type { InstallablePackage, Installation, RegistryDataStream } from '../../../../../types';
 import { getNormalizedDataStreams } from '../../../../../../common/services';
 
 import { packagePolicyService } from '../../../../package_policy';
@@ -27,6 +28,7 @@ import { withPackageSpan } from '../../utils';
 
 import { clearLatestFailedAttempts } from '../../install_errors_helpers';
 import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
+import { getNormalizedDataStreamsFromPackagePolicy } from '../../input_type_packages';
 
 import type { InstallContext } from '../_state_machine_package_install';
 
@@ -35,6 +37,35 @@ const onlyRetryConflictErrors = (err: Error) => {
     throw err;
   }
 };
+
+async function getInputPackagePoliciesEsIndexPatterns(
+  savedObjectsClient: SavedObjectsClientContract,
+  packageInfo: InstallablePackage,
+  logger: Logger
+): Promise<Record<string, string>> {
+  const patterns: Record<string, string> = {};
+  try {
+    const { items: packagePolicies } = await packagePolicyService.list(savedObjectsClient, {
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+    });
+    for (const packagePolicy of packagePolicies) {
+      Object.assign(
+        patterns,
+        generateESIndexPatterns(
+          getNormalizedDataStreamsFromPackagePolicy(packagePolicy, packageInfo),
+          packageInfo
+        )
+      );
+    }
+  } catch (error) {
+    logger.warn(
+      `Failed to recompute input-package es_index_patterns for ${packageInfo.name}: ${error.message}`
+    );
+  }
+  return patterns;
+}
 
 export async function stepSaveSystemObject(context: InstallContext) {
   const {
@@ -87,6 +118,13 @@ export async function stepSaveSystemObject(context: InstallContext) {
     ),
     packageInfo
   );
+
+  if (packageInfo.type === 'input') {
+    Object.assign(
+      recomputedEsIndexPatterns,
+      await getInputPackagePoliciesEsIndexPatterns(savedObjectsClient, packageInfo, logger)
+    );
+  }
 
   const updateEsIndexPatterns = async () => {
     const latest = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);

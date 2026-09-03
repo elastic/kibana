@@ -12,6 +12,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerTaskManagerRunSoonRoute } from './run_soon';
 import { registerTaskManagerDeleteRoute } from './delete';
 import { registerTaskManagerScheduleRoute } from './schedule';
+import { registerTaskManagerBulkScheduleRoute } from './bulk_schedule';
 import { registerTaskManagerGetRoute } from './get';
 
 export const registerTaskManagerRoutes = (
@@ -20,6 +21,7 @@ export const registerTaskManagerRoutes = (
 ) => {
   registerTaskManagerRunSoonRoute(router, getStartContract);
   registerTaskManagerScheduleRoute(router, getStartContract);
+  registerTaskManagerBulkScheduleRoute(router, getStartContract);
   registerTaskManagerDeleteRoute(router, getStartContract);
   registerTaskManagerGetRoute(router, getStartContract);
 };

@@ -41,6 +41,7 @@ import type {
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import type { ServerlessPluginStart } from '@kbn/serverless/server';
 import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingServerSetup;
@@ -60,6 +61,7 @@ export interface InfraServerPluginSetupDeps {
   apmDataAccess: ApmDataAccessPluginSetup;
   serverless?: ServerlessPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface InfraServerPluginStartDeps {
