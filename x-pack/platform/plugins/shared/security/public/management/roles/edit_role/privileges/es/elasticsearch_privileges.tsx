@@ -151,6 +151,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <EuiSpacer />
           </>
         )}
+
         {buildFlavor === 'traditional' && (
           <>
             <EuiDescribedFormGroup
@@ -198,6 +199,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
             <EuiSpacer />
           </>
         )}
+
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
@@ -228,7 +230,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           editable={editable}
           isDarkMode={this.props.isDarkMode}
         />
-
         {buildFlavor === 'traditional' && canUseRemoteIndices && (
           <>
             <EuiSpacer />

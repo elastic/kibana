@@ -34,12 +34,9 @@ const AVAILABLE_DATA_SOURCE_PRIVILEGES: RoleDataSourcePrivilege['privileges'] = 
   'manage',
 ];
 
-const getGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege | undefined =>
-  role.elasticsearch.global;
-
 const ensureGlobalPrivilege = (role: Role): estypes.SecurityGlobalPrivilege => {
   return (
-    getGlobalPrivilege(role) ?? {
+    role.elasticsearch.global ?? {
       application: {
         manage: {
           applications: [],
@@ -66,9 +63,7 @@ export const DataSourcePrivileges = ({
   validator,
   editable = true,
 }: Props) => {
-  const dataSources: RoleDataSourcePrivilege[] = useMemo(() => {
-    return getGlobalPrivilege(role)?.data_source ?? [];
-  }, [role]);
+  const dataSources: RoleDataSourcePrivilege[] = role.elasticsearch.global?.data_source ?? [];
 
   const isRoleReadOnlyValue = useMemo(() => {
     return !editable || isRoleReadOnly(role);
