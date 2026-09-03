@@ -112230,12 +112230,7 @@ components:
           maxItems: 100
           type: array
         global:
-          anyOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
-            - items:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
-              maxItems: 1000
-              type: array
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
         indices:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_indices_privileges'
