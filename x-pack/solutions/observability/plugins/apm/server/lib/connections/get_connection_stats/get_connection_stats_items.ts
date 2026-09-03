@@ -27,7 +27,7 @@ import {
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';

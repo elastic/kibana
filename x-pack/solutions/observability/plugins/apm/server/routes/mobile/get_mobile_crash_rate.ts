@@ -14,8 +14,8 @@ import { ERROR_TYPE, ERROR_ID, SERVICE_NAME } from '../../../common/es_fields/ap
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 
 export interface CrashRateTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };

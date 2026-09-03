@@ -17,7 +17,7 @@ import { fetchExitSpanSamplesFromTraceIds } from '../../routes/service_map/fetch
 import { getConnectionStatsItems } from '../../lib/connections/get_connection_stats/get_connection_stats_items';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
-import { ApmDocumentType } from '../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
 import { buildApmToolResources } from '../utils/build_apm_tool_resources';

@@ -8,8 +8,8 @@
 import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getNCT({

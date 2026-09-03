@@ -21,7 +21,7 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';

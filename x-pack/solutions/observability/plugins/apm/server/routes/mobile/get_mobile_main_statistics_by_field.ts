@@ -18,8 +18,8 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 
 interface Props {
   kuery: string;

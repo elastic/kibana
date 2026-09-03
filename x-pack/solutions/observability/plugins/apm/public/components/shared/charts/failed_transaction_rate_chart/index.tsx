@@ -28,7 +28,7 @@ import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';

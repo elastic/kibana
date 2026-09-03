@@ -15,7 +15,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { getComparisonChartTheme } from '../../components/shared/time_comparison/get_comparison_chart_theme';
 import { getAggsTypeFromRule } from '../../components/alerting/ui_components/alert_details_app_section/helpers';
 import { getTimeZone } from '../../components/shared/charts/helper/timezone';
-import { ApmDocumentType } from '../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 

@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';

@@ -30,7 +30,7 @@ import { getLatencyChartSelector } from '../../../../selectors/latency_chart_sel
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getAggsTypeFromRule } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';

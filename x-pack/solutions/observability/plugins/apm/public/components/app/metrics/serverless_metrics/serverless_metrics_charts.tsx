@@ -13,7 +13,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { MetricsChart } from '../../../shared/charts/metrics_chart';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 
 interface Props {
   serverlessId?: string;

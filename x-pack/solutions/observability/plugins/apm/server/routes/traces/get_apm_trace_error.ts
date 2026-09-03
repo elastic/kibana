@@ -30,8 +30,8 @@ import {
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 
 export async function getApmTraceError(params: {
   apmEventClient: APMEventClient;

@@ -11,8 +11,8 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ApmDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
+import { ApmDocumentType } from '@kbn/apm-types';
+import { RollupInterval } from '@kbn/apm-types';
 
 interface Props {
   kuery: string;

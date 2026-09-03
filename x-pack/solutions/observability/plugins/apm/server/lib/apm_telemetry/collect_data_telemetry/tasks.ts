@@ -76,7 +76,7 @@ import type {
   MetricSupportingRollUp,
 } from '../types';
 import type { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
-import { RollupInterval } from '../../../../common/rollup';
+import { RollupInterval } from '@kbn/apm-types';
 import type { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../../../common/custom_dashboards';
 import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';

@@ -26,7 +26,7 @@ import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { ApmDocumentType } from '@kbn/apm-types';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
