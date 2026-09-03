@@ -210,8 +210,11 @@ export async function deleteSecretsIfNotReferenced(opts: {
   soClient: SavedObjectsClientContract;
   ids: string[];
   agentPolicyIds?: string[];
+  // When true, skip the compiled .fleet-policies check (the caller guarantees those docs are
+  // already removed). The package-policy SO check still runs to guard against shared secrets.
+  skipCompiledPolicyCheck?: boolean;
 }): Promise<void> {
-  const { esClient, soClient, ids, agentPolicyIds } = opts;
+  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck } = opts;
   const logger = appContextService.getLogger();
 
   const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
@@ -229,24 +232,29 @@ export async function deleteSecretsIfNotReferenced(opts: {
     });
   }
 
-  // Check compiled .fleet-policies documents. These are what fleet-server actually reads;
-  // a compiled doc can reference a secret that no live package policy SO does (e.g. an
-  // older revision_idx still in the index). Fails closed: if the check cannot complete,
-  // we keep all candidates rather than risk deleting a referenced secret.
-  const { referencedIds: compiledPolicyReferencedIds, checkFailed } =
-    await findFleetPoliciesUsingSecrets({
+  let compiledPolicyReferencedIds = new Set<string>();
+
+  if (!skipCompiledPolicyCheck) {
+    // Check compiled .fleet-policies documents. These are what fleet-server actually reads;
+    // a compiled doc can reference a secret that no live package policy SO does (e.g. an
+    // older revision_idx still in the index). Fails closed: if the check cannot complete,
+    // we keep all candidates rather than risk deleting a referenced secret.
+    const { referencedIds, checkFailed } = await findFleetPoliciesUsingSecrets({
       esClient,
       ids,
       agentPolicyIds: agentPolicyIds ?? [],
     });
 
-  if (checkFailed) {
-    logger.warn(
-      `[deleteSecretsIfNotReferenced] Could not verify .fleet-policies references for secrets [${ids.join(
-        ', '
-      )}] — skipping deletion to avoid removing a referenced secret.`
-    );
-    return;
+    if (checkFailed) {
+      logger.warn(
+        `[deleteSecretsIfNotReferenced] Could not verify .fleet-policies references for secrets [${ids.join(
+          ', '
+        )}] — skipping deletion to avoid removing a referenced secret.`
+      );
+      return;
+    }
+
+    compiledPolicyReferencedIds = referencedIds;
   }
 
   const skippedByCompiledPolicy = ids.filter((id) => compiledPolicyReferencedIds.has(id));

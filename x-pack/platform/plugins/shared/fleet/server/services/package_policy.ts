@@ -215,7 +215,6 @@ import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
   deleteSecretsIfNotReferenced as deleteSecrets,
-  deleteSecrets as deleteSecretsUnscoped,
   isSecretStorageEnabled,
 } from './secrets';
 import { extractAccountType } from './cloud_connectors/integration_helpers';
@@ -2814,10 +2813,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     } else if (secretsToDelete.length > 0) {
       // skipUnassignFromAgentPolicies is set when the parent agent policy is itself being deleted.
-      // In that case, deleteFleetServerPoliciesForPolicyId has already removed the .fleet-policies
-      // docs before this code runs, so there is no live compiled doc that can reference these
-      // secrets. Skip the reference check and delete directly.
-      await deleteSecretsUnscoped({ esClient, ids: secretsToDelete });
+      // deleteFleetServerPoliciesForPolicyId has already removed the .fleet-policies docs before
+      // this code runs, so no compiled doc can reference these secrets — skip that check.
+      // The package-policy SO check still runs to guard against secrets shared across policies
+      // via policy_ids (deleteSecretsIfNotReferenced with skipCompiledPolicyCheck: true).
+      await deleteSecrets({
+        esClient,
+        soClient,
+        ids: secretsToDelete,
+        skipCompiledPolicyCheck: true,
+      });
     }
 
     try {
