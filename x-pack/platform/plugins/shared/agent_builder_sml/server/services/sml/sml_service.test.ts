@@ -113,11 +113,18 @@ const expectedVisibilityFilter = ({
                               },
                             },
                             {
-                              terms_set: {
-                                [PERM_NAME_FIELD]: {
-                                  terms: actions,
-                                  minimum_should_match_field: PERM_COUNT_FIELD,
-                                },
+                              bool: {
+                                filter: [
+                                  { range: { [PERM_COUNT_FIELD]: { gt: 0 } } },
+                                  {
+                                    terms_set: {
+                                      [PERM_NAME_FIELD]: {
+                                        terms: actions,
+                                        minimum_should_match_field: PERM_COUNT_FIELD,
+                                      },
+                                    },
+                                  },
+                                ],
                               },
                             },
                           ],
@@ -137,23 +144,36 @@ const expectedVisibilityFilter = ({
 /** The slice of Query DSL the visibility-filter assertions have to walk. */
 interface QueryClause {
   nested?: { query: { bool: { filter: QueryClause[] } } };
-  bool?: { should?: QueryClause[] };
+  bool?: { should?: QueryClause[]; filter?: QueryClause[] };
   terms_set?: Record<string, unknown>;
 }
 
+const hasTermsSet = (clause: QueryClause): boolean =>
+  clause.bool?.filter?.some((f) => f.terms_set != null) ?? false;
+
 /**
  * Dig the zero-action `should` branch out of an emitted visibility filter: the nested privilege
- * clause -> the privilege `bool` -> the branch that is not the `terms_set`.
+ * clause -> the privilege `bool` -> the branch that is not the gated (`terms_set`) branch.
  */
 const findZeroActionBranch = (visibilityFilter: unknown): QueryClause | undefined => {
   const { should } = (visibilityFilter as { bool: { should: QueryClause[] } }).bool;
   const nested = should.find((clause) => clause.nested != null)?.nested;
-  // The space-scope clause is also a `bool.should`; the privilege clause is the one holding the
-  // `terms_set`.
+  // The space-scope clause is also a `bool.should`; the privilege clause is the one whose branches
+  // hold the `terms_set`.
   const privilegeClause = nested?.query.bool.filter.find((clause) =>
-    clause.bool?.should?.some((branch) => branch.terms_set != null)
+    clause.bool?.should?.some(hasTermsSet)
   );
-  return privilegeClause?.bool?.should?.find((clause) => clause.terms_set == null);
+  return privilegeClause?.bool?.should?.find((clause) => !hasTermsSet(clause));
+};
+
+/** Dig the gated (`terms_set`) `should` branch out of an emitted visibility filter. */
+const findGatedBranch = (visibilityFilter: unknown): QueryClause | undefined => {
+  const { should } = (visibilityFilter as { bool: { should: QueryClause[] } }).bool;
+  const nested = should.find((clause) => clause.nested != null)?.nested;
+  const privilegeClause = nested?.query.bool.filter.find((clause) =>
+    clause.bool?.should?.some(hasTermsSet)
+  );
+  return privilegeClause?.bool?.should?.find(hasTermsSet);
 };
 
 /** The authorization filter emitted when the security plugin is present. */
@@ -1392,10 +1412,10 @@ describe('SmlService', () => {
 
     it('gates the zero-action branch on the element carrying no action names', async () => {
       // The indexer derives `count` from the action list, so `count: 0` always means "no names".
-      // An element with `count: 0` AND names is malformed, and `terms_set` would match it for
-      // free (minimum_should_match_field resolves to 0). The branch therefore pairs the count
-      // term with `must_not exists` on the name leaf so such an element fails CLOSED instead of
-      // reading as public. Asserted independently of `expectedAuthzFilter` — loosening the shared
+      // An element with `count: 0` AND names is malformed: `terms_set` clamps a `0` minimum to `1`,
+      // so it would match whenever the caller holds a named action. The branch therefore pairs the
+      // count term with `must_not exists` on the name leaf so such an element fails CLOSED instead
+      // of reading as public. Asserted independently of `expectedAuthzFilter` — loosening the shared
       // helper must not silently loosen this rule.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       aggResponse = universeAgg(['saved_object:dashboard/get']);
@@ -1424,6 +1444,49 @@ describe('SmlService', () => {
           filter: [
             { term: { [PERM_COUNT_FIELD]: 0 } },
             { bool: { must_not: [{ exists: { field: PERM_NAME_FIELD } }] } },
+          ],
+        },
+      });
+    });
+
+    it('gates the terms_set branch on count > 0', async () => {
+      // `terms_set` cannot express `minimum_should_match_field: 0`, so a `count: 0` element that
+      // still names an action would match here for any caller holding that action. The `count > 0`
+      // guard is what makes such a malformed element fail CLOSED. Asserted independently of
+      // `expectedAuthzFilter` — loosening the shared helper must not silently loosen this rule.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      aggResponse = universeAgg(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = { hits: { total: 0, hits: [] } };
+
+      await smlService.autocomplete({
+        query: 'git',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = docSearchCall(esClient);
+      const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
+      const gatedClause = findGatedBranch(filterClauses[0]);
+
+      expect(gatedClause).toBeDefined();
+      expect(gatedClause).toEqual({
+        bool: {
+          filter: [
+            { range: { [PERM_COUNT_FIELD]: { gt: 0 } } },
+            {
+              terms_set: {
+                [PERM_NAME_FIELD]: {
+                  terms: ['saved_object:dashboard/get'],
+                  minimum_should_match_field: PERM_COUNT_FIELD,
+                },
+              },
+            },
           ],
         },
       });
@@ -1729,8 +1792,8 @@ describe('SmlService', () => {
       // The indexer writes `{ space, name: [], count: 0 }` when a type resolves to no actions.
       // Such an element must grant access to anyone in that space — `count: 0` makes the ES-side
       // `terms_set` (minimum_should_match_field: count) require zero matches, and the Kibana-side
-      // mirror here is the vacuous `[].every(...)`. Records with zero actions therefore keep
-      // showing up in search/autocomplete rather than being silently dropped.
+      // mirror here is the `count === 0 && name.length === 0` public escape. Records with zero
+      // actions therefore keep showing up in search/autocomplete rather than being silently dropped.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
@@ -1761,9 +1824,8 @@ describe('SmlService', () => {
     });
 
     it('denies access for a malformed element whose count is 0 but still names actions', async () => {
-      // Parity with the ES-side filter, which pairs `count: 0` with `must_not exists` on the name
-      // leaf for exactly this case. The in-memory mirror reads the names directly, so an unheld
-      // action denies regardless of what `count` claims. Both paths fail CLOSED.
+      // Parity with the ES-side filter: a `count: 0` element naming actions is malformed and the
+      // `count === 0` branch is the public escape only when it names nothing, so it fails CLOSED.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
@@ -1797,6 +1859,162 @@ describe('SmlService', () => {
       });
 
       expect(result.get('item-malformed')).toBe(false);
+    });
+
+    it('denies a malformed count-0 element even to a caller holding the named action', async () => {
+      // The real fail-open: without the `count === 0` guard, `every(held)` would pass for the
+      // action holder and leak the malformed element. This is the sibling of the ES-side
+      // `count > 0` guard on the gated branch.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-malformed',
+                permissions: {
+                  kibana: {
+                    privileges: [
+                      { space: 'default', name: ['saved_object:dashboard/get'], count: 0 },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-malformed'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-malformed')).toBe(false);
+    });
+
+    it('denies a malformed negative-count element even to a caller holding the named action', async () => {
+      // A negative count is not the public escape (count !== 0), and it must not sneak into the
+      // gated path either: the `count > 0` guard rejects it regardless of the actions held.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-negative',
+                permissions: {
+                  kibana: {
+                    privileges: [
+                      { space: 'default', name: ['saved_object:dashboard/get'], count: -1 },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-negative'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-negative')).toBe(false);
+    });
+
+    it('denies a malformed positive-count element that names no actions', async () => {
+      // A positive count with an empty name list must fail closed: zero named actions can never
+      // satisfy a positive required count. The nonempty-list guard rejects it outright.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-empty-names',
+                permissions: {
+                  kibana: {
+                    privileges: [{ space: 'default', name: [], count: 3 }],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-empty-names'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-empty-names')).toBe(false);
+    });
+
+    it('denies a malformed element whose count is padded by duplicate action names', async () => {
+      // `terms_set` counts DISTINCT matching terms, so `{ name: ['a', 'a'], count: 2 }` needs two
+      // distinct held actions, not one held twice. Counting matches without deduping would grant
+      // access to a holder of the single action — a fail-open the `Set` prevents.
+      const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger, securityAuthz });
+
+      hitsResponse = {
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'item-duplicate-names',
+                permissions: {
+                  kibana: {
+                    privileges: [
+                      {
+                        space: 'default',
+                        name: ['saved_object:dashboard/get', 'saved_object:dashboard/get'],
+                        count: 2,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      const result = await smlService.checkItemsAccess({
+        ids: ['item-duplicate-names'],
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.get('item-duplicate-names')).toBe(false);
     });
 
     it('handles 404 error by returning false for all items', async () => {

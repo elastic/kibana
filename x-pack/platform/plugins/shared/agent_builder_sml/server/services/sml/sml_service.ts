@@ -410,10 +410,10 @@ const resolveAuthorizedUniverse = async ({
  *
  * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
  * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
- * still gets one element per space stamped, just with an empty action list. That branch also
- * requires the element to carry no action names, so it is deliberately stricter than the
- * Elasticsearch-side DLS query: the indexer derives `count` from the action list, so an element
- * with `count: 0` *and* names is malformed and must fail CLOSED instead of reading as public.
+ * still gets one element per space stamped, just with an empty action list. The indexer derives
+ * `count` from that list, so a `count: 0` element that still names an action is malformed: the
+ * public branch requires no names and the gated branch requires `count > 0`, so both reject it and
+ * it fails CLOSED.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -460,10 +460,7 @@ const buildVisibilityFilter = ({
                         bool: {
                           minimum_should_match: 1,
                           should: [
-                            // `terms_set` cannot express minimum_should_match_field: 0.
-                            // The absent-name half is to be extra defensive: the indexer always writes
-                            // `count: actions.length`, so a `count: 0` element carrying action
-                            // names is malformed and must not be read.
+                            // Public escape: an element requiring zero actions and naming none.
                             {
                               bool: {
                                 filter: [
@@ -473,11 +470,18 @@ const buildVisibilityFilter = ({
                               },
                             },
                             {
-                              terms_set: {
-                                [PERM_NAME_FIELD]: {
-                                  terms: authz.authorizedActions,
-                                  minimum_should_match_field: PERM_COUNT_FIELD,
-                                },
+                              bool: {
+                                filter: [
+                                  { range: { [PERM_COUNT_FIELD]: { gt: 0 } } },
+                                  {
+                                    terms_set: {
+                                      [PERM_NAME_FIELD]: {
+                                        terms: authz.authorizedActions,
+                                        minimum_should_match_field: PERM_COUNT_FIELD,
+                                      },
+                                    },
+                                  },
+                                ],
                               },
                             },
                           ],
@@ -495,20 +499,19 @@ const buildVisibilityFilter = ({
 });
 
 /**
- * The action-sets an item requires in a given space: one entry per privilege group scoped to that
- * space or to the global wildcard. Mirrors the ES-side DLS clause — a caller must hold ALL actions
- * within a single group, and groups for other spaces are irrelevant.
+ * The privilege groups that apply in a given space: those scoped to it or to the global wildcard.
+ * Mirrors the ES-side DLS clause — a caller must satisfy one whole group to see the document, and
+ * groups for other spaces are irrelevant.
  */
-const requiredActionsInSpace = (
+const relevantGroupsInSpace = (
   privileges: SmlKibanaPrivilegeGroup[],
   spaceId: string
-): string[][] =>
-  privileges.filter((g) => g.space === spaceId || g.space === '*').map((g) => g.name);
+): SmlKibanaPrivilegeGroup[] => privileges.filter((g) => g.space === spaceId || g.space === '*');
 
 /**
  * Check whether the current user has access to specific SML items.
- * For each id, the access verdict checks that all listed Kibana
- * `permissions.kibana.privileges[].name` action strings are authorized.
+ * For each id, the access verdict grants when the caller holds at least `count` of a group's
+ * distinct named actions, for a group scoped to the requested space (or the global wildcard).
  *
  * Chunks without any kibana privileges are visible to anyone in the
  * space. When the security plugin is absent, all ids resolve to `true`
@@ -579,12 +582,14 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const relevantGroupsByDoc = new Map<string, string[][]>();
+  const relevantGroupsByDoc = new Map<string, SmlKibanaPrivilegeGroup[]>();
   for (const [id, groups] of docAuthz) {
-    relevantGroupsByDoc.set(id, requiredActionsInSpace(groups, spaceId));
+    relevantGroupsByDoc.set(id, relevantGroupsInSpace(groups, spaceId));
   }
 
-  const uniqueActions = [...new Set([...relevantGroupsByDoc.values()].flat(2))];
+  const uniqueActions = [
+    ...new Set([...relevantGroupsByDoc.values()].flat().flatMap((g) => g.name)),
+  ];
 
   const authorizedPerms = await getAuthorizedPrivileges({
     permissions: uniqueActions,
@@ -607,10 +612,15 @@ const checkItemsAccess = async ({
       accessMap.set(id, true);
       continue;
     }
-    // Existential across groups, universal within one — the same shape as the nested DLS query.
     accessMap.set(
       id,
-      groups.some((actions) => actions.every((a) => authorizedPerms.has(a)))
+      groups.some((group) => {
+        if (group.count === 0) {
+          return group.name.length === 0;
+        }
+        const distinctHeld = new Set(group.name.filter((action) => authorizedPerms.has(action)));
+        return group.count > 0 && group.name.length > 0 && distinctHeld.size >= group.count;
+      })
     );
   }
 
