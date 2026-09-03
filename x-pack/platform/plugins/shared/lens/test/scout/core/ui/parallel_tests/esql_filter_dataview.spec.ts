@@ -60,17 +60,21 @@ const createFlightsLibraryLens = async (
   });
 };
 
-/**
- * Waits for the new ES|QL panel's initial suggestion/column fetch to finish.
- *
- * That request uses `FROM <index> | limit 0` and can complete *after* a later
- * STATS Run, overwriting a good chart suggestion with an empty Table.
- */
-const waitForEsqlPanelInitialized = async (page: ScoutPage): Promise<void> => {
+/** Waits until the inline ES|QL editor is interactive. */
+const waitForEsqlEditorReady = async (page: ScoutPage): Promise<void> => {
   await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
   await expect(page.testSubj.locator('ESQLEditor-run-query-button')).toBeEnabled();
   await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
-  // Stats appear once the initial suggestion/column fetch (`FROM … | limit 0`) settles.
+};
+
+/**
+ * Waits for a *new* ES|QL panel's editor and initial suggestion/column fetch.
+ *
+ * The initial request uses `FROM <index> | limit 0` and can complete *after* a
+ * later STATS Run, overwriting a good chart suggestion with an empty Table.
+ */
+const waitForNewEsqlPanelInitialized = async (page: ScoutPage): Promise<void> => {
+  await waitForEsqlEditorReady(page);
   await expect(
     page.testSubj.locator('ESQLEditor-queryStats-totalDocumentsProcessed')
   ).toBeVisible();
@@ -141,7 +145,7 @@ spaceTest.describe(
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-          await waitForEsqlPanelInitialized(page);
+          await waitForNewEsqlPanelInitialized(page);
         });
 
         await spaceTest.step('set the ESQL query and apply', async () => {
@@ -193,7 +197,7 @@ spaceTest.describe(
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-          await waitForEsqlPanelInitialized(page);
+          await waitForNewEsqlPanelInitialized(page);
         });
 
         await spaceTest.step('set the initial ESQL query and apply', async () => {
@@ -206,14 +210,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('reopen the inline editor and change the query', async () => {
-          const esqlPanel = page.testSubj
-            .locator('dashboardPanel')
-            .filter({ has: page.testSubj.locator('xyVisChart') });
-          const panelElementId = await esqlPanel.getAttribute('id');
-          const embeddableId = panelElementId!.replace('panel-', '');
-
-          await dashboard.openInlineEditor(embeddableId);
-          await waitForEsqlPanelInitialized(page);
+          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await waitForEsqlEditorReady(page);
 
           await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
         });
