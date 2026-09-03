@@ -119,6 +119,8 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
 // `synthetics-param` mappings are `dynamic: false`, so `key` cannot be queried
 // server-side; fetch the params visible in the target namespaces and compare in memory.
+// Keys are checked per namespace scope so a mixed bulk request (shared + space-local)
+// does not widen the search for space-local keys to all spaces via `*`.
 const findConflictingParamKey = async (
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsData: Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>>
@@ -132,10 +134,34 @@ const findConflictingParamKey = async (
     return duplicateInRequest;
   }
 
-  const namespaces = Array.from(
-    new Set(savedObjectsData.flatMap((obj) => obj.initialNamespaces ?? []))
-  );
+  const keysByNamespaceScope = new Map<string, { namespaces: string[]; keys: string[] }>();
+  for (const obj of savedObjectsData) {
+    const namespaces = obj.initialNamespaces ?? [];
+    const scopeKey = JSON.stringify(namespaces);
+    const group = keysByNamespaceScope.get(scopeKey) ?? { namespaces, keys: [] };
+    group.keys.push(obj.attributes.key);
+    keysByNamespaceScope.set(scopeKey, group);
+  }
 
+  for (const { namespaces, keys } of keysByNamespaceScope.values()) {
+    const conflictingKey = await findConflictingKeyInNamespaces(
+      savedObjectsClient,
+      keys,
+      namespaces
+    );
+    if (conflictingKey) {
+      return conflictingKey;
+    }
+  }
+
+  return undefined;
+};
+
+const findConflictingKeyInNamespaces = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  requestedKeys: string[],
+  namespaces: string[]
+): Promise<string | undefined> => {
   const finder = savedObjectsClient.createPointInTimeFinder<
     Omit<SyntheticsParamSOAttributes, 'id'>
   >({
