@@ -156,6 +156,32 @@ def _teams_for_route(route: str, knowledge_md: str) -> list[str]:
     return matched
 
 
+def _shares_substring(left: str, right: str) -> bool:
+    return left in right or right in left
+
+
+def _partial_candidates(
+    labels: tuple[str, ...],
+    *,
+    area: str | None,
+    area_slug: str | None,
+    route: str | None,
+) -> tuple[str, ...]:
+    needles = [value.lower() for value in (area, area_slug, route) if value]
+    if not needles:
+        return ()
+    matches: list[str] = []
+    for label in labels:
+        haystacks = (label.lower(), _team_label_slug(label))
+        if any(
+            _shares_substring(needle, haystack)
+            for needle in needles
+            for haystack in haystacks
+        ):
+            matches.append(label)
+    return tuple(matches)
+
+
 def infer_team_label(
     *,
     area: str | None,
@@ -177,11 +203,19 @@ def infer_team_label(
             if _team_label_slug(label) == area_slug:
                 return TeamInference("confident", label, ())
 
+    route_teams: list[str] = []
     if route is not None:
         route_teams = _teams_for_route(route, knowledge_md)
         if len(route_teams) == 1:
             return TeamInference("confident", route_teams[0], ())
-        if len(route_teams) > 1:
-            return TeamInference("ask", None, tuple(route_teams))
 
-    return TeamInference("ask", None, ())
+    seen: set[str] = set()
+    candidates: list[str] = []
+    for label in (*route_teams, *_partial_candidates(
+        labels, area=area, area_slug=area_slug, route=route
+    )):
+        if label in seen:
+            continue
+        seen.add(label)
+        candidates.append(label)
+    return TeamInference("ask", None, tuple(candidates))
