@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -70,6 +71,8 @@ export interface EditDataLifecycleFlyoutProps {
 
   // ---- Successful data ----
   successfulData: {
+    /** Rendered above the successful data editor, e.g. a warning that the lifecycle is not applied. */
+    notice?: ReactNode;
     inheritLifecycle: boolean;
     onInheritLifecycleChange?: (next: boolean) => void;
     inheritLabel?: string;
@@ -344,6 +347,7 @@ export const EditDataLifecycleFlyout = ({
     >
       {(selectedTabId) => (
         <>
+          {selectedTabId === 'successful_data' && successfulData.notice}
           {selectedTabId === 'successful_data' && (
             <EditDataLifecycleFlyoutBody
               inherit={

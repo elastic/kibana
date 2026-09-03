@@ -27,7 +27,11 @@ import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-
 import type { DataStream, TemplateDeserialized } from '../../../../../../../common';
 import { API_BASE_PATH } from '../../../../../../../common/constants';
 import { splitSizeAndUnits } from '../../../../../../../common';
-import { isNextGenIlm } from '../../../../../lib/data_streams';
+import {
+  getIlmPolicyNameForSummary,
+  isIlmLifecyclePreferred,
+  isNextGenIlm,
+} from '../../../../../lib/data_streams';
 import { useAppContext } from '../../../../../app_context';
 import {
   updateDSFailureStore,
@@ -154,24 +158,17 @@ export const useEditDataLifecycle = ({
     }
   }, []);
 
-  // Eagerly load ILM policies for the summary's policy inspection (stateful, next-gen ILM only).
+  // Eagerly load ILM policies for the summary's policy inspection.
   useEffect(() => {
     if (config.isServerless) return;
     if (!dataStream) return;
-    if (!isNextGenIlm(dataStream)) return;
-    if (typeof dataStream.ilmPolicyName !== 'string' || dataStream.ilmPolicyName.length === 0)
-      return;
+    if (!isIlmLifecyclePreferred(dataStream)) return;
+    const summaryIlmPolicyName = getIlmPolicyNameForSummary(dataStream);
+    if (typeof summaryIlmPolicyName !== 'string' || summaryIlmPolicyName.length === 0) return;
     if (ilmPolicies.length > 0) return;
 
     loadIlmPolicies();
-  }, [
-    config.isServerless,
-    dataStream,
-    dataStream?.ilmPolicyName,
-    dataStream?.nextGenerationManagedBy,
-    ilmPolicies.length,
-    loadIlmPolicies,
-  ]);
+  }, [config.isServerless, dataStream, ilmPolicies.length, loadIlmPolicies]);
 
   useEffect(() => {
     const licensing = plugins.licensing;
