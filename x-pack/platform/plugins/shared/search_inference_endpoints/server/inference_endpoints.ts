@@ -25,18 +25,29 @@ import type { ResolvedInferenceEndpoints } from './types';
  * @param featureId - The feature to resolve endpoints for.
  * @param logger - Logger instance for warnings.
  */
+export interface GetForFeatureOpts {
+  /**
+   * When true, skips the KIBANA_DEFAULT_CHAT_COMPLETION fallback so that an empty list is
+   * returned when no configured or recommended endpoints are available in the deployment.
+   * Use this when the caller wants a clean "nothing available" signal and handles the fallback
+   * itself (e.g. Agent Builder falling back to the user's execution model).
+   */
+  onlyReturnConfigured?: boolean;
+}
+
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOpts
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
     ids,
     warnings: resolveWarnings,
     soEntryFound,
-  } = await resolveEndpointIds(registry, soClient, featureId, logger);
+  } = await resolveEndpointIds(registry, soClient, featureId, logger, opts);
   if (ids.length === 0) {
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
@@ -98,7 +109,8 @@ export const resolveFeatureEndpointIds = (
   registry: InferenceFeatureRegistry,
   soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOpts
 ): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
@@ -186,9 +198,11 @@ export const resolveFeatureEndpointIds = (
   }
 
   return {
-    ids: recEntry?.recommendedEndpoints ?? [
-      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
-    ],
+    ids:
+      recEntry?.recommendedEndpoints ??
+      (opts?.onlyReturnConfigured
+        ? []
+        : [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
     warnings: [],
     soEntryFound: false,
   };
@@ -198,11 +212,12 @@ const resolveEndpointIds = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   featureId: string,
-  logger: Logger
+  logger: Logger,
+  opts?: GetForFeatureOpts
 ): Promise<ResolvedEndpointIds> => {
   const soFeatures = await readSettingsFeatures(soClient, logger);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
-  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger);
+  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger, opts);
 };
 
 const readSettingsFeatures = async (

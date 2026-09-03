@@ -117,18 +117,14 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    const { endpoints, soEntryFound } = await searchInferenceEndpoints.endpoints.getForFeature(
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-      request
+      request,
+      { onlyReturnConfigured: true }
     );
 
-    if (soEntryFound && endpoints.length > 0) {
+    if (endpoints.length > 0) {
       return endpoints[0].connectorId;
-    }
-
-    const recommended = endpoints.find((endpoint) => endpoint.isRecommended);
-    if (recommended) {
-      return recommended.connectorId;
     }
 
     const fallbackId = await getDefaultConnectorId();

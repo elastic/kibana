@@ -188,14 +188,35 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: async (featureId: string, request: KibanaRequest) => {
+        getForFeature: async (
+          featureId: string,
+          request: KibanaRequest,
+          opts?: { onlyReturnConfigured?: boolean }
+        ) => {
           const soClient = core.savedObjects.getScopedClient(request, {
             includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
           });
+          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+
+          if (opts?.onlyReturnConfigured) {
+            const result = await getForFeatureFn(
+              featureRegistry,
+              soClient,
+              getConnectorById,
+              featureId,
+              this.logger,
+              opts
+            );
+            return {
+              endpoints: result.endpoints,
+              warnings: result.warnings,
+              soEntryFound: result.soEntryFound,
+            };
+          }
+
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
-          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
           const getConnectorList = () => plugins.inference.getConnectorList(request);
