@@ -50,13 +50,6 @@ interface ExecutionPartial {
 
 /**
  * Reconstructs rounds from a timeline.
- *
- * A round may span multiple executions: an initial run (`exec_0`, triggered by a `user_message`)
- * and one or more resumes (`exec_k`, each triggered by a `prompt_response` after a HITL pause).
- * Each execution is reconstructed independently, then the executions of a round are folded back
- * into a single round via {@link applyResumeResolution} — the same primitive the runtime uses when
- * it merges a resume into its pending round, so a stored multi-execution timeline reconstructs to
- * the round the runtime produced. Single-execution rounds fold trivially (identity).
  */
 export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
