@@ -40,7 +40,13 @@ export function loadHttp({ bind, onActivation }: ContainerModuleLoadOptions): vo
       handler = router.handleLegacyErrors(handler);
     }
 
-    register(route, handler);
+    // Static getters (e.g. `options`, `validate`) on a route class are
+    // non-enumerable. Kibana's router internally spreads the route config
+    // object, which silently drops non-enumerable properties and causes
+    // `access` to default to 'internal'. Explicitly read the getters here
+    // so the router receives a plain object with all properties visible.
+    const resolvedRoute = { ...route, options: route.options, validate: route.validate };
+    register(resolvedRoute, handler);
 
     return route;
   });

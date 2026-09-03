@@ -79,7 +79,17 @@ describe('http', () => {
     container.bind(Route).toConstantValue(TestRoute);
     setup();
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    // The resolved route is a plain object with non-enumerable static getters
+    // (like `options` and `validate`) explicitly copied so they survive Kibana's
+    // internal route-config spread.
+    expect(router.post).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: TestRoute.method,
+        path: TestRoute.path,
+        validate: TestRoute.validate,
+      }),
+      expect.any(Function)
+    );
   });
 
   it('should not register a route if there are no corresponding bindings ', () => {
@@ -93,7 +103,10 @@ describe('http', () => {
     setup();
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    expect(router.post).toHaveBeenCalledWith(
+      expect.objectContaining({ method: TestRoute.method, path: TestRoute.path }),
+      expect.any(Function)
+    );
     const [, handler] = router.post.mock.lastCall!;
     const request = {} as unknown as KibanaRequest;
     const response = {
@@ -120,6 +133,9 @@ describe('http', () => {
     setup();
     TestRoute.handleLegacyErrors = false;
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, wrapper);
+    expect(router.post).toHaveBeenCalledWith(
+      expect.objectContaining({ method: TestRoute.method, path: TestRoute.path }),
+      wrapper
+    );
   });
 });
