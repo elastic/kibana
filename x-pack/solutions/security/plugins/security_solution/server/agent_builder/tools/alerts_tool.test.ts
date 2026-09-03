@@ -6,8 +6,6 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
@@ -21,6 +19,14 @@ import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
   runSearchTool: jest.fn(),
 }));
+
+const getStandardResults = (ret: unknown) => {
+  const standard = ret as { results?: unknown[] };
+  if (!standard.results) {
+    throw new Error('Expected standard tool return with results');
+  }
+  return standard.results;
+};
 
 describe('alertsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -135,9 +141,9 @@ describe('alertsTool', () => {
         index: `${DEFAULT_ALERTS_INDEX}-testing`,
       });
       expect(runSearchTool).not.toHaveBeenCalled();
-      expect(isToolHandlerStandardReturn(result)).toBe(true);
-      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
-      expect((result as ToolHandlerStandardReturn).results[0]).toMatchObject({
+      const results = getStandardResults(result);
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
         type: ToolResultType.other,
         data: {
           count: 0,
