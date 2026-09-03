@@ -2,7 +2,7 @@
 
 ## Sections
 
-`Body.Section` and `Body.Accordion` give body content a title and consistent spacing. They are alternates of one concept — a body uses one or the other, not both — and both accept `Subsection` children for a second level.
+`Body.Section` and `Body.Accordion` give body content a title and consistent spacing. Pick one style per flyout — mixing sections and accordions in the same body is not supported. Both accept `Subsection` children for a second level.
 
 ```tsx
 <FlyoutTemplate.Body>
@@ -10,11 +10,11 @@
     <SummaryContent />
   </FlyoutTemplate.Body.Section>
 
-  <FlyoutTemplate.Body.Accordion id="details" title="Details" initialIsOpen>
-    <FlyoutTemplate.Body.Accordion.Subsection title="Host">
+  <FlyoutTemplate.Body.Section id="details" title="Details">
+    <FlyoutTemplate.Body.Section.Subsection title="Host">
       <HostFields />
-    </FlyoutTemplate.Body.Accordion.Subsection>
-  </FlyoutTemplate.Body.Accordion>
+    </FlyoutTemplate.Body.Section.Subsection>
+  </FlyoutTemplate.Body.Section>
 </FlyoutTemplate.Body>
 ```
 

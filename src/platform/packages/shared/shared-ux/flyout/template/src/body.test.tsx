@@ -208,27 +208,6 @@ describe('FlyoutTemplate body', () => {
     expect(screen.getByRole('region', { name: 'Summary' })).toBe(section);
   });
 
-  it('renders a section and an accordion that share an id', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(noop);
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Body>
-          <FlyoutTemplate.Body.Section id="overview" title="Section overview">
-            section content
-          </FlyoutTemplate.Body.Section>
-          <FlyoutTemplate.Body.Accordion id="overview" title="Accordion overview">
-            accordion content
-          </FlyoutTemplate.Body.Accordion>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByRole('heading', { level: 4, name: 'Section overview' })).toBeInTheDocument();
-    expect(screen.getAllByText('Accordion overview').length).toBeGreaterThan(0);
-    expect(consoleError).not.toHaveBeenCalled();
-    consoleError.mockRestore();
-  });
-
   it('preserves JSX order between sections and passthrough children in the body', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="ordered">
