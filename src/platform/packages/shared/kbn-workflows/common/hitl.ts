@@ -29,6 +29,12 @@ export const MAX_HITL_ACTION_LABEL_LENGTH = 256 as const;
 /** Max length for `respondedBy` on HITL step output. */
 export const MAX_HITL_RESPONDED_BY_LENGTH = 1024 as const;
 
+/** Max length for `channel` on HITL step output (e.g. inbox, kibana_execution_view, timeout). */
+export const MAX_HITL_CHANNEL_LENGTH = 256 as const;
+
+/** Max length for `respondedAt` ISO-8601 timestamp on HITL step output. */
+export const MAX_HITL_RESPONDED_AT_LENGTH = 64 as const;
+
 /** Max length for external resume / form URLs in template context. */
 export const MAX_HITL_EXTERNAL_LINK_LENGTH = 8192 as const;
 
