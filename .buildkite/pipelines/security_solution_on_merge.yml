@@ -275,7 +275,6 @@ steps:
     branches: main
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
-      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -297,7 +296,6 @@ steps:
     branches: main
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
-      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -318,7 +316,6 @@ steps:
     label: 'Detection Engine - Security Solution Cypress Tests'
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
-      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -339,7 +336,6 @@ steps:
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
-      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
