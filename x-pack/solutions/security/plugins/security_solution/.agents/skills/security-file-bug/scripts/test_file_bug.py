@@ -8,7 +8,9 @@ sys.dont_write_bytecode = True
 os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from file_bug import IssueMatch, decide_write_path, validate_labels  # noqa: E402
+from file_bug import IssueMatch, decide_write_path, infer_team_label, validate_labels  # noqa: E402
+
+FIXTURE = Path(__file__).resolve().parent / "__tests__" / "fixtures" / "domain-snippet.md"
 
 
 class DecideWritePathTest(unittest.TestCase):
@@ -60,6 +62,43 @@ class ValidateLabelsTest(unittest.TestCase):
         decision = validate_labels(["bug", "nope"], self.catalog)
         self.assertEqual(decision.keep, ("bug",))
         self.assertFalse(decision.ask_team)
+
+
+class InferTeamLabelTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.md = FIXTURE.read_text(encoding="utf-8")
+
+    def test_area_entity_analytics_is_confident(self):
+        result = infer_team_label(
+            area="Entity Analytics", area_slug=None, route=None, knowledge_md=self.md
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Team:Entity Analytics")
+
+    def test_slug_entity_analytics_is_confident(self):
+        result = infer_team_label(
+            area=None, area_slug="entity-analytics", route=None, knowledge_md=self.md
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Team:Entity Analytics")
+
+    def test_known_route_is_confident(self):
+        result = infer_team_label(
+            area=None,
+            area_slug=None,
+            route="Security > Entity Analytics",
+            knowledge_md=self.md,
+        )
+        self.assertEqual(result.status, "confident")
+        self.assertEqual(result.label, "Team:Entity Analytics")
+
+    def test_unknown_area_asks(self):
+        result = infer_team_label(
+            area="Onboarding", area_slug="onboarding", route=None, knowledge_md=self.md
+        )
+        self.assertEqual(result.status, "ask")
+        self.assertIsNone(result.label)
 
 
 if __name__ == "__main__":
