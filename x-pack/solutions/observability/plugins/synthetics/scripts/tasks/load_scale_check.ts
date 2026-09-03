@@ -184,11 +184,19 @@ const getAgentWriterClient = async (esClient: Client): Promise<Client> => {
     name: AGENTS_WRITER_ROLE,
     indices: [{ names: [`${AGENTS_INDEX}*`], privileges: ['all'], allow_restricted_indices: true }],
   });
-  await esClient.security.putUser({
-    username: AGENTS_WRITER_ROLE,
-    password: AGENTS_WRITER_PASSWORD,
-    roles: [AGENTS_WRITER_ROLE],
-  });
+  try {
+    await esClient.security.putUser({
+      username: AGENTS_WRITER_ROLE,
+      password: AGENTS_WRITER_PASSWORD,
+      roles: [AGENTS_WRITER_ROLE],
+    });
+  } catch (error) {
+    // The role above is already provisioned; drop it rather than leaving it
+    // behind for a caller that never gets a `writerClient` to hand to
+    // `removeAgentWriterCredentials`.
+    await esClient.security.deleteRole({ name: AGENTS_WRITER_ROLE }).catch(() => {});
+    throw error;
+  }
   const basicAuth = Buffer.from(`${AGENTS_WRITER_ROLE}:${AGENTS_WRITER_PASSWORD}`).toString(
     'base64'
   );
@@ -306,145 +314,150 @@ export const checkLoadScale = async () => {
   const locationId = await ensurePrivateLocation(args.locationLabel, agentPolicyId);
   const writerClient = await getAgentWriterClient(esClient);
 
-  const agentIds: string[] = [];
-  for (let i = 0; i < args.agentCount; i++) {
-    const id = await indexFakeAgent(
-      writerClient,
-      agentPolicyId,
-      args.capacityMib[i],
-      `load-scale-agent-${i}`
-    );
-    agentIds.push(id);
-  }
-  await writerClient.indices.refresh({ index: AGENTS_INDEX });
-  console.log(`  ✓ ${agentIds.length} fake agents enrolled on policy ${agentPolicyId}`);
-
-  console.log('\n=== 2. Bulk-creating monitors (throughput + conflict rate) ===');
-  const createStart = Date.now();
-  let conflicts = 0;
-  const monitorIds: string[] = [];
-  for (let i = 0; i < args.monitorCount; i++) {
-    const res = await request(
-      'post',
-      '/api/synthetics/monitors',
-      testMonitor(`load-scale-monitor-${i}-${createStart}`, {
-        id: locationId,
-        label: args.locationLabel,
-      })
-    );
-    if (res.status === 200) {
-      monitorIds.push(res.body.id);
-    } else if (res.status === 409) {
-      conflicts++;
-    } else {
-      console.log(`  ! Create failed (status ${res.status}): ${JSON.stringify(res.body)}`);
+  // Everything from here on holds the `.fleet-agents` writer credentials
+  // provisioned above; always drop them -- even under `--keep` (which only
+  // preserves the monitors/agents/location for inspection) or when a step
+  // throws mid-run. This is a native-realm user with `all` on a restricted
+  // index, password hardcoded in this file, on the developer's own
+  // long-lived cluster, not an ephemeral test cluster.
+  try {
+    const agentIds: string[] = [];
+    for (let i = 0; i < args.agentCount; i++) {
+      const id = await indexFakeAgent(
+        writerClient,
+        agentPolicyId,
+        args.capacityMib[i],
+        `load-scale-agent-${i}`
+      );
+      agentIds.push(id);
     }
-  }
-  const createDurationMs = Date.now() - createStart;
-  console.log(
-    `  ✓ Created ${monitorIds.length}/${args.monitorCount} monitors in ${(
-      createDurationMs / 1000
-    ).toFixed(1)}s ` +
-      `(${(monitorIds.length / (createDurationMs / 1000)).toFixed(1)}/s), ${conflicts} conflict(s)`
-  );
+    await writerClient.indices.refresh({ index: AGENTS_INDEX });
+    console.log(`  ✓ ${agentIds.length} fake agents enrolled on policy ${agentPolicyId}`);
 
-  console.log('\n=== 3. Waiting for full placement (throughput to steady state) ===');
-  const placementStart = Date.now();
-  const deadline = placementStart + 5 * 60_000;
-  let placedCount = 0;
-  let policies: PackagePolicy[] = [];
-  while (Date.now() < deadline) {
-    policies = await getPackagePolicies(agentPolicyId);
-    const byPolicyId = new Map(policies.map((p) => [p.id, p]));
-    placedCount = monitorIds.filter((id) => {
-      const policy = byPolicyId.get(`${id}-${locationId}`);
-      return policy?.condition && policy.condition !== UNASSIGNED_CONDITION;
-    }).length;
-    if (placedCount === monitorIds.length) {
-      break;
+    console.log('\n=== 2. Bulk-creating monitors (throughput + conflict rate) ===');
+    const createStart = Date.now();
+    let conflicts = 0;
+    const monitorIds: string[] = [];
+    for (let i = 0; i < args.monitorCount; i++) {
+      const res = await request(
+        'post',
+        '/api/synthetics/monitors',
+        testMonitor(`load-scale-monitor-${i}-${createStart}`, {
+          id: locationId,
+          label: args.locationLabel,
+        })
+      );
+      if (res.status === 200) {
+        monitorIds.push(res.body.id);
+      } else if (res.status === 409) {
+        conflicts++;
+      } else {
+        console.log(`  ! Create failed (status ${res.status}): ${JSON.stringify(res.body)}`);
+      }
     }
-    await sleep(5_000);
-  }
-  const placementDurationMs = Date.now() - placementStart;
-  console.log(
-    `  ${placedCount === monitorIds.length ? '✓' : '✗'} ${placedCount}/${
-      monitorIds.length
-    } monitors placed after ${(placementDurationMs / 1000).toFixed(1)}s`
-  );
-
-  console.log('\n=== 4. Balance across agents ===');
-  const countByAgent = new Map<string, number>(agentIds.map((id) => [id, 0]));
-  for (const policy of policies) {
-    const agentId = agentIdFromCondition(policy.condition);
-    if (agentId && countByAgent.has(agentId)) {
-      countByAgent.set(agentId, countByAgent.get(agentId)! + 1);
-    }
-  }
-  const totalCapacity = args.capacityMib.reduce((sum, mib) => sum + mib, 0);
-  agentIds.forEach((id, i) => {
-    const count = countByAgent.get(id) ?? 0;
-    const expectedShare = args.capacityMib[i] / totalCapacity;
-    const actualShare = monitorIds.length > 0 ? count / monitorIds.length : 0;
+    const createDurationMs = Date.now() - createStart;
     console.log(
-      `  agent ${i} (${args.capacityMib[i]}MiB): ${count} monitors ` +
-        `(expected share ${(expectedShare * 100).toFixed(0)}%, actual ${(actualShare * 100).toFixed(
-          0
-        )}%)`
+      `  ✓ Created ${monitorIds.length}/${args.monitorCount} monitors in ${(
+        createDurationMs / 1000
+      ).toFixed(1)}s ` +
+        `(${(monitorIds.length / (createDurationMs / 1000)).toFixed(
+          1
+        )}/s), ${conflicts} conflict(s)`
     );
-  });
 
-  console.log('\n=== 5. Agent-stats latency ===');
-  const statsLatencies: number[] = [];
-  for (let i = 0; i < 5; i++) {
-    const res = await request('get', '/internal/synthetics/private_locations/agent_stats');
-    statsLatencies.push(res.durationMs);
-  }
-  const avgLatency = statsLatencies.reduce((sum, ms) => sum + ms, 0) / statsLatencies.length;
-  console.log(
-    `  avg ${avgLatency.toFixed(0)}ms over ${statsLatencies.length} calls ` +
-      `(min ${Math.min(...statsLatencies)}ms, max ${Math.max(...statsLatencies)}ms)`
-  );
-
-  if (!args.keep) {
-    console.log('\n=== 6. Cleaning up ===');
-    for (const id of monitorIds) {
-      await request('delete', `/api/synthetics/monitors/${id}`);
+    console.log('\n=== 3. Waiting for full placement (throughput to steady state) ===');
+    const placementStart = Date.now();
+    const deadline = placementStart + 5 * 60_000;
+    let placedCount = 0;
+    let policies: PackagePolicy[] = [];
+    while (Date.now() < deadline) {
+      policies = await getPackagePolicies(agentPolicyId);
+      const byPolicyId = new Map(policies.map((p) => [p.id, p]));
+      placedCount = monitorIds.filter((id) => {
+        const policy = byPolicyId.get(`${id}-${locationId}`);
+        return policy?.condition && policy.condition !== UNASSIGNED_CONDITION;
+      }).length;
+      if (placedCount === monitorIds.length) {
+        break;
+      }
+      await sleep(5_000);
     }
-    await writerClient.deleteByQuery({
-      index: AGENTS_INDEX,
-      query: { terms: { _id: agentIds } },
-      refresh: true,
-      ignore_unavailable: true,
+    const placementDurationMs = Date.now() - placementStart;
+    console.log(
+      `  ${placedCount === monitorIds.length ? '✓' : '✗'} ${placedCount}/${
+        monitorIds.length
+      } monitors placed after ${(placementDurationMs / 1000).toFixed(1)}s`
+    );
+
+    console.log('\n=== 4. Balance across agents ===');
+    const countByAgent = new Map<string, number>(agentIds.map((id) => [id, 0]));
+    for (const policy of policies) {
+      const agentId = agentIdFromCondition(policy.condition);
+      if (agentId && countByAgent.has(agentId)) {
+        countByAgent.set(agentId, countByAgent.get(agentId)! + 1);
+      }
+    }
+    const totalCapacity = args.capacityMib.reduce((sum, mib) => sum + mib, 0);
+    agentIds.forEach((id, i) => {
+      const count = countByAgent.get(id) ?? 0;
+      const expectedShare = args.capacityMib[i] / totalCapacity;
+      const actualShare = monitorIds.length > 0 ? count / monitorIds.length : 0;
+      console.log(
+        `  agent ${i} (${args.capacityMib[i]}MiB): ${count} monitors ` +
+          `(expected share ${(expectedShare * 100).toFixed(0)}%, actual ${(
+            actualShare * 100
+          ).toFixed(0)}%)`
+      );
     });
-    await request('delete', `/api/synthetics/private_locations/${locationId}`);
-  } else {
-    console.log('\n=== 6. --keep set: leaving monitors, agents, and location in place ===');
+
+    console.log('\n=== 5. Agent-stats latency ===');
+    const statsLatencies: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      const res = await request('get', '/internal/synthetics/private_locations/agent_stats');
+      statsLatencies.push(res.durationMs);
+    }
+    const avgLatency = statsLatencies.reduce((sum, ms) => sum + ms, 0) / statsLatencies.length;
+    console.log(
+      `  avg ${avgLatency.toFixed(0)}ms over ${statsLatencies.length} calls ` +
+        `(min ${Math.min(...statsLatencies)}ms, max ${Math.max(...statsLatencies)}ms)`
+    );
+
+    if (!args.keep) {
+      console.log('\n=== 6. Cleaning up ===');
+      for (const id of monitorIds) {
+        await request('delete', `/api/synthetics/monitors/${id}`);
+      }
+      await writerClient.deleteByQuery({
+        index: AGENTS_INDEX,
+        query: { terms: { _id: agentIds } },
+        refresh: true,
+        ignore_unavailable: true,
+      });
+      await request('delete', `/api/synthetics/private_locations/${locationId}`);
+    } else {
+      console.log('\n=== 6. --keep set: leaving monitors, agents, and location in place ===');
+    }
+
+    console.log('\n=== Summary ===');
+    console.log(
+      JSON.stringify(
+        {
+          agents: args.agentCount,
+          monitorsRequested: args.monitorCount,
+          monitorsCreated: monitorIds.length,
+          createConflicts: conflicts,
+          createThroughputPerSec: Number(
+            (monitorIds.length / (createDurationMs / 1000)).toFixed(2)
+          ),
+          placementDurationSec: Number((placementDurationMs / 1000).toFixed(1)),
+          allPlaced: placedCount === monitorIds.length,
+          agentStatsLatencyMsAvg: Number(avgLatency.toFixed(0)),
+        },
+        null,
+        2
+      )
+    );
+  } finally {
+    await removeAgentWriterCredentials(esClient);
   }
-
-  // Always drop the `.fleet-agents` writer credentials, even under `--keep`
-  // (which only preserves the monitors/agents/location for inspection).
-  // Unlike the Scout fixture's equivalent role, which lives on an ephemeral
-  // test cluster, this one is created on the developer's own long-lived
-  // cluster -- leaving behind a native-realm user holding `all` on a
-  // restricted index, with a password hardcoded in this file, is not
-  // something a harness run should persist.
-  await removeAgentWriterCredentials(esClient);
-
-  console.log('\n=== Summary ===');
-  console.log(
-    JSON.stringify(
-      {
-        agents: args.agentCount,
-        monitorsRequested: args.monitorCount,
-        monitorsCreated: monitorIds.length,
-        createConflicts: conflicts,
-        createThroughputPerSec: Number((monitorIds.length / (createDurationMs / 1000)).toFixed(2)),
-        placementDurationSec: Number((placementDurationMs / 1000).toFixed(1)),
-        allPlaced: placedCount === monitorIds.length,
-        agentStatsLatencyMsAvg: Number(avgLatency.toFixed(0)),
-      },
-      null,
-      2
-    )
-  );
 };
