@@ -28,17 +28,24 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   executionStarted: '::execution_started',
   executionTerminated: '::execution_terminated',
   execution: '::execution',
+  stepPrefix: '::step::',
 } as const;
 
-const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = Object.values(
-  ROUND_DERIVED_EVENT_ID_SUFFIXES
-);
+const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated,
+  ROUND_DERIVED_EVENT_ID_SUFFIXES.execution,
+];
+
+const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
 
 /**
  * True when `id` was produced by {@link roundToEvents}
  */
 export const isRoundDerivedEventId = (id: string): boolean =>
-  ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix));
+  ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
+  STEP_EVENT_ID_PATTERN.test(id);
 
 /** Round-derived event ids for a given round, keyed for readability. */
 const roundDerivedEventIds = (roundId: string) => ({
@@ -48,57 +55,99 @@ const roundDerivedEventIds = (roundId: string) => ({
   execution: `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`,
 });
 
-/**
- * Converts a single round into its coarse timeline events: `user_message`, `execution_started`,
- * and a terminal `execution_terminated` whose `outcome` is `responded` (completed round) or
- * `prompt_requested` (awaiting-prompt round).
- */
-export const roundToEvents = (
-  round: ConversationRound,
+/** ID for a step event. */
+export const roundStepEventId = (roundId: string, sequence: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${sequence}`;
+
+/** The fields of a round needed to build its `user_message` start event. */
+type RoundStart = Pick<ConversationRound, 'id' | 'input' | 'started_at' | 'author' | 'origin'>;
+
+export const userMessageEvent = (round: RoundStart, conversation: Conversation): TimelineEvent => ({
+  id: `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.userMessage}`,
+  type: TimelineEventType.userMessage,
+  created_at: round.started_at,
+  actor: userMessageActor(conversation, round),
+  data: round.input,
+});
+
+export const executionStartedEvent = (
+  round: Pick<ConversationRound, 'id' | 'started_at'>,
+  conversation: Conversation
+): TimelineEvent => {
+  const ids = roundDerivedEventIds(round.id);
+  return {
+    id: ids.executionStarted,
+    type: TimelineEventType.executionStarted,
+    created_at: round.started_at,
+    actor: agentActor(conversation),
+    execution_id: ids.execution,
+    trigger_event_id: ids.userMessage,
+    data: { trigger_type: TimelineTriggerType.userMessage },
+  };
+};
+
+export const roundStartEvents = (
+  round: RoundStart,
+  conversation: Conversation
+): TimelineEvent[] => [
+  userMessageEvent(round, conversation),
+  executionStartedEvent(round, conversation),
+];
+
+export const roundStepEvents = (
+  round: Pick<ConversationRound, 'id' | 'started_at' | 'steps'>,
   conversation: Conversation
 ): TimelineEvent[] => {
   const ids = roundDerivedEventIds(round.id);
-  const agent = agentActor(conversation);
+  return (round.steps ?? []).map((step, index) => ({
+    id: roundStepEventId(round.id, index),
+    type: TimelineEventType.executionStep,
+    created_at: round.started_at,
+    actor: agentActor(conversation),
+    execution_id: ids.execution,
+    trigger_event_id: ids.userMessage,
+    data: { step, sequence: index },
+  }));
+};
+
+export const roundTerminatedEvent = (
+  round: ConversationRound,
+  conversation: Conversation
+): TimelineEvent | undefined => {
+  const ids = roundDerivedEventIds(round.id);
   const endedAt = new Date(
     new Date(round.started_at).getTime() + round.time_to_last_token
   ).toISOString();
-
-  const events: TimelineEvent[] = [
-    {
-      id: ids.userMessage,
-      type: TimelineEventType.userMessage,
-      created_at: round.started_at,
-      actor: userMessageActor(conversation, round),
-      data: round.input,
-    },
-    {
-      id: ids.executionStarted,
-      type: TimelineEventType.executionStarted,
-      created_at: round.started_at,
-      actor: agent,
-      execution_id: ids.execution,
-      trigger_event_id: ids.userMessage,
-      data: { trigger_type: TimelineTriggerType.userMessage },
-    },
-  ];
 
   const terminated = (outcome: ExecutionOutcome): TimelineEvent => ({
     id: ids.executionTerminated,
     type: TimelineEventType.executionTerminated,
     created_at: endedAt,
-    actor: agent,
+    actor: agentActor(conversation),
     execution_id: ids.execution,
     trigger_event_id: ids.userMessage,
     data: { ...executionRunSummary(round), outcome },
   });
 
   if (round.status === ConversationRoundStatus.completed) {
-    events.push(terminated({ type: 'responded', response: round.response }));
-  } else if (round.status === ConversationRoundStatus.awaitingPrompt) {
-    events.push(terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] }));
+    return terminated({ type: 'responded', response: round.response });
   }
+  if (round.status === ConversationRoundStatus.awaitingPrompt) {
+    return terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] });
+  }
+  return undefined;
+};
 
-  return events;
+export const roundToEvents = (
+  round: ConversationRound,
+  conversation: Conversation
+): TimelineEvent[] => {
+  const terminated = roundTerminatedEvent(round, conversation);
+  return [
+    ...roundStartEvents(round, conversation),
+    ...roundStepEvents(round, conversation),
+    ...(terminated ? [terminated] : []),
+  ];
 };
 
 /**
@@ -108,9 +157,7 @@ export const roundToEvents = (
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
-/** The run summary for a round (shared by both outcomes); the response/prompts live on the outcome. */
 const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
-  steps: round.steps,
   model_usage: round.model_usage,
   time_to_first_token: round.time_to_first_token,
   time_to_last_token: round.time_to_last_token,
@@ -124,7 +171,7 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
   conversation: Conversation,
-  round: ConversationRound
+  round: Pick<ConversationRound, 'author' | 'origin'>
 ): EventActor => {
   if (round.author) {
     return {
@@ -145,7 +192,7 @@ export const userMessageActor = (
 };
 
 /** Actor for a run's lifecycle events. */
-const agentActor = (conversation: Conversation): EventActor => ({
+export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventActor => ({
   type: EventActorType.agent,
   id: conversation.agent_id,
 });

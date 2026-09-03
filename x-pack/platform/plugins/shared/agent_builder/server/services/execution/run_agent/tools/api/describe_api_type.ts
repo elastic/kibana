@@ -8,12 +8,13 @@
 import { z } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { EXPANDABLE_KEY, loadApi, targetSchema, toDescribedDefinition } from '../../api';
-import type { ApiTarget, DescribedSchema } from '../../api';
+import type { DescribedSchema } from '../../api';
 import { apiFailureToErrorResult } from './errors';
 
 export interface ApiDescribeTypeResultData {
