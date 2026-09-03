@@ -13,7 +13,8 @@ export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updatin
 
 export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
 export const EngineLogExtractionState = z.object({
-  /** Inclusive lower bound for the next log-slice probe and the fromDateISO for entity recovery. */
+  /** Inclusive lower bound for the next log-slice probe. Stays at the slice start while a
+   * slice's entity pages are in flight, so a resumed run re-enters the interrupted slice. */
   checkpointTimestamp: z.string().nullable().default(null),
   paginationId: z.string().nullable().default(null),
   lastExecutionTimestamp: z.string().nullable().default(null),
