@@ -266,6 +266,21 @@ describe('migrateLegacySecurityAssets', () => {
     expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
   });
 
+  it('deletes legacy updates data stream without recreating the neutral stream', async () => {
+    const legacyUpdates = `.entities.v2.updates.security_${namespace}`;
+
+    mockConcrete([legacyUpdates]);
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockDeleteDataStream).toHaveBeenCalledWith(esClient, legacyUpdates);
+    expect(mockCreateDataStream).not.toHaveBeenCalledWith(
+      esClient,
+      `.entities.v2.updates.${namespace}`,
+      expect.anything()
+    );
+  });
+
   it('reindexes metadata into the data stream with op_type create', async () => {
     const legacyMetadata = `.entities.v2.metadata.security_${namespace}`;
     const newMetadata = `.entities.v2.metadata.${namespace}`;
