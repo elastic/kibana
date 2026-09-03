@@ -40,7 +40,7 @@ import { FeatureNotEnabledError } from '../../errors/feature_not_enabled_error';
 
 export { findSimilarFeatures } from './feature_similarity_search';
 
-const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
+const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 2;
 
 export const selectPreviouslyIdentifiedFeatures = (
   features: ReadonlyArray<Feature>,
@@ -433,7 +433,6 @@ export interface IdentifyInferredFeaturesResult {
 export async function identifyInferredFeatures({
   esClient,
   kiClient,
-  soClient: _soClient,
   agentBuilder,
   request,
   connectorId,

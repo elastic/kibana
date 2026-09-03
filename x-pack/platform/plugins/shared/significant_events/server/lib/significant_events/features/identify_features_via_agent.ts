@@ -51,17 +51,20 @@ export interface ExecuteFeatureIdentificationAgentOptions {
 }
 
 export function buildFeatureIdentificationUserMessage({
+  streamName,
   sampleDocuments,
   previouslyIdentifiedFeatures,
   knownFeatureIds,
   excludedFeatures,
 }: {
+  streamName: string;
   sampleDocuments: string;
   previouslyIdentifiedFeatures: string;
   knownFeatureIds: string;
   excludedFeatures: string;
 }): string {
   const parts: string[] = [];
+  parts.push(`\`stream_name\`: ${streamName}`);
   if (excludedFeatures) {
     parts.push(`\`excluded_features\`:\n${excludedFeatures}`);
   }
@@ -101,6 +104,7 @@ export async function executeFeatureIdentificationAgent({
   );
 
   const userMessage = buildFeatureIdentificationUserMessage({
+    streamName,
     sampleDocuments: JSON.stringify(formattedDocuments),
     previouslyIdentifiedFeatures:
       previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '',
@@ -109,7 +113,7 @@ export async function executeFeatureIdentificationAgent({
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({
-    mode: AgentExecutionMode.standalone,
+    mode: AgentExecutionMode.conversation,
     request,
     abortSignal: signal,
     useTaskManager: false,

@@ -324,6 +324,7 @@ evaluate.describe(
                       .map(toPreviouslyIdentifiedFeature);
 
                     const userMessage = buildFeatureIdentificationUserMessage({
+                      streamName: MANAGED_STREAM_NAME,
                       sampleDocuments: JSON.stringify(sampleDocuments),
                       previouslyIdentifiedFeatures:
                         previouslyIdentifiedFeatures.length > 0

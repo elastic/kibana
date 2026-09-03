@@ -45,6 +45,7 @@ export async function runExcludeExperiment({
   });
 
   const initialUserMessage = buildFeatureIdentificationUserMessage({
+    streamName: MANAGED_STREAM_NAME,
     sampleDocuments: JSON.stringify(sampleDocuments),
     previouslyIdentifiedFeatures: '',
     knownFeatureIds: '',
@@ -91,6 +92,7 @@ export async function runExcludeExperiment({
 
   for (let i = 0; i < followUpRuns; i++) {
     const followUpUserMessage = buildFeatureIdentificationUserMessage({
+      streamName: MANAGED_STREAM_NAME,
       sampleDocuments: JSON.stringify(sampleDocuments),
       previouslyIdentifiedFeatures: '',
       knownFeatureIds: '',

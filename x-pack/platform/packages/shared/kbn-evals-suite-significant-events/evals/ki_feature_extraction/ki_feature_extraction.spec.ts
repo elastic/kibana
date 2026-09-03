@@ -158,6 +158,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 }
 
                 const userMessage = buildFeatureIdentificationUserMessage({
+                  streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: JSON.stringify(heavy.sampleDocuments),
                   previouslyIdentifiedFeatures: '',
                   knownFeatureIds: '',
