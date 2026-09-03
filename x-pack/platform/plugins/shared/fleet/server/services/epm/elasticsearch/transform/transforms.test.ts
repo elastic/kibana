@@ -35,6 +35,7 @@ const meta = getESAssetMetadata({ packageName: 'endpoint' });
 describe('test transform install', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let currentAttributes: Partial<Installation> = {};
 
   const mockRequest = httpServerMock.createKibanaRequest();
   const getYamlTestData = (
@@ -178,12 +179,25 @@ _meta:
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => ({
-      type: PACKAGES_SAVED_OBJECT_TYPE,
-      id: 'endpoint',
-      attributes,
-      references: [],
-    }));
+    currentAttributes = {};
+    savedObjectsClient.get.mockImplementation(
+      async () =>
+        ({
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          id: 'endpoint',
+          attributes: currentAttributes,
+          references: [],
+        } as any)
+    );
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => {
+      currentAttributes = { ...currentAttributes, ...(attributes as Partial<Installation>) };
+      return {
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+        id: 'endpoint',
+        attributes: currentAttributes,
+        references: [],
+      };
+    });
   });
 
   afterEach(() => {
