@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
+import fs, { readFileSync } from 'fs';
 import { join, resolve } from 'path';
 
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getDataPath } from '@kbn/utils';
 
@@ -39,6 +40,22 @@ import { defaultConfig } from './default/stateful/base.config';
  *
  * They also set `prebootOnly`, which tells Scout to skip the post-startup steps that assume a fully
  * booted Kibana (pre-creating the Elasticsearch Security indexes over SAML).
+ *
+ * ## Why there is one config set per Playwright config
+ *
+ * Each of these suites ends the `preboot` stage: the happy-path test writes the Elasticsearch
+ * connection to disk and Kibana boots, permanently. So every such Playwright config needs a Kibana
+ * that was *just* started into `preboot`.
+ *
+ * CI starts one test server per lane and runs every config assigned to that lane against it
+ * (`.buildkite/scripts/steps/test/scout/run_test_lane.sh`), and lanes are packed per config set
+ * (`create_test_tracks.ts`). Two configs sharing a config set can therefore land in the same lane,
+ * where the second one runs against the Kibana the first already booted — requests to the preboot
+ * routes then get redirected to the login page (HTTP 302) instead of served.
+ *
+ * Since nothing lets a config demand its own lane, a dedicated config set per Playwright config is
+ * the only way to guarantee a lane never holds two of them. That is why the sets below are thin
+ * aliases over three shared server definitions rather than three shared config sets.
  */
 
 const TEST_ENDPOINTS_PLUGIN_PATH = resolve(
@@ -160,3 +177,43 @@ export const createPrebootConfig = ({
     },
   };
 };
+
+/** TLS-enabled, security-enabled cluster with enrollment turned on. */
+export const tlsServers: ScoutServerConfig = createPrebootConfig({
+  esProtocol: 'https',
+  esSsl: true,
+  esCertificateAuthorities: [readFileSync(CA_CERT_PATH)],
+  esServerArgs: [
+    ...defaultConfig.esTestCluster.serverArgs,
+    'xpack.security.enabled=true',
+    'xpack.security.enrollment.enabled=true',
+    `xpack.security.http.ssl.keystore.path=${ES_HTTP_KEYSTORE_PATH}`,
+    `xpack.security.http.ssl.keystore.secure_password=${ES_HTTP_KEYSTORE_PASSWORD}`,
+  ],
+});
+
+/** Security-enabled cluster served over plain HTTP, so the wizard offers no CA step. */
+export const noTlsServers: ScoutServerConfig = createPrebootConfig({
+  esServerArgs: [...defaultConfig.esTestCluster.serverArgs, 'xpack.security.enabled=true'],
+});
+
+/**
+ * Cluster with security disabled entirely, so the wizard asks only for an address.
+ *
+ * Every `xpack.security.*` Elasticsearch arg has to go rather than just be overridden, and the
+ * stateful `roles.yml` with it, since file-based roles are meaningless without security. On the
+ * Kibana side `withoutKibanaSecurity` drops the mock-IdP SAML provider — which would otherwise
+ * reference a realm that cannot exist — and falls back to basic auth.
+ *
+ * Kibana reports security as unavailable either way, so basic auth is not actually usable. That is
+ * expected and matches the FTR suite this replaced: no interactive-setup test ever logs in, the
+ * flow only needs Kibana to boot cleanly and leave the setup page.
+ */
+export const noSecurityServers: ScoutServerConfig = createPrebootConfig({
+  esFiles: [],
+  withoutKibanaSecurity: true,
+  esServerArgs: [
+    ...defaultConfig.esTestCluster.serverArgs.filter((arg) => !arg.startsWith('xpack.security.')),
+    'xpack.security.enabled=false',
+  ],
+});
