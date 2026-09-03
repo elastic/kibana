@@ -13,6 +13,7 @@ import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('logs-*'),
+  getProjectRoutingFromEsqlQuery: jest.fn().mockReturnValue(undefined),
   parseTimeFieldFromESQLQuery: jest.fn().mockReturnValue(undefined),
 }));
 
@@ -29,6 +30,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
 }));
 
 const { parseTimeFieldFromESQLQuery } = jest.requireMock('@kbn/esql-utils');
+const { getProjectRoutingFromEsqlQuery } = jest.requireMock('@kbn/esql-utils');
 const { Parser } = jest.requireMock('@elastic/esql');
 
 function buildMocks() {
@@ -43,7 +45,7 @@ function buildMocks() {
   const esClient = {
     asCurrentUser: {
       fieldCaps: jest.fn().mockResolvedValue({ fields: { '@timestamp': {} } }),
-      transport: { request: jest.fn().mockResolvedValue({ columns: [] }) },
+      esql: { query: jest.fn().mockResolvedValue({ columns: [] }) },
     },
   };
   const core = {
@@ -76,6 +78,49 @@ describe('registerGetTimeFieldRoute', () => {
     expect(router.post).toHaveBeenCalledWith(
       expect.objectContaining({ path: TIMEFIELD_ROUTE }),
       expect.any(Function)
+    );
+  });
+
+  it('forwards project routing to field caps', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(
+      requestHandlerContext,
+      { body: { query: 'FROM logs-*', projectRouting: '_alias:*' } },
+      response
+    );
+
+    const core = await requestHandlerContext.core;
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).toHaveBeenCalledWith({
+      index: 'logs-*',
+      fields: '@timestamp',
+      include_unmapped: false,
+      project_routing: '_alias:*',
+    });
+  });
+
+  it('prefers SET project_routing over the provided project routing', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    getProjectRoutingFromEsqlQuery.mockReturnValueOnce('_alias:linked');
+    registerGetTimeFieldRoute(router, context);
+
+    await handler(
+      requestHandlerContext,
+      {
+        body: {
+          query: 'SET project_routing = "_alias:linked"; FROM logs-*',
+          projectRouting: '_alias:_origin',
+        },
+      },
+      response
+    );
+
+    const core = await requestHandlerContext.core;
+    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({ project_routing: '_alias:linked' })
     );
   });
 

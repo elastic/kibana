@@ -770,7 +770,7 @@ describe('useAvailablePackages', () => {
       expect(mockApplyGrouping).not.toHaveBeenCalled();
     });
 
-    it('calls applyGrouping and emits collection cards when flag is on', () => {
+    it('calls applyGrouping and emits collection cards when flag is on and enableCollectionGrouping is true', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
@@ -780,7 +780,10 @@ describe('useAvailablePackages', () => {
       });
 
       const { result } = renderHook(() =>
-        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+        useAvailablePackages({
+          prereleaseIntegrationsEnabled: false,
+          enableCollectionGrouping: true,
+        })
       );
 
       expect(mockApplyGrouping).toHaveBeenCalled();
@@ -809,7 +812,7 @@ describe('useAvailablePackages', () => {
       expect(result.current.allCards.every((c) => !c.isCollectionCard)).toBe(true);
     });
 
-    it('skips applyGrouping and emits individual cards when disableCollectionGrouping is true, even if flag is on', () => {
+    it('skips applyGrouping and emits individual cards when enableCollectionGrouping is false, even if flag is on', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
@@ -817,7 +820,7 @@ describe('useAvailablePackages', () => {
       const { result } = renderHook(() =>
         useAvailablePackages({
           prereleaseIntegrationsEnabled: false,
-          disableCollectionGrouping: true,
+          enableCollectionGrouping: false,
         })
       );
 

@@ -429,6 +429,57 @@ test.describe(
       });
     });
 
+    test('edit flow (YAML-only): removing all tags in the editor persists', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      let ruleId: string;
+
+      await test.step('seed an alert + standalone rule with tags (opens YAML-only)', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
+            },
+            time_field: 'timestamp',
+            metadata: { name: 'scout-yaml-clear-tags', tags: ['prod', 'infra'] },
+          })
+        );
+        ruleId = rule.id;
+        expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
+      });
+
+      await test.step('open the edit flyout in YAML-only mode', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+      });
+
+      await test.step('remove the tags block from the YAML buffer', async () => {
+        const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
+        expect(yaml).toContain('tags:');
+        // `tags` is serialized last under `metadata` as a block sequence; drop the
+        // `tags:` line and its indented `- item` lines. The next key is top-level.
+        const withoutTags = yaml.replace(/\n[ \t]*tags:[^\n]*(\n[ \t]+-[^\n]*)*/, '');
+        expect(withoutTags).not.toContain('tags:');
+        await pageObjects.composeDiscover.setYamlEditorValue(withoutTags);
+      });
+
+      await test.step('save via YAML and verify the rule has no tags', async () => {
+        await pageObjects.composeDiscover.clickYamlSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+        await expect
+          .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
+            timeout: 30_000,
+          })
+          .toBeUndefined();
+      });
+    });
+
     test('create flow: manually selected sandbox time field holds and persists (#281806)', async ({
       pageObjects,
       apiServices,

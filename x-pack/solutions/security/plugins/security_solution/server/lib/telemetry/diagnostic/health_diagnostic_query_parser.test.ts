@@ -84,6 +84,39 @@ filterlist:
       expect((q as ParseFailureQuery).id).toBe('bad');
     });
 
+    it('strips integrations from a v1 descriptor — index-only result', () => {
+      const yaml = `---
+id: q1
+name: my-v1-query
+index: logs-endpoint.*
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml) as IndexQuery[];
+      expect(q.kind).toBe('index');
+      expect(q.index).toBe('logs-endpoint.*');
+      expect(q.integrations).toBeUndefined();
+    });
+
+    it('returns ParseFailureQuery for v1 descriptor with integrations but no index', () => {
+      const yaml = `---
+id: q-bad
+name: bad
+integrations: endpoint
+type: DSL
+query: '{"query": {"match_all": {}}}'
+scheduleCron: 5m
+filterlist:
+  user.name: keep
+enabled: true`;
+      const [q] = parseHealthDiagnosticQueries(yaml);
+      expect((q as ParseFailureQuery)._raw).toBeDefined();
+    });
+
     it('returns ParseFailureQuery when v1 descriptor is missing the enabled field', () => {
       const yaml = `---
 id: no-enabled
@@ -561,6 +594,20 @@ filterlist: {}
 
       it('leaves integrations undefined when the field is absent', () => {
         const [q] = parseHealthDiagnosticQueries(baseYaml) as ApiQuery[];
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('treats empty integrations YAML sequence as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: []\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
+      it('treats empty integrations scalar string as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: ""\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
         expect(q.integrations).toBeUndefined();
       });
 

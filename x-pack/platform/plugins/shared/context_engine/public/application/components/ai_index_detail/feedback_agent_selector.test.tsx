@@ -58,7 +58,7 @@ describe('FeedbackAgentSelector', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('renders an option per agent plus an unset placeholder, reflecting the current selection', () => {
-    renderSelector({ ...aiIndex, feedback_agent_id: 'agent-b' });
+    renderSelector({ ...aiIndex, feedback_analysis: { enabled: false, agent_id: 'agent-b' } });
 
     const select = screen.getByTestId('contextSignalsFeedbackAgentSelect') as HTMLSelectElement;
     expect(select.value).toBe('agent-b');
@@ -77,7 +77,7 @@ describe('FeedbackAgentSelector', () => {
   });
 
   it('clears the selection (undefined) when the unset placeholder is chosen', () => {
-    renderSelector({ ...aiIndex, feedback_agent_id: 'agent-a' });
+    renderSelector({ ...aiIndex, feedback_analysis: { enabled: false, agent_id: 'agent-a' } });
 
     fireEvent.change(screen.getByTestId('contextSignalsFeedbackAgentSelect'), {
       target: { value: '' },

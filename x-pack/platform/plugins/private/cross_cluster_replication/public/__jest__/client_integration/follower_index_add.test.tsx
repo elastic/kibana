@@ -8,6 +8,8 @@
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 import { fireEvent, screen, act } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import './mocks';
 import { setupEnvironment, pageHelpers } from './helpers';
 
@@ -46,6 +48,9 @@ describe('Create Follower index', () => {
     });
 
     test('should display a "loading remote clusters" indicator', () => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Add follower index'
+      );
       expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
       expect(screen.getByTestId('sectionLoading').textContent).toBe('Loading remote clusters…');
     });
@@ -59,8 +64,11 @@ describe('Create Follower index', () => {
       });
     });
 
-    test('should have a link to the documentation', () => {
-      expect(screen.getByTestId('docsButton')).toBeInTheDocument();
+    test('should have a link to the documentation', async () => {
+      await openAppMenuOverflow(user);
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
     });
 
     test('should display the Follower index form', () => {

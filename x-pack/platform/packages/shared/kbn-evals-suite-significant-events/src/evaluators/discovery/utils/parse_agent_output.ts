@@ -8,6 +8,7 @@
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { isToolId } from './tool_usage';
 
 interface EventsWriteToolResult {
   data?: {
@@ -31,7 +32,13 @@ type EventsWriteItemResult =
     };
 
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
-  steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
+  steps.filter(
+    (step) =>
+      step.type === 'tool_call' &&
+      typeof step.tool_id === 'string' &&
+      isToolId(step.tool_id, toolId) &&
+      step.params
+  );
 
 const getBulkItems = (params: Record<string, unknown> | undefined): Partial<SignificantEvent>[] => {
   if (!Array.isArray(params?.items)) {
