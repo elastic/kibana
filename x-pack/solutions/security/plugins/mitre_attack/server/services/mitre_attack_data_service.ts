@@ -14,17 +14,17 @@ import { buildSoId, summarizeEntityCounts } from './utils';
 
 const BULK_CREATE_BATCH_SIZE = 500;
 
+type InitializationState =
+  | { status: 'idle' }
+  | { status: 'initializing'; promise: Promise<boolean> }
+  | { status: 'ready' }
+  | { status: 'failed' };
+
 export class MitreAttackDataService {
   private readonly logger: Logger;
 
-  /** True once a population run has completed with zero errors; gates the early return in populate() and ensureInitialized(). */
-  private initialized = false;
-
-  /** True while a population run is in flight; prevents concurrent runs from stacking. */
-  private isInitializing = false;
-
-  /** The in-flight run, handed to concurrent callers so they await the same population rather than starting another. */
-  private inflightPopulation: Promise<boolean> | undefined;
+  /** Tracks the population lifecycle; transitions idle → initializing → ready | failed. */
+  private state: InitializationState = { status: 'idle' };
 
   /** Type-scoped internal repository supplied by initialize() at plugin start; undefined until then. */
   private savedObjectsRepository: ISavedObjectsRepository | undefined;
@@ -39,7 +39,7 @@ export class MitreAttackDataService {
   }
 
   public get isInitialized(): boolean {
-    return this.initialized;
+    return this.state.status === 'ready';
   }
 
   /**
@@ -48,15 +48,15 @@ export class MitreAttackDataService {
    * Concurrent calls while a run is in progress return the same in-flight promise.
    */
   public populate(): Promise<boolean> {
-    if (this.initialized) {
+    if (this.state.status === 'ready') {
       return Promise.resolve(true);
     }
-    if (this.isInitializing && this.inflightPopulation !== undefined) {
-      return this.inflightPopulation;
+    if (this.state.status === 'initializing') {
+      return this.state.promise;
     }
-    this.isInitializing = true;
-    this.inflightPopulation = this.runPopulation();
-    return this.inflightPopulation;
+    const promise = this.runPopulation();
+    this.state = { status: 'initializing', promise };
+    return promise;
   }
 
   /**
@@ -64,7 +64,7 @@ export class MitreAttackDataService {
    * Respects the in-flight guard so concurrent callers await the same run.
    */
   public ensureInitialized(): Promise<boolean> {
-    if (this.initialized) {
+    if (this.state.status === 'ready') {
       return Promise.resolve(true);
     }
     return this.populate();
@@ -118,10 +118,11 @@ export class MitreAttackDataService {
         this.logger.error(
           `Failed to populate MITRE ATT&CK data: ${allErrors.length} error(s) out of ${entities.length} entities. First failures: ${firstFailures}`
         );
+        this.state = { status: 'failed' };
         return false;
       }
 
-      this.initialized = true;
+      this.state = { status: 'ready' };
       this.logger.info(
         `MITRE ATT&CK data populated: ${entities.length} entities. ${summarizeEntityCounts(
           entities
@@ -132,9 +133,8 @@ export class MitreAttackDataService {
       this.logger.error(
         `Failed to populate MITRE ATT&CK data: ${err instanceof Error ? err.message : String(err)}`
       );
+      this.state = { status: 'failed' };
       return false;
-    } finally {
-      this.isInitializing = false;
     }
   }
 }

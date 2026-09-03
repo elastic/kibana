@@ -309,6 +309,8 @@ describe('MitreAttackDataClient.list', () => {
     expect(listFindArgs.perPage).toBe(10000);
     expect(listFindArgs.namespaces).toEqual(['*']);
     expect(listFindArgs.type).toBe(MITRE_ATTACK_ENTITY_SO_TYPE);
+    expect(listFindArgs.sortField).toBe('id');
+    expect(listFindArgs.sortOrder).toBe('asc');
   });
 
   it('returns the empty collection and issues no repository call when ensureInitialized() resolves false', async () => {
