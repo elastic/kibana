@@ -227,12 +227,17 @@ export const updateTabs: InternalStateThunkActionCreator<
         const currentQuery = currentTab.appState.query;
         const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
 
+        tab.skipInitialFetch = true;
+        const currentRefreshInterval =
+          tab.globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: { ...currentRefreshInterval, pause: true },
+        };
+
         if (!currentQuery || !currentDataView) {
           return tab;
         }
-
-        const isAutoRefreshActive = !services.timefilter.getRefreshInterval().pause;
-        tab.skipInitialFetch = !isAutoRefreshActive;
 
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
