@@ -24,12 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { deslugifyStepName } from './deslugify_step_name';
+import { getStepChipPalette } from './step_chip_palette';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
   WORKFLOWS_MONACO_EDITOR_THEME,
 } from '../../hooks/use_workflows_monaco_theme';
-import { TypeIcon } from '../step_icons';
+import { getStepFamily, TypeIcon } from '../step_icons';
 
 export type WorkflowVisualEditorFlyoutTarget =
   | {
@@ -171,28 +172,42 @@ export function WorkflowVisualEditorFlyout({
           css={{ minWidth: 0, flex: '1 1 auto' }}
         >
           <EuiFlexItem grow={false}>
-            <div
-              css={{
-                width: 40,
-                height: 40,
-                // Same light-gray inner-box stroke the graph step uses
-                // (Figma FIGMA_STEP_INNER_BOX_BORDER) so the flyout header
-                // visually echoes the row that opened it.
-                border: `1px solid #e4e7f1`,
-                borderRadius: 8,
-                background: euiTheme.colors.backgroundBasePlain,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {renderStepIcon ? (
-                renderStepIcon({ stepType: iconStepType, isTrigger, size: 'm' })
-              ) : (
-                <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
-              )}
-            </div>
+            {(() => {
+              // Flyout is the editor context — no execution status, always idle.
+              const flyoutChip = getStepChipPalette(
+                euiTheme,
+                getStepFamily(iconStepType, isTrigger),
+                'none'
+              );
+              return (
+                <div
+                  css={{
+                    width: 40,
+                    height: 40,
+                    // Echoes the idle chip colours from the graph node so the
+                    // flyout header reads as the same step that was clicked.
+                    background: flyoutChip.fill,
+                    border: `1px solid ${flyoutChip.border}`,
+                    borderRadius: euiTheme.border.radius.small,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {renderStepIcon ? (
+                    renderStepIcon({
+                      stepType: iconStepType,
+                      isTrigger,
+                      size: 'm',
+                      color: flyoutChip.icon,
+                    })
+                  ) : (
+                    <TypeIcon type={iconStepType} kind={isTrigger ? 'trigger' : 'step'} size="m" />
+                  )}
+                </div>
+              );
+            })()}
           </EuiFlexItem>
           <EuiFlexItem css={{ minWidth: 0 }}>
             <div

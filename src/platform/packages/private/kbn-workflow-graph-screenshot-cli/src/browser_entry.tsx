@@ -94,7 +94,6 @@ const GraphApp = () => {
           showMinimap={false}
           showZoomControls={false}
           showBackground={!graphConfig.transparent}
-          edgeZIndex={0}
           onReady={handleReady}
           renderStepIcon={renderStepIcon}
         />
