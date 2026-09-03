@@ -15,11 +15,9 @@ export {
   createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
-  createInFlightWrites,
   placeholderConversation,
   type ConversationOperation,
   type ConversationWithOperation,
-  type InFlightWrites,
 } from './conversations';
 export { convertErrors } from './convert_errors';
 export { resolveServices } from './resolve_services';

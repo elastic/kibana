@@ -31,37 +31,6 @@ import type { ConversationClient } from '../../conversation';
 import { roundToEvents, userMessageEvent } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
-export interface InFlightWrites {
-  /** Registers a write. Returns the original promise so call sites can keep chaining on it. */
-  track: <T>(promise: Promise<T>) => Promise<T>;
-  /** Resolves once every tracked write has settled (fulfilled or rejected). Never rejects. */
-  settled: () => Promise<void>;
-}
-
-/** Creates an {@link InFlightWrites} tracker scoped to one persistence pipeline. */
-export const createInFlightWrites = (): InFlightWrites => {
-  const pending = new Set<Promise<void>>();
-
-  const track = <T>(promise: Promise<T>): Promise<T> => {
-    const entry: Promise<void> = promise.then(
-      () => undefined,
-      () => undefined
-    );
-    pending.add(entry);
-    void entry.then(() => pending.delete(entry));
-    return promise;
-  };
-
-  const settled = async (): Promise<void> => {
-    // Loop: writes dispatched while we were waiting must be drained too.
-    while (pending.size > 0) {
-      await Promise.all([...pending]);
-    }
-  };
-
-  return { track, settled };
-};
-
 /**
  * Persist a new conversation and emit the corresponding event
  */

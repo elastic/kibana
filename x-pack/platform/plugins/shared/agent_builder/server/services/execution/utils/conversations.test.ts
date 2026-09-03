@@ -32,7 +32,6 @@ import {
 import type { ConversationWithOperation } from './conversations';
 import {
   appendRoundTerminated$,
-  createInFlightWrites,
   getConversation,
   persistRoundInput,
   updateConversation$,
@@ -681,45 +680,6 @@ describe('conversations utils', () => {
         'round-x::step::1',
         'round-x::execution_terminated',
       ]);
-    });
-  });
-
-  describe('createInFlightWrites', () => {
-    it('settled resolves even when a tracked write rejects, and drains writes added while waiting', async () => {
-      const inFlightWrites = createInFlightWrites();
-
-      let rejectFirst!: (error: Error) => void;
-      inFlightWrites
-        .track(
-          new Promise<void>((_, reject) => {
-            rejectFirst = reject;
-          })
-        )
-        .catch(() => {
-          // The caller handles the rejection; the tracker only waits for settlement.
-        });
-
-      let resolveSecond!: () => void;
-      let settledResolved = false;
-      const settledPromise = inFlightWrites.settled().then(() => {
-        settledResolved = true;
-      });
-
-      // While the first write is pending, dispatch a second one — settled must wait for both.
-      void inFlightWrites.track(
-        new Promise<void>((resolve) => {
-          resolveSecond = resolve;
-        })
-      );
-
-      rejectFirst(new Error('write failed'));
-      await Promise.resolve();
-      await Promise.resolve();
-      expect(settledResolved).toBe(false);
-
-      resolveSecond();
-      await settledPromise;
-      expect(settledResolved).toBe(true);
     });
   });
 });
