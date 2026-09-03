@@ -26,6 +26,7 @@ import {
   EuiTextColor,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -254,11 +255,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        {this.state.isLoadingDataView ? (
-          <div css={editorFormStyle}>
-            <EuiLoadingSpinner />
-          </div>
-        ) : (
+        <EuiSkeletonText
+          lines={3}
+          isLoading={this.state.isLoadingDataView}
+        >
           <EuiForm>
             <div css={editorFormStyle}>
               {this.renderIndexPatternInput()}
@@ -278,46 +278,46 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                 />
               </EuiFormRow>
             </div>
-
-            <EuiPopoverFooter paddingSize="s">
-              {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
-              <EuiFlexGroup
-                direction="rowReverse"
-                alignItems="center"
-                css={{ isolation: 'isolate' }}
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={this.onSubmit}
-                    isDisabled={!this.isFilterValid()}
-                    data-test-subj="saveFilter"
-                    size="s"
-                  >
-                    {this.props.mode === 'add'
-                      ? strings.getAddButtonLabel()
-                      : strings.getUpdateButtonLabel()}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    flush="right"
-                    onClick={this.props.onCancel}
-                    data-test-subj="cancelSaveFilter"
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
-            </EuiPopoverFooter>
           </EuiForm>
-        )}
+        </EuiSkeletonText>
+
+        <EuiPopoverFooter paddingSize="s">
+          {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+          <EuiFlexGroup
+            direction="rowReverse"
+            alignItems="center"
+            css={{ isolation: 'isolate' }}
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={this.onSubmit}
+                isDisabled={!this.isFilterValid() || this.state.isLoadingDataView}
+                data-test-subj="saveFilter"
+                size="s"
+              >
+                {this.props.mode === 'add'
+                  ? strings.getAddButtonLabel()
+                  : strings.getUpdateButtonLabel()}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="right"
+                onClick={this.props.onCancel}
+                data-test-subj="cancelSaveFilter"
+                size="s"
+              >
+                <FormattedMessage
+                  id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem />
+          </EuiFlexGroup>
+        </EuiPopoverFooter>
       </div>
     );
   }
