@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { getUiamApiKeyId } from '@kbn/task-manager-plugin/server';
+import { decodeStoredApiKey, getUiamApiKeyId } from '@kbn/task-manager-plugin/server';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';
@@ -43,7 +43,7 @@ export const transformBackfillParamToAdHocRun = (
       // Task Manager uses — so scheduling the backfill does not throw before the snapshotted
       // UIAM key below takes over. The ad hoc task runner treats an empty `apiKeyToUse` as
       // absent and falls back to `uiamApiKey` when building the fake request.
-      apiKeyId: rule.apiKey ? Buffer.from(rule.apiKey, 'base64').toString().split(':')[0] : '',
+      apiKeyId: rule.apiKey ? decodeStoredApiKey(rule.apiKey).id : '',
       apiKeyToUse: rule.apiKey ?? '',
       // Snapshot the rule's UIAM API key (when present) so the ad hoc task runner
       // can authenticate the same way a regular rule run does in UIAM deployments.
