@@ -9,7 +9,6 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
 import type { OpenAgentChatOptions } from './use_agent_builder_integration';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import type { FixWithAiTarget } from '../../lib/register_fix_with_ai_code_action_provider';
@@ -28,12 +27,13 @@ interface UseFixWithAiReturn {
   onFixWithAi: ((error: YamlValidationResult) => void) | undefined;
 }
 
-const getPrompt = ({ startLineNumber, startColumn, message }: FixWithAiTarget) =>
-  i18n.translate('workflowsManagement.workflowYAMLEditor.fixValidationErrorPrompt', {
-    defaultMessage:
-      'For the attached workflow, we get this validation error on line {lineNumber}, column {columnNumber}:\n\n{message}\n\nFix it, verify the workflow is valid, and then give a concise explanation.',
-    values: { lineNumber: startLineNumber, columnNumber: startColumn, message },
-  });
+// Not translated: the agent and its skills work in English. The button label is.
+const getPrompt = ({ startLineNumber, startColumn, message, severity }: FixWithAiTarget) =>
+  [
+    `For the attached workflow, we get this validation ${severity} on line ${startLineNumber}, column ${startColumn}:`,
+    message,
+    'Fix it, verify the workflow is valid, and then give a concise explanation.',
+  ].join('\n\n');
 
 /**
  * Asks the agent to fix one validation error, from the editor diagnostic (Monaco quick fix)
@@ -57,6 +57,7 @@ export const useFixWithAi = ({
         initialMessage: getPrompt(target),
         // Prefill only, so the user can review or edit the prompt before sending
         autoSendInitialMessage: false,
+        // `initialMessage` only applies to a new conversation
         newConversation: true,
       });
     },
@@ -75,9 +76,11 @@ export const useFixWithAi = ({
     }
     const disposable = registerFixWithAiCodeActionProvider({
       getFixWithAi: () => fixWithAiRef.current,
+      isEditorModel: (model) =>
+        model.uri.toString() === editorRef.current?.getModel()?.uri.toString(),
     });
     return () => disposable.dispose();
-  }, [isEnabled]);
+  }, [editorRef, isEnabled]);
 
   const onFixWithAi = useCallback(
     (error: YamlValidationResult) => {
@@ -85,6 +88,7 @@ export const useFixWithAi = ({
         startLineNumber: error.startLineNumber,
         startColumn: error.startColumn,
         message: error.message ?? '',
+        severity: error.severity === 'error' ? 'error' : 'warning',
       });
     },
     [fixWithAi]

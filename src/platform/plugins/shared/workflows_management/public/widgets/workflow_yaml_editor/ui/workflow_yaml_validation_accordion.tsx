@@ -137,7 +137,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
   }, [error, onErrorClick]);
 
   const handleRowKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
+    (e: React.KeyboardEvent<HTMLElement>) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleRowClick();
@@ -146,23 +146,12 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
     [handleRowClick]
   );
 
-  const stopRowActivation = useCallback((e: React.SyntheticEvent) => {
-    e.stopPropagation();
-  }, []);
-
   const handleFixWithAi = useCallback(() => {
     onFixWithAi?.(error);
   }, [error, onFixWithAi]);
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      css={styles.validationError}
-      data-test-subj="workflowYamlValidationErrorRow"
-      onClick={handleRowClick}
-      onKeyDown={handleRowKeyDown}
-    >
+    <div css={styles.validationError} data-test-subj="workflowYamlValidationErrorRow">
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={
@@ -187,7 +176,16 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
       <EuiFlexItem css={styles.validationErrorText}>
         <p>
           <EuiText color="text" size="xs" component="span">
-            <span className="validation-error-message">{message}</span>
+            <span
+              className="validation-error-message"
+              role="button"
+              tabIndex={0}
+              data-test-subj="workflowYamlValidationErrorMessage"
+              onClick={handleRowClick}
+              onKeyDown={handleRowKeyDown}
+            >
+              {message}
+            </span>
           </EuiText>
           <EuiText color="subdued" size="xs" component="span" css={styles.validationErrorLocation}>
             <span>
@@ -209,13 +207,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
         </p>
       </EuiFlexItem>
       {onFixWithAi || message ? (
-        <EuiFlexItem
-          grow={false}
-          css={styles.rowActions}
-          onClick={stopRowActivation}
-          onKeyDown={stopRowActivation}
-          onMouseDown={stopRowActivation}
-        >
+        <EuiFlexItem grow={false} css={styles.rowActions}>
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             {onFixWithAi ? (
               <EuiFlexItem grow={false}>

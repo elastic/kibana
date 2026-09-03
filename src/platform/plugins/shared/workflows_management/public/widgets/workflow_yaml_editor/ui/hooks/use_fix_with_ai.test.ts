@@ -31,10 +31,12 @@ const validationError = {
   startLineNumber: 15,
   startColumn: 17,
   message: 'Variable inputs.mesage is invalid',
+  severity: 'error',
 } as YamlValidationResult;
 
 describe('useFixWithAi', () => {
-  const editor = { id: 'editor' } as unknown as monaco.editor.IStandaloneCodeEditor;
+  const model = { uri: { toString: () => 'inmemory://workflow.yaml' } };
+  const editor = { getModel: () => model } as unknown as monaco.editor.IStandaloneCodeEditor;
   let dispose: jest.Mock;
   let openAgentChat: jest.Mock;
 
@@ -67,11 +69,32 @@ describe('useFixWithAi', () => {
     const { initialMessage, autoSendInitialMessage, newConversation } =
       openAgentChat.mock.calls[0][0];
     expect(initialMessage).toContain('For the attached workflow');
-    expect(initialMessage).toContain('line 15, column 17');
+    expect(initialMessage).toContain('validation error on line 15, column 17');
     expect(initialMessage).toContain('Variable inputs.mesage is invalid');
     expect(initialMessage).toContain('give a concise explanation');
     expect(autoSendInitialMessage).toBe(false);
     expect(newConversation).toBe(true);
+  });
+
+  it('names the severity of a warning in the prompt', () => {
+    const { result } = render();
+
+    result.current.onFixWithAi?.({
+      ...validationError,
+      severity: 'warning',
+    } as YamlValidationResult);
+
+    expect(openAgentChat.mock.calls[0][0].initialMessage).toContain('validation warning on line');
+  });
+
+  it('offers the quick fix for the editor model only', () => {
+    render();
+
+    const { isEditorModel } = registerProviderMock.mock.calls[0][0];
+    const asModel = (uri: string) => ({ uri: { toString: () => uri } } as monaco.editor.ITextModel);
+
+    expect(isEditorModel(asModel('inmemory://workflow.yaml'))).toBe(true);
+    expect(isEditorModel(asModel('inmemory://preview.yaml'))).toBe(false);
   });
 
   it('registers the code action provider and disposes it on unmount', () => {
@@ -86,7 +109,12 @@ describe('useFixWithAi', () => {
     render();
 
     const { getFixWithAi } = registerProviderMock.mock.calls[0][0];
-    const target: FixWithAiTarget = { startLineNumber: 3, startColumn: 5, message: 'Boom' };
+    const target: FixWithAiTarget = {
+      startLineNumber: 3,
+      startColumn: 5,
+      message: 'Boom',
+      severity: 'error',
+    };
     getFixWithAi()(target);
 
     expect(navigateMock).toHaveBeenCalledWith(editor, 3, 5);

@@ -81,11 +81,11 @@ describe('WorkflowYamlValidationAccordion', () => {
     expect(screen.getByLabelText('Fix with AI Agent')).toBeInTheDocument();
   });
 
-  it('navigates to the error when the row is clicked without a text selection', () => {
+  it('navigates to the error when the message is clicked without a text selection', () => {
     const { onErrorClick } = renderAccordion();
     expandAccordion();
 
-    fireEvent.click(screen.getByTestId('workflowYamlValidationErrorRow'));
+    fireEvent.click(screen.getByTestId('workflowYamlValidationErrorMessage'));
 
     expect(onErrorClick).toHaveBeenCalledTimes(1);
     expect(onErrorClick).toHaveBeenCalledWith(sampleError);
@@ -101,7 +101,7 @@ describe('WorkflowYamlValidationAccordion', () => {
       addRange: jest.fn(),
     } as unknown as Selection);
 
-    fireEvent.click(screen.getByTestId('workflowYamlValidationErrorRow'));
+    fireEvent.click(screen.getByTestId('workflowYamlValidationErrorMessage'));
 
     expect(onErrorClick).not.toHaveBeenCalled();
     selectionSpy.mockRestore();
@@ -129,11 +129,11 @@ describe('WorkflowYamlValidationAccordion', () => {
     expect(onErrorClick).not.toHaveBeenCalled();
   });
 
-  it('navigates when Enter is pressed on the row', () => {
+  it('navigates when Enter is pressed on the message', () => {
     const { onErrorClick } = renderAccordion();
     expandAccordion();
 
-    fireEvent.keyDown(screen.getByTestId('workflowYamlValidationErrorRow'), { key: 'Enter' });
+    fireEvent.keyDown(screen.getByTestId('workflowYamlValidationErrorMessage'), { key: 'Enter' });
 
     expect(onErrorClick).toHaveBeenCalledWith(sampleError);
   });

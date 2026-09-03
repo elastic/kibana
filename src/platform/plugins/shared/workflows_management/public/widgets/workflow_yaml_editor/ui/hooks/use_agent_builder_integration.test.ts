@@ -952,61 +952,6 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('keeps the workflow attachment in setChatConfig while an auto-send is in flight', async () => {
-      const agentBuilder = createMockAgentBuilder();
-      setupKibanaMock(agentBuilder);
-      const editor = createMockEditor(mockModel);
-
-      const { result } = renderHook(() =>
-        useAgentBuilderIntegration({
-          editorRef: { current: editor },
-          isEditorMounted: true,
-        })
-      );
-
-      await flushChatAccessCheck();
-
-      act(() => {
-        result.current.openAgentChat({
-          initialMessage: 'Fix this workflow',
-          autoSendInitialMessage: true,
-          newConversation: true,
-        });
-      });
-
-      agentBuilder.setChatConfig.mockClear();
-      mockModel.simulateContentChange('name: while-autosend');
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
-
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          initialMessage: 'Fix this workflow',
-          autoSendInitialMessage: true,
-          newConversation: true,
-          attachments: [expectedAttachment('name: while-autosend')],
-        })
-      );
-
-      agentBuilder.setChatConfig.mockClear();
-      act(() => {
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-after-send',
-          conversation: { attachments: [] },
-        } as unknown as ActiveConversation);
-      });
-
-      mockModel.simulateContentChange('name: after-autosend');
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
-
-      expect(agentBuilder.setChatConfig).not.toHaveBeenCalledWith(
-        expect.objectContaining({ newConversation: true })
-      );
-    });
-
     it('does not call openChat when agentBuilder is not available', () => {
       setupKibanaMock(undefined);
       const editor = createMockEditor(mockModel);

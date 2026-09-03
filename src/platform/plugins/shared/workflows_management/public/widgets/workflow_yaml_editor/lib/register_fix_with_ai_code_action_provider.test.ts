@@ -29,9 +29,22 @@ const buildMarker = (
   ...overrides,
 });
 
-const provideCodeActions = (provider: CodeActionProvider, markers: monaco.editor.IMarkerData[]) =>
+const editorModel = {
+  uri: { toString: () => 'inmemory://workflow.yaml' },
+} as monaco.editor.ITextModel;
+const otherModel = {
+  uri: { toString: () => 'inmemory://preview.yaml' },
+} as monaco.editor.ITextModel;
+
+const isEditorModel = (model: monaco.editor.ITextModel) => model === editorModel;
+
+const provideCodeActions = (
+  provider: CodeActionProvider,
+  markers: monaco.editor.IMarkerData[],
+  model: monaco.editor.ITextModel = editorModel
+) =>
   provider.provideCodeActions(
-    {} as monaco.editor.ITextModel,
+    model,
     {} as monaco.Range,
     { markers, only: undefined, trigger: monaco.languages.CodeActionTriggerType.Invoke },
     {} as monaco.CancellationToken
@@ -68,7 +81,7 @@ describe('registerFixWithAiCodeActionProvider', () => {
   });
 
   it('offers one quick fix, pointing at the fix command', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn() });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [buildMarker()]);
 
@@ -83,13 +96,14 @@ describe('registerFixWithAiCodeActionProvider', () => {
           startLineNumber: 15,
           startColumn: 17,
           message: 'Variable inputs.mesage is invalid',
+          severity: 'error',
         },
       ],
     });
   });
 
   it('ignores hint markers and markers without a message', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn() });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [
       buildMarker({ severity: monaco.MarkerSeverity.Hint }),
@@ -103,11 +117,12 @@ describe('registerFixWithAiCodeActionProvider', () => {
       startLineNumber: 15,
       startColumn: 17,
       message: 'Step is deprecated',
+      severity: 'warning',
     });
   });
 
   it('merges every marker under the cursor into one action at the earliest position', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn() });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
 
     const { actions } = provideCodeActions(provider, [
       buildMarker({ startColumn: 25, message: 'expected "|" before filter' }),
@@ -120,24 +135,34 @@ describe('registerFixWithAiCodeActionProvider', () => {
       startLineNumber: 15,
       startColumn: 17,
       message: 'expected "|" before filter\nVariable inputs.mesage is invalid',
+      severity: 'error',
     });
+  });
+
+  it('offers no quick fix for another yaml model, such as a version preview', () => {
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel });
+
+    const { actions } = provideCodeActions(provider, [buildMarker()], otherModel);
+
+    expect(actions).toHaveLength(0);
   });
 
   it('runs the current handler when the command is executed', () => {
     const fixWithAi = jest.fn();
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => fixWithAi });
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => fixWithAi, isEditorModel });
 
-    commandHandler({}, { startLineNumber: 3, startColumn: 5, message: 'Boom' });
+    commandHandler({}, { startLineNumber: 3, startColumn: 5, message: 'Boom', severity: 'error' });
 
     expect(fixWithAi).toHaveBeenCalledWith({
       startLineNumber: 3,
       startColumn: 5,
       message: 'Boom',
+      severity: 'error',
     });
   });
 
   it('disposes the command and the provider', () => {
-    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn() }).dispose();
+    registerFixWithAiCodeActionProvider({ getFixWithAi: () => jest.fn(), isEditorModel }).dispose();
 
     expect(commandDispose).toHaveBeenCalled();
     expect(providerDispose).toHaveBeenCalled();

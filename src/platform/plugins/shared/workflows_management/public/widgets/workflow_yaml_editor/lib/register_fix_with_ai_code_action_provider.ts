@@ -12,26 +12,25 @@ import { FIX_WITH_AI_LABEL } from './fix_with_ai_label';
 
 export const FIX_WITH_AI_COMMAND_ID = 'workflows.editor.action.fixWithAi';
 
-/** Position and message of the diagnostic the agent is asked to fix. */
+/** The diagnostic the agent is asked to fix. */
 export interface FixWithAiTarget {
   startLineNumber: number;
   startColumn: number;
   message: string;
+  severity: 'error' | 'warning';
 }
 
 interface RegisterFixWithAiCodeActionProviderParams {
   /** Read on every invocation, so the provider can be registered once. */
   getFixWithAi: () => (target: FixWithAiTarget) => void;
+  /** Other yaml models can share the page (version preview), and only this one is editable. */
+  isEditorModel: (model: monaco.editor.ITextModel) => boolean;
 }
 
 const isFixableSeverity = (severity: monaco.MarkerSeverity) =>
   severity === monaco.MarkerSeverity.Error || severity === monaco.MarkerSeverity.Warning;
 
-/**
- * Several validators usually flag the same spot with different ranges and messages. Monaco only
- * passes the markers under the cursor, so they all describe one problem: build a single action
- * carrying every message instead of a row per marker.
- */
+/** Markers under the cursor describe one problem, so they become one action. */
 const buildTarget = (markers: monaco.editor.IMarkerData[]): FixWithAiTarget | null => {
   const fixable = markers.filter(
     (marker) => isFixableSeverity(marker.severity) && Boolean(marker.message)
@@ -39,22 +38,27 @@ const buildTarget = (markers: monaco.editor.IMarkerData[]): FixWithAiTarget | nu
   if (fixable.length === 0) {
     return null;
   }
-  const [first] = [...fixable].sort(
-    (a, b) => a.startLineNumber - b.startLineNumber || a.startColumn - b.startColumn
+  const first = fixable.reduce((earliest, marker) =>
+    marker.startLineNumber < earliest.startLineNumber ||
+    (marker.startLineNumber === earliest.startLineNumber &&
+      marker.startColumn < earliest.startColumn)
+      ? marker
+      : earliest
   );
   return {
     startLineNumber: first.startLineNumber,
     startColumn: first.startColumn,
     message: [...new Set(fixable.map((marker) => marker.message))].join('\n'),
+    severity: fixable.some((marker) => marker.severity === monaco.MarkerSeverity.Error)
+      ? 'error'
+      : 'warning',
   };
 };
 
-/**
- * Offers a "Fix with AI Agent" quick fix on every validation marker, so the agent can be
- * reached from the diagnostic itself instead of only from the validation list.
- */
+/** Offers the agent as a quick fix on the diagnostic, not only in the validation list. */
 export const registerFixWithAiCodeActionProvider = ({
   getFixWithAi,
+  isEditorModel,
 }: RegisterFixWithAiCodeActionProviderParams): monaco.IDisposable => {
   const commandDisposable = monaco.editor.registerCommand(
     FIX_WITH_AI_COMMAND_ID,
@@ -64,8 +68,8 @@ export const registerFixWithAiCodeActionProvider = ({
   );
 
   const providerDisposable = monaco.languages.registerCodeActionProvider(YAML_LANG_ID, {
-    provideCodeActions: (_model, _range, context) => {
-      const target = buildTarget(context.markers);
+    provideCodeActions: (model, _range, context) => {
+      const target = isEditorModel(model) ? buildTarget(context.markers) : null;
       if (!target) {
         return { actions: [], dispose: () => {} };
       }

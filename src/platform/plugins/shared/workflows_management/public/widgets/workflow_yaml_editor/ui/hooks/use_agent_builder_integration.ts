@@ -38,12 +38,6 @@ interface UseAgentBuilderIntegrationParams {
   validationErrors?: YamlValidationResult[] | null;
 }
 
-interface PendingAutoSend {
-  initialMessage: string;
-  autoSendInitialMessage?: boolean;
-  newConversation?: boolean;
-}
-
 export interface OpenAgentChatOptions {
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
@@ -95,7 +89,6 @@ export const useAgentBuilderIntegration = ({
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
   const hasAutoOpenedRef = useRef(false);
-  const pendingAutoSendRef = useRef<PendingAutoSend | null>(null);
   const unsavedWorkflowIdRef = useRef<string>(v4());
   const workflowNameRef = useRef(workflowName);
   workflowNameRef.current = workflowName;
@@ -276,12 +269,10 @@ export const useAgentBuilderIntegration = ({
     const syncAttachment = (yaml: string) => {
       if (!attachmentTargetResolvedRef.current) return;
       const attachment = buildAttachment(yaml);
-      const pending = pendingAutoSendRef.current;
       agentBuilder.setChatConfig({
         sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         attachments: [attachment],
-        ...(pending ?? {}),
       });
       agentBuilder.addAttachment(attachment);
     };
@@ -302,7 +293,6 @@ export const useAgentBuilderIntegration = ({
         if (!activeConversation) return;
         if (activeConversation.id) {
           conversationIdRef.current = activeConversation.id;
-          pendingAutoSendRef.current = null;
         }
 
         if (activeConversation.id && !activeConversation.conversation) {
@@ -377,7 +367,6 @@ export const useAgentBuilderIntegration = ({
       conversationIdRef.current = undefined;
       syncAttachmentIdRef.current = undefined;
       attachmentTargetResolvedRef.current = true;
-      pendingAutoSendRef.current = null;
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
@@ -419,18 +408,9 @@ export const useAgentBuilderIntegration = ({
       }
 
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
-      pendingAutoSendRef.current =
-        options?.initialMessage != null && options.initialMessage.length > 0
-          ? {
-              initialMessage: options.initialMessage,
-              autoSendInitialMessage: options.autoSendInitialMessage,
-              newConversation: options.newConversation,
-            }
-          : null;
-
-      // A new conversation has no restored attachment to wait for, so attach
-      // the current YAML immediately. `setChatConfig` keeps syncing it after
-      // the auto-send, including while these open flags are still in flight.
+      // A new conversation has no restored attachment to wait for, so attach the YAML now.
+      // Otherwise the active-conversation subscription adds it once it knows which
+      // conversation this session shares.
       const shouldAttachNow =
         attachmentTargetResolvedRef.current || options?.newConversation === true;
 
