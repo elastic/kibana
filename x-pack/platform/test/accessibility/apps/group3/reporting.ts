@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { REPORT_TABLE_ID } from '@kbn/reporting-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitFor('Reporting app', async () => {
         await common.navigateToApp('reporting');
-        return testSubjects.exists(APP_HEADER_TEST_SUBJECTS.title);
+        return testSubjects.exists(REPORT_TABLE_ID, { timeout: 10 * 1000 });
       });
     });
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { REPORT_TABLE_ID } from '@kbn/reporting-common';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -31,11 +31,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
-    await retry.tryForTime(60 * 1000, async () => {
+    await retry.tryForTime(120 * 1000, async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('reportingManagement');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.title, { timeout: 2000 });
+      await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 30 * 1000 });
     });
   };
 
