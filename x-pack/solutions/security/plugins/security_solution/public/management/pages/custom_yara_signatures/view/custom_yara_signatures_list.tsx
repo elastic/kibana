@@ -40,6 +40,7 @@ export const CustomYaraSignaturesList = memo(() => {
       allowCardDeleteAction={canWriteCustomYaraSignatures}
       allowCardEditAction={canWriteCustomYaraSignatures}
       allowCardCreateAction={canWriteCustomYaraSignatures}
+      showAsSimpleTable
     />
   );
 });
