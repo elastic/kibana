@@ -533,11 +533,24 @@ const installTransformsAssets = async (
 
     // Remove any transforms that leaked from a previous broken install and are no longer
     // tracked by a saved-object ref. Best-effort — never throws.
+    // keepIds must include unchanged transforms (modules where fleet_transform_version did not
+    // bump and currentTransformSameAsPrev is true) — those are absent from transformRefs but still
+    // live in ES and must not be treated as orphans.
+    const removedTransformIds = new Set([
+      ...transformsToRemove.map((t) => t.id),
+      ...transformsToRemoveWithDestIndex.map((t) => t.id),
+    ]);
+    const reconcileKeepIds = [
+      ...previousInstalledTransformEsAssets
+        .filter((t) => !removedTransformIds.has(t.id))
+        .map((t) => t.id),
+      ...transformRefs.map((r) => r.id),
+    ];
     await reconcileTransforms(
       esClient,
       logger,
       packageInstallContext.packageInfo.name,
-      transformRefs.map((r) => r.id)
+      reconcileKeepIds
     );
 
     // get and save refs associated with the transforms before installing
