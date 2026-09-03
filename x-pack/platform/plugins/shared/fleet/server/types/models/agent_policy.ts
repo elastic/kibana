@@ -458,7 +458,10 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
       schema.arrayOf(
         schema.object({
           name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
-          value: schema.oneOf([schema.string({ maxLength: 1000 }), schema.number()]),
+          value: schema.oneOf([
+            schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
+            schema.number(),
+          ]),
         }),
         {
           validate: validateGlobalDataTagInput,

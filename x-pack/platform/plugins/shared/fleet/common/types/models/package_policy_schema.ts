@@ -394,7 +394,23 @@ const RestPackagePolicyStreamsSchema = {
   data_stream: schema.object({
     dataset: schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }),
     type: schema.maybe(schema.string({ maxLength: 100 })),
-    elasticsearch: PackagePolicyStreamDataStreamElasticsearchSchema,
+    // Inline bounded version — PackagePolicyStreamDataStreamElasticsearchSchema stays unbounded
+    // because it feeds the frozen SO model-version schemas via PackagePolicyStreamsSchema.
+    elasticsearch: schema.maybe(
+      schema.object({
+        privileges: schema.maybe(
+          schema.object({
+            indices: schema.maybe(
+              schema.arrayOf(schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }), {
+                maxSize: 100,
+              })
+            ),
+          })
+        ),
+        dynamic_dataset: schema.maybe(schema.boolean()),
+        dynamic_namespace: schema.maybe(schema.boolean()),
+      })
+    ),
   }),
   vars: schema.maybe(RestConfigRecordSchema),
   config: schema.maybe(RestConfigRecordSchema),

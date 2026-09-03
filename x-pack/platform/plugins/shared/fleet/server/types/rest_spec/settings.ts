@@ -204,8 +204,8 @@ export const SpaceSettingsResponseSchema = schema.object({
 export const SettingsSchemaV5 = schema.object({
   has_seen_add_data_notice: schema.maybe(schema.boolean()),
   prerelease_integrations_enabled: schema.maybe(schema.boolean()),
-  id: schema.maybe(schema.string({ maxLength: 50 })),
-  version: schema.maybe(schema.string({ maxLength: 50 })),
+  id: schema.maybe(schema.string()),
+  version: schema.maybe(schema.string()),
   preconfigured_fields: schema.maybe(
     schema.arrayOf(schema.literal('fleet_server_hosts'), { maxSize: 1 })
   ),
@@ -216,7 +216,7 @@ export const SettingsSchemaV5 = schema.object({
     schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
   ),
   use_space_awareness_migration_started_at: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string({ maxLength: 50 })])
+    schema.oneOf([schema.literal(null), schema.string()])
   ),
   delete_unenrolled_agents: schema.maybe(
     schema.object({
