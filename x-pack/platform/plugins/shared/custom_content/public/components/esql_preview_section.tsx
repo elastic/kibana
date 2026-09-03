@@ -52,14 +52,9 @@ const MAX_PREVIEW_CELL_CHARS = 120;
 // Values are clipped to one line — they are only a sample of the shape — but names are what the
 // template references as row["name"], so headers wrap rather than hide behind a hover.
 const previewTableCss = css({
-  td: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
+  // `anywhere`, not `break-word`: only `anywhere` shrinks the flex item EUI wraps cell text in.
   th: {
-    whiteSpace: 'normal',
-    wordBreak: 'break-word',
+    overflowWrap: 'anywhere',
   },
 });
 
@@ -228,7 +223,7 @@ export const EsqlPreviewSection = ({
                   {columns.map((col, colIdx) => {
                     const { text, full } = formatCell(row[colIdx]);
                     return (
-                      <EuiTableRowCell key={col.name} title={full}>
+                      <EuiTableRowCell key={col.name} title={full} truncateText>
                         {text}
                       </EuiTableRowCell>
                     );
