@@ -758,3 +758,101 @@ entries:
   description: Adds a Knowledge Indicators tab on AI index detail, with type filters and expandable rows that show the stored KI as JSON.
   prs:
   - https://github.com/elastic/kibana/pull/286456
+- file:
+    name: 272414.yaml
+    checksum: ad846435a7217b52b4c6686f0127b957beacd399
+  type: deprecation
+  title: Deprecate `elastic.apm` settings
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-06-16
+  impact: The Elastic APM instrumentation is deprecated and will be removed in a future version.
+  action: Use the OpenTelemetry instrumentation when collecting traces and metrics from Kibana. Refer to [Instrumenting with OTel Traces](https://www.elastic.co/docs/extend/kibana/kibana-debugging#_instrumenting_with_otel_traces) for more information.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/272414
+- file:
+    name: 272894.yaml
+    checksum: afd18d8ddcb2dc0a625da450953ea5f9bd27c53b
+  type: deprecation
+  title: Add AgentlessPolicy response model and remove legacy fields from Agentless API
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-06-30
+  impact: 'Changes `POST /api/fleet/agentless_policies` to return a new dedicated `AgentlessPolicy` response model instead of the internal `PackagePolicy` shape. Removes the `format` query parameter. The following request body fields are no longer accepted: `description`, `var_group_selections`, `additional_datastreams_permissions`, and `condition`.'
+  action: External API clients that consume `PackagePolicy` fields such as `policy_ids`, `revision`, `supports_agentless`, `secret_references`, `output_id`, `fleet_server_host_id`, or `enabled` from the response must migrate to the new model.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/272894
+- file:
+    name: 274803.yaml
+    checksum: 60b2fa7c612f63edd52d2f13ba43d7c4d18decb1
+  type: breaking-change
+  title: Limit exception list entry string lengths for endpoint artifacts
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-07-21
+  - product: kibana
+    versions:
+    - 9.6.0
+  description: Endpoint artifact exception list validators now enforce maximum string lengths on entry fields (for example blocklist, trusted applications, trusted devices, and event filters). Values longer than the limit are rejected.
+  impact: Creating or updating endpoint exception list items with string values longer than the new limits fails validation. Other exception list types are unaffected.
+  action: Shorten entry values that exceed the limits before saving. Typical limits are 4096 characters for entry values and 1024 characters for field names in advanced trusted apps and event filters.
+  subtype: api
+  prs:
+  - https://github.com/elastic/kibana/pull/274803
+- file:
+    name: 268951.yaml
+    checksum: 5895245a35a8a2fce86dd0da3a23f598ab31698f
+  type: breaking-change
+  title: Dashboards API search endpoint uses a new response schema and enforces a page size limit
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-07-07
+  description: The response envelope for the Dashboards API search endpoint changed from `{ dashboards, page, total }` to `{ data, meta }`, where the pagination fields (`page`, `per_page`, and `total`) move under `meta`. The endpoint also enforces a maximum `per_page` of 1000.
+  impact: Requests that set `per_page` above 1000 are rejected. Clients that read `dashboards`, `page`, or `total` from the top level of the response no longer receive those fields.
+  action: Update Dashboards API search clients to read results from `data` and pagination from `meta`, and keep `per_page` at or below 1000. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268951
+  issues:
+  - https://github.com/elastic/kibana/issues/267607
+- file:
+    name: 266410.yaml
+    checksum: 99691c77c8009de4b4dc75c90efa530749b0605b
+  type: breaking-change
+  title: Entity Store v1 HTTP APIs, clients, and server-side components are removed
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-07-09
+  impact: Integrations and automations that call v1 `/api/entity_store/*` routes or rely on v1 engine management must migrate to Entity Store v2.
+  action: Update integrations to use Entity Store v2 APIs provided by the `entity_store` plugin. Remove references to v1 routes such as `/api/entity_store/engines*` and `/entities*`.
+  prs:
+  - https://github.com/elastic/kibana/pull/266410
+- file:
+    name: 274792.yaml
+    checksum: e6fb325677e516e0d7cbaf71c7f24a36a017d5f7
+  type: breaking-change
+  title: Dashboards and Visualizations APIs use short-hand duration units
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-07-09
+  description: The `duration` format used in visualization configuration now uses short-hand unit values aligned with {{esql}} conventions for its `from` and `to` options. This affects the `api/visualizations` and `api/dashboards` APIs, for both by-value and by-reference panels. For example, `minutes` becomes `min`, `humanize` becomes `auto-approximate`, and `humanizePrecise` becomes `auto`.
+  impact: API requests that configure duration formats with the previous verbose unit names (for example, `minutes`, `humanize`, or `asMilliseconds`) are rejected.
+  action: Update the duration `from` and `to` values in your visualization and dashboard panel API payloads to the new short-hand units. Refer to the [Dashboards API reference](https://dashboardsapispec.kibana.dev/index.html) for the updated schemas.
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/274792
+  issues:
+  - https://github.com/elastic/kibana/issues/265849
