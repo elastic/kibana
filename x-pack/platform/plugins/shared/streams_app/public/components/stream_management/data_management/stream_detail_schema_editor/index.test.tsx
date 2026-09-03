@@ -210,7 +210,7 @@ describe('StreamDetailSchemaEditor', () => {
     });
   });
 
-  describe('Root stream read-only callout', () => {
+  describe('Root stream mappings callout', () => {
     it('displays read-only callout for root streams', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
@@ -248,7 +248,7 @@ describe('StreamDetailSchemaEditor', () => {
 
       expect(
         screen.getByText(
-          /Root streams are selectively immutable and their schema cannot be modified/
+          /Custom field mappings on this root stream are inherited by all child streams/
         )
       ).toBeInTheDocument();
     });
@@ -290,7 +290,7 @@ describe('StreamDetailSchemaEditor', () => {
 
       expect(
         screen.queryByText(
-          /Root streams are selectively immutable and their schema cannot be modified/
+          /Custom field mappings on this root stream are inherited by all child streams/
         )
       ).not.toBeInTheDocument();
     });
@@ -609,11 +609,11 @@ describe('StreamDetailSchemaEditor', () => {
       expect(screen.getByTestId('streamsAppContentAddFieldButton')).toBeInTheDocument();
     });
 
-    it('hides add field button for root streams even with manage privilege', () => {
+    it('shows add field button for root streams with manage privilege', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
           type: 'wired',
-          name: 'logs', // root stream
+          name: 'logs.otel',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -655,7 +655,7 @@ describe('StreamDetailSchemaEditor', () => {
         </I18nProvider>
       );
 
-      expect(screen.queryByTestId('streamsAppContentAddFieldButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('streamsAppContentAddFieldButton')).toBeInTheDocument();
     });
   });
 });
