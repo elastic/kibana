@@ -67,7 +67,13 @@
     // Owned by @kbn/connector-specs (which declares its own graphql) and referenced
     // as a dynamic string by @kbn/evals-phoenix-executor's codegen script; the root
     // declaration backs that untraceable usage, so knip's partial graph flags it.
-    "graphql"
+    "graphql",
+    // Consumed only by @kbn/cli-dev-mode (packages/kbn-cli-dev-mode/src/base_path_proxy/http2.ts)
+    // for the HTTP/2 dev base-path proxy. That package declares no deps and resolves via root
+    // hoisting, so knip attributes the imports to it; the root declaration then looks unused on
+    // CI's partial graph (it traces fine locally with the complete module graph).
+    "http2-proxy",
+    "http2-wrapper"
   ],
   "workspaces": {
     ".": {
