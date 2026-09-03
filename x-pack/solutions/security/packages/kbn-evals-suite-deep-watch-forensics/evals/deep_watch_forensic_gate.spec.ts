@@ -9,7 +9,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
-import { evaluate } from '../src/evaluate';
+import { evaluate, tags } from '../src/evaluate';
 import { DEEP_WATCH_GOLDEN_ROWS, DEEP_WATCH_ROW_BY_ID } from '../src/golden_dataset';
 import { setupWatchCell, teardownWatchCell } from '../src/watch_cell_setup';
 import { enableDeepWatch, runDeepWatch } from '../src/deep_watch_run';
@@ -67,7 +67,7 @@ const scoreFromTask = (name: string, pick: (output: DeepWatchTaskOutput) => numb
  * (at least one correct open AND one correct close) is asserted after the
  * run rather than reported as an accuracy number.
  */
-evaluate.describe('Deep Watch forensic gate', () => {
+evaluate.describe('Deep Watch forensic gate', { tag: [tags.stateful.classic] }, () => {
   evaluate(
     'runs forensic reconstruction exactly when triage confirms an incident',
     async ({ executorClient, esClient, fetch, log }: DeepWatchEvalContext) => {

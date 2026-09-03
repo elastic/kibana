@@ -8,5 +8,6 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
+  workers: 1,
   timeout: 30 * 60_000,
 });

@@ -204,7 +204,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
@@ -458,6 +458,21 @@
         "evals:siem-readiness"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "deep-watch-forensics",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-deep-watch-forensics/playwright.config.ts",
+      "serverConfigSet": "evals_attack_discovery_agent_builder",
+      "name": "Deep Watch Forensic Gate",
+      "slackChannel": "#security-generative-ai-evals",
+      "tags": [
+        "security",
+        "attack-discovery",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:attack-discovery-agent-builder"
+      ]
     }
   ]
 }

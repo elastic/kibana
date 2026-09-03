@@ -98,9 +98,10 @@ export const setupWatchCell = async ({
   const now = Date.now();
   const ops: unknown[] = [];
   for (const [off, host, category, type, proc, text] of KILL_CHAIN_EVENTS) {
-    ops.push({ index: { _index: EVENT_INDEX, _id: `dwf-evt-${off}` } });
+    ops.push({ create: { _index: EVENT_INDEX } });
     ops.push({
       '@timestamp': new Date(now - (42 - off) * 60_000).toISOString(),
+      'event.dataset': 'endpoint forensics watch eval seed',
       'event.category': [category],
       'event.type': [type],
       'event.action': text,
@@ -126,7 +127,7 @@ export const teardownWatchCell = async ({
   rows: DeepWatchGoldenRow[];
 }): Promise<void> => {
   for (const [off] of KILL_CHAIN_EVENTS) {
-    await esClient.delete({ index: EVENT_INDEX, id: `dwf-evt-${off}` }).catch(() => undefined);
+    await esClient.deleteByQuery({ index: EVENT_INDEX, refresh: true, query: { term: { 'event.dataset': 'endpoint forensics watch eval seed' } } }).catch(() => undefined);
   }
   for (const row of rows) {
     await esClient.delete({ index: ATTACK_DISCOVERY_INDEX, id: row.id }).catch(() => undefined);
