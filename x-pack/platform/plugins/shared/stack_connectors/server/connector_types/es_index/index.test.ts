@@ -141,7 +141,9 @@ describe('config validation', () => {
         { documents: ['should be an object or object string'] },
         { configurationUtilities }
       );
-    }).toThrowError("error validating action params: ✖ Unexpected token 's', \"should be \"... is not valid JSON")
+    }).toThrowError(
+      'error validating action params: ✖ Unexpected token \'s\', "should be "... is not valid JSON'
+    );
   });
 });
 
