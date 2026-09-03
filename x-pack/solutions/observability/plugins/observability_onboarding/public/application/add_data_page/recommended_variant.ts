@@ -9,12 +9,14 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 
 const OPENTELEMETRY_CATEGORY = 'opentelemetry';
 
-/** First installable OpenTelemetry member. Assets-only `content` packages carry the category but collect nothing, so they never qualify. */
+/** First installable OpenTelemetry member. Only `integration` and `input` collect data, so assets-only `content` packages never qualify. */
 export const findRecommendedMember = (
   members: readonly IntegrationCardItem[]
 ): IntegrationCardItem | undefined =>
   members.find(
-    (member) => member.categories.includes(OPENTELEMETRY_CATEGORY) && member.type !== 'content'
+    (member) =>
+      member.categories.includes(OPENTELEMETRY_CATEGORY) &&
+      (member.type === 'integration' || member.type === 'input')
   );
 
 /** Moves the recommended member to the front and keeps Fleet's order for the rest. */

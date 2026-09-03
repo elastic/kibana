@@ -50,6 +50,20 @@ describe('findRecommendedMember', () => {
     expect(findRecommendedMember([ecs, ecsIngress])).toBeUndefined();
     expect(findRecommendedMember([ecs, otelAssets])).toBeUndefined();
   });
+
+  it('skips OpenTelemetry members whose type is missing or unknown', () => {
+    const missingType = member('nginx_otel_unknown', {
+      type: undefined,
+      categories: ['observability', 'opentelemetry'],
+    });
+    const unknownType = member('nginx_otel_link', {
+      type: 'ui_link',
+      categories: ['observability', 'opentelemetry'],
+    });
+
+    expect(findRecommendedMember([missingType, ecs, otelInput])).toBe(otelInput);
+    expect(findRecommendedMember([unknownType])).toBeUndefined();
+  });
 });
 
 describe('orderMembers', () => {
