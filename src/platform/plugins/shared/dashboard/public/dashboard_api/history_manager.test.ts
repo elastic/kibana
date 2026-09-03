@@ -41,15 +41,10 @@ const makeSetup = async () => {
     initialState$,
   });
 
-  // Build a combined disabledActions$ from the three separate observables exposed by internalApi.
-  const disabledActions$ = combineLatest([
-    internalApi.canUndo$,
-    internalApi.canRedo$,
-    internalApi.disableUndoRedo$,
-  ]).pipe(
-    map(([canUndo, canRedo, disableUndoRedo]) => ({
-      undo: disableUndoRedo || !canUndo,
-      redo: disableUndoRedo || !canRedo,
+  const disabledActions$ = combineLatest([internalApi.canUndo$, internalApi.canRedo$]).pipe(
+    map(([canUndo, canRedo]) => ({
+      undo: !canUndo,
+      redo: !canRedo,
     }))
   );
 
