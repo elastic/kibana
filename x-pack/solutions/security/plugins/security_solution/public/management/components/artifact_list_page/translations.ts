@@ -190,6 +190,42 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Name',
     }
   ),
+  tableColumnPolicyAssignmentLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.columnPolicyAssignmentLabel',
+    {
+      defaultMessage: 'Policy assignment',
+    }
+  ),
+  tablePolicyAssignmentGlobalLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentGlobalLabel',
+    {
+      defaultMessage: 'Global',
+    }
+  ),
+  tablePolicyAssignmentNoneLabel: i18n.translate(
+    'xpack.securitySolution.artifactListPage.table.policyAssignmentNoneLabel',
+    {
+      defaultMessage: 'None',
+    }
+  ),
+  getTablePolicyAssignmentAdditionalCountLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountLabel',
+      {
+        defaultMessage: '+{count}',
+        values: { count },
+      }
+    );
+  },
+  getTablePolicyAssignmentAdditionalCountAriaLabel: (count: number): string => {
+    return i18n.translate(
+      'xpack.securitySolution.artifactListPage.table.policyAssignmentAdditionalCountAriaLabel',
+      {
+        defaultMessage: '{count, plural, one {# more policy} other {# more policies}}',
+        values: { count },
+      }
+    );
+  },
   tableColumnOperatingSystemsLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.table.columnOperatingSystemsLabel',
     {

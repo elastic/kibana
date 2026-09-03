@@ -19,9 +19,15 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { artifactListPageLabels } from '../translations';
 import { ArtifactSimpleTable, type ArtifactSimpleTableProps } from './artifact_simple_table';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+import type { MenuItemPropsByPolicyId } from '../../artifact_entry_card';
+import { useArtifactAssignedPolicies as _useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
 
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../hooks/use_artifact_assigned_policies');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+const useArtifactAssignedPoliciesMock = _useArtifactAssignedPolicies as jest.Mock;
 
 describe('ArtifactSimpleTable', () => {
   const generator = new ExceptionsListItemGenerator('seed');
@@ -45,6 +51,10 @@ describe('ArtifactSimpleTable', () => {
   beforeEach(() => {
     useUserPrivilegesMock.mockReturnValue({
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
+    });
+    useArtifactAssignedPoliciesMock.mockReturnValue({
+      policies: {},
+      isLoading: false,
     });
 
     const mockedContext = createAppRootMockRenderer();
@@ -74,6 +84,7 @@ describe('ArtifactSimpleTable', () => {
 
   afterEach(() => {
     useUserPrivilegesMock.mockReset();
+    useArtifactAssignedPoliciesMock.mockReset();
   });
 
   it('renders the expected columns', () => {
@@ -82,6 +93,7 @@ describe('ArtifactSimpleTable', () => {
     const columns = renderResult.getAllByRole('columnheader');
     expect(columns.map((column) => column.textContent)).toEqual([
       'Name',
+      'Policy assignment',
       'Operating systems',
       'Updated by',
       'Last updated',
@@ -180,6 +192,7 @@ describe('ArtifactSimpleTable', () => {
     const columns = renderResult.getAllByRole('columnheader');
     expect(columns.map((column) => column.textContent)).toEqual([
       'Name',
+      'Policy assignment',
       'Operating systems',
       'Updated by',
       'Last updated',
@@ -194,5 +207,172 @@ describe('ArtifactSimpleTable', () => {
     fireEvent.click(renderResult.getByTestId('pagination-button-next'));
 
     expect(onChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 10 });
+  });
+
+  describe('policy assignment column', () => {
+    it('renders Global when the artifact has the global tag', () => {
+      render({
+        items: [generator.generate({ ...item, tags: [GLOBAL_ARTIFACT_TAG] })],
+      });
+
+      expect(renderResult.getByTestId('testTable-columnPolicyAssignment-global')).toHaveTextContent(
+        'Global'
+      );
+    });
+
+    it('renders None when the artifact is not assigned to any policy', () => {
+      render({
+        items: [generator.generate({ ...item, tags: [] })],
+      });
+
+      expect(renderResult.getByTestId('testTable-columnPolicyAssignment-none')).toHaveTextContent(
+        'None'
+      );
+    });
+
+    it('renders the first policy as a link when the user can read policies', () => {
+      const policies: MenuItemPropsByPolicyId = {
+        'policy-1': {
+          children: 'Policy one',
+          href: 'http://example/policy-1',
+          target: '_blank',
+          'data-test-subj': 'policyMenuItem-1',
+        },
+      };
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies,
+        isLoading: false,
+      });
+
+      render({
+        items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-1')] })],
+      });
+
+      const firstPolicy = renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy');
+      expect(firstPolicy).toHaveTextContent('Policy one');
+      expect(firstPolicy).toHaveAttribute('href', 'http://example/policy-1');
+      expect(
+        renderResult.queryByTestId('testTable-columnPolicyAssignment-additionalCount')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders the first policy as text when the user cannot read policies', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadPolicyManagement: false }),
+      });
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies: {
+          'policy-1': {
+            children: 'Policy one',
+            href: 'http://example/policy-1',
+            target: '_blank',
+          },
+        },
+        isLoading: false,
+      });
+
+      render({
+        items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-1')] })],
+      });
+
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
+      ).toHaveTextContent('Policy one');
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
+      ).not.toHaveAttribute('href');
+    });
+
+    it('renders the first policy name and a count badge when assigned to multiple policies', () => {
+      const policies: MenuItemPropsByPolicyId = {
+        'policy-1': {
+          children: 'Policy one',
+          href: 'http://example/policy-1',
+          'data-test-subj': 'policyMenuItem-1',
+        },
+        'policy-2': {
+          children: 'Policy two',
+          href: 'http://example/policy-2',
+          'data-test-subj': 'policyMenuItem-2',
+        },
+        'policy-3': {
+          children: 'Policy three',
+          href: 'http://example/policy-3',
+          'data-test-subj': 'policyMenuItem-3',
+        },
+      };
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies,
+        isLoading: false,
+      });
+
+      render({
+        items: [
+          generator.generate({
+            ...item,
+            tags: [
+              buildPerPolicyTag('policy-1'),
+              buildPerPolicyTag('policy-2'),
+              buildPerPolicyTag('policy-3'),
+            ],
+          }),
+        ],
+      });
+
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
+      ).toHaveTextContent('Policy one');
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-additionalCount')
+      ).toHaveTextContent('+2');
+    });
+
+    it('opens the policies popup listing only the additional policies when the count badge is clicked', async () => {
+      const policies: MenuItemPropsByPolicyId = {
+        'policy-1': {
+          children: 'Policy one',
+          href: 'http://example/policy-1',
+          'data-test-subj': 'policyMenuItem-1',
+        },
+        'policy-2': {
+          children: 'Policy two',
+          href: 'http://example/policy-2',
+          'data-test-subj': 'policyMenuItem-2',
+        },
+      };
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies,
+        isLoading: false,
+      });
+
+      render({
+        items: [
+          generator.generate({
+            ...item,
+            tags: [buildPerPolicyTag('policy-1'), buildPerPolicyTag('policy-2')],
+          }),
+        ],
+      });
+
+      fireEvent.click(renderResult.getByTestId('testTable-columnPolicyAssignment-additionalCount'));
+
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-popupMenu-popoverPanel')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByTestId('policyMenuItem-1')).not.toBeInTheDocument();
+      expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent(
+        'Policy twoView details'
+      );
+    });
+
+    it('shows the policy id when the policy is not in the policies map', () => {
+      render({
+        items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-unknown')] })],
+      });
+
+      expect(
+        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
+      ).toHaveTextContent('policy-unknown');
+    });
   });
 });

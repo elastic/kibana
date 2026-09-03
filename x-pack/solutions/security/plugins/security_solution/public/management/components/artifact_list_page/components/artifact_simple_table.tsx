@@ -27,6 +27,8 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useArtifactActionsDisabled } from '../../../hooks/artifacts';
 import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { artifactListPageLabels } from '../translations';
+import { useArtifactAssignedPolicies } from '../hooks/use_artifact_assigned_policies';
+import { PolicyAssignmentCell } from './policy_assignment_cell';
 
 const EMPTY_OS_TYPES: OsType[] = [];
 
@@ -84,6 +86,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const tableItems = items as ExceptionListItemSchema[];
+    const { policies, isLoading: loadingPoliciesList } = useArtifactAssignedPolicies(tableItems);
 
     const handleTableChange = useCallback(
       ({ page }: CriteriaWithPagination<ExceptionListItemSchema>) => {
@@ -113,6 +116,19 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
                 {name}
               </EuiText>
             </EuiToolTip>
+          ),
+        },
+        {
+          name: labels.tableColumnPolicyAssignmentLabel,
+          truncateText: true,
+          render: (item: ExceptionListItemSchema) => (
+            <PolicyAssignmentCell
+              item={item}
+              policies={policies}
+              loadingPoliciesList={loadingPoliciesList}
+              labels={labels}
+              data-test-subj={getTestId('columnPolicyAssignment')}
+            />
           ),
         },
         {
@@ -228,14 +244,10 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       allowCardDeleteAction,
       allowCardEditAction,
       getTestId,
-      labels.cardActionDeleteLabel,
-      labels.cardActionEditLabel,
-      labels.tableColumnActionsLabel,
-      labels.tableColumnLastUpdatedLabel,
-      labels.tableColumnNameLabel,
-      labels.tableColumnOperatingSystemsLabel,
-      labels.tableColumnUpdatedByLabel,
+      labels,
+      loadingPoliciesList,
       onAction,
+      policies,
     ]);
 
     return (
