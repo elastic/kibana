@@ -385,7 +385,7 @@ export const observablesAddedTriggerCommonDefinition: CommonTriggerDefinition = 
 
 **Payload fields**
 - event.observableIds — IDs of the newly-persisted observables, in insertion order.
-- event.observableTypeKeys — deduplicated, sorted list of type keys for the newly-persisted observables (e.g. "{ipv4Key}", "{fileHashKey}"). Custom observable types use a UUID key. Use this field in trigger conditions.
+- event.observableTypeKeys — type keys for the newly-persisted observables, one entry per observable, index-aligned with event.observableIds (e.g. "{ipv4Key}", "{fileHashKey}"). A type key repeats when several observables of the same type are added in one request. Custom observable types use a UUID key. Use this field in trigger conditions — KQL matches on any element.
 
 **Observable values are not included in the payload.** Use a cases.getCase step to read the current observable values after the trigger fires. This preserves the invariant that users without Cases read access cannot observe case data through workflow triggers.
 

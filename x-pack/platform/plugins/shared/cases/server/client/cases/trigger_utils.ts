@@ -20,9 +20,9 @@ export const emitObservablesAddedEvent = (
   const payload: ObservablesAddedEventPayload = {
     caseId: theCase.id,
     owner: theCase.attributes.owner as Owner,
-    // Ids in insertion order; type keys deduplicated and sorted.
+    // Both arrays are index-aligned: observableTypeKeys[i] is the type of observableIds[i].
     observableIds: observables.map(({ id }) => id),
-    observableTypeKeys: [...new Set(observables.map(({ typeKey }) => typeKey))].sort(),
+    observableTypeKeys: observables.map(({ typeKey }) => typeKey),
   };
   clientArgs.casesEventBus?.emitObservablesAdded(clientArgs.request, payload);
 };

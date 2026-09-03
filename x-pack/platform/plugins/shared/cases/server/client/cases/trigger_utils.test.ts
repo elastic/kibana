@@ -24,7 +24,7 @@ const makeObservable = (overrides: Partial<Observable> = {}): Observable => ({
 });
 
 describe('emitObservablesAddedEvent', () => {
-  it('emits observablesAdded with ids in insertion order and sorted unique type keys', () => {
+  it('emits observablesAdded with ids and type keys in insertion order, index-aligned', () => {
     const clientArgs = createCasesClientMockArgs();
     const theCase = makeCase();
     const observables = [
@@ -39,9 +39,12 @@ describe('emitObservablesAddedEvent', () => {
       caseId: 'case-1',
       owner: 'securitySolution',
       observableIds: ['obs-1', 'obs-2', 'obs-3'],
-      // deduped and sorted
-      observableTypeKeys: ['observable-type-ipv4', 'observable-type-url'],
+      // index-aligned: observableTypeKeys[i] is the type of observableIds[i]; repeats are preserved
+      observableTypeKeys: ['observable-type-url', 'observable-type-ipv4', 'observable-type-url'],
     });
+
+    const [[, payload]] = (clientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock.calls;
+    expect(payload.observableIds.length).toBe(payload.observableTypeKeys.length);
   });
 
   it('emits a single observable correctly', () => {

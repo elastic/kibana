@@ -57,7 +57,7 @@ export interface ObservablesAddedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
   /** IDs of the newly-persisted observables, in insertion order. */
   readonly observableIds: string[];
-  /** Deduplicated, sorted list of type keys for the newly-persisted observables. */
+  /** Type keys for the newly-persisted observables, index-aligned with observableIds (observableTypeKeys[i] is the type of observableIds[i]). A type key may repeat when multiple observables of the same type are added in one request. */
   readonly observableTypeKeys: string[];
 }
 

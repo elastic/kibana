@@ -525,6 +525,41 @@ describe('bulkAddObservables', () => {
       },
     });
   });
+
+  it('emits observableTypeKeys index-aligned with observableIds for a multi-type batch', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    // caseSO starts with no observables so all three are new
+    mockCaseService.getCase.mockResolvedValue({
+      ...caseSO,
+      attributes: { ...caseSO.attributes, observables: [] },
+    });
+
+    await bulkAddObservables(
+      {
+        caseId: caseSO.id,
+        observables: [
+          { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '1.1.1.1', description: '' },
+          { typeKey: OBSERVABLE_TYPE_IPV4.key, value: '2.2.2.2', description: '' },
+          { typeKey: OBSERVABLE_TYPE_IPV6.key, value: '::1', description: '' },
+        ],
+      },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
+    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as jest.Mock).mock
+      .calls;
+
+    expect(payload.observableIds).toHaveLength(3);
+    expect(payload.observableTypeKeys).toHaveLength(3);
+    // Both arrays are index-aligned: observableTypeKeys[i] matches observableIds[i].
+    expect(payload.observableTypeKeys).toEqual([
+      OBSERVABLE_TYPE_IPV4.key,
+      OBSERVABLE_TYPE_IPV4.key,
+      OBSERVABLE_TYPE_IPV6.key,
+    ]);
+  });
 });
 
 describe('applyObservablesToCase', () => {
