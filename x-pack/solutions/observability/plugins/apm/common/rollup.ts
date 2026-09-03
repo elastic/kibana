@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RollupInterval } from '@kbn/apm-data-access-plugin/common';
+export { RollupInterval } from '@kbn/apm-types';
