@@ -32,6 +32,7 @@ import {
   type CanvasContextMenuTarget,
   type ContextMenuPosition,
 } from './canvas_context_menu';
+import { CanvasEmptyState } from './canvas_empty_state';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
@@ -460,6 +461,7 @@ function StreamsCanvasInner() {
             })}
           />
         )}
+        {nodes.length === 0 && <CanvasEmptyState />}
         {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
         {selectedSource && (
           <SourceDetailsFlyout

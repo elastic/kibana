@@ -65,6 +65,7 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  public readonly canvasEmptyState;
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
@@ -130,6 +131,7 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    this.canvasEmptyState = this.page.testSubj.locator('streamsCanvasEmptyState');
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
