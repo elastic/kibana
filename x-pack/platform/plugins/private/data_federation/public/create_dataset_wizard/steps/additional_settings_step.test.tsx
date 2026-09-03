@@ -136,7 +136,10 @@ describe('AdditionalSettingsStep', () => {
 
     const region = getByTestId('datasetWizardRegion');
     const format = getByTestId('datasetWizardSettingsFormat');
-    expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const renderedFields = Array.from(
+      getByTestId('datasetWizardAdditionalSettingsStep').querySelectorAll('[data-test-subj]')
+    );
+    expect(renderedFields.indexOf(region)).toBeLessThan(renderedFields.indexOf(format));
     expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
       'Additional settings'
     );
@@ -497,6 +500,36 @@ describe('AdditionalSettingsStep', () => {
       expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
     });
 
+    it('hides the advanced accordion when the other steps have claimed all of its fields', async () => {
+      // Orc leaves only the partition path and schema resolution to advanced,
+      // and both are asked for on another step.
+      const { queryByTestId, getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.orc"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsFields')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeNull();
+    });
+
+    it('keeps the advanced accordion for a format that still has fields for it', async () => {
+      const { getByTestId } = render(
+        <TestHarness
+          resource="s3://bucket/data.csv"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
+      });
+    });
+
     it('leaves settings unset so the request can omit them', async () => {
       const Harness = () => {
         const syncedResourceRef = useRef<string | null>(null);
@@ -776,7 +809,10 @@ describe('AdditionalSettingsStep', () => {
 
     it('keeps schema mapping settings on additional settings in flow 3', async () => {
       const { getByTestId } = render(
-        <TestHarness resource="s3://bucket/data.ndjson" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+        <TestHarness
+          resource="s3://bucket/data.ndjson"
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+        />
       );
 
       await waitFor(() => {

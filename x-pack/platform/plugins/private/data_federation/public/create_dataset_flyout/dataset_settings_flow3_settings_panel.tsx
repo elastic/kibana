@@ -28,7 +28,7 @@ import {
   DatasetSettingsFieldsLayout,
   getIndentedDatasetSettingsFieldsWidthCss,
 } from './dataset_settings_fields_layout';
-import { getFlow3CommonFields } from './dataset_settings_flow3_layout';
+import { getFlow3AdvancedFields, getFlow3CommonFields } from './dataset_settings_flow3_layout';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 
@@ -98,12 +98,38 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
     [errorMode, excludeFieldIds, format]
   );
 
+  const advancedFields = useMemo(
+    () =>
+      getFlow3AdvancedFields(format, errorMode).filter(
+        (fieldId) => !excludeFieldIds.includes(fieldId)
+      ),
+    [errorMode, excludeFieldIds, format]
+  );
+
   const commonSettingsAccordionId = useGeneratedHtmlId({
     prefix: 'datasetWizardFlow3CommonSettingsAccordion',
   });
   const advancedSettingsAccordionId = useGeneratedHtmlId({
     prefix: 'datasetWizardFlow3AdvancedSettingsAccordion',
   });
+
+  /**
+   * Rendered even with no fields of its own, because it also keeps the custom
+   * JSON in step with the form, which the review reads back.
+   */
+  const advancedSettings = (
+    <DatasetSettingsAdvancedViewToggle
+      control={control}
+      getValues={getValues}
+      setValue={setValue}
+      format={format}
+      errorMode={errorMode}
+      fields={advancedFields}
+      testSubjPrefix={testSubjPrefix}
+      constrainWidth={hasPanelBackground}
+      compressed={fieldsCompressed}
+    />
+  );
 
   return (
     <>
@@ -140,40 +166,34 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
           </div>
         </EuiPanel>
       </EuiAccordion>
-      <EuiAccordion
-        id={advancedSettingsAccordionId}
-        element="fieldset"
-        borders="horizontal"
-        buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h4>{advancedSettingsTitle}</h4>
-          </EuiTitle>
-        }
-        data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
-        initialIsOpen={false}
-        paddingSize="none"
-      >
-        <EuiPanel
-          {...panelProps}
-          hasShadow={false}
-          data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsPanel`}
+      {advancedFields.length > 0 ? (
+        <EuiAccordion
+          id={advancedSettingsAccordionId}
+          element="fieldset"
+          borders="horizontal"
+          buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
+          buttonContent={
+            <EuiTitle size="xs">
+              <h4>{advancedSettingsTitle}</h4>
+            </EuiTitle>
+          }
+          data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
+          initialIsOpen={false}
+          paddingSize="none"
         >
-          <div css={fieldsCss} data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsFields`}>
-            <DatasetSettingsAdvancedViewToggle
-              control={control}
-              getValues={getValues}
-              setValue={setValue}
-              format={format}
-              errorMode={errorMode}
-              testSubjPrefix={testSubjPrefix}
-              constrainWidth={hasPanelBackground}
-              compressed={fieldsCompressed}
-              excludeFieldIds={excludeFieldIds}
-            />
-          </div>
-        </EuiPanel>
-      </EuiAccordion>
+          <EuiPanel
+            {...panelProps}
+            hasShadow={false}
+            data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsPanel`}
+          >
+            <div css={fieldsCss} data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsFields`}>
+              {advancedSettings}
+            </div>
+          </EuiPanel>
+        </EuiAccordion>
+      ) : (
+        advancedSettings
+      )}
     </>
   );
 };
