@@ -2240,7 +2240,7 @@
     "prettier": "2.8.8",
     "proxy": "2.1.1",
     "qs": "6.16.0",
-    "react-element-to-jsx-string": "15.0.0",
+    "react-element-to-jsx-string": "17.0.1",
     "react-refresh": "0.18.0",
     "react-test-renderer": "18.2.0",
     "recast": "0.24.0",
