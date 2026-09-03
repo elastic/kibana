@@ -526,7 +526,7 @@ export async function identifyInferredFeatures({
 
   // Bridge the managed Agent Builder tool when available (single schema source; stream_name injected
   // server-side), else a direct KI-client fallback so dedup still works without Agent Builder.
-  const searchTools =
+  let searchTools =
     agentBuilderTools && request
       ? await createInferenceToolsFromAgentBuilder({
           tools: agentBuilderTools,
@@ -542,6 +542,13 @@ export async function identifyInferredFeatures({
           logger: logger.get('feature_similarity_search'),
         })
       : buildFeatureSimilarityInferenceTools({ kiClient, streamName });
+
+  if (
+    !searchTools.tools.search_similar_features ||
+    !searchTools.callbacks.search_similar_features
+  ) {
+    searchTools = buildFeatureSimilarityInferenceTools({ kiClient, streamName });
+  }
 
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
     {},
