@@ -3136,5 +3136,38 @@ describe('Editor actions provider', () => {
       expect(sendRequest).toHaveBeenCalledWith(expect.objectContaining({ host: undefined }));
       expect(setSelectedHostSpy).toHaveBeenCalledWith(null);
     });
+
+    it('keeps a request paired with its own line number when an earlier entry cannot be stringified', async () => {
+      (sendRequest as jest.Mock).mockResolvedValue([]);
+
+      const context = serviceContextMock.create();
+      jest.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
+      jest.spyOn(context.services.esHostService, 'getAllHosts').mockReturnValue([]);
+
+      // Line 1 holds a method without a url, so `getRequestFromEditor()` returns null for
+      // its parsed entry. Before requests carried their own line numbers, dropping that
+      // entry shifted the valid request on line 2 onto line 1 (index-based pairing).
+      editor.getModel.mockReturnValue(createModel(['GET', 'GET _search']));
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 1,
+        endLineNumber: 2,
+      } as monaco.Selection);
+
+      const provider = new MonacoEditorActionsProvider(editor, jest.fn(), '.className', {
+        getRequests: jest.fn().mockResolvedValue([
+          { startOffset: 0, endOffset: 3, method: 'GET', url: '' },
+          { startOffset: 4, endOffset: 15, method: 'GET', url: '_search' },
+        ]),
+        getErrors: jest.fn().mockResolvedValue([]),
+      } as any);
+
+      await provider.sendRequests(jest.fn(), context);
+
+      expect(sendRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requests: [expect.objectContaining({ method: 'GET', url: '_search', lineNumber: 2 })],
+        })
+      );
+    });
   });
 });

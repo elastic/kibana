@@ -1,12 +1,12 @@
 {
-  "sha1": "07b3237379450fe70eaaf1b7ab47f02b9e1f28ff",
+  "sha1": "77b255816394d13108cd0d87d4eb2f0e9b5c27ba",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "f2f499f63d28a1a-b1e5ecf530b8e74",
-      "title": "Console output copy to clipboard copies the selected output on a human-speed (held) click",
+      "id": "771cf8e37b6a820-cc9bb1f738ba996",
+      "title": "Console autocomplete of indices and fields suggests an index that exists in the cluster",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -19,9 +19,309 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/copy_output.spec.ts",
-        "line": 20,
-        "column": 24
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/autocomplete_dynamic.spec.ts",
+        "line": 37,
+        "column": 28
+      }
+    },
+    {
+      "id": "771cf8e37b6a820-b25bcf16e2f7967",
+      "title": "Console autocomplete of indices and fields suggests only the fields of the index being queried",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/autocomplete_dynamic.spec.ts",
+        "line": 38,
+        "column": 74
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-9e2b405863b1eb0",
+      "title": "Console core opens on the Shell tab with the default request and an empty output panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-bd51ed0ee50bf2b",
+      "title": "Console core runs the default requests and leaves the empty state behind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 58,
+        "column": 13
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-260c2ed34a131fc",
+      "title": "Console core resizes the editor with the window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 63,
+        "column": 5
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-b76d24e1f8e41e4",
+      "title": "Console core clears the input editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 75,
+        "column": 62
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-9c937f7ecf8b0e9",
+      "title": "Console core sends a request written with a mixed case method",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 82,
+        "column": 8
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-af83148ec465222",
+      "title": "Console core sends a request to the Kibana API with the kbn: prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 86,
+        "column": 44
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-faf9b37484e6475",
+      "title": "Console core sends a request with query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 92,
+        "column": 5
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-378f66759746686",
+      "title": "Console core prefixes each response of a multi-request run with its input line number",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 97,
+        "column": 23
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-6aceddfb6fd3908",
+      "title": "Console core reports the line number of each repeated request in the output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 109,
+        "column": 11
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-611e0d6e78c15d2",
+      "title": "Console core clears the console output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 121,
+        "column": 5
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-74e2ddd2d277eb8",
+      "title": "Console core keeps the actions menu reachable when the first request line is off screen",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 130,
+        "column": 23
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-f1f32d71f7da735",
+      "title": "Console core shows OK when the response is a 200 with an empty body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 183,
+        "column": 1
+      }
+    },
+    {
+      "id": "ec2d216726f23d1-fa02a3dc5110c7a",
+      "title": "Console core shows the error body when the request fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/console_core.spec.ts",
+        "line": 190,
+        "column": 1
+      }
+    },
+    {
+      "id": "f54e0b9bb5d3f18-c4a2ef1da8ef153",
+      "title": "Console vector tile response renders a binary vector tile response as text",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/console/test/scout/ui/tests/vector_tile_response.spec.ts",
+        "line": 24,
+        "column": 23
       }
     }
   ]
