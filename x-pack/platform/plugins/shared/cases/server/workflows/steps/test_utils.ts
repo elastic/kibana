@@ -28,6 +28,9 @@ export const createStepHandlerContext = ({
     config,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
+      getContext: jest.fn(() => {
+        throw new Error('getContext is not available');
+      }),
     },
     logger: {
       debug: jest.fn(),

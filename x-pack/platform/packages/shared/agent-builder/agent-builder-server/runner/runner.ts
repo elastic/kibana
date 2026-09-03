@@ -107,6 +107,7 @@ export interface RunContext {
 export interface RunAgentStackEntry {
   type: 'agent';
   agentId: string;
+  agentName?: string;
   conversationId?: string;
   executionId?: string;
 }

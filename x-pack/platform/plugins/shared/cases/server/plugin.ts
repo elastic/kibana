@@ -42,7 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import type { CasesClientSource } from './client/types';
+import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
@@ -244,10 +244,10 @@ export class CasePlugin
 
     const getCasesClient = (
       clientSource: CasesClientSource
-    ): ((request: KibanaRequest) => Promise<CasesClient>) => {
-      return async (request: KibanaRequest) => {
+    ): ((request: KibanaRequest, options?: GetCasesClientOptions) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest, options?: GetCasesClientOptions) => {
         const [coreStart] = await core.getStartServices();
-        return this.getCasesClientWithRequest(coreStart, clientSource)(request);
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
     };
 
@@ -559,7 +559,7 @@ export class CasePlugin
 
   private getCasesClientWithRequest =
     (core: CoreStart, clientSource: CasesClientSource) =>
-    async (request: KibanaRequest): Promise<CasesClient> => {
+    async (request: KibanaRequest, options?: GetCasesClientOptions): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
       return this.clientFactory.create({
@@ -567,6 +567,7 @@ export class CasePlugin
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
         clientSource,
+        actionSource: options?.actionSource,
       });
     };
 }

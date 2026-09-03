@@ -221,6 +221,38 @@ describe('UserActionPersister', () => {
 
         expect(persistedAttributes.payload).not.toHaveProperty('foo');
       });
+
+      it('stamps source when the service context has actionSource', async () => {
+        const actionSource = {
+          type: 'agent' as const,
+          id: 'elastic-ai-agent',
+          name: 'Elastic AI Agent',
+        };
+        persister = new UserActionPersister({
+          log: mockLogger,
+          unsecuredSavedObjectsClient,
+          savedObjectsSerializer,
+          auditLogger: auditMockLocker,
+          analyticsV2ActivityWriter,
+          actionSource,
+        });
+
+        await persister.createUserAction(getRequest());
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as UserActionPersistedAttributes;
+
+        expect(persistedAttributes.source).toEqual(actionSource);
+      });
+
+      it('does not stamp source when the service context has no actionSource', async () => {
+        await persister.createUserAction(getRequest());
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock
+          .calls[0][1] as UserActionPersistedAttributes;
+
+        expect(persistedAttributes.source).toBeUndefined();
+      });
     });
 
     describe('bulkCreateAttachmentCreation', () => {

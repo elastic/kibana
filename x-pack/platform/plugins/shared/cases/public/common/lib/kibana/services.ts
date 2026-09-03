@@ -32,7 +32,13 @@ export class KibanaServices {
     kibanaVersion: string;
     config: CasesUiConfigType;
   }) {
-    this.services = { application, http, serverless, savedObjectsTaggingOss, ...startServices };
+    this.services = {
+      application,
+      http,
+      serverless,
+      savedObjectsTaggingOss,
+      ...startServices,
+    };
     this.kibanaVersion = kibanaVersion;
     this.config = config;
   }

@@ -84,3 +84,6 @@ export const STATUS_ESMODEL_TO_EXTERNAL: Record<CasePersistedStatus, CaseStatuse
   [CasePersistedStatus.IN_PROGRESS]: CaseStatuses['in-progress'],
   [CasePersistedStatus.CLOSED]: CaseStatuses.closed,
 };
+
+/** Passes ActionSource from agent-builder invokeStepHandler into getCasesClientFromStepsContext. */
+export const ACTION_SOURCE_STEP_CONFIG_KEY = 'actionSource';

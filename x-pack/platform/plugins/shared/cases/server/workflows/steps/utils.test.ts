@@ -11,6 +11,7 @@ import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../..
 import {
   createCasesStepHandler,
   normalizeCaseStepUpdatesForBulkPatch,
+  resolveActionSourceFromStepContext,
   safeParseCaseForWorkflowOutput,
 } from './utils';
 import { createStepHandlerContext } from './test_utils';
@@ -50,6 +51,41 @@ describe('normalizeCaseStepUpdatesForBulkPatch', () => {
   });
 });
 
+describe('resolveActionSourceFromStepContext', () => {
+  it('uses a valid actionSource from step config', () => {
+    const context = createStepHandlerContext({
+      config: {
+        actionSource: { type: 'agent', id: 'elastic-ai-agent', name: 'Elastic AI Agent' },
+      },
+    });
+
+    expect(resolveActionSourceFromStepContext(context)).toEqual({
+      type: 'agent',
+      id: 'elastic-ai-agent',
+      name: 'Elastic AI Agent',
+    });
+  });
+
+  it('falls back to the workflow context when config has no source', () => {
+    const context = createStepHandlerContext();
+    (context.contextManager.getContext as jest.Mock).mockReturnValue({
+      workflow: { id: 'wf-1', name: 'Escalate' },
+      execution: { id: 'exec-1' },
+    });
+
+    expect(resolveActionSourceFromStepContext(context)).toEqual({
+      type: 'workflow',
+      id: 'wf-1',
+      name: 'Escalate',
+      run_id: 'exec-1',
+    });
+  });
+
+  it('returns undefined when getContext throws', () => {
+    expect(resolveActionSourceFromStepContext(createStepHandlerContext())).toBeUndefined();
+  });
+});
+
 describe('createCasesStepHandler', () => {
   const createContext = (params?: { input?: unknown; config?: Record<string, unknown> }) =>
     createStepHandlerContext({
@@ -73,11 +109,29 @@ describe('createCasesStepHandler', () => {
     const result = await handler(context);
 
     expect(operation).toHaveBeenCalledWith(expect.any(Object), { foo: 'bar' }, {});
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything());
     expect(result).toEqual({
       output: {
         case: createdCase,
       },
     });
+  });
+
+  it('passes actionSource from step config to getCasesClient', async () => {
+    const actionSource = { type: 'agent', id: 'elastic-ai-agent', name: 'Elastic AI Agent' };
+    const operation = jest.fn().mockResolvedValue({ id: 'case-1', connector: { id: 'none' } });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { push: jest.fn() },
+    });
+
+    const handler = createCasesStepHandler(getCasesClient, operation);
+    await handler(
+      createContext({
+        config: { actionSource },
+      })
+    );
+
+    expect(getCasesClient).toHaveBeenCalledWith(expect.anything(), { actionSource });
   });
 
   it('calls push when push-case is enabled', async () => {

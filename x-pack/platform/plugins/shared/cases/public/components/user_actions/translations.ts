@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ActionSourceTypes, type ActionSourceType } from '../../../common/types/domain';
 
 export * from '../case_view/translations';
 
@@ -157,3 +158,45 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     values: { count },
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
+
+const ACTION_SOURCE_KIND_LABELS: Record<ActionSourceType, string> = {
+  [ActionSourceTypes.agent]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.agentLabel',
+    {
+      defaultMessage: 'Agent',
+    }
+  ),
+  [ActionSourceTypes.workflow]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.workflowLabel',
+    {
+      defaultMessage: 'Workflow',
+    }
+  ),
+  [ActionSourceTypes.rule]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.ruleLabel',
+    {
+      defaultMessage: 'Rule',
+    }
+  ),
+  [ActionSourceTypes.attack]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.attackDiscoveryLabel',
+    {
+      defaultMessage: 'Attack Discovery',
+    }
+  ),
+  [ActionSourceTypes.api]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.apiLabel',
+    {
+      defaultMessage: 'API',
+    }
+  ),
+  [ActionSourceTypes.user]: i18n.translate(
+    'xpack.cases.caseView.userActions.actionSource.userLabel',
+    {
+      defaultMessage: 'User',
+    }
+  ),
+};
+
+export const getActionSourceKindLabel = (type: ActionSourceType): string =>
+  ACTION_SOURCE_KIND_LABELS[type];
