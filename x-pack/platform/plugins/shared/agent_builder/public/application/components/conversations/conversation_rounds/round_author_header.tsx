@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,33 @@ const labels = {
   viaSlack: i18n.translate('xpack.agentBuilder.roundAuthor.viaSlack', {
     defaultMessage: 'via Slack',
   }),
+};
+
+const formatDisplayTime = (startedAt: string): string => {
+  const m = moment(startedAt);
+  const now = moment();
+
+  if (m.isSame(now, 'day')) {
+    return m.format('LT');
+  }
+  if (m.isSame(moment().subtract(1, 'day'), 'day')) {
+    return i18n.translate('xpack.agentBuilder.roundAuthor.yesterdayTime', {
+      defaultMessage: 'Yesterday, {time}',
+      values: { time: m.format('LT') },
+    });
+  }
+  if (m.isSame(now, 'year')) {
+    return m.format('MMM D, LT');
+  }
+  return m.format('MMM D, YYYY, LT');
+};
+
+const formatTooltipTime = (startedAt: string): string => {
+  const formattedDate = moment(startedAt).format('LLL');
+  const tzAbbr = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+    .formatToParts(new Date(startedAt))
+    .find((part) => part.type === 'timeZoneName')?.value;
+  return tzAbbr ? `${formattedDate} ${tzAbbr}` : formattedDate;
 };
 
 const RoundAuthorName: React.FC<{ name?: string }> = ({ name }) => <strong>{name}</strong>;
@@ -79,10 +106,18 @@ const RoundOrigin: React.FC<{ origin: ConversationRoundOrigin }> = ({ origin }) 
   );
 };
 
-const RoundTime: React.FC<{ time: string }> = ({ time }) => {
+const RoundTime: React.FC<{ startedAt: string }> = ({ startedAt }) => {
   const euiThemeContext = useEuiTheme();
+  const displayTime = formatDisplayTime(startedAt);
+  const fullTime = formatTooltipTime(startedAt);
 
-  return <span css={roundAuthorDetailItemStyles(euiThemeContext)}>{time}</span>;
+  return (
+    <EuiToolTip content={fullTime}>
+      <span css={roundAuthorDetailItemStyles(euiThemeContext)} aria-label={fullTime} tabIndex={0}>
+        {displayTime}
+      </span>
+    </EuiToolTip>
+  );
 };
 
 interface RoundAuthorHeaderProps {
@@ -99,7 +134,6 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
   startedAt,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const time = moment(startedAt).format('LT');
 
   return (
     <EuiText
@@ -132,7 +166,7 @@ export const RoundAuthorHeader: React.FC<RoundAuthorHeaderProps> = ({
             <RoundAuthorSeparator />
           </>
         )}
-        <RoundTime time={time} />
+        <RoundTime startedAt={startedAt} />
       </span>
     </EuiText>
   );
