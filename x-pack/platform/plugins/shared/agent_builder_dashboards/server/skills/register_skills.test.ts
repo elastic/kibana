@@ -27,18 +27,17 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+  it('teaches the target generate_dashboard vocabulary', () => {
+    expect(skill.content).toContain('How should I enhance this dashboard?');
+    expect(skill.content).toContain('normalize_panels');
+    expect(skill.content).toContain('set_layout');
+    expect(skill.content).toContain('intent.legend_statistics');
   });
 
-  it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
-    expect(skill.content).toContain('Chart Type Guidance');
-    expect(skill.content).toContain('Available chart types');
-    expect(skill.content).toContain('- region_map:');
-    expect(skill.content).toContain('only when the terms are short strings');
-    expect(skill.content).toContain(
-      'provide a new `chartType` when the request changes the chart family'
-    );
+  it('does not teach grid arithmetic or banned legend prose', () => {
+    expect(skill.content).not.toContain('grid: { x');
+    expect(skill.content).not.toContain('Grid Packing Rules');
+    expect(skill.content).not.toContain('48 columns');
+    expect(skill.content).not.toContain('show avg/min/max in the legend');
   });
 });

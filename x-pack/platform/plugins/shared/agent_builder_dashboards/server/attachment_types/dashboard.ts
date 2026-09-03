@@ -130,7 +130,7 @@ export const createDashboardAttachmentType = ({
       };
     },
     getAgentDescription: () =>
-      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboard-management skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place.`,
+      `A dashboard attachment represents a composed dashboard with panels and sections. Rendering it inline displays an interactive dashboard card in the conversation UI that the user can click to open the full dashboard. Summarize the dashboard content (title, description, panel list) in plain text alongside the rendered attachment. To modify this dashboard, load the dashboard-management skill, then call the \`platform.dashboard.generate_dashboard\` tool with this attachment's id as \`dashboardAttachmentId\`; the tool reads and updates this attachment in place. For prettify or enhance requests, do not read this attachment. \`generate_dashboard\` reads it server-side via \`dashboardAttachmentId\`.`,
     getTools: () => [],
   };
 };
