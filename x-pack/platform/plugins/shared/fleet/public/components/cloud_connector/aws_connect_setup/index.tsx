@@ -40,13 +40,15 @@ export interface AwsConnectSetupProps {
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
   showIdentityFederation?: boolean;
+  packageName?: string;
+  iacTemplateUrl?: string;
   staticKeysContent?: React.ReactNode;
   onBack?: () => void;
   onContinue?: () => void;
   isContinueButtonLoading?: boolean;
   continueButtonLabel?: React.ReactNode;
   continueButtonIconType?: IconType;
-  onConnectorIdChange?: (connectorId: string | undefined) => void;
+  onConnectorIdChange?: (connectorId: string | undefined, connectorName?: string) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
   onTemporaryKeysChange?: (keys: AwsTemporaryKeyCredentials | undefined) => void;
 }
@@ -60,6 +62,8 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialStaticKeys,
   initialTemporaryKeys,
   showIdentityFederation = true,
+  packageName,
+  iacTemplateUrl,
   staticKeysContent,
   onBack,
   onContinue,
@@ -118,6 +122,8 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           isEditPage={isEditPage}
           initialConnectorId={initialConnectorId}
+          packageName={packageName}
+          iacTemplateUrl={iacTemplateUrl}
           onReadyChange={setIsFormReady}
           onConnectorIdChange={onConnectorIdChange}
         />

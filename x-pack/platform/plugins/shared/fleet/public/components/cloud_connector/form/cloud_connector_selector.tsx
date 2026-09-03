@@ -172,12 +172,14 @@ export const CloudConnectorSelector = ({
             ? connector.vars.external_id.value
             : connector.vars.external_id?.value;
         setCredentials({
+          name: connector.name,
           roleArn: connector.vars.role_arn?.value,
           externalId: externalIdValue,
           cloudConnectorId: connector.id,
         });
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
+          name: connector.name,
           tenantId: connector.vars.tenant_id?.value,
           clientId: connector.vars.client_id?.value,
           azure_credentials_cloud_connector_id:
@@ -186,6 +188,7 @@ export const CloudConnectorSelector = ({
         });
       } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
+          name: connector.name,
           serviceAccount: connector.vars.service_account?.value,
           audience: connector.vars.audience?.value,
           gcp_credentials_cloud_connector_id:

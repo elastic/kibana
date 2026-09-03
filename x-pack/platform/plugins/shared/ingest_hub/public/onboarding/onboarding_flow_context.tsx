@@ -16,6 +16,7 @@ import { getOnboardingSessionKey } from './onboarding_session_storage';
 
 export interface AuthenticateAndDeployStepState {
   connectorId?: string;
+  connectorName?: string;
   staticKeys?: AwsStaticKeyCredentials;
 }
 
@@ -32,6 +33,7 @@ export interface DetectAndReviewStepState {
 // Only non-sensitive fields are persisted — password values are never written to session storage
 interface PersistedAuthenticateAndDeployStep {
   connectorId?: string;
+  connectorName?: string;
   authType?: 'identity_federation' | 'static_keys';
   accessKeyId?: string;
   deploymentMethod?: DeploymentMethod;
@@ -59,7 +61,7 @@ const DEFAULT_SELECTED_IDS: string[] = [];
 
 interface OnboardingFlowState {
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
-  setConnectorId: (id: string | undefined) => void;
+  setConnectorId: (id: string | undefined, name?: string) => void;
   setStaticKeys: (keys: AwsStaticKeyCredentials | undefined) => void;
   deploymentMethod: DeploymentMethod;
   setDeploymentMethod: (method: DeploymentMethod) => void;
@@ -102,25 +104,31 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const setConnectorId = useCallback(
-    (id: string | undefined) => {
+    (id: string | undefined, name?: string) => {
       setStaticKeysState(undefined);
       setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthenticateAndDeployStep,
         connectorId: id,
+        connectorName: id ? name : undefined,
         authType: id ? 'identity_federation' : undefined,
+        accessKeyId: undefined,
       });
     },
-    [setPersistedAuthenticateAndDeployStep]
+    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
   );
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
       setPersistedAuthenticateAndDeployStep({
+        ...persistedAuthenticateAndDeployStep,
+        connectorId: undefined,
+        connectorName: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [setPersistedAuthenticateAndDeployStep]
+    [persistedAuthenticateAndDeployStep, setPersistedAuthenticateAndDeployStep]
   );
 
   const setSelectedServiceIds = useCallback(
@@ -252,6 +260,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const authenticateAndDeployStep: AuthenticateAndDeployStepState = {
     connectorId: persistedAuthenticateAndDeployStep?.connectorId,
+    connectorName: persistedAuthenticateAndDeployStep?.connectorName,
     staticKeys,
   };
 
