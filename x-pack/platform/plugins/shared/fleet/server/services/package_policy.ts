@@ -213,6 +213,7 @@ import {
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
   deleteSecretsIfNotReferenced as deleteSecrets,
+  deleteSecrets as deleteSecretsUnscoped,
   isSecretStorageEnabled,
 } from './secrets';
 import { extractAccountType } from './cloud_connectors/integration_helpers';
@@ -259,6 +260,10 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 };
 
 const ASYNC_DEPLOY_POLICIES_THRESHOLD = 100;
+
+function computeWillDeployAsync(asyncDeploy: boolean | undefined, policyCount: number): boolean {
+  return (asyncDeploy ?? false) || policyCount > ASYNC_DEPLOY_POLICIES_THRESHOLD;
+}
 
 async function getPkgInfoAssetsMap({
   savedObjectsClient,
@@ -917,7 +922,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         (policyId) =>
           agentPolicyService.bumpRevision(deps.soClient, deps.esClient, policyId, {
             user: options?.user,
-            asyncDeploy: options.asyncDeploy || policyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD,
+            asyncDeploy: computeWillDeployAsync(options.asyncDeploy, policyIds.length),
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
@@ -1874,13 +1879,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } associated agent policies ${[...associatedPolicyIds]}`
     );
 
-    // Compute whether the bump will deploy asynchronously, using the same formula as
-    // bumpAgentPoliciesRevision. When asyncDeploy is true the new .fleet-policies document
-    // is not written before we return, so we cannot safely delete the old secret — the old
-    // compiled document still references it and fleet-server may restart against it.
-    const willDeployAsync =
-      (options?.asyncDeploy ?? false) ||
-      [...associatedPolicyIds].length > ASYNC_DEPLOY_POLICIES_THRESHOLD;
+    // When the bump deploys asynchronously the new .fleet-policies document is not written
+    // before we return, so we cannot safely delete the old secret — fleet-server may still
+    // restart against the old compiled doc that references it.
+    const willDeployAsync = computeWillDeployAsync(
+      options?.asyncDeploy,
+      [...associatedPolicyIds].length
+    );
 
     const bumpPromise = shouldBumpAgentPolicies
       ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
@@ -2401,11 +2406,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // without sequencing, secrets can be deleted while old compiled docs still reference them.
     await Promise.all([bumpPromise, removeAssetPromise, installAssetsPromise]);
 
-    // Compute whether the bump deployed asynchronously (same formula as bumpAgentPoliciesRevision).
     // When async, the new .fleet-policies docs are not yet written — skip deletion.
-    const willDeployAsync =
-      (options?.asyncDeploy ?? false) ||
-      [...associatedPolicyIds].length > ASYNC_DEPLOY_POLICIES_THRESHOLD;
+    const willDeployAsync = computeWillDeployAsync(
+      options?.asyncDeploy,
+      [...associatedPolicyIds].length
+    );
 
     if (allSecretsToDelete.length) {
       if (willDeployAsync) {
@@ -2712,9 +2717,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
 
       if (secretsToDelete.length > 0) {
-        const willDeployAsync =
-          (options?.asyncDeploy ?? false) ||
-          bumpedAgentPolicyIds.length > ASYNC_DEPLOY_POLICIES_THRESHOLD;
+        const willDeployAsync = computeWillDeployAsync(
+          options?.asyncDeploy,
+          bumpedAgentPolicyIds.length
+        );
 
         if (willDeployAsync) {
           logger.warn(
@@ -2735,13 +2741,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
     } else if (secretsToDelete.length > 0) {
-      // skipUnassignFromAgentPolicies is set — no agent policy ids available to scope the
-      // .fleet-policies check, so deleteSecretsIfNotReferenced will fail closed and skip
-      // the delete. Log so the outcome is visible.
-      logger.warn(
-        `[deleteSecretsIfNotReferenced] skipUnassignFromAgentPolicies is set — cannot scope` +
-          ` .fleet-policies check for secrets [${secretsToDelete.join(', ')}], skipping deletion.`
-      );
+      // skipUnassignFromAgentPolicies is set when the parent agent policy is itself being deleted.
+      // In that case, deleteFleetServerPoliciesForPolicyId has already removed the .fleet-policies
+      // docs before this code runs, so there is no live compiled doc that can reference these
+      // secrets. Skip the reference check and delete directly.
+      await deleteSecretsUnscoped({ esClient, ids: secretsToDelete });
     }
 
     try {

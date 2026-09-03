@@ -23,30 +23,31 @@ jest.mock('../app_context', () => ({
   },
 }));
 
-// Helper: build the aggregation response shape returned by the new implementation.
-// Each entry is { policy_base_id, secret_references } for the latest revision of that policy.
+type PolicyEntry = { policyId: string; secretRefs: Array<{ id: string }> };
+
+function makeBuckets(policies: PolicyEntry[]) {
+  return policies.map(({ policyId, secretRefs }) => ({
+    key: policyId,
+    latest_doc: {
+      hits: {
+        hits: [{ _source: { data: { secret_references: secretRefs } } }],
+      },
+    },
+  }));
+}
+
+// Helper: build the dual-agg response shape (by_policy_base_id + by_policy_id).
+// Pass the same list for both aggs to simulate modern docs (which have both fields).
+// Pass different lists to simulate pre-backfill docs (policy_base_id absent).
 function makeAggResponse(
-  policies: Array<{ policyBaseId: string; secretRefs: Array<{ id: string }> }>
+  byPolicyBaseId: PolicyEntry[],
+  byPolicyId: PolicyEntry[] = byPolicyBaseId
 ) {
   return {
     hits: { total: { value: 0, relation: 'eq' }, hits: [] },
     aggregations: {
-      by_policy: {
-        buckets: policies.map(({ policyBaseId, secretRefs }) => ({
-          key: policyBaseId,
-          latest_doc: {
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    data: { secret_references: secretRefs },
-                  },
-                },
-              ],
-            },
-          },
-        })),
-      },
+      by_policy_base_id: { buckets: makeBuckets(byPolicyBaseId) },
+      by_policy_id: { buckets: makeBuckets(byPolicyId) },
     },
   } as any;
 }
@@ -86,7 +87,7 @@ describe('findFleetPoliciesUsingSecrets', () => {
   it('returns referenced ids found in the latest compiled policy document', async () => {
     esClientMock.search.mockResolvedValueOnce(
       makeAggResponse([
-        { policyBaseId: 'policy-1', secretRefs: [{ id: 'secret-1' }, { id: 'secret-2' }] },
+        { policyId: 'policy-1', secretRefs: [{ id: 'secret-1' }, { id: 'secret-2' }] },
       ])
     );
 
@@ -110,7 +111,7 @@ describe('findFleetPoliciesUsingSecrets', () => {
     esClientMock.search.mockResolvedValueOnce(
       makeAggResponse([
         {
-          policyBaseId: 'policy-1',
+          policyId: 'policy-1',
           // Latest revision: secret has been rotated, references new id only
           secretRefs: [{ id: 'new-secret-id' }],
         },
@@ -130,7 +131,7 @@ describe('findFleetPoliciesUsingSecrets', () => {
 
   it('returns the secret as referenced when the latest compiled document still references it', async () => {
     esClientMock.search.mockResolvedValueOnce(
-      makeAggResponse([{ policyBaseId: 'policy-1', secretRefs: [{ id: 'live-secret-id' }] }])
+      makeAggResponse([{ policyId: 'policy-1', secretRefs: [{ id: 'live-secret-id' }] }])
     );
 
     const result = await findFleetPoliciesUsingSecrets({
@@ -145,7 +146,7 @@ describe('findFleetPoliciesUsingSecrets', () => {
 
   it('returns empty referencedIds when no compiled document references the secrets', async () => {
     esClientMock.search.mockResolvedValueOnce(
-      makeAggResponse([{ policyBaseId: 'policy-1', secretRefs: [{ id: 'other-secret' }] }])
+      makeAggResponse([{ policyId: 'policy-1', secretRefs: [{ id: 'other-secret' }] }])
     );
 
     const result = await findFleetPoliciesUsingSecrets({
@@ -214,12 +215,16 @@ describe('findFleetPoliciesUsingSecrets', () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: { total: { value: 0, relation: 'eq' }, hits: [] },
       aggregations: {
-        by_policy: {
+        by_policy_base_id: {
           buckets: [
             {
               key: 'policy-1',
               latest_doc: { hits: { hits: [{ _source: { data: {} } }] } }, // no secret_references
             },
+          ],
+        },
+        by_policy_id: {
+          buckets: [
             {
               key: 'policy-2',
               latest_doc: {
@@ -240,11 +245,31 @@ describe('findFleetPoliciesUsingSecrets', () => {
     expect(result).toEqual({ referencedIds: new Set(), checkFailed: false });
   });
 
+  it('reads secret_references from pre-backfill docs matched only via policy_id (no policy_base_id)', async () => {
+    // Pre-backfill docs have policy_base_id absent/null, so they land in no by_policy_base_id bucket.
+    // The by_policy_id agg catches them and their references must be returned.
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse(
+        [], // by_policy_base_id: no modern docs for this policy
+        [{ policyId: 'policy-old', secretRefs: [{ id: 'old-policy-secret' }] }] // by_policy_id only
+      )
+    );
+
+    const result = await findFleetPoliciesUsingSecrets({
+      esClient: esClientMock,
+      ids: ['old-policy-secret'],
+      agentPolicyIds: ['policy-old'],
+    });
+
+    expect(result.checkFailed).toBe(false);
+    expect(result.referencedIds.has('old-policy-secret')).toBe(true);
+  });
+
   it('collects referenced ids across multiple policies', async () => {
     esClientMock.search.mockResolvedValueOnce(
       makeAggResponse([
-        { policyBaseId: 'policy-1', secretRefs: [{ id: 'secret-a' }] },
-        { policyBaseId: 'policy-2', secretRefs: [{ id: 'secret-b' }] },
+        { policyId: 'policy-1', secretRefs: [{ id: 'secret-a' }] },
+        { policyId: 'policy-2', secretRefs: [{ id: 'secret-b' }] },
       ])
     );
 

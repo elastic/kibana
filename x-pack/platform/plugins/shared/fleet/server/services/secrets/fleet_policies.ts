@@ -54,15 +54,17 @@ export async function findFleetPoliciesUsingSecrets(opts: {
   try {
     const referencedIds = new Set<string>();
 
-    // Use a terms aggregation bucketed by policy_base_id with a top_hits sub-agg sorted
-    // by revision_idx desc so we read only the latest compiled doc per policy. Older
-    // revision documents naturally still carry the previous secret_references, so
+    // Use terms aggregations to bucket the latest compiled doc per policy, sorted by
+    // revision_idx desc. Older revision documents carry the previous secret_references —
     // including them would block deletion of any rotated secret permanently.
     //
-    // Use both policy_base_id and policy_id so we catch:
-    //  - base docs and version-specific variants (policy_base_id, indexed on current ES)
-    //  - docs written before backfill_policy_base_id ran (policy_id fallback)
-    // Do NOT use a prefix/wildcard on policy_id — see sweep_orphaned_fleet_policies.ts.
+    // Two parallel aggs handle the pre-backfill / mixed-version case:
+    //   by_policy_base_id — buckets on policy_base_id (current schema, most docs)
+    //   by_policy_id      — buckets on policy_id to catch docs written before
+    //                       backfill_policy_base_id ran (policy_base_id absent/null).
+    // Modern docs have both fields so they appear in both aggs; duplicates are harmless
+    // because we union into a Set. Do NOT use a prefix/wildcard on policy_id — see
+    // sweep_orphaned_fleet_policies.ts.
     const res = await esClient.search<never>(
       {
         index: AGENT_POLICY_INDEX,
@@ -78,9 +80,24 @@ export async function findFleetPoliciesUsingSecrets(opts: {
           },
         },
         aggs: {
-          by_policy: {
+          by_policy_base_id: {
             terms: {
               field: 'policy_base_id',
+              size: agentPolicyIds.length,
+            },
+            aggs: {
+              latest_doc: {
+                top_hits: {
+                  size: 1,
+                  sort: [{ revision_idx: 'desc' }],
+                  _source: ['data.secret_references'],
+                },
+              },
+            },
+          },
+          by_policy_id: {
+            terms: {
+              field: 'policy_id',
               size: agentPolicyIds.length,
             },
             aggs: {
@@ -113,19 +130,22 @@ export async function findFleetPoliciesUsingSecrets(opts: {
       buckets: PolicyBucket[];
     }
 
-    const buckets = (res.aggregations?.by_policy as ByPolicyAgg | undefined)?.buckets ?? [];
-
-    for (const bucket of buckets) {
-      const hit = bucket.latest_doc.hits.hits[0];
-      const secretRefs = hit?._source?.data?.secret_references;
-      if (Array.isArray(secretRefs)) {
-        for (const ref of secretRefs) {
-          if (ref?.id) {
-            referencedIds.add(ref.id);
+    const collectFromBuckets = (agg: ByPolicyAgg | undefined) => {
+      for (const bucket of agg?.buckets ?? []) {
+        const hit = bucket.latest_doc.hits.hits[0];
+        const secretRefs = hit?._source?.data?.secret_references;
+        if (Array.isArray(secretRefs)) {
+          for (const ref of secretRefs) {
+            if (ref?.id) {
+              referencedIds.add(ref.id);
+            }
           }
         }
       }
-    }
+    };
+
+    collectFromBuckets(res.aggregations?.by_policy_base_id as ByPolicyAgg | undefined);
+    collectFromBuckets(res.aggregations?.by_policy_id as ByPolicyAgg | undefined);
 
     return { referencedIds, checkFailed: false };
   } catch (e) {
