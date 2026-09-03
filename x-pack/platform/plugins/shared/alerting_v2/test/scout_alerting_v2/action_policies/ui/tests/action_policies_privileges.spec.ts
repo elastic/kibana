@@ -47,13 +47,13 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await actionPoliciesList.goto();
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
-    await test.step('create button and row view-details are visible', async () => {
+    await test.step('create button and the row name link are visible', async () => {
       await expect(actionPoliciesList.createButton).toBeVisible();
-      await expect(actionPoliciesList.viewDetailsButton).toBeVisible();
+      await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
     });
 
     await test.step('details flyout exposes the Take action button', async () => {
-      await actionPoliciesList.openDetailsFlyout();
+      await actionPoliciesList.openDetailsFlyout(policyName);
       await expect(actionPoliciesList.detailsFlyout).toBeVisible();
       await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toBeVisible();
     });
@@ -65,13 +65,13 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await actionPoliciesList.goto();
     await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
-    await test.step('create button is hidden but view-details remains', async () => {
+    await test.step('create button is hidden but the row name link remains', async () => {
       await expect(actionPoliciesList.createButton).toHaveCount(0);
-      await expect(actionPoliciesList.viewDetailsButton).toBeVisible();
+      await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
     });
 
     await test.step('details flyout opens but hides the Take action button', async () => {
-      await actionPoliciesList.openDetailsFlyout();
+      await actionPoliciesList.openDetailsFlyout(policyName);
       // Positive, privilege-independent anchor: confirm the flyout actually
       // rendered before asserting the write affordances are absent, otherwise
       // the toHaveCount(0) check would pass even if the flyout never opened.

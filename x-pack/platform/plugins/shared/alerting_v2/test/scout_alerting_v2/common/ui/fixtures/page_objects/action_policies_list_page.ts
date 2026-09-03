@@ -16,8 +16,6 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export class ActionPoliciesListPage {
   /** Header "Create policy" button; hidden for read-only users. */
   public readonly createButton: Locator;
-  /** Row "view details" icon; visible to every role with read access. */
-  public readonly viewDetailsButton: Locator;
   /** Details flyout container; a privilege-independent anchor that it opened. */
   public readonly detailsFlyout: Locator;
   /** "Take action" button inside the details flyout footer; hidden for read-only users. */
@@ -25,7 +23,6 @@ export class ActionPoliciesListPage {
 
   constructor(private readonly page: ScoutPage) {
     this.createButton = this.page.testSubj.locator('createActionPolicyButton');
-    this.viewDetailsButton = this.page.testSubj.locator('actionPolicyViewDetailsButton');
     this.detailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
     this.detailsFlyoutTakeActionButton = this.page.testSubj.locator(
       'detailsFlyoutTakeActionButton'
@@ -44,7 +41,7 @@ export class ActionPoliciesListPage {
     return this.page.testSubj.locator(`content-list-table-item-link`, { hasText: policyName });
   }
 
-  async openDetailsFlyout() {
-    await this.viewDetailsButton.click();
+  async openDetailsFlyout(policyName: string) {
+    await this.detailsLink(policyName).click();
   }
 }
