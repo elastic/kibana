@@ -6,14 +6,19 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 export const ALERTS_INDEX = '.alerts-security.alerts-default';
-const ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 /**
  * Builds a single ES|QL query that counts distinct non-H/C entities whose
  * maximum alert risk score in the last 30 days is >= 70, using a LOOKUP JOIN
  * from alerts → entity-latest on the typed EUID (entity.id).
+ *
+ * Entity resolution uses kibana.alert.entity.id (stamped at enrichment time, #285223)
+ * when present, falling back to derived EUID for older alerts. See alert_euid_pipeline.ts.
+ * The fallback is load-bearing for the full 30d window until #285223 has aged in
+ * (~2026-10-01 for new installs).
  */
 export const buildHiddenRiskCountQuery = (
   euid: EntityStoreEuid,
@@ -24,19 +29,7 @@ export const buildHiddenRiskCountQuery = (
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ALERTS_INDEX}`);
   parts.push(`| WHERE @timestamp >= NOW() - 30d`);
-
-  for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-    if (fieldEvals) {
-      parts.push(`| EVAL ${fieldEvals}`);
-    }
-    parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-
-  parts.push(
-    `| EVAL entity.id = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
-  );
-  parts.push(`| WHERE entity.id IS NOT NULL`);
+  parts.push(...buildAlertEuidPipeline(euid));
 
   parts.push(`| RENAME @timestamp AS event_timestamp`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);

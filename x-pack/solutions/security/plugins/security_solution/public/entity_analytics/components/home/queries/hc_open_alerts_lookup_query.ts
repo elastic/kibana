@@ -6,24 +6,18 @@
  */
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
 export const ALERTS_INDEX = '.alerts-security.alerts-default';
 
-const ENTITY_TYPES = ['user', 'host', 'service'] as const;
-
 /**
  * Builds a single ES|QL query that counts distinct H/C-risk entities with at
- * least one open alert, using a LOOKUP JOIN from alerts → entity-latest on the
- * typed EUID (entity.id). This mirrors the pattern used by the anomalies panel.
+ * least one alert in the last 24h, using a LOOKUP JOIN from alerts → entity-latest.
  *
- * Uses euidApi to generate the correct EVAL expressions for each entity type so
- * the computed EUID matches the entity store's format (including namespace/source
- * suffixes like `@example.com@okta` for IDP users or `host.id`-first for hosts).
- *
- * COALESCE priority is user > host > service per alert row. An alert matching
- * multiple entity types (e.g. has both user.name and host.name) counts only the
- * highest-priority type. This mirrors the anomalies component's behaviour and is
- * acceptable for tile counting purposes.
+ * Entity resolution uses kibana.alert.entity.id (stamped at enrichment time, #285223)
+ * when present, falling back to derived EUID for older alerts. See alert_euid_pipeline.ts.
+ * Multi-entity alerts produce one row per entity after MV_EXPAND, so both entities
+ * are counted (more accurate than the previous single-entity-per-alert approach).
  */
 export const buildEntitiesWithAlertsCountQuery = (
   euid: EntityStoreEuid,
@@ -34,22 +28,10 @@ export const buildEntitiesWithAlertsCountQuery = (
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ALERTS_INDEX}`);
   parts.push(`| WHERE @timestamp >= NOW() - 24h`);
-
-  for (const entityType of ENTITY_TYPES) {
-    const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-    if (fieldEvals) {
-      parts.push(`| EVAL ${fieldEvals}`);
-    }
-    parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
-  }
-
-  parts.push(
-    `| EVAL entity.id = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
-  );
-  parts.push(`| WHERE entity.id IS NOT NULL`);
+  parts.push(...buildAlertEuidPipeline(euid));
 
   // RENAME @timestamp to avoid it being overwritten by entity-latest's own @timestamp
-  // during the LOOKUP JOIN (same pattern used by the anomalies panel).
+  // during the LOOKUP JOIN.
   parts.push(`| RENAME @timestamp AS event_timestamp`);
   parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
   parts.push(`| RENAME event_timestamp AS @timestamp`);

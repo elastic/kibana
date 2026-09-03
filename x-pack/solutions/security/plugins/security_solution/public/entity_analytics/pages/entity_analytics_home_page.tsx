@@ -224,9 +224,9 @@ const EntityAnalyticsHomePageContent = () => {
     useWatchlistedCount({ spaceId: resolvedSpaceId });
   const { count: newEntityCount, isLoading: newEntityLoading } =
     useNewEntityCount({ spaceId: resolvedSpaceId });
-  const { count: riskMoversCount, entityNames: riskMoversEntityNames, isLoading: riskMoversLoading } =
+  const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
     useRiskMoversCount({ spaceId: resolvedSpaceId });
-  const { count: newlyHCCount, entityNames: newlyHCEntityNames, isLoading: newlyHCLoading } =
+  const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
     useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
 
   const handleFilterForCard = useCallback(
@@ -248,13 +248,13 @@ const EntityAnalyticsHomePageContent = () => {
       case 'hiddenRisk':
         return hiddenRiskEntityIds.length > 0 ? { terms: { 'entity.id': hiddenRiskEntityIds } } : null;
       case 'riskMovers':
-        return riskMoversEntityNames.length > 0 ? { terms: { 'entity.name': riskMoversEntityNames } } : null;
+        return riskMoversEntityIds.length > 0 ? { terms: { 'entity.id': riskMoversEntityIds } } : null;
       case 'newlyHighCritical':
-        return newlyHCEntityNames.length > 0 ? { terms: { 'entity.name': newlyHCEntityNames } } : null;
+        return newlyHCEntityIds.length > 0 ? { terms: { 'entity.id': newlyHCEntityIds } } : null;
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }
-  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, hiddenRiskEntityIds, riskMoversEntityNames, newlyHCEntityNames]);
+  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, hiddenRiskEntityIds, riskMoversEntityIds, newlyHCEntityIds]);
 
   const signalCards = useMemo((): SignalCardData[] => [
     {

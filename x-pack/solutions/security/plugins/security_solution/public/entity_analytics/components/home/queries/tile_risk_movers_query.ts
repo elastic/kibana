@@ -17,7 +17,7 @@
  * SET unmapped_fields="nullify" prevents errors when only some entity types are
  * present in the index (e.g. only host docs → user.name is not in the mapping).
  */
-export const buildRiskMoversCountQuery = (spaceId: string): string => {
+export const buildRiskMoversCountQuery = (spaceId: string, entitiesIndexName: string): string => {
   const index = `risk-score.risk-score-${spaceId}`;
   return [
     `SET unmapped_fields="nullify";`,
@@ -29,6 +29,8 @@ export const buildRiskMoversCountQuery = (spaceId: string): string => {
     `| EVAL bucket = CASE(@timestamp >= NOW() - 24h, "today", "yday")`,
     `| STATS today_score = MAX(CASE(bucket == "today", risk_score, null)), yday_score = MAX(CASE(bucket == "yday", risk_score, null)) BY entity_name`,
     `| WHERE today_score IS NOT NULL AND yday_score IS NOT NULL AND today_score - yday_score >= 10`,
-    `| STATS value = COUNT(*), entity_names = VALUES(entity_name)`,
+    `| EVAL entity.id = entity_name`,
+    `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
   ].join('\n');
 };

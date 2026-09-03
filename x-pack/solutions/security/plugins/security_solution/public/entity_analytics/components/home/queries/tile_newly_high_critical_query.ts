@@ -18,7 +18,10 @@
  *   - today_level_num >= 3  (today is High or Critical)
  *   - yday_level_num < 3 OR yday_level_num IS NULL  (was not H/C yesterday)
  */
-export const buildNewlyHighCriticalCountQuery = (spaceId: string): string => {
+export const buildNewlyHighCriticalCountQuery = (
+  spaceId: string,
+  entitiesIndexName: string
+): string => {
   const index = `risk-score.risk-score-${spaceId}`;
   return [
     `SET unmapped_fields="nullify";`,
@@ -31,6 +34,8 @@ export const buildNewlyHighCriticalCountQuery = (spaceId: string): string => {
     `| EVAL level_num = CASE(risk_level == "Critical", 4, risk_level == "High", 3, risk_level == "Medium", 2, risk_level == "Low", 1, 0)`,
     `| STATS today_level_num = MAX(CASE(bucket == "today", level_num, null)), yday_level_num = MAX(CASE(bucket == "yday", level_num, null)) BY entity_name`,
     `| WHERE today_level_num >= 3 AND (yday_level_num IS NULL OR yday_level_num < 3)`,
-    `| STATS value = COUNT(*), entity_names = VALUES(entity_name)`,
+    `| EVAL entity.id = entity_name`,
+    `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    `| STATS value = COUNT(*), entity_ids = VALUES(entity.id)`,
   ].join('\n');
 };

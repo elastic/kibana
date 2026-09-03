@@ -12,6 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
+import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 
 export const useRiskMoversCount = ({
@@ -23,22 +24,31 @@ export const useRiskMoversCount = ({
 }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const { data: resolvedIndex, isLoading: isIndexLoading } =
+    useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled =
     !skip &&
     !isStatusLoading &&
-    riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
+    !isIndexLoading &&
+    riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED' &&
+    Boolean(resolvedIndex?.indexName);
 
-  const query = useMemo(() => buildRiskMoversCountQuery(spaceId), [spaceId]);
+  const query = useMemo(
+    () =>
+      resolvedIndex?.indexName ? buildRiskMoversCountQuery(spaceId, resolvedIndex.indexName) : null,
+    [spaceId, resolvedIndex?.indexName]
+  );
 
   const {
     data: queryResult,
     isLoading,
     isRefetching,
     error,
-  } = useQuery<{ count: number; entityNames: string[] }, SecurityAppError>(
+  } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['riskMoversCount', query],
     async ({ signal }) => {
+      if (!query) return { count: 0, entityIds: [] };
       const raw = await lastValueFrom(
         data.search.search(
           { params: { query } },
@@ -48,18 +58,18 @@ export const useRiskMoversCount = ({
       const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      const entityNamesIndex = response.columns?.findIndex((c) => c.name === 'entity_names') ?? -1;
+      const entityIdsIndex = response.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
       const count = typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
-      const rawIds = entityNamesIndex >= 0 ? row?.[entityNamesIndex] : undefined;
-      const entityNames: string[] = Array.isArray(rawIds)
+      const rawIds = entityIdsIndex >= 0 ? row?.[entityIdsIndex] : undefined;
+      const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
         ? [rawIds]
         : [];
-      return { count, entityNames };
+      return { count, entityIds };
     },
     {
-      enabled: isEnabled,
+      enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
       retry: 1,
     }
@@ -72,8 +82,8 @@ export const useRiskMoversCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityNames: queryResult?.entityNames ?? [],
-    isLoading: isStatusLoading || isLoading || isRefetching,
+    entityIds: queryResult?.entityIds ?? [],
+    isLoading: isStatusLoading || isIndexLoading || isLoading || isRefetching,
     error: filteredError,
   };
 };
