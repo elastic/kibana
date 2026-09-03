@@ -353,13 +353,26 @@ describe('relayTest', () => {
 
 describe('withRelayGuards', () => {
   const createActions = () => ({
-    sendMessage: { input: {} as never, handler: jest.fn().mockResolvedValue({ ok: true }) },
-    listChannels: { input: {} as never, handler: jest.fn().mockResolvedValue({ channels: [] }) },
+    sendMessage: {
+      input: {} as never,
+      handler: jest.fn().mockResolvedValue({ ok: true }),
+      scope: 'write' as const,
+    },
+    listChannels: {
+      input: {} as never,
+      handler: jest.fn().mockResolvedValue({ channels: [] }),
+      scope: 'read' as const,
+    },
     resolveChannelId: {
       input: {} as never,
       handler: jest.fn().mockResolvedValue({ found: false }),
+      scope: 'read' as const,
     },
-    searchMessages: { input: {} as never, handler: jest.fn().mockResolvedValue({ messages: [] }) },
+    searchMessages: {
+      input: {} as never,
+      handler: jest.fn().mockResolvedValue({ messages: [] }),
+      scope: 'read' as const,
+    },
   });
 
   it('fails an unsupported action under relay auth', async () => {
@@ -400,7 +413,13 @@ describe('withRelayGuards', () => {
 
   it('preserves the rest of an action definition', () => {
     const actions = {
-      searchMessages: { isTool: true, input: {} as never, description: 'x', handler: jest.fn() },
+      searchMessages: {
+        isTool: true,
+        input: {} as never,
+        description: 'x',
+        handler: jest.fn(),
+        scope: 'read' as const,
+      },
     };
 
     expect(withRelayGuards(actions).searchMessages).toMatchObject({
