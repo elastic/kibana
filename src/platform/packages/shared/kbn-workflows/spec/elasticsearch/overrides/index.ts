@@ -8,12 +8,14 @@
  */
 
 import { BULK_CONTRACT } from './elasticsearch.bulk';
+import { ESQL_QUERY_CONTRACT } from './elasticsearch.esql_query';
 import { INDEX_CONTRACT } from './elasticsearch.index';
 import { INDICES_CREATE_CONTRACT } from './elasticsearch.indices_create';
 import { SEARCH_CONTRACT } from './elasticsearch.search';
 
 export const ELASTICSEARCH_OVERRIDES = {
   'elasticsearch.bulk': BULK_CONTRACT,
+  'elasticsearch.esql.query': ESQL_QUERY_CONTRACT,
   'elasticsearch.indices.create': INDICES_CREATE_CONTRACT,
   'elasticsearch.index': INDEX_CONTRACT,
   'elasticsearch.search': SEARCH_CONTRACT,

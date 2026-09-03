@@ -9,9 +9,34 @@
 
 import { z } from '@kbn/zod/v4';
 import { SEARCH_CONTRACT } from './generated/elasticsearch.search.gen';
+import { ESQL_QUERY_CONTRACT } from './overrides/elasticsearch.esql_query';
+import { buildElasticsearchRequest } from '../../common/elasticsearch_request_builder';
 import { getSchemaAtPath } from '../../common/utils/zod';
 
 describe('elasticsearch connectors', () => {
+  describe('elasticsearch.esql.query', () => {
+    it('should support query approximation', () => {
+      expect(ESQL_QUERY_CONTRACT.parameterTypes?.bodyParams).toContain('approximation');
+
+      const params = {
+        query: 'FROM logs-* | STATS count = COUNT(*)',
+        approximation: {
+          rows: 10_000,
+          confidence_level: 0.9,
+        },
+      };
+
+      expect(ESQL_QUERY_CONTRACT.paramsSchema?.parse(params)).toEqual(params);
+      expect(buildElasticsearchRequest('elasticsearch.esql.query', params)).toEqual({
+        method: 'POST',
+        path: '/_query',
+        body: params,
+        query: undefined,
+        bulkBody: undefined,
+      });
+    });
+  });
+
   describe('elasticsearch.search', () => {
     it('should have output schema with nestedhits property', () => {
       const outputSchema = SEARCH_CONTRACT.outputSchema;
