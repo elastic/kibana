@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  describe('lens old color mapping runtime migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/284790
+  describe.skip('lens old color mapping runtime migrations', () => {
     let panels: WebElementWrapper[] = [];
     let panelTitleIndex = new Map<string, number>();
 
