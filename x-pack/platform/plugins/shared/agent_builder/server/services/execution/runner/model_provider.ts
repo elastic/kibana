@@ -122,9 +122,13 @@ export const createModelProvider = ({
       request
     );
 
-    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-    if (recommendedEndpoint.length > 0) {
-      return recommendedEndpoint[0].connectorId;
+    if (soEntryFound && endpoints.length > 0) {
+      return endpoints[0].connectorId;
+    }
+
+    const recommended = endpoints.find((endpoint) => endpoint.isRecommended);
+    if (recommended) {
+      return recommended.connectorId;
     }
 
     const fallbackId = await getDefaultConnectorId();
