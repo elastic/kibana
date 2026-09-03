@@ -28,7 +28,13 @@ import {
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
-import { roundToEvents, userMessageEvent } from '../../conversation/client/rounds_to_events';
+import {
+  roundToEvents,
+  userMessageEvent,
+  promptResponseEvent,
+  resumeExecutionToEvents,
+  executionTerminatedEventId,
+} from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
 /**
@@ -276,6 +282,100 @@ export const appendRoundTerminated$ = ({
           : createConversationUpdatedEvent(persistedConversation)
       )
     )
+  );
+};
+
+/** True when an execution id belongs to the given round (its initial run or any resume). */
+const executionBelongsToRound = (executionId: string, roundId: string): boolean =>
+  executionId === `${roundId}::execution` || executionId.startsWith(`${roundId}::execution::`);
+
+/**
+ * Append-only resume write. A resumed round is a NEW execution (`exec_k`) on the same round: this
+ * appends a `prompt_response` event (the human's answer) plus the resume execution's events, and
+ * never rewrites the pause (`exec_0`). `eventsToRounds` folds the executions back into one round on
+ * read.
+ */
+export const appendResumeExecution$ = ({
+  conversation,
+  conversationClient,
+  roundCompletedEvents$,
+  input,
+  author,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  /** The converse input for this resume; `input.prompts` carries the human's responses. */
+  input: ConverseInput;
+  author?: ConversationRoundAuthor;
+}): Observable<ChatEvent> => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) =>
+      from(
+        (async () => {
+          const {
+            round,
+            resume_execution: resumeExecution,
+            conversation_state: conversationState,
+            attachments,
+            workspace_id: workspaceId,
+          } = roundCompletedEvent.data;
+
+          if (!resumeExecution) {
+            throw new Error('appendResumeExecution$ requires a resume_execution payload');
+          }
+          const followUpRound = resumeExecution.follow_up_round;
+
+          // Derive the resume index from the executions already stored for this round.
+          const storedEvents = conversation.events ?? [];
+          const roundExecutionIds = new Set(
+            storedEvents
+              .map((event) => event.execution_id)
+              .filter((id): id is string => Boolean(id) && executionBelongsToRound(id!, round.id))
+          );
+          const executionIndex = roundExecutionIds.size; // exec_0 present -> 1 for the first resume
+          const promptRequestedEventId = executionTerminatedEventId(round.id, executionIndex - 1);
+
+          const promptResponse = promptResponseEvent({
+            roundId: round.id,
+            executionIndex,
+            promptRequestedEventId,
+            responses: input.prompts ?? {},
+            conversation,
+            author,
+            createdAt: followUpRound.started_at,
+          });
+
+          const executionEvents = resumeExecutionToEvents({
+            followUpRound,
+            roundId: round.id,
+            executionIndex,
+            triggerEventId: promptResponse.id,
+            conversation,
+          });
+
+          return conversationClient.appendEvents(
+            {
+              id: conversation.id,
+              events: [promptResponse, ...executionEvents],
+              status: round.status,
+              ...(conversationState ? { state: conversationState } : {}),
+              ...(attachments
+                ? {
+                    attachments: {
+                      snapshot: conversation.attachments ?? [],
+                      produced: attachments,
+                    },
+                  }
+                : {}),
+              ...(workspaceId ? { workspaceId } : {}),
+            },
+            { access: 'converse' }
+          );
+        })()
+      )
+    ),
+    switchMap((persistedConversation) => of(createConversationUpdatedEvent(persistedConversation)))
   );
 };
 

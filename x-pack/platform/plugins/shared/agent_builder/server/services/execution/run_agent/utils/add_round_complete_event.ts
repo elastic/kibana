@@ -24,7 +24,6 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
@@ -49,7 +48,6 @@ import {
   type TodosUpdatedUiEventData,
   isUserQuestionAskedEvent,
   isUserQuestionAnsweredEvent,
-  isAskUserQuestionStep,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import type {
@@ -74,6 +72,11 @@ import {
   createReasoningStep,
   createToolCallStep,
 } from './round_steps';
+import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
+import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
+
+// Re-exported so `prepare_conversation` keeps its existing import site.
+export { mergeAttachmentRefs };
 
 type SourceEvents = ConvertedEvents;
 
@@ -156,37 +159,47 @@ export const addRoundCompleteEvent = ({
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
-          const round = pendingRound
-            ? resumeRound({
-                pendingRound,
-                events,
-                input: userInput,
-                startTime,
-                endTime,
-                modelProvider,
-                mainConnectorId,
-                attachmentRefs,
-                configurationOverrides,
-                compactionResult,
-              })
-            : createRound({
-                roundId: providedRoundId,
-                events,
-                input: userInput,
-                origin,
-                author,
-                startTime,
-                endTime,
-                modelProvider,
-                mainConnectorId,
-                attachmentRefs,
-                configurationOverrides,
-                compactionResult,
-                initialTodos,
-                relevantSkillsSelection,
-              });
+          let round: ConversationRound;
+          let resumeExecution: { follow_up_round: ConversationRound } | undefined;
+          if (pendingRound) {
+            const resumed = resumeRound({
+              pendingRound,
+              events,
+              input: userInput,
+              startTime,
+              endTime,
+              modelProvider,
+              mainConnectorId,
+              attachmentRefs,
+              configurationOverrides,
+              compactionResult,
+            });
+            round = resumed.round;
+            resumeExecution = { follow_up_round: resumed.followUpRound };
+          } else {
+            round = createRound({
+              roundId: providedRoundId,
+              events,
+              input: userInput,
+              origin,
+              author,
+              startTime,
+              endTime,
+              modelProvider,
+              mainConnectorId,
+              attachmentRefs,
+              configurationOverrides,
+              compactionResult,
+              initialTodos,
+              relevantSkillsSelection,
+            });
+          }
 
           round.state = buildRoundState({ round, events, stateManager });
+          // exec_k's terminated carries the same resume state as the folded round.
+          if (resumeExecution) {
+            resumeExecution.follow_up_round.state = round.state;
+          }
 
           if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
             const attachmentContext = formatAttachmentsMetadata(
@@ -204,6 +217,7 @@ export const addRoundCompleteEvent = ({
             data: {
               round,
               resumed: pendingRound !== undefined,
+              ...(resumeExecution ? { resume_execution: resumeExecution } : {}),
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
               ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -239,38 +253,33 @@ const resumeRound = ({
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
-}): ConversationRound => {
-  // Replay tool events for all pending steps (those with empty results)
-  const pendingSteps = pendingRound.steps
+}): { round: ConversationRound; followUpRound: ConversationRound } => {
+  // The resume re-runs the paused tool calls; synthesize their resolved steps (result + progression)
+  // from the replayed graph events so they can be persisted as this execution's own steps. The
+  // paused tool-call step position/params come from `pendingRound`; the resolved result from here.
+  const resolvedToolCallSteps = pendingRound.steps
     .filter(isToolCallStep)
-    .filter((step) => step.results.length === 0);
+    .filter((step) => step.results.length === 0)
+    .map((step) => {
+      const toolResults = events
+        .filter(isToolResultEvent)
+        .filter(({ data }) => data.tool_call_id === step.tool_call_id);
+      const toolProgressions = events
+        .filter(isToolProgressEvent)
+        .filter(({ data }) => data.tool_call_id === step.tool_call_id);
+      return {
+        ...step,
+        results: toolResults.flatMap(({ data }) => data.results),
+        progression: [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)],
+      };
+    });
 
-  for (const step of pendingSteps) {
-    const toolCallId = step.tool_call_id;
-    const toolResults = events
-      .filter(isToolResultEvent)
-      .filter(({ data }) => data.tool_call_id === toolCallId);
-    const toolProgressions = events
-      .filter(isToolProgressEvent)
-      .filter(({ data }) => data.tool_call_id === toolCallId);
-
-    step.results = toolResults.flatMap(({ data }) => data.results);
-    step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
-  }
-
-  // Back-fill pending ask_user_question steps from answered events (matched by prompt_id)
-  const pendingAskUserQuestionSteps = pendingRound.steps
-    .filter(isAskUserQuestionStep)
-    .filter((step) => step.answers === undefined);
-
-  for (const step of pendingAskUserQuestionSteps) {
-    const answeredEvent = events
+  // ask_user_question answers from the replayed answered events, keyed by prompt_id.
+  const answers = new Map(
+    events
       .filter(isUserQuestionAnsweredEvent)
-      .find((e) => e.data.prompt_id === step.prompt_id);
-    if (answeredEvent) {
-      step.answers = answeredEvent.data.answers;
-    }
-  }
+      .map((event) => [event.data.prompt_id, event.data.answers] as const)
+  );
 
   const followUp = createRound({
     events,
@@ -284,72 +293,16 @@ const resumeRound = ({
     compactionResult,
   });
 
-  return mergeRounds(pendingRound, followUp);
-};
-
-const mergeRounds = (previous: ConversationRound, next: ConversationRound): ConversationRound => {
-  let traceId: string[] | undefined;
-  if (previous.trace_id || next.trace_id) {
-    traceId = [
-      ...(previous.trace_id
-        ? Array.isArray(previous.trace_id)
-          ? previous.trace_id
-          : [previous.trace_id]
-        : []),
-      ...(next.trace_id ? (Array.isArray(next.trace_id) ? next.trace_id : [next.trace_id]) : []),
-    ];
-  }
-
-  const mergedRound: ConversationRound = {
-    id: previous.id,
-    status: next.status,
-    pending_prompts: next.pending_prompts,
-    state: undefined, // state is recomputed after the merge
-    input: mergeRoundInput(previous.input, next.input),
-    steps: [...previous.steps, ...next.steps],
-    trace_id: traceId,
-    started_at: previous.started_at,
-    time_to_first_token: previous.time_to_first_token + next.time_to_first_token,
-    time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
-    model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
-    response: next.response,
-    origin: previous.origin,
-    author: previous.author,
-    configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
+  // The resume execution (exec_k): the resolved paused calls (in their original position) followed
+  // by the follow-up's own steps. This is both what we fold into the round and what we persist.
+  const followUpRound: ConversationRound = {
+    ...followUp,
+    steps: [...resolvedToolCallSteps, ...followUp.steps],
   };
 
-  return mergedRound;
-};
+  const round = applyResumeResolution(pendingRound, followUpRound, answers);
 
-const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
-  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
-  return {
-    ...previous,
-    ...next,
-    message: next.message || previous.message,
-    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
-  };
-};
-
-export const mergeAttachmentRefs = (
-  previous?: AttachmentVersionRef[],
-  next?: AttachmentVersionRef[]
-): AttachmentVersionRef[] | undefined => {
-  if (!previous?.length && !next?.length) return undefined;
-  const merged = new Map<string, AttachmentVersionRef>();
-  for (const ref of previous ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  for (const ref of next ?? []) {
-    merged.set(
-      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
-      ref
-    );
-  }
-  return Array.from(merged.values());
+  return { round, followUpRound };
 };
 
 const createRound = ({
@@ -586,20 +539,4 @@ const buildRoundState = ({
   };
 
   return state;
-};
-
-const mergeModelUsage = (
-  a: RoundModelUsageStats,
-  b: RoundModelUsageStats
-): RoundModelUsageStats => {
-  return {
-    connector_id: a.connector_id,
-    llm_calls: a.llm_calls + b.llm_calls,
-    input_tokens: a.input_tokens + b.input_tokens,
-    output_tokens: a.output_tokens + b.output_tokens,
-    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
-      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
-      : {}),
-    model: a.model ?? b.model,
-  };
 };

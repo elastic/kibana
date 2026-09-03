@@ -8,6 +8,7 @@
 import type {
   Conversation,
   ConversationRound,
+  ConversationRoundAuthor,
   EventActor,
   ExecutionOutcome,
   ExecutionRunSummary,
@@ -19,6 +20,7 @@ import {
   TimelineEventType,
   TimelineTriggerType,
 } from '@kbn/agent-builder-common';
+import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 
 /**
  * Suffixes used to build the ids of every round-derived timeline event.
@@ -29,6 +31,7 @@ export const ROUND_DERIVED_EVENT_ID_SUFFIXES = {
   executionTerminated: '::execution_terminated',
   execution: '::execution',
   stepPrefix: '::step::',
+  promptResponse: '::prompt_response',
 } as const;
 
 const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
@@ -39,13 +42,20 @@ const ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES: readonly string[] = [
 ];
 
 const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
+// A resume writes a `prompt_response` event `${roundId}::prompt_response::${k}`. It is round-derived
+// (regenerated/preserved with its round), so it must not be treated as an additive event.
+const PROMPT_RESPONSE_EVENT_ID_PATTERN = /::prompt_response::\d+$/;
 
 /**
- * True when `id` was produced by {@link roundToEvents}
+ * True when `id` was produced by {@link roundToEvents} or the resume append path. Resume executions
+ * carry ids `${roundId}::execution::${k}::execution_started|::execution_terminated|::step::N`, which
+ * already end with a recognized suffix / step pattern, plus the `${roundId}::prompt_response::${k}`
+ * link event.
  */
 export const isRoundDerivedEventId = (id: string): boolean =>
   ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
-  STEP_EVENT_ID_PATTERN.test(id);
+  STEP_EVENT_ID_PATTERN.test(id) ||
+  PROMPT_RESPONSE_EVENT_ID_PATTERN.test(id);
 
 /** Round-derived event ids for a given round, keyed for readability. */
 const roundDerivedEventIds = (roundId: string) => ({
@@ -119,7 +129,11 @@ export const roundTerminatedEvent = (
     new Date(round.started_at).getTime() + round.time_to_last_token
   ).toISOString();
 
-  const terminated = (outcome: ExecutionOutcome): TimelineEvent => ({
+  const outcome = outcomeForRound(round);
+  if (!outcome) {
+    return undefined;
+  }
+  return {
     id: ids.executionTerminated,
     type: TimelineEventType.executionTerminated,
     created_at: endedAt,
@@ -127,13 +141,16 @@ export const roundTerminatedEvent = (
     execution_id: ids.execution,
     trigger_event_id: ids.userMessage,
     data: { ...executionRunSummary(round), outcome },
-  });
+  };
+};
 
+/** The terminal outcome for a round, or `undefined` for a still-in-progress round (no terminal). */
+const outcomeForRound = (round: ConversationRound): ExecutionOutcome | undefined => {
   if (round.status === ConversationRoundStatus.completed) {
-    return terminated({ type: 'responded', response: round.response });
+    return { type: 'responded', response: round.response };
   }
   if (round.status === ConversationRoundStatus.awaitingPrompt) {
-    return terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] });
+    return { type: 'prompt_requested', prompts: round.pending_prompts ?? [] };
   }
   return undefined;
 };
@@ -196,3 +213,108 @@ export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventA
   type: EventActorType.agent,
   id: conversation.agent_id,
 });
+
+// --- Resume (HITL) append path --------------------------------------------------------------
+// A round's initial run is `exec_0` (`${roundId}::execution`, ids `${roundId}::user_message` etc,
+// built above). A k-th resume (k >= 1) is a new execution appended append-only: it never rewrites
+// the pause, and carries execution-scoped ids so `eventsToRounds` can fold the executions back into
+// one round.
+
+/** Execution id for the k-th resume of a round (k >= 1). */
+export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
+
+/** The `execution_terminated` event id for an execution index (0 = the initial run). */
+export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated}`
+    : `${resumeExecutionId(roundId, executionIndex)}${
+        ROUND_DERIVED_EVENT_ID_SUFFIXES.executionTerminated
+      }`;
+
+/** The `prompt_response` link event id written for the k-th resume of a round. */
+export const promptResponseEventId = (roundId: string, executionIndex: number): string =>
+  `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.promptResponse}::${executionIndex}`;
+
+/** Records a human answering a paused round, resuming a specific run. */
+export const promptResponseEvent = ({
+  roundId,
+  executionIndex,
+  promptRequestedEventId,
+  responses,
+  conversation,
+  author,
+  createdAt,
+}: {
+  roundId: string;
+  executionIndex: number;
+  promptRequestedEventId: string;
+  responses: Record<string, PromptResponse>;
+  conversation: Conversation;
+  author?: ConversationRoundAuthor;
+  createdAt: string;
+}): TimelineEvent => ({
+  id: promptResponseEventId(roundId, executionIndex),
+  type: TimelineEventType.promptResponse,
+  created_at: createdAt,
+  actor: userMessageActor(conversation, { author }),
+  data: { prompt_requested_event_id: promptRequestedEventId, responses },
+});
+
+/**
+ * Builds the events for a resume execution (`exec_k`). Mirrors {@link roundToEvents} but with
+ * execution-scoped ids and a `prompt_response` trigger, and without a `user_message` (a resume
+ * continues an existing round, it does not start one).
+ */
+export const resumeExecutionToEvents = ({
+  followUpRound,
+  roundId,
+  executionIndex,
+  triggerEventId,
+  conversation,
+}: {
+  followUpRound: ConversationRound;
+  roundId: string;
+  executionIndex: number;
+  /** The `prompt_response` event id that triggered this execution. */
+  triggerEventId: string;
+  conversation: Conversation;
+}): TimelineEvent[] => {
+  const executionId = resumeExecutionId(roundId, executionIndex);
+  const startedEvent: TimelineEvent = {
+    id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.executionStarted}`,
+    type: TimelineEventType.executionStarted,
+    created_at: followUpRound.started_at,
+    actor: agentActor(conversation),
+    execution_id: executionId,
+    trigger_event_id: triggerEventId,
+    data: { trigger_type: TimelineTriggerType.promptResponse },
+  };
+  const stepEvents: TimelineEvent[] = (followUpRound.steps ?? []).map((step, index) => ({
+    id: `${executionId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.stepPrefix}${index}`,
+    type: TimelineEventType.executionStep,
+    created_at: followUpRound.started_at,
+    actor: agentActor(conversation),
+    execution_id: executionId,
+    trigger_event_id: triggerEventId,
+    data: { step, sequence: index },
+  }));
+  const outcome = outcomeForRound(followUpRound);
+  const endedAt = new Date(
+    new Date(followUpRound.started_at).getTime() + followUpRound.time_to_last_token
+  ).toISOString();
+  const terminatedEvents: TimelineEvent[] = outcome
+    ? [
+        {
+          id: executionTerminatedEventId(roundId, executionIndex),
+          type: TimelineEventType.executionTerminated,
+          created_at: endedAt,
+          actor: agentActor(conversation),
+          execution_id: executionId,
+          trigger_event_id: triggerEventId,
+          data: { ...executionRunSummary(followUpRound), outcome },
+        },
+      ]
+    : [];
+  return [startedEvent, ...stepEvents, ...terminatedEvents];
+};

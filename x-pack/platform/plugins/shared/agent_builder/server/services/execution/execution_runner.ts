@@ -26,7 +26,12 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConversationAction,
+  ConverseInput,
+  ConversationRoundAuthor,
+} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -39,6 +44,7 @@ import {
   createInternalError,
   normalizeInteractive,
   DEFAULT_CONVERSATION_TITLE,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import type { InteractivityConfig } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
@@ -63,6 +69,7 @@ import {
   createConversation$,
   persistRoundInput,
   appendRoundTerminated$,
+  appendResumeExecution$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -285,6 +292,8 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
+        nextInput,
+        author,
       })
     : EMPTY;
 
@@ -516,12 +525,16 @@ const buildPersistenceEvents = ({
   title$,
   agentEvents$,
   action,
+  nextInput,
+  author,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
+  nextInput: ConverseInput;
+  author?: ConversationRoundAuthor;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -549,6 +562,18 @@ const buildPersistenceEvents = ({
         })
       )
     );
+  }
+
+  // A resume of an events-native conversation appends a new execution (append-only); the pause is
+  // never rewritten. Legacy (non-events-native) resumes and regenerate keep the rounds-path write.
+  if (isResume && isEventsNativeVersion(conversation.schema_version)) {
+    return appendResumeExecution$({
+      conversation,
+      conversationClient,
+      roundCompletedEvents$,
+      input: nextInput,
+      author,
+    });
   }
 
   return conversation.operation === 'CREATE'
