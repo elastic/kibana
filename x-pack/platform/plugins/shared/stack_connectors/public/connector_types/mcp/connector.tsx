@@ -10,8 +10,6 @@ import {
   EuiFlexGroup,
   EuiPanel,
   EuiSpacer,
-  EuiTextColor,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,7 +34,6 @@ const additionalSettingsStyles = css`
 `;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
-  const { euiTheme } = useEuiTheme();
   const additionalSettingsId = useGeneratedHtmlId({ prefix: 'additionalSettings' });
   const { emptyField, urlField } = fieldValidators;
   const [isOpen, toggleIsOpen] = useToggle(false);
@@ -99,11 +96,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         }}
         onToggle={toggleIsOpen}
         forceState={isOpen ? 'open' : 'closed'}
-        buttonContent={
-          <EuiTextColor color={euiTheme.colors.link}>
-            {mcpFieldStrings.additionalSettings.label}
-          </EuiTextColor>
-        }
+        buttonContent={mcpFieldStrings.additionalSettings.label}
         initialIsOpen={isEdit}
       >
         <EuiSpacer size="m" />

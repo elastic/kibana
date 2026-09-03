@@ -149,7 +149,7 @@ export const FormattedCell = ({
 
 export interface LinkCellProps {
   content: string;
-  linkColor: string;
+  linkColor?: string;
   onClick: () => void;
   alignment: Alignment;
   fitRowToContent?: boolean;
@@ -166,7 +166,7 @@ export const LinkCell = ({
     data-test-subj="lnsTableCellContent"
     className={getCellClassName(alignment, fitRowToContent)}
   >
-    <EuiLink style={{ color: linkColor }} onClick={onClick}>
+    <EuiLink style={linkColor ? { color: linkColor } : undefined} onClick={onClick}>
       {content}
     </EuiLink>
   </div>
