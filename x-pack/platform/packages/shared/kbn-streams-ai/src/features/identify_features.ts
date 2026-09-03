@@ -32,6 +32,7 @@ import { sumTokens } from '../helpers/sum_tokens';
  * validation, which would retry the whole generation and then drop the batch.
  */
 const MAX_EVIDENCE_ITEMS = 5;
+export const MAX_IDENTIFIED_FEATURES_PER_ITERATION = 100;
 
 export interface PreviouslyIdentifiedFeature {
   id: string;
@@ -87,7 +88,6 @@ export interface IdentifyFeaturesOptions {
   signal: AbortSignal;
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
-  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -102,7 +102,6 @@ export async function identifyFeatures({
   signal,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
-  searchSimilarFeatures,
   additionalTools,
   additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
@@ -126,37 +125,6 @@ export async function identifyFeatures({
       maxSteps: additionalToolCallbacks ? 6 : 4,
       toolCallbacks: {
         ...(additionalToolCallbacks ?? {}),
-        search_similar_features: async (toolCall) => {
-          if (!searchSimilarFeatures) {
-            return {
-              response: {
-                features: [],
-                count: 0,
-                error: 'Semantic feature search is unavailable.',
-              },
-            };
-          }
-
-          try {
-            const features = await searchSimilarFeatures(toolCall.function.arguments);
-            return {
-              response: {
-                features,
-                count: features.length,
-              },
-            };
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`Failed to search similar features: ${errorMessage}`);
-            return {
-              response: {
-                features: [],
-                count: 0,
-                error: errorMessage,
-              },
-            };
-          }
-        },
         finalize_features: async () => ({ response: { finalized: true } }),
       },
       finalToolChoice: {
@@ -204,7 +172,10 @@ export async function identifyFeatures({
   }
 
   return {
-    features: uniqBy(finalizedFeatures, (feature) => feature.id),
+    features: uniqBy(finalizedFeatures, (feature) => feature.id).slice(
+      0,
+      MAX_IDENTIFIED_FEATURES_PER_ITERATION
+    ),
     ignoredFeatures,
     tokensUsed: sumTokens({ added: response.tokens }),
   };
