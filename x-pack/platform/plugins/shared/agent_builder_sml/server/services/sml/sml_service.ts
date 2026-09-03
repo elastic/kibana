@@ -408,12 +408,10 @@ const resolveAuthorizedUniverse = async ({
  *   privilege enforcement is skipped, matching the open-access semantics of every other
  *   Kibana surface in that configuration.
  *
- * The `count: 0` escape is what makes a type that omits `getPermissions` public *within its
- * spaces*, which is the contract {@link SmlTypeDefinition.getPermissions} advertises. Such a type
- * still gets one element per space stamped, just with an empty action list. The indexer derives
- * `count` from that list, so a `count: 0` element that still names an action is malformed: the
- * public branch requires no names and the gated branch requires `count > 0`, so both reject it and
- * it fails CLOSED.
+ * `count: 0` with no names is the public escape a type without `getPermissions` gets (one empty
+ * element per space), per {@link SmlTypeDefinition.getPermissions}. Since the indexer derives
+ * `count` from the list, `count: 0` *with* a name is malformed: the public branch requires no
+ * names, the gated branch requires `count > 0`, so both reject it and it fails CLOSED.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -460,7 +458,7 @@ const buildVisibilityFilter = ({
                         bool: {
                           minimum_should_match: 1,
                           should: [
-                            // Public escape: an element requiring zero actions and naming none.
+                            // Public escape: zero required actions, no names.
                             {
                               bool: {
                                 filter: [
@@ -498,24 +496,16 @@ const buildVisibilityFilter = ({
   },
 });
 
-/**
- * The privilege groups that apply in a given space: those scoped to it or to the global wildcard.
- * Mirrors the ES-side DLS clause — a caller must satisfy one whole group to see the document, and
- * groups for other spaces are irrelevant.
- */
+/** Privilege groups scoped to this space or the global wildcard; others are irrelevant. */
 const relevantGroupsInSpace = (
   privileges: SmlKibanaPrivilegeGroup[],
   spaceId: string
 ): SmlKibanaPrivilegeGroup[] => privileges.filter((g) => g.space === spaceId || g.space === '*');
 
 /**
- * Check whether the current user has access to specific SML items.
- * For each id, the access verdict grants when the caller holds at least `count` of a group's
- * distinct named actions, for a group scoped to the requested space (or the global wildcard).
- *
- * Chunks without any kibana privileges are visible to anyone in the
- * space. When the security plugin is absent, all ids resolve to `true`
- * (open access).
+ * Whether the caller may access each SML item. Grants when it holds at least `count` distinct named
+ * actions of a group scoped to this space (or the wildcard). Items with no privileges are public;
+ * with the security plugin absent every id resolves to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,

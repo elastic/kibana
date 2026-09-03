@@ -93,11 +93,9 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
   }
 };
 
-// Writes a fixture entry straight into the SML data index at the chosen `count`, overwriting any
-// previous version at the same id. It names the gated action so the gated role is a real registered
-// holder: at `count: 1` that role must see the entry (a positive control proving it is a reachable
-// candidate), and at `count: 0` the entry is malformed — a contradiction the indexer can never
-// produce, since it derives `count` from the action list — and must be hidden from everyone.
+// Writes the fixture entry directly into the SML index at a chosen `count`, overwriting the same
+// id. Names the gated action so the gated role is a real holder; the indexer never emits `count: 0`
+// with names, so that combination is only reachable by writing it by hand.
 const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<void> => {
   const document: SmlDocument = {
     id: MALFORMED_ENTRY_ID,
@@ -239,13 +237,12 @@ apiTest.describe(
     apiTest(
       'a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder',
       async ({ apiClient }) => {
-        // The same entry at count 1 must be visible to role holding named action.
+        // Positive control: at count 1 the holder must see it, proving it is a reachable candidate.
         await indexEntryWithCount(sysEsClient, 1);
         const holderAtCountOne = await searchSml(apiClient, gatedTypeCredentials);
         expect(holderAtCountOne).toContain(SML_TEST_MALFORMED_KI_TYPE);
 
-        // Overwrite the same id with malformed count 0 and prove it flips closed for holder
-        // and non-holder.
+        // Same id at malformed count 0 must flip closed for holder and non-holder alike.
         await indexEntryWithCount(sysEsClient, 0);
         const holderAtCountZero = await searchSml(apiClient, gatedTypeCredentials);
         expect(holderAtCountZero).not.toContain(SML_TEST_MALFORMED_KI_TYPE);

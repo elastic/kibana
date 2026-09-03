@@ -151,22 +151,18 @@ interface QueryClause {
 const hasTermsSet = (clause: QueryClause): boolean =>
   clause.bool?.filter?.some((f) => f.terms_set != null) ?? false;
 
-/**
- * Dig the zero-action `should` branch out of an emitted visibility filter: the nested privilege
- * clause -> the privilege `bool` -> the branch that is not the gated (`terms_set`) branch.
- */
+/** Non-gated (public-escape) branch of an emitted visibility filter. */
 const findZeroActionBranch = (visibilityFilter: unknown): QueryClause | undefined => {
   const { should } = (visibilityFilter as { bool: { should: QueryClause[] } }).bool;
   const nested = should.find((clause) => clause.nested != null)?.nested;
-  // The space-scope clause is also a `bool.should`; the privilege clause is the one whose branches
-  // hold the `terms_set`.
+  // Privilege clause = space-filter sibling whose branches hold a `terms_set`.
   const privilegeClause = nested?.query.bool.filter.find((clause) =>
     clause.bool?.should?.some(hasTermsSet)
   );
   return privilegeClause?.bool?.should?.find((clause) => !hasTermsSet(clause));
 };
 
-/** Dig the gated (`terms_set`) `should` branch out of an emitted visibility filter. */
+/** Gated (`terms_set`) branch of an emitted visibility filter. */
 const findGatedBranch = (visibilityFilter: unknown): QueryClause | undefined => {
   const { should } = (visibilityFilter as { bool: { should: QueryClause[] } }).bool;
   const nested = should.find((clause) => clause.nested != null)?.nested;
@@ -1411,12 +1407,8 @@ describe('SmlService', () => {
     });
 
     it('gates the zero-action branch on the element carrying no action names', async () => {
-      // The indexer derives `count` from the action list, so `count: 0` always means "no names".
-      // An element with `count: 0` AND names is malformed: `terms_set` clamps a `0` minimum to `1`,
-      // so it would match whenever the caller holds a named action. The branch therefore pairs the
-      // count term with `must_not exists` on the name leaf so such an element fails CLOSED instead
-      // of reading as public. Asserted independently of `expectedAuthzFilter` — loosening the shared
-      // helper must not silently loosen this rule.
+      // Asserted independently of `expectedAuthzFilter` so loosening that helper can't hide a
+      // regression: the public branch must pair `count: 0` with `must_not exists` on names.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       aggResponse = universeAgg(['saved_object:dashboard/get']);
       const service = createSmlService();
@@ -1450,10 +1442,8 @@ describe('SmlService', () => {
     });
 
     it('gates the terms_set branch on count > 0', async () => {
-      // `terms_set` cannot express `minimum_should_match_field: 0`, so a `count: 0` element that
-      // still names an action would match here for any caller holding that action. The `count > 0`
-      // guard is what makes such a malformed element fail CLOSED. Asserted independently of
-      // `expectedAuthzFilter` — loosening the shared helper must not silently loosen this rule.
+      // Asserted independently of `expectedAuthzFilter`: the gated branch must carry the `count > 0`
+      // guard, else a malformed `count: 0` element leaks to holders of a named action.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       aggResponse = universeAgg(['saved_object:dashboard/get']);
       const service = createSmlService();
@@ -1789,11 +1779,8 @@ describe('SmlService', () => {
     });
 
     it('grants access for items whose space element requires zero actions', async () => {
-      // The indexer writes `{ space, name: [], count: 0 }` when a type resolves to no actions.
-      // Such an element must grant access to anyone in that space — `count: 0` makes the ES-side
-      // `terms_set` (minimum_should_match_field: count) require zero matches, and the Kibana-side
-      // mirror here is the `count === 0 && name.length === 0` public escape. Records with zero
-      // actions therefore keep showing up in search/autocomplete rather than being silently dropped.
+      // A type resolving to no actions gets `{ name: [], count: 0 }`, the public escape: visible to
+      // anyone in the space rather than silently dropped.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
@@ -1824,8 +1811,8 @@ describe('SmlService', () => {
     });
 
     it('denies access for a malformed element whose count is 0 but still names actions', async () => {
-      // Parity with the ES-side filter: a `count: 0` element naming actions is malformed and the
-      // `count === 0` branch is the public escape only when it names nothing, so it fails CLOSED.
+      // `count: 0` is the public escape only when it names nothing; naming an action is malformed
+      // and fails CLOSED.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
@@ -1862,9 +1849,8 @@ describe('SmlService', () => {
     });
 
     it('denies a malformed count-0 element even to a caller holding the named action', async () => {
-      // The real fail-open: without the `count === 0` guard, `every(held)` would pass for the
-      // action holder and leak the malformed element. This is the sibling of the ES-side
-      // `count > 0` guard on the gated branch.
+      // The real fail-open: a holder of the named action would see this malformed element without
+      // the `count === 0` guard.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
@@ -1901,8 +1887,7 @@ describe('SmlService', () => {
     });
 
     it('denies a malformed negative-count element even to a caller holding the named action', async () => {
-      // A negative count is not the public escape (count !== 0), and it must not sneak into the
-      // gated path either: the `count > 0` guard rejects it regardless of the actions held.
+      // A negative count is neither public (count !== 0) nor gated (count > 0), so it fails CLOSED.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
@@ -1939,8 +1924,7 @@ describe('SmlService', () => {
     });
 
     it('denies a malformed positive-count element that names no actions', async () => {
-      // A positive count with an empty name list must fail closed: zero named actions can never
-      // satisfy a positive required count. The nonempty-list guard rejects it outright.
+      // Zero named actions can never satisfy a positive count, so the empty-list case fails CLOSED.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
@@ -1975,9 +1959,8 @@ describe('SmlService', () => {
     });
 
     it('denies a malformed element whose count is padded by duplicate action names', async () => {
-      // `terms_set` counts DISTINCT matching terms, so `{ name: ['a', 'a'], count: 2 }` needs two
-      // distinct held actions, not one held twice. Counting matches without deduping would grant
-      // access to a holder of the single action — a fail-open the `Set` prevents.
+      // `terms_set` counts DISTINCT terms, so `['a','a']` with `count: 2` needs two distinct held
+      // actions; without deduping, holding `a` once would leak it.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
       const service = createSmlService();
       service.setup({ logger });
