@@ -548,9 +548,7 @@ describe('createPackRoute', () => {
         service: {
           getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
           getAgentPolicyService: jest.fn().mockReturnValue({
-            getByIds:
-              getByIds ??
-              jest.fn().mockResolvedValue(agentPolicyNames),
+            getByIds: getByIds ?? jest.fn().mockResolvedValue(agentPolicyNames),
           }),
           getPackagePolicyService: jest.fn().mockReturnValue({
             list: packagePolicyList,
