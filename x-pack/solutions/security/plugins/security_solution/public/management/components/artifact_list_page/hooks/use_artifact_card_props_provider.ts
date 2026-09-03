@@ -16,6 +16,8 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';
 
+const EMPTY_EXCEPTION_LIST_ITEMS: ExceptionListItemSchema[] = [];
+
 type CardActionType = 'edit' | 'delete';
 
 export interface UseArtifactCardPropsProviderProps {
@@ -26,6 +28,7 @@ export interface UseArtifactCardPropsProviderProps {
   dataTestSubj?: string;
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  disabled?: boolean;
 }
 
 type ArtifactCardPropsProvider = (artifactItem: ExceptionListItemSchema) => ArtifactEntryCardProps;
@@ -42,13 +45,16 @@ export const useArtifactCardPropsProvider = ({
   dataTestSubj,
   allowCardDeleteAction = true,
   allowCardEditAction = true,
+  disabled = false,
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
   const toasts = useToasts();
 
+  const itemsToUse = disabled ? EMPTY_EXCEPTION_LIST_ITEMS : items;
+
   const itemsPolicyIds = useMemo(() => {
-    return items.map((item) => getPolicyIdsFromArtifact(item)).flat();
-  }, [items]);
+    return itemsToUse.map((item) => getPolicyIdsFromArtifact(item)).flat();
+  }, [itemsToUse]);
 
   const { data: policyData, error } = useBulkFetchFleetIntegrationPolicies<PolicyData>(
     { ids: itemsPolicyIds },
@@ -64,7 +70,7 @@ export const useArtifactCardPropsProvider = ({
 
     // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
     // with common component's props
-    for (const artifactItem of items as ExceptionListItemSchema[]) {
+    for (const artifactItem of itemsToUse as ExceptionListItemSchema[]) {
       const cardActions: ArtifactEntryCardProps['actions'] = [];
 
       if (allowCardEditAction) {
@@ -101,7 +107,7 @@ export const useArtifactCardPropsProvider = ({
 
     return cachedCardProps;
   }, [
-    items,
+    itemsToUse,
     allowCardEditAction,
     allowCardDeleteAction,
     policies,
