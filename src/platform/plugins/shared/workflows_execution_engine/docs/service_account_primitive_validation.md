@@ -5,9 +5,9 @@ It is not the complete Workflows service-account product.
 
 ## Baseline
 
-UIAM's first iteration already supports creating a native organization service account and
-exchanging it through the project's mTLS identity. The Workflows slice consumes the higher-level
-Kibana operation contract from
+UIAM supports creating, getting, listing, deleting, and exchanging a native organization service
+account through the project's mTLS identity. The Workflows slice consumes the higher-level Kibana
+operation contract from
 [PR #286664](https://github.com/elastic/kibana/pull/286664), which keeps the ephemeral credential
 inside Security and gives the execution engine a scoped request.
 
@@ -19,13 +19,26 @@ inside Security and gives the execution engine a scoped request.
 - Reattach: reauthorize the declared account before a YAML update is persisted.
 - `detach` and `getBinding`: remove and verify the binding before deleting a saved workflow or
   removing `settings.run_as`.
-- `withScopedRequest`: run one Task Manager-backed manual execution with the scoped request.
+- `withScopedRequest`: run saved manual and scheduled executions with the scoped request.
 - Fail closed when the YAML declaration and the authorized binding do not match.
 - Keep test and ephemeral executions on their caller-scoped request even if their inline YAML
   contains `settings.run_as`.
+- Persist the triggering user as `executedBy` and the service account as `effectiveIdentity`.
 
 The attach/detach paths compensate the workflow write when possible so a failed operation does not
 silently leave the YAML and binding out of sync.
+
+## Validation status
+
+Automated Scout coverage creates UIAM service accounts directly, saves and rebinds a workflow with
+`settings.run_as`, and verifies manual and scheduled executions. The workflow uses `console` and
+`elasticsearch.request` steps against a seeded index, and a separate run verifies an `ai.agent`
+step. The authorization matrix also covers admin binding, editor execution, metadata updates, YAML
+denial, and service-account listing.
+
+The thin Workflows UI lists and selects service accounts, resolves names for persisted identities,
+shows the triggering and effective identities, and exposes service-account details when hovering
+over `settings.run_as` in the YAML editor.
 
 ## Backend status
 
@@ -53,8 +66,8 @@ service account that Kibana can exchange.
 
 ## Deliberately not covered
 
-- Service-account creation, listing, or editor UI.
+- Service-account creation and full management UI.
 - Bulk create/import and managed-workflow synchronization.
-- Scheduled, event-driven, nested, resume, and retry identity propagation.
-- Full authorization and audit matrix.
+- Event-driven, nested, resume, and retry identity propagation.
+- Complete audit coverage.
 - Elasticsearch-backed workload bindings.

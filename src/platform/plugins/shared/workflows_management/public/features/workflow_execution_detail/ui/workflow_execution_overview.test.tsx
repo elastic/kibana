@@ -14,6 +14,8 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
+const mockUseServiceAccount = jest.fn();
+
 const renderWithIntl = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });
 };
@@ -30,6 +32,10 @@ jest.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enh
   FormattedRelativeEnhanced: ({ value }: { value: string }) => (
     <span data-test-subj="formatted-relative">{value}</span>
   ),
+}));
+
+jest.mock('../../../hooks/use_service_account', () => ({
+  useServiceAccount: (...args: unknown[]) => mockUseServiceAccount(...args),
 }));
 
 const createMockStepExecution = (
@@ -66,6 +72,10 @@ const createMockStepExecution = (
 });
 
 describe('WorkflowExecutionOverview', () => {
+  beforeEach(() => {
+    mockUseServiceAccount.mockReset();
+  });
+
   describe('rendering', () => {
     it('should render the component with execution data', () => {
       const stepExecution = createMockStepExecution();
@@ -191,6 +201,61 @@ describe('WorkflowExecutionOverview', () => {
         return icon.getAttribute('data-euiicon-type') === 'clock';
       });
       expect(clockIcons).toHaveLength(0);
+    });
+  });
+
+  describe('execution identity', () => {
+    it('shows the triggering user and effective service account', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          executedBy="user-profile-id"
+          effectiveIdentity="service-account-id"
+        />
+      );
+
+      expect(screen.getByText('Initiated by')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionExecutedBy')).toHaveTextContent(
+        'user-profile-id'
+      );
+      expect(screen.getByText('Ran as')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionEffectiveIdentity')).toHaveTextContent(
+        'service-account-id'
+      );
+    });
+
+    it('falls back to the triggering user when there is no separate effective identity', () => {
+      const stepExecution = createMockStepExecution();
+      renderWithIntl(
+        <WorkflowExecutionOverview stepExecution={stepExecution} executedBy="user-profile-id" />
+      );
+
+      expect(screen.getByTestId('workflowExecutionEffectiveIdentity')).toHaveTextContent(
+        'user-profile-id'
+      );
+    });
+
+    it('shows the resolved service-account name and preserves its id', () => {
+      mockUseServiceAccount.mockReturnValue({
+        id: 'service-account-id',
+        name: 'Workflow production account',
+      });
+      const stepExecution = createMockStepExecution();
+
+      renderWithIntl(
+        <WorkflowExecutionOverview
+          stepExecution={stepExecution}
+          executedBy="user-profile-id"
+          effectiveIdentity="service-account-id"
+        />
+      );
+
+      expect(screen.getByTestId('workflowExecutionEffectiveIdentity')).toHaveTextContent(
+        'Workflow production account'
+      );
+      expect(screen.getByText('service-account-id')).toBeInTheDocument();
+      expect(mockUseServiceAccount).toHaveBeenCalledWith('service-account-id', true);
     });
   });
 

@@ -16,6 +16,7 @@ import type { WorkflowStepExecutionDto, WorkflowTokenUsage } from '@kbn/workflow
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { useServiceAccount } from '../../../hooks/use_service_account';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -24,6 +25,8 @@ import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usag
 
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
+  executedBy?: string;
+  effectiveIdentity?: string;
   workflowExecutionDuration?: number;
   /** Aggregated token usage across all `ai.*` steps in this execution. */
   workflowExecutionUsage?: WorkflowTokenUsage;
@@ -59,6 +62,8 @@ const formatExecutionDate = (date: string) => {
 export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewProps>(
   ({
     stepExecution,
+    executedBy,
+    effectiveIdentity,
     workflowExecutionDuration,
     workflowExecutionUsage,
     showResumeUI = false,
@@ -70,6 +75,10 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     waitingStepExecutionId,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const serviceAccount = useServiceAccount(
+      effectiveIdentity,
+      Boolean(effectiveIdentity && effectiveIdentity !== executedBy)
+    );
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
     const executionData = context?.execution as { isTestRun?: boolean } | undefined;
@@ -207,6 +216,54 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
               </EuiFlexGroup>
             </div>
           </EuiFlexItem>
+
+          {(executedBy || effectiveIdentity) && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="l" responsive={false}>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('workflowsManagement.executionOverview.executedBy', {
+                          defaultMessage: 'Initiated by',
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong data-test-subj="workflowExecutionExecutedBy">
+                          {executedBy ?? '-'}
+                        </strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('workflowsManagement.executionOverview.effectiveIdentity', {
+                          defaultMessage: 'Ran as',
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong data-test-subj="workflowExecutionEffectiveIdentity">
+                          {serviceAccount?.name ?? effectiveIdentity ?? executedBy ?? '-'}
+                        </strong>
+                      </EuiText>
+                      {serviceAccount ? (
+                        <EuiText size="xs" color="subdued">
+                          {serviceAccount.id}
+                        </EuiText>
+                      ) : null}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
 
           {showResumeUI && executionId && (
             <EuiFlexItem grow={false}>

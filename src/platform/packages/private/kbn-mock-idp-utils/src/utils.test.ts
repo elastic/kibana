@@ -251,6 +251,12 @@ describe('mock-idp-utils', () => {
         expect(payload.given_name).toBe('Test');
         expect(payload.family_name).toBe('User');
         expect(payload.ras).toBeDefined();
+        expect(payload.ras.organization).toEqual([
+          {
+            role_id: 'ess-default-organization',
+            organization_id: serverlessOptions.serverless.organizationId,
+          },
+        ]);
         // One grant per canonical project type — origin project type first — so the session can
         // reach cross-project (CPS) linked projects of any type.
         expect(

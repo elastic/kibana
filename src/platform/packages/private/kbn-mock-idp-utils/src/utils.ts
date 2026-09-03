@@ -391,7 +391,12 @@ export async function createUiamSessionTokens({
 
       ras: {
         platform: [],
-        organization: [],
+        organization: [
+          {
+            role_id: 'ess-default-organization',
+            organization_id: organizationId,
+          },
+        ],
         user: [],
         // One grant per project type so the session can reach cross-project (CPS) linked
         // projects of any type, not just the type of the Kibana instance being logged in to.

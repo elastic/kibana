@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
+import { WorkflowRunAsFlyout } from './workflow_run_as_flyout';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -167,6 +168,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [dispatch]);
 
     const [savedLabel, setSavedLabel] = useState<string>('');
+    const [isRunAsFlyoutOpen, setIsRunAsFlyoutOpen] = useState(false);
 
     useEffect(() => {
       if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
@@ -340,6 +342,19 @@ export const WorkflowDetailHeader = React.memo(
       () => getAddConnectorsMenuItem(application),
       [application]
     );
+    const runAsMenuItem = useMemo<AppMenuItemType | undefined>(() => {
+      return {
+        id: 'workflowRunAs',
+        order: 3,
+        label: i18n.translate('workflows.workflowDetailHeader.runAsButton', {
+          defaultMessage: 'Run as',
+        }),
+        iconType: 'userAvatar',
+        run: () => setIsRunAsFlyoutOpen(true),
+        disableButton: isExecutionsTab || !canSaveWorkflow || isManagedWorkflow,
+        testId: 'workflowRunAsButton',
+      };
+    }, [canSaveWorkflow, isExecutionsTab, isManagedWorkflow]);
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
@@ -412,6 +427,9 @@ export const WorkflowDetailHeader = React.memo(
       if (historyItem) {
         items.push(historyItem);
       }
+      if (runAsMenuItem) {
+        items.push(runAsMenuItem);
+      }
       if (addConnectorsMenuItem) {
         items.push(addConnectorsMenuItem);
       }
@@ -444,6 +462,7 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      runAsMenuItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
       isVisualEditorEnabled,
@@ -473,6 +492,9 @@ export const WorkflowDetailHeader = React.memo(
           />
         </EuiPageTemplate>
         {runConfirmationModal}
+        {isRunAsFlyoutOpen ? (
+          <WorkflowRunAsFlyout onClose={() => setIsRunAsFlyoutOpen(false)} />
+        ) : null}
       </>
     );
   }

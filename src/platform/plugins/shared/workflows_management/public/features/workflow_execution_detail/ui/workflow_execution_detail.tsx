@@ -337,6 +337,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
             <WorkflowStepExecutionDetails
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
+              executedBy={workflowExecution?.executedBy}
+              effectiveIdentity={workflowExecution?.effectiveIdentity}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               workflowExecutionUsage={workflowExecution?.usage}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
