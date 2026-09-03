@@ -13,10 +13,7 @@ import type { StepFamily } from '../step_icons';
 // Proxy returns the property name as its value, so assertions read as the
 // token name rather than an opaque colour string.
 const mockTheme = {
-  colors: new Proxy(
-    {},
-    { get: (_t, prop) => (typeof prop === 'string' ? prop : String(prop)) }
-  ),
+  colors: new Proxy({}, { get: (_t, prop) => (typeof prop === 'string' ? prop : String(prop)) }),
 } as any;
 
 describe('getStepChipPalette', () => {

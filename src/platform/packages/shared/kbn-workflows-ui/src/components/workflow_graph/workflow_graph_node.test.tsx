@@ -240,10 +240,7 @@ describe('WorkflowGraphNode', () => {
 describe('resolveNodeColors', () => {
   // Proxy returns the token name as its value — assertions stay readable.
   const theme = {
-    colors: new Proxy(
-      {},
-      { get: (_t, prop) => (typeof prop === 'string' ? prop : String(prop)) }
-    ),
+    colors: new Proxy({}, { get: (_t, prop) => (typeof prop === 'string' ? prop : String(prop)) }),
     border: { radius: { medium: 'medium-radius', small: 'small-radius' } },
   } as any;
 
