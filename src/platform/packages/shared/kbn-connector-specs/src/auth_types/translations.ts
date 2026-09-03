@@ -316,7 +316,7 @@ export const EARS_LABEL = i18n.translate('connectorSpecs.ears.label', {
 });
 
 export const RELAY_LABEL = i18n.translate('connectorSpecs.relay.label', {
-  defaultMessage: 'Elastic app',
+  defaultMessage: 'Elastic app (bot user)',
 });
 
 export const GCP_SERVICE_ACCOUNT_LABEL = i18n.translate('connectorSpecs.gcpServiceAccount.label', {

@@ -1189,6 +1189,5 @@ export const Slack: ConnectorSpec = {
     'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user’s memberships.',
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range. Both are paginated; listFiles supports a `types` filter (e.g. "images,pdfs").',
-    'A connector using the Elastic Slack app supports only sendMessage, listChannels and resolveChannelId, and only over the channels connected to this deployment — listChannels returns those channels, not the whole workspace. Reading history or searching messages, users, and files fails, so answer from the channel list and the messages you send rather than trying to read the workspace.',
   ].join('\n'),
 };
