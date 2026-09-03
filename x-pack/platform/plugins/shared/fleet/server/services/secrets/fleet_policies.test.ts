@@ -23,7 +23,10 @@ jest.mock('../app_context', () => ({
   },
 }));
 
-type PolicyEntry = { policyId: string; secretRefs: Array<{ id: string }> };
+interface PolicyEntry {
+  policyId: string;
+  secretRefs: Array<{ id: string }>;
+}
 
 function makeBuckets(policies: PolicyEntry[]) {
   return policies.map(({ policyId, secretRefs }) => ({
