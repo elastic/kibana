@@ -55,25 +55,16 @@ export const useDashboardMenuItems = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const [
-    hasOverlays,
-    hasUnsavedChanges,
-    lastSavedId,
-    viewMode,
-    accessControl,
-    canRedo,
-    canUndo,
-    disableUndoRedo,
-  ] = useBatchedPublishingSubjects(
-    dashboardApi.hasOverlays$,
-    dashboardApi.hasUnsavedChanges$,
-    dashboardApi.savedObjectId$,
-    dashboardApi.viewMode$,
-    dashboardApi.accessControl$,
-    dashboardInternalApi.canRedo$,
-    dashboardInternalApi.canUndo$,
-    dashboardInternalApi.disableUndoRedo$
-  );
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl, canRedo, canUndo] =
+    useBatchedPublishingSubjects(
+      dashboardApi.hasOverlays$,
+      dashboardApi.hasUnsavedChanges$,
+      dashboardApi.savedObjectId$,
+      dashboardApi.viewMode$,
+      dashboardApi.accessControl$,
+      dashboardInternalApi.canRedo$,
+      dashboardInternalApi.canUndo$
+    );
 
   const disableTopNav = isSaveInProgress || hasOverlays;
   const { isInEditAccessMode, canManageAccessControl } = useMemo(
@@ -233,19 +224,19 @@ export const useDashboardMenuItems = ({
   const historyConfig = useMemo(() => {
     return {
       undo: {
-        disabled: disableTopNav || disableUndoRedo || !canUndo,
+        disabled: disableTopNav || !canUndo,
         onClick: () => {
           dashboardInternalApi.undo();
         },
       },
       redo: {
-        disabled: disableTopNav || disableUndoRedo || !canRedo,
+        disabled: disableTopNav || !canRedo,
         onClick: async () => {
           dashboardInternalApi.redo();
         },
       },
     };
-  }, [disableTopNav, canRedo, canUndo, disableUndoRedo, dashboardInternalApi]);
+  }, [disableTopNav, canRedo, canUndo, dashboardInternalApi]);
 
   /**
    * Register all of the top nav configs that can be used by dashboard.

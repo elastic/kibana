@@ -38,14 +38,6 @@ export function initializeHistoryManager({
   dataLoading$: Observable<boolean>;
   initialState$: Subject<DashboardState>;
 }) {
-  const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-
-  const disableUndoRedoSubscription = combineLatest([hasOverlays$, dataLoading$])
-    .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
-    .subscribe((disableUndoRedo) => {
-      disableUndoRedo$.next(disableUndoRedo);
-    });
-
   const pauseHistory$ = new BehaviorSubject<boolean>(false);
   const pauseHistorySubscription = combineLatest([hasOverlays$, dataLoading$]).subscribe(
     ([hasOverlays, dataLoading]) => {
@@ -76,10 +68,8 @@ export function initializeHistoryManager({
   return {
     internalApi: {
       ...historyApi,
-      disableUndoRedo$,
     },
     cleanup: () => {
-      disableUndoRedoSubscription.unsubscribe();
       pauseHistorySubscription.unsubscribe();
       cleanupHistoryTracking();
     },

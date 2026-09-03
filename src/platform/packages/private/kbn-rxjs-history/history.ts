@@ -11,7 +11,7 @@ import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, pairwise } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, pairwise } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
@@ -68,6 +68,13 @@ export function startTrackingHistory<T extends object = {}>({
     canRedo$.next(!topOfStack);
   });
 
+  const disabledActionsSubscription = combineLatest([pointer$, pause$]).subscribe(
+    ([pointer, paused]) => {
+      canRedo$.next(!paused && pointer + 1 < history.length);
+      canUndo$.next(!paused && pointer > -1);
+    }
+  );
+
   const undoPatch = async () => {
     canRedo$.next(false);
     canUndo$.next(false);
@@ -123,6 +130,7 @@ export function startTrackingHistory<T extends object = {}>({
     cleanup: () => {
       stateSubscription.unsubscribe();
       pointerSubscription.unsubscribe();
+      disabledActionsSubscription.unsubscribe();
       document.removeEventListener('keydown', keyDownHandler);
     },
   };
