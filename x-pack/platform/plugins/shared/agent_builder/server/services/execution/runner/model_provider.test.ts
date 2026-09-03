@@ -30,7 +30,8 @@ interface FastEndpointMock {
 }
 
 const createSearchInferenceEndpointsMock = (
-  endpoints: FastEndpointMock[] = []
+  endpoints: FastEndpointMock[] = [],
+  soEntryFound = false
 ): jest.Mocked<SearchInferenceEndpointsPluginStart> => {
   return {
     features: {} as any,
@@ -38,7 +39,7 @@ const createSearchInferenceEndpointsMock = (
       getForFeature: jest.fn().mockResolvedValue({
         endpoints,
         warnings: [],
-        soEntryFound: false,
+        soEntryFound,
       }),
     },
   } as unknown as jest.Mocked<SearchInferenceEndpointsPluginStart>;
@@ -50,9 +51,11 @@ const createTrackingServiceMock = (): jest.Mocked<Pick<TrackingService, 'trackLL
 
 const setupDeps = ({
   fastEndpoints = [] as FastEndpointMock[],
+  soEntryFound = false,
   defaultConnectorId,
 }: {
   fastEndpoints?: FastEndpointMock[];
+  soEntryFound?: boolean;
   defaultConnectorId?: string;
 } = {}) => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
@@ -60,7 +63,7 @@ const setupDeps = ({
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
   const inference = inferenceMock.createStartContract();
-  const searchInferenceEndpoints = createSearchInferenceEndpointsMock(fastEndpoints);
+  const searchInferenceEndpoints = createSearchInferenceEndpointsMock(fastEndpoints, soEntryFound);
   const trackingService = createTrackingServiceMock() as unknown as TrackingService;
 
   savedObjects.getScopedClient.mockReturnValue({} as any);
@@ -274,6 +277,36 @@ describe('createModelProvider', () => {
 
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'first-recommended' })
+      );
+    });
+
+    it('uses the first SO-override endpoint even when not marked isRecommended', async () => {
+      const deps = setupDeps({
+        fastEndpoints: [{ connectorId: 'admin-fast-connector' }],
+        soEntryFound: true,
+      });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'admin-fast-connector' })
+      );
+    });
+
+    it('falls back to the default connector when SO override is set but endpoints list is empty', async () => {
+      const deps = setupDeps({
+        fastEndpoints: [],
+        soEntryFound: true,
+      });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'default-connector' })
       );
     });
 

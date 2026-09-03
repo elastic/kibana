@@ -103,24 +103,27 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    let connectorId: string | undefined;
-
-    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+    const { endpoints, soEntryFound } = await searchInferenceEndpoints.endpoints.getForFeature(
       AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
       request
     );
 
-    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-    if (recommendedEndpoint.length > 0) {
-      connectorId = recommendedEndpoint[0].connectorId;
+    if (soEntryFound && endpoints.length > 0) {
+      const connectorId = endpoints[0].connectorId;
+      logger.debug(`[getFastModelConnectorId] Using SO-override connectorId: ${connectorId}`);
+      return connectorId;
     }
 
-    if (!connectorId) {
-      connectorId = await getDefaultConnectorId();
+    const recommended = endpoints.find((endpoint) => endpoint.isRecommended);
+    if (recommended) {
+      logger.debug(
+        `[getFastModelConnectorId] Using recommended connectorId: ${recommended.connectorId}`
+      );
+      return recommended.connectorId;
     }
 
-    logger.debug(`[getFastModelConnectorId] Using connectorId: ${connectorId}`);
-
+    const connectorId = await getDefaultConnectorId();
+    logger.debug(`[getFastModelConnectorId] Falling back to default connectorId: ${connectorId}`);
     return connectorId;
   });
 
@@ -205,8 +208,9 @@ export const createModelProvider = ({
       getFastModelConnectorId(),
       getDefaultConnectorId(),
     ]);
-    // getFastModelConnectorId falls back to the default connector when no recommended fast endpoint
-    // is configured, so a distinct id means a genuinely dedicated (cheaper) fast model exists.
+    // getFastModelConnectorId falls back to the default connector when no fast endpoint is
+    // configured (no SO override, no EIS recommended endpoint), so a distinct id means a
+    // genuinely dedicated (cheaper/faster) fast model exists.
     return fastConnectorId !== resolvedDefaultConnectorId;
   });
 
