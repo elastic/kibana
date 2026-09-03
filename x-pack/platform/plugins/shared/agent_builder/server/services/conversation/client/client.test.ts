@@ -544,8 +544,12 @@ describe('ConversationClient', () => {
                         },
                       },
                       {
-                        term: {
-                          'title.keyword': { value: 'sales rep', boost: 5, case_insensitive: true },
+                        prefix: {
+                          'title.keyword': {
+                            value: 'sales rep ',
+                            boost: 5,
+                            case_insensitive: true,
+                          },
                         },
                       },
                     ],

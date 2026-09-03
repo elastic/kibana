@@ -319,9 +319,14 @@ class ConversationClientImpl implements ConversationClient {
                     'title.keyword': { value: trimmedQuery, boost: 2, case_insensitive: true },
                   },
                 },
+                // Trailing space asserts a word boundary, boosting clean whole-word prefix matches above partial-token ones.
                 {
-                  term: {
-                    'title.keyword': { value: trimmedQuery, boost: 5, case_insensitive: true },
+                  prefix: {
+                    'title.keyword': {
+                      value: trimmedQuery + ' ',
+                      boost: 5,
+                      case_insensitive: true,
+                    },
                   },
                 },
               ],
