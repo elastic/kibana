@@ -67441,6 +67441,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -68063,6 +68064,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -68717,6 +68719,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -69393,6 +69396,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -70131,6 +70135,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -70753,6 +70758,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -71407,6 +71413,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -72083,6 +72090,7 @@ paths:
                                 type: string
                               type: array
                         created_by:
+                          description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                           type: string
                         EngineMetadata:
                           additionalProperties: false
@@ -72821,6 +72829,7 @@ paths:
                                           type: string
                                         type: array
                                   created_by:
+                                    description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                                     type: string
                                   EngineMetadata:
                                     additionalProperties: false
@@ -73443,6 +73452,7 @@ paths:
                                           type: string
                                         type: array
                                   created_by:
+                                    description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                                     type: string
                                   EngineMetadata:
                                     additionalProperties: false
@@ -74097,6 +74107,7 @@ paths:
                                           type: string
                                         type: array
                                   created_by:
+                                    description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                                     type: string
                                   EngineMetadata:
                                     additionalProperties: false
@@ -74773,6 +74784,7 @@ paths:
                                           type: string
                                         type: array
                                   created_by:
+                                    description: Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
                                     type: string
                                   EngineMetadata:
                                     additionalProperties: false
