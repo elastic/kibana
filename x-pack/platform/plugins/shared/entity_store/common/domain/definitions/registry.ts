@@ -20,8 +20,13 @@ import { k8sReplicaSetEntityDefinition } from './k8s_replicaset';
 import { k8sNamespaceEntityDefinition } from './k8s_namespace';
 import { k8sNodeEntityDefinition } from './k8s_node';
 import { k8sDaemonSetEntityDefinition } from './k8s_daemonset';
+import { perfEntityDefinitions } from './perf_synthetic';
 
-const entitiesDefinitionRegistry = {
+// The perf.entity.NNN entries are added via spread from perfEntityDefinitions. TypeScript cannot
+// verify at compile time that the spread covers all 89 required keys (it sees Record<string, ...>),
+// so `satisfies Record<EntityType, ...>` is not used here. The `assert` in
+// getEntityDefinitionWithoutId guards unknown types at runtime.
+const entitiesDefinitionRegistry: Record<string, EntityDefinitionWithoutId> = {
   host: hostEntityDefinition,
   user: userEntityDefinition,
   service: serviceEntityDefinition,
@@ -33,7 +38,8 @@ const entitiesDefinitionRegistry = {
   'k8s.namespace': k8sNamespaceEntityDefinition,
   'k8s.node': k8sNodeEntityDefinition,
   'k8s.daemonset': k8sDaemonSetEntityDefinition,
-} as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
+  ...perfEntityDefinitions,
+};
 
 export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
   `security_${entityType}_${space}`;

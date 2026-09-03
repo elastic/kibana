@@ -16,20 +16,9 @@ import {
   uninstallAllEntityTypes,
 } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
+import { BASE_ENTITY_TYPES } from '../../../../../common/domain/definitions/entity_schema';
 
-const ALL_ENTITY_TYPES = [
-  'generic',
-  'host',
-  'k8s.container',
-  'k8s.daemonset',
-  'k8s.deployment',
-  'k8s.namespace',
-  'k8s.node',
-  'k8s.pod',
-  'k8s.replicaset',
-  'service',
-  'user',
-];
+const ALL_ENTITY_TYPES = [...BASE_ENTITY_TYPES].sort();
 
 apiTest.describe('Entity Store Stop API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;

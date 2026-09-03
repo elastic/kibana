@@ -365,6 +365,40 @@ const version7: SavedObjectsFullModelVersion = {
   },
 };
 
+// Version 8 widens `type` to schema.string() to support arbitrary entity types
+// (e.g. perf.entity.NNN synthetic types for performance testing). All existing
+// engines continue to pass; new types are not constrained to the original 11.
+const engineDescriptorSchemaV8 = schema.object({
+  type: schema.string({ minLength: 1, maxLength: 200 }),
+  status: schema.oneOf([
+    schema.literal('installing'),
+    schema.literal('started'),
+    schema.literal('stopped'),
+    schema.literal('updating'),
+    schema.literal('error'),
+  ]),
+  logExtractionState: logExtractionRuntimeStateSchemaV6,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+  versionState: schema.object({
+    version: schema.oneOf([schema.literal(1), schema.literal(2)]),
+    state: schema.oneOf([schema.literal('running'), schema.literal('migrating')]),
+    isMigratedFromV1: schema.boolean(),
+  }),
+});
+
+const version8: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV8,
+    forwardCompatibility: engineDescriptorSchemaV8.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
@@ -378,6 +412,7 @@ export const EngineDescriptorType: SavedObjectsType = {
     5: version5,
     6: version6,
     7: version7,
+    8: version8,
   },
   hiddenFromHttpApis: true,
 };
