@@ -69,7 +69,7 @@ export async function codeGrep({
     repo: gitRepo,
     ref,
     pattern: rlikeToEre(regex),
-    path: filePath,
+    ...(filePath ? { path: filePath } : {}),
     maxCount: limit,
   });
 
@@ -168,7 +168,7 @@ export interface DiscoverLoggingSitesOptions {
   repository: string;
   /** Immutable commit SHA to scope every grep to. */
   gitSha: string;
-  /** Repository-relative service root; grep is confined to `<root>/`. */
+  /** Repository-relative service root, retained as provenance for downstream context. */
   serviceRoot: string;
   /** Primary language, carried onto each candidate for downstream context. */
   language?: string;
@@ -220,7 +220,6 @@ export async function discoverLoggingSites({
   const { org, repo } = splitRepository(repository);
   const ref = gitSha;
   const root = serviceRoot.replace(/^\.[\/\\]?$/, '').replace(/\/+$/, '');
-  const filePath = root ? `${root}/` : undefined;
 
   const locations = new Set<string>();
   let patternErrors = 0;
@@ -235,7 +234,6 @@ export async function discoverLoggingSites({
         gitOrg: org,
         gitRepo: repo,
         ref,
-        filePath,
         regex,
         limit: perPatternLimit,
       });

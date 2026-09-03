@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { extractOtelSignalsFromWindows } from './extract_otel_signals';
+import { loggerMock } from '@kbn/logging-mocks';
+import { createMockCodeboxClient } from './__mocks__/codebox_client';
+import { extractOtelSignalsResult, extractOtelSignalsFromWindows } from './extract_otel_signals';
 
 const extract = (files: Record<string, string>) =>
   extractOtelSignalsFromWindows(
@@ -13,6 +15,37 @@ const extract = (files: Record<string, string>) =>
   );
 
 describe('extractOtelSignals', () => {
+  it('discovers and extracts repository signals outside serviceRoot', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockResolvedValue([
+      {
+        ref: 'abc',
+        path: 'shared/telemetry.ts',
+        lineNumber: 10,
+        content: 'tracer.startSpan("shared.operation")',
+      },
+    ]);
+    codebox.show.mockResolvedValue('\n\n\ntracer.startSpan("shared.operation")\n\n\n');
+
+    const result = await extractOtelSignalsResult({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoot: 'services/api',
+      logger: loggerMock.create(),
+    });
+
+    expect(result.failed).toBe(false);
+    expect(result.signals).toEqual([
+      expect.objectContaining({
+        kind: 'span_name',
+        value: 'shared.operation',
+        file: 'shared/telemetry.ts',
+      }),
+    ]);
+    expect(codebox.grep.mock.calls.every(([request]) => !('path' in request))).toBe(true);
+  });
+
   it('extracts cross-language span names', () => {
     const signals = extract({
       'src/a.ts': 'tracer.startSpan("ts.span")',

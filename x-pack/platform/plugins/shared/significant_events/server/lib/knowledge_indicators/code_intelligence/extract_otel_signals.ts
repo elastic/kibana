@@ -283,7 +283,6 @@ export async function extractOtelSignalsResult({
         gitOrg: org,
         gitRepo: repo,
         ref: gitSha,
-        filePath: root ? `${root}/` : undefined,
         regex,
         limit: perPatternLimit,
       });

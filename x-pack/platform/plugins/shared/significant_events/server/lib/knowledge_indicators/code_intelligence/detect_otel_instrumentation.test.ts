@@ -42,6 +42,34 @@ describe('detectOtelInstrumentation', () => {
     });
 
     expect(result.hasOtel).toBe(true);
+    expect(codebox.grep.mock.calls.every(([request]) => !('path' in request))).toBe(true);
+  });
+
+  it('detects repository signals outside serviceRoot', async () => {
+    const codebox = createMockCodeboxClient();
+    codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) =>
+      pattern.includes('opentelemetry')
+        ? [
+            {
+              ref: 'abc',
+              path: 'shared/telemetry.ts',
+              lineNumber: 1,
+              content: "import { trace } from '@opentelemetry/api'",
+            },
+          ]
+        : []
+    );
+
+    const result = await detectOtelInstrumentation({
+      codebox,
+      repository: 'org/repo',
+      gitSha: 'abc123',
+      serviceRoot: 'services/api',
+      logger: loggerMock.create(),
+    });
+
+    expect(result.hasOtel).toBe(true);
+    expect(codebox.grep.mock.calls.every(([request]) => !('path' in request))).toBe(true);
   });
 
   it('returns hasOtel=false when no patterns match', async () => {
@@ -93,14 +121,14 @@ describe('detectOtelInstrumentationForRoots', () => {
     expect(result.get('svc-a')!.hasOtel).toBe(false);
   });
 
-  it('attributes hits to the correct root', async () => {
+  it('makes repository-wide detection available to every candidate root', async () => {
     const codebox = createMockCodeboxClient();
     codebox.grep.mockImplementation(async ({ pattern }: { pattern: string }) => {
       if (pattern.includes('opentelemetry')) {
         return [
           {
             ref: 'abc',
-            path: 'svc-a/main.go',
+            path: 'shared/telemetry.go',
             lineNumber: 1,
             content: 'import "go.opentelemetry.io/otel"',
           },
@@ -118,6 +146,8 @@ describe('detectOtelInstrumentationForRoots', () => {
     });
 
     expect(result.get('svc-a')!.hasOtel).toBe(true);
-    expect(result.get('svc-b')!.hasOtel).toBe(false);
+    expect(result.get('svc-b')!.hasOtel).toBe(true);
+    expect(result.get('svc-a')!.signalCounts).toEqual(result.get('svc-b')!.signalCounts);
+    expect(codebox.grep.mock.calls.every(([request]) => !('path' in request))).toBe(true);
   });
 });

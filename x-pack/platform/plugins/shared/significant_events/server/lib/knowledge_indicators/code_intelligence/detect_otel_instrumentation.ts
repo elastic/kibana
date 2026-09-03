@@ -102,11 +102,10 @@ const computeDetection = (counts: OtelSignalCounts): OtelDetection => {
 };
 
 /**
- * Batched detector: greps each pattern ONCE at repository scope and buckets hits
- * to every candidate root that contains the file, so N roots cost O(patterns)
- * searches instead of O(N × patterns). Attribution is inclusive (a file under
- * `a/b` counts for both root `a` and root `a/b`), reproducing the per-root
- * `root/**` counts exactly. Never throws.
+ * Batched detector: greps each pattern once at repository scope and applies the
+ * repository-wide counts to every candidate root, so N roots cost O(patterns)
+ * searches instead of O(N × patterns). Service roots remain result keys for
+ * provenance and compatibility, but do not constrain discovery. Never throws.
  */
 export async function detectOtelInstrumentationForRoots({
   codebox,
@@ -124,20 +123,7 @@ export async function detectOtelInstrumentationForRoots({
   perPatternLimit?: number;
 }): Promise<Map<string, OtelDetection>> {
   const { org, repo } = splitRepository(repository);
-  const normalizedRoots = serviceRoots.map((serviceRoot) => ({
-    serviceRoot,
-    normalized: serviceRoot.replace(/^\.[/\\]?$/, '').replace(/\/+$/, ''),
-  }));
-  const ownersOf = (filePath: string): string[] =>
-    normalizedRoots
-      .filter(
-        ({ normalized }) =>
-          normalized === '' || filePath === normalized || filePath.startsWith(`${normalized}/`)
-      )
-      .map(({ serviceRoot }) => serviceRoot);
-  const sitesByRoot = new Map<string, Map<keyof OtelSignalCounts, Set<string>>>(
-    normalizedRoots.map(({ serviceRoot }) => [serviceRoot, new Map()])
-  );
+  const sitesByKind = new Map<keyof OtelSignalCounts, Set<string>>();
 
   try {
     // Flatten all (kind, regex) pairs and run them in parallel.
@@ -166,12 +152,9 @@ export async function detectOtelInstrumentationForRoots({
         });
         for (const hit of hits) {
           if (!isEligibleSite(kind, hit.filePath, hit.content)) continue;
-          for (const owner of ownersOf(hit.filePath)) {
-            const kinds = sitesByRoot.get(owner)!;
-            const sites = kinds.get(kind) ?? new Set<string>();
-            sites.add(`${hit.filePath}:${hit.lineNumber}`);
-            kinds.set(kind, sites);
-          }
+          const sites = sitesByKind.get(kind) ?? new Set<string>();
+          sites.add(`${hit.filePath}:${hit.lineNumber}`);
+          sitesByKind.set(kind, sites);
         }
       }
     };
@@ -183,22 +166,24 @@ export async function detectOtelInstrumentationForRoots({
       }`
     );
     return new Map(
-      normalizedRoots.map(({ serviceRoot }) => [
+      serviceRoots.map((serviceRoot) => [
         serviceRoot,
         { hasOtel: false, signalCounts: { ...EMPTY_OTEL_SIGNAL_COUNTS } },
       ])
     );
   }
 
-  const result = new Map<string, OtelDetection>();
-  for (const { serviceRoot } of normalizedRoots) {
-    const counts = { ...EMPTY_OTEL_SIGNAL_COUNTS };
-    for (const [kind, sites] of sitesByRoot.get(serviceRoot)!) {
-      counts[kind] = sites.size;
-    }
-    result.set(serviceRoot, computeDetection(counts));
+  const counts = { ...EMPTY_OTEL_SIGNAL_COUNTS };
+  for (const [kind, sites] of sitesByKind) {
+    counts[kind] = sites.size;
   }
-  return result;
+  const detection = computeDetection(counts);
+  return new Map(
+    serviceRoots.map((serviceRoot) => [
+      serviceRoot,
+      { hasOtel: detection.hasOtel, signalCounts: { ...detection.signalCounts } },
+    ])
+  );
 }
 
 /** Detects OTel imports and idiom sites for one service. Never throws. */
@@ -213,7 +198,6 @@ export async function detectOtelInstrumentation({
   const counts = { ...EMPTY_OTEL_SIGNAL_COUNTS };
   const { org, repo } = splitRepository(repository);
   const root = serviceRoot.replace(/^\.[/\\]?$/, '').replace(/\/+$/, '');
-  const filePath = root ? `${root}/**` : '**';
 
   try {
     // Run all kind×pattern pairs in parallel.
@@ -237,7 +221,6 @@ export async function detectOtelInstrumentation({
           gitOrg: org,
           gitRepo: repo,
           ref: gitSha,
-          filePath: filePath !== '**' ? filePath : undefined,
           regex,
           limit: perPatternLimit,
         });

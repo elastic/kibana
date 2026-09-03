@@ -124,7 +124,7 @@ describe('fetchLineWindows', () => {
 });
 
 describe('discoverLoggingSites', () => {
-  it('greps every idiom pattern, scoped to serviceRoot', async () => {
+  it('greps every idiom pattern at repository scope', async () => {
     const codebox = createMockCodeboxClient();
     codebox.grep.mockResolvedValue([]);
 
@@ -140,7 +140,7 @@ describe('discoverLoggingSites', () => {
     // One grep per idiom pattern
     expect(codebox.grep).toHaveBeenCalledTimes(LOGGER_IDIOM_PATTERNS.length);
     for (const call of codebox.grep.mock.calls) {
-      expect(call[0].path).toBe('src/ad/');
+      expect(call[0]).not.toHaveProperty('path');
       expect(call[0].ref).toBe('abc123');
     }
   });
@@ -149,7 +149,7 @@ describe('discoverLoggingSites', () => {
     const codebox = createMockCodeboxClient();
     // Every grep returns the same hit -> single deduped candidate
     codebox.grep.mockResolvedValue([
-      { ref: 'abc123', path: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info(' },
+      { ref: 'abc123', path: 'shared/Main.java', lineNumber: 42, content: 'logger.info(' },
     ]);
     codebox.show.mockResolvedValue('logger.info(\n"hi");\nnext();');
 
@@ -164,7 +164,7 @@ describe('discoverLoggingSites', () => {
 
     expect(candidates).toEqual([
       {
-        location: 'src/ad/Main.java:42',
+        location: 'shared/Main.java:42',
         content: 'logger.info(\n"hi");\nnext();',
         language: 'Java',
       },
