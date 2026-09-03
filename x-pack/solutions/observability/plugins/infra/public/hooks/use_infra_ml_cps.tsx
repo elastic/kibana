@@ -11,6 +11,7 @@ import { matchPath, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ProjectRoutingAccess, useCpsPickerAccess, useIsCpsMultiProject } from '@kbn/cps-utils';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import { withTimeout } from '@kbn/std';
 import {
   OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
@@ -42,18 +43,14 @@ const ML_CPS_CAPABILITY_TIMEOUT_MS = 35_000;
 
 // Fails closed: an unreachable, erroring, or unresponsive ML info API reads as capability-off.
 const loadMlCpsCapability = async (mlApi: MlApi): Promise<boolean> => {
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await Promise.race([
-      mlApi.mlInfo().then((mlInfo) => mlInfo.isMlCpsEnabled),
-      new Promise<boolean>((resolve) => {
-        timeoutId = setTimeout(() => resolve(false), ML_CPS_CAPABILITY_TIMEOUT_MS);
-      }),
-    ]);
+    const result = await withTimeout({
+      promise: mlApi.mlInfo(),
+      timeoutMs: ML_CPS_CAPABILITY_TIMEOUT_MS,
+    });
+    return result.timedout ? false : result.value.isMlCpsEnabled;
   } catch {
     return false;
-  } finally {
-    clearTimeout(timeoutId);
   }
 };
 
