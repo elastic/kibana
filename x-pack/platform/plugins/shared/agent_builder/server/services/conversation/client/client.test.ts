@@ -1933,7 +1933,9 @@ describe('ConversationClient', () => {
           onMetadataPatched,
         });
 
-        mockGetDocumentResponse(createConversationDocumentWithTemplate({ templateId: template.id }));
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: template.id })
+        );
         mockEsClient.index.mockRejectedValue(new Error('disk full'));
 
         await expect(
