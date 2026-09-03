@@ -23,6 +23,34 @@ jest.mock('../app_context', () => ({
   },
 }));
 
+// Helper: build the aggregation response shape returned by the new implementation.
+// Each entry is { policy_base_id, secret_references } for the latest revision of that policy.
+function makeAggResponse(
+  policies: Array<{ policyBaseId: string; secretRefs: Array<{ id: string }> }>
+) {
+  return {
+    hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+    aggregations: {
+      by_policy: {
+        buckets: policies.map(({ policyBaseId, secretRefs }) => ({
+          key: policyBaseId,
+          latest_doc: {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    data: { secret_references: secretRefs },
+                  },
+                },
+              ],
+            },
+          },
+        })),
+      },
+    },
+  } as any;
+}
+
 describe('findFleetPoliciesUsingSecrets', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
 
@@ -55,21 +83,12 @@ describe('findFleetPoliciesUsingSecrets', () => {
     expect(esClientMock.search).not.toHaveBeenCalled();
   });
 
-  it('returns referenced ids found in a compiled policy document', async () => {
-    esClientMock.search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [
-          {
-            _source: {
-              data: {
-                secret_references: [{ id: 'secret-1' }, { id: 'secret-2' }],
-              },
-            },
-          },
-        ],
-      },
-    } as any);
+  it('returns referenced ids found in the latest compiled policy document', async () => {
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse([
+        { policyBaseId: 'policy-1', secretRefs: [{ id: 'secret-1' }, { id: 'secret-2' }] },
+      ])
+    );
 
     const result = await findFleetPoliciesUsingSecrets({
       esClient: esClientMock,
@@ -83,36 +102,20 @@ describe('findFleetPoliciesUsingSecrets', () => {
     });
   });
 
-  it('still returns a secret as referenced when it appears only in an older revision_idx document (the incident scenario)', async () => {
-    // The primary crash-loop scenario: a newer compiled doc no longer references the secret,
-    // but an older revision is still in .fleet-policies and fleet-server may read it.
-    esClientMock.search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 2, relation: 'eq' },
-        hits: [
-          {
-            _index: '.fleet-policies',
-            _source: {
-              data: {
-                // Older revision: still references the old secret
-                secret_references: [{ id: 'old-secret-id' }],
-              },
-            },
-            sort: [1, 'policy-1'],
-          },
-          {
-            _index: '.fleet-policies',
-            _source: {
-              data: {
-                // Newer revision: secret has been rotated, no longer references old id
-                secret_references: [{ id: 'new-secret-id' }],
-              },
-            },
-            sort: [2, 'policy-1'],
-          },
-        ],
-      },
-    } as any);
+  it('does NOT block deletion when the secret appears only in an older revision — only the latest revision is consulted', async () => {
+    // The aggregation returns only the latest revision per policy (top_hits sorted by
+    // revision_idx desc). The latest revision has the new secret, not the old one.
+    // Older revisions are served to no agent and are separately swept; they must not
+    // block deletion of a rotated secret.
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse([
+        {
+          policyBaseId: 'policy-1',
+          // Latest revision: secret has been rotated, references new id only
+          secretRefs: [{ id: 'new-secret-id' }],
+        },
+      ])
+    );
 
     const result = await findFleetPoliciesUsingSecrets({
       esClient: esClientMock,
@@ -121,24 +124,29 @@ describe('findFleetPoliciesUsingSecrets', () => {
     });
 
     expect(result.checkFailed).toBe(false);
-    expect(result.referencedIds).toContain('old-secret-id');
+    expect(result.referencedIds.has('old-secret-id')).toBe(false);
+    expect(result.referencedIds.has('new-secret-id')).toBe(true);
+  });
+
+  it('returns the secret as referenced when the latest compiled document still references it', async () => {
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse([{ policyBaseId: 'policy-1', secretRefs: [{ id: 'live-secret-id' }] }])
+    );
+
+    const result = await findFleetPoliciesUsingSecrets({
+      esClient: esClientMock,
+      ids: ['live-secret-id'],
+      agentPolicyIds: ['policy-1'],
+    });
+
+    expect(result.checkFailed).toBe(false);
+    expect(result.referencedIds.has('live-secret-id')).toBe(true);
   });
 
   it('returns empty referencedIds when no compiled document references the secrets', async () => {
-    esClientMock.search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [
-          {
-            _source: {
-              data: {
-                secret_references: [{ id: 'other-secret' }],
-              },
-            },
-          },
-        ],
-      },
-    } as any);
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse([{ policyBaseId: 'policy-1', secretRefs: [{ id: 'other-secret' }] }])
+    );
 
     const result = await findFleetPoliciesUsingSecrets({
       esClient: esClientMock,
@@ -177,48 +185,8 @@ describe('findFleetPoliciesUsingSecrets', () => {
     ).resolves.not.toThrow();
   });
 
-  it('paginates when hits.length equals SO_SEARCH_LIMIT and fetches the next page', async () => {
-    // SO_SEARCH_LIMIT is 10000; use a small result to simulate a page boundary.
-    // We test the pagination logic by mocking SO_SEARCH_LIMIT through the module.
-    // Here we verify the loop runs a second time when the first page is "full".
-    const SO_SEARCH_LIMIT = 10000;
-
-    const fullPage = Array.from({ length: SO_SEARCH_LIMIT }, (_, i) => ({
-      _source: { data: { secret_references: [{ id: `secret-${i}` }] } },
-      sort: [i, `policy-${i}`],
-    }));
-
-    esClientMock.search
-      .mockResolvedValueOnce({
-        hits: { total: { value: SO_SEARCH_LIMIT + 1, relation: 'eq' }, hits: fullPage },
-      } as any)
-      .mockResolvedValueOnce({
-        hits: {
-          total: { value: SO_SEARCH_LIMIT + 1, relation: 'eq' },
-          hits: [
-            {
-              _source: { data: { secret_references: [{ id: 'secret-on-page-2' }] } },
-              sort: [SO_SEARCH_LIMIT, 'policy-extra'],
-            },
-          ],
-        },
-      } as any);
-
-    const result = await findFleetPoliciesUsingSecrets({
-      esClient: esClientMock,
-      ids: ['secret-on-page-2'],
-      agentPolicyIds: ['policy-1'],
-    });
-
-    expect(esClientMock.search).toHaveBeenCalledTimes(2);
-    expect(result.checkFailed).toBe(false);
-    expect(result.referencedIds.has('secret-on-page-2')).toBe(true);
-  });
-
   it('uses both policy_base_id and policy_id in the query to handle docs missing the backfill', async () => {
-    esClientMock.search.mockResolvedValueOnce({
-      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-    } as any);
+    esClientMock.search.mockResolvedValueOnce(makeAggResponse([]));
 
     await findFleetPoliciesUsingSecrets({
       esClient: esClientMock,
@@ -242,42 +210,51 @@ describe('findFleetPoliciesUsingSecrets', () => {
     );
   });
 
-  it('fetches only data.secret_references from _source to keep payloads small', async () => {
-    esClientMock.search.mockResolvedValueOnce({
-      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-    } as any);
-
-    await findFleetPoliciesUsingSecrets({
-      esClient: esClientMock,
-      ids: ['secret-1'],
-      agentPolicyIds: ['policy-1'],
-    });
-
-    expect(esClientMock.search).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _source: ['data.secret_references'],
-      }),
-      expect.anything()
-    );
-  });
-
   it('handles missing or null secret_references gracefully', async () => {
     esClientMock.search.mockResolvedValueOnce({
-      hits: {
-        total: { value: 2, relation: 'eq' },
-        hits: [
-          { _source: { data: {} } }, // no secret_references field
-          { _source: { data: { secret_references: null } } }, // null
-        ],
+      hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+      aggregations: {
+        by_policy: {
+          buckets: [
+            {
+              key: 'policy-1',
+              latest_doc: { hits: { hits: [{ _source: { data: {} } }] } }, // no secret_references
+            },
+            {
+              key: 'policy-2',
+              latest_doc: {
+                hits: { hits: [{ _source: { data: { secret_references: null } } }] },
+              }, // null
+            },
+          ],
+        },
       },
     } as any);
 
     const result = await findFleetPoliciesUsingSecrets({
       esClient: esClientMock,
       ids: ['secret-1'],
-      agentPolicyIds: ['policy-1'],
+      agentPolicyIds: ['policy-1', 'policy-2'],
     });
 
     expect(result).toEqual({ referencedIds: new Set(), checkFailed: false });
+  });
+
+  it('collects referenced ids across multiple policies', async () => {
+    esClientMock.search.mockResolvedValueOnce(
+      makeAggResponse([
+        { policyBaseId: 'policy-1', secretRefs: [{ id: 'secret-a' }] },
+        { policyBaseId: 'policy-2', secretRefs: [{ id: 'secret-b' }] },
+      ])
+    );
+
+    const result = await findFleetPoliciesUsingSecrets({
+      esClient: esClientMock,
+      ids: ['secret-a', 'secret-b'],
+      agentPolicyIds: ['policy-1', 'policy-2'],
+    });
+
+    expect(result.checkFailed).toBe(false);
+    expect(result.referencedIds).toEqual(new Set(['secret-a', 'secret-b']));
   });
 });

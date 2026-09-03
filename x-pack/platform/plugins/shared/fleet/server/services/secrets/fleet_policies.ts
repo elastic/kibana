@@ -6,29 +6,31 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
-import { SO_SEARCH_LIMIT, AGENT_POLICY_INDEX } from '../../../common';
+import { AGENT_POLICY_INDEX } from '../../../common';
 import { appContextService } from '../app_context';
 
 /**
- * Determines which of the given secret ids are still referenced by any compiled
- * agent policy document in .fleet-policies, scoped to the provided agent policy ids.
+ * Determines which of the given secret ids are still referenced by the **latest**
+ * compiled agent policy document in .fleet-policies, scoped to the provided agent
+ * policy ids.
  *
  * The .fleet-policies index is ES-managed and maps `data` as { enabled: false } —
  * it cannot be queried by field; we must fetch _source and filter in Kibana.
  *
- * Scoping by agentPolicyIds is what keeps this bounded. The crash-loop scenario
+ * Only the latest revision per policy is consulted. Older revision_idx documents
+ * naturally still carry the previous secret_references — consulting them would
+ * permanently block deletion of any rotated secret, since a prior revision always
+ * references the old value. Fleet-server serves only the latest revision to agents;
+ * older revisions are harmless and are swept by sweepOrphanedFleetPolicies.
+ *
+ * Scoping by agentPolicyIds keeps the query bounded. The crash-loop scenario
  * (an older revision_idx document referencing a just-deleted secret) always involves
- * a policy we already know about at the call site. Truly orphaned .fleet-policies docs
- * (issue #282911) belong to deleted agent policies, are never served to fleet-server,
- * and are separately swept by sweepOrphanedFleetPolicies — defending against them
- * would force a full index scan for no safety gain.
+ * a policy we already know about at the call site.
  *
  * Returns checkFailed: true when we cannot safely determine the set of references
- * (empty agentPolicyIds, ES error, or result truncation). Callers must treat this
- * as "do not delete" — leaking a secret is recoverable; deleting a referenced one
- * crashes fleet-server.
+ * (empty agentPolicyIds, ES error). Callers must treat this as "do not delete" —
+ * leaking a secret is recoverable; deleting a referenced one crashes fleet-server.
  */
 export async function findFleetPoliciesUsingSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -51,60 +53,79 @@ export async function findFleetPoliciesUsingSecrets(opts: {
 
   try {
     const referencedIds = new Set<string>();
-    let searchAfter: SortResults | undefined;
 
-    do {
-      const res = await esClient.search<{
-        data?: { secret_references?: Array<{ id: string }> };
-      }>(
-        {
-          index: AGENT_POLICY_INDEX,
-          ignore_unavailable: true,
-          size: SO_SEARCH_LIMIT,
-          // .fleet-policies maps `data` as { enabled: false } — subfields are stored in _source
-          // only and cannot be queried. Fetch only secret_references to keep the payload small.
-          _source: ['data.secret_references'],
-          // Use both policy_base_id and policy_id so we catch:
-          //  - base docs and version-specific variants (policy_base_id, indexed on current ES)
-          //  - docs written before backfill_policy_base_id ran (policy_id fallback)
-          // Do NOT use a prefix/wildcard on policy_id — see the rationale in sweep_orphaned_fleet_policies.ts.
-          query: {
-            bool: {
-              should: [
-                { terms: { policy_base_id: agentPolicyIds } },
-                { terms: { policy_id: agentPolicyIds } },
-              ],
-              minimum_should_match: 1,
+    // Use a terms aggregation bucketed by policy_base_id with a top_hits sub-agg sorted
+    // by revision_idx desc so we read only the latest compiled doc per policy. Older
+    // revision documents naturally still carry the previous secret_references, so
+    // including them would block deletion of any rotated secret permanently.
+    //
+    // Use both policy_base_id and policy_id so we catch:
+    //  - base docs and version-specific variants (policy_base_id, indexed on current ES)
+    //  - docs written before backfill_policy_base_id ran (policy_id fallback)
+    // Do NOT use a prefix/wildcard on policy_id — see sweep_orphaned_fleet_policies.ts.
+    const res = await esClient.search<never>(
+      {
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        query: {
+          bool: {
+            should: [
+              { terms: { policy_base_id: agentPolicyIds } },
+              { terms: { policy_id: agentPolicyIds } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: {
+          by_policy: {
+            terms: {
+              field: 'policy_base_id',
+              size: agentPolicyIds.length,
+            },
+            aggs: {
+              latest_doc: {
+                top_hits: {
+                  size: 1,
+                  sort: [{ revision_idx: 'desc' }],
+                  _source: ['data.secret_references'],
+                },
+              },
             },
           },
-          sort: [{ revision_idx: 'asc' }, { policy_id: 'asc' }],
-          ...(searchAfter ? { search_after: searchAfter } : {}),
         },
-        // maxRetries: 0 — fail closed immediately on an ES error rather than masking an availability
-        // issue with silent retries. A false "no references" verdict deletes a live secret.
-        { maxRetries: 0 }
-      );
+      },
+      // maxRetries: 0 — fail closed immediately on an ES error rather than masking an availability
+      // issue with silent retries. A false "no references" verdict deletes a live secret.
+      { maxRetries: 0 }
+    );
 
-      const hits = res.hits.hits;
+    interface SecretRef {
+      id: string;
+    }
+    interface LatestHit {
+      _source: { data?: { secret_references?: SecretRef[] } };
+    }
+    interface PolicyBucket {
+      latest_doc: { hits: { hits: LatestHit[] } };
+    }
+    interface ByPolicyAgg {
+      buckets: PolicyBucket[];
+    }
 
-      for (const hit of hits) {
-        const secretRefs = hit._source?.data?.secret_references;
-        if (Array.isArray(secretRefs)) {
-          for (const ref of secretRefs) {
-            if (ref?.id) {
-              referencedIds.add(ref.id);
-            }
+    const buckets = (res.aggregations?.by_policy as ByPolicyAgg | undefined)?.buckets ?? [];
+
+    for (const bucket of buckets) {
+      const hit = bucket.latest_doc.hits.hits[0];
+      const secretRefs = hit?._source?.data?.secret_references;
+      if (Array.isArray(secretRefs)) {
+        for (const ref of secretRefs) {
+          if (ref?.id) {
+            referencedIds.add(ref.id);
           }
         }
       }
-
-      if (hits.length === SO_SEARCH_LIMIT) {
-        const last = hits[hits.length - 1];
-        searchAfter = last.sort as SortResults;
-      } else {
-        searchAfter = undefined;
-      }
-    } while (searchAfter);
+    }
 
     return { referencedIds, checkFailed: false };
   } catch (e) {
