@@ -1,8 +1,7 @@
 {
-  "sha1": "ab13d2cee56763a1b1298dcc4cfa7ab2beeb5c4b",
+  "sha1": "593fc7ac82518ac3f5a41bc3e75f616041ed6dda",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -358,130 +357,130 @@
     {
       "id": "bd9da19748d56a0-522397fe666b178",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the MCP Clients page from the Manage MCP menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 32,
+        "line": 31,
         "column": 7
       }
     },
     {
       "id": "bd9da19748d56a0-50c5d6fe181a557",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a public client and surfaces its details without a secret",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 7
       }
     },
     {
       "id": "bd9da19748d56a0-49fc9bb9dca158a",
       "title": "[NON-MKI] Agent Builder — MCP Clients management registers a confidential client and reveals its secret in the post-create modal",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 13
       }
     },
     {
       "id": "bd9da19748d56a0-18c9f656e2d023f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management filters the client list by search term and status",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 78,
+        "line": 77,
         "column": 11
       }
     },
     {
       "id": "bd9da19748d56a0-05e3fd96e1d9c5f",
       "title": "[NON-MKI] Agent Builder — MCP Clients management opens the details flyout from a client name link",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 112,
+        "line": 111,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-f38a4af978bc4ca",
       "title": "[NON-MKI] Agent Builder — MCP Clients management edits a client through the row actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 133,
+        "line": 132,
         "column": 25
       }
     },
     {
       "id": "bd9da19748d56a0-36311f4cb75a3c1",
       "title": "[NON-MKI] Agent Builder — MCP Clients management prefills the remote redirect type from stored HTTPS URIs",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 173,
+        "line": 172,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-58854346134b8b7",
       "title": "[NON-MKI] Agent Builder — MCP Clients management does not offer edit for a revoked client",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 194,
+        "line": 193,
         "column": 95
       }
     },
     {
       "id": "bd9da19748d56a0-8035a9627ab4f43",
       "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 213,
+        "line": 212,
         "column": 9
       }
     },
     {
       "id": "bd9da19748d56a0-7ca72e847a3eb59",
       "title": "[NON-MKI] Agent Builder — MCP Clients management deletes a revoked client through the row actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 229,
+        "line": 228,
         "column": 22
       }
     },
@@ -563,6 +562,48 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
         "line": 25,
         "column": 28
+      }
+    },
+    {
+      "id": "68458d257ac9b36-45d6adf763ad160",
+      "title": "Agent Builder — per-space default agent admin sets and clears the space default from the agents list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "68458d257ac9b36-de662ae87232055",
+      "title": "Agent Builder — per-space default agent restricts a non-admin to the space default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 100,
+        "column": 61
+      }
+    },
+    {
+      "id": "68458d257ac9b36-b7847fbf70756d4",
+      "title": "Agent Builder — per-space default agent admin still sees all agents when a space default is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 130,
+        "column": 15
       }
     }
   ]

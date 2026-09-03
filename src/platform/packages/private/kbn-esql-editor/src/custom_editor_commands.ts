@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/code-editor';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
@@ -320,41 +321,63 @@ export const addEditorKeyBindings = (
   toggleVisor: () => void,
   onPrettifyQuery: () => void,
   onGenerateFromComment?: () => void
-) => {
-  // Add editor key bindings
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit(QuerySource.MANUAL)
-  );
-
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-    () => editor.trigger('keyboard', 'type', { text: '\n' })
-  );
-
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => toggleVisor()
-  );
-
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-    () => {
-      onPrettifyQuery();
-    }
-  );
+): monaco.IDisposable[] => {
+  // Actions, not commands: `addCommand` keybindings are page-wide and fire while another editor on
+  // the page has focus.
+  const disposables = [
+    editor.addAction({
+      id: 'esql.submitQuery',
+      label: i18n.translate('esqlEditor.query.submitQueryLabel', {
+        defaultMessage: 'Run query',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => onQuerySubmit(QuerySource.MANUAL),
+    }),
+    editor.addAction({
+      id: 'esql.insertNewline',
+      label: i18n.translate('esqlEditor.query.insertNewlineLabel', {
+        defaultMessage: 'Insert newline',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      run: (currentEditor) => currentEditor.trigger('keyboard', 'type', { text: '\n' }),
+    }),
+    editor.addAction({
+      id: 'esql.toggleVisor',
+      label: i18n.translate('esqlEditor.query.toggleVisorLabel', {
+        defaultMessage: 'Toggle quick search',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
+      run: () => toggleVisor(),
+    }),
+    editor.addAction({
+      id: 'esql.prettifyQuery',
+      label: i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+        defaultMessage: 'Prettify query',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
+      run: () => onPrettifyQuery(),
+    }),
+  ];
 
   if (onGenerateFromComment) {
-    editor.addCommand(
-      // eslint-disable-next-line no-bitwise
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ,
-      () => onGenerateFromComment()
+    disposables.push(
+      editor.addAction({
+        id: 'esql.generateFromComment',
+        label: i18n.translate('esqlEditor.query.generateFromCommentLabel', {
+          defaultMessage: 'Generate query from comment',
+        }),
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ],
+        run: () => onGenerateFromComment(),
+      })
     );
   }
+
+  return disposables;
 };
 
 export const addTabKeybindingRules = () => {

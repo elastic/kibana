@@ -42,7 +42,7 @@ describe('Transaction error rate alert', () => {
     });
 
     await executor({ params });
-    expect(services.alertsClient.report).not.toBeCalled();
+    expect(services.alertsClient.report).not.toHaveBeenCalled();
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {

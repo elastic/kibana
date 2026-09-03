@@ -17,9 +17,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
+  EuiSkeletonText,
+  EuiSpacer,
   EuiText,
+  EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,10 +37,13 @@ import { resolveOwnerLabel } from '../../../utils/owner';
 import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentAiIndices } from '../../../hooks/ai_indices/use_agent_ai_indices';
+import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
+import { labels as i18nLabels } from '../../../utils/i18n';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import {
   useSetSpaceDefaultAgent,
@@ -46,6 +53,8 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentAiIndices } from './agent_ai_indices';
+import { AiIndicesWarningsPanel } from '../ai_indices/ai_indices_warnings_panel';
 import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
@@ -100,6 +109,7 @@ const columnNames = {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  aiIndices: i18nLabels.aiIndices.columnTitle,
   createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
     defaultMessage: 'Created by',
   }),
@@ -156,6 +166,15 @@ const spaceDefaultBadgeTooltip = i18n.translate(
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const profileMap = useOwnerProfiles(agents ?? []);
+  const isContextEngineEnabled = useIsContextEngineEnabled();
+  const {
+    aiIndicesByAgentId,
+    warnings: aiIndicesWarnings,
+    isLoading: isLoadingAgentAiIndices,
+    error: aiIndicesError,
+  } = useAgentAiIndices({
+    enabled: isContextEngineEnabled,
+  });
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
@@ -197,16 +216,19 @@ export const AgentsList: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<ListAgentResponseItem>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<ListAgentResponseItem> = {
-      width: '48px',
+      width: '40px',
       align: 'center',
+      valign: 'top',
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
     const canEditAgent = (agent: ListAgentResponseItem) => agent.permissions.update_agent;
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '30%',
       field: 'name',
       name: columnNames.name,
+      valign: 'top',
       render: (name: string, agent: ListAgentResponseItem) => {
         const canEdit = canEditAgent(agent);
         const nameContent = !canEdit ? (
@@ -242,7 +264,7 @@ export const AgentsList: React.FC = () => {
                     <EuiToolTip position="top" content={spaceDefaultBadgeTooltip}>
                       <EuiBadge
                         color="hollow"
-                        iconType="starFilled"
+                        iconType="starFill"
                         tabIndex={0}
                         data-test-subj="agentBuilderAgentsListSpaceDefaultBadge"
                       >
@@ -255,7 +277,7 @@ export const AgentsList: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
-                {agent.description}
+                <EuiTextBlockTruncate lines={2}>{agent.description}</EuiTextBlockTruncate>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -265,7 +287,8 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLabels: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '25%',
+      width: '16%',
+      valign: 'top',
       field: 'labels',
       name: columnNames.labels,
       render: (labels?: string[]) => {
@@ -278,15 +301,45 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
+    const agentAiIndices: EuiTableComputedColumnType<ListAgentResponseItem> = {
+      width: '14%',
+      valign: 'top',
+      name: columnNames.aiIndices,
+      render: (agent) => {
+        if (isLoadingAgentAiIndices) {
+          return (
+            <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />
+          );
+        }
+        if (aiIndicesError) {
+          return (
+            <EuiIconTip
+              type="warning"
+              color="danger"
+              content={i18nLabels.aiIndices.loadErrorMessage}
+              data-test-subj="agentBuilderAgentsListAiIndicesError"
+            />
+          );
+        }
+
+        return (
+          <AgentAiIndices aiIndices={(aiIndicesByAgentId[agent.id] ?? []).map(({ id }) => id)} />
+        );
+      },
+      'data-test-subj': 'agentBuilderAgentsListAiIndices',
+    };
+
     const agentAccessControlMode: EuiTableComputedColumnType<ListAgentResponseItem> = {
-      width: '135px',
+      width: '110px',
+      valign: 'top',
       name: columnNames.accessControlMode,
       render: (agent) => <AgentAccessControlModeBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
     const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '12%',
+      width: '11%',
+      valign: 'top',
       field: 'created_by',
       name: columnNames.createdBy,
       render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
@@ -295,7 +348,8 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '12%',
+      width: '11%',
+      valign: 'top',
       field: 'updated_by',
       name: columnNames.lastUpdatedBy,
       render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
@@ -304,7 +358,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
-      width: '120px',
+      width: '100px',
       actions: [
         {
           type: 'icon',
@@ -404,6 +458,7 @@ export const AgentsList: React.FC = () => {
       agentNameAndDescription,
       agentAccessControlMode,
       agentLabels,
+      ...(isContextEngineEnabled ? [agentAiIndices] : []),
       agentCreatedBy,
       agentLastUpdatedBy,
       agentActions,
@@ -413,6 +468,10 @@ export const AgentsList: React.FC = () => {
     deleteAgent,
     manageAgents,
     canManageAgentAccess,
+    isContextEngineEnabled,
+    aiIndicesByAgentId,
+    isLoadingAgentAiIndices,
+    aiIndicesError,
     spaceDefaultAgentId,
     setSpaceDefaultAgent,
     profileMap,
@@ -441,6 +500,15 @@ export const AgentsList: React.FC = () => {
 
   return (
     <>
+      {isContextEngineEnabled && aiIndicesWarnings && aiIndicesWarnings.length > 0 && (
+        <>
+          <AiIndicesWarningsPanel
+            warnings={aiIndicesWarnings}
+            data-test-subj="agentBuilderAgentsListAiIndicesWarnings"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.agentBuilder.agents.tableCaption', {
           defaultMessage: 'Agents',

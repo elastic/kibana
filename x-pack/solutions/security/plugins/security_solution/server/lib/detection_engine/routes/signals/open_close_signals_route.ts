@@ -33,11 +33,21 @@ import {
   buildRuntimeMappingsFromFieldTypes,
   MAX_RUNTIME_FIELDS_PER_REQUEST,
 } from './bulk_close_runtime_mappings';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  prefetchAllPreviousStatusesByIds,
+  prefetchPreviousStatusesByQuery,
+  collectStatusTransitions,
+  type FoundHit,
+  type PreviousStatus,
+} from '../common/operations/prefetch_previous_statuses';
+import { emitAlertStatusChangedWithCap } from '../../../../workflows/triggers/emit_status_changed';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  sender: ITelemetryEventsSender
+  sender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -112,14 +122,46 @@ export const setSignalsStatusRoute = (
 
         try {
           if ('signal_ids' in request.body) {
+            const signalIds = request.body.signal_ids;
+            let changingIds: string[] = [];
+            let changingStatuses: PreviousStatus[] = [];
+            if (eventBus) {
+              try {
+                // Fetch all IDs in chunks so requests larger than MAX_ALERTS_PER_TRIGGER
+                // don't silently suppress the trigger when the first chunk is all no-ops.
+                const { hits } = await prefetchAllPreviousStatusesByIds(
+                  esClient,
+                  alertsIndex,
+                  signalIds
+                );
+                ({ ids: changingIds, previousStatuses: changingStatuses } =
+                  collectStatusTransitions(hits, status));
+              } catch (err) {
+                logger.warn(
+                  `Failed to pre-fetch previous alert statuses for workflow trigger: ${err}`
+                );
+              }
+            }
+
             // Use common operation for "by IDs" case
             const body = await updateAlertsWorkflowStatus({
               context,
               index: alertsIndex,
-              ids: request.body.signal_ids,
+              ids: signalIds,
               status,
               reason,
             });
+
+            if (eventBus) {
+              emitAlertStatusChangedWithCap(
+                eventBus,
+                request,
+                status,
+                changingIds,
+                changingStatuses,
+                logger
+              );
+            }
 
             return response.ok({ body });
           } else {
@@ -151,6 +193,22 @@ export const setSignalsStatusRoute = (
             // result to the underlying `_update_by_query`.
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
+            let prefetchedHits: FoundHit[] = [];
+            let truncated = false;
+            if (eventBus) {
+              try {
+                ({ hits: prefetchedHits, truncated } = await prefetchPreviousStatusesByQuery(
+                  esClient,
+                  alertsIndex,
+                  query,
+                  runtimeMappings,
+                  status
+                ));
+              } catch (err) {
+                logger.warn(`Failed to pre-fetch alert IDs for workflow trigger: ${err}`);
+              }
+            }
+
             const body = await updateSignalsStatusByQuery(
               status,
               query,
@@ -161,6 +219,23 @@ export const setSignalsStatusRoute = (
               reason,
               runtimeMappings
             );
+
+            // Post-filter: excludeStatus pre-filters modern docs at ES level, but legacy
+            // docs (signal.status only) and status-less docs may still appear. Drop both
+            // the remaining no-ops and the status-less docs the update script never
+            // mutates; docs with an unrecognized non-null status are kept since they do
+            // transition. No cap is applied here — the by-query prefetch already returns
+            // at most MAX_ALERTS_PER_TRIGGER hits, and `truncated` reports the overflow.
+            const { ids: changingIds, previousStatuses: changingStatuses } =
+              collectStatusTransitions(prefetchedHits, status);
+            if (changingIds.length > 0 || truncated) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: changingIds,
+                status,
+                previousStatuses: changingStatuses,
+                truncated,
+              });
+            }
 
             return response.ok({ body });
           }
