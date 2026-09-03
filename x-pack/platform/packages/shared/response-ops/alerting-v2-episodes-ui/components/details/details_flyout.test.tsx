@@ -62,11 +62,21 @@ describe('AlertEpisodeDetailsFlyout', () => {
     } as ReturnType<typeof useFetchRule>);
   });
 
-  it('renders header, overview tab body by default, and footer button with the right href', () => {
+  it('renders header and the overview tab body by default', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     expect(screen.getByTestId('headerSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('overviewSectionStub')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toHaveAttribute(
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutCloseIcon')).toBeInTheDocument();
+  });
+
+  it('exposes view details behind the footer take action menu', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.queryByTestId('alertingV2EpisodeTakeAction-viewDetails')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toHaveAttribute(
       'href',
       mockHttp.basePath.prepend('/app/management/alertingV2/episodes/ep-1')
     );
@@ -108,10 +118,10 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('calls onClose when the top-bar icon button is clicked', () => {
+  it('calls onClose when the header close icon is clicked', () => {
     const onClose = jest.fn();
     render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseIcon'));
     expect(onClose).toHaveBeenCalled();
   });
 });
