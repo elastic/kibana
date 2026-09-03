@@ -35,6 +35,7 @@ export const RulesListContainer = () => {
     notifications: { toasts },
     docLinks,
     setBreadcrumbs,
+    tabHrefOverrides,
   } = useKibana().services;
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
@@ -66,6 +67,8 @@ export const RulesListContainer = () => {
         selectedTab: RULES_PAGE_TAB_IDS.v1,
         prepend: http.basePath.prepend,
         showV2Tab: true,
+        v1Href: tabHrefOverrides?.v1Href,
+        v2Href: tabHrefOverrides?.v2Href,
       });
     }
 

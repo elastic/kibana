@@ -62,6 +62,7 @@ export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
           breadcrumbStatus: 'hidden' as const,
           children: [
             { link: obsAlertingLink('rules-v2') },
+            { link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' as const },
             {
               link: obsAlertingLink('rule-library'),
               badgeType: 'new' as const,

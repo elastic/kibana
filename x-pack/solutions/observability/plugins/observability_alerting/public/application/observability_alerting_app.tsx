@@ -65,7 +65,11 @@ export const ObservabilityAlertingApp = ({
         <RedirectToPath to={OBSERVABILITY_ALERTING_INBOX_PATH} />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
-        <ClassicRulesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />
+        <ClassicRulesPage
+          coreStart={coreStart}
+          setBreadcrumbs={setBreadcrumbs}
+          tabHrefOverrides={{ v1Href, v2Href }}
+        />
       </Route>
       <Route path={OBSERVABILITY_ALERTING_INBOX_PATH}>
         <EpisodesPage coreStart={coreStart} setBreadcrumbs={setBreadcrumbs} />

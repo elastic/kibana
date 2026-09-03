@@ -35,6 +35,7 @@ import type { TriggersAndActionsUiServices } from './rules_app';
 export interface ClassicRulesPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  tabHrefOverrides?: { v1Href?: string; v2Href?: string };
 }
 
 export interface ClassicRulesPageInternalDeps {
@@ -104,6 +105,7 @@ const AppWithoutRouter = () => {
 export const ComposableClassicRulesPage = ({
   coreStart,
   setBreadcrumbs,
+  tabHrefOverrides,
   internalDeps,
 }: ClassicRulesPageProps & { internalDeps: ClassicRulesPageInternalDeps }) => {
   const pluginsStart = internalDeps.pluginsStart as Record<string, any>;
@@ -141,6 +143,7 @@ export const ComposableClassicRulesPage = ({
     uiActions: pluginsStart.uiActions,
     cps: pluginsStart.cps,
     inspector: pluginsStart.inspector,
+    tabHrefOverrides,
   };
 
   return (

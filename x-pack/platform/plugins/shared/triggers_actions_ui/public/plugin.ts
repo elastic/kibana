@@ -672,6 +672,7 @@ export class Plugin
         return (props: {
           coreStart: CoreStart;
           setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+          tabHrefOverrides?: { v1Href?: string; v2Href?: string };
         }) => {
           const internalDeps = {
             actions: actions as any,

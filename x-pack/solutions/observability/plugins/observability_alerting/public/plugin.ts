@@ -27,6 +27,8 @@ import {
   OBSERVABILITY_ALERTING_INBOX_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from './constants';
@@ -81,6 +83,15 @@ export class ObservabilityAlertingPlugin
           path: OBSERVABILITY_ALERTING_INBOX_PATH,
           visibleIn: ['globalSearch', 'projectSideNav'],
           keywords: ['alerting', 'episodes', 'inbox'],
+        },
+        {
+          id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
+          title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
+            defaultMessage: 'Rules (Classic)',
+          }),
+          path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
+          visibleIn: ['globalSearch', 'projectSideNav'],
+          keywords: ['alerting', 'rules', 'classic'],
         },
         {
           id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
