@@ -36,7 +36,7 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
                 : undefined
             }
           >
-            <MonitorPageLink configId={mon.configId!} remote={mon.remote}>
+            <MonitorPageLink configId={mon.configId!} remote={mon.remote} spaces={mon.spaces}>
               {mon.name || mon.id}
             </MonitorPageLink>
           </EuiToolTip>

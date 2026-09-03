@@ -182,7 +182,7 @@ describe('duration anomaly alert', () => {
       const state: Record<string, any> = await alert.executor(options);
       expect(mockGetAnomliesTableDataGetter).toHaveBeenCalledTimes(1);
       expect(alertsClient.report).toHaveBeenCalledTimes(2);
-      expect(mockGetAnomliesTableDataGetter).toBeCalledWith(
+      expect(mockGetAnomliesTableDataGetter).toHaveBeenCalledWith(
         ['uptime_monitor_high_latency_by_geo'],
         [],
         [],

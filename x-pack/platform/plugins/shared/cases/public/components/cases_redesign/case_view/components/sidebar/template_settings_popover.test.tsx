@@ -244,6 +244,7 @@ describe('TemplateSettingsPopover', () => {
             version: otherTemplate.templateVersion,
             fields: otherParsedTemplate.definition.fields,
           },
+          entryPoint: 'case_view_sidebar',
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
@@ -338,7 +339,7 @@ describe('TemplateSettingsPopover', () => {
       await user.click(screen.getByTestId('confirm-change-template-modal-confirm'));
 
       expect(mockMutate).toHaveBeenCalledWith(
-        { caseData: caseWithTemplate, newTemplate: null },
+        { caseData: caseWithTemplate, newTemplate: null, entryPoint: 'case_view_sidebar' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
