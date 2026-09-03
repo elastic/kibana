@@ -16,19 +16,16 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
-import type { SearchInferenceEndpointsConfig } from './config';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
-import {
-  resolveModelsForFeature,
-  NO_DEFAULT_CONNECTOR,
-} from './lib/resolve_models_for_feature';
+import { resolveModelsForFeature, NO_DEFAULT_CONNECTOR } from './lib/resolve_models_for_feature';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -223,7 +220,9 @@ export class SearchInferenceEndpointsPlugin
                 return { endpoints: [connector], warnings: [], soEntryFound: false };
               } catch (e) {
                 this.logger.warn(
-                  `Failed to load default connector "${defaultConnectorId}": ${e instanceof Error ? e.message : String(e)}`
+                  `Failed to load default connector "${defaultConnectorId}": ${
+                    e instanceof Error ? e.message : String(e)
+                  }`
                 );
                 return { endpoints: [], warnings: [], soEntryFound: false };
               }

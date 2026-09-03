@@ -493,7 +493,11 @@ describe('getForFeature', () => {
 
     it('returns recommendedEndpoints when present and onlyReturnConfigured is true', async () => {
       registry.register(
-        createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'], taskType: 'chat_completion' })
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: ['rec1'],
+          taskType: 'chat_completion',
+        })
       );
       const result = await getForFeature(
         registry,

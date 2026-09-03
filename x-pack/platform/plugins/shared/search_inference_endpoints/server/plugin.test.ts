@@ -185,7 +185,11 @@ describe('SearchInferenceEndpointsPlugin', () => {
           request,
           { onlyReturnConfigured: true }
         );
-        expect(result).toEqual({ endpoints: [defaultConnector], warnings: [], soEntryFound: false });
+        expect(result).toEqual({
+          endpoints: [defaultConnector],
+          warnings: [],
+          soEntryFound: false,
+        });
       });
 
       it('returns empty list when defaultConnectorOnly is set but no default connector is configured', async () => {
