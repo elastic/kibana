@@ -6449,8 +6449,8 @@ describe('Package policy service', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const result = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
-        { ...mockPackagePolicy, inputs: [], spaceIds: ['space-a'] },
+      await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        { ...mockPackagePolicy, inputs: [], spaceIds: ['space-a'] } as any,
       ]);
 
       (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);

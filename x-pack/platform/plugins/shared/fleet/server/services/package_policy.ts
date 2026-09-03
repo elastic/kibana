@@ -1057,7 +1057,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
 
         // eslint-disable-next-line prefer-const
-        let { id, spaceIds: _spaceIds, ...pkgPolicyWithoutId } = packagePolicy;
+        let { id, spaceIds: _spaceIds, ...pkgPolicyWithoutId } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1727,7 +1727,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     // eslint-disable-next-line prefer-const
-    let { version, id: _id, ...restOfPackagePolicy } = packagePolicy;
+    // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
+    let { version, id: _id, spaceIds: _spaceIds, ...restOfPackagePolicy } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
 
     // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
     // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
