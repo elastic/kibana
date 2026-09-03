@@ -451,7 +451,7 @@ function reconstructESQLControlVariables(
   columns: TextBasedLayerColumn[],
   esql: string
 ): TextBasedLayerColumn[] {
-  const identifierVariables = new Set(getESQLIdentifierVariables(esql).filter(Boolean));
+  const identifierVariables = new Set(getESQLIdentifierVariables(esql));
   if (identifierVariables.size === 0) {
     return columns;
   }
