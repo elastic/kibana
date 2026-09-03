@@ -61,11 +61,11 @@ export const applyHeadroomToDomain = (
   domain: Domain,
   headroom: { min?: number; max?: number } = { max: 1.1 }
 ): Domain => {
-  const min = domain.min * (headroom.min ?? 1);
-  const max = domain.max * (headroom.max ?? 1);
+  const minValue = domain.min * (headroom.min ?? 1);
+  const maxValue = domain.max * (headroom.max ?? 1);
   return {
-    min: Math.min(min, max),
-    max: Math.max(min, max),
+    min: Math.min(minValue, maxValue),
+    max: Math.max(minValue, maxValue),
   };
 };
 
