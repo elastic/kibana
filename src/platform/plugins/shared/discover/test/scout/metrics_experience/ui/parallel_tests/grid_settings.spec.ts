@@ -157,7 +157,7 @@ spaceTest.describe(
           await metricsExperience.waitForFirstCard('gauge_0-0');
           await metricsExperience.openInsightsFlyout(0);
           await flyout.esqlQuery.tabButton.click();
-          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(gauge_0)');
+          await expect(flyout.esqlQuery.codeBlock).toContainText('MIN(MIN_OVER_TIME(gauge_0))');
           await flyout.closeButton.click();
           await metricsExperience.clearSearch();
         });

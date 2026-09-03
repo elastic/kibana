@@ -18,7 +18,7 @@ describe('createMetricAggregation', () => {
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
-      expect(result).toBe('AVG(system.load.`1m`)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(system.load.`1m`))');
     });
 
     it('should substitute without adding backticks when not needed', () => {
@@ -27,7 +27,7 @@ describe('createMetricAggregation', () => {
         instrument: 'gauge',
         metricName: 'system.load.normal',
       });
-      expect(result).toBe('AVG(system.load.normal)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(system.load.normal))');
     });
 
     it('should handle nested functions like SUM(RATE(...))', () => {
@@ -94,13 +94,13 @@ describe('createMetricAggregation', () => {
       expect(result).toBe('PERCENTILE(TO_TDIGEST(??metricName), 95)');
     });
 
-    it('should return AVG for gauge instrument', () => {
+    it('should return AVG(AVG_OVER_TIME(...)) for gauge instrument', () => {
       const result = createMetricAggregation({
         types: [ES_FIELD_TYPES.HISTOGRAM],
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
-      expect(result).toBe('AVG(??metricName)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(??metricName))');
     });
   });
 });
@@ -122,15 +122,37 @@ describe('createMetricAggregation with gridSettings override', () => {
     expect(result).toBe('MAX(RATE(requests.count))');
   });
 
-  it('applies the gauge aggregation setting directly', () => {
+  it('applies the gauge aggregation setting wrapped in the matching *_OVER_TIME()', () => {
     const result = createMetricAggregation({
       types: [ES_FIELD_TYPES.DOUBLE],
       instrument: 'gauge',
       metricName: 'cpu.usage',
       gridSettings,
     });
-    expect(result).toBe('MIN(cpu.usage)');
+    expect(result).toBe('MIN(MIN_OVER_TIME(cpu.usage))');
   });
+
+  it.each([
+    ['avg', 'AVG(AVG_OVER_TIME(cpu.usage))'],
+    ['min', 'MIN(MIN_OVER_TIME(cpu.usage))'],
+    ['max', 'MAX(MAX_OVER_TIME(cpu.usage))'],
+    ['sum', 'SUM(SUM_OVER_TIME(cpu.usage))'],
+  ] as const)(
+    'wraps gauge %s in the matching *_OVER_TIME inner aggregation',
+    (gaugeAggregation, expected) => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE],
+        instrument: 'gauge',
+        metricName: 'cpu.usage',
+        gridSettings: {
+          counterAggregation: 'sum',
+          gaugeAggregation,
+          histogramPercentile: 'p95',
+        },
+      });
+      expect(result).toBe(expected);
+    }
+  );
 
   it('applies the histogram percentile setting for legacy histograms', () => {
     const result = createMetricAggregation({
@@ -194,7 +216,7 @@ describe('createMetricAggregation with gridSettings override', () => {
         instrument: 'gauge',
         metricName: 'cpu.usage',
       })
-    ).toBe('AVG(cpu.usage)');
+    ).toBe('AVG(AVG_OVER_TIME(cpu.usage))');
   });
 });
 
@@ -215,7 +237,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'http.request.duration',
       });
-      expect(result).toBe('AVG(TO_DOUBLE(http.request.duration))');
+      expect(result).toBe('AVG(AVG_OVER_TIME(TO_DOUBLE(http.request.duration)))');
     });
 
     it('should cast long+integer to long', () => {
@@ -233,7 +255,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
-      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+      expect(result).toBe('AVG(AVG_OVER_TIME(TO_DOUBLE(system.load.`1m`)))');
     });
 
     it('should not cast when types are compatible duplicates', () => {
@@ -242,7 +264,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'cpu.usage',
       });
-      expect(result).toBe('AVG(cpu.usage)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(cpu.usage))');
     });
 
     it('should cast mixed float and integer types to double', () => {
@@ -251,7 +273,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'metric.value',
       });
-      expect(result).toBe('AVG(TO_DOUBLE(metric.value))');
+      expect(result).toBe('AVG(AVG_OVER_TIME(TO_DOUBLE(metric.value)))');
     });
 
     it('should handle field names with special chars in cast', () => {
@@ -260,7 +282,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'system.load.1m',
       });
-      expect(result).toBe('AVG(TO_DOUBLE(system.load.`1m`))');
+      expect(result).toBe('AVG(AVG_OVER_TIME(TO_DOUBLE(system.load.`1m`)))');
     });
   });
 
@@ -271,7 +293,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
-      expect(result).toBe('AVG(TO_DOUBLE(??metricName))');
+      expect(result).toBe('AVG(AVG_OVER_TIME(TO_DOUBLE(??metricName)))');
     });
 
     it('should cast counter with placeholder', () => {
@@ -291,7 +313,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'field.name',
       });
-      expect(result).toBe('AVG(field.name)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(field.name))');
     });
 
     it('should pass through text + long without casting', () => {
@@ -309,7 +331,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         placeholderName: 'metricName',
       });
-      expect(result).toBe('AVG(??metricName)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(??metricName))');
     });
   });
 
@@ -320,7 +342,7 @@ describe('createMetricAggregation with conflicting types', () => {
         instrument: 'gauge',
         metricName: 'cpu.usage',
       });
-      expect(result).toBe('AVG(cpu.usage)');
+      expect(result).toBe('AVG(AVG_OVER_TIME(cpu.usage))');
     });
 
     it('should work with legacy histogram and single type', () => {
