@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiFlexItem,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +15,6 @@ import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
@@ -30,7 +23,6 @@ import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
-import { useInvestigationAvailability } from '../../hooks/use_investigation_availability';
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -57,7 +49,7 @@ export function AlertActions(
   const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
 
   const canReadAlertRule = authorizedToReadRuleForAlert(alert);
-  const { application, http, telemetryClient } = useKibana().services;
+  const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
@@ -116,58 +108,7 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isInvestigating, setIsInvestigating] = useState(false);
-  const alertId = observabilityAlert.fields[ALERT_UUID];
-  const hasInvestigationActionPrerequisites = Boolean(
-    application.capabilities.agentBuilder?.write === true && alertId
-  );
-  const isInvestigationAvailable = useInvestigationAvailability({
-    enabled: hasInvestigationActionPrerequisites,
-  });
-  const showInvestigateAction = Boolean(
-    hasInvestigationActionPrerequisites && isInvestigationAvailable
-  );
-
-  const handleInvestigate = async () => {
-    if (!alertId) return;
-
-    setIsInvestigating(true);
-    closeActionsPopover();
-
-    try {
-      await http.post(`/internal/observability/alerts/${encodeURIComponent(alertId)}/investigate`);
-      services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.observability.alertsTable.investigateSuccessTitle', {
-          defaultMessage: 'Investigation started',
-        }),
-      });
-    } catch (error) {
-      services.notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observability.alertsTable.investigateErrorTitle', {
-          defaultMessage: 'Failed to start investigation',
-        }),
-        text: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsInvestigating(false);
-    }
-  };
-
   const actionsMenuItems = [
-    ...(showInvestigateAction
-      ? [
-          <EuiContextMenuItem
-            key="investigate"
-            disabled={isInvestigating}
-            onClick={handleInvestigate}
-            data-test-subj="o11yAlertActionsInvestigate"
-          >
-            {i18n.translate('xpack.observability.alertsTable.investigateTextLabel', {
-              defaultMessage: 'Investigate',
-            })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
     ...caseAlertActionItems,
 
     useMemo(

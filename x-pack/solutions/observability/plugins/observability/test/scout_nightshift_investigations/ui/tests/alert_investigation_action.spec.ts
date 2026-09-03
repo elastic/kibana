@@ -109,5 +109,12 @@ test.describe(
         `/internal/observability/alerts/${alertId}/investigate`
       );
     });
+
+    test('shows the investigation action on the rule detail alerts table', async ({ page }) => {
+      await page.gotoApp(`management/insightsAndAlerting/triggersActions/rule/${ruleId}`);
+      await page.testSubj.locator('alertsTableIsLoaded').waitFor({ state: 'visible' });
+      await page.testSubj.locator('alertsTableRowActionMore').click();
+      await expect(page.testSubj.locator('investigateAlert')).toBeVisible();
+    });
   }
 );

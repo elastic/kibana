@@ -203,7 +203,7 @@ export class AlertsTablePage {
   }
 
   async clickInvestigate() {
-    await this.page.testSubj.click('o11yAlertActionsInvestigate');
+    await this.page.testSubj.click('investigateAlert');
   }
 
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)

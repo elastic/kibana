@@ -713,6 +713,10 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
        * rule-create authorized users.
        */
       canModifyAlerts?: boolean;
+      investigationContext?: {
+        ruleId?: string;
+        ruleTypeId?: string;
+      };
     };
 
 export interface BulkActionsConfig {
