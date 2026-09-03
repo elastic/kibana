@@ -14,7 +14,8 @@ import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
@@ -68,6 +69,7 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   SearchExecutionsViewParams,
@@ -210,6 +212,31 @@ export interface BulkScheduleWorkflowItem {
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
 
+export type AlertPreprocessingContext = Pick<
+  CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
+  'core' | 'alerting'
+>;
+
+export interface RunWorkflowWithAlertPreprocessingParams {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  request: KibanaRequest;
+  preprocessingContext: AlertPreprocessingContext;
+  metadata?: Record<string, unknown>;
+  /**
+   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
+   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
+   * the expanded alert-event shape.
+   */
+  eventOverrides?: Record<string, unknown>;
+}
+
+export interface RunWorkflowWithAlertPreprocessingResult {
+  workflowExecutionId: string;
+}
+
 const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
 const INITIAL_EXECUTE_WORKFLOW_WAIT_MS = 1_000;
 const EXECUTE_WORKFLOW_CHECK_INTERVAL_MS = 2_500;
@@ -271,7 +298,8 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean
+    public readonly isWorkflowsAvailable: boolean,
+    private readonly logger: Logger
   ) {}
 
   public setAuditLog(audit: WorkflowManagementAuditLog): void {
@@ -510,6 +538,56 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   *
+   * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
+   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
+   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   */
+  public async runWorkflowWithAlertPreprocessing({
+    workflow,
+    spaceId,
+    inputs,
+    request,
+    preprocessingContext,
+    metadata,
+    eventOverrides,
+  }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    const processedInputs = await preprocessAlertInputs(
+      inputs,
+      preprocessingContext,
+      spaceId,
+      this.logger
+    );
+
+    const finalInputs =
+      eventOverrides != null
+        ? {
+            ...processedInputs,
+            event: {
+              ...(typeof processedInputs.event === 'object' &&
+              processedInputs.event !== null &&
+              !Array.isArray(processedInputs.event)
+                ? (processedInputs.event as Record<string, unknown>)
+                : {}),
+              ...eventOverrides,
+            },
+          }
+        : processedInputs;
+
+    const workflowExecutionId = await this.runWorkflow(
+      workflow,
+      spaceId,
+      finalInputs,
+      request,
+      undefined,
+      metadata
+    );
+
+    return { workflowExecutionId };
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
