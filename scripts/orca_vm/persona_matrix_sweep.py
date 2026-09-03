@@ -279,6 +279,28 @@ TRACE_FACTORY_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/"
     "evaluators/trace_based/factory.ts"
 )
+# Golden trace export (regressed 2026-09-01): the base image's kbn-evals/scout
+# sources predate agentBuilderTracingExporters support entirely (0 occurrences
+# in profiles.ts / eval_stack.ts / classic.stateful.config.ts), so
+# config.local.json's key is written but never read and Agent Builder spans
+# only land on the VM's local Scout ES. Overlay all three files from this
+# worktree so the golden OTLP exporter is appended during stack boot.
+PATCHED_PROFILES = (
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/cli/profiles.ts"
+)
+PROFILES_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/cli/profiles.ts"
+)
+PATCHED_SCOUT_TRACING_CONFIG = (
+    KIBANA_MAIN.parent / "kibana.worktrees/evals-ext-matrix"
+    / "src/platform/packages/shared/kbn-scout/src/servers/configs/"
+    "config_sets/evals_tracing/stateful/classic.stateful.config.ts"
+)
+SCOUT_TRACING_CONFIG_REMOTE = (
+    "Projects/kibana/src/platform/packages/shared/kbn-scout/src/servers/"
+    "configs/config_sets/evals_tracing/stateful/classic.stateful.config.ts"
+)
 # Env seeds/tools seed/spec live in the matrix branch itself (merged as
 # f85527ed "Unbreak failing columns", plus the tool-registration assert).
 # Overlay from this worktree — the persona-matrix-env-truth worktree predates
@@ -501,6 +523,8 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
     scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
+    scp(str(PATCHED_PROFILES), ip, PROFILES_REMOTE)
+    scp(str(PATCHED_SCOUT_TRACING_CONFIG), ip, SCOUT_TRACING_CONFIG_REMOTE)
     if persona_only:
         # Every import evaluate_dataset.ts pulls from ./datasets must exist
         # locally before we ship it. A missing file used to surface only on
@@ -541,6 +565,8 @@ def deploy(ip: str) -> None:
         f"grep -q erroredRuns ~/{EXECUTOR_CLIENT_REMOTE}",
         f"grep -q getStatusCode ~/{RETRY_UTILS_REMOTE}",
         f"grep -q 'retries: 8' ~/{TRACE_FACTORY_REMOTE}",
+        f"grep -q agentBuilderTracingExporters ~/{PROFILES_REMOTE}",
+        f"grep -q agentBuilderTracingExporters ~/{SCOUT_TRACING_CONFIG_REMOTE}",
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
