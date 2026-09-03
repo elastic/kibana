@@ -1849,6 +1849,7 @@
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-smoke-tests": "link:x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
+    "@kbn/evals-suite-threat-intel-enrichment": "link:x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment",
     "@kbn/evals-suite-workflows": "link:src/platform/packages/shared/kbn-evals-suite-workflows",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
