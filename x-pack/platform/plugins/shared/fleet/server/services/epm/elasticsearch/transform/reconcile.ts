@@ -9,6 +9,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { deleteTransforms } from './remove';
 
+// Upper bound on transforms returned per reconciliation pass. A single package
+// is extremely unlikely to have anywhere near this many transforms, but we cap
+// it to avoid unbounded response sizes.
+const MAX_TRANSFORMS_PER_PACKAGE_RECONCILE = 1000;
+
 /**
  * Best-effort ES-side reconciliation: finds transforms owned by `pkgName` that are
  * not in `keepIds` and deletes them without touching their destination indices.
@@ -34,7 +39,7 @@ export const reconcileTransforms = async (
     const response = await esClient.transform.getTransform({
       transform_id: `${pkgName}.*,logs-${pkgName}.*`,
       allow_no_match: true,
-      size: 1000,
+      size: MAX_TRANSFORMS_PER_PACKAGE_RECONCILE,
     });
 
     const keepSet = new Set(keepIds);
@@ -62,9 +67,20 @@ export const reconcileTransforms = async (
       } orphaned transform(s) for package ${pkgName}: ${orphanIds.join(', ')}`
     );
 
+    // Delete orphans one at a time so a failure on one does not block the rest.
     // Never delete destination indices for ES-discovered orphans — a destination
     // index may be shared with, or still referenced by, external tooling.
-    await deleteTransforms(esClient, orphanIds, false);
+    for (const orphanId of orphanIds) {
+      try {
+        await deleteTransforms(esClient, [orphanId], false);
+      } catch (delErr) {
+        logger.warn(
+          `[Fleet] Failed to delete orphaned transform ${orphanId} for package ${pkgName} (non-fatal): ${
+            delErr?.message ?? delErr
+          }`
+        );
+      }
+    }
   } catch (err) {
     logger.warn(
       `[Fleet] Transform reconciliation for package ${pkgName} failed (non-fatal): ${

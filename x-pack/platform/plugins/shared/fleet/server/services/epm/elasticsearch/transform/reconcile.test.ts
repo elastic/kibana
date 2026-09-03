@@ -152,7 +152,7 @@ describe('reconcileTransforms', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unreachable'));
   });
 
-  test('swallows deleteTransform errors and logs a warning', async () => {
+  test('swallows stopTransform errors and logs a warning', async () => {
     esClient.transform.getTransform.mockResponseOnce({
       count: 1,
       transforms: [
@@ -166,5 +166,41 @@ describe('reconcileTransforms', () => {
 
     await expect(reconcileTransforms(esClient, logger, 'endpoint', [])).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stop failed'));
+  });
+
+  test('continues deleting remaining orphans when one deletion fails mid-batch', async () => {
+    // Regression guard: per-orphan error isolation — a failure on one orphan must not
+    // prevent the others from being deleted. deleteTransforms is called once per orphan
+    // so that a thrown error is caught individually.
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 3,
+      transforms: [
+        // @ts-expect-error incomplete data
+        { id: 'endpoint.metadata_current-default-0.1.0', _meta: { package: { name: 'endpoint' } } },
+        // @ts-expect-error incomplete data
+        { id: 'endpoint.metadata_current-default-0.14.0', _meta: { package: { name: 'endpoint' } } },
+        // @ts-expect-error incomplete data
+        { id: 'endpoint.metadata_current-default-0.15.0', _meta: { package: { name: 'endpoint' } } },
+      ],
+    });
+
+    // First stopTransform call fails; the other two orphans should still be processed.
+    esClient.transform.stopTransform.mockImplementationOnce(() => {
+      throw new Error('stop failed for 0.1.0');
+    });
+
+    await expect(
+      reconcileTransforms(esClient, logger, 'endpoint', ['endpoint.metadata_current-default-0.16.0'])
+    ).resolves.toBeUndefined();
+
+    // First orphan's failure is logged as a warning, not thrown.
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('stop failed for 0.1.0'));
+
+    // Remaining two orphans are still stopped and deleted despite the first failure.
+    const stoppedIds = (esClient.transform.stopTransform.mock.calls as any[]).map(
+      (c) => c[0].transform_id
+    );
+    expect(stoppedIds).toContain('endpoint.metadata_current-default-0.14.0');
+    expect(stoppedIds).toContain('endpoint.metadata_current-default-0.15.0');
   });
 });
