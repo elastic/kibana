@@ -1806,15 +1806,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
-  {                                                                                                                                                                                                       
-    key: 'windows.advanced.kernel.dev_drives.harden',                                                                                                                                                     
-    first_supported_version: '8.16',                                                                                                                                                                      
-    documentation: i18n.translate(                                                                                                                                                                        
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',                                                                                                        
-      {                                                                                                                                                                                                   
-        defaultMessage: 'Apply malware protection to dev drives. Default: false.',                                                                                                                        
-      }                                                                                                                                                                                                   
-    ),                                                                                                                                                                                                    
+  {
+    key: 'windows.advanced.kernel.dev_drives.harden',
+    first_supported_version: '8.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.dev_drives.harden',
+      {
+        defaultMessage: 'Apply malware protection to dev drives. Default: false.',
+      }
+    ),
   },
   {
     key: 'windows.advanced.kernel.enable_sync_driver_loads',
@@ -1822,7 +1822,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.enable_sync_driver_loads',
       {
-        defaultMessage: 'Mitigates vulnerable driver abuse by providing additional safeguards and enrichment for driver loads. Default: true.',
+        defaultMessage:
+          'Mitigates vulnerable driver abuse by providing additional safeguards and enrichment for driver loads. Default: true.',
       }
     ),
   },
