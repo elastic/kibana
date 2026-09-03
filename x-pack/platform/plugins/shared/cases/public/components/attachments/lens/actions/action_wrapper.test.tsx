@@ -132,6 +132,6 @@ describe('ActionWrapper', () => {
         <div />
       </ActionWrapper>
     );
-    expect(mockCasePermissions).toBeCalledWith(undefined);
+    expect(mockCasePermissions).toHaveBeenCalledWith(undefined);
   });
 });
