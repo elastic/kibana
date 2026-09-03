@@ -64,6 +64,7 @@ import { getChartType } from '../../../common/util/chart_utils';
 
 import type { MlClient } from '../../lib/ml_client';
 import type { MlJob } from '../..';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 export function chartLimits(data: ChartPoint[] = []) {
   const domain = extent(data, (d) => {
@@ -156,6 +157,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     const scriptFields = datafeedConfig?.script_fields;
     const aggFields = getDatafeedAggregations(datafeedConfig);
 
+    const isMlCpsEnabled = await getIsMlCpsEnabled(client);
+
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
@@ -207,7 +210,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     });
 
-    const projectRouting = datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
+    const projectRouting =
+      isMlCpsEnabled && datafeedConfig ? getProjectRoutingFromDatafeed(datafeedConfig) : null;
 
     const esSearchRequest: estypes.SearchRequest = {
       index,

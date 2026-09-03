@@ -42,7 +42,7 @@ export function resultsServiceProvider(
     intervalMs: number,
     runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions,
-    projectRouting?: string
+    projectRoutingIn?: string
   ): Promise<any>;
   getRecordMaxScoreByTime(
     jobId: string,
