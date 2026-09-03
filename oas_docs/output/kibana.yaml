@@ -95891,7 +95891,6 @@ components:
               enabled:
                 type: boolean
               name:
-                maxLength: 100
                 type: string
             required:
               - name
@@ -95917,7 +95916,6 @@ components:
               required:
                 - enabled
             cluster_id:
-              maxLength: 512
               type: string
             resources:
               additionalProperties: false
@@ -95952,20 +95950,16 @@ components:
           maxLength: 512
           type: string
         data_output_id:
-          maxLength: 512
           nullable: true
           type: string
         description:
-          maxLength: 10000
           type: string
         download_source_id:
-          maxLength: 512
           nullable: true
           type: string
         fips_agents:
           type: number
         fleet_server_host_id:
-          maxLength: 512
           nullable: true
           type: string
         global_data_tags:
@@ -95975,12 +95969,10 @@ components:
             type: object
             properties:
               name:
-                maxLength: 255
                 type: string
               value:
                 anyOf:
-                  - maxLength: 1000
-                    type: string
+                  - type: string
                   - type: number
             required:
               - name
@@ -96030,17 +96022,14 @@ components:
                 burst:
                   type: number
                 interval:
-                  maxLength: 512
                   type: string
             uploader:
               additionalProperties: false
               type: object
               properties:
                 init_dur:
-                  maxLength: 512
                   type: string
                 max_dur:
-                  maxLength: 512
                   type: string
                 max_retries:
                   type: number
@@ -96067,20 +96056,17 @@ components:
             enabled:
               type: boolean
             host:
-              maxLength: 2048
               type: string
             port:
               maximum: 65353
               minimum: 0
               type: number
         monitoring_output_id:
-          maxLength: 512
           nullable: true
           type: string
         monitoring_pprof_enabled:
           type: boolean
         name:
-          maxLength: 255
           minLength: 1
           type: string
         namespace:
@@ -96137,7 +96123,6 @@ components:
                 type: number
               version:
                 description: Target version for automatic agent upgrade
-                maxLength: 512
                 type: string
             required:
               - version
@@ -96152,7 +96137,6 @@ components:
           type: string
         space_ids:
           items:
-            maxLength: 512
             type: string
           maxItems: 100
           type: array
@@ -102206,14 +102190,12 @@ components:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
-            maxLength: 256
             type: string
           maxItems: 1000
           nullable: true
           type: array
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
-          maxLength: 255
           nullable: true
           type: string
         cloud_connector_name:
@@ -102233,7 +102215,6 @@ components:
           type: string
         description:
           description: Package policy description
-          maxLength: 2048
           type: string
         elasticsearch:
           additionalProperties: true
@@ -102272,12 +102253,10 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
-                maxLength: 255
                 type: string
               value:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                 description: The value of the custom field.
             required:
@@ -102479,14 +102458,12 @@ components:
           type: array
         name:
           description: Unique name for the package policy.
-          maxLength: 255
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
-          maxLength: 255
           nullable: true
           type: string
         overrides:
@@ -102502,18 +102479,15 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          maxLength: 50
           type: string
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
-          maxLength: 255
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
-            maxLength: 255
             type: string
           maxItems: 1000
           type: array
@@ -102579,7 +102553,6 @@ components:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
-            maxLength: 256
             type: string
           maxItems: 1000
           nullable: true
@@ -102588,7 +102561,6 @@ components:
           type: number
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
-          maxLength: 255
           nullable: true
           type: string
         cloud_connector_name:
@@ -102608,7 +102580,6 @@ components:
           type: string
         description:
           description: Package policy description
-          maxLength: 2048
           type: string
         elasticsearch:
           additionalProperties: true
@@ -102632,12 +102603,10 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
-                maxLength: 255
                 type: string
               value:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                 description: The value of the custom field.
             required:
@@ -102937,14 +102906,12 @@ components:
           type: boolean
         name:
           description: Unique name for the package policy.
-          maxLength: 255
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
-          maxLength: 255
           nullable: true
           type: string
         overrides:
@@ -102960,18 +102927,15 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          maxLength: 50
           type: string
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
-          maxLength: 255
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
-            maxLength: 255
             type: string
           maxItems: 1000
           type: array
@@ -114592,7 +114556,6 @@ components:
               required:
                 - enabled
             cluster_id:
-              maxLength: 512
               type: string
             resources:
               additionalProperties: false
@@ -114668,7 +114631,6 @@ components:
           nullable: true
           type: boolean
         min_agent_version:
-          maxLength: 512
           nullable: true
           type: string
         monitoring_diagnostics:
@@ -114750,13 +114712,10 @@ components:
             type: object
             properties:
               name:
-                maxLength: 255
                 type: string
               title:
-                maxLength: 255
                 type: string
               version_condition:
-                maxLength: 512
                 type: string
             required:
               - name
@@ -118613,7 +118572,6 @@ components:
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
-            maxLength: 256
             type: string
           maxItems: 1000
           nullable: true
@@ -118622,7 +118580,6 @@ components:
           type: number
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
-          maxLength: 255
           nullable: true
           type: string
         cloud_connector_name:
@@ -118642,7 +118599,6 @@ components:
           type: string
         description:
           description: Package policy description
-          maxLength: 2048
           type: string
         elasticsearch:
           additionalProperties: true
@@ -118666,12 +118622,10 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
-                maxLength: 255
                 type: string
               value:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                 description: The value of the custom field.
             required:
@@ -118971,14 +118925,12 @@ components:
           type: boolean
         name:
           description: Unique name for the package policy.
-          maxLength: 255
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
-          maxLength: 255
           nullable: true
           type: string
         overrides:
@@ -118994,18 +118946,15 @@ components:
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_package_policy_package'
         package_agent_version_condition:
-          maxLength: 50
           type: string
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
-          maxLength: 255
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
-            maxLength: 255
             type: string
           maxItems: 1000
           type: array
@@ -123751,7 +123700,6 @@ components:
               required:
                 - enabled
             cluster_id:
-              maxLength: 512
               type: string
             resources:
               additionalProperties: false
@@ -123829,7 +123777,6 @@ components:
           nullable: true
           type: boolean
         min_agent_version:
-          maxLength: 512
           nullable: true
           type: string
         monitoring_diagnostics:
@@ -123911,13 +123858,10 @@ components:
             type: object
             properties:
               name:
-                maxLength: 255
                 type: string
               title:
-                maxLength: 255
                 type: string
               version_condition:
-                maxLength: 512
                 type: string
             required:
               - name
