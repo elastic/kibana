@@ -109,6 +109,14 @@ describe('timeRangeToDisplayText', () => {
     );
   });
 
+  it('shows the label as configured when the text matches a preset label', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(
+      timeRangeToDisplayText(textToTimeRange('financial year to date', { presets }), { presets })
+    ).toBe('Financial Year to Date');
+  });
+
   it('returns raw text for invalid ranges', () => {
     const invalidRange = textToTimeRange('not a range');
 

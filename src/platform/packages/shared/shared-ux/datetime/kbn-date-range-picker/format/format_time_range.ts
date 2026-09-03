@@ -13,6 +13,7 @@ import moment from 'moment';
 import {
   ENGLISH_GRAMMAR,
   getActiveGrammar,
+  matchPreset,
   resolveNamedRangeAlias,
   type LocaleGrammar,
 } from '../parse';
@@ -53,6 +54,7 @@ export function timeRangeToDisplayText(
     delimiter = DATE_RANGE_DISPLAY_DELIMITER,
     timePrecision = 's',
     locale,
+    presets = [],
   } = options ?? {};
   const grammar = getActiveGrammar(locale ?? i18n.getLocale());
 
@@ -60,6 +62,10 @@ export function timeRangeToDisplayText(
     return timeRange.value;
   }
   if (timeRange.isNaturalLanguage) {
+    // Text that matched a preset label shows the label as configured, not as typed
+    const preset = matchPreset(timeRange.value, presets);
+    if (preset?.label) return preset.label;
+
     // Resolve aliases (e.g. "yd" → "yesterday") before capitalizing
     const resolved = resolveNamedRangeAlias(timeRange.value);
     return resolved.charAt(0).toUpperCase() + resolved.slice(1);

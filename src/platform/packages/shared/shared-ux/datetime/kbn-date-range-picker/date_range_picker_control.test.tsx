@@ -188,6 +188,31 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('uses a custom preset label in the list, the input, and the button', async () => {
+      const presets = [
+        { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date', isEditable: false },
+      ];
+
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="last 20 minutes" presets={presets} />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+      const item = screen.getByTestId('dateRangePickerPresetItem-Financial_Year_to_Date');
+      fireEvent.click(within(item).getByRole('button'));
+
+      await waitForPopoverClose();
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Financial Year to Date');
+      expect(button).toHaveAttribute('data-date-range', 'now-3M/y+3M to now');
+
+      const selectedInput = openEditing() as HTMLInputElement;
+      expect(selectedInput.value).toBe('Financial Year to Date');
+      fireEvent.keyDown(selectedInput, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
     it('selects clicked no-year absolute display parts in the input', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-06-04T12:00:00.000Z'));
 

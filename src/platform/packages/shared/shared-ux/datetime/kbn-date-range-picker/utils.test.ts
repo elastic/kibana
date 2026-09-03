@@ -113,6 +113,25 @@ describe('getOptionDisplayLabel', () => {
     expect(getOptionDisplayLabel({ start, end: 'now', label })).toBe(label);
   });
 
+  it('keeps a custom label from timepicker:quickRanges', () => {
+    expect(
+      getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' })
+    ).toBe('Financial Year to Date');
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [
+      { start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' },
+      { start: 'now/d', end: 'now/d', label: 'Today' },
+    ];
+
+    expect(getOptionDisplayLabel({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+    expect(getOptionDisplayLabel({ start: 'now/d', end: 'now/d' }, { presets })).toBe('Today');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' }, { presets })).toBe('Last 7 days');
+  });
+
   it('regenerates a display-form label from bounds, honouring timePrecision', () => {
     const start = '2026-05-25T00:00:00.000Z';
     const end = '2026-05-27T23:59:59.999Z';
@@ -238,10 +257,22 @@ describe('getOptionInputText', () => {
     ).toBe(`-15m/m to ${moment.utc(end).local().format('MMM D, YYYY, HH:mm:ss.SSS')}`);
   });
 
-  it('falls back to shorthand when label does not parse', () => {
+  it('returns a custom label so the input round-trips through the preset match', () => {
     expect(getOptionInputText({ start: 'now-15m', end: 'now', label: 'My custom preset' })).toBe(
-      '-15m'
+      'My custom preset'
     );
+  });
+
+  it('uses the label of a preset with the same bounds when the option has none (recent)', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(getOptionInputText({ start: 'now-3M/y+3M', end: 'now' }, { presets })).toBe(
+      'Financial Year to Date'
+    );
+  });
+
+  it('derives shorthand when the label is the raw input form of the bounds', () => {
+    expect(getOptionInputText({ start: 'now-15m', end: 'now', label: '-15m to now' })).toBe('-15m');
   });
 
   it('generates shorthand from bounds when no label is provided', () => {

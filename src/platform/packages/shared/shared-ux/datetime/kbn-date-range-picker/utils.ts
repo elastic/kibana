@@ -21,7 +21,7 @@ import type {
   AutoRefreshIntervalUnit,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER, DEFAULT_DATE_FORMAT, UNIT_DISPLAY_ABBREV } from './constants';
-import { textToTimeRange, getNamedRangeAlias } from './parse';
+import { textToTimeRange, getNamedRangeAlias, getPresetLabel } from './parse';
 import type { RangePart } from './parse/parse_range_parts';
 import { dateMathToRelativeParts, timeRangeToDisplayText, applyTimePrecision } from './format';
 import { MS_PER } from './format/format_duration';
@@ -220,11 +220,29 @@ export function resolveInitialFocus(
 }
 
 /**
+ * Returns the option's own usable label, or that of a preset with the same
+ * bounds. Recent ranges carry no label, so this is how a recently used
+ * "Financial Year to Date" shows its name instead of its raw bounds.
+ */
+function resolveOptionLabel(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'presets' | 'locale'>
+): string | null {
+  const own = getPresetLabel(option, options);
+  if (own) return own;
+
+  const preset = options?.presets?.find(
+    ({ start, end }) => start === option.start && end === option.end
+  );
+  return preset ? getPresetLabel(preset, options) : null;
+}
+
+/**
  * Returns a human-readable display label for a time range option.
  *
- * Natural-language labels (e.g. "Last 15 minutes", "Today") are kept verbatim —
- * they carry semantics the bounds alone can't reconstruct (e.g. "now/d to now/d"
- * is "Today"). Every other label is regenerated from the bounds using the same
+ * Real names (see {@link getPresetLabel}) are kept verbatim — they carry
+ * semantics the bounds alone can't reconstruct (e.g. "now/d to now/d" is
+ * "Today"). Every other label is regenerated from the bounds using the same
  * pipeline as the control button (build text → parse → format), so the list always
  * uses the `→` delimiter and honours the current `timePrecision`, rather than
  * echoing a frozen display string or a raw input-form label saved earlier.
@@ -233,14 +251,8 @@ export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
   options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'locale'>
 ): string {
-  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
-  // and its `presets` would let the option's own label self-match as "natural language".
-  if (
-    option.label &&
-    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
-  ) {
-    return option.label;
-  }
+  const label = resolveOptionLabel(option, options);
+  if (label) return label;
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
   const timeRange = textToTimeRange(text, options);
@@ -282,11 +294,9 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
 /**
  * Determines the text to populate the input with when an option is selected.
  *
- * 1. If the option has a natural-language label (e.g. "Last 15 minutes", "Today"),
- *    returns it so that input round-trips. Only natural-language labels qualify:
- *    display-form labels (e.g. "Feb 3 → Feb 10") must not leak into the input, and
- *    we cannot rely on `!isInvalid` because moment's forgiving parser "validates"
- *    them by matching a fragment and discarding the rest (producing garbage bounds).
+ * 1. If the option has a real name (see {@link getPresetLabel}), returns it: the
+ *    parser matches preset labels first, so the text round-trips to the option's
+ *    bounds. Frozen display text (e.g. "Feb 3 → Feb 10") never reaches the input.
  * 2. Otherwise derives re-parseable input text from the bounds: relative offsets
  *    are stripped of the `now` prefix (e.g. "-15m"), and absolute bounds are
  *    formatted as readable dates rather than raw ISO. Absolute bounds use full
@@ -296,16 +306,10 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
  */
 export function getOptionInputText(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'locale'>
+  options?: Pick<TimeRangeTransformOptions, 'presets' | 'locale'>
 ): string {
-  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
-  // and its `presets` would let the option's own label self-match as "natural language".
-  if (
-    option.label &&
-    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
-  ) {
-    return option.label;
-  }
+  const label = resolveOptionLabel(option, options);
+  if (label) return label;
 
   const startFragment = boundToInputFragment(option.start);
   const endFragment = boundToInputFragment(option.end);
