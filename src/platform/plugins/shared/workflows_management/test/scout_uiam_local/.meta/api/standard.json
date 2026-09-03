@@ -1,0 +1,79 @@
+{
+  "sha1": "f80a54bacc9a29119b3a85bffb510fd60ffb2aef",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "4752a5ed7356cc8-34a2eddf213e182",
+      "title": "[NON-MKI] Agent Builder workflow service-account execution runs the agent as the bound account and probes conversation access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/service_account_agent_builder.spec.ts",
+        "line": 35,
+        "column": 25
+      }
+    },
+    {
+      "id": "ad77ea02ada3b87-378a57818e1a1f7",
+      "title": "[NON-MKI] Workflow service-account authorization allows admin binding and editor execution while denying editor rebinding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/service_account_authorization.spec.ts",
+        "line": 24,
+        "column": 15
+      }
+    },
+    {
+      "id": "5fcbc1491b740c7-b69b0ecbf6b8e8e",
+      "title": "[NON-MKI] Workflow service-account rebinding uses the replacement account on the next run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/service_account_rebinding.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
+    {
+      "id": "ea84e9d79c50e8a-4ab13aa06c95728",
+      "title": "[NON-MKI] Resumed workflow service-account execution records the Elasticsearch identity before and after waitForInput",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/service_account_resume_execution.spec.ts",
+        "line": 25,
+        "column": 15
+      }
+    },
+    {
+      "id": "6aaa50153153443-b1f8c11aec713fd",
+      "title": "[NON-MKI] Scheduled workflow service-account execution queries Elasticsearch as the bound service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/api/tests/service_account_scheduled_execution.spec.ts",
+        "line": 24,
+        "column": 15
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "sha1": "74b442da1e0d0b7c37ebb0aa9aa2dfe14c1e86f3",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "c732bec736e1cae-9ef576c6ed9d6f0",
+      "title": "Workflow service-account browser execution binds in the browser and queries Elasticsearch as the selected account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/ui/tests/service_account_browser_execution.spec.ts",
+        "line": 43,
+        "column": 15
+      }
+    },
+    {
+      "id": "c732bec736e1cae-29b82448ecedb0e",
+      "title": "Workflow service-account browser execution shows the resolved service-account name and ID on an execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_uiam_local/ui/tests/service_account_browser_execution.spec.ts",
+        "line": 121,
+        "column": 16
+      }
+    }
+  ]
+}
