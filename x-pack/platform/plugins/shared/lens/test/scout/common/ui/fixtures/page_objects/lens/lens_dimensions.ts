@@ -600,22 +600,27 @@ export class LensDimensions {
   }
 
   /**
-   * Removes the (first) dimension in the given panel.
-   * Caller should hover-assert the remove control when that visibility is under test.
+   * Removes one dimension (the first) in the given panel and waits until its
+   * trigger count drops by one. Caller should hover-assert the remove control
+   * when that visibility is under test.
    */
   async removeDimension(dimensionTestSubj: string) {
+    const triggers = this.getDimensionTriggersLocator(dimensionTestSubj);
     const removeLocator = this.getDimensionRemoveLocator(dimensionTestSubj);
-    await removeLocator.hover();
-    await removeLocator.click();
+    const countBefore = await triggers.count();
+    const buttons = await removeLocator.all();
+    const button = buttons[0];
+    if (!button) {
+      throw new Error(`No remove control for "${dimensionTestSubj}"`);
+    }
+    await button.hover();
+    await button.click();
     await this.page.waitForFunction(
-      (panelSubj) => {
-        const panel = document.querySelector(`[data-test-subj="${panelSubj}"]`);
-        if (!panel) {
-          return true;
-        }
-        return panel.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]').length === 0;
-      },
-      dimensionTestSubj,
+      ({ panelSubj, expected }) =>
+        document.querySelectorAll(
+          `[data-test-subj="${panelSubj}"] [data-test-subj="lns-dimensionTrigger"]`
+        ).length === expected,
+      { panelSubj: dimensionTestSubj, expected: Math.max(0, countBefore - 1) },
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
