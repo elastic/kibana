@@ -270,12 +270,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # TODO: no dedicated team channel found — update SLACK_NOTIFICATIONS_CHANNEL when one exists
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     branches: main
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
+      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -292,12 +292,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # TODO: no dedicated team channel found — update SLACK_NOTIFICATIONS_CHANNEL when one exists
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     branches: main
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
+      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -314,11 +314,11 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # TODO: no dedicated team channel found — update SLACK_NOTIFICATIONS_CHANNEL when one exists
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
+      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -335,11 +335,11 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # TODO: no dedicated team channel found — update SLACK_NOTIFICATIONS_CHANNEL when one exists
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     env:
       SLACK_NOTIFICATIONS_CHANNEL: '#security-detection-engineering-team'
+      SLACK_NOTIFICATIONS_NEEDS_TEAM: 'true'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
