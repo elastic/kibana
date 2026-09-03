@@ -40,6 +40,29 @@ import { getMonacoRangeFromYamlNode } from '../utils';
 
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
+interface ServiceAccountDetails {
+  id: string;
+  name: string;
+  type: string;
+  role_assignments?: {
+    project?: Record<
+      string,
+      Array<{
+        role_id?: string;
+        application_roles?: string[];
+      }>
+    >;
+  };
+  assumable_by?: Array<{
+    project_type?: string;
+    project_id?: string;
+  }>;
+}
+
+interface ServiceAccountHttpClient {
+  get<T>(path: string): Promise<T>;
+}
+
 /**
  * Unified hover provider that delegates to connector-specific handlers
  * Replaces individual ES/Kibana hover providers with a single extensible system
@@ -50,11 +73,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   private readonly getYamlDocument: () => YAML.Document | null;
   private readonly getExecutionContext?: () => ExecutionContext | null;
   private readonly fetchStepExecutionData?: (stepId: string) => Promise<StepExecutionData | null>;
+  private readonly http?: ServiceAccountHttpClient;
+  private readonly serviceAccountCache = new Map<string, Promise<ServiceAccountDetails | null>>();
 
   constructor(config: ProviderConfig) {
     this.getYamlDocument = config.getYamlDocument;
     this.getExecutionContext = config.getExecutionContext;
     this.fetchStepExecutionData = config.fetchStepExecutionData;
+    this.http = config.options?.http as ServiceAccountHttpClient | undefined;
   }
 
   async provideHover(
@@ -176,6 +202,15 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
+      const serviceAccountHover = await this.provideServiceAccountHover(
+        model,
+        position,
+        yamlDocument
+      );
+      if (serviceAccountHover) {
+        return serviceAccountHover;
+      }
+
       const context = await this.buildHoverContext(model, position, yamlDocument);
       if (!context) {
         return null;
@@ -211,6 +246,86 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     } catch (error) {
       return null;
     }
+  }
+
+  private async provideServiceAccountHover(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    yamlDocument: YAML.Document
+  ): Promise<monaco.languages.Hover | null> {
+    const yamlPath = getPathAtOffset(yamlDocument, model.getOffsetAt(position));
+    if (yamlPath.length !== 2 || yamlPath[0] !== 'settings' || yamlPath[1] !== 'run_as') {
+      return null;
+    }
+
+    const serviceAccountId = yamlDocument.getIn(yamlPath);
+    if (typeof serviceAccountId !== 'string' || !serviceAccountId || !this.http) {
+      return null;
+    }
+
+    const serviceAccount = await this.getServiceAccount(serviceAccountId);
+    if (!serviceAccount) {
+      return null;
+    }
+
+    const projectAssignments = Object.values(serviceAccount.role_assignments?.project ?? {});
+    const roles = [
+      ...new Set(
+        projectAssignments.flatMap((assignments) =>
+          assignments.flatMap(({ application_roles: applicationRoles, role_id: roleId }) =>
+            applicationRoles?.length ? applicationRoles : roleId ? [roleId] : []
+          )
+        )
+      ),
+    ];
+    const projects =
+      serviceAccount.assumable_by
+        ?.filter(({ project_type: projectType, project_id: projectId }) => projectType && projectId)
+        .map(
+          ({ project_type: projectType, project_id: projectId }) =>
+            `- **${projectType}:** \`${projectId}\``
+        ) ?? [];
+
+    return {
+      contents: [
+        {
+          value: [
+            'Service account ID used to execute this saved workflow.',
+            '',
+            `**Service account:** ${serviceAccount.name}`,
+            '',
+            `**ID:** \`${serviceAccount.id}\``,
+            '',
+            `**Type:** ${serviceAccount.type}`,
+            '',
+            `**Roles:** ${roles.length > 0 ? roles.map((role) => `\`${role}\``).join(', ') : '-'}`,
+            '',
+            '**Projects:**',
+            '',
+            ...(projects.length > 0 ? projects : ['-']),
+          ].join('\n'),
+        },
+      ],
+    };
+  }
+
+  private getServiceAccount(serviceAccountId: string): Promise<ServiceAccountDetails | null> {
+    const cachedServiceAccount = this.serviceAccountCache.get(serviceAccountId);
+    if (cachedServiceAccount) {
+      return cachedServiceAccount;
+    }
+
+    if (!this.http) {
+      return Promise.resolve(null);
+    }
+
+    const serviceAccount = this.http
+      .get<ServiceAccountDetails>(
+        `/internal/security/service_account/${encodeURIComponent(serviceAccountId)}`
+      )
+      .catch(() => null);
+    this.serviceAccountCache.set(serviceAccountId, serviceAccount);
+    return serviceAccount;
   }
 
   /**

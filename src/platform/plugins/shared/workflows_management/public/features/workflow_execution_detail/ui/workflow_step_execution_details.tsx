@@ -42,6 +42,8 @@ import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
+  executedBy?: string;
+  effectiveIdentity?: string;
   workflowExecutionDuration?: number;
   /** Aggregated token usage across all `ai.*` steps, shown on the overview pseudo-step. */
   workflowExecutionUsage?: WorkflowTokenUsage;
@@ -62,6 +64,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
   ({
     workflowExecutionId,
     stepExecution,
+    executedBy,
+    effectiveIdentity,
     workflowExecutionDuration,
     workflowExecutionUsage,
     isLoadingStepData,
@@ -194,6 +198,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       return (
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
+          executedBy={executedBy}
+          effectiveIdentity={effectiveIdentity}
           workflowExecutionDuration={workflowExecutionDuration}
           workflowExecutionUsage={workflowExecutionUsage}
           showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}

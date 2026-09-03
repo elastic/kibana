@@ -291,6 +291,47 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
     expect(result).not.toBeNull();
   });
 
+  describe('service-account hover', () => {
+    it('resolves the run_as id to account details', async () => {
+      mockParseTemplateAtPosition.mockReturnValue(null);
+      mockGetPathAtOffset.mockReturnValue(['settings', 'run_as']);
+      jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([]);
+      const get = jest.fn().mockResolvedValue({
+        id: 'service-account-id',
+        name: 'workflow-production',
+        type: 'project',
+        role_assignments: {
+          project: {
+            security: [{ application_roles: ['admin'] }],
+          },
+        },
+        assumable_by: [
+          {
+            project_type: 'security',
+            project_id: 'project-id',
+          },
+        ],
+      });
+      const yamlDocument = {
+        getIn: jest.fn().mockReturnValue('service-account-id'),
+      };
+      const serviceAccountProvider = new UnifiedHoverProvider({
+        getYamlDocument: () => yamlDocument as never,
+        options: { http: { get } },
+      });
+
+      const result = await serviceAccountProvider.provideCustomHover(
+        createMockModel('settings:\n  run_as: service-account-id'),
+        createMockPosition(2, 20)
+      );
+
+      expect(get).toHaveBeenCalledWith('/internal/security/service_account/service-account-id');
+      expect(result?.contents[0].value).toContain('**Service account:** workflow-production');
+      expect(result?.contents[0].value).toContain('`admin`');
+      expect(result?.contents[0].value).toContain('**security:** `project-id`');
+    });
+  });
+
   describe('provider ID', () => {
     it('should expose the correct provider ID', () => {
       const idProvider = new UnifiedHoverProvider({ getYamlDocument: () => null });

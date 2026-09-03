@@ -187,6 +187,9 @@ describe('WorkflowDetailHeader', () => {
             }),
           },
         },
+        http: {
+          get: jest.fn().mockResolvedValue({ service_accounts: [] }),
+        },
       },
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
@@ -249,6 +252,15 @@ describe('WorkflowDetailHeader', () => {
       '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
     );
     expect(result.queryByText('Add integrations')).not.toBeInTheDocument();
+  });
+
+  it('opens the service-account selector from the app menu', async () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    await openAppMenuOverflow();
+    fireEvent.click(await result.findByTestId('workflowRunAsButton'));
+
+    expect(await result.findByTestId('workflowRunAsFlyout')).toBeInTheDocument();
   });
 
   it('navigates back to the workflows list with the stored list search params', () => {

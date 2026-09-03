@@ -138,7 +138,12 @@ function createUserDocument(userData: TestUserData): PersistableUser {
       ),
       deployment: [],
       platform: [],
-      organization: [],
+      organization: [
+        {
+          role_id: 'ess-default-organization',
+          organization_id: userData.organizationId,
+        },
+      ],
       cloudConnected: [],
     },
     enabled: true,
