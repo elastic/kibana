@@ -6,7 +6,7 @@ metadata:
   description: Run all Kibana tests using Node.js compatible with glibc 2.17
   links:
     - title: Pipeline link
-      url: https://buildkite.com/elastic/kibana-glibc-217
+      url: https://buildkite.com/elastic/kibana-glibc-2-dot-17
 spec:
   type: buildkite-pipeline
   owner: group:kibana-operations

@@ -26,7 +26,7 @@ Prefer API-based setup. Use `cy.request()` in `beforeEach`, not `esArchiver`.
 
 ## Data & Cleanup Audit
 
-Before fixing a test, audit all resources it creates:
+Before a Cypress (`@serverlessQA`) or Scout rewrite, audit all resources the test creates:
 
 | Resource Created | Cleanup Method | Cleaned in beforeEach? | Cleaned in afterEach? |
 |------------------|----------------|------------------------|----------------------|
@@ -53,20 +53,20 @@ afterEach(() => {
 
 ## Test Deletion Guidelines
 
-### When to Delete vs Fix
+### When to Delete vs Migrate
 
 **Delete if:**
-- Full duplicate coverage exists at API/unit level
+- Full duplicate coverage exists at API/unit level (keep `@serverlessQA` Cypress until Scout is in the Kibana QA gate)
 - Skipped for 3+ months with no progress
 - Validates purely cosmetic/visual behavior
-- Effort to fix exceeds value
+- Effort to migrate exceeds value
 - Functionality is deprecated or being removed
 
-**Fix if:**
-- Tests unique E2E user flows not covered elsewhere
-- Catches real bugs other tests miss
-- Fix is straightforward (missing wait, wrong selector)
-- Tests a critical user journey
+**Migrate (or keep `@serverlessQA` Cypress) if:**
+- Unique E2E user flow not covered elsewhere → Scout (Cypress patch only if `@serverlessQA`)
+- Catches real bugs other tests miss → fix the app
+- Straightforward race (missing wait, wrong selector) → encode the wait in the destination, not Cypress, unless `@serverlessQA`
+- Critical user journey → Scout
 
 ### Deletion Process
 
@@ -100,8 +100,9 @@ If you never see your test fail, you don't know if it's testing the right thing.
 
 ## Flaky Test Runner
 
-Use the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner) to verify fixes:
-1. Go to the CI Stats website
+Trigger runs from the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner). Docs: [Flaky Test Runner](https://codex.elastic.dev/r/kibana-team/testing/flaky-and-skipped-tests/flaky-test-runner).
+
+1. Go to the CI Stats trigger page
 2. Pick a PR or branch
 3. Select which test(s) to run
 4. Use the default number of executions
