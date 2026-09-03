@@ -78,7 +78,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   /** Recently used time ranges shown in the Recent section. */
   recent: TimeRangeBoundsOption[];
   /**
-   * Assembled `{ presets, dateFormat, roundRelativeTime, timePrecision, locale }`
+   * Assembled `{ presets, inputDateFormats, roundRelativeTime, timePrecision, locale }`
    * passed to `textToTimeRange`/`prettifyValue`/`timeRangeToDisplayText` and to
    * the part-level parser. Single source of truth so every call site forwards
    * the same options instead of rebuilding (and risking dropping) them by hand.
@@ -166,7 +166,7 @@ export function DateRangePickerProvider({
   value,
   defaultValue,
   onChange,
-  dateFormat,
+  inputDateFormats,
   locale,
   isInvalid = false,
   disabled = false,
@@ -198,12 +198,12 @@ export function DateRangePickerProvider({
   const transformOptions: TimeRangeTransformOptions = useMemo(
     () => ({
       presets,
-      dateFormat,
+      inputDateFormats,
       roundRelativeTime: settings.roundRelativeTime,
       timePrecision,
       locale,
     }),
-    [presets, dateFormat, settings.roundRelativeTime, timePrecision, locale]
+    [presets, inputDateFormats, settings.roundRelativeTime, timePrecision, locale]
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);

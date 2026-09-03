@@ -220,7 +220,7 @@ export function resolveInitialFocus(
  */
 export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'dateFormat' | 'locale'>
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'locale'>
 ): string {
   // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
   // and its `presets` would let the option's own label self-match as "natural language".
