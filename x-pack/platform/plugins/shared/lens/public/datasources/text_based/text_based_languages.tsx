@@ -34,7 +34,6 @@ import type {
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
   UserMessage,
-  OperationMetadata,
   TextBasedPrivateState,
   TextBasedPersistedState,
   TextBasedLayerColumn,
@@ -56,6 +55,7 @@ import {
   isNotNumeric,
   isNumeric,
   MAX_NUM_OF_COLUMNS,
+  operationFromDataType,
   resolveTextBasedColumnType,
 } from './utils';
 import {
@@ -778,27 +778,16 @@ export function getTextBasedDatasource({
             return null;
           }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
-          const dataType = resolveTextBasedColumnType(
+          const resolvedType = resolveTextBasedColumnType(
             column,
             activeData?.columns.find((col) => col.id === columnId)
           );
-          let scale: OperationMetadata['scale'] = 'ordinal';
-          switch (dataType) {
-            case 'date':
-              scale = 'interval';
-              break;
-            case 'number':
-              scale = 'ratio';
-              break;
-            default:
-              scale = 'ordinal';
-              break;
-          }
+          const { dataType, isBucketed, scale } = operationFromDataType(resolvedType);
 
           return {
             dataType,
             label: columnLabelMap[columnId] ?? column.fieldName,
-            isBucketed: Boolean(isNotNumeric(column)),
+            isBucketed,
             inMetricDimension: column.inMetricDimension,
             hasTimeShift: false,
             hasReducedTimeRange: false,

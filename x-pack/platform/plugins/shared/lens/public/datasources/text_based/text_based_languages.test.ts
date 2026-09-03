@@ -1504,6 +1504,84 @@ describe('Textbased Data Source', () => {
           scale: 'interval',
         });
       });
+
+      it('should derive isBucketed and scale from the overlayed type, not persisted meta (number -> date)', () => {
+        // API Format Path can persist a metric-role guess of `number` while the query returns `date`.
+        // dataType, isBucketed and scale must all follow the overlayed Query Result Type.
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: '@timestamp',
+                  meta: { type: 'number' },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeData: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: '@timestamp', meta: { type: 'date' } }],
+            rows: [],
+          },
+        });
+
+        expect(publicAPI.getOperationForColumnId('col1')).toEqual({
+          label: '@timestamp',
+          dataType: 'date',
+          isBucketed: true,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'interval',
+        });
+      });
+
+      it('should derive isBucketed and scale from the overlayed type, not persisted meta (string -> number)', () => {
+        // Persisted non-metric role guess of `string`, but the query returns `number`:
+        // the column must be treated as a metric (isBucketed: false, scale: ratio).
+        const state = {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'col1',
+                  fieldName: 'bytes',
+                  meta: { type: 'string' },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState;
+
+        publicAPI = TextBasedDatasource.getPublicAPI({
+          state,
+          layerId: 'a',
+          indexPatterns,
+          activeData: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'bytes', meta: { type: 'number' } }],
+            rows: [],
+          },
+        });
+
+        expect(publicAPI.getOperationForColumnId('col1')).toEqual({
+          label: 'bytes',
+          dataType: 'number',
+          isBucketed: false,
+          hasTimeShift: false,
+          hasReducedTimeRange: false,
+          scale: 'ratio',
+        });
+      });
     });
 
     describe('getSourceId', () => {

@@ -8,6 +8,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type {
   DataType,
+  OperationMetadata,
   ValueFormatConfig,
   IndexPatternRef,
   TextBasedPrivateState,
@@ -77,6 +78,23 @@ export function resolveTextBasedColumnType(
   activeColumn?: DatatableColumn
 ): DataType {
   return (activeColumn?.meta?.type ?? column.meta?.type) as DataType;
+}
+
+/**
+ * Derives the type-shaped operation metadata (dataType, isBucketed, scale) from a single
+ * resolved Query Result Type from activeData, so these fields never disagree with each other.
+ */
+export function operationFromDataType(
+  dataType: DataType
+): Pick<OperationMetadata, 'dataType' | 'isBucketed' | 'scale'> {
+  switch (dataType) {
+    case 'date':
+      return { dataType, isBucketed: true, scale: 'interval' };
+    case 'number':
+      return { dataType, isBucketed: false, scale: 'ratio' };
+    default:
+      return { dataType, isBucketed: true, scale: 'ordinal' };
+  }
 }
 
 export function canColumnBeDroppedInMetricDimension(
