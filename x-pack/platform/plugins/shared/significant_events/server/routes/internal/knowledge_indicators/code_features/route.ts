@@ -372,10 +372,9 @@ const codeIntelligenceAvailabilityRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// List code-derived Knowledge Indicators from streams the request can access.
-// The KI data stream is global plugin storage, so pseudo-stream KIs without a
-// caller-authorized stream definition are deliberately excluded. Powers the
-// discovery Code Intelligence tab.
+// List code-derived Knowledge Indicators from the active space. The KI client
+// enforces space scope; Code Intelligence provenance does not require Streams
+// ownership or authorization.
 // ---------------------------------------------------------------------------
 
 const listCodeKnowledgeIndicatorsRoute = createServerRoute({
@@ -393,7 +392,6 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-    getSpaceId,
     server,
   }): Promise<{ features: Feature[]; queries: QueryLink[]; isTruncated: boolean }> => {
     const scopedClients = await getScopedClients({ request });
@@ -402,12 +400,8 @@ const listCodeKnowledgeIndicatorsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const { streamNames, isTruncated: streamEnumerationTruncated } =
-      await listAuthorizedCodeKnowledgeIndicatorStreams({
-        kiClient,
-        streamsClient: scopedClients.streamsClient,
-        spaceId: await getSpaceId(request),
-      });
+    const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const streamEnumerationTruncated = streamNames.length === REVISION_SIZE_LIMIT;
     if (streamNames.length === 0) {
       return { features: [], queries: [], isTruncated: streamEnumerationTruncated };
     }
@@ -565,7 +559,6 @@ const resetCodeFeaturesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    getSpaceId,
     server,
     logger,
     maintenanceService,
@@ -583,12 +576,8 @@ const resetCodeFeaturesRoute = createServerRoute({
 
     const routeLogger = logger.get('code_intelligence', 'reset');
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const { streamNames: authorizedStreamNames, isTruncated: streamEnumerationTruncated } =
-      await listAuthorizedCodeKnowledgeIndicatorStreams({
-        kiClient,
-        streamsClient: scopedClients.streamsClient,
-        spaceId: await getSpaceId(request),
-      });
+    const authorizedStreamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
+    const streamEnumerationTruncated = authorizedStreamNames.length === REVISION_SIZE_LIMIT;
     if (streamEnumerationTruncated) {
       throw new StatusError(
         'Code Intelligence reset is unavailable because the stream result reached its maximum size.',
@@ -920,17 +909,16 @@ const identifyOtelSignalsRoute = createServerRoute({
       resolved.traceStreams.length > 0 ||
       resolved.metricStreams.length > 0 ||
       resolved.logStreams.length > 0;
-    const predictiveFallback =
-      !hasTypedStreamCoverage && authorizedStreamNames.has(FALLBACK_LOG_STREAM)
-        ? {
-            traceStreams: [FALLBACK_TRACE_INDEX_PATTERN],
-            metricStreams: [FALLBACK_METRIC_INDEX_PATTERN],
-            logStreams: [FALLBACK_LOG_INDEX_PATTERN],
-            traceStreamNames: [FALLBACK_LOG_STREAM],
-            metricStreamNames: [FALLBACK_LOG_STREAM],
-            logStreamNames: [FALLBACK_LOG_STREAM],
-          }
-        : resolved;
+    const predictiveFallback = !hasTypedStreamCoverage
+      ? {
+          traceStreams: [FALLBACK_TRACE_INDEX_PATTERN],
+          metricStreams: [FALLBACK_METRIC_INDEX_PATTERN],
+          logStreams: [FALLBACK_LOG_INDEX_PATTERN],
+          traceStreamNames: [FALLBACK_LOG_STREAM],
+          metricStreamNames: [FALLBACK_LOG_STREAM],
+          logStreamNames: [FALLBACK_LOG_STREAM],
+        }
+      : resolved;
     if (!hasTypedStreamCoverage && predictiveFallback !== resolved) {
       routeLogger.info(
         `No typed streams exist for OTel service "${name}"; generating predictive typed queries on root "${FALLBACK_LOG_STREAM}"`
@@ -949,9 +937,10 @@ const identifyOtelSignalsRoute = createServerRoute({
     // usable stream. Any later typed-path failure must not create a mixed
     // typed/message-string result for this OTel service.
     if (generated.gateBypassed) {
-      routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
+      routeLogger.info(`No actionable OTel signals found for service "${name}"; no-op`);
       return {
-        ...(await runTemplateFallbackOrThrow('had no typed stream coverage')),
+        status: 'noop' as const,
+        queriesGenerated: 0,
         otelSignalsFound: extraction.signals.length,
       };
     }

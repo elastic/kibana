@@ -56,7 +56,8 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   const fileName = 'code_snippet_otel_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
-  await onboardingHomePage.selectKubernetesUseCase();
+  await onboardingHomePage.waitForLanding();
+  await onboardingHomePage.selectKubernetesOtel();
 
   const helmRepoSnippet = (await otelKubernetesFlowPage.getHelmRepositorySnippet()) ?? '';
 

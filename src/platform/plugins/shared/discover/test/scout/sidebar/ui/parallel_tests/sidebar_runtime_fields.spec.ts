@@ -8,6 +8,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { ApiServicesFixture } from '@kbn/scout';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import type { DiscoverPageObjects, DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
 
@@ -26,29 +28,34 @@ type RuntimeFieldSettings = Record<
  * field-editor UI; keep UI only for relabel / delete / column interactions.
  */
 const openAdHocSessionWithRuntimeFields = async ({
+  apiServices,
   discoverScoutSpace,
   pageObjects,
   fieldSettings,
 }: {
+  apiServices: ApiServicesFixture;
   discoverScoutSpace: DiscoverScoutSpace;
   pageObjects: DiscoverPageObjects;
   fieldSettings?: RuntimeFieldSettings;
 }): Promise<void> => {
-  const sessionId = await discoverScoutSpace.createDiscoverSession({
-    title: `sidebar-runtime-fields-${discoverScoutSpace.id}`,
-    tabs: [
-      {
-        id: 'main',
-        label: 'Untitled',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: testData.DEFAULT_DATA_VIEW,
-          time_field: '@timestamp',
-          ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+  const sessionId = await apiServices.discover.create(
+    {
+      title: `sidebar-runtime-fields-${discoverScoutSpace.id}`,
+      tabs: [
+        {
+          id: 'main',
+          label: 'Untitled',
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: testData.DEFAULT_DATA_VIEW,
+            time_field: '@timestamp',
+            ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+          },
         },
-      },
-    ],
-  });
+      ],
+    } satisfies DiscoverSessionApiDataInput,
+    discoverScoutSpace.id
+  );
 
   await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
   await pageObjects.discover.waitUntilTabIsLoaded();
@@ -66,12 +73,13 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'supports ad-hoc data views with runtime field relabel and remove',
-    async ({ discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
 
       await openAdHocSessionWithRuntimeFields({
+        apiServices,
         discoverScoutSpace,
         pageObjects,
         fieldSettings: {
@@ -105,12 +113,13 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'keeps the sidebar rendered when document retrieval fails',
-    async ({ discoverScoutSpace, page, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const invalidField = '_invalid-runtimefield';
 
       // Curly quotes make this an invalid Painless script (matches FTR).
       await openAdHocSessionWithRuntimeFields({
+        apiServices,
         discoverScoutSpace,
         pageObjects,
         fieldSettings: {
@@ -140,11 +149,12 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
 
   spaceTest(
     'removes the data grid column after a runtime field is deleted',
-    async ({ discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
       const newField = '_test_field_and_column_removal';
 
       await openAdHocSessionWithRuntimeFields({
+        apiServices,
         discoverScoutSpace,
         pageObjects,
         fieldSettings: {
@@ -158,17 +168,17 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
       await unifiedFieldList.expectAvailableFieldCount(testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1);
 
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(false);
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
       await unifiedFieldList.clickFieldListItemAdd(newField);
       await discover.waitUntilSearchingHasFinished();
       expect(await unifiedFieldList.isFieldSelected(newField)).toBe(true);
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', newField]);
 
       await discover.deleteRuntimeField(newField);
       await unifiedFieldList.searchField(newField);
       await expect(unifiedFieldList.getAvailableField(newField)).toBeHidden();
-      expect(await discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      await expect.poll(() => discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
     }
   );
 });

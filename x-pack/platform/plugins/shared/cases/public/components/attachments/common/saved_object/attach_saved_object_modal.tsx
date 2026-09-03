@@ -167,7 +167,7 @@ export const AttachSavedObjectModal: React.FC<AttachSavedObjectModalProps> = ({
       // Fall back to the raw soType when the attachment type isn't registered
       const attachmentTypeId = SO_TYPE_TO_ATTACHMENT_TYPE[soType];
       if (!unifiedAttachmentTypeRegistry.has(attachmentTypeId)) return soType;
-      return unifiedAttachmentTypeRegistry.get(attachmentTypeId).displayName;
+      return unifiedAttachmentTypeRegistry.get(attachmentTypeId).getLabel();
     },
     [unifiedAttachmentTypeRegistry]
   );

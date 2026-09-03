@@ -114,6 +114,7 @@ function makeClient(): {
     dataStreamClient,
     esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
+    space: 'default',
     logger,
   };
   const findStreamNamesWithOwnedRules = jest.fn().mockResolvedValue([]);
@@ -644,6 +645,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       dataStreamClient,
       esClient: {} as KnowledgeIndicatorClientDeps['esClient'],
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
+      space: 'default',
       logger,
     };
     const rulesManagementClient = {

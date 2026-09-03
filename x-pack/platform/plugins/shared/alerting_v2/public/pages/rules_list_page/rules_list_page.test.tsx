@@ -30,6 +30,8 @@ jest.mock('../../application/breadcrumb_context', () => ({
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
+let mockCanWriteActionPolicies = true;
+let mockToursEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -39,7 +41,11 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return {
-          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canWrite: (feature: string) => {
+            if (feature === 'rules') return mockCanWriteRules;
+            if (feature === 'actionPolicies') return mockCanWriteActionPolicies;
+            return true;
+          },
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
@@ -62,7 +68,17 @@ jest.mock('@kbn/core-di-browser', () => {
         },
         chrome: { docTitle: { change: mockDocTitleChange } },
         http: { basePath: { prepend: (p: string) => p } },
-        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        notifications: {
+          toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => mockToursEnabled },
+        },
+        docLinks: {
+          links: {
+            alerting: {
+              actionPolicies: 'https://docs.test/action-policies',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};
@@ -210,9 +226,12 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     // Content List uses a shared QueryClient; clear cached pages between tests.
     contentListQueryClient.clear();
+    window.localStorage.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    mockCanWriteActionPolicies = true;
+    mockToursEnabled = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -230,6 +249,53 @@ describe('RulesListPage', () => {
     await waitForRules();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  describe('centralized action policies banner', () => {
+    it('renders the banner above the search bar when rules exist', async () => {
+      renderPage();
+      await waitForRules();
+
+      const banner = screen.getByTestId('centralizedActionPoliciesBanner');
+      const searchBar = screen.getByPlaceholderText('Search rules');
+      expect(banner).toBeInTheDocument();
+      expect(banner.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('renders the banner even when there are no rules (empty phase)', async () => {
+      resolveRules([], 0);
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('centralizedActionPoliciesBanner')).toBeInTheDocument();
+      });
+    });
+
+    it('hides the banner after dismissal', async () => {
+      renderPage();
+      await waitForRules();
+
+      const dismissBtn = screen.getByTestId('centralizedActionPoliciesBannerDismiss');
+      fireEvent.click(dismissBtn);
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
+
+    it('does not show the banner for users without action-policy write privilege', async () => {
+      mockCanWriteActionPolicies = false;
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
+
+    it('does not show the banner when hideAnnouncements is enabled', async () => {
+      mockToursEnabled = false;
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
+    });
   });
 
   it('renders loading state', async () => {
@@ -409,7 +475,7 @@ describe('RulesListPage', () => {
 
     expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListTagsFilter')).toBeInTheDocument();
-    expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListKindFilter')).toBeInTheDocument();
   });
 
   it('does not show an active count on the status filter when nothing is selected', async () => {
@@ -445,13 +511,13 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('passes mode filters to findItems', async () => {
+  it('passes kind filters to findItems', async () => {
     renderPage();
     await waitForRules();
 
-    fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    const list = await screen.findByTestId('rulesListModeFilter-list');
-    fireEvent.click(within(list).getByText('Signal'));
+    fireEvent.click(screen.getByTestId('rulesListKindFilter'));
+    const list = await screen.findByTestId('rulesListKindFilter-list');
+    fireEvent.click(within(list).getByText('Events'));
 
     await waitFor(() => {
       expect(lastFindItemsArgs().filters.kind).toMatchObject({ include: ['signal'] });
@@ -477,12 +543,12 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('sorts by kind when the Mode header is clicked', async () => {
+  it('sorts by kind when the Outcome header is clicked', async () => {
     renderPage();
     await waitForRules();
 
-    const modeHeader = screen.getByRole('columnheader', { name: /^mode$/i });
-    fireEvent.click(within(modeHeader).getByRole('button'));
+    const kindHeader = screen.getByRole('columnheader', { name: /^outcome$/i });
+    fireEvent.click(within(kindHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(lastFindItemsArgs().sort).toEqual({ field: 'kind', direction: 'asc' });
@@ -526,7 +592,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
@@ -547,7 +613,7 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
@@ -563,11 +629,11 @@ describe('RulesListPage', () => {
     await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
     fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
 
     expect(mockCreateRuleMutate).toHaveBeenCalledWith(
-      {},
+      { payload: {} },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
@@ -707,7 +773,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone rule');
     });
   });
 
@@ -874,6 +940,14 @@ describe('RulesListPage', () => {
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCanWriteRules = false;
+      mockCanWriteActionPolicies = false;
+    });
+
+    it('hides the centralized action policies banner', async () => {
+      renderPage();
+      await waitForRules();
+
+      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
     });
 
     it('hides the header create controls even when rules exist', async () => {
@@ -894,14 +968,13 @@ describe('RulesListPage', () => {
       expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
     });
 
-    it('hides row selection, quick edit, and actions menu affordances', async () => {
+    it('hides row selection and quick edit', async () => {
       renderPage();
       await waitForRules();
 
       expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
     it('hides the enabled switch and shows a read-only status badge instead', async () => {

@@ -163,6 +163,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Invoke a GCP Cloud Function or Cloud Run function by name using its HTTP trigger URL. Use this when you need to run a known function with an optional JSON payload and return the function response.',
       input: lazySchema(() =>
@@ -215,6 +216,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     listFunctions: {
       isTool: true,
+      scope: 'read',
       description:
         'List GCP Cloud Functions and Cloud Run functions in the configured project and region. Use this to discover available function names before invoking or inspecting a function.',
       input: lazySchema(() =>
@@ -283,6 +285,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
 
     getFunction: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details for a single GCP Cloud Function or Cloud Run function by name. Use this when you already know the function name and need its endpoint or deployment configuration before deciding what to invoke.',
       input: lazySchema(() =>

@@ -35,7 +35,7 @@ export interface IManagementSectionsPluginsStart {
 export interface AppDependencies {
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
-  core: CoreStart; // for RedirectAppLinks
+  core: CoreStart;
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;

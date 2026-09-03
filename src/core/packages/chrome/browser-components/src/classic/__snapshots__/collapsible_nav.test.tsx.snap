@@ -33,7 +33,7 @@ Array [
             class="euiThemeProvider emotion-euiColorMode-dark"
           >
             <ul
-              class="euiListGroup emotion-euiListGroup"
+              class="euiListGroup emotion-euiListGroup-navListGroupCss"
               style="max-inline-size: none;"
             >
               <li
@@ -80,7 +80,7 @@ Array [
         >
           <ul
             aria-label="Pinned links"
-            class="euiListGroup emotion-euiListGroup"
+            class="euiListGroup emotion-euiListGroup-navListGroupCss"
             style="max-inline-size: none;"
           >
             <li
@@ -183,7 +183,7 @@ Array [
           >
             <ul
               aria-label="Recently viewed links"
-              class="euiListGroup emotion-euiListGroup-navRecentsListGroupCss"
+              class="euiListGroup emotion-euiListGroup-navListGroupCss-navRecentsListGroupCss-CollapsibleNav"
               style="max-inline-size: none;"
             >
               <li
@@ -317,7 +317,7 @@ Array [
             >
               <ul
                 aria-label="Primary navigation links, Analytics"
-                class="euiListGroup emotion-euiListGroup"
+                class="euiListGroup emotion-euiListGroup-navListGroupCss"
                 style="max-inline-size: none;"
               >
                 <li
@@ -463,7 +463,7 @@ Array [
             >
               <ul
                 aria-label="Primary navigation links, Observability"
-                class="euiListGroup emotion-euiListGroup"
+                class="euiListGroup emotion-euiListGroup-navListGroupCss"
                 style="max-inline-size: none;"
               >
                 <li
@@ -587,7 +587,7 @@ Array [
             >
               <ul
                 aria-label="Primary navigation links, Security"
-                class="euiListGroup emotion-euiListGroup"
+                class="euiListGroup emotion-euiListGroup-navListGroupCss"
                 style="max-inline-size: none;"
               >
                 <li
@@ -689,7 +689,7 @@ Array [
             >
               <ul
                 aria-label="Primary navigation links, Management"
-                class="euiListGroup emotion-euiListGroup"
+                class="euiListGroup emotion-euiListGroup-navListGroupCss"
                 style="max-inline-size: none;"
               >
                 <li
@@ -728,7 +728,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <ul
-            class="euiListGroup emotion-euiListGroup-maxWidthDefault"
+            class="euiListGroup emotion-euiListGroup-maxWidthDefault-navListGroupCss"
           >
             <li
               class="euiListItemLayout__wrapper emotion-euiListItemLayout__wrapper-isInteractive"

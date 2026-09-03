@@ -103,6 +103,11 @@ export interface FieldStatisticTableEmbeddableProps {
   resetData$?: Observable<number>;
   timeRange?: TimeRange;
   onRenderComplete?: () => void;
+  /**
+   * Callback reporting the number of fields currently displayed in the table.
+   * Reports `undefined` while a (re)load is in progress.
+   */
+  onFieldsCountChange?: (fieldsCount: number | undefined) => void;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

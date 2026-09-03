@@ -74,6 +74,13 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
     description: 'Retrieve mappings for indices, aliases or datastreams.',
+    annotations: {
+      title: 'Get Index Mapping',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: getIndexMappingsSchema,
     handler: async ({ indices, raw }, { esClient }) => {
       // getIndexFields transparently handles the local-vs-CCS split:

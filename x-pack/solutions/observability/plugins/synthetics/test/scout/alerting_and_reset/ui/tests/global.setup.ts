@@ -6,12 +6,14 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import { testData } from '../../../common/ui/fixtures';
+import { resetArchivedSyntheticsDataStreams, testData } from '../../../common/ui/fixtures';
 
 globalSetupHook(
   'Ingest Synthetics test data',
-  { tag: tags.stateful.classic },
-  async ({ esArchiver, log }) => {
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ esArchiver, esClient, log }) => {
+    await resetArchivedSyntheticsDataStreams(esClient, log);
+
     log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of [
       testData.ES_ARCHIVES.FULL_HEARTBEAT,

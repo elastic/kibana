@@ -167,7 +167,15 @@ export class DatePicker {
       ).toHaveText(to);
     }
 
-    await getTestSubjLocator('querySubmitButton').click();
+    // A standalone EuiSuperDatePicker (e.g. APM) commits the staged range through
+    // its own Update button; a query-bar-embedded picker commits through the
+    // shared submit button. Mirrors FTR's time_picker.ts.
+    const applyTimeButton = getTestSubjLocator('superDatePickerApplyTimeButton');
+    if ((await applyTimeButton.count()) > 0) {
+      await applyTimeButton.click();
+    } else {
+      await getTestSubjLocator('querySubmitButton').click();
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -353,6 +361,14 @@ export class DatePicker {
 
   getDateRangePreset(label: string) {
     return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
+  }
+
+  /**
+   * Delete action for a preset. Only user-saved presets expose one; presets
+   * coming from the `timepicker:quickRanges` uiSetting are locked.
+   */
+  getDateRangePresetDeleteButton(label: string) {
+    return this.getDateRangePreset(label).getByTestId('dateRangePickerDeletePresetButton');
   }
 
   async deleteDateRangePreset(label: string) {

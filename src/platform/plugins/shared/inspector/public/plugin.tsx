@@ -12,6 +12,7 @@ import * as React from 'react';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { InspectorViewRegistry } from './view_registry';
 import type { InspectorOptions, InspectorSession } from './types';
 import type { Adapters } from '../common';
@@ -19,6 +20,7 @@ import { getRequestsViewDescription } from './views';
 
 export interface InspectorPluginStartDeps {
   share: SharePluginStart;
+  cps?: CPSPluginStart;
 }
 
 export interface Setup {
@@ -103,6 +105,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
                 share: startDeps.share,
                 settings: core.settings,
                 theme: core.theme,
+                cpsManager: startDeps.cps?.cpsManager,
               }}
             />
           );

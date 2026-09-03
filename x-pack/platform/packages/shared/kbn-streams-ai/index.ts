@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getDiverseSampleDocuments } from './src/sampling/get_diverse_sample_documents';
 export { generateStreamDescription } from './src/description/generate_description';
 export { overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
@@ -28,6 +29,9 @@ export {
   identifyKIQueries,
   DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptStatus,
+  type QueryAttemptFailureReason,
 } from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,
@@ -45,7 +49,18 @@ export {
   type SearchSimilarFeaturesArguments,
   type SimilarFeatureHit,
 } from './src/features/identify_features';
-export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  formatRawDocument,
+  DEFAULT_INFERENCE_DOCUMENT_LIMITS,
+  type InferenceDocument,
+  type InferenceDocumentLimits,
+} from './src/features/utils/format_raw_document';
+export {
+  generateAllComputedFeatures,
+  DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
+  type ComputedFeatureGenerationResult,
+  type GenerateAllComputedFeaturesOptions,
+} from './src/features/computed';
 export {
   CODE_ANALYSIS_PROVIDER_KEY,
   codeAnalysisGenerator,

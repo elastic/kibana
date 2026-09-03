@@ -8,7 +8,6 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
@@ -19,18 +18,12 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
-// When available, the installer writes: 8 always-on base workflows + the code-extraction workflow
-// (only when code KI extraction is enabled) + 4 memory workflows (all via `installWorkflows`)
-// + 1 investigation workflow.
-const ALWAYS_ON_BASE_WORKFLOW_COUNT = 8;
+// 9 base workflows include the optional code-extraction workflow and upstream's
+// investigation-completed workflow. Memory adds 4 more installs.
+const BASE_WORKFLOW_COUNT = 9;
 const CODE_EXTRACTION_WORKFLOW_COUNT = 1;
 const MEMORY_WORKFLOW_COUNT = 4;
-const INVESTIGATION_WORKFLOW_COUNT = 1;
-// Default test setup enables code extraction, so the full set includes it.
-const BASE_WORKFLOW_COUNT = ALWAYS_ON_BASE_WORKFLOW_COUNT + CODE_EXTRACTION_WORKFLOW_COUNT;
-const TOTAL_WORKFLOW_COUNT =
-  BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
-// With code KI extraction disabled, the code-extraction workflow is excluded.
+const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
 const TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION =
   TOTAL_WORKFLOW_COUNT - CODE_EXTRACTION_WORKFLOW_COUNT;
 
@@ -109,7 +102,7 @@ describe('createManagedWorkflowsInstaller', () => {
 
     await installer.install();
 
-    // base + memory + investigation, all installed before ready() closes the window.
+    // base + memory, all installed before ready() closes the window.
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
     expect(installCountAtReady).toBe(TOTAL_WORKFLOW_COUNT);
   });
@@ -131,14 +124,6 @@ describe('createManagedWorkflowsInstaller', () => {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
     }
-  });
-
-  it('installs the investigation workflow when available', async () => {
-    const { client, installer } = createInstaller();
-
-    await installer.install();
-
-    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID);
   });
 
   it('installs the code-extraction workflow when code KI extraction is enabled', async () => {

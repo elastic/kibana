@@ -127,7 +127,6 @@ export function useMonitorListColumns({
       render: (_: string, monitor: MonitorListItem) => (
         <MonitorTypeBadge
           monitorType={monitor[ConfigKey.MONITOR_TYPE]}
-          ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
           onClick={() => {
             history.push({
               search: `monitorTypes=${encodeURIComponent(

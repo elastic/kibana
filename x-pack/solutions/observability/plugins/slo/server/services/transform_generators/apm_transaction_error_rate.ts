@@ -38,7 +38,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildAggregations(slo),
       this.buildSettings(slo, '@timestamp'),
       slo,
-      this.isServerless && this.isCpsEnabled
+      this.getProjectRouting(slo)
     );
   }
 

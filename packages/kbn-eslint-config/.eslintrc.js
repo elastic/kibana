@@ -19,47 +19,6 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
-/**
- * Compile an exact, kibana-root-relative file path (forward slashes) into an
- * anchored regex. A regex is required because the `module_migration` rule matches
- * each `exclude` with `RegExp.test()` against a path that uses the OS-native
- * separator, so each `/` is matched as `[\/\\]` to also work on Windows.
- */
-const exactFilePathMatcher = (relativePath) =>
-  new RegExp(
-    `^${relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\//g, '[\\/\\\\]')}$`
-  );
-
-/**
- * Files that already import js-yaml. New js-yaml imports must not be added here;
- * this list is expected to shrink as consumers migrate to the `yaml` package.
- * Each entry is an exact file path, so adding a new js-yaml import (even in an
- * already-listed directory) is flagged until that file is migrated or added here.
- * The `module_migration` rule evaluates each mapping independently, so this list
- * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
- */
-const JS_YAML_LEGACY_CONSUMERS = [
-  'packages/kbn-rspack-optimizer/src/limits.ts',
-  'src/platform/kbn-ui/_tooling/affected_packages.ts',
-  'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
-  'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
-  'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
-  'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
-  'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
-  'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
-  'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
-  'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
-  'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
-].map(exactFilePathMatcher);
-
 const USES_ELASTIC_APM_AGENT = [
   // Core platform APM integration & agent infrastructure
   /src[\/\\]core[\/\\]/,
@@ -270,10 +229,8 @@ module.exports = {
         {
           from: 'js-yaml',
           to: false,
-          exclude: JS_YAML_LEGACY_CONSUMERS,
           disallowedMessage:
-            "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). " +
-            'Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.',
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
         },
       ],
     ],
@@ -439,6 +396,7 @@ module.exports = {
      */
     '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
     '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
+    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
 
     /**
      * EUI Team rules

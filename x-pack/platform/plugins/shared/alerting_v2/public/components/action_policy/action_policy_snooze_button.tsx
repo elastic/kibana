@@ -37,7 +37,7 @@ export const ActionPolicySnoozeButton = ({
   isDisabled = false,
 }: ActionPolicySnoozeButtonProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { snoozedUntil } = policy;
+  const { snoozed_until: snoozedUntil } = policy;
 
   if (isSnoozed(snoozedUntil)) {
     return (

@@ -18,6 +18,7 @@ import {
   esqlToObjects,
   executeAndDecodeSource,
   pickLatestPerGroup,
+  fromIndexForSpace,
   withSort,
   withWhere,
   type LatestSourceWhereCondition,
@@ -28,7 +29,11 @@ import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 export const REVISION_SIZE_LIMIT = 10_000;
 
 export class RevisionReader {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly space: string
+  ) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
@@ -36,7 +41,11 @@ export class RevisionReader {
     sort?: ComposerSortShorthand[],
     limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
+    let query = fromIndexForSpace({
+      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+      space: this.space,
+      columns: ['_id', '_source'],
+    });
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
@@ -64,7 +73,11 @@ export class RevisionReader {
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition
   ): Promise<string[]> {
-    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']);
+    let query = fromIndexForSpace({
+      index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+      space: this.space,
+      columns: ['_id'],
+    });
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);

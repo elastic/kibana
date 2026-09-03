@@ -45,5 +45,7 @@ export interface KnowledgeIndicatorClientDeps {
   dataStreamClient: KnowledgeIndicatorDataStreamClient;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  /** Active Kibana space for every KI read and write. */
+  space: string;
   logger: Logger;
 }

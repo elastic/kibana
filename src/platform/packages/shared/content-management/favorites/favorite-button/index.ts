@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { FavoriteButtonStatus } from './src/favorite_status';
-export { FavoriteButton, type FavoriteButtonProps } from './src/favorite_button';
-export { StardustWrapper } from './src/stardust_wrapper';
+/** @deprecated Import from `@kbn/ui-favorite-button` instead. */
+export {
+  FavoriteButton,
+  StardustWrapper,
+  type FavoriteButtonProps,
+  type FavoriteButtonStatus,
+} from '@kbn/ui-favorite-button';

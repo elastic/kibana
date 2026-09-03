@@ -432,9 +432,9 @@ export const LOGGING_PROFILE_DRIFT_RATIO = 0.5;
  * attached to the root wired-logs stream `logs`. They lie dormant until log
  * data begins flowing, then start matching automatically — no re-run needed.
  */
-export const FALLBACK_LOG_INDEX_PATTERN = 'logs*' as const;
-export const FALLBACK_TRACE_INDEX_PATTERN = 'traces*' as const;
-export const FALLBACK_METRIC_INDEX_PATTERN = 'metrics*' as const;
+export const FALLBACK_LOG_INDEX_PATTERN = 'logs-*' as const;
+export const FALLBACK_TRACE_INDEX_PATTERN = 'traces-*' as const;
+export const FALLBACK_METRIC_INDEX_PATTERN = 'metrics-*' as const;
 export const FALLBACK_LOG_STREAM = 'logs' as const;
 export const FALLBACK_LOG_MESSAGE_FIELD = 'message' as const;
 

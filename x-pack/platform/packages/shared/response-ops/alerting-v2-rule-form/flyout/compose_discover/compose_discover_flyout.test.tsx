@@ -13,9 +13,10 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -53,10 +54,6 @@ jest.mock('./compose_discover_form/notifications_step', () => ({
 
 jest.mock('./compose_discover_form/linked_action_policies_step', () => ({
   LinkedActionPoliciesStep: () => null,
-}));
-
-jest.mock('./compose_discover_form/centralized_action_policies_panel', () => ({
-  CentralizedActionPoliciesPanel: () => null,
 }));
 
 jest.mock('./compose_discover_form/esql_recovery_content', () => ({
@@ -147,7 +144,6 @@ jest.mock('./query_sandbox_flyout', () => ({
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
         <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onTimeFieldChange ? (
-          // eslint-disable-next-line jsx-a11y/no-onchange
           <select
             data-test-subj="querySandboxTimeField"
             value={props.timeField}
@@ -248,6 +244,8 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
 });
@@ -338,7 +336,7 @@ describe('ComposeDiscoverFlyout', () => {
     it('renders the stepper with the correct aria-label for step 1 of 4', () => {
       renderFlyout();
 
-      const stepper = screen.getByRole('group', { name: /Step 1 of 4: Alert Condition/ });
+      const stepper = screen.getByRole('group', { name: /Step 1 of 4: Condition/ });
       expect(stepper).toBeInTheDocument();
     });
 
@@ -346,7 +344,7 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout();
 
       expect(screen.getByText('1 / 4')).toBeInTheDocument();
-      expect(screen.getByText('Alert Condition')).toBeInTheDocument();
+      expect(screen.getByText('Condition')).toBeInTheDocument();
     });
 
     it('does not render the stepper in YAML mode', () => {
@@ -427,14 +425,50 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('flyout title', () => {
-    it('shows "Create alert rule" in create mode', () => {
+    it('shows "Create ES|QL rule" in create mode', () => {
       renderFlyout({ mode: 'create' });
-      expect(screen.getByText('Create alert rule')).toBeInTheDocument();
+      expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
     });
 
-    it('shows "Edit alert rule" in edit mode', () => {
+    it('shows "Create Threshold rule" when creating a threshold builder rule', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+      expect(screen.getByText('Create Threshold rule')).toBeInTheDocument();
+    });
+
+    it('shows "Create rule" when builderType is unknown', () => {
+      renderFlyout({ mode: 'create', builderType: 'unknown-builder' });
+      expect(screen.getByText('Create rule')).toBeInTheDocument();
+    });
+
+    it('shows "Edit {name}" in edit mode when the rule has a name', () => {
+      renderFlyout({
+        mode: 'edit',
+        ruleId: 'rule-1',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      });
+      expect(screen.getByText('Edit CPU high')).toBeInTheDocument();
+    });
+
+    it('shows "Edit rule" in edit mode when the name is empty', () => {
       renderFlyout({ mode: 'edit' });
-      expect(screen.getByText('Edit alert rule')).toBeInTheDocument();
+      expect(screen.getByText('Edit rule')).toBeInTheDocument();
+    });
+
+    it('shows "Clone rule" in clone mode', () => {
+      renderFlyout({ mode: 'clone' });
+      expect(screen.getByText('Clone rule')).toBeInTheDocument();
     });
   });
 
@@ -503,10 +537,10 @@ describe('ComposeDiscoverFlyout', () => {
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -642,6 +676,45 @@ describe('ComposeDiscoverFlyout', () => {
     const timeLiteralVariable: ESQLControlVariable[] = [
       { key: 'window', value: '15m', type: ESQLVariableType.TIME_LITERAL },
     ];
+
+    it('treats a populated base-only query as committed', () => {
+      renderFlyout({ initialQuery: 'FROM logs-* | LIMIT 500' });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: 'FROM logs-* | LIMIT 500',
+        breach: { segment: '' },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('keeps a populated base-only query committed when Discover updates it', async () => {
+      const props = {
+        ...defaultProps,
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      };
+      const { rerender } = render(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} />
+        </TestWrapper>
+      );
+
+      rerender(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 500" />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(getLatestFormProps().state.queryCommitted).toBe(true);
+        expect(readCommittedQuery?.()).toEqual({
+          format: 'composed',
+          base: 'FROM metrics-* | LIMIT 500',
+          breach: { segment: '' },
+        });
+      });
+    });
 
     it('shows unresolved variables in a callout and disables YAML Create rule', () => {
       renderFlyout({
@@ -869,6 +942,56 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
 
+  describe('create from template rule', () => {
+    const templateRule = {
+      id: '',
+      kind: 'alert' as const,
+      enabled: false,
+      metadata: {
+        name: '[Kubernetes OTel] Pod CrashLoopBackOff',
+        description: 'Alerts when containers have a high restart count',
+        tags: ['Kubernetes'],
+        version: 1,
+      },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '15m' },
+      query: {
+        format: 'composed' as const,
+        base: 'TS metrics-k8sclusterreceiver.otel-* | STATS restarts = MAX(k8s.container.restarts) BY k8s.pod.name',
+        breach: { segment: 'WHERE restarts > 0 | SORT restarts DESC | LIMIT 50' },
+      },
+      created_by: null,
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_by: null,
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    it('commits the template query in create mode so the flyout shows it', () => {
+      renderFlyout({ mode: 'create', rule: templateRule as any });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: templateRule.query.base,
+        breach: { segment: templateRule.query.breach.segment },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('does not commit an empty template query in create mode', () => {
+      renderFlyout({
+        mode: 'create',
+        rule: {
+          ...templateRule,
+          query: { format: 'composed' as const, base: '', breach: { segment: '' } },
+        } as any,
+      });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(false);
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+  });
+
   describe('handleSandboxApply', () => {
     it('runs heuristic split and commits the result in create + alert unified editor', () => {
       renderFlyout({ mode: 'create' });
@@ -910,10 +1033,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -979,10 +1102,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1098,10 +1221,10 @@ describe('ComposeDiscoverFlyout', () => {
             breach: { segment: '| WHERE count > 100' },
             recovery: { segment: '| WHERE count < 50' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1271,10 +1394,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 

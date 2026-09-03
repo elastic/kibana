@@ -6,7 +6,6 @@
  */
 
 import { MAX_ID_LENGTH, type Feature } from '@kbn/significant-events-schema';
-import { getCodeFeatureStreamPrefix } from '../../../../lib/knowledge_indicators/code_intelligence';
 import { internalKICodeFeaturesRoutes } from './route';
 
 const mockClassifyLoggingSites = jest.fn();
@@ -80,12 +79,12 @@ const createMaintenanceService = () => ({
 });
 
 describe('Code Intelligence routes', () => {
-  it('lists only streams visible to the request', async () => {
+  it('lists Code Intelligence KIs without requiring a matching Streams definition', async () => {
     const getFeatures = jest.fn().mockResolvedValue({ hits: [codeFeature('logs.visible', 'one')] });
     const getQueryLinks = jest.fn().mockResolvedValue([]);
-    const getStreamNamesWithKnowledgeIndicators = jest.fn().mockResolvedValue([]);
+    const getStreamNamesWithKnowledgeIndicators = jest.fn().mockResolvedValue(['logs.visible']);
     const streamsClient = {
-      listStreams: jest.fn().mockResolvedValue([{ name: 'logs.visible' }]),
+      listStreams: jest.fn().mockResolvedValue([]),
     };
 
     const result = await listRoute.handler({
@@ -119,36 +118,6 @@ describe('Code Intelligence routes', () => {
     expect(getStreamNamesWithKnowledgeIndicators).toHaveBeenCalled();
   });
 
-  it('includes only code feature pseudo-streams owned by the active space', async () => {
-    const ownedPseudoStream = `${getCodeFeatureStreamPrefix('default')}:repository:owned`;
-    const foreignPseudoStream = `${getCodeFeatureStreamPrefix('other')}:repository:foreign`;
-    const getFeatures = jest
-      .fn()
-      .mockResolvedValue({ hits: [codeFeature(ownedPseudoStream, 'one')] });
-
-    await listRoute.handler({
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        streamsClient: { listStreams: jest.fn().mockResolvedValue([{ name: 'logs.visible' }]) },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
-          getFeatures,
-          getQueryLinks: jest.fn().mockResolvedValue([]),
-          getStreamNamesWithKnowledgeIndicators: jest
-            .fn()
-            .mockResolvedValue([ownedPseudoStream, foreignPseudoStream]),
-        }),
-      }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
-      server: {},
-    } as unknown as ListHandlerParams);
-
-    expect(getFeatures).toHaveBeenCalledWith(
-      ['logs.visible', ownedPseudoStream],
-      expect.anything()
-    );
-  });
-
   it('limits reset work to a resumable stream batch', async () => {
     const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
@@ -166,7 +135,9 @@ describe('Code Intelligence routes', () => {
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           getFeatures,
-          getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+          getStreamNamesWithKnowledgeIndicators: jest
+            .fn()
+            .mockResolvedValue(Array.from({ length: 11 }, (_, index) => `logs.${index}`)),
         }),
       }),
       getSpaceId: jest.fn().mockResolvedValue('default'),
@@ -201,7 +172,9 @@ describe('Code Intelligence routes', () => {
           getFeatures: jest.fn().mockResolvedValue({
             hits: [codeFeature('logs.one', 'one'), codeFeature('logs.two', 'two')],
           }),
-          getStreamNamesWithKnowledgeIndicators: jest.fn().mockResolvedValue([]),
+          getStreamNamesWithKnowledgeIndicators: jest
+            .fn()
+            .mockResolvedValue(['logs.one', 'logs.two']),
           bulk,
         }),
       }),
@@ -422,9 +395,9 @@ describe('Code Intelligence routes', () => {
 
     expect(mockGenerateOtelQueries).toHaveBeenCalledWith(
       expect.objectContaining({
-        traceStreams: ['traces*'],
-        metricStreams: ['metrics*'],
-        logStreams: ['logs*'],
+        traceStreams: ['traces-*'],
+        metricStreams: ['metrics-*'],
+        logStreams: ['logs-*'],
         traceStreamNames: ['logs'],
         metricStreamNames: ['logs'],
         logStreamNames: ['logs'],

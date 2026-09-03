@@ -65,7 +65,7 @@ describe('UniFi', () => {
     expect(Unifi.metadata.id).toBe('.unifi');
     expect(Unifi.metadata.displayName).toBe('UniFi');
     expect(Unifi.metadata.minimumLicense).toBe('enterprise');
-    expect(Unifi.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    expect(Unifi.metadata.supportedFeatureIds).toEqual(['agentBuilder', 'workflows']);
   });
 
   it('should support api_key_header auth using the X-API-KEY header', () => {

@@ -43,10 +43,6 @@ exports[`Header renders 1`] = `
               </span>
             </span>
           </a>
-        </div>
-        <div
-          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
-        >
           <a
             aria-label="Elastic home"
             class="css-4ghmd2-logoCss"
@@ -93,44 +89,50 @@ exports[`Header renders 1`] = `
       >
         <div
           class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
-        />
-        <div
-          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
         >
           <div
-            class="euiPopover emotion-euiPopover-inline-block"
-            data-test-subj="helpMenuButton"
-            id="headerHelpMenu"
+            class="css-1kcq09z-rightGroup"
           >
-            <button
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Help menu"
-              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-              type="button"
+            <div
+              class="css-12qq8z7-helpSlot"
+              data-test-subj="chromeNextGlobalHeaderHelp"
             >
               <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                class="euiThemeProvider emotion-euiColorMode-LIGHT"
               >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                <div
+                  class="euiPopover emotion-euiPopover-inline-block"
+                  data-test-subj="helpMenuButton"
+                  id="headerHelpMenu"
                 >
                   <span
-                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+                    class="euiThemeProvider emotion-euiColorMode-dark"
                   >
-                    <span
-                      aria-hidden="true"
-                      data-euiicon-type="question"
-                    />
+                    <button
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      aria-label="Help menu"
+                      class="css-2ijv7t-headerButtonBaseStyles-squareStyles-headerButtonBorderedStyles-HeaderActionButton"
+                      data-test-subj="chromeNextGlobalHeaderHelpButton"
+                      style="--header-btn-border: #485975; --header-btn-hover: rgba(255,255,255, 0.08); --header-btn-focus: #61A2FF; border-radius: 4px;"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        color="subdued"
+                        data-euiicon-type="question"
+                      />
+                    </button>
                   </span>
-                </span>
+                </div>
               </span>
-            </button>
+            </div>
+            <div
+              class="css-ghaac-actionsSlot"
+              data-test-subj="chromeNextGlobalHeaderActions"
+            />
           </div>
         </div>
-        <div
-          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
-        />
       </div>
     </div>
     <div

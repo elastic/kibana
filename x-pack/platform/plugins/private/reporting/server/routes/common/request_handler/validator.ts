@@ -68,8 +68,20 @@ const timezoneSchema = z.string().refine((val) => validateTimezone(val) === unde
 const dimensionsSchema = z
   .object({
     // 16000px height is the maximum screenshot Chrome can make
-    height: z.number().positive().max(16000),
-    width: z.number().positive().max(14400),
+    height: z
+      .number()
+      .positive()
+      .max(
+        16000,
+        'Dashboard height exceeds the maximum dimensions (16000px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+      ),
+    width: z
+      .number()
+      .positive()
+      .max(
+        14400,
+        'Dashboard width exceeds the maximum dimensions (14400px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+      ),
   })
   .strict();
 
@@ -145,5 +157,15 @@ const jobParamsSchema = z
   .strict();
 
 export function validateJobParams(jobParams: BaseParams) {
-  return jobParamsSchema.parse(jobParams);
+  const result = jobParamsSchema.safeParse(jobParams);
+  if (result.success) {
+    return result.data;
+  }
+
+  const msg = result.error.issues
+    .map(({ message, path }) => {
+      return `${path.map(String).join('.')}: ${message}`;
+    })
+    .join('\n');
+  throw new Error(msg);
 }

@@ -54,13 +54,14 @@ export class KnowledgeIndicatorClient {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
-    const revisionReader = new RevisionReader(deps.esClient, deps.logger);
+    const revisionReader = new RevisionReader(deps.esClient, deps.logger, deps.space);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
       deps.dataStreamClient,
       deps.logger,
       revisionReader,
-      config.feature_ttl_days
+      config.feature_ttl_days,
+      deps.space
     );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);

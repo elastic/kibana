@@ -10,6 +10,7 @@ import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -43,15 +44,14 @@ const BASE_WORKFLOWS_TO_INSTALL: WorkflowInstall[] = [
     workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
+  {
+    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  },
 ];
 
-// Code Intelligence (Stage 1) extraction. Installed globally like the other core
-// KI workflows whenever the code-KI extraction feature flag is on. The workflow's
-// `ai.agent` steps target the persisted code-intelligence agent (Sourcerer), whose
-// presence can only be checked with a request-scoped registry; that guard lives in
-// the `_run` route (request time), not here. The reconciler prunes owner workflows
-// not in the installed set, so excluding it when the flag is off also removes a
-// previously-installed copy.
+// Code Intelligence (Stage 1) extraction. Installed globally whenever the
+// code-KI extraction feature flag is on.
 const CODE_EXTRACTION_WORKFLOW: WorkflowInstall = {
   workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -62,7 +62,6 @@ export const installWorkflows = async ({
   includeCodeExtraction,
 }: {
   client: PluginScopedManagedWorkflowsApi;
-  /** Install the code-intelligence extraction workflow (agent must be present). */
   includeCodeExtraction: boolean;
 }): Promise<void> => {
   const workflowsToInstall = includeCodeExtraction

@@ -6,42 +6,23 @@
  */
 
 /** Query param that restores the open event flyout on load or from a shared link. */
-export const NIGHTSHIFT_EVENT_UUID_QUERY_PARAM = 'eventUuid';
-
 export const NIGHTSHIFT_EVENT_ID_QUERY_PARAM = 'eventId';
 
-export const BLAST_RADIUS_QUERY_PARAM = 'blastRadius';
+export const IMPACTED_SERVICES_QUERY_PARAM = 'impactedServices';
 
-export const getNightshiftEventSelectionFromSearch = (
-  search: string
-): { eventId?: string; eventUuid?: string } => {
-  const params = new URLSearchParams(search);
-  return {
-    eventId: params.get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined,
-    eventUuid: params.get(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM) ?? undefined,
-  };
+export const getNightshiftEventIdFromSearch = (search: string): string | undefined =>
+  new URLSearchParams(search).get(NIGHTSHIFT_EVENT_ID_QUERY_PARAM) ?? undefined;
+
+export const setNightshiftEventIdParam = (params: URLSearchParams, eventId: string): void => {
+  params.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, eventId);
 };
 
-export const setNightshiftEventSelectionParams = (
-  params: URLSearchParams,
-  selection: { eventId: string; eventUuid: string }
-): void => {
-  params.set(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM, selection.eventUuid);
-  params.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, selection.eventId);
-};
-
-export const clearNightshiftEventSelectionParams = (params: URLSearchParams): void => {
-  params.delete(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM);
+export const clearNightshiftEventIdParam = (params: URLSearchParams): void => {
   params.delete(NIGHTSHIFT_EVENT_ID_QUERY_PARAM);
 };
 
-export const buildNightshiftEventFlyoutShareUrl = (eventUuid: string, eventId?: string): string => {
+export const buildNightshiftEventFlyoutShareUrl = (eventId: string): string => {
   const url = new URL(window.location.href);
-  url.searchParams.set(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM, eventUuid);
-  if (eventId) {
-    url.searchParams.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, eventId);
-  } else {
-    url.searchParams.delete(NIGHTSHIFT_EVENT_ID_QUERY_PARAM);
-  }
+  url.searchParams.set(NIGHTSHIFT_EVENT_ID_QUERY_PARAM, eventId);
   return url.toString();
 };

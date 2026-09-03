@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 
-const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-dashboard-migrations';
+const SIEM_MIGRATIONS_BASE_INDEX_PATTERN = '.kibana-siem-rule-migrations';
 const MIGRATIONS_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-migrations-default`;
 const RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-rules-default`;
 const RESOURCES_INDEX_PATTERN = `${SIEM_MIGRATIONS_BASE_INDEX_PATTERN}-resources-default`;

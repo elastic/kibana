@@ -73,6 +73,13 @@ export function createGetRuntimeMetricsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getRuntimeMetricsToolSchema> = {
     id: OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Runtime Metrics',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves runtime metrics for services, including CPU usage, memory consumption, thread counts, and GC duration.
 
 Currently supports JVM (Java) metrics. Returns for each service node (application instance):

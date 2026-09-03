@@ -43,7 +43,8 @@ export class IndicatorWriter {
     private readonly dataStreamClient: KnowledgeIndicatorDataStreamClient,
     private readonly logger: Logger,
     private readonly revisionReader: RevisionReader,
-    private readonly ttlDays: number
+    private readonly ttlDays: number,
+    private readonly space: string
   ) {}
 
   async bulk(
@@ -80,6 +81,7 @@ export class IndicatorWriter {
     await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) =>
       this.dataStreamClient.create({
         refresh: 'wait_for',
+        space: this.space,
         documents: this.buildBulkDocs(stream, operations, {
           excludableLatest,
           restorableLatest,
@@ -333,6 +335,7 @@ export class IndicatorWriter {
       }
       return this.dataStreamClient.create({
         refresh: 'wait_for',
+        space: this.space,
         documents: docs as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
       });
     });
@@ -351,6 +354,7 @@ export class IndicatorWriter {
     const tombstones = latest.map((doc) => toTombstone(stream, doc));
     const response = await this.dataStreamClient.create({
       refresh: 'wait_for',
+      space: this.space,
       documents: tombstones as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
     });
     if (response.errors) {
