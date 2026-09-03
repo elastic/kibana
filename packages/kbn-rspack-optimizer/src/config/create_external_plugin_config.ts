@@ -22,7 +22,6 @@ import { getExternals, isKeaReactReduxImport } from './externals';
 import {
   getSharedResolveConfig,
   getSharedResolveFallback,
-  getSharedResolvePlugins,
   getSharedModuleRules,
   getSharedModuleParserConfig,
   getSharedIgnoreWarnings,
@@ -221,8 +220,6 @@ export async function createExternalPluginConfig(
     plugins: [
       // Same plugins as main build
       new NodeLibsBrowserPlugin() as any,
-      // Rewrite resolve-time module requests (e.g. vega-tooltip -> JS build entry).
-      ...getSharedResolvePlugins(),
 
       // Redirect kea's react-redux import to react-redux-v7 so it shares the
       // same React context as the <Provider> from react-redux-v7 used by
