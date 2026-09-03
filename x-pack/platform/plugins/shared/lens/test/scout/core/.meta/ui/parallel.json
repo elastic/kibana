@@ -608,7 +608,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql/legacy_slot_self_heal.spec.ts",
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
         "line": 137,
         "column": 33
       }

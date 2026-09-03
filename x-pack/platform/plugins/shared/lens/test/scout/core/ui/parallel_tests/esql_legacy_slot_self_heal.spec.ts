@@ -7,7 +7,7 @@
 
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const DASHBOARD_ID = 'esql-legacy-slot-self-heal-dashboard';
 const PANEL_INDEX = 'esql-legacy-slot-panel';
