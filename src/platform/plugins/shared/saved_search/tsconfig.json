@@ -33,7 +33,7 @@
     "@kbn/discover-utils",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/logging-mocks",
-    "@kbn/saved-search-constants",
+    "@kbn/discover-session-constants",
   ],
   "exclude": ["target/**/*"]
 }

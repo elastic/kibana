@@ -17,4 +17,4 @@ export {
   MAX_DISCOVER_SESSION_TAGS,
   MAX_SEARCH_QUERY_LENGTH,
   MAX_DISCOVER_SESSION_TABS,
-} from '@kbn/saved-search-constants';
+} from '@kbn/discover-session-constants';

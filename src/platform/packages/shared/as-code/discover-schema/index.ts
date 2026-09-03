@@ -45,4 +45,4 @@ export {
   VIEW_MODE,
   DataGridDensity,
   UnifiedHistogramSuggestionType,
-} from '@kbn/saved-search-constants';
+} from '@kbn/discover-session-constants';

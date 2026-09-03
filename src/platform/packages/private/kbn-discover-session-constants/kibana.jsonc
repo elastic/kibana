@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/saved-search-constants",
+  "id": "@kbn/discover-session-constants",
   "owner": "@elastic/kibana-data-discovery",
   "group": "platform",
   "visibility": "private"

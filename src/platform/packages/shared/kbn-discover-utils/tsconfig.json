@@ -36,7 +36,7 @@
     "@kbn/search-errors",
     "@kbn/utility-types",
     "@kbn/esql-language",
-    "@kbn/saved-search-constants",
+    "@kbn/discover-session-constants",
     "@kbn/cps"
   ]
 }

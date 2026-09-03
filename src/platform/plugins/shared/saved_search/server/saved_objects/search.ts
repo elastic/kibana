@@ -10,7 +10,7 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { SavedSearchTypeDisplayName } from '@kbn/saved-search-constants';
+import { SavedSearchTypeDisplayName } from '@kbn/discover-session-constants';
 import { getAllMigrations } from './search_migrations';
 import { SCHEMA_SEARCH_V8_8_0 } from './schema_legacy';
 import { MODEL_VERSIONS, typeVersionGuesser } from './model_versions';

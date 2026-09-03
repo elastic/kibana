@@ -6482,6 +6482,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-session-constants@link:src/platform/packages/private/kbn-discover-session-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-shared-plugin@link:src/platform/plugins/shared/discover_shared":
   version "0.0.0"
   uid ""
@@ -8603,10 +8607,6 @@
   uid ""
 
 "@kbn/saved-search-component@link:src/platform/packages/shared/kbn-saved-search-component":
-  version "0.0.0"
-  uid ""
-
-"@kbn/saved-search-constants@link:src/platform/packages/private/kbn-saved-search-constants":
   version "0.0.0"
   uid ""
 

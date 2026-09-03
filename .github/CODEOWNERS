@@ -438,7 +438,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
 src/platform/packages/private/kbn-reporting/public @elastic/response-ops
 src/platform/packages/private/kbn-reporting/server @elastic/response-ops
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
-src/platform/packages/private/kbn-saved-search-constants @elastic/kibana-data-discovery
+src/platform/packages/private/kbn-discover-session-constants @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/response-ops
