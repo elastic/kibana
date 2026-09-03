@@ -148,13 +148,13 @@ const TIME_TOKENS = /[Hhk]|LT|LLL|lll/;
 const isBracketedLiteral = (segment: string): boolean => BRACKETED_LITERAL.test(segment);
 
 const stripSubMinuteTokens = (segment: string): string =>
-  segment
-    .replace(/LTS/g, 'LT')
-    .replace(SUB_MINUTE_TOKENS, '');
+  segment.replace(/LTS/g, 'LT').replace(SUB_MINUTE_TOKENS, '');
 
 export const getParsedDateFormat = (format: string): string => {
   const segments = format.split(BRACKETED_LITERAL);
-  const hasTime = segments.some((segment) => !isBracketedLiteral(segment) && TIME_TOKENS.test(segment));
+  const hasTime = segments.some(
+    (segment) => !isBracketedLiteral(segment) && TIME_TOKENS.test(segment)
+  );
   const withoutSubMinuteTokens = segments
     .map((segment) => (isBracketedLiteral(segment) ? segment : stripSubMinuteTokens(segment)))
     .join('')
