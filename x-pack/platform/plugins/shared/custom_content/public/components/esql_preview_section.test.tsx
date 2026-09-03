@@ -62,7 +62,9 @@ describe('EsqlPreviewSection', () => {
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
 
-    expect(screen.queryByText(/connect the query to the dashboard time filter/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/connect the query to the dashboard time filter/i)
+    ).not.toBeInTheDocument();
   });
 
   it('does not show the time filter hint on mount when a time field is detected', async () => {
@@ -71,7 +73,9 @@ describe('EsqlPreviewSection', () => {
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
     await act(async () => {});
 
-    expect(screen.queryByText(/connect the query to the dashboard time filter/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/connect the query to the dashboard time filter/i)
+    ).not.toBeInTheDocument();
   });
 
   it('shows the hint after clicking preview when the query has no time field', async () => {
