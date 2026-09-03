@@ -1,15 +1,17 @@
 version: "1"
 name: Detection Rule Tuning Worker
 description: >
-  Harvests rules whose alerts analysts closed as false positives and launches one
-  tuning proposal workflow per rule, so every proposal holds its own approval gate.
+  Harvests rules whose alerts analysts closed as false positives, fans out one
+  tuning proposal workflow per rule so every proposal holds its own approval gate,
+  and joins once every gate has settled to report the decision totals.
 enabled: true
 tags:
   - security
   - detection-rule-tuning
 settings:
-  # The sweep itself finishes in seconds (gates live in the proposal children),
-  # so this only guards against overlapping harvests.
+  # The sweep now runs as long as its slowest gate (up to 72h). Dropping overlaps
+  # serializes sweeps on purpose: alerts are only tagged once a gate resolves, so
+  # a second sweep started mid-join would rediagnose the same rules.
   concurrency:
     key: detection-rule-tuning
     strategy: drop
@@ -45,6 +47,12 @@ triggers:
       additionalProperties: false
 outputs:
   - name: proposals_requested
+    type: number
+  - name: proposals_approved
+    type: number
+  - name: proposals_failed
+    type: number
+  - name: rules_applied
     type: number
   - name: harvest_failed
     type: boolean
@@ -100,19 +108,30 @@ steps:
     on-failure:
       continue: true
 
-  # One proposal execution per rule, fire-and-forget. Gates cannot live here: a
-  # waitForApproval in this run would serialize on the single resume slot, and it
-  # is rejected inside a parallel branch. Each child parks on its own gate for up
-  # to 72h while this sweep completes; the child's per-rule concurrency key drops
-  # relaunches for rules whose gate is still pending.
-  - name: launch_proposals
-    type: foreach
+  # One proposal execution per rule, launched synchronously inside a parallel
+  # branch so this sweep joins once every gate has settled. The gate itself cannot
+  # live in this run: waitForApproval is rejected inside a parallel branch, and one
+  # execution has exactly one resume slot. Each child parks on its own gate for up
+  # to 72h while its branch sits in WAITING_FOR_CHILD.
+  # No `timeout` or `branch-timeout` here: either one aborts the branch and cancels
+  # the child while the approver is still thinking. The gate's own 72h timeout is
+  # the only clock.
+  - name: run_proposals
+    type: parallel
     foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
+    # Settled: one dropped or failed proposal must not skip the other rules'
+    # gates. Failures stay visible in the aggregate results and counts.
+    mode: settled
+    concurrency:
+      # Must cover consts.max_rules_per_sweep so every gate opens at once.
+      max: 10
+      # A branch parked in WAITING_FOR_CHILD frees its slot.
+      count-waiting: false
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
       # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
-      - name: launch_proposal
-        type: workflow.executeAsync
+      - name: run_proposal
+        type: workflow.execute
         with:
           workflow-id: system-security-rule-tuning-proposal
           inputs:
@@ -125,15 +144,24 @@ steps:
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
 
+  # Fan-in: every branch has settled, so each child either resolved its gate and
+  # tagged its alerts, or failed (its error stays in the aggregate results). A
+  # branch output is the child's workflow.output payload: rule_id, approved, applied.
   # Size is computed on its own because comparison operators cannot follow a filter chain.
-  - name: count_requested_proposals
+  - name: summarize_decisions
     type: data.set
     with:
       proposals_requested: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
+      proposals_failed: "${{ steps.run_proposals.output.failed | default: 0 }}"
+      proposals_approved: "${{ steps.run_proposals.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
+      rules_applied: "${{ steps.run_proposals.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      proposals_requested: "${{ steps.count_requested_proposals.output.proposals_requested }}"
+      proposals_requested: "${{ steps.summarize_decisions.output.proposals_requested }}"
+      proposals_approved: "${{ steps.summarize_decisions.output.proposals_approved }}"
+      proposals_failed: "${{ steps.summarize_decisions.output.proposals_failed }}"
+      rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
       harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"

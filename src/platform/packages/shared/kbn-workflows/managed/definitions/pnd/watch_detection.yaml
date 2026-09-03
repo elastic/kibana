@@ -85,8 +85,13 @@ steps:
       # Tuning thresholds (FP count, FP rate, analysis window) live as consts on the
       # worker itself; the watch only forwards the preview depth it also hands to
       # rule creation.
+      # Async: the sweep joins on its proposal gates and can park for up to 72h.
+      # A synchronous call would park this watch run with it, and the shared
+      # `detection-watch-sweep` concurrency key would then drop every scheduled
+      # run until the slowest gate resolved. The sweep's own drop concurrency
+      # already serializes overlapping sweeps.
       - name: run_rule_tuning
-        type: workflow.execute
+        type: workflow.executeAsync
         with:
           workflow-id: system-security-rule-tuning
           inputs:

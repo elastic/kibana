@@ -564,12 +564,17 @@ describe('project watch', () => {
       expect(dispatch?.else?.map(({ name }) => name)).toEqual(['run_rule_creation']);
     });
 
-    it('calls each worker exactly once', () => {
-      const calls = flattenSteps(definition.steps as unknown as NestedStep[]).filter(
-        ({ type }) => type === 'workflow.execute'
+    // Tuning is async because the sweep joins on its proposal gates and can park
+    // for 72h; a sync call would park this watch run and its concurrency slot too.
+    it('calls each worker exactly once, the tuning sweep asynchronously', () => {
+      const calls = flattenSteps(definition.steps as unknown as NestedStep[]).filter(({ type }) =>
+        ['workflow.execute', 'workflow.executeAsync'].includes(String(type))
       );
 
-      expect(calls.map(({ name }) => name)).toEqual(['run_rule_tuning', 'run_rule_creation']);
+      expect(calls.map(({ name, type }) => [name, type])).toEqual([
+        ['run_rule_tuning', 'workflow.executeAsync'],
+        ['run_rule_creation', 'workflow.execute'],
+      ]);
     });
 
     it('projects no skills of its own', () => {
@@ -881,7 +886,7 @@ describe('project watch', () => {
           .replace('| KEEP', '')
           .split(',')
           .map((column) => column.trim().replace(/`/g, ''));
-        const launch = tuningSteps.find(({ name }) => name === 'launch_proposal')!;
+        const launch = tuningSteps.find(({ name }) => name === 'run_proposal')!;
         const launchInputs = launch.with?.inputs as Record<string, string>;
 
         expect(columns).toContain('alert_ids');
@@ -891,21 +896,58 @@ describe('project watch', () => {
         }
       });
 
-      // Alerts are tagged only after a gate resolves, so a resweep re-harvests rules
-      // whose gate is still pending; the per-rule drop key is what deduplicates them.
-      it('launches one fire-and-forget proposal per rule, deduplicated per rule', () => {
-        const launches = tuningSteps.filter(({ type }) => type === 'workflow.executeAsync');
+      // The gates live in the proposal children (one execution = one resume slot),
+      // while the sweep fans out synchronously and joins once every gate settles.
+      it('fans out one sync proposal per rule and joins on all gates', () => {
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_proposals')! as NestedStep & {
+          mode?: string;
+          concurrency?: { max: number; 'count-waiting': boolean };
+        };
+        const launches = tuningSteps.filter(({ type }) => type === 'workflow.execute');
 
-        expect(launches.map(({ name }) => name)).toEqual(['launch_proposal']);
+        expect(fanOut.type).toBe('parallel');
+        // Settled: one failed proposal must not skip the other rules' gates.
+        expect(fanOut.mode).toBe('settled');
+        // A slot per harvested rule (max_rules_per_sweep) so every gate opens at once.
+        expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
+        // A timeout here would abort branches and cancel children mid-approval;
+        // the child gate's own timeout is the only clock.
+        expect(fanOut).not.toHaveProperty('timeout');
+        expect(fanOut).not.toHaveProperty('branch-timeout');
+
+        expect(launches.map(({ name }) => name)).toEqual(['run_proposal']);
         expect(launches[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID);
         expect(launches[0]).not.toHaveProperty('on-failure');
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
+        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.executeAsync');
 
         const { concurrency } = (proposal as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
         expect(concurrency.key).toContain('{{ inputs.rule_id }}');
         expect(concurrency.strategy).toBe('drop');
         expect(concurrency.max).toBe(1);
+      });
+
+      // The fan-in reads the settled aggregate, so the summary cannot run before
+      // every gate has resolved or failed.
+      it('summarizes decisions from the settled fan-out results', () => {
+        const summary = tuningSteps.find(({ name }) => name === 'summarize_decisions')!;
+        const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
+        const summaryInput = JSON.stringify(summary.with);
+
+        expect(summaryInput).toContain('steps.run_proposals.output.failed');
+        expect(summaryInput).toContain("where: 'approved'");
+        expect(summaryInput).toContain("where: 'applied'");
+        for (const key of [
+          'proposals_requested',
+          'proposals_approved',
+          'proposals_failed',
+          'rules_applied',
+        ]) {
+          expect(String((emit.with as Record<string, string>)[key])).toContain(
+            `steps.summarize_decisions.output.${key}`
+          );
+        }
       });
     });
   });
