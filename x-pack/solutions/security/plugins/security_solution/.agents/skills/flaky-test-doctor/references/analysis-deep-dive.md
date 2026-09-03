@@ -9,7 +9,7 @@
 - [Step 4: Diagnosing "Element Disabled" failures](#step-4-diagnosing-element-disabled-failures)
 - [Step 5: Pre-proposal checklist](#step-5-pre-proposal-checklist)
 
-Detailed guidance for Steps 0, 2, and 4 of the analysis framework.
+Detailed guidance for Steps 0, 2, 3, 4, and 5 of the analysis framework.
 
 ## Step 0: Common reasons tests become invalid
 
@@ -53,29 +53,41 @@ Compare both tests and recommend keeping the better-written one.
 
 ### Duplicate in Scout tests
 
-Scout runs on MKI and supports both stateful (`@local-stateful-classic`) and serverless environments. Scout tests can replace Cypress tests for both ESS and MKI coverage.
+Scout runs on stateful (ESS / classic Cloud) and on serverless, including MKI. Stateful is not MKI. Scout can replace Cypress `@ess` when it has `tags.stateful.*`, and Cypress `@serverless` when it has `tags.serverless.security.*` (MKI).
 
-**Check the test tags:**
-- Cypress test: Does it have `@serverless` tag? `@ess` tag?
-- Scout test: Does it have tags that cover the same environments?
+**Read the `tag:` argument in the Scout spec** — do not grep for `@local-…` / `@cloud-…` strings. Those are runtime expansions of the `tags.*` helpers and almost never appear in source.
 
-**Decision logic:**
+| Cypress tag | Matching Scout coverage |
+|-------------|-------------------------|
+| `@ess` | `tags.stateful.classic` |
+| `@serverless` | `tags.serverless.security.complete` (or `.essentials` / `.ease` / `.all` if that was the intended tier) |
+| `@serverlessQA` | Do **not** delete Cypress for this tag alone — Kibana QA gate is still Cypress; Scout QA is not a replacement yet |
 
-| Cypress Tags | Scout Tags | Recommendation |
-|--------------|------------|----------------|
-| `@serverless` | `@*-serverless-security_*` | Delete Cypress — Scout covers MKI |
-| `@ess` only | `@*-stateful-*` | Delete Cypress — Scout covers ESS |
+`tags.stateful.classic` expands to `@local-stateful-classic` + `@cloud-stateful-classic`.
+`tags.serverless.security.complete` expands to `@local-serverless-security_complete` + `@cloud-serverless-security_complete`.
+
+Apply the **first matching row**. `@serverlessQA` wins over delete.
+
+| Cypress tags | Scout `tag:` | Recommendation |
+|--------------|--------------|----------------|
+| has `@serverlessQA` | any | Keep Cypress until Scout is in the Kibana QA gate |
+| `@ess` + `@serverless` (no `@serverlessQA`) | `tags.stateful.classic` **and** `tags.serverless.security.*` | Delete Cypress — Scout covers both sides |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.serverless.security.*` | Keep Cypress for ESS, or recommend a Scout **migration** that adds `tags.stateful.classic`. Do not edit an existing Scout spec's tags. |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.stateful.classic` | Keep Cypress for serverless, or recommend a Scout **migration** that adds serverless coverage. Do not edit an existing Scout spec's tags to turn on MKI. |
+| `@serverless` only (no `@ess`, no `@serverlessQA`) | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
+| `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
 
 **Format:**
-- Delete Cypress: `[path]` — Reason: Scout covers this environment (including MKI)
+- Delete Cypress: `[path]` — Reason: Scout spec `[path]` uses `tags.…` covering the same env
 
 ## Step 3: Layer recommendation format
 
 > **Layer Analysis**
 > - Current: E2E (Cypress)
 > - Tests: [what the test actually validates]
-> - Recommendation: [keep at E2E / move to API / move to unit]
-> - Reason: [why this layer is appropriate or not]
+> - Destination: [Scout UI / API / unit / delete]
+> - Cypress fix allowed?: [yes — `@serverlessQA` / no]
+> - Reason: [why this destination]
 
 **Real Example:** [#246754](https://github.com/elastic/kibana/pull/246754) — Flaky Cypress test using CSS class selector was deleted and coverage moved to a more appropriate layer. The test "opens alerts page when alerts count is clicked" was testing navigation logic that doesn't require E2E testing.
 
@@ -191,7 +203,8 @@ Before proposing ANY fix, verify:
 | Check | Status | Action if Not Done |
 |-------|--------|-------------------|
 | **Step 0: Functionality Valid?** | [ ] | Go back and verify the feature still exists and works |
-| **Step 1: Environment Context?** | [ ] | Ask user which environment(s) are failing |
+| **Step 1: Environment Context?** | [ ] | Read tags and open CI in the browser (user can log in). Ask only if CI is unreachable |
 | **Step 2: Duplicate Coverage?** | [ ] | Search for API/unit tests covering same functionality |
+| **Step 3: Destination layer?** | [ ] | Scout UI / API / unit / delete — Cypress fix only if `@serverlessQA` |
 
 Do NOT skip these steps. Proposing a fix for an invalid or redundant test wastes time.
