@@ -40341,7 +40341,6 @@
     "xpack.security.management.editRole.roleSuccessfullyCreatedNotificationMessage": "作成されたロール",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "ロールを削除しました",
     "xpack.security.management.editRole.roleSuccessfullyUpdatedNotificationMessage": "更新されたロール",
-    "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "Elasticsearchデータの権限を設定し、プロジェクトスペースへのアクセスを管理します。",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "すべて",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "Kibana 全体への完全アクセスを許可します",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput": "すべて",

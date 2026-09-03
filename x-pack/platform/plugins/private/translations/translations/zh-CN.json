@@ -40352,7 +40352,6 @@
     "xpack.security.management.editRole.roleSuccessfullyCreatedNotificationMessage": "已创建角色",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "已删除角色",
     "xpack.security.management.editRole.roleSuccessfullyUpdatedNotificationMessage": "已更新角色",
-    "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "设置 Elasticsearch 数据的权限并控制对项目空间的访问权限。",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "全部",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "授予对 Kibana 全部功能的完全权限",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput": "全部",

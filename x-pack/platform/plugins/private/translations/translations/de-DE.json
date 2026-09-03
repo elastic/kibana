@@ -40228,7 +40228,6 @@
     "xpack.security.management.editRole.roleSuccessfullyCreatedNotificationMessage": "Rolle erstellt",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "Rolle löschen",
     "xpack.security.management.editRole.roleSuccessfullyUpdatedNotificationMessage": "Aktualisierte Rolle",
-    "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "Legen Sie Berechtigungen für Ihre Elasticsearch-Daten fest und steuern Sie den Zugriff auf Ihre Projektbereiche.",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "Alle",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "Gewährt vollen Zugriff auf ganz Kibana",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput": "Alle",
