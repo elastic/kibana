@@ -9,8 +9,6 @@ import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -40,11 +38,6 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
         iconSide="right"
         iconOnClick={onRemoveAttachment}
         iconOnClickAriaLabel={removeAriaLabel}
-        {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.pageContent,
-          action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
-          detail: 'conversation',
-        })}
       >
         {displayName}
       </EuiBadge>
