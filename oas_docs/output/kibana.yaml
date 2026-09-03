@@ -67418,6 +67418,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -67963,6 +67965,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -68538,6 +68542,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -69131,6 +69137,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -69805,6 +69813,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -70350,6 +70360,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -70925,6 +70937,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -71518,6 +71532,8 @@ paths:
                               items:
                                 type: string
                               type: array
+                        created_by:
+                          type: string
                         EngineMetadata:
                           additionalProperties: false
                           type: object
@@ -72192,6 +72208,8 @@ paths:
                                         items:
                                           type: string
                                         type: array
+                                  created_by:
+                                    type: string
                                   EngineMetadata:
                                     additionalProperties: false
                                     type: object
@@ -72737,6 +72755,8 @@ paths:
                                         items:
                                           type: string
                                         type: array
+                                  created_by:
+                                    type: string
                                   EngineMetadata:
                                     additionalProperties: false
                                     type: object
@@ -73312,6 +73332,8 @@ paths:
                                         items:
                                           type: string
                                         type: array
+                                  created_by:
+                                    type: string
                                   EngineMetadata:
                                     additionalProperties: false
                                     type: object
@@ -73905,6 +73927,8 @@ paths:
                                         items:
                                           type: string
                                         type: array
+                                  created_by:
+                                    type: string
                                   EngineMetadata:
                                     additionalProperties: false
                                     type: object
@@ -119903,6 +119927,7 @@ components:
         names:
           items:
             description: A list of data source names or wildcard patterns to which the permissions in this entry apply.
+            maxLength: 1000
             type: string
           maxItems: 100
           minItems: 1
@@ -119980,6 +120005,7 @@ components:
                 applications:
                   items:
                     description: A list of application names that the role can manage at the global privilege scope.
+                    maxLength: 100
                     type: string
                   maxItems: 1000
                   type: array
@@ -120001,6 +120027,7 @@ components:
                 applications:
                   items:
                     description: A list of application names whose user profile data the role can write at the global privilege scope.
+                    maxLength: 100
                     type: string
                   maxItems: 1000
                   type: array
