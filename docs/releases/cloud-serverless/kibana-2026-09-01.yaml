@@ -184,7 +184,7 @@ entries:
   products:
   - product: cloud-serverless
   - product: kibana
-  description: "`POST /api/fleet/outputs now correctly` rejects attempts to create a non-preconfigured Elasticsearch output at the PrivateLink URL in Serverless. Previously, the server-side host validation whitelisted the PrivateLink URL unconditionally, allowing an unsupported duplicate output to be created via the API."
+  description: "`POST /api/fleet/outputs` now correctly rejects attempts to create a non-preconfigured Elasticsearch output at the PrivateLink URL in Serverless. Previously, the server-side host validation whitelisted the PrivateLink URL unconditionally, allowing an unsupported duplicate output to be created via the API."
   prs:
   - https://github.com/elastic/kibana/pull/287316
 - file:
