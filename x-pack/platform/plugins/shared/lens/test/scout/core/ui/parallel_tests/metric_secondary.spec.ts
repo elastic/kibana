@@ -148,7 +148,25 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
   );
 
   spaceTest(
-    'replaces the secondary metric label and badge when the primary metric becomes non-numeric',
+    'shows and hides the secondary metric name',
+    async ({ page, pageObjects: { lens } }) => {
+      await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
+
+      // Name display defaults to Hide, so the secondary name element is omitted from the chart.
+      await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBeUndefined();
+
+      await page.testSubj.click('lnsMetric_secondaryNameVisibility_before');
+      await lens.waitForVisualization('mtrVis');
+      await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toContain('Average of bytes');
+
+      await page.testSubj.click('lnsMetric_secondaryNameVisibility_hidden');
+      await lens.waitForVisualization('mtrVis');
+      await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBeUndefined();
+    }
+  );
+
+  spaceTest(
+    'keeps the secondary metric name and resets the badge when the primary metric becomes non-numeric',
     async ({ page, pageObjects: { lens } }) => {
       await lens.configureDimension({
         dimension: `${PRIMARY_PANEL} > lns-dimensionTrigger`,
@@ -158,17 +176,26 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         field: 'Records',
       });
 
-      await spaceTest.step('shows the difference against the primary metric', async () => {
-        await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
-        await page.testSubj.click('lnsMetric_color_mode_dynamic');
-        await page.testSubj.click('lnsMetric_secondary_trend_baseline_primary');
+      await spaceTest.step(
+        'shows the secondary name and difference against the primary',
+        async () => {
+          await lens.dimensions.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
+          // Turn the name on so we can assert it is no longer overridden to "Difference" when
+          // comparing to the primary metric (Name display defaults to Hide).
+          await page.testSubj.click('lnsMetric_secondaryNameVisibility_before');
+          await page.testSubj.click('lnsMetric_color_mode_dynamic');
+          await page.testSubj.click('lnsMetric_secondary_trend_baseline_primary');
 
-        await expect.poll(() => lens.metric.getSecondaryMetricLabel()).toBe('Difference');
-        await expect
-          .poll(() => lens.metric.getSecondaryMetricBadgeText())
-          .toMatch(TREND_VALUE_WITH_ARROW);
-        await lens.closeDimensionEditor();
-      });
+          // Comparing to the primary metric no longer renames the secondary metric.
+          await expect
+            .poll(() => lens.metric.getSecondaryMetricLabel())
+            .toContain('Average of bytes');
+          await expect
+            .poll(() => lens.metric.getSecondaryMetricBadgeText())
+            .toMatch(TREND_VALUE_WITH_ARROW);
+          await lens.closeDimensionEditor();
+        }
+      );
 
       await spaceTest.step(
         'falls back to a static baseline once the primary metric is non-numeric',
@@ -180,9 +207,12 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
             isPreviousIncompatible: true,
           });
 
-          // Lens reactively swaps the secondary metric's trend config once the primary metric
-          // becomes non-numeric; that happens independently of the chart's own re-render, so poll
-          // for it rather than assuming it's already settled once `configureDimension` resolves.
+          // The badge text changes while the name stays the same. Lens reactively swaps the
+          // secondary trend config once the primary becomes non-numeric; poll rather than
+          // assuming it settled when `configureDimension` resolves.
+          await expect
+            .poll(() => lens.metric.getSecondaryMetricLabel())
+            .toContain('Average of bytes');
           await expect
             .poll(() => lens.metric.getSecondaryMetricLabel())
             .toContain('Average of bytes');

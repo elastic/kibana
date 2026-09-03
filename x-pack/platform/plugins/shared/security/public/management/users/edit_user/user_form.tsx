@@ -27,6 +27,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UserAvatar } from '@kbn/user-profile-components';
 
 import type { Role, User } from '../../../../common';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
@@ -218,6 +219,23 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   const availableRoles = rolesState.value ?? [];
   const selectedRoleNames = form.values.roles ?? [];
+  const avatarUser = {
+    username: form.values.username ?? '',
+    full_name: form.values.full_name,
+    email: form.values.email,
+  };
+  const hasAvatarIdentity = Boolean(
+    avatarUser.username || avatarUser.full_name || avatarUser.email
+  );
+
+  const avatarAriaLabel =
+    avatarUser.full_name ||
+    avatarUser.email ||
+    avatarUser.username ||
+    i18n.translate('xpack.security.management.users.userForm.avatarAriaLabel', {
+      defaultMessage: 'User avatar',
+    });
+
   const deprecatedRoles = selectedRoleNames.reduce<Role[]>((roles, name) => {
     const role = availableRoles.find((r) => r.name === name);
     if (role && isRoleDeprecated(role)) {
@@ -248,72 +266,86 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           defaultMessage: 'Provide personal details.',
         })}
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.security.management.users.userForm.usernameLabel', {
-            defaultMessage: 'Username',
-          })}
-          helpText={
-            !isNewUser && !isReservedUser
-              ? i18n.translate(
-                  'xpack.security.management.users.userForm.changingUserNameAfterCreationDescription',
-                  { defaultMessage: 'User name cannot be changed after account creation.' }
-                )
-              : undefined
-          }
-          error={form.errors.username}
-          isInvalid={form.touched.username && !!form.errors.username}
-        >
-          <EuiFieldText
-            name="username"
-            data-test-subj={'userFormUserNameInput'}
-            icon="user"
-            value={form.values.username}
-            isLoading={form.isValidating}
-            isInvalid={form.touched.username && !!form.errors.username}
-            disabled={disabled || !isNewUser}
-            onChange={disabled || !isNewUser ? undefined : eventHandlers.onChange}
-            onBlur={eventHandlers.onBlur}
-          />
-        </EuiFormRow>
+        <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={i18n.translate('xpack.security.management.users.userForm.usernameLabel', {
+                defaultMessage: 'Username',
+              })}
+              helpText={
+                !isNewUser && !isReservedUser
+                  ? i18n.translate(
+                      'xpack.security.management.users.userForm.changingUserNameAfterCreationDescription',
+                      { defaultMessage: 'User name cannot be changed after account creation.' }
+                    )
+                  : undefined
+              }
+              error={form.errors.username}
+              isInvalid={form.touched.username && !!form.errors.username}
+            >
+              <EuiFieldText
+                name="username"
+                data-test-subj={'userFormUserNameInput'}
+                icon="user"
+                value={form.values.username}
+                isLoading={form.isValidating}
+                isInvalid={form.touched.username && !!form.errors.username}
+                disabled={disabled || !isNewUser}
+                onChange={disabled || !isNewUser ? undefined : eventHandlers.onChange}
+                onBlur={eventHandlers.onBlur}
+              />
+            </EuiFormRow>
 
-        {!isReservedUser ? (
-          <>
-            <EuiFormRow
-              label={i18n.translate('xpack.security.management.users.userForm.fullNameLabel', {
-                defaultMessage: 'Full name',
-              })}
-              error={form.errors.full_name}
-              isInvalid={form.touched.full_name && !!form.errors.full_name}
-            >
-              <EuiFieldText
-                name="full_name"
-                data-test-subj={'userFormFullNameInput'}
-                value={form.values.full_name}
-                isInvalid={form.touched.full_name && !!form.errors.full_name}
-                onChange={eventHandlers.onChange}
-                onBlur={eventHandlers.onBlur}
-                disabled={disabled}
+            {!isReservedUser ? (
+              <>
+                <EuiFormRow
+                  label={i18n.translate('xpack.security.management.users.userForm.fullNameLabel', {
+                    defaultMessage: 'Full name',
+                  })}
+                  error={form.errors.full_name}
+                  isInvalid={form.touched.full_name && !!form.errors.full_name}
+                >
+                  <EuiFieldText
+                    name="full_name"
+                    data-test-subj={'userFormFullNameInput'}
+                    value={form.values.full_name}
+                    isInvalid={form.touched.full_name && !!form.errors.full_name}
+                    onChange={eventHandlers.onChange}
+                    onBlur={eventHandlers.onBlur}
+                    disabled={disabled}
+                  />
+                </EuiFormRow>
+                <EuiFormRow
+                  label={i18n.translate('xpack.security.management.users.userForm.emailLabel', {
+                    defaultMessage: 'Email address',
+                  })}
+                  error={form.errors.email}
+                  isInvalid={form.touched.email && !!form.errors.email}
+                >
+                  <EuiFieldText
+                    name="email"
+                    data-test-subj={'userFormEmailInput'}
+                    value={form.values.email}
+                    isInvalid={form.touched.email && !!form.errors.email}
+                    onChange={eventHandlers.onChange}
+                    onBlur={eventHandlers.onBlur}
+                    disabled={disabled}
+                  />
+                </EuiFormRow>
+              </>
+            ) : undefined}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <UserAvatar
+                user={hasAvatarIdentity ? avatarUser : undefined}
+                aria-label={avatarAriaLabel}
+                size="xl"
+                data-test-subj="userFormAvatar"
               />
             </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate('xpack.security.management.users.userForm.emailLabel', {
-                defaultMessage: 'Email address',
-              })}
-              error={form.errors.email}
-              isInvalid={form.touched.email && !!form.errors.email}
-            >
-              <EuiFieldText
-                name="email"
-                data-test-subj={'userFormEmailInput'}
-                value={form.values.email}
-                isInvalid={form.touched.email && !!form.errors.email}
-                onChange={eventHandlers.onChange}
-                onBlur={eventHandlers.onBlur}
-                disabled={disabled}
-              />
-            </EuiFormRow>
-          </>
-        ) : undefined}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiDescribedFormGroup>
       {isNewUser ? (
         <EuiDescribedFormGroup

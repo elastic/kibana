@@ -10,6 +10,11 @@ import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
+import {
+  MAX_INFERENCE_DOCUMENT_BYTES,
+  MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_INFERENCE_FIELD_NAME_LENGTH,
+} from '../../../../lib/significant_events/features';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { internalIdentifyKIFeaturesRoutes } from './identify_route';
 
@@ -30,7 +35,12 @@ jest.mock('@kbn/streams-schema', () => ({
 
 jest.mock('../../../../lib/significant_events/features', () => ({
   MS_PER_DAY: 86_400_000,
+  MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
+  MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
+  MAX_INFERENCE_DOCUMENT_FIELDS: 100,
+  MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
   buildTelemetry: jest.fn(),
+  prepareInferredSampling: jest.fn(),
   identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
   identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
 }));
@@ -39,6 +49,17 @@ jest.mock('../../../../lib/significant_events/features/should_identify_features'
   shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
 }));
 
+jest.mock(
+  '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
+  () => ({
+    isSignificantEventsSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
+  })
+);
+
+const prepareRoute =
+  internalIdentifyKIFeaturesRoutes[
+    'POST /internal/streams/{streamName}/features/_identify/inferred/prepare'
+  ];
 const inferredRoute =
   internalIdentifyKIFeaturesRoutes[
     'POST /internal/streams/{streamName}/features/_identify/inferred'
@@ -53,6 +74,20 @@ const shouldIdentifyRoute =
 type InferredHandlerParams = Parameters<typeof inferredRoute.handler>[0];
 type ComputedHandlerParams = Parameters<typeof computedRoute.handler>[0];
 type ShouldIdentifyHandlerParams = Parameters<typeof shouldIdentifyRoute.handler>[0];
+
+const createInferredParams = (
+  documents: Array<{ _id: string; fields: Record<string, unknown> }>
+) => ({
+  path: { streamName: 'logs.test' },
+  body: {
+    documents,
+    samplingTelemetry: {
+      totalFilters: 0,
+      filtersCapped: false,
+      hasFilteredDocuments: false,
+    },
+  },
+});
 
 const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
   getState: jest.fn().mockResolvedValue(state),
@@ -91,7 +126,6 @@ const makeInferredHandlerParams = ({
   const telemetry = { trackFeaturesIdentified: jest.fn() };
   const identifyResult = { features: [], documentsSampled: 10 };
 
-  mockGetStreamSamplingSource.mockReturnValue({ name: 'logs.test' });
   mockGetStreamTypeFromDefinition.mockReturnValue('logs');
   mockIdentifyInferredFeatures.mockResolvedValue(identifyResult);
 
@@ -100,17 +134,16 @@ const makeInferredHandlerParams = ({
       path: { streamName: 'logs.test' },
       body: {
         connectorId: 'connector-1',
-        start: 100,
-        end: 200,
         runId: 'run-1',
         iteration: 2,
-        sampleSize: 50,
-        entityFilteredRatio: 0.25,
-        diverseRatio: 0.5,
-        maxEntityFilters: 4,
+        documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
+        samplingTelemetry: {
+          totalFilters: 3,
+          filtersCapped: false,
+          hasFilteredDocuments: true,
+        },
         maxExcludedFeaturesInPrompt: 5,
         maxPreviouslyIdentifiedFeatures: 6,
-        samplingTimeoutMs: 7_000,
       },
     },
     request,
@@ -204,7 +237,7 @@ const makeComputedHandlerParams = () => {
 
 describe('feature identification route schemas', () => {
   it('bounds ratios and timeouts', () => {
-    const inferredParams = {
+    const prepareParams = {
       path: { streamName: 'logs.test' },
       body: {
         entityFilteredRatio: 0,
@@ -213,23 +246,23 @@ describe('feature identification route schemas', () => {
       },
     };
 
-    expect(inferredRoute.params.safeParse(inferredParams).success).toBe(true);
+    expect(prepareRoute.params.safeParse(prepareParams).success).toBe(true);
     expect(
-      inferredRoute.params.safeParse({
-        ...inferredParams,
-        body: { ...inferredParams.body, entityFilteredRatio: -0.1 },
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, entityFilteredRatio: -0.1 },
       }).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse({
-        ...inferredParams,
-        body: { ...inferredParams.body, diverseRatio: 1.1 },
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, diverseRatio: 1.1 },
       }).success
     ).toBe(false);
     expect(
-      inferredRoute.params.safeParse({
-        ...inferredParams,
-        body: { ...inferredParams.body, samplingTimeoutMs: 999 },
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, samplingTimeoutMs: 999 },
       }).success
     ).toBe(false);
     expect(
@@ -237,6 +270,57 @@ describe('feature identification route schemas', () => {
         path: { streamName: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
       }).success
+    ).toBe(false);
+  });
+
+  it('enforces the compact inference document contract', () => {
+    expect(
+      inferredRoute.params.safeParse(
+        createInferredParams([{ _id: '1', fields: { message: 'ok' } }])
+      ).success
+    ).toBe(true);
+    expect(inferredRoute.params.safeParse(createInferredParams([])).success).toBe(false);
+    expect(
+      inferredRoute.params.safeParse(
+        createInferredParams([
+          {
+            _id: '1',
+            fields: Object.fromEntries(
+              Array.from({ length: MAX_INFERENCE_DOCUMENT_FIELDS + 1 }, (_, index) => [
+                `field-${index}`,
+                'value',
+              ])
+            ),
+          },
+        ])
+      ).success
+    ).toBe(false);
+    expect(
+      inferredRoute.params.safeParse(
+        createInferredParams([
+          {
+            _id: '1',
+            fields: { ['x'.repeat(MAX_INFERENCE_FIELD_NAME_LENGTH + 1)]: 'value' },
+          },
+        ])
+      ).success
+    ).toBe(false);
+    expect(
+      inferredRoute.params.safeParse(
+        createInferredParams([
+          { _id: '1', fields: { message: 'x'.repeat(MAX_INFERENCE_DOCUMENT_BYTES) } },
+        ])
+      ).success
+    ).toBe(false);
+    expect(
+      inferredRoute.params.safeParse(
+        createInferredParams(
+          Array.from({ length: 30 }, (_, index) => ({
+            _id: `${index}`,
+            fields: { message: 'x'.repeat(30_000) },
+          }))
+        )
+      ).success
     ).toBe(false);
   });
 });
@@ -306,24 +390,20 @@ describe('inferred feature identification route', () => {
         kiClient,
         streamName: 'logs.test',
         streamType: 'logs',
-        samplingSource: { name: 'logs.test' },
-        start: 100,
-        end: 200,
+        connectorId: 'connector-1',
         runId: 'run-1',
         iteration: 2,
+        documents: [{ _id: 'document-1', fields: { message: 'test message' } }],
+        totalFilters: 3,
+        filtersCapped: false,
+        hasFilteredDocuments: true,
         tuning: {
-          sample_size: 50,
-          entity_filtered_ratio: 0.25,
-          diverse_ratio: 0.5,
-          max_entity_filters: 4,
           max_excluded_features_in_prompt: 5,
           maxPreviouslyIdentifiedFeatures: 6,
-          sampling_timeout_ms: 7_000,
         },
         trackFeaturesIdentified: expect.any(Function),
       })
     );
-    expect(mockGetStreamSamplingSource).toHaveBeenCalledWith(stream);
     expect(mockGetStreamTypeFromDefinition).toHaveBeenCalledWith(stream);
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
     expect(ensureEnabled).toHaveBeenCalledWith({ request });
