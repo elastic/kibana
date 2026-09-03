@@ -324,7 +324,7 @@ mime-types@2.1.35
 minimalistic-assert@1.0.1
 minimalistic-crypto-utils@1.0.1
 minimatch@3.1.5
-moment-timezone@0.6.1
+moment-timezone@0.6.2
 moment@2.30.1
 ms@2.1.3
 neo-async@2.6.2
