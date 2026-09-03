@@ -7,41 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BuildkiteClient } from '#pipeline-utils';
-import type { Build } from '#pipeline-utils';
-
-const ARTIFACT_NAME = 'kibana-default.tar.zst';
-const REQUEST_TIMEOUT_MS = 30_000;
+import {
+  KIBANA_DISTRIBUTABLE_ARTIFACT,
+  createTimeBoundedClient,
+  findBuildWithKibanaDistributable,
+} from '#pipeline-utils';
+import type { Build, BuildkiteClient } from '#pipeline-utils';
 
 function log(message: string): void {
   console.error(message);
-}
-
-function createClient(): BuildkiteClient {
-  const client = new BuildkiteClient();
-  // BuildkiteClient's axios instance has no default timeout; bound requests so a
-  // stalled API call skips the benchmark instead of hanging the step.
-  client.http.defaults.timeout = REQUEST_TIMEOUT_MS;
-  return client;
-}
-
-async function buildHasArtifact(
-  client: BuildkiteClient,
-  pipelineSlug: string,
-  buildNumber: number
-): Promise<boolean> {
-  // First page only: kibana-default.tar.zst is uploaded with the distro and
-  // appears early. Avoid getArtifacts() — it drains up to 50 pages of junit
-  // noise per candidate (30+ pages on a typical kibana-on-merge build).
-  const { data: artifacts } = await client.http.get<Array<{ filename: string; path?: string }>>(
-    `v2/organizations/elastic/pipelines/${pipelineSlug}/builds/${buildNumber}/artifacts`,
-    { params: { per_page: 100 } }
-  );
-
-  return (artifacts ?? []).some(
-    (artifact) =>
-      artifact.filename === ARTIFACT_NAME || (artifact.path ?? '').endsWith(ARTIFACT_NAME)
-  );
 }
 
 async function findMergeBaseBuild(
@@ -49,7 +23,7 @@ async function findMergeBaseBuild(
   pipelineSlug: string,
   commit: string
 ): Promise<Build | null> {
-  log(`--- Looking for ${ARTIFACT_NAME} on elastic/${pipelineSlug} at ${commit}`);
+  log(`--- Looking for ${KIBANA_DISTRIBUTABLE_ARTIFACT} on elastic/${pipelineSlug} at ${commit}`);
 
   const { data: builds } = await client.http.get<Build[]>(
     `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`,
@@ -63,18 +37,14 @@ async function findMergeBaseBuild(
 
   // A commit can be built more than once (retries, manual rebuilds); the newest
   // build that still has the artifact wins.
-  for (const build of builds) {
-    try {
-      if (await buildHasArtifact(client, pipelineSlug, build.number)) {
-        return build;
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      log(`Artifact lookup failed for ${pipelineSlug} #${build.number}: ${message}`);
-    }
+  const build = await findBuildWithKibanaDistributable(client, pipelineSlug, builds);
+  if (build) {
+    return build;
   }
 
-  log(`No ${ARTIFACT_NAME} on any ${pipelineSlug} build for ${commit}; it has likely expired`);
+  log(
+    `No ${KIBANA_DISTRIBUTABLE_ARTIFACT} on any ${pipelineSlug} build for ${commit}; it has likely expired`
+  );
   return null;
 }
 
@@ -88,7 +58,7 @@ async function main(): Promise<void> {
   const pipelineSlug = process.env.WARM_START_MEMORY_BASELINE_PIPELINE || 'kibana-on-merge';
 
   try {
-    const build = await findMergeBaseBuild(createClient(), pipelineSlug, commit);
+    const build = await findMergeBaseBuild(createTimeBoundedClient(), pipelineSlug, commit);
     if (!build) {
       return;
     }
