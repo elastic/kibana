@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -14,6 +15,7 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { sumTokenUsage } from '../utils';
 
@@ -26,62 +28,30 @@ export interface FailedStepContext {
 
 /**
  * Step-execution metadata held by `WorkflowExecutionState`. Excludes
- * `input` / `output` — those live in `StepIoService` and are merged in only
- * at flush time. Callers that need IO must go through the service.
+ * `input` / `output` — those live in the `stepIo` map and are merged in only
+ * at flush time.
  */
 export type StepExecutionMetadata = Omit<EsWorkflowStepExecution, 'input' | 'output'>;
 
 /**
  * Narrow shape required by `createStep`: `id` is mandatory at creation time;
- * `stepId` is *expected* but historically allowed to be undefined (status-only
- * seed writes that fill it in on a later upsert). `input` / `output` are
- * deliberately rejected — IO writes go through `StepIoService.setStepInput`
- * / `setStepOutput`, never through `state.upsertStep`.
+ * `stepId` is expected but historically allowed to be undefined. `input` /
+ * `output` are deliberately rejected — IO writes go through `setStepIo`, never
+ * through `upsertStep`.
  */
 type CreateStepInput = Omit<Partial<EsWorkflowStepExecution>, 'input' | 'output'> &
   Pick<EsWorkflowStepExecution, 'id'>;
 
 /**
- * Narrow view of `WorkflowExecutionState` used by `StepIoService`. Implemented
- * structurally via `Pick<WorkflowExecutionState, …>` rather than a separate
- * interface — the boundary is enforced by the type but costs nothing at
- * runtime (no closure bag, no extra allocation per state instance). State
- * still has no dependency on the IO layer.
- *
- * Surfaces metadata reads, workflow-level reads, and the lifecycle
- * change-tracking primitives that the service merges with its own IO
- * partials at flush time. IO storage and ES persistence (bulk upsert /
- * mget) belong to the service.
- */
-export type StepIoStateAccessor = Pick<
-  WorkflowExecutionState,
-  | 'getStepExecution'
-  | 'getLatestStepExecution'
-  | 'getAllStepExecutions'
-  | 'getStepExecutionIdsByStepId'
-  | 'getWorkflowExecutionStatus'
-  | 'getWorkflowExecutionId'
-  | 'getWorkflowExecutionScopeStack'
-  | 'getWorkflowExecutionStepExecutionIds'
-  | 'drainPendingStepChanges'
-  | 'ingestLoadedStepDocs'
-  | 'flushWorkflowDoc'
->;
-
-/**
  * In-memory step/workflow document store with deferred ES persistence.
  *
- * Owns step *metadata* (status, scopeStack, error, indices, etc.) and the
- * workflow-level document. **Does not own `input` / `output`** — those live
- * in `StepIoService`, which:
- *   - holds the canonical IO maps,
- *   - drives the step-execution bulk-upsert (merging state's lifecycle
- *     partials with its own IO partials),
- *   - owns eviction / rehydration.
+ * Owns step *metadata* (status, scopeStack, error, indices, etc.), the
+ * workflow-level document, and step IO (input/output). Step IO is written via
+ * `setStepIo` / `getStepIo` and flushed together with metadata changes by
+ * `flushStepChanges`.
  *
- * The dependency is strictly one-way: state → workflowExecutionRepository;
- * service → state (via the structural `StepIoStateAccessor` type) and
- * stepExecutionRepository.
+ * The dependency direction is: state → workflowExecutionRepository + stepExecutionRepository.
+ * `StepIoService` calls state (not the reverse).
  */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
@@ -90,6 +60,11 @@ export class WorkflowExecutionState {
   private stepDocumentsChanges: Map<string, Partial<StepExecutionMetadata>> = new Map();
 
   private lastFailedStepContext: FailedStepContext | undefined = undefined;
+
+  /** Live IO for all steps — includes in-flight writes and resume-loaded inputs. */
+  private stepIo = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
+  /** Pending IO changes waiting for the next `flushStepChanges` call. */
+  private pendingStepIo = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
 
   /**
    * Maps step IDs to their execution IDs in chronological order. Enables
@@ -100,7 +75,8 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository
+    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private stepExecutionRepository: StepExecutionRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
@@ -150,11 +126,6 @@ export class WorkflowExecutionState {
 
   /**
    * Accumulates a step's normalized token usage into the per-execution total.
-   * Called once per token-consuming step as it finishes (success or failure
-   * with partial counts). The new total is written through
-   * `updateWorkflowExecution`, so it is included in the next workflow-doc
-   * flush and persisted to `.workflows-executions`. No-op when `usage` is
-   * absent, so executions with zero `ai.*` steps keep `usage` unset.
    */
   public accumulateUsage(usage: WorkflowTokenUsage | undefined): void {
     if (!usage) {
@@ -168,8 +139,6 @@ export class WorkflowExecutionState {
 
   /**
    * Appends one step's usage entry to the per-execution list in finish order.
-   * Unlike `accumulateUsage`, entries are never merged, so two steps on the
-   * same connector stay attributable to the step that produced each.
    */
   public recordStepUsage(stepUsage: WorkflowStepTokenUsage): void {
     const stepUsages = [...(this.workflowExecution.stepUsage ?? []), stepUsage];
@@ -186,12 +155,6 @@ export class WorkflowExecutionState {
 
   /**
    * Retrieves all executions for a workflow step in chronological order.
-   * Returns `[]` when the step has not executed yet.
-   *
-   * Skips IDs missing from the canonical map (rather than asserting them
-   * with a cast). The index and the canonical map are kept in sync by
-   * `createStep` / `buildStepIdExecutionIdIndex`, but a defensive skip
-   * keeps a future bug from surfacing as a downstream `undefined`.
    */
   public getStepExecutionsByStepId(stepId: string): StepExecutionMetadata[] {
     const executionIds = this.stepIdExecutionIdIndex.get(stepId);
@@ -211,11 +174,57 @@ export class WorkflowExecutionState {
     return allExecutions.length ? allExecutions[allExecutions.length - 1] : undefined;
   }
 
+  // ----- IO access ----------------------------------------------------------
+
+  /**
+   * Writes step IO (input and/or output) into the live map and queues it for
+   * the next `flushStepChanges`. Called by `StepIoService.write`.
+   */
+  public setStepIo(
+    stepExecutionId: string,
+    io: { input?: JsonValue; output?: JsonValue | null }
+  ): void {
+    const existing = this.stepIo.get(stepExecutionId) ?? {};
+    this.stepIo.set(stepExecutionId, { ...existing, ...io });
+    const existingPending = this.pendingStepIo.get(stepExecutionId) ?? {};
+    this.pendingStepIo.set(stepExecutionId, { ...existingPending, ...io });
+  }
+
+  /**
+   * Reads a step's input or output from the live map.
+   * Returns `undefined` when the value has not been set or was cleared.
+   */
+  public getStepIo(
+    stepExecutionId: string,
+    type: 'input' | 'output'
+  ): JsonValue | null | undefined {
+    return this.stepIo.get(stepExecutionId)?.[type];
+  }
+
+  /**
+   * Drops the `output` field from the live map for each flushed ID, freeing
+   * memory. The `input` field is intentionally kept — inputs must remain
+   * readable (e.g. for foreach context re-evaluation across loop iterations).
+   */
+  public clearFlushedOutputs(ids: ReadonlyArray<string>): void {
+    for (const id of ids) {
+      const io = this.stepIo.get(id);
+      if (!io) continue;
+      if (io.input !== undefined) {
+        this.stepIo.set(id, { input: io.input });
+      } else {
+        this.stepIo.delete(id);
+      }
+    }
+  }
+
+  // ----- ES persistence primitives -----------------------------------------
+
   /**
    * Records a step-metadata change. `input` / `output` are *not* permitted
-   * here — those flow through `StepIoService.setStepInput` /
-   * `setStepOutput`. The compile-time `Omit` already excludes them; this
-   * runtime guard catches stray callers that bypass typing via casts.
+   * here — those flow through `setStepIo`. The compile-time `Omit` already
+   * excludes them; this runtime guard catches stray callers that bypass typing
+   * via casts.
    */
   public upsertStep(step: Partial<StepExecutionMetadata>): void {
     if (!step.id) {
@@ -223,7 +232,7 @@ export class WorkflowExecutionState {
     }
     if ('input' in step || 'output' in step) {
       throw new Error(
-        'WorkflowExecutionState: input/output writes must go through StepIoService, not upsertStep'
+        'WorkflowExecutionState: input/output writes must go through setStepIo, not upsertStep'
       );
     }
 
@@ -235,13 +244,9 @@ export class WorkflowExecutionState {
     this.createStep({ ...step, id: step.id });
   }
 
-  // ----- ES persistence primitives -----------------------------------------
-
   /**
-   * Drains pending step-document changes. Returns a `Map<id, partial>` whose
-   * values are pure metadata (no `input` / `output`). The caller (the IO
-   * service) merges this with its own IO partials and runs the combined
-   * `bulkUpsert`. Returns an empty map when nothing is pending.
+   * Drains pending step-document changes (metadata only). Returns an empty map
+   * when nothing is pending.
    */
   public drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>> {
     if (!this.stepDocumentsChanges.size) {
@@ -253,9 +258,7 @@ export class WorkflowExecutionState {
   }
 
   /**
-   * Ingests step docs loaded from ES at resume time. The caller (the IO
-   * service) is responsible for stripping `output` (and ingesting it into
-   * its own IO map for pinned step types). State stores the metadata only.
+   * Ingests step docs loaded from ES at resume time. Stores metadata only.
    */
   public ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void {
     for (const step of steps) {
@@ -287,10 +290,69 @@ export class WorkflowExecutionState {
     );
   }
 
+  /**
+   * Flushes pending step-metadata and IO changes to Elasticsearch in a single
+   * `bulkUpsert`. After the write is confirmed, clears output from the live
+   * IO map to free memory (inputs are kept for ongoing loop re-evaluation).
+   */
+  public async flushStepChanges(): Promise<void> {
+    const metadataChanges = this.drainPendingStepChanges();
+    const ioChanges = this.pendingStepIo;
+    this.pendingStepIo = new Map();
+
+    if (!metadataChanges.size && !ioChanges.size) {
+      return;
+    }
+
+    const allIds = new Set([...metadataChanges.keys(), ...ioChanges.keys()]);
+    const updates: Array<Partial<EsWorkflowStepExecution>> = [];
+    for (const id of allIds) {
+      updates.push({
+        ...metadataChanges.get(id),
+        ...ioChanges.get(id),
+        id,
+      });
+    }
+
+    await this.stepExecutionRepository.bulkUpsert(updates);
+    this.clearFlushedOutputs([...ioChanges.keys()]);
+  }
+
+  /**
+   * Loads step execution documents from ES at resume time. Fetches all fields
+   * except `output` (on-demand rehydration handles outputs via `StepIoService`).
+   * Inputs are loaded into the live IO map but NOT into the pending map —
+   * they are already persisted in ES.
+   */
+  public async load(): Promise<void> {
+    const stepExecutionIds = this.getWorkflowExecutionStepExecutionIds();
+    if (!stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+
+    const docs = await this.stepExecutionRepository.getStepExecutionsByIds(
+      stepExecutionIds,
+      undefined,
+      ['output']
+    );
+
+    const metadata: StepExecutionMetadata[] = [];
+    for (const doc of docs) {
+      if (doc.input !== undefined) {
+        const existing = this.stepIo.get(doc.id) ?? {};
+        this.stepIo.set(doc.id, { ...existing, input: doc.input });
+      }
+      const { input: _input, output: _output, ...meta } = doc;
+      metadata.push(meta as StepExecutionMetadata);
+    }
+
+    this.ingestLoadedStepDocs(metadata);
+  }
+
   private createStep(step: CreateStepInput) {
     const { id, stepId } = step;
-    // Index entry is keyed by stepId — only register when we actually have
-    // one (a partial seed write may not). The index is rebuilt on resume.
     let previousExecutionCount = 0;
     if (stepId) {
       let executionIds = this.stepIdExecutionIdIndex.get(stepId);
@@ -302,15 +364,6 @@ export class WorkflowExecutionState {
       executionIds.push(id);
     }
 
-    // `scopeStack` is required on the doc; default to an empty array so we
-    // never write `undefined` into ES (callers in the engine always supply
-    // it, but this guards against a future Partial caller).
-    //
-    // The cast is intentional: `EsWorkflowStepExecution` requires
-    // `status` / `startedAt` / `topologicalIndex`, but a minimal "create
-    // shell" call (e.g. just to seed `state`) may not have them. Those
-    // fields are populated on the next `updateStep`, and ES partial-update
-    // semantics tolerate missing fields on doc_as_upsert.
     const newStep = {
       ...step,
       id,
@@ -324,9 +377,6 @@ export class WorkflowExecutionState {
     } as StepExecutionMetadata;
     this.stepExecutions.set(id, newStep);
     this.stepDocumentsChanges.set(id, newStep);
-    // Execution and flushes are synchronous, so an incremental update here
-    // preserves the global execution order without depending on what was
-    // loaded by the resume task.
     this.updateWorkflowExecution({
       stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), id],
     });
@@ -335,8 +385,6 @@ export class WorkflowExecutionState {
   private updateStep(stepId: string, step: Partial<StepExecutionMetadata>) {
     const existingStep = this.stepExecutions.get(stepId);
     if (!existingStep) {
-      // upsertStep already routed us through createStep when the step was
-      // missing — reaching this branch with no existing step is a logic bug.
       throw new Error(`WorkflowExecutionState: updateStep called for ${stepId} but no step exists`);
     }
     const updatedStep: StepExecutionMetadata = {
@@ -344,8 +392,6 @@ export class WorkflowExecutionState {
       ...step,
     };
     this.stepExecutions.set(stepId, updatedStep);
-    // Accumulate changes for the next flush — merge with any pending changes.
-    // ES partial update (doc_as_upsert) preserves fields not included.
     this.stepDocumentsChanges.set(stepId, {
       ...(this.stepDocumentsChanges.get(stepId) || {}),
       ...step,

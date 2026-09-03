@@ -23,7 +23,8 @@ export async function flushState(
 ) {
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
   await Promise.all([
-    params.stepIoService.flush(),
+    params.workflowExecutionState.flushWorkflowDoc(),
+    params.workflowExecutionState.flushStepChanges(),
     params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();

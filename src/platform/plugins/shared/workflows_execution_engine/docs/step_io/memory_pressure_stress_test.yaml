@@ -1,0 +1,84 @@
+# Memory pressure stress test for the workflow execution engine.
+#
+# Generates enough step outputs to exceed the default 10 MB step-IO cache budget,
+# forcing the engine to evict stale entries and rehydrate on demand from ES.
+#
+# Memory profile:
+#   base_payload output  :  ~10 KB  (held warm — referenced every iteration)
+#   produce_chunk output :  ~10 KB  x 1100 iterations  =  ~11 MB total generated
+#   Cache budget (default):  10 MB  -> eviction starts around iteration 1000
+#   Evicted entries       :  old produce_chunk outputs (not re-referenced)
+#
+# What to observe:
+#   - Workflow completes without errors despite exceeding the cache budget
+#   - ES getStepExecutionsByIds calls appear once eviction kicks in (~iteration 1000)
+#   - Heap stays near the 10 MB cache ceiling rather than growing to 11+ MB
+#
+# foreach section stresses scope-stack rehydration across iterations.
+
+name: memory-pressure-stress-test
+enabled: false
+triggers:
+  - type: manual
+
+steps:
+  # -- Base payload (~10 KB) ------------------------------------------------
+  # Referenced by every iteration. Kept warm in the cache because it is the
+  # most-recently-read entry and is never displaced despite the memory pressure.
+  - name: base_payload
+    type: data.set
+    with:
+      label: 10kb-block
+      data: |
+        {%- assign times = (0..(1024 | times: 10)) -%}
+        {%- for product in times -%}x{%- endfor -%}
+
+  # -- foreach pressure: scope-stack rehydration (10 heavy iterations) ------
+  # Each iteration reads the large base_payload output via the scope-stack path,
+  # exercising rehydration of the foreach loop-source entry.
+  - name: foreach_pressure
+    type: foreach
+    foreach: '[1,2,3,4,5,6,7,8,9,10]'
+    steps:
+      - name: foreach_chunk
+        type: data.set
+        with:
+          chunk: '{{steps.base_payload.output.data}}'
+          item: '{{foreach.item}}'
+
+  # -- while pressure: 1100 iterations, ~11 MB total output -----------------
+  # Each iteration writes a ~10 KB produce_chunk output.
+  # After ~1000 iterations the cache evicts the oldest entries automatically.
+  # base_payload and the latest advance output stay warm throughout.
+  - name: iter_init
+    type: data.set
+    with:
+      iteration: 0
+
+  - name: pressure_loop
+    type: while
+    condition: '${{variables.iteration < 1100}}'
+    max-iterations: 1150
+    steps:
+      - name: produce_chunk
+        type: data.set
+        with:
+          chunk: '{{steps.base_payload.output.data}}'
+          index: '{{variables.iteration}}'
+
+      - name: advance
+        type: data.set
+        with:
+          iteration: '{{variables.iteration | plus: 1}}'
+
+  # -- Summary ---------------------------------------------------------------
+  # Reads variables (served from state) and base_payload (rehydrated from ES
+  # if evicted, or served from cache if still warm).
+  - name: summary
+    type: console
+    with:
+      message: >
+        stress-test complete
+        iterations={{variables.iteration}}
+        payload_label={{steps.base_payload.output.label}}
+        chunk_size={{steps.base_payload.output.data | size}}

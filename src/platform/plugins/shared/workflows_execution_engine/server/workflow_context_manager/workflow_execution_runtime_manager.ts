@@ -16,7 +16,7 @@ import {
   isEventDrivenWorkflowTriggerSource,
   isTerminalStatus,
 } from '@kbn/workflows';
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   getActiveOtelSpanId,
@@ -40,7 +40,6 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
-  workflowExecutionGraph: WorkflowGraph;
   workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
@@ -76,14 +75,12 @@ export class WorkflowExecutionRuntimeManager {
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
-  private workflowGraph: WorkflowGraph;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
-    this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
@@ -464,7 +461,10 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await this.stepIoService.flush();
+    await Promise.all([
+      this.workflowExecutionState.flushWorkflowDoc(),
+      this.workflowExecutionState.flushStepChanges(),
+    ]);
   }
 
   public async resume(): Promise<void> {
@@ -473,8 +473,7 @@ export class WorkflowExecutionRuntimeManager {
         'Execution can`t be resummed because current node ID is not set in execution state'
       );
     }
-    await this.stepIoService.load();
-    this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
+    await this.workflowExecutionState.load();
     this.workflowExecutionCursor.navigateToNode(this.workflowExecution.currentNodeId);
     this.workflowExecutionCursor.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
