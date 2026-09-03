@@ -1113,8 +1113,8 @@ export function ComposeDiscoverFlyout({
     uiState.recoveryType,
     uiState.step,
     uiState.manualSplitEnabled,
-    isAlert,
     sandboxQuery.format,
+    isAlert,
   ]);
 
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
