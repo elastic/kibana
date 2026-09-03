@@ -36,9 +36,9 @@ export const PackagePolicyNamespaceSchema = schema.string({
 });
 
 export const ConfigRecordSchema = schema.recordOf(
-  schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH }),
+  schema.string(),
   schema.object({
-    type: schema.maybe(schema.string({ maxLength: 100 })),
+    type: schema.maybe(schema.string()),
     value: schema.maybe(schema.any()),
     frozen: schema.maybe(schema.boolean()),
   }),
@@ -102,27 +102,29 @@ const SimplifiedPackagePolicyStreamDeprecationInfoSchema = DeprecationInfoSchema
   { meta: { id: 'simplified_package_policy_stream_deprecation_info' } }
 );
 
+const PackagePolicyStreamDataStreamElasticsearchSchema = schema.maybe(
+  schema.object({
+    privileges: schema.maybe(
+      schema.object({
+        indices: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      })
+    ),
+    dynamic_dataset: schema.maybe(schema.boolean()),
+    dynamic_namespace: schema.maybe(schema.boolean()),
+  })
+);
+
 const PackagePolicyStreamsSchema = {
-  id: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_ID_MAX_LENGTH })), // BWC < 7.11
+  id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   release: schema.maybe(
     schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
   ),
   data_stream: schema.object({
-    dataset: schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }),
-    type: schema.maybe(schema.string({ maxLength: 100 })),
-    elasticsearch: schema.maybe(
-      schema.object({
-        privileges: schema.maybe(
-          schema.object({
-            indices: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-          })
-        ),
-        dynamic_dataset: schema.maybe(schema.boolean()),
-        dynamic_namespace: schema.maybe(schema.boolean()),
-      })
-    ),
+    dataset: schema.string(),
+    type: schema.maybe(schema.string()),
+    elasticsearch: PackagePolicyStreamDataStreamElasticsearchSchema,
   }),
   vars: schema.maybe(ConfigRecordSchema),
   var_group_selections: VarGroupSelectionsSchema,
@@ -139,14 +141,14 @@ const PackagePolicyStreamsSchema = {
     )
   ),
   deprecated: schema.maybe(PackagePolicyStreamDeprecationInfoSchema),
-  migrate_from: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH })),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const PackagePolicyInputsSchema = {
-  id: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_ID_MAX_LENGTH })),
-  name: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
-  type: schema.string({ maxLength: 100 }),
-  policy_template: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
+  id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
+  type: schema.string(),
+  policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
@@ -164,7 +166,7 @@ export const PackagePolicyInputsSchema = {
     )
   ),
   deprecated: schema.maybe(PackagePolicyInputDeprecationInfoSchema),
-  migrate_from: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH })),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
@@ -369,6 +371,48 @@ export const NewPackagePolicySchema = schema.object(
   { meta: { id: 'new_package_policy' } }
 );
 
+// REST-only bounded schemas — mirror ConfigRecordSchema / PackagePolicyStreamsSchema /
+// PackagePolicyInputsSchema with maxLength added. The originals stay unbounded so that bounds
+// do not flow into the frozen SO model-version schemas (V22–V25).
+const RestConfigRecordSchema = schema.recordOf(
+  schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH }),
+  schema.object({
+    type: schema.maybe(schema.string({ maxLength: 100 })),
+    value: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.boolean()),
+  }),
+  {
+    meta: {
+      description: 'Package variable (see integration documentation for more information)',
+    },
+  }
+);
+
+const RestPackagePolicyStreamsSchema = {
+  ...PackagePolicyStreamsSchema,
+  id: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_ID_MAX_LENGTH })),
+  data_stream: schema.object({
+    dataset: schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH }),
+    type: schema.maybe(schema.string({ maxLength: 100 })),
+    elasticsearch: PackagePolicyStreamDataStreamElasticsearchSchema,
+  }),
+  vars: schema.maybe(RestConfigRecordSchema),
+  config: schema.maybe(RestConfigRecordSchema),
+  migrate_from: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH })),
+};
+
+const RestPackagePolicyInputsSchema = {
+  ...PackagePolicyInputsSchema,
+  id: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_ID_MAX_LENGTH })),
+  name: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
+  type: schema.string({ maxLength: 100 }),
+  policy_template: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_NAME_MAX_LENGTH })),
+  vars: schema.maybe(RestConfigRecordSchema),
+  config: schema.maybe(RestConfigRecordSchema),
+  migrate_from: schema.maybe(schema.string({ maxLength: PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH })),
+  streams: schema.arrayOf(schema.object(RestPackagePolicyStreamsSchema), { maxSize: 1000 }),
+};
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   // REST-only bounds: PackagePolicyBaseSchema is intentionally unbounded so that bounds do not
@@ -469,9 +513,9 @@ const CreatePackagePolicyProps = {
   package: schema.maybe(PackagePolicyPackageSchema),
   inputs: schema.arrayOf(
     schema.object({
-      ...PackagePolicyInputsSchema,
+      ...RestPackagePolicyInputsSchema,
       streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
+        schema.arrayOf(schema.object(RestPackagePolicyStreamsSchema), { maxSize: 1000 })
       ),
     }),
     { maxSize: 1000 }
@@ -786,9 +830,9 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
     inputs: schema.maybe(
       schema.arrayOf(
         schema.object({
-          ...PackagePolicyInputsSchema,
+          ...RestPackagePolicyInputsSchema,
           streams: schema.maybe(
-            schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
+            schema.arrayOf(schema.object(RestPackagePolicyStreamsSchema), { maxSize: 1000 })
           ),
         }),
         { maxSize: 1000 }
