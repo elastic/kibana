@@ -75,6 +75,18 @@ export async function deleteConnectorById({
   });
 }
 
+/**
+ * Returns the inference endpoint id for EIS connectors (`.inference` connectors
+ * whose config points at an existing inference endpoint), or undefined otherwise.
+ */
+function getInferenceEndpointId(connector: AvailableConnectorWithId): string | undefined {
+  if (connector.actionTypeId !== '.inference') {
+    return undefined;
+  }
+  const { inferenceId } = connector.config;
+  return typeof inferenceId === 'string' && inferenceId.length > 0 ? inferenceId : undefined;
+}
+
 export async function createConnectorFixture({
   predefinedConnector,
   fetch,
@@ -88,6 +100,33 @@ export async function createConnectorFixture({
 }) {
   interface ConnectorGetResponse {
     is_preconfigured?: boolean;
+  }
+
+  async function waitForInferenceEndpoint(inferenceId: string): Promise<void> {
+    const retries = process.env.KBN_EVALS_AWAIT_CCM_CONNECTORS ? 3 : 0;
+
+    await pRetry(
+      async () => {
+        const res = (await fetch({
+          path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
+          method: 'GET',
+          // versioned internal route: requests without this header are rejected
+          headers: { 'elastic-api-version': '1' },
+        })) as { isEndpointExists?: boolean };
+
+        if (res?.isEndpointExists !== true) {
+          throw new Error(`Inference endpoint [${inferenceId}] does not exist`);
+        }
+      },
+      { retries, minTimeout: 3000, factor: 1 }
+    ).catch((error) => {
+      throw new Error(
+        `Inference endpoint [${inferenceId}] for EIS connector [${predefinedConnector.id}] is not available. ` +
+          `EIS connectors bind directly to inference endpoints and are never created as stack connectors, ` +
+          `so make sure the EIS/CCM setup has created the endpoint before running evals. ` +
+          `Original error: ${error instanceof Error ? error.message : String(error)}`
+      );
+    });
   }
 
   async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
@@ -122,8 +161,22 @@ export async function createConnectorFixture({
     return;
   }
 
-  // If this connector is already preconfigured in the Kibana instance (e.g. EIS-managed connectors),
-  // we should reuse it rather than creating/deleting a saved object connector.
+  // EIS connectors reference an ES inference endpoint (created by EIS/CCM setup). We bind directly
+  // to that endpoint instead of creating a `.inference` stack connector wrapper around it — the
+  // inference plugin resolves inference endpoint ids passed as connector ids.
+  const inferenceEndpointId = getInferenceEndpointId(predefinedConnector);
+  if (inferenceEndpointId) {
+    await waitForInferenceEndpoint(inferenceEndpointId);
+    log.info(
+      `Binding EIS connector ${predefinedConnector.id} to inference endpoint ${inferenceEndpointId}`
+    );
+    await use({ ...predefinedConnector, id: inferenceEndpointId });
+    return;
+  }
+
+  // If this connector is already preconfigured in the Kibana instance (e.g. connectors declared
+  // via `xpack.actions.preconfigured` in a local kibana.yml), we should reuse it rather than
+  // creating/deleting a saved object connector.
   if (await isPreconfiguredConnector(predefinedConnector.id)) {
     log.info(`Reusing preconfigured connector: ${predefinedConnector.id}`);
     await use(predefinedConnector);

@@ -418,6 +418,150 @@ describe('createConnectorFixture', () => {
     });
   });
 
+  describe('with an EIS connector (.inference with config.inferenceId)', () => {
+    const eisConnector: AvailableConnectorWithId = {
+      id: 'eis-gpt-4o',
+      name: 'EIS GPT-4o',
+      actionTypeId: '.inference',
+      config: {
+        provider: 'elastic',
+        inferenceId: '.openai-gpt-4o-chat_completion',
+        taskType: 'chat_completion',
+      },
+      secrets: {},
+    };
+
+    it('binds to the inference endpoint without creating a stack connector', async () => {
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
+
+      await createConnectorFixture({
+        predefinedConnector: eisConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledWith({
+        path: `/internal/_inference/_exists/${encodeURIComponent(
+          '.openai-gpt-4o-chat_completion'
+        )}`,
+        method: 'GET',
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      // No Actions API calls at all
+      const actionsCalls = mockFetch.mock.calls.filter(([arg]: [{ path: string }]) =>
+        arg.path.startsWith('/api/actions')
+      );
+      expect(actionsCalls).toHaveLength(0);
+
+      expect(mockUse).toHaveBeenCalledWith({
+        ...eisConnector,
+        id: '.openai-gpt-4o-chat_completion',
+      });
+    });
+
+    it('URI-encodes the inference endpoint id in the exists path', async () => {
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: true });
+
+      await createConnectorFixture({
+        predefinedConnector: eisConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      const [{ path }] = mockFetch.mock.calls[0];
+      expect(path).toBe('/internal/_inference/_exists/.openai-gpt-4o-chat_completion');
+    });
+
+    it('throws a clear error when the endpoint does not exist, without falling back to Actions', async () => {
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: false });
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector: eisConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toThrow(
+        /Inference endpoint \[\.openai-gpt-4o-chat_completion\] for EIS connector \[eis-gpt-4o\] is not available/
+      );
+
+      const actionsCalls = mockFetch.mock.calls.filter(([arg]: [{ path: string }]) =>
+        arg.path.startsWith('/api/actions')
+      );
+      expect(actionsCalls).toHaveLength(0);
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('throws a clear error when the exists check fails, without falling back to Actions', async () => {
+      const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
+      mockFetch.mockRejectedValueOnce(serverError);
+
+      await expect(
+        createConnectorFixture({
+          predefinedConnector: eisConnector,
+          fetch: mockFetch,
+          log: mockLog,
+          use: mockUse,
+        })
+      ).rejects.toThrow(/is not available.*Internal Server Error/s);
+
+      const actionsCalls = mockFetch.mock.calls.filter(([arg]: [{ path: string }]) =>
+        arg.path.startsWith('/api/actions')
+      );
+      expect(actionsCalls).toHaveLength(0);
+      expect(mockUse).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the stack connector path for .inference connectors without an inferenceId', async () => {
+      const inferenceWithoutEndpoint: AvailableConnectorWithId = {
+        ...eisConnector,
+        id: 'local-inference',
+        config: { provider: 'openai', taskType: 'chat_completion' },
+      };
+      const uuid = v5(inferenceWithoutEndpoint.id, v5.DNS);
+
+      mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockResolvedValueOnce(undefined);
+
+      await createConnectorFixture({
+        predefinedConnector: inferenceWithoutEndpoint,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenNthCalledWith(2, {
+        path: `/api/actions/connector/${uuid}`,
+        method: 'POST',
+        body: JSON.stringify({
+          config: inferenceWithoutEndpoint.config,
+          connector_type_id: inferenceWithoutEndpoint.actionTypeId,
+          name: inferenceWithoutEndpoint.name,
+          secrets: inferenceWithoutEndpoint.secrets,
+        }),
+      });
+      expect(mockUse).toHaveBeenCalledWith({ ...inferenceWithoutEndpoint, id: uuid });
+    });
+
+    it('is bypassed by KBN_EVALS_SKIP_CONNECTOR_SETUP (yields the connector as-is)', async () => {
+      process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
+
+      await createConnectorFixture({
+        predefinedConnector: eisConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(mockUse).toHaveBeenCalledWith(eisConnector);
+    });
+  });
+
   describe('when KBN_EVALS_SKIP_CONNECTOR_SETUP is set', () => {
     beforeEach(() => {
       process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP = 'true';
