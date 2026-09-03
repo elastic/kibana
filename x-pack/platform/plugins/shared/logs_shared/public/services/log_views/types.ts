@@ -11,6 +11,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type {
   LogView,
   LogViewAttributes,
@@ -35,11 +36,20 @@ export interface LogViewsServiceStartDeps {
   logSourcesService: LogSourcesService;
 }
 
+export interface GetResolvedLogViewStatusOptions {
+  uiSettings?: IUiSettingsClient;
+  /**
+   * Scopes the status query to the given CPS projects. When omitted, the search falls back to the
+   * global project routing or remains undefined in non CPS contexts.
+   */
+  projectRouting?: ProjectRouting;
+}
+
 export interface ILogViewsClient {
   getLogView(logViewReference: LogViewReference): Promise<LogView>;
   getResolvedLogViewStatus(
     resolvedLogView: ResolvedLogView<DataView>,
-    uiSettings?: IUiSettingsClient
+    options?: GetResolvedLogViewStatusOptions
   ): Promise<LogViewStatus>;
   getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView<DataView>>;
   putLogView(
