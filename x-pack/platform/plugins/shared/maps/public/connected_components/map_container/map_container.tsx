@@ -114,14 +114,14 @@ function MapControlsThemeStyles() {
               width: '24px !important',
               borderRadius: '2px !important',
             },
-            '.maplibregl-ctrl button:not(:disabled):hover': {
+            '.maplibregl-ctrl button:not(:disabled):hover::before': {
               backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
             },
           },
           '.mapToolbarOverlay__button': {
             transform: 'translateY(0px) !important',
           },
-          '.mapToolbarOverlay__button:hover': {
+          '.mapToolbarOverlay__button:hover::before': {
             backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
           },
           // The layer table-of-contents entries live in the right-side overlay
