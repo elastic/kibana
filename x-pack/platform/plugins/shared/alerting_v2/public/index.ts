@@ -59,37 +59,21 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
     React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
-const lazyPage = (
-  loader: () => Promise<{ default: React.ComponentType<AlertingV2PageProps> }>
+const lazyPageWithContainer = (
+  loader: () => Promise<{
+    default: React.ComponentType<
+      AlertingV2PageProps & { container: import('inversify').Container }
+    >;
+  }>
 ): React.ComponentType<AlertingV2PageProps> => {
   const LazyComponent = React.lazy(loader);
   return (props: AlertingV2PageProps) =>
     React.createElement(
       React.Suspense,
       { fallback: null },
-      React.createElement(LazyComponent, props)
+      React.createElement(LazyComponent, { ...props, container: _alertingV2Container! })
     );
 };
-
-const RulesPage = lazyPage(() =>
-  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2RulesPage }))
-);
-const RuleLibraryPage = lazyPage(() =>
-  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2RuleLibraryPage }))
-);
-const EpisodesPage = lazyPage(() =>
-  import('./application/composable_pages').then((m) => ({ default: m.AlertingV2EpisodesPage }))
-);
-const ActionPoliciesPage = lazyPage(() =>
-  import('./application/composable_pages').then((m) => ({
-    default: m.AlertingV2ActionPoliciesPage,
-  }))
-);
-const ExecutionHistoryPage = lazyPage(() =>
-  import('./application/composable_pages').then((m) => ({
-    default: m.AlertingV2ExecutionHistoryPage,
-  }))
-);
 
 export type {
   AlertingV2PublicStart,
@@ -98,6 +82,8 @@ export type {
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
+
+let _alertingV2Container: import('inversify').Container | undefined;
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -111,13 +97,32 @@ const pluginModule = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
-    RulesPage,
-    RuleLibraryPage,
-    EpisodesPage,
-    ActionPoliciesPage,
-    ExecutionHistoryPage,
+    RulesPage: lazyPageWithContainer(() =>
+      import('./application/composable_pages').then((m) => ({ default: m.AlertingV2RulesPage }))
+    ),
+    RuleLibraryPage: lazyPageWithContainer(() =>
+      import('./application/composable_pages').then((m) => ({
+        default: m.AlertingV2RuleLibraryPage,
+      }))
+    ),
+    EpisodesPage: lazyPageWithContainer(() =>
+      import('./application/composable_pages').then((m) => ({
+        default: m.AlertingV2EpisodesPage,
+      }))
+    ),
+    ActionPoliciesPage: lazyPageWithContainer(() =>
+      import('./application/composable_pages').then((m) => ({
+        default: m.AlertingV2ActionPoliciesPage,
+      }))
+    ),
+    ExecutionHistoryPage: lazyPageWithContainer(() =>
+      import('./application/composable_pages').then((m) => ({
+        default: m.AlertingV2ExecutionHistoryPage,
+      }))
+    ),
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
+    _alertingV2Container = container;
     const getStartServices = container.get(CoreSetup('getStartServices'));
     const workflowsExtensionsSetup = container.get(
       PluginSetup('workflowsExtensions')

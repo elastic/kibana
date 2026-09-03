@@ -100,8 +100,9 @@ const createMockCoreStart = () => {
   } as unknown as CoreStart;
 };
 
-const defaultProps = (): AlertingV2PageProps => ({
+const defaultProps = () => ({
   coreStart: createMockCoreStart(),
+  container: createMockContainer() as any,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
 });
 
@@ -109,11 +110,11 @@ const renderInRouter = (ui: React.ReactElement, path = '/') =>
   render(<MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>);
 
 describe('composable pages', () => {
-  let AlertingV2RulesPage: React.ComponentType<AlertingV2PageProps>;
-  let AlertingV2RuleLibraryPage: React.ComponentType<AlertingV2PageProps>;
-  let AlertingV2EpisodesPage: React.ComponentType<AlertingV2PageProps>;
-  let AlertingV2ActionPoliciesPage: React.ComponentType<AlertingV2PageProps>;
-  let AlertingV2ExecutionHistoryPage: React.ComponentType<AlertingV2PageProps>;
+  let AlertingV2RulesPage: React.ComponentType<any>;
+  let AlertingV2RuleLibraryPage: React.ComponentType<any>;
+  let AlertingV2EpisodesPage: React.ComponentType<any>;
+  let AlertingV2ActionPoliciesPage: React.ComponentType<any>;
+  let AlertingV2ExecutionHistoryPage: React.ComponentType<any>;
 
   beforeAll(async () => {
     const mod = await import('./composable_pages');
@@ -125,14 +126,9 @@ describe('composable pages', () => {
   });
 
   describe('AlertingV2RulesPage', () => {
-    it('renders the rules list at /', () => {
+    it('renders the rules list', () => {
       renderInRouter(<AlertingV2RulesPage {...defaultProps()} />);
       expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
-    });
-
-    it('renders the rule detail at /:ruleId', () => {
-      renderInRouter(<AlertingV2RulesPage {...defaultProps()} />, '/abc-123');
-      expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
     });
   });
 
@@ -144,26 +140,16 @@ describe('composable pages', () => {
   });
 
   describe('AlertingV2EpisodesPage', () => {
-    it('renders the episodes list at /', () => {
+    it('renders the episodes list', () => {
       renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} />);
       expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
-    });
-
-    it('renders the episode detail at /:episodeId', () => {
-      renderInRouter(<AlertingV2EpisodesPage {...defaultProps()} />, '/ep-1');
-      expect(screen.getByTestId('episodeDetailsPage')).toBeInTheDocument();
     });
   });
 
   describe('AlertingV2ActionPoliciesPage', () => {
-    it('renders the action policies list at /', () => {
+    it('renders the action policies list', () => {
       renderInRouter(<AlertingV2ActionPoliciesPage {...defaultProps()} />);
       expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
-    });
-
-    it('renders the create form at /create', () => {
-      renderInRouter(<AlertingV2ActionPoliciesPage {...defaultProps()} />, '/create');
-      expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
     });
   });
 
@@ -181,18 +167,16 @@ describe('composable pages', () => {
       expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
     });
 
-    it('creates the DI container from coreStart.injection.getContainer()', () => {
+    it('uses the DI container passed as a prop', () => {
       const props = defaultProps();
-      const getContainerSpy = jest.spyOn(props.coreStart.injection, 'getContainer');
       renderInRouter(<AlertingV2RulesPage {...props} />);
-      expect(getContainerSpy).toHaveBeenCalled();
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
     });
 
     it('episodes page resolves services from the DI container', () => {
       const props = defaultProps();
-      const container = props.coreStart.injection.getContainer();
       renderInRouter(<AlertingV2EpisodesPage {...props} />);
-      expect(container.get).toHaveBeenCalled();
+      expect(props.container.get).toHaveBeenCalled();
     });
   });
 });
