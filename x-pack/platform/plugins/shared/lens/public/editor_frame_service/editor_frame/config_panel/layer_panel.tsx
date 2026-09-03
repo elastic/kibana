@@ -23,7 +23,7 @@ import { DimensionButton } from '@kbn/visualization-ui-components';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { isTextBasedAttributes } from '@kbn/lens-common';
+import { isTextBasedAttributes, LENS_LAYER_TYPES } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -52,6 +52,7 @@ import {
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { reconcileQueryColumns } from '../../../datasources/text_based/utils';
 import { isOperation } from '../../../types_guards';
+import { isEsqlChart } from '../../../utils';
 import { getLongMessage } from '../../../user_messages_utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
@@ -335,6 +336,10 @@ export function LayerPanel(props: LayerPanelProps) {
   const isTextBasedLanguage =
     isSelectedDatasourceTextBased ||
     (isDataLayer && !datasourcePublicAPI && isTextBasedAttributes(editorProps.attributes));
+  // On ES|QL charts, form-based helper layers (e.g. reference lines) must not expose the data view switcher
+  const hideLayerDataViewPicker =
+    layerType === LENS_LAYER_TYPES.REFERENCELINE &&
+    isEsqlChart(props.framePublicAPI.datasourceLayers);
   const textBasedDatasourceState = isSelectedDatasourceTextBased
     ? (layerDatasourceState as TextBasedPrivateState | undefined)
     : undefined;
@@ -549,21 +554,25 @@ export function LayerPanel(props: LayerPanelProps) {
             </EuiFlexGroup>
             {props.indexPatternService &&
               !isTextBasedLanguage &&
+              !hideLayerDataViewPicker &&
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}
-            {layerDatasource && props.indexPatternService && !isTextBasedLanguage && (
-              <layerDatasource.LayerPanelComponent
-                {...{
-                  layerId,
-                  state: layerDatasourceState,
-                  activeData: props.framePublicAPI.activeData,
-                  dataViews,
-                  onChangeIndexPattern: (indexPatternId) =>
-                    onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
-                }}
-              />
-            )}
+            {layerDatasource &&
+              props.indexPatternService &&
+              !isTextBasedLanguage &&
+              !hideLayerDataViewPicker && (
+                <layerDatasource.LayerPanelComponent
+                  {...{
+                    layerId,
+                    state: layerDatasourceState,
+                    activeData: props.framePublicAPI.activeData,
+                    dataViews,
+                    onChangeIndexPattern: (indexPatternId) =>
+                      onChangeIndexPattern({ indexPatternId, layerId, datasourceId }),
+                  }}
+                />
+              )}
             {shouldRenderESQLEditor ? (
               <React.Fragment key={layerId}>
                 <ESQLEditor
@@ -946,6 +955,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 isFullscreen,
                 setState: updateDataLayerState,
                 supportStaticValue: Boolean(openColumnGroup.supportStaticValue),
+                staticValueOnly: Boolean(openColumnGroup.staticValueOnly),
                 paramEditorCustomProps: openColumnGroup.paramEditorCustomProps,
                 enableFormatSelector: openColumnGroup.enableFormatSelector !== false,
                 layerType: activeVisualization.getLayerType(layerId, visualizationState),

@@ -32,6 +32,7 @@ import type {
   DatasourceStates,
   VisualizationState,
   TriggerEvent,
+  FramePublicAPI,
 } from '@kbn/lens-common';
 import type { LensDatasourceId } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
@@ -77,6 +78,15 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
+
+/**
+ * Returns true when the chart's data is powered by ES|QL (text-based datasource),
+ * i.e. at least one layer resolves to the text-based datasource.
+ */
+export const isEsqlChart = (datasourceLayers: FramePublicAPI['datasourceLayers']): boolean =>
+  Object.values(datasourceLayers).some(
+    (layer) => layer?.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
+  );
 
 export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {

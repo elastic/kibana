@@ -29,6 +29,8 @@ import {
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -56,6 +58,23 @@ const getConvertibleLayerName = (layerId: string): string =>
     defaultMessage: 'Layer {layerId}',
     values: { layerId: layerId.substring(0, 6) },
   });
+
+/**
+ * Detects query-based annotations in a visualization state. These rely on data views
+ * and are not yet supported on ES|QL charts, so they block conversion.
+ */
+export const hasQueryBasedAnnotations = (visualizationState: unknown): boolean => {
+  const layers = (visualizationState as { layers?: unknown })?.layers;
+  if (!Array.isArray(layers)) {
+    return false;
+  }
+  return layers.some(
+    (layer: { layerType?: string; annotations?: EventAnnotationConfig[] }) =>
+      layer?.layerType === layerTypes.ANNOTATIONS &&
+      Array.isArray(layer.annotations) &&
+      layer.annotations.some(isQueryAnnotationConfig)
+  );
+};
 
 const makeNonConvertibleLayer = (
   layerId: string,
@@ -114,6 +133,13 @@ export const useEsqlConversionCheck = (
     if (isSavedToLibrary(persistedDoc)) {
       return getEsqlConversionDisabledSettings(
         esqlConversionFailureReasonMessages.saved_to_library_not_supported
+      );
+    }
+
+    // Guard: query-based annotations require data views and are not yet supported on ES|QL charts
+    if (hasQueryBasedAnnotations(state)) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages.query_annotations_not_supported
       );
     }
 

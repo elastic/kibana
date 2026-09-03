@@ -1167,6 +1167,12 @@ describe('LayerPanel', () => {
       },
     };
 
+    // the ES|QL editor only renders for text-based documents (see `isTextBasedAttributes`)
+    const makeTextBasedAttributes = (layers: Record<string, unknown>) =>
+      ({
+        state: { datasourceStates: { textBased: { layers } } },
+      } as unknown as LayerPanelProps['attributes']);
+
     it('renders the editor for the selected text-based layer', () => {
       mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
       renderLayerPanel({
@@ -1174,6 +1180,7 @@ describe('LayerPanel', () => {
           layerId: 'data',
           isOnlyLayer: false,
           framePublicAPI: makeMixedDatasourceFrameAPI(),
+          attributes: makeTextBasedAttributes({ data: { query: esqlQuery } }),
         },
         preloadedState: mixedDatasourceState,
       });
@@ -1246,6 +1253,7 @@ describe('LayerPanel', () => {
               second: mockTextBasedDatasource.publicAPIMock,
             },
           },
+          attributes: makeTextBasedAttributes(textBasedState.layers),
         },
         preloadedState: {
           query: firstQuery,
