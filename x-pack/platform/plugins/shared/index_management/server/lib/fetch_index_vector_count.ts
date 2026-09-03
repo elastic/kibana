@@ -5,18 +5,8 @@
  * 2.0.
  */
 
+import type { IndicesStatsShardStats } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-
-interface VectorStats {
-  value_count?: number;
-}
-
-// `dense_vector` and `sparse_vector` are missing from the stats types for this level of the
-// response, though Elasticsearch returns them.
-interface IndexStatsWithVectors {
-  dense_vector?: VectorStats;
-  sparse_vector?: VectorStats;
-}
 
 export const hasIndexMonitorPrivilege = async (
   client: IScopedClusterClient,
@@ -34,18 +24,41 @@ export const hasIndexMonitorPrivilege = async (
   }
 };
 
+const shardVectorCount = (shard: IndicesStatsShardStats): number =>
+  (shard.dense_vector?.value_count ?? 0) + (shard.sparse_vector?.value_count ?? 0);
+
+/**
+ * Counts indexed dense + sparse vectors, counting each logical shard exactly once.
+ * In stateless 'total' and 'primaries' can both return the wrong counts because they might not be loaded onto nodes.
+ * Returns null when not all shards responded.
+ */
 export const fetchIndexVectorCount = async (
   client: IScopedClusterClient,
   indexName: string
-): Promise<number> => {
-  const { _all: all } = await client.asInternalUser.indices.stats({
+): Promise<number | null> => {
+  const { _shards: shards, indices } = await client.asInternalUser.indices.stats({
     expand_wildcards: 'none',
     index: indexName,
-    level: 'cluster',
+    level: 'shards',
     metric: ['dense_vector', 'sparse_vector'],
+    filter_path: [
+      '_shards',
+      'indices.*.shards.*.dense_vector.value_count',
+      'indices.*.shards.*.sparse_vector.value_count',
+    ],
   });
 
-  const primaries = all?.primaries as IndexStatsWithVectors | undefined;
+  if (!shards || shards.successful !== shards.total) {
+    return null;
+  }
 
-  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
+  let count = 0;
+  for (const index of Object.values(indices ?? {})) {
+    for (const copies of Object.values(index.shards ?? {})) {
+      if (copies.length > 0) {
+        count += Math.max(...copies.map(shardVectorCount));
+      }
+    }
+  }
+  return count;
 };
