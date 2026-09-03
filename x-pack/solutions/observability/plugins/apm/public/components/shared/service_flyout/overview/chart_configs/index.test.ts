@@ -7,7 +7,7 @@
 
 import { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import { ChartType } from '../../../charts/helper/get_timeseries_color';
-import { getInfrastructureMetricCharts, getLatencyChartType, getOtelKeyMetricCharts } from '.';
+import { getInfrastructureMetricCharts, getLatencyChartType, getEsqlKeyMetricCharts } from '.';
 
 const TRANSACTION_INDEXES = 'traces-apm*';
 const SPAN_INDEXES = 'traces-apm*'; // same value as TRANSACTION_INDEXES in MOCK_INDICES
@@ -22,17 +22,24 @@ const MOCK_INDICES = {
   sourcemap: 'apm-*',
 };
 
-function buildOtelKeyMetrics(
-  overrides: Partial<Parameters<typeof getOtelKeyMetricCharts>[0]> = {}
-): ReturnType<typeof getOtelKeyMetricCharts> {
-  return getOtelKeyMetricCharts({
+function buildKeyMetrics(
+  overrides: Partial<Parameters<typeof getEsqlKeyMetricCharts>[0]> = {}
+): ReturnType<typeof getEsqlKeyMetricCharts> {
+  return getEsqlKeyMetricCharts({
     indices: MOCK_INDICES,
+    schema: 'otel',
     serviceName: 'opbeans-java',
     environment: 'production',
+    transactionType: 'request',
     latencyAggregationType: LatencyAggregationType.avg,
     ...overrides,
   });
 }
+
+const buildOtelKeyMetrics = buildKeyMetrics;
+const buildEcsKeyMetrics = (
+  overrides: Partial<Parameters<typeof getEsqlKeyMetricCharts>[0]> = {}
+) => buildKeyMetrics({ schema: 'ecs', ...overrides });
 
 function buildInfrastructureMetrics(
   overrides: Partial<Parameters<typeof getInfrastructureMetricCharts>[0]> = {}
@@ -54,7 +61,32 @@ describe('service flyout chart_configs', () => {
     });
   });
 
-  describe('getOtelKeyMetricCharts', () => {
+  describe('getEsqlKeyMetricCharts', () => {
+    it('scopes ECS key metrics to the transaction index only with the transaction type filter', () => {
+      const keyMetrics = buildEcsKeyMetrics();
+
+      expect(keyMetrics.map((c) => c.id)).toEqual([
+        'latency',
+        'failedTransactionRate',
+        'throughput',
+      ]);
+      keyMetrics.forEach(({ config }) => {
+        // single index pattern — not combined with span indices
+        expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES} |`);
+        expect(config?.dataset.esql).toContain('`processor.event` == "transaction"');
+      });
+      expect(keyMetrics[0].config?.dataset.esql).toContain('`transaction.type` == "request"');
+    });
+
+    it('returns chart layout without config for ECS when indices are undefined', () => {
+      const keyMetrics = buildEcsKeyMetrics({ indices: undefined });
+
+      keyMetrics.forEach((chart) => {
+        expect(chart.title).toEqual(expect.any(String));
+        expect(chart.config).toBeUndefined();
+      });
+    });
+
     it('returns the RED key metric charts', () => {
       const keyMetrics = buildOtelKeyMetrics();
 

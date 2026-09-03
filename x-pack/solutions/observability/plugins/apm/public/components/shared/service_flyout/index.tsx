@@ -83,6 +83,12 @@ interface ServiceFlyoutProps {
   onClose: () => void;
   historyKey?: symbol;
   contextActions?: ServiceFlyoutContextValue['contextActions'];
+  /**
+   * Set by hosts whose surrounding UI is computed from raw documents (Discover):
+   * the key metric charts then stay ES|QL over raw documents for every schema,
+   * so they agree with the host instead of the rollup-based APM chart APIs.
+   */
+  preferDocumentBasedCharts?: boolean;
 }
 
 export function ServiceFlyout({
@@ -93,6 +99,7 @@ export function ServiceFlyout({
   onClose,
   historyKey,
   contextActions,
+  preferDocumentBasedCharts,
 }: ServiceFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
@@ -154,6 +161,7 @@ export function ServiceFlyout({
           service,
           capabilities,
           indices,
+          preferDocumentBasedCharts,
           filters: {
             environment: flyoutEnvironment,
             setEnvironment: setFlyoutEnvironment,

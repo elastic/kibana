@@ -66,12 +66,15 @@ function buildContextValue({
   refreshToken = 0,
   schema = 'ecs' as const,
   filters = {},
+  preferDocumentBasedCharts,
 }: {
   refreshToken?: number;
   schema?: 'ecs' | 'otel' | 'unknown';
   filters?: Record<string, unknown>;
+  preferDocumentBasedCharts?: boolean;
 } = {}) {
   return {
+    preferDocumentBasedCharts,
     deps: {
       core: {
         http: {},
@@ -200,6 +203,29 @@ describe('ServiceFlyoutOverview key metrics chart implementation per schema', ()
     );
 
     expect(screen.getByTestId('apmChartsMock')).toBeInTheDocument();
+  });
+
+  it('keeps the ES|QL Lens charts for ECS services in document-based hosts (Discover)', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    mockUseServiceFlyoutContext.mockReturnValue({
+      ...buildContextValue({ schema: 'ecs', preferDocumentBasedCharts: true }),
+      indices: {
+        transaction: 'traces-apm*',
+        span: 'traces-apm*',
+        error: 'logs-apm*',
+        metric: 'metrics-apm*',
+        onboarding: 'apm-*',
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <ServiceFlyoutOverview />
+      </IntlProvider>
+    );
+
+    expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('apmChartsMock')).not.toBeInTheDocument();
   });
 
   it('keeps the ES|QL Lens charts for OTel services', () => {

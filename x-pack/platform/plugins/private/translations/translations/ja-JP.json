@@ -14041,6 +14041,7 @@
     "xpack.apm.serviceFlyout.actionsButtonLabel": "アクション",
     "xpack.apm.serviceFlyout.alertsActionsGroupLabel": "アラート",
     "xpack.apm.serviceFlyout.cpuUsageChartTitle": "CPU使用状況",
+    "xpack.apm.serviceFlyout.failedTransactionRateChartTitle": "失敗したトランザクション率",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTitle": "インフラストラクチャーの指標",
     "xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip": "インフラの指標はシステムレベルのデータを反映し、トランザクションタイプでフィルタリングされません。",
     "xpack.apm.serviceFlyout.keyMetricsSectionTitle": "主要指標",

@@ -31,7 +31,7 @@ import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
 import { ServiceFlyoutApmCharts } from './apm_charts';
-import { getInfrastructureMetricCharts, getOtelKeyMetricCharts } from './chart_configs';
+import { getEsqlKeyMetricCharts, getInfrastructureMetricCharts } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
@@ -189,6 +189,7 @@ export function ServiceFlyoutOverview() {
     service,
     capabilities,
     indices,
+    preferDocumentBasedCharts,
     filters: {
       environment,
       rangeFrom,
@@ -214,18 +215,21 @@ export function ServiceFlyoutOverview() {
   // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
   const projectRouting = useProjectRouting();
 
-  // Unprocessed OTel services are invisible to the APM chart APIs, so their key
-  // metrics keep the ES|QL/Lens charts; every other schema renders the same APM
+  // ES|QL charts over raw documents for: unprocessed OTel services (invisible to
+  // the APM chart APIs) and document-based hosts like Discover (whose surrounding
+  // RED charts read the raw documents). Every other case renders the same APM
   // chart components as the alert details page.
-  const isOtel = capabilities.schema === 'otel';
+  const useEsqlKeyMetrics = Boolean(preferDocumentBasedCharts) || capabilities.schema === 'otel';
 
-  const otelKeyMetrics = useMemo(
+  const esqlKeyMetrics = useMemo(
     () =>
-      isOtel
-        ? getOtelKeyMetricCharts({
+      useEsqlKeyMetrics
+        ? getEsqlKeyMetricCharts({
             indices: indices ?? undefined,
+            schema: capabilities.schema,
             serviceName: service.name,
             environment,
+            transactionType: transactionType ?? '',
             latencyAggregationType,
             latencyTitleAction: (
               <LatencyAggregationTypeSelect
@@ -237,7 +241,16 @@ export function ServiceFlyoutOverview() {
             projectRouting,
           })
         : [],
-    [isOtel, environment, indices, latencyAggregationType, service.name, projectRouting]
+    [
+      useEsqlKeyMetrics,
+      capabilities.schema,
+      environment,
+      indices,
+      latencyAggregationType,
+      service.name,
+      transactionType,
+      projectRouting,
+    ]
   );
 
   const infrastructureMetrics = useMemo(
@@ -286,11 +299,11 @@ export function ServiceFlyoutOverview() {
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          {isOtel ? (
+          {useEsqlKeyMetrics ? (
             <ServiceFlyoutChartsSection
               id="keyMetrics"
               title={KEY_METRICS_SECTION_TITLE}
-              charts={otelKeyMetrics}
+              charts={esqlKeyMetrics}
               isLoading={indices === undefined}
               hasError={indices === null}
               rangeFrom={rangeFrom}

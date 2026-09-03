@@ -9,12 +9,14 @@ import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import {
+  EVENT_OUTCOME,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   PROCESSOR_EVENT,
+  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../../../../common/es_fields/apm';
 import { ChartType } from '../../../charts/helper/get_timeseries_color';
@@ -27,6 +29,7 @@ import {
   seriesColor,
 } from './shared';
 import type {
+  EcsServiceScope,
   FlyoutLensChartConfigDefinition,
   FlyoutLensChartProcessorEvent,
   ServiceScope,
@@ -49,6 +52,39 @@ function createApmBaseQuery({
   applyServiceFilters(query, scope);
   return query;
 }
+
+export function buildApmLatencyQuery(
+  indices: string,
+  scope: EcsServiceScope,
+  aggregation: string
+): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
+  query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
+  query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
+  return query;
+}
+
+export function buildApmThroughputQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
+  query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
+  return query;
+}
+
+export function buildApmErrorRateQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
+  query.pipe(
+    `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure", all = COUNT(*) WHERE (TO_STRING(${EVENT_OUTCOME}) IN ("failure", "success")) BY ${TIME_BUCKET_BY}`
+  );
+  query.pipe('EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL)');
+  query.pipe(`KEEP ${TIME_BUCKET_FIELD}, failed_transaction_rate`);
+  query.pipe(`SORT ${TIME_BUCKET_FIELD}`);
+  return query;
+}
+
+export const APM_ERROR_RATE_TITLE = i18n.translate(
+  'xpack.apm.serviceFlyout.failedTransactionRateChartTitle',
+  { defaultMessage: 'Failed transaction rate' }
+);
 
 export function getCpuUsageChart(
   indices: string | undefined,

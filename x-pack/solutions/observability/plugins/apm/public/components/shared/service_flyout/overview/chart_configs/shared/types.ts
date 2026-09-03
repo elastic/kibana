@@ -23,5 +23,9 @@ export interface ServiceScope {
   environment: string;
 }
 
+export interface EcsServiceScope extends ServiceScope {
+  transactionType: string;
+}
+
 export type LensYAxis = LensSeriesLayer['yAxis'][number];
 export type LensYBounds = Extract<LensConfig, { chartType: 'xy' }>['yBounds'];
