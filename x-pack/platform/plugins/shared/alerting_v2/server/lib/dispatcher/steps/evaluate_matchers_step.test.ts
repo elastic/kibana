@@ -108,7 +108,10 @@ describe('EvaluateMatchersStep', () => {
   it('does not match when KQL matcher evaluates to false', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'episode_status: active' },
+    });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -118,7 +121,10 @@ describe('EvaluateMatchersStep', () => {
   it('matches when KQL matcher evaluates to true', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: 'episode_status: active' });
+    const policy = createActionPolicy({
+      id: 'p1',
+      matcher: { expression: 'episode_status: active' },
+    });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -136,7 +142,7 @@ describe('EvaluateMatchersStep', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
-      matcher: 'episode_status: active and group_hash: critical-group',
+      matcher: { expression: 'episode_status: active and group_hash: critical-group' },
     });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -149,7 +155,7 @@ describe('EvaluateMatchersStep', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
-      matcher: 'episode_status: active or episode_status: recovering',
+      matcher: { expression: 'episode_status: active or episode_status: recovering' },
     });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -166,7 +172,7 @@ describe('EvaluateMatchersStep', () => {
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({
       id: 'p1',
-      matcher: 'episode_status: active and group_hash: critical-group',
+      matcher: { expression: 'episode_status: active and group_hash: critical-group' },
     });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -219,7 +225,7 @@ describe('EvaluateMatchersStep', () => {
   it('skips policies with invalid KQL matchers and logs a warning', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: 'invalid kql (((' });
+    const policy = createActionPolicy({ id: 'p1', matcher: { expression: 'invalid kql (((' } });
 
     const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
@@ -242,10 +248,13 @@ describe('EvaluateMatchersStep', () => {
   it('continues evaluating sibling policies when one matcher throws', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
     const rule = createRule({ id: 'r1' });
-    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: 'invalid kql (((' });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
     const goodPolicy = createActionPolicy({
       id: 'p-good',
-      matcher: 'episode_status: active',
+      matcher: { expression: 'episode_status: active' },
     });
 
     const matched = await runStep(
@@ -266,7 +275,10 @@ describe('EvaluateMatchersStep', () => {
     const e1 = createAlertEpisode({ episode_id: 'e1', rule_id: 'r1' });
     const e2 = createAlertEpisode({ episode_id: 'e2', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const badPolicy = createActionPolicy({ id: 'p-bad', matcher: 'invalid kql (((' });
+    const badPolicy = createActionPolicy({
+      id: 'p-bad',
+      matcher: { expression: 'invalid kql (((' },
+    });
     const catchAllPolicy = createActionPolicy({ id: 'p-catchall' });
 
     const matched = await runStep(
@@ -287,7 +299,10 @@ describe('EvaluateMatchersStep', () => {
   it('warn message keeps policy and episode ids in labels and omits the matcher', async () => {
     const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p-broken', matcher: 'invalid kql (((' });
+    const policy = createActionPolicy({
+      id: 'p-broken',
+      matcher: { expression: 'invalid kql (((' },
+    });
 
     await runStep([episode], new Map([['r1', rule]]), new Map([['p-broken', policy]]));
 
@@ -310,17 +325,17 @@ describe('EvaluateMatchersStep', () => {
   });
 
   it('does not log long matchers at any length', async () => {
-    const longMatcher = '('.repeat(600);
+    const longMatcherExpr = '('.repeat(600);
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
-    const policy = createActionPolicy({ id: 'p1', matcher: longMatcher });
+    const policy = createActionPolicy({ id: 'p1', matcher: { expression: longMatcherExpr } });
 
     await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
     expect(rendered).not.toContain('(');
-    expect(rendered).not.toContain(longMatcher.slice(0, 20));
+    expect(rendered).not.toContain(longMatcherExpr.slice(0, 20));
   });
 
   describe('external episode matching', () => {
@@ -366,7 +381,7 @@ describe('EvaluateMatchersStep', () => {
       const policy = createActionPolicy({
         id: 'p1',
         spaceId: 'default',
-        matcher: 'rule.name: "My Rule"',
+        matcher: { expression: 'rule.name: "My Rule"' },
       });
 
       const matched = await runStep([episode], new Map(), new Map([['p1', policy]]));
@@ -382,7 +397,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', name: 'Test rule' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'rule.name: "Test rule"',
+        matcher: { expression: 'rule.name: "Test rule"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -395,7 +410,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', tags: ['production', 'critical'] });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'rule.tags: "production"',
+        matcher: { expression: 'rule.tags: "production"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -408,7 +423,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'episode_status: active and rule.tags: "production"',
+        matcher: { expression: 'episode_status: active and rule.tags: "production"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -421,7 +436,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', tags: [] });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'rule.tags: "production"',
+        matcher: { expression: 'rule.tags: "production"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -434,7 +449,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'episode_status: active and rule.tags: "production"',
+        matcher: { expression: 'episode_status: active and rule.tags: "production"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -452,7 +467,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'data.severity: "critical"',
+        matcher: { expression: 'data.severity: "critical"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -468,7 +483,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'data.env: "production"',
+        matcher: { expression: 'data.env: "production"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -481,7 +496,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'data.severity: "critical"',
+        matcher: { expression: 'data.severity: "critical"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -497,7 +512,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', name: 'CPU Alert' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'data.severity: "critical" and rule.name: "CPU Alert"',
+        matcher: { expression: 'data.severity: "critical" and rule.name: "CPU Alert"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -513,7 +528,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'data.host.name: "my-host.com"',
+        matcher: { expression: 'data.host.name: "my-host.com"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -528,7 +543,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'severity: "critical"',
+        matcher: { expression: 'severity: "critical"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -541,7 +556,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'severity: "critical"',
+        matcher: { expression: 'severity: "critical"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -554,7 +569,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1' });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'severity: "critical"',
+        matcher: { expression: 'severity: "critical"' },
       });
 
       const matched = await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -570,7 +585,7 @@ describe('EvaluateMatchersStep', () => {
       const rule = createRule({ id: 'r1', tags: ['production'] });
       const policy = createActionPolicy({
         id: 'p1',
-        matcher: 'severity: "high" and rule.tags: "production"',
+        matcher: { expression: 'severity: "high" and rule.tags: "production"' },
       });
 
       const matched = await runStep(episodes, new Map([['r1', rule]]), new Map([['p1', policy]]));
