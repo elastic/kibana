@@ -88,18 +88,23 @@ apiTest.describe(
       monitorId: string,
       extraFields: Record<string, unknown> = {}
     ): Promise<string> => {
-      const res = await addMonitor(
-        apiClient,
-        editorHeaders,
-        {
-          ...httpMonitorFixture,
-          locations: [privateLocation],
-          name: uuidv4(),
-          ...extraFields,
-        },
-        { id: monitorId }
-      );
-      return (res.body as { id: string }).id;
+      // Leftover package-policy seeds share the agent policy; Fleet can still
+      // be deploying that write when the next monitor create runs, which 409s
+      // (or 404s) the deterministic `${monitorId}-${locationId}` policy.
+      return tryForTime(30_000, async () => {
+        const res = await addMonitor(
+          apiClient,
+          editorHeaders,
+          {
+            ...httpMonitorFixture,
+            locations: [privateLocation],
+            name: uuidv4(),
+            ...extraFields,
+          },
+          { id: monitorId }
+        );
+        return (res.body as { id: string }).id;
+      });
     };
 
     const seedLegacyPolicy = (apiClient: ApiClientFixture, monitorId: string, spaceId: string) =>
