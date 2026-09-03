@@ -140,8 +140,6 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 ## Don't select elements by index [dont-select-elements-by-index]
 
-`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, part of [Playwright's recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of failures from clicking by index, and Scout raises the stakes: suites [share one Kibana/ES deployment](./parallelism.md) and run without a restart between them, so a saved object or index left behind by an earlier suite adds rows to the list you are indexing into — `.nth(0)` then clicks a row you never created.
-
 `.first()` is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug — scope the locator to a container, or add a `data-test-subj` to the component. If you added it because the collection was not ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that.
 
 Otherwise, use the replacement instead of an index:
@@ -149,7 +147,6 @@ Otherwise, use the replacement instead of an index:
 | You need                               | Use                                                                                                                                                                         |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | To confirm at least one item rendered  | `await expect(items).not.toHaveCount(0)`, or assert the value you actually care about                                                                                       |
-| To assert the order of a list or table | `await expect(rows).toHaveText([...])` or `toContainText([...])` — an ordered array needs no index                                                                          |
 | One row identified by its content      | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })`                                                                                              |
 | To act on every item in a collection   | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so it races the UI |
 | A genuinely positional element         | Only through the escape hatch below, once the rows above are ruled out                                                                                                      |
