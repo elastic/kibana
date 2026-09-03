@@ -10,6 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  InstallablePackage,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -48,6 +49,44 @@ import { cleanupAssets } from './remove';
 
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
   packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
+
+/**
+ * Derives the normalized data streams an input package's policy declares through its dataset var,
+ * using the same normalization the template installer uses, so callers' patterns always match the
+ * installed templates. `path` is set to the dataset name, the key used in `es_index_patterns`.
+ */
+export const getNormalizedDataStreamsFromPackagePolicy = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  packageInfo: PackageInfo | InstallablePackage
+): RegistryDataStream[] => {
+  if (packageInfo.type !== 'input') {
+    return [];
+  }
+  const datasetName = getDatasetName(packagePolicy.inputs);
+  if (!datasetName) {
+    return [];
+  }
+
+  const signalTypes: string[] = (
+    hasDynamicSignalTypes(packageInfo)
+      ? ['logs', 'metrics', 'traces']
+      : [
+          packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+            packagePolicy.inputs[0].streams[0].data_stream?.type ||
+            'logs',
+        ]
+  )
+    // Fleet does not create data streams for unmanaged signal types (e.g. profiles);
+    // those are owned by the producer/exporter (see FLEET_UNMANAGED_DATA_STREAM_TYPES).
+    .filter((type) => !FLEET_UNMANAGED_DATA_STREAM_TYPES.includes(type));
+
+  return signalTypes.flatMap((dataStreamType) =>
+    getNormalizedDataStreams(packageInfo, datasetName, dataStreamType)
+      .filter((ds): ds is RegistryDataStream => !!ds.type)
+      .slice(0, 1)
+      .map((ds) => ({ ...ds, path: datasetName }))
+  );
+};
 
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
@@ -350,7 +389,7 @@ async function installAssetsForDataStreamType(opts: {
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([dataStream])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }], pkgInfo)
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
