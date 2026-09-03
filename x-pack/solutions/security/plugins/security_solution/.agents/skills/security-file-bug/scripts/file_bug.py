@@ -20,6 +20,13 @@ class WritePath:
     candidates: tuple[IssueMatch, ...]
 
 
+@dataclass(frozen=True)
+class LabelDecision:
+    keep: tuple[str, ...]
+    dropped: tuple[tuple[str, str], ...]
+    ask_team: bool
+
+
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
     if len(matches) == 0:
         return WritePath("create", None, ())
@@ -30,3 +37,17 @@ def decide_write_path(matches: list[IssueMatch]) -> WritePath:
         )
         return WritePath(action, match.number, (match,))
     return WritePath("ask", None, tuple(matches))
+
+
+def validate_labels(requested: list[str], catalog: set[str]) -> LabelDecision:
+    keep: list[str] = []
+    dropped: list[tuple[str, str]] = []
+    ask_team = False
+    for name in requested:
+        if name in catalog:
+            keep.append(name)
+            continue
+        dropped.append((name, "not in catalog"))
+        if name.startswith("Team:"):
+            ask_team = True
+    return LabelDecision(tuple(keep), tuple(dropped), ask_team)
