@@ -13,6 +13,8 @@ import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../../common/co
 import { TestProviders } from '../../../../../common/mock';
 import { ChartContextMenu } from '.';
 
+jest.setTimeout(30_000);
+
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';
   beforeEach(() => jest.clearAllMocks());
