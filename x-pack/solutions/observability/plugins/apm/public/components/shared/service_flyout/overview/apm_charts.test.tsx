@@ -130,6 +130,9 @@ describe('ServiceFlyoutApmCharts', () => {
           showAlertAnnotations: false,
           showChartActions: false,
           panelPaddingSize: 's',
+          // synced crosshair stays, but sibling tooltips would overlap in the
+          // narrow flyout columns
+          chartSettings: { externalPointerEvents: { tooltip: { visible: false } } },
         })
       );
       const props = chart.mock.calls[0][0] as { alert?: unknown; start: string; end: string };

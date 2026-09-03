@@ -22,9 +22,4 @@ export interface ServiceFlyoutOptions {
   /** Previous-period comparison, matching the host page's comparison toggle. */
   comparisonEnabled?: boolean;
   offset?: string;
-  /**
-   * Display-only: tells the flyout the host context is scoped to this transaction name.
-   * The flyout charts are NOT filtered by it — they show service-level metrics.
-   */
-  transactionName?: string;
 }

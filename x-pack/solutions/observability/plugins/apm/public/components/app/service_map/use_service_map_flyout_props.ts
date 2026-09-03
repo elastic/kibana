@@ -39,7 +39,6 @@ export function useServiceMapFlyoutProps({
               latencyAggregationType: flyoutOptions?.latencyAggregationType,
               comparisonEnabled: flyoutOptions?.comparisonEnabled,
               offset: flyoutOptions?.offset,
-              transactionName: flyoutOptions?.transactionName,
             },
           }
         : null,
@@ -52,7 +51,6 @@ export function useServiceMapFlyoutProps({
       flyoutOptions?.latencyAggregationType,
       flyoutOptions?.comparisonEnabled,
       flyoutOptions?.offset,
-      flyoutOptions?.transactionName,
       start,
       end,
     ]

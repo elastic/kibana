@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -197,7 +196,6 @@ export function ServiceFlyoutOverview() {
       transactionType,
       refreshToken,
       latencyAggregationType: initialLatencyAggregationType,
-      transactionName,
     },
   } = useServiceFlyoutContext();
   const [latencyAggregationType, setLatencyAggregationType] = useState(
@@ -283,21 +281,6 @@ export function ServiceFlyoutOverview() {
       <ServiceFlyoutQueryControls />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
-        {transactionName && (
-          <EuiFlexItem grow={false}>
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              iconType="info"
-              data-test-subj="serviceFlyoutTransactionNameCallout"
-              title={i18n.translate('xpack.apm.serviceFlyout.transactionNameScopeCalloutTitle', {
-                defaultMessage:
-                  "Charts show service-level metrics and are not filtered by the transaction ''{transactionName}''.",
-                values: { transactionName },
-              })}
-            />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem>
           {useEsqlKeyMetrics ? (
             <ServiceFlyoutChartsSection

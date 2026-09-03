@@ -22,6 +22,13 @@ import { getComparisonChartTheme } from '../../time_comparison/get_comparison_ch
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 
+// Keep the synced crosshair across the three charts, but don't mirror the
+// tooltip onto sibling charts: the flyout columns are too narrow for three
+// simultaneous tooltips, which end up overlapping each other.
+const FLYOUT_CHART_SETTINGS = {
+  externalPointerEvents: { tooltip: { visible: false } },
+} as const;
+
 /**
  * Renders the same latency / failed transaction rate / throughput charts as the
  * alert details page (and the alerting dashboard embeddables), so the flyout
@@ -84,6 +91,7 @@ export function ServiceFlyoutApmCharts({
     // Narrow flyout columns: the default panel padding would squeeze the chart
     // titles onto two lines.
     panelPaddingSize: 's' as const,
+    chartSettings: FLYOUT_CHART_SETTINGS,
   };
 
   return (

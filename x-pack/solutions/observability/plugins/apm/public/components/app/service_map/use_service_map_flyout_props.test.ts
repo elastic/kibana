@@ -95,7 +95,6 @@ describe('useServiceMapFlyoutProps', () => {
           latencyAggregationType: LatencyAggregationType.p95,
           comparisonEnabled: true,
           offset: '1d',
-          transactionName: 'GET /checkout',
         },
       })
     );
@@ -108,7 +107,6 @@ describe('useServiceMapFlyoutProps', () => {
       latencyAggregationType: LatencyAggregationType.p95,
       comparisonEnabled: true,
       offset: '1d',
-      transactionName: 'GET /checkout',
     });
   });
 

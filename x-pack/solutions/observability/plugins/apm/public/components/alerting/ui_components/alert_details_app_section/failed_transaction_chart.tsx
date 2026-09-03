@@ -13,7 +13,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { Theme } from '@elastic/charts';
+import type { SettingsSpec, Theme } from '@elastic/charts';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
@@ -72,6 +72,7 @@ export function FailedTransactionChart({
   showChartActions = true,
   chartId = 'errorRate',
   panelPaddingSize,
+  chartSettings,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -107,6 +108,8 @@ export function FailedTransactionChart({
   chartId?: string;
   /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
   panelPaddingSize?: EuiPanelProps['paddingSize'];
+  /** Elastic Charts settings overrides, e.g. to hide synced-cursor tooltips in narrow hosts. */
+  chartSettings?: Partial<SettingsSpec>;
 }) {
   const {
     services: { uiSettings },
@@ -262,7 +265,7 @@ export function FailedTransactionChart({
               offset={offset}
               customTheme={comparisonChartTheme}
               timeZone={timeZone}
-              settings={CHART_SETTINGS}
+              settings={{ ...CHART_SETTINGS, ...chartSettings }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

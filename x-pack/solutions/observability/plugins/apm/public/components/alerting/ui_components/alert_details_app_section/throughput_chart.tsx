@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import type { Theme } from '@elastic/charts';
+import type { SettingsSpec, Theme } from '@elastic/charts';
 import type { BoolQuery } from '@kbn/es-query';
 import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
@@ -60,6 +60,7 @@ export function ThroughputChart({
   showChartActions = true,
   chartId = 'throughput',
   panelPaddingSize,
+  chartSettings,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -95,6 +96,8 @@ export function ThroughputChart({
   chartId?: string;
   /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
   panelPaddingSize?: EuiPanelProps['paddingSize'];
+  /** Elastic Charts settings overrides, e.g. to hide synced-cursor tooltips in narrow hosts. */
+  chartSettings?: Partial<SettingsSpec>;
 }) {
   const {
     services: { uiSettings },
@@ -259,7 +262,7 @@ export function ThroughputChart({
               timeseries={timeseriesThroughput}
               yLabelFormat={asExactTransactionRate}
               timeZone={timeZone}
-              settings={CHART_SETTINGS}
+              settings={{ ...CHART_SETTINGS, ...chartSettings }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

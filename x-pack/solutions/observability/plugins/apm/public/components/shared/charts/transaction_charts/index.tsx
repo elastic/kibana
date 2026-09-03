@@ -81,17 +81,15 @@ export function TransactionCharts({
   }, [transactionName, transactionType]);
 
   // Seed the service flyout with the page's filters so its charts match the
-  // page charts. transactionName is display-only — the flyout indicates the
-  // transaction scope without filtering its service-level charts by it.
+  // page charts.
   const serviceMapFlyoutOptions = useMemo(
     () => ({
       transactionType,
       latencyAggregationType,
       comparisonEnabled,
       offset,
-      transactionName,
     }),
-    [transactionType, latencyAggregationType, comparisonEnabled, offset, transactionName]
+    [transactionType, latencyAggregationType, comparisonEnabled, offset]
   );
 
   const latencyChart = (

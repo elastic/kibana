@@ -35,6 +35,13 @@ const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
   .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
   .join(',\n  ');
 
+// The flyout's own chart tooltips must render above the flyout. Elastic Charts
+// derives the portal z-index from the chart's ancestors, which breaks when the
+// flyout is stacked over another flyout (e.g. Discover's doc viewer) — the
+// portal ends up below the flyout and the tooltip is invisible.
+const SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR =
+  "body [id^='echTooltipPortalMainTooltip__serviceFlyout']";
+
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
   alerts: 'alerts',
@@ -73,11 +80,6 @@ interface ServiceFlyoutProps {
     /** Previous-period comparison, matching the host page's comparison toggle. */
     comparisonEnabled?: boolean;
     offset?: string;
-    /**
-     * Display-only: the host context is scoped to this transaction name, but the
-     * flyout charts are NOT filtered by it — they show service-level metrics.
-     */
-    transactionName?: string;
   };
   telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
@@ -103,7 +105,7 @@ export function ServiceFlyout({
 }: ServiceFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
-  const { latencyAggregationType, comparisonEnabled, offset, transactionName } = filters;
+  const { latencyAggregationType, comparisonEnabled, offset } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
@@ -149,8 +151,19 @@ export function ServiceFlyout({
     <>
       <Global
         styles={css`
+          ${preferDocumentBasedCharts
+            ? // Document-based hosts (Discover) show the flyout's ES|QL Lens charts,
+              // whose Elastic Charts ids are generated — they can't be targeted
+              // individually, so raise all chart tooltips while the flyout is open.
+              `body [id^='echTooltipPortalMainTooltip__'] {
+                z-index: ${Number(euiTheme.levels.toast)} !important;
+              }`
+            : ''}
           ${SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS} {
             z-index: ${Number(euiTheme.levels.flyout) - 1} !important;
+          }
+          ${SERVICE_FLYOUT_OWN_CHART_TOOLTIP_SELECTOR} {
+            z-index: ${Number(euiTheme.levels.toast)} !important;
           }
         `}
       />
@@ -175,7 +188,6 @@ export function ServiceFlyout({
             latencyAggregationType,
             comparisonEnabled,
             offset,
-            transactionName,
           },
         }}
       >

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Theme } from '@elastic/charts';
+import type { SettingsSpec, Theme } from '@elastic/charts';
 import type { EuiPanelProps, RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
@@ -69,6 +69,7 @@ export function LatencyChart({
   showChartActions = true,
   chartId = 'latencyChart',
   panelPaddingSize,
+  chartSettings,
 }: {
   // Optional so the chart can render outside an alert context (e.g. the service flyout);
   // without it the alert annotations are simply omitted.
@@ -109,6 +110,8 @@ export function LatencyChart({
   chartId?: string;
   /** Panel padding, for hosts with narrow chart columns (e.g. the service flyout). */
   panelPaddingSize?: EuiPanelProps['paddingSize'];
+  /** Elastic Charts settings overrides, e.g. to hide synced-cursor tooltips in narrow hosts. */
+  chartSettings?: Partial<SettingsSpec>;
 }) {
   const {
     services: { uiSettings },
@@ -276,7 +279,7 @@ export function LatencyChart({
               timeseries={timeseriesLatency}
               yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
               timeZone={timeZone}
-              settings={CHART_SETTINGS}
+              settings={{ ...CHART_SETTINGS, ...chartSettings }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

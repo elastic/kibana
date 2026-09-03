@@ -77,9 +77,6 @@ export interface ServiceFlyoutContextValue {
     latencyAggregationType?: LatencyAggregationType;
     comparisonEnabled?: boolean;
     offset?: string;
-    // Display-only: the host context is scoped to this transaction name, but the
-    // flyout charts are NOT filtered by it — they show service-level metrics
-    transactionName?: string;
   };
 }
 

@@ -268,27 +268,6 @@ describe('ServiceFlyoutOverview key metrics chart implementation per schema', ()
     );
   });
 
-  it('shows a callout when the host context is scoped to a transaction name', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    mockUseServiceFlyoutContext.mockReturnValue(
-      buildContextValue({ filters: { transactionName: 'GET /checkout' } })
-    );
-
-    render(
-      <IntlProvider locale="en">
-        <ServiceFlyoutOverview />
-      </IntlProvider>
-    );
-
-    expect(screen.getByTestId('serviceFlyoutTransactionNameCallout')).toBeInTheDocument();
-  });
-
-  it('does not show the transaction name callout without a transaction name', () => {
-    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
-    renderOverview();
-
-    expect(screen.queryByTestId('serviceFlyoutTransactionNameCallout')).not.toBeInTheDocument();
-  });
 });
 
 describe('ServiceFlyoutOverview OTel key metrics indices loading and error states', () => {

@@ -215,14 +215,13 @@ describe('AlertDetailsServiceMapSection', () => {
     const alertStart = '2024-01-15T13:00:00.000Z';
     const alertEnd = '2024-01-15T13:05:00.000Z';
 
-    it('inherits the rule latency aggregation type and the alert transaction fields', () => {
+    it('inherits the rule latency aggregation type and the alert transaction type', () => {
       renderComponent(makeAlert(), createMockDeps(), { aggregationType: '95th' });
 
       expect(getEmbeddableFlyoutOptions()).toEqual(
         expect.objectContaining({
           latencyAggregationType: LatencyAggregationType.p95,
           transactionType: 'request',
-          transactionName: 'GET /api/users',
         })
       );
     });

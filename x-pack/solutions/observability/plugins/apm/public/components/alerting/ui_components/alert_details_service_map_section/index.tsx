@@ -117,17 +117,12 @@ export function AlertDetailsServiceMapSection({ alert, rule }: AlertDetailsAppSe
       ? getPaddedAlertTimeRange(rangeStart, alertEnd != null ? String(alertEnd) : undefined)
       : undefined;
 
-    const transactionNameField = alert.fields[TRANSACTION_NAME];
-
     return {
       transactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
       rangeFrom: paddedRange?.from,
       rangeTo: paddedRange?.to,
       // Inherit the rule's aggregation so e.g. a p95 latency rule opens a p95 flyout chart.
       latencyAggregationType: getAggsTypeFromRule(rule.params.aggregationType ?? 'avg'),
-      // Display-only: the flyout indicates the alert's transaction-name scope
-      // without filtering its service-level charts by it.
-      transactionName: transactionNameField != null ? String(transactionNameField) : undefined,
     };
   }, [alert, rule.params.aggregationType, alertStart, alertEnd]);
 
