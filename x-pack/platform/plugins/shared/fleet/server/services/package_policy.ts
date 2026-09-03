@@ -2209,8 +2209,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         const { version } = packagePolicyUpdate;
         // id, version, and spaceIds are not part of the saved object attributes
+
         // eslint-disable-next-line prefer-const
-        let { version: _version, id: _id, spaceIds: _spaceIds, ...restOfPackagePolicy } = packagePolicy;
+        let {
+          version: _version,
+          id: _id,
+          spaceIds: _spaceIds,
+          ...restOfPackagePolicy
+        } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
 
         if (restOfPackagePolicy.vars === undefined) {
           restOfPackagePolicy.vars = oldPackagePolicy.vars;
