@@ -55,7 +55,9 @@ async function findReusableBuild(client: BuildkiteClient): Promise<Build | null>
     return null;
   }
 
-  log(`Checking ${builds.length} newest candidate build(s) for ${KIBANA_DISTRIBUTABLE_ARTIFACT}...`);
+  log(
+    `Checking ${builds.length} newest candidate build(s) for ${KIBANA_DISTRIBUTABLE_ARTIFACT}...`
+  );
 
   const build = await findBuildWithKibanaDistributable(client, sourcePipeline, builds);
   if (build) {
