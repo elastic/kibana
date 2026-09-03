@@ -9,6 +9,7 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { EsqlService } from '@kbn/esql-server-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
@@ -23,14 +24,15 @@ import { stripPanelLevelKeys } from './panel_level';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
 import { probeColumns, type ProbedColumn } from './probe_columns';
-import {
-  GENERATE_ESQL_NODE,
-  PROBE_NODE,
-  COMPILE_NODE,
-  FINALIZE_NODE,
-} from './actions_lens';
+import { GENERATE_ESQL_NODE, PROBE_NODE, COMPILE_NODE, FINALIZE_NODE } from './actions_lens';
 
 const DEFAULT_COMPILE_ALLOW_LIST = Object.values(SupportedChartType);
+
+/**
+ * Default range used only to bind `?_tstart`/`?_tend` when probing columns.
+ * Kibana applies the live dashboard range at render time.
+ */
+const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
@@ -237,8 +239,9 @@ export const createVisualizationGraph = async (
     logger.debug('Probing visualization query columns');
     try {
       const esqlService = new EsqlService({ client: esClient.asCurrentUser });
+      const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
       const columns = await probeColumns(state.esqlQuery, async (query) => {
-        const probed = await esqlService.getColumns(query);
+        const probed = await esqlService.getColumns(query, timeRangeParams);
         return probed.map((column) => ({ name: column.name, type: column.type }));
       });
       return { columns, error: null };
@@ -278,9 +281,7 @@ export const createVisualizationGraph = async (
     };
   };
 
-  const authorFromScratch = async (
-    state: VisualizationState
-  ): Promise<CompileDispatchResult> => {
+  const authorFromScratch = async (state: VisualizationState): Promise<CompileDispatchResult> => {
     const authored = await author(
       {
         mode: 'from_scratch',
@@ -345,11 +346,7 @@ export const createVisualizationGraph = async (
     if (!isAmbiguousSlot(first.ambiguous) || slotIsHinted(prepared.intent, first.ambiguous)) {
       return {
         status: 'error',
-        error: bindFailure(
-          `Could not bind ${first.ambiguous}`,
-          state.esqlQuery,
-          state.columns
-        ),
+        error: bindFailure(`Could not bind ${first.ambiguous}`, state.esqlQuery, state.columns),
       };
     }
 
@@ -370,10 +367,7 @@ export const createVisualizationGraph = async (
         )
     );
     if (!('column' in fallback)) {
-      const message =
-        'error' in fallback
-          ? fallback.error
-          : `Could not bind ${fallback.ambiguous}`;
+      const message = 'error' in fallback ? fallback.error : `Could not bind ${fallback.ambiguous}`;
       return {
         status: 'error',
         error: bindFailure(message, state.esqlQuery, state.columns),
@@ -385,8 +379,7 @@ export const createVisualizationGraph = async (
       intent: applySlotHint(prepared.intent, first.ambiguous, fallback.column),
     });
     if (!isCompileSuccess(second)) {
-      const message =
-        'error' in second ? second.error : `Could not bind ${second.ambiguous}`;
+      const message = 'error' in second ? second.error : `Could not bind ${second.ambiguous}`;
       return {
         status: 'error',
         error: bindFailure(message, state.esqlQuery, state.columns),

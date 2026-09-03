@@ -111,6 +111,10 @@ describe('createVisualizationGraph', () => {
     const finalState = await graph.invoke(baseState());
 
     expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(mockGetColumns).toHaveBeenCalledWith(COUNT_QUERY, [
+      { _tstart: expect.any(String) },
+      { _tend: expect.any(String) },
+    ]);
     expect(model.defaultChat.invoke).not.toHaveBeenCalled();
     expect(model.fallbackChat.invoke).not.toHaveBeenCalled();
     expect(finalState.authoringNote).toBeNull();
