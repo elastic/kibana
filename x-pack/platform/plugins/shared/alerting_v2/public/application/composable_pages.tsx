@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Container } from 'inversify';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
 import { Context } from '@kbn/core-di-browser';
@@ -111,6 +111,8 @@ export const AlertingV2ExecutionHistoryPage = ({
   </StandardProviders>
 );
 
+const episodesStorage = new Storage(localStorage);
+
 export const AlertingV2EpisodesPage = ({
   coreStart,
   container,
@@ -118,21 +120,24 @@ export const AlertingV2EpisodesPage = ({
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
 
-  const kibanaReactServices: AlertEpisodesKibanaServices = {
-    ...coreStart,
-    share: container.get(PluginStart('share')) as SharePluginStart,
-    data: container.get(PluginStart('data')) as DataPublicPluginStart,
-    dataViews: container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
-    expressions: container.get(PluginStart('expressions')) as ExpressionsStart,
-    uiActions: container.get(PluginStart('uiActions')) as UiActionsStart,
-    fieldFormats: container.get(PluginStart('fieldFormats')) as FieldFormatsStart,
-    lens: container.get(PluginStart('lens')) as LensPublicStart,
-    charts: container.get(PluginStart('charts')) as ChartsPluginStart,
-    storage: new Storage(localStorage),
-    toastNotifications: coreStart.notifications.toasts,
-    unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
-    spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
-  };
+  const kibanaReactServices: AlertEpisodesKibanaServices = useMemo(
+    () => ({
+      ...coreStart,
+      share: container.get(PluginStart('share')) as SharePluginStart,
+      data: container.get(PluginStart('data')) as DataPublicPluginStart,
+      dataViews: container.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
+      expressions: container.get(PluginStart('expressions')) as ExpressionsStart,
+      uiActions: container.get(PluginStart('uiActions')) as UiActionsStart,
+      fieldFormats: container.get(PluginStart('fieldFormats')) as FieldFormatsStart,
+      lens: container.get(PluginStart('lens')) as LensPublicStart,
+      charts: container.get(PluginStart('charts')) as ChartsPluginStart,
+      storage: episodesStorage,
+      toastNotifications: coreStart.notifications.toasts,
+      unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
+      spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
+    }),
+    [coreStart, container]
+  );
 
   return (
     <KibanaContextProvider services={kibanaReactServices}>
