@@ -17,6 +17,7 @@ import {
   buildConvAgentMap,
   queryExecuteToolSpans,
   queryInvokeAgentSpans,
+  querySelfAnalysisTraceIds,
   spaceFromTracesIndex,
 } from './traces_repository';
 import type { ToolSpanReadRow } from './traces_repository';
@@ -95,9 +96,14 @@ export const generateSignals = async ({
   const traceIds = [
     ...new Set(toolRows.map((row) => row.trace_id).filter((id): id is string => !!id)),
   ];
-  const agentRows = await queryInvokeAgentSpans(esClient, traceIds, signal);
+  const [agentRows, selfAnalysisTraceIds] = await Promise.all([
+    queryInvokeAgentSpans(esClient, traceIds, signal),
+    querySelfAnalysisTraceIds(esClient, traceIds, signal),
+  ]);
   const convAgent = buildConvAgentMap(agentRows);
 
+  // The watermark covers the batch that was read, including the rounds dropped below, so a
+  // self-analysis round is not re-read on every subsequent run.
   let windowMax = '';
   for (const row of toolRows) {
     if (row['@timestamp'] > windowMax) {
@@ -105,7 +111,19 @@ export const generateSignals = async ({
     }
   }
 
-  const rowsBySpace = groupRowsBySpace(toolRows, logger);
+  // A round that loaded the analysis skill is the loop diagnosing an AI index: it reads the
+  // very index under analysis, which the target-index filter in `build` cannot recognize as
+  // self-referential, so the whole round is dropped here instead.
+  const analyzableRows = toolRows.filter((row) => !selfAnalysisTraceIds.has(row.trace_id));
+  if (selfAnalysisTraceIds.size > 0) {
+    logger.debug(
+      `Excluded ${toolRows.length - analyzableRows.length} tool span(s) from ${
+        selfAnalysisTraceIds.size
+      } self-analysis round(s)`
+    );
+  }
+
+  const rowsBySpace = groupRowsBySpace(analyzableRows, logger);
 
   let fullyProcessed = true;
   let total = 0;
@@ -135,7 +153,7 @@ export const generateSignals = async ({
   }
 
   logger.debug(
-    `Generated ${total} signal(s) across ${rowsBySpace.size} space(s) from ${toolRows.length} tool span(s)`
+    `Generated ${total} signal(s) across ${rowsBySpace.size} space(s) from ${analyzableRows.length} tool span(s)`
   );
 
   return { watermark: fullyProcessed ? windowMax || undefined : state.watermark };

@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/alerts-ui-shared'
   - '@kbn/react-hooks'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod

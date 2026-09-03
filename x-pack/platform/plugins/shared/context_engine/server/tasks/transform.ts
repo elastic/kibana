@@ -6,6 +6,7 @@
  */
 
 import type { EsqlToolCallSignal } from '../../common/http_api/signals';
+import { isSelfReferentialTarget } from './self_referential';
 
 const NANOSECONDS_PER_MILLISECOND = 1_000_000;
 const LOOP_THRESHOLD = 3;
@@ -183,12 +184,26 @@ const groupByRound = (toolRows: ExecuteToolSpan[]): Map<string, ExecuteToolSpan[
  * that don't resolve to an esql query (`query_kind === 'other'`) are skipped —
  * they carry no `target_index`/`query` and aren't actionable as signals. Round
  * context is still computed over the whole round.
+ *
+ * Reads of the feedback loop's own indices are dropped before any round context is
+ * computed, so an analysis round neither emits signals nor inflates the loop/fallback
+ * counters of the round it shares a trace with.
  */
 export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[] => {
   const signals: EsqlToolCallSignal[] = [];
 
-  for (const [traceId, rows] of groupByRound(toolRows)) {
+  for (const [traceId, allRows] of groupByRound(toolRows)) {
     const agent = convAgent.get(traceId) ?? UNKNOWN_AGENT;
+
+    const rows = allRows.filter(
+      (row) =>
+        !isSelfReferentialTarget(
+          parseFromClause(parseArguments(row['attributes.gen_ai.tool.call.arguments']).query)
+        )
+    );
+    if (rows.length === 0) {
+      continue;
+    }
 
     const queries = rows.map(
       (row) => parseArguments(row['attributes.gen_ai.tool.call.arguments']).query
