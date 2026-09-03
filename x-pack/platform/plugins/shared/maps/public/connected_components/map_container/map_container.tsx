@@ -95,6 +95,9 @@ function MapControlsThemeStyles() {
             '.maplibregl-ctrl-group:not(:empty)': {
               backgroundColor: euiTheme.colors.backgroundBasePlain,
             },
+            '.maplibregl-ctrl-group:not(:empty):hover': {
+              transform: 'translateY(0px) !important',
+            },
             '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
               backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
               backgroundRepeat: 'no-repeat',
@@ -105,6 +108,9 @@ function MapControlsThemeStyles() {
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
             },
+          },
+          '.mapToolbarOverlay__button':{
+            transform: 'translateY(0px) !important',
           },
           // The layer table-of-contents entries live in the right-side overlay
           // (a sibling of `.mapContainer`), so their divider and state background
