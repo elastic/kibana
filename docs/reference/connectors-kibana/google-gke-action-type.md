@@ -68,15 +68,15 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 :   Lists recent and in-flight operations in a project, across every location by default.
 
 `cancelOperation`
-:   Cancels an in-progress node upgrade operation (`UPGRADE_NODES`). GKE rejects cancellation of other operation types. The operation ends with an "aborted" error; use `rollbackNodePoolUpgrade` to revert nodes that already moved.
+:   Cancels an in-progress node upgrade operation (`UPGRADE_NODES`). GKE rejects cancellation of other operation types. The operation ends with an "aborted" error. Use `rollbackNodePoolUpgrade` to revert nodes that already moved.
 
 ### Node pools
 
 `setNodePoolSize`
-:   Scales a node pool to an exact per-zone node count (`nodeCount`). Use `0` to drain a pool without deleting it. On an autoscaled pool the autoscaler may resize again.
+:   Scales a node pool to an exact per-zone node count (`nodeCount`). Use `0` to drain a pool without deleting it. On an autoscaled pool the autoscaler might resize it again.
 
 `setNodePoolAutoscaling`
-:   Enables, adjusts, or disables autoscaling. Parameters: `enabled`, and either per-zone bounds (`minNodeCount`, `maxNodeCount`) or cluster-wide bounds (`totalMinNodeCount`, `totalMaxNodeCount`), plus an optional `locationPolicy`.
+:   Turns autoscaling on, adjusts its bounds, or turns it off. Parameters: `enabled`, and either per-zone bounds (`minNodeCount`, `maxNodeCount`) or cluster-wide bounds (`totalMinNodeCount`, `totalMaxNodeCount`), plus an optional `locationPolicy`.
 
 `setNodePoolManagement`
 :   Turns node `autoRepair` and `autoUpgrade` on or off. Omitted flags keep their current value.
@@ -96,7 +96,7 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 :   Updates cluster configuration or version: `desiredMasterVersion`, `desiredNodeVersion` with `desiredNodePoolId`, `desiredImageType`, `desiredLocations`, `desiredReleaseChannel`, `desiredMonitoringService`, `desiredLoggingService`, and an optional `etag`. At least one change is required.
 
 `setNetworkPolicy`
-:   Enables or disables Kubernetes NetworkPolicy enforcement (Calico) on a Standard cluster. GKE applies this in two steps (the cluster addon, then the nodes), each a node-recreating operation. Every call performs the next outstanding step and returns its operation with a `phase` of `addon`, `nodes`, or `done`; poll the operation and call the action again until it reports `done`.
+:   Turns Kubernetes NetworkPolicy enforcement (Calico) on or off for a Standard cluster. GKE applies this in two steps (the cluster addon, then the nodes), each a node-recreating operation. Every call performs the next outstanding step and returns its operation with a `phase` of `addon`, `nodes`, or `done`. Poll the operation and call the action again until it reports `done`.
 
 `setBinaryAuthorization`
 :   Sets the Binary Authorization `evaluationMode` to `PROJECT_SINGLETON_POLICY_ENFORCE` or `DISABLED`.
@@ -116,10 +116,10 @@ Every cluster action accepts an optional `projectId` and a `location` (the zone 
 
 * Node counts (`nodeCount`, `initialNodeCount`, `minNodeCount`, `maxNodeCount`) are per zone. A regional node pool spanning three zones with `nodeCount` 2 runs six nodes. Use `totalMinNodeCount` and `totalMaxNodeCount` for cluster-wide autoscaler bounds.
 * Autopilot clusters have GKE-managed node pools. Node pool actions do not apply to them.
-* Operations are slow. Node pool resizes take a few minutes; upgrades, rollbacks, logging or monitoring changes, Binary Authorization changes, and network policy steps re-create nodes and take 5 to 15 minutes; cluster creation takes 5 to 15 minutes. Do not wait for an operation inside a single step: keep the returned operation ID and poll `getOperation` from later steps, with a wait in between, so the calling agent turn or workflow step does not time out.
+* Operations are slow. Node pool resizes take a few minutes; upgrades, rollbacks, logging or monitoring changes, Binary Authorization changes, and network policy steps re-create nodes and take 5 to 15 minutes; cluster creation takes 5 to 15 minutes. Do not wait for an operation inside a single step: keep the returned operation ID and poll `getOperation` from later steps, with a wait between polls, so the calling agent turn or workflow step does not time out.
 * `updateCluster` changes the logging and monitoring services together, as GKE requires. When you pass only one, the connector reads the other from the cluster and sends it back unchanged.
 * A safe upgrade reads `getServerConfig`, upgrades the control plane with `updateCluster` and `desiredMasterVersion`, polls the operation, then upgrades each node pool with `desiredNodeVersion` and `desiredNodePoolId`. If a node upgrade fails, `rollbackNodePoolUpgrade` reverts the nodes that already moved.
-* `autoUpgrade` cannot be disabled on clusters enrolled in a release channel. Leave the channel first with `updateCluster` and `desiredReleaseChannel: "UNSPECIFIED"`.
+* `autoUpgrade` cannot be turned off on clusters enrolled in a release channel. Leave the channel first with `updateCluster` and `desiredReleaseChannel: "UNSPECIFIED"`.
 * Organizations that enforce tagging on Compute Engine instances can pass `resourceManagerTags` to `createCluster` and `createNodePool`; without the required tags node creation is denied by the organization policy and the operation ends in an error.
 * To manage workloads in a cluster, call `getCluster`, then create a Kubernetes connector with the returned `kubernetesConnector.apiUrl`, the **Google Kubernetes Engine (GKE)** authentication type, the same service account JSON key, and `caCertificatePem` as the cluster CA certificate.
 
@@ -131,10 +131,10 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 To use the Google Kubernetes Engine connector you need a Google Cloud service account and a JSON key for it:
 
-1. In the Google Cloud console, open **IAM & Admin > Service Accounts** and either pick an existing service account or create one for the connector.
+1. In the Google Cloud console, open **IAM & Admin → Service Accounts** and either pick an existing service account or create one for the connector.
 2. Grant the service account a role on the project. **Kubernetes Engine Cluster Admin** (`roles/container.clusterAdmin`) covers every action in this connector. For a read-only connector, **Kubernetes Engine Cluster Viewer** (`roles/container.clusterViewer`) is enough for `listClusters`, `getCluster`, `listNodePools`, `getNodePool`, `getServerConfig`, `getOperation`, and `listOperations`.
 3. To use `createCluster` or `createNodePool`, also grant the connector's service account the **Service Account User** role (`roles/iam.serviceAccountUser`) on the service account the nodes run as (by default the Compute Engine default service account, `PROJECT_NUMBER-compute@developer.gserviceaccount.com`). Without it GKE rejects node creation with "The user does not have access to service account".
-4. On the service account's **Keys** tab, choose **Add key > Create new key**, select **JSON**, and download the file.
+4. On the service account's **Keys** tab, choose **Add key → Create new key**, select **JSON**, and download the file.
 5. Enable the **Kubernetes Engine API** on the project.
 6. When you create the connector in {{kib}}, upload the JSON key file as the service account key.
 
