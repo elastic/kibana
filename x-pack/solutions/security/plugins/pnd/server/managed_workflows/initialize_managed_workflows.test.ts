@@ -182,6 +182,32 @@ describe('initializeManagedWorkflows', () => {
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
+  it('does not reconcile when ensureAgentForSpace fails for a space', async () => {
+    const { client, workflowsExtensions, logger } = createDependencies();
+    client.listInstalledWorkflowStates = jest.fn(async () => [
+      {
+        workflowId: `${PND_WATCH_FLOOR_WORKFLOW_ID}-space-a`,
+        spaceId: 'space-a',
+        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
+        templateValues: { settingsVersion: 1, autonomyLevel: 'manual' },
+        documentVersion: 1,
+      },
+    ]);
+    const ensureAgentForSpace = jest.fn(async (spaceId: string) => {
+      throw new Error(`agent unavailable in ${spaceId}`);
+    });
+
+    await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
+
+    expect(client.ready).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('agent unavailable in space-a')
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('reconciliation skipped because initialization degraded')
+    );
+  });
+
   it('returns the managed client when ready reconciliation fails', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.ready.mockRejectedValueOnce(new Error('reconciliation failed'));

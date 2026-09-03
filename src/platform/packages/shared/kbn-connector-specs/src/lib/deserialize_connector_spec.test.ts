@@ -114,6 +114,7 @@ describe('fromConnectorSpecSchema', () => {
         actions: {
           testAction: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -167,6 +168,7 @@ describe('fromConnectorSpecSchema', () => {
         actions: {
           testAction: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },

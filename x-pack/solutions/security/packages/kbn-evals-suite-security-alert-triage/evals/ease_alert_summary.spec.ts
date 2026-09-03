@@ -39,6 +39,7 @@ import { callEaseSummary } from '../src/ease_summary_task';
 const easeJsonCompliance = {
   name: 'EaseJsonCompliance',
   kind: 'CODE' as const,
+  direction: 'maximize' as const,
   evaluate: async ({ output }: { output: unknown; metadata: unknown }) => {
     const rawResponse = (output as { rawResponse?: string })?.rawResponse ?? '';
 
