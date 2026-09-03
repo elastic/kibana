@@ -61,14 +61,7 @@ export function startTrackingHistory<T extends object = {}>({
 
   const canUndo$ = new BehaviorSubject(false);
   const canRedo$ = new BehaviorSubject(false);
-  const pointerSubscription = pointer$.subscribe((pointer) => {
-    const bottomOfStack = pointer <= -1;
-    const topOfStack = pointer + 1 >= history.length;
-    canUndo$.next(!bottomOfStack);
-    canRedo$.next(!topOfStack);
-  });
-
-  const disabledActionsSubscription = combineLatest([pointer$, pause$]).subscribe(
+  const pauseHistorySubscription = combineLatest([pointer$, pause$]).subscribe(
     ([pointer, paused]) => {
       canRedo$.next(!paused && pointer + 1 < history.length);
       canUndo$.next(!paused && pointer > -1);
@@ -129,8 +122,7 @@ export function startTrackingHistory<T extends object = {}>({
     },
     cleanup: () => {
       stateSubscription.unsubscribe();
-      pointerSubscription.unsubscribe();
-      disabledActionsSubscription.unsubscribe();
+      pauseHistorySubscription.unsubscribe();
       document.removeEventListener('keydown', keyDownHandler);
     },
   };

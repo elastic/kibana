@@ -66,9 +66,7 @@ export function initializeHistoryManager({
   );
 
   return {
-    internalApi: {
-      ...historyApi,
-    },
+    internalApi: historyApi,
     cleanup: () => {
       pauseHistorySubscription.unsubscribe();
       cleanupHistoryTracking();
