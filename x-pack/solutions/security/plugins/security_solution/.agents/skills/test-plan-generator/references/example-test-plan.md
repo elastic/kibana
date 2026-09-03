@@ -11,7 +11,7 @@ The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** �
 ## What this example demonstrates
 
 - All required sections from `references/document-structure.md`, in order
-- The two HTML marker lines that must open every published plan
+- The HTML marker lines that must open every published plan — three always required (`<!-- test-plan-generated -->`, `<!-- generated-by: … -->`, `<!-- verbosity: … -->`) and one conditional (`<!-- tokens: … -->` when the session-token script captured a value); see [`output-formats.md` § Token usage marker](output-formats.md#token-usage-marker) for the canonical order
 - Scenarios written in terms of user intent, not UI clicks (see Gherkin rules in `references/optional-scenarios.md`)
 - Scenario 1 ("User successfully adds a note") covers both display and persistence in a single `And` step — intentional for brevity; a real plan could split these into two P0 scenarios if independent verification is needed
 - Automation coverage lines that name specific test files and test descriptions — not aggregate counts

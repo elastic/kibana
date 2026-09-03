@@ -31,17 +31,22 @@ Verbosity must never change:
 
 If a lower verbosity level would require dropping a ⚠️ flag or a reason clause, the flag/clause wins and the text stays.
 
-### Invocation grammar and level detection
+### Invocation grammar and keyword detection
 
-The level is captured from the user's invocation. Same matching applies to `generate`, `create`, `update`, and `regenerate`:
+Only the **keyword** is captured from the user's invocation here — resolution to `VERBOSITY_LEVEL` happens once per flow and is defined in one place per flow (do not resolve it in this file). Same matching applies to `generate`, `create`, `write`, `update`, and `regenerate`:
 
-| Invocation matches (case-insensitive) | `VERBOSITY_LEVEL` |
+| Invocation matches (case-insensitive) | `INVOCATION_VERBOSITY_KEYWORD` |
 |---|---|
 | `<verb> a lean test plan …` / `<verb> lean test plan …` | `lean` |
+| `<verb> a standard test plan …` / `<verb> standard test plan …` | `standard` |
 | `<verb> a detailed test plan …` / `<verb> detailed test plan …` | `detailed` |
-| `<verb> a standard test plan …` / `<verb> standard test plan …` / any invocation without a level keyword | `standard` |
+| Anything else (no level keyword at all) | *unset* |
 
-For `update` / `regenerate`, if the invocation contains no level keyword, fall back to the level persisted in the published `<!-- verbosity: … -->` marker; if that marker is also absent (plan predates this feature), fall back to `standard`. See [`mode-update.md`](mode-update.md) Step 1.
+Flow-based resolution of `VERBOSITY_LEVEL` from `INVOCATION_VERBOSITY_KEYWORD`:
+
+- **Fresh draft** (fresh `generate` / `create` / `write`, or `update` / `regenerate` when no published plan exists) — keyword if set; otherwise `standard`. Resolved before Step 1 per [`../SKILL.md` § Modes of operation](../SKILL.md#modes-of-operation) and not revisited.
+- **Update against an existing published plan** — keyword if set; otherwise the published `<!-- verbosity: … -->` marker if present; otherwise `standard`. Resolved in [`mode-update.md`](mode-update.md) Step 1, which parses `PUBLISHED_VERBOSITY_LEVEL` unconditionally first.
+- **Publish** — level-independent; neither the keyword nor `VERBOSITY_LEVEL` is consulted.
 
 ### What each level renders
 
@@ -55,7 +60,7 @@ For `update` / `regenerate`, if the invocation contains no level keyword, fall b
 
 ### Draft-save marker
 
-At draft-save time (see [`SKILL.md` § Step 3 saving-the-draft](../SKILL.md#saving-the-draft) sub-step 7 or [`mode-update.md`](mode-update.md) Step 6), always prepend `<!-- verbosity: <level> -->` as the top marker of the draft file. This marker is **always emitted regardless of level** — absent markers on already-published plans are handled by the fallback in *Level detection* above.
+At draft-save time (see [`SKILL.md` § Step 3 saving-the-draft](../SKILL.md#saving-the-draft) sub-step 7 or [`mode-update.md`](mode-update.md) Step 6), always prepend `<!-- verbosity: <level> -->` as the top marker of the draft file. This marker is **always emitted regardless of level** — absent markers on already-published plans are handled by the *Update against an existing published plan* bullet in *Flow-based resolution* above (fall back to `standard` when neither an invocation keyword nor a published marker is present).
 
 ### AC/⚠️ safeguard
 
@@ -142,7 +147,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Is not redundant — covers something not already covered by another scenario in this plan or in a sub-issue test plan
 - [ ] **Execution block** is present at the end of the scenario, after the Gherkin block, in the canonical shape defined under *Scenario format*: three checkboxes (`✅ Pass` / `❌ Fail` / `🚫 Blocked`) plus the italic instruction line. All three boxes are unchecked. No `_Scenario updated on..._` callout is present in fresh `generate` mode
 - [ ] **Automation coverage line matches `VERBOSITY_LEVEL`.** Under `lean`: single tag `🤖 automated (N tests)` or `🧪 manual only`. Under `standard`/`detailed`: itemised list per *Automation coverage rules*.
-- [ ] **`**Source:**` line — `detailed` only.** Present between `**Priority:**` and `**Automation coverage**:`; cites verifiable AC items or PR artifacts; never fabricated. Absent under `lean` and `standard`.
+- [ ] **`**Source:**` line — `detailed` only.** Present between `**Priority:**` and `**Automation coverage**:`; cites verifiable sources from the four allowed categories in *Source line rules* (consolidated AC, PR artifact, always-evaluated coverage trigger, or code-derived fact); never fabricated. Absent under `lean` and `standard`.
 
 **Per-section checks (after writing all scenarios in a section):**
 - [ ] Scenarios are coherent as a set — they collectively cover the acceptance criteria for this area
