@@ -52,6 +52,13 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
     onToggle();
   }, [onToggle]);
 
+  const hasFeedItems = Boolean(newsFetchResult && newsFetchResult.feedItems.length > 0);
+
+  // Hide the menu icon entirely when there are no news items to show
+  if (!hasFeedItems) {
+    return null;
+  }
+
   return (
     <EuiToolTip ref={tooltipRef} content={whatsNewLabel} disableScreenReaderOutput>
       <EuiHeaderSectionItemButton
