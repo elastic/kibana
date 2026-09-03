@@ -15,7 +15,11 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
-export { builtInStepDefinitions, getBuiltInStepDefinition } from './spec/builtin_step_definitions';
+export {
+  builtInStepDefinitions,
+  getBuiltInStepDefinition,
+  hitlAuditOutputFields,
+} from './spec/builtin_step_definitions';
 export type { BuiltInStepDefinition } from './spec/builtin_step_definitions';
 export {
   builtInTriggerDefinitions,
