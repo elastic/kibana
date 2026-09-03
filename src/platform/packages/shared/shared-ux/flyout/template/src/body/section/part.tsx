@@ -53,7 +53,10 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
       );
     }
 
-    // The border lands on each subsection, so the section reports it without adding its own panel.
+    // When bordered, the border lands on each subsection, so the section reports it without
+    // adding its own panel.
+    const isBordered = Boolean(authored);
+
     return (
       <FlyoutSection
         id={id}
@@ -61,8 +64,8 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
         icon={icon}
         tooltip={tooltip}
         action={action}
-        hasBorder={authored}
-        borderOnChildren
+        hasBorder={isBordered}
+        borderOnChildren={isBordered}
         data-test-subj={dataTestSubj}
       >
         {items.map((item, index) => {
@@ -71,7 +74,7 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
           }
           return (
             <Fragment key={item.instanceId}>
-              {subsectionPart.resolve(item, { hasBorder: authored ?? false }) ?? null}
+              {subsectionPart.resolve(item, { hasBorder: isBordered }) ?? null}
             </Fragment>
           );
         })}
