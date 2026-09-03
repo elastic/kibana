@@ -76,6 +76,7 @@ export {
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
+  OBLT_DEFAULT_CATEGORIES,
 } from './constants';
 export {
   // Route services

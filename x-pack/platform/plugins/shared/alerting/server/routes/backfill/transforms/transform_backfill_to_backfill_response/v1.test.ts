@@ -8,6 +8,7 @@
 import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponse } from './v1';
 import { backfillInitiator } from '../../../../../common/constants';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 describe('transformBackfillToBackfillResponse', () => {
   const mockBackfillResult: Backfill = {
@@ -34,7 +35,7 @@ describe('transformBackfillToBackfillResponse', () => {
       revision: 0,
       id: '1',
     },
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     start: '2023-11-16T08:00:00.000Z',
     status: 'pending',
     schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
