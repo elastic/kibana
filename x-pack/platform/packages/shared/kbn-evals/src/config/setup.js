@@ -15,7 +15,14 @@ process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, `--require ${requireArg}`]
   .filter(Boolean)
   .join(' ');
 
-export default function globalSetup() {
+export default async function globalSetup(config) {
   // Record the start time for elapsed time calculation in globalTeardown
   process.env.EVAL_START_TIME = String(Date.now());
+
+  const groundTruth = config?.metadata?.groundTruth;
+  if (groundTruth) {
+    const { ensureGroundTruthDir } = require('../ground_truth/ground_truth');
+    // eslint-disable-next-line no-console
+    await ensureGroundTruthDir({ source: groundTruth, log: (message) => console.log(message) });
+  }
 }
