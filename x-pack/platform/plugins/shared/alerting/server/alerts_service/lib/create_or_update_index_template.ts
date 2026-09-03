@@ -11,7 +11,7 @@ import type {
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
@@ -20,6 +20,7 @@ import {
   getTotalFieldsLimitSettings,
   TOTAL_FIELDS_LIMIT_SETTING,
 } from './total_fields_limit_settings';
+import { computeResourceHash, RESOURCE_CONTENT_HASH_META_FIELD } from './resource_hash';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];
@@ -111,11 +112,16 @@ interface CreateOrUpdateIndexTemplateOpts {
  * conflicts. Simulate should return an empty mapping if a template
  * conflicts with an already installed template.
  */
-const getExistingTemplateFieldsLimit = async (
+interface ExistingIndexTemplateInfo {
+  fieldsLimit?: number;
+  contentHash?: string;
+}
+
+const getExistingIndexTemplate = async (
   esClient: ElasticsearchClient,
   name: string,
   logger: Logger
-): Promise<number | undefined> => {
+): Promise<ExistingIndexTemplateInfo | undefined> => {
   try {
     const response = await retryTransientEsErrors(
       () => esClient.indices.getIndexTemplate({ name }),
@@ -124,12 +130,21 @@ const getExistingTemplateFieldsLimit = async (
     const existingTemplate = (response?.index_templates ?? []).find(
       (indexTemplate) => indexTemplate.name === name
     );
-    return getTotalFieldsLimitFromSettings(existingTemplate?.index_template?.template?.settings);
-  } catch (err) {
-    if (err?.statusCode === 404) {
+    if (!existingTemplate) {
       return undefined;
     }
-    throw err;
+    return {
+      fieldsLimit: getTotalFieldsLimitFromSettings(
+        existingTemplate.index_template?.template?.settings
+      ),
+      contentHash: existingTemplate.index_template?._meta?.[RESOURCE_CONTENT_HASH_META_FIELD],
+    };
+  } catch (err) {
+    // Any failure reading the installed template (404, permissions, exhausted
+    // retries) leaves the installed content unknown, which falls through to the
+    // PUT. The check must never block an install that would otherwise succeed.
+    logger.debug(`Could not read installed index template ${name}; will install (${err.message})`);
+    return undefined;
   }
 };
 
@@ -141,18 +156,20 @@ export const createOrUpdateIndexTemplate = async ({
   logger.debug(`Installing index template ${template.name}`);
 
   let templateToInstall = template;
+  let existing: ExistingIndexTemplateInfo | undefined;
   try {
+    existing = await getExistingIndexTemplate(esClient, template.name, logger);
+
     // Never lower a total_fields.limit that is already higher than the configured value;
     // a higher limit may have been set manually or by a previous, higher configuration.
-    const existingLimit = await getExistingTemplateFieldsLimit(esClient, template.name, logger);
     const templateLimit = getTotalFieldsLimitFromSettings(template.template?.settings);
     if (
-      existingLimit !== undefined &&
+      existing?.fieldsLimit !== undefined &&
       templateLimit !== undefined &&
-      existingLimit > templateLimit
+      existing.fieldsLimit > templateLimit
     ) {
       logger.debug(
-        `Preserving existing total_fields.limit of ${existingLimit} for index template ${template.name} instead of lowering it to ${templateLimit}`
+        `Preserving existing total_fields.limit of ${existing.fieldsLimit} for index template ${template.name} instead of lowering it to ${templateLimit}`
       );
       templateToInstall = {
         ...template,
@@ -160,7 +177,7 @@ export const createOrUpdateIndexTemplate = async ({
           ...template.template,
           settings: {
             ...template.template?.settings,
-            [TOTAL_FIELDS_LIMIT_SETTING]: existingLimit,
+            [TOTAL_FIELDS_LIMIT_SETTING]: existing.fieldsLimit,
           },
         },
       };
@@ -168,6 +185,26 @@ export const createOrUpdateIndexTemplate = async ({
   } catch (err) {
     logger.error(`Error fetching existing index template ${template.name} - ${err.message}`, err);
     throw err;
+  }
+
+  // Stamp the content hash (over the template body, excluding the top-level `_meta`
+  // that carries it) so a later install can detect an unchanged template and skip
+  // the cluster-state write.
+  const contentHash = computeResourceHash(omit(templateToInstall, '_meta'));
+  templateToInstall = {
+    ...templateToInstall,
+    _meta: {
+      ...templateToInstall._meta,
+      [RESOURCE_CONTENT_HASH_META_FIELD]: contentHash,
+    },
+  };
+
+  // Skip only on a positive hash match; any missing stamp / error falls through to the PUT.
+  if (existing?.contentHash === contentHash) {
+    logger.debug(
+      `Skipping install of index template ${template.name}; content unchanged (${contentHash})`
+    );
+    return;
   }
 
   let mappings: MappingTypeMapping = {};

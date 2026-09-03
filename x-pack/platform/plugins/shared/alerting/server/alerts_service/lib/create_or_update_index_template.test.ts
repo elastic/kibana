@@ -131,12 +131,24 @@ describe('getIndexTemplate', () => {
 });
 
 describe('createOrUpdateIndexTemplate', () => {
+  // The template is stamped with a content hash in `_meta` before it is installed.
+  const stampedIndexTemplate = (namespace = 'default', useDataStream = false) => {
+    const indexTemplate = IndexTemplate(namespace, useDataStream);
+    return {
+      ...indexTemplate,
+      _meta: {
+        ...indexTemplate._meta,
+        content_hash: expect.stringMatching(/^[0-9a-f]{16}$/),
+      },
+    };
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(global.Math, 'random').mockReturnValue(randomDelayMultiplier);
   });
 
-  it(`should call esClient to put index template`, async () => {
+  it(`should call esClient to put index template, stamped with a content hash`, async () => {
     clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
     await createOrUpdateIndexTemplate({
       logger,
@@ -144,8 +156,62 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
-    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(IndexTemplate());
-    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate());
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should skip the PUT when the installed content hash matches`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+
+    // First install to capture the hash this template stamps.
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+    const installedHash = (
+      clusterClient.indices.putIndexTemplate.mock.calls[0][0] as unknown as {
+        _meta: { content_hash: string };
+      }
+    )._meta.content_hash;
+    clusterClient.indices.putIndexTemplate.mockClear();
+
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: { _meta: { content_hash: installedHash } },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it(`should PUT when the installed content hash differs`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: { _meta: { content_hash: 'stale-hash' } },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
   });
 
   it(`should preserve a higher total_fields.limit from the existing template`, async () => {
@@ -199,7 +265,7 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
-    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate());
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
   });
 
   it(`should install the configured total_fields.limit when the template does not exist`, async () => {
@@ -214,25 +280,23 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
-    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate());
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
   });
 
-  it(`should log and throw when fetching the existing template fails`, async () => {
-    clusterClient.indices.getIndexTemplate.mockRejectedValue(new Error('fetch error'));
+  it(`should PUT when the installed template cannot be read`, async () => {
+    clusterClient.indices.getIndexTemplate.mockRejectedValue(new Error('security_exception'));
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
 
-    await expect(() =>
-      createOrUpdateIndexTemplate({
-        logger,
-        esClient: clusterClient,
-        template: IndexTemplate(),
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"fetch error"`);
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
 
-    expect(logger.error).toHaveBeenCalledWith(
-      `Error fetching existing index template .alerts-test.alerts-default-index-template - fetch error`,
-      expect.any(Error)
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed index template .alerts-test.alerts-default-index-template; will install (security_exception)`
     );
-    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
   it(`should retry on transient ES errors`, async () => {
