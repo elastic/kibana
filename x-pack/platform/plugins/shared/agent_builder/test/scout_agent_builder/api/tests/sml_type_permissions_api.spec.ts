@@ -239,22 +239,20 @@ apiTest.describe(
     apiTest(
       'a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder',
       async ({ apiClient }) => {
-        // Positive control: the same entry at count 1 must be visible to the role holding the named
-        // action. This proves it is a real candidate for the visibility filter, so the count-0
-        // assertions below cannot pass merely because the entry was never reachable.
+        // The same entry at count 1 must be visible to role holding named action.
         await indexEntryWithCount(sysEsClient, 1);
         const holderAtCountOne = await searchSml(apiClient, gatedTypeCredentials);
         expect(holderAtCountOne).toContain(SML_TEST_MALFORMED_KI_TYPE);
 
-        // Overwrite the same id with the malformed count 0 and prove it flips closed for the holder
-        // and the non-holder alike.
+        // Overwrite the same id with malformed count 0 and prove it flips closed for holder
+        // and non-holder.
         await indexEntryWithCount(sysEsClient, 0);
         const holderAtCountZero = await searchSml(apiClient, gatedTypeCredentials);
         expect(holderAtCountZero).not.toContain(SML_TEST_MALFORMED_KI_TYPE);
         const readOnlyAtCountZero = await searchSml(apiClient, smlReadOnlyCredentials);
         expect(readOnlyAtCountZero).not.toContain(SML_TEST_MALFORMED_KI_TYPE);
 
-        // A genuinely public entry still shows, so the guard has not swallowed legitimate count-0 docs.
+        // A genuinely public entry still shows, so the guard has not swallowed legitimate docs.
         expect(readOnlyAtCountZero).toContain(SML_TEST_PUBLIC_KI_TYPE);
       }
     );
