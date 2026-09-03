@@ -107,7 +107,10 @@ function makeEcfReturn(
       crowdstrikeLaunchUrl: undefined,
       globalRegion: 'us-east-1',
       launchedFamilies: [],
+      stackNames: {},
+      stackVersions: {},
       onLaunch: jest.fn(),
+      onStackNameChange: jest.fn(),
     },
   };
 }

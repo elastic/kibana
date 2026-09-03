@@ -11,11 +11,12 @@
  * ECF deploys as one or more CloudFormation stacks in the user's AWS account, forwarding logs to
  * Elastic via an OTLP endpoint.  The wizard collects the necessary parameters (S3 buckets,
  * CloudWatch log groups, global region, OTLP endpoint) across Steps 1–3 so that the Launch button
- * in Step 4 can open the AWS console with everything pre-filled.
+ * in Step 3 can open the AWS console with everything pre-filled.
  *
- * Three template families are supported, each producing its own Launch button in Step 4:
+ * Three template families are supported, each producing its own Launch button:
  *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
- *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams (different S3 param name)
+ *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams
+ *                                                                   (uses `S3SourceBuckets` instead of `S3Buckets`)
  *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
  *
  * Reference templates:
@@ -28,39 +29,31 @@ import type {
   ServiceInstance,
   ServiceVars,
 } from './step_components/service_settings_step/use_service_settings';
+import {
+  buildEcfTemplateUrl,
+  ECF_FALLBACK_TEMPLATE_VERSION,
+} from '../../common/ecf_template_version';
 
-// ── Template URLs ─────────────────────────────────────────────────────────────
+// ── Template filenames ────────────────────────────────────────────────────────
 
-/**
- * S3 URL for the unified multi-signal ECF CloudFormation template.
- * Supports VPC Flow Logs, CloudTrail, ELB access logs, WAF, GuardDuty, and Netskope.
- */
-export const ECF_UNIFIED_TEMPLATE_URL =
-  'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/ecs_logs-cloudformation.yaml';
+/** CloudFormation template filename for the unified multi-signal (ECS) ECF stack. */
+export const ECF_UNIFIED_TEMPLATE_FILE = 'ecs_logs-cloudformation.yaml';
 
-/**
- * S3 URL for the CrowdStrike FDR dedicated ECF CloudFormation template.
- * Uses a separate stack with CrowdStrike-specific parameters.
- */
-export const ECF_CROWDSTRIKE_TEMPLATE_URL =
-  'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/crowdstrike_fdr_cloudformation.yaml';
+/** CloudFormation template filename for the OTel multi-signal ECF stack. */
+export const ECF_OTEL_TEMPLATE_FILE = 'otel_logs-cloudformation.yaml';
 
-/** Default stack name for the unified multi-signal ECF stack. */
+/** CloudFormation template filename for the CrowdStrike FDR dedicated ECF stack. */
+export const ECF_CROWDSTRIKE_TEMPLATE_FILE = 'crowdstrike_fdr_cloudformation.yaml';
+
+// ── Default stack names ───────────────────────────────────────────────────────
+
+/** Default CloudFormation stack name for the unified multi-signal (ECS) ECF stack. */
 export const ECF_UNIFIED_STACK_NAME = 'edot-cloud-forwarder';
 
-/**
- * S3 URL for the OTel multi-signal ECF CloudFormation template.
- * Supports VPC Flow Logs, CloudTrail, ELB access logs, WAF, Network Firewall, and S3 access logs
- * routed to OpenTelemetry-compatible data streams.
- * Note: uses `S3SourceBuckets` instead of `S3Buckets` compared to the ECS unified template.
- */
-export const ECF_OTEL_TEMPLATE_URL =
-  'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/otel_logs-cloudformation.yaml';
-
-/** Default stack name for the unified multi-signal ECF stack. */
+/** Default CloudFormation stack name for the OTel multi-signal ECF stack. */
 export const ECF_OTEL_STACK_NAME = 'edot-cloud-forwarder-otel';
 
-/** Default stack name for the CrowdStrike FDR dedicated ECF stack. */
+/** Default CloudFormation stack name for the CrowdStrike FDR dedicated ECF stack. */
 export const ECF_CROWDSTRIKE_STACK_NAME = 'edot-cloud-forwarder-crowdstrike-fdr';
 
 // ── Type helpers ──────────────────────────────────────────────────────────────
@@ -175,15 +168,22 @@ const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn 
  * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
  * @param region        AWS region for the CloudFormation stack (the global region from Step 2).
  * @param otlpEndpoint  Managed OTLP endpoint URL from `cloud.managedOtlp?.url`.
+ * @param version       ECF template semantic version (from the version-resolver hook).
+ *                      Falls back to `ECF_FALLBACK_TEMPLATE_VERSION` when omitted.
+ * @param stackName     CloudFormation stack name. Defaults to `ECF_UNIFIED_STACK_NAME`.
  */
 export const buildEcfUnifiedCloudFormationUrl = ({
   ecfConfigs,
   region,
   otlpEndpoint,
+  version = ECF_FALLBACK_TEMPLATE_VERSION,
+  stackName = ECF_UNIFIED_STACK_NAME,
 }: {
   ecfConfigs: EcfServiceConfig[];
   region: string;
   otlpEndpoint?: string;
+  version?: string;
+  stackName?: string;
 }): string => {
   const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
   const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
@@ -198,8 +198,8 @@ export const buildEcfUnifiedCloudFormationUrl = ({
 
   // The CloudFormation console uses hash-based routing; params go into the fragment.
   const hashParams = new URLSearchParams();
-  hashParams.set('templateURL', ECF_UNIFIED_TEMPLATE_URL);
-  hashParams.set('stackName', ECF_UNIFIED_STACK_NAME);
+  hashParams.set('templateURL', buildEcfTemplateUrl(ECF_UNIFIED_TEMPLATE_FILE, version));
+  hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
     hashParams.set('param_OTLPEndpoint', otlpEndpoint);
@@ -226,13 +226,19 @@ export const buildEcfUnifiedCloudFormationUrl = ({
  *
  * @param region        AWS region for the CloudFormation stack.
  * @param otlpEndpoint  Managed OTLP endpoint URL.
+ * @param version       ECF template semantic version. Falls back to `ECF_FALLBACK_TEMPLATE_VERSION`.
+ * @param stackName     CloudFormation stack name. Defaults to `ECF_CROWDSTRIKE_STACK_NAME`.
  */
 export const buildEcfCrowdstrikeCloudFormationUrl = ({
   region,
   otlpEndpoint,
+  version = ECF_FALLBACK_TEMPLATE_VERSION,
+  stackName = ECF_CROWDSTRIKE_STACK_NAME,
 }: {
   region: string;
   otlpEndpoint?: string;
+  version?: string;
+  stackName?: string;
 }): string => {
   const url = new URL('https://console.aws.amazon.com/cloudformation/home');
 
@@ -241,8 +247,8 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
   }
 
   const hashParams = new URLSearchParams();
-  hashParams.set('templateURL', ECF_CROWDSTRIKE_TEMPLATE_URL);
-  hashParams.set('stackName', ECF_CROWDSTRIKE_STACK_NAME);
+  hashParams.set('templateURL', buildEcfTemplateUrl(ECF_CROWDSTRIKE_TEMPLATE_FILE, version));
+  hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
     hashParams.set('param_OTLPEndpoint', otlpEndpoint);
@@ -265,15 +271,21 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
  * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
  * @param region        AWS region for the CloudFormation stack.
  * @param otlpEndpoint  Managed OTLP endpoint URL from `cloud.managedOtlp?.url`.
+ * @param version       ECF template semantic version. Falls back to `ECF_FALLBACK_TEMPLATE_VERSION`.
+ * @param stackName     CloudFormation stack name. Defaults to `ECF_OTEL_STACK_NAME`.
  */
 export const buildEcfOtelCloudFormationUrl = ({
   ecfConfigs,
   region,
   otlpEndpoint,
+  version = ECF_FALLBACK_TEMPLATE_VERSION,
+  stackName = ECF_OTEL_STACK_NAME,
 }: {
   ecfConfigs: EcfServiceConfig[];
   region: string;
   otlpEndpoint?: string;
+  version?: string;
+  stackName?: string;
 }): string => {
   const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
   const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
@@ -286,8 +298,8 @@ export const buildEcfOtelCloudFormationUrl = ({
   }
 
   const hashParams = new URLSearchParams();
-  hashParams.set('templateURL', ECF_OTEL_TEMPLATE_URL);
-  hashParams.set('stackName', ECF_OTEL_STACK_NAME);
+  hashParams.set('templateURL', buildEcfTemplateUrl(ECF_OTEL_TEMPLATE_FILE, version));
+  hashParams.set('stackName', stackName);
 
   if (otlpEndpoint) {
     hashParams.set('param_OTLPEndpoint', otlpEndpoint);
