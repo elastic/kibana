@@ -26,10 +26,12 @@ export class AddExceptionFlyoutPage {
   public readonly submitButton: Locator;
   public readonly flyoutTitle: Locator;
 
+  private readonly builderLoaded: Locator;
   private readonly addExceptionButtons: Record<AddExceptionButtonType, Locator>;
 
   constructor(private readonly page: ScoutPage) {
     this.flyoutTitle = this.page.testSubj.locator('exceptionFlyoutTitle');
+    this.builderLoaded = this.page.testSubj.locator('addExceptionFlyoutBuilder-loaded');
     this.itemNameInput = this.page.testSubj.locator('exceptionFlyoutNameInput');
     this.bulkCloseCheckbox = this.page.testSubj.locator('bulkCloseAlertOnAddExceptionCheckbox');
     this.submitButton = this.page.testSubj.locator('addExceptionConfirmButton');
@@ -43,6 +45,8 @@ export class AddExceptionFlyoutPage {
 
   async waitForVisible() {
     await this.flyoutTitle.waitFor({ state: 'visible' });
+    // The field combobox mounts empty before useFetchIndexPatterns resolves; wait for its options.
+    await this.builderLoaded.waitFor({ state: 'visible' });
   }
 
   async addException(buttonType: AddExceptionButtonType) {
