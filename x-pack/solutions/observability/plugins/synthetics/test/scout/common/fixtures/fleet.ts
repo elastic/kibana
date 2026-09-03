@@ -69,6 +69,50 @@ export async function getPackagePolicyForMonitor(
 }
 
 /**
+ * Force-updates a managed synthetics package policy's agent `condition`.
+ * Used to seed a leftover `${agent.id}` pin before asserting that disabling
+ * location sharding clears it — CI locations have no enrolled agents, so
+ * create never stamps a pin on its own.
+ */
+export async function setPackagePolicyCondition(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  policyId: string,
+  condition: string | null
+): Promise<PackagePolicy> {
+  const getRes = await apiClient.get(`api/fleet/package_policies/${policyId}`, {
+    headers,
+    responseType: 'json',
+  });
+  expect(getRes).toHaveStatusCode(200);
+  const item = (getRes.body as { item: PackagePolicy }).item;
+
+  const putRes = await apiClient.put(`api/fleet/package_policies/${policyId}`, {
+    headers,
+    body: {
+      name: item.name,
+      description: item.description,
+      namespace: item.namespace,
+      enabled: item.enabled,
+      is_managed: item.is_managed,
+      package: item.package,
+      inputs: item.inputs.map(({ compiled_input: _compiledInput, ...input }) => ({
+        ...input,
+        streams: input.streams.map(({ compiled_stream: _compiledStream, ...stream }) => stream),
+      })),
+      vars: item.vars,
+      policy_id: item.policy_id,
+      policy_ids: item.policy_ids,
+      force: true,
+      condition,
+    },
+    responseType: 'json',
+  });
+  expect(putRes).toHaveStatusCode(200);
+  return (putRes.body as { item: PackagePolicy }).item;
+}
+
+/**
  * `GET /api/fleet/agent_policies/{id}` -- returns the agent policy's current
  * revision. A monitor write against a scalable (condition-sharded) private
  * location opts out of Fleet's own immediate bump and instead schedules a

@@ -15,6 +15,7 @@ import { appReceivedNewExternalProperties } from '../store/actions';
  */
 export function useStateSyncingActions({
   databaseDocumentID,
+  databaseDocumentTimestamp,
   resolverComponentInstanceID,
   indices,
   filters,
@@ -24,6 +25,10 @@ export function useStateSyncingActions({
    * The `_id` of an event in ES. Used to determine the origin of the Resolver graph.
    */
   databaseDocumentID: string;
+  /**
+   * The `@timestamp` (in milliseconds since epoch) of the analyzed document itself.
+   */
+  databaseDocumentTimestamp?: number;
   resolverComponentInstanceID: string;
   indices: string[];
   shouldUpdate: boolean;
@@ -36,6 +41,7 @@ export function useStateSyncingActions({
       appReceivedNewExternalProperties({
         id: resolverComponentInstanceID,
         databaseDocumentID,
+        databaseDocumentTimestamp,
         resolverComponentInstanceID,
         locationSearch,
         indices,
@@ -46,6 +52,7 @@ export function useStateSyncingActions({
   }, [
     dispatch,
     databaseDocumentID,
+    databaseDocumentTimestamp,
     resolverComponentInstanceID,
     locationSearch,
     indices,
