@@ -6,13 +6,31 @@ Object {
     "bool": Object {
       "filter": Array [
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "term": Object {
-            "processor.event": "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
         Object {
@@ -38,13 +56,31 @@ Object {
     "bool": Object {
       "filter": Array [
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "term": Object {
-            "processor.event": "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
       ],
@@ -59,11 +95,11 @@ Object {
 exports[`hasRumDataWithServiceNameQuery builds a tier restricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
-    "services": Object {
+    "otelServices": Object {
       "aggs": Object {
         "mostTraffic": Object {
           "terms": Object {
-            "field": "service.name",
+            "field": "resource.attributes.service.name",
             "size": 1,
           },
         },
@@ -83,13 +119,31 @@ Object {
     "bool": Object {
       "filter": Array [
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "term": Object {
-            "processor.event": "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
         Object {
@@ -110,11 +164,11 @@ Object {
 exports[`hasRumDataWithServiceNameQuery builds an unrestricted query with a services aggregation 1`] = `
 Object {
   "aggs": Object {
-    "services": Object {
+    "otelServices": Object {
       "aggs": Object {
         "mostTraffic": Object {
           "terms": Object {
-            "field": "service.name",
+            "field": "resource.attributes.service.name",
             "size": 1,
           },
         },
@@ -134,13 +188,31 @@ Object {
     "bool": Object {
       "filter": Array [
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "term": Object {
-            "processor.event": "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
       ],
