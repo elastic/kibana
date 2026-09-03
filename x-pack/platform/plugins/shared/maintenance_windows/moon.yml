@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/maintenance_windows
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/security-plugin'
   - '@kbn/licensing-plugin'

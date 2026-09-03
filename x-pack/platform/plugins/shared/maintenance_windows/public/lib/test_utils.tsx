@@ -8,6 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
@@ -81,9 +82,11 @@ export const createAppMockRenderer = ({
   };
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) =>
     core.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </KibanaContextProvider>
+      <MockAppHeaderProvider>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </KibanaContextProvider>
+      </MockAppHeaderProvider>
     )
   );
 
