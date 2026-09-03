@@ -37,10 +37,12 @@ describe('rumSessionsTransformBody', () => {
     expect(aggregations.ttfb.aggs.p75).toBeDefined();
     expect(aggregations).not.toHaveProperty('sequences');
     expect(JSON.stringify(aggregations)).not.toContain('scripted_metric');
-    expect(aggregations.page_first.aggs.token.top_metrics.size).toBe(1);
-    expect(aggregations.click_first.aggs.token.top_metrics.metrics.field).toBe(
+    expect(aggregations.pages.aggs.token.top_metrics.size).toBe(10);
+    expect(aggregations.page_last.aggs.token.top_metrics.size).toBe(1);
+    expect(aggregations.clicks.aggs.token.top_metrics.metrics.field).toBe(
       'attributes.browser.css_selector'
     );
+    expect(aggregations.last_seen.top_metrics.size).toBe(1);
     expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(10);
     expect(aggregations.last_seen.top_metrics.metrics).toEqual(
       expect.arrayContaining([
@@ -62,7 +64,7 @@ describe('rumSessionsTransformBody', () => {
         { field: 'resource.attributes.user.email' },
       ])
     );
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 9 }));
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 10 }));
     expect(aggregations.last_seen.top_metrics.metrics).toEqual(
       expect.arrayContaining([{ field: 'attributes.url.path.grouped' }])
     );
@@ -93,12 +95,12 @@ describe('rumSessionsTransformBody', () => {
 
   it('builds sequences from native top_metrics, not scripted_metric', () => {
     const { aggregations } = rumSessionsTransformBody.pivot;
-    expect(aggregations.page_first.filter).toEqual(
+    expect(aggregations.pages.filter).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({ minimum_should_match: 1 }),
       })
     );
-    expect(aggregations.page_first.aggs.token.top_metrics.sort).toEqual({
+    expect(aggregations.pages.aggs.token.top_metrics.sort).toEqual({
       '@timestamp': 'asc',
     });
     expect(aggregations.page_last.aggs.token.top_metrics.sort).toEqual({ '@timestamp': 'desc' });
@@ -131,6 +133,9 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('ctx.user_seen');
     expect(source).toContain('ctx.user.key');
     expect(source).toContain('resource.attributes.client.geo.country_iso_code');
+    expect(source).toContain('tokensFrom');
+    expect(source).toContain('token.top');
+    expect(source).toContain('ctx.pages');
     expect(source).toContain('ctx.page_first');
     expect(source).toContain('ctx.replay_event_count');
     expect(source).toContain('ctx.fcp_p75');

@@ -7,12 +7,17 @@
 
 export const RUM_SESSIONS_VERSION = 3;
 /** Pivot / dest-pipeline revision. Replace transform when this changes; dest stays. */
-export const RUM_SESSIONS_SPEC = 9;
+export const RUM_SESSIONS_SPEC = 10;
 /**
- * Transform dest only persists the first `top_metrics` hit (ES #74420).
- * Size 1 is the only value that lands on the session index.
+ * Last-seen / identity `top_metrics` stay size 1 so dest ingest still gets a
+ * flattened metrics map (ES #156876 keeps that shape).
  */
-export const RUM_SEQUENCE_TOP_SIZE = 1;
+export const RUM_LAST_SEEN_TOP_SIZE = 1;
+/**
+ * First-N page/click path on the session dest. ES #156876 writes `token.top[]`
+ * for size > 1. Cap is the cluster default `index.top_metrics_max_size` (10).
+ */
+export const RUM_SEQUENCE_TOP_SIZE = 10;
 export const RUM_CLICK_TARGET_FIELD = 'attributes.browser.css_selector';
 export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;

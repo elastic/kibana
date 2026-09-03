@@ -13,6 +13,7 @@ import {
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
   RUM_CLICK_TARGET_FIELD,
   RUM_HAS_REPLAY_FIELD,
+  RUM_LAST_SEEN_TOP_SIZE,
   RUM_SEQUENCE_TOP_SIZE,
   RUM_SESSION_GROUP_FIELD,
   RUM_SESSIONS_INDEX,
@@ -128,11 +129,11 @@ const lastSeen = (field: string) => ({
   top_metrics: {
     metrics: { field },
     sort: { '@timestamp': 'desc' as const },
-    size: RUM_SEQUENCE_TOP_SIZE,
+    size: RUM_LAST_SEEN_TOP_SIZE,
   },
 });
 
-const earliestSeen = (field: string) => ({
+const sequenceSeen = (field: string) => ({
   top_metrics: {
     metrics: { field },
     sort: { '@timestamp': 'asc' as const },
@@ -175,7 +176,7 @@ const lastSeenMany = {
   top_metrics: {
     metrics: LAST_SEEN_FIELDS.map((field) => ({ field })),
     sort: { '@timestamp': 'desc' as const },
-    size: RUM_SEQUENCE_TOP_SIZE,
+    size: RUM_LAST_SEEN_TOP_SIZE,
   },
 };
 
@@ -430,6 +431,24 @@ export const rumSessionsDestPipeline = {
             tokens.add(token);
             return tokens;
           }
+          def tokensFrom(def bucket, def field) {
+            def out = [];
+            if ((bucket instanceof Map) == false) { return out; }
+            def token = bucket.token;
+            def one = fieldOf(token, field);
+            if (one != '') {
+              addToken(out, one);
+              return out;
+            }
+            def top = token instanceof Map ? token.top : null;
+            if (top instanceof List) {
+              for (hit in top) {
+                def metrics = hit instanceof Map ? hit.metrics : null;
+                addToken(out, fieldOf(metrics, field));
+              }
+            }
+            return out;
+          }
           def joinTokens(def tokens, def sep) {
             def out = '';
             for (int i = 0; i < tokens.length; i++) {
@@ -500,14 +519,18 @@ export const rumSessionsDestPipeline = {
             ctx.error_groups = keys;
           }
           def last = ctx.last_seen;
-          def pageTokens = [];
-          addToken(pageTokens, tokenFrom(ctx.page_first, 'attributes.url.path.grouped'));
+          def pageTokens = tokensFrom(ctx.pages, 'attributes.url.path.grouped');
+          if (pageTokens.length == 0) {
+            addToken(pageTokens, tokenFrom(ctx.page_first, 'attributes.url.path.grouped'));
+          }
           addToken(pageTokens, tokenFrom(ctx.page_last, 'attributes.url.path.grouped'));
           if (pageTokens.length == 0) {
             addToken(pageTokens, fieldOf(last, 'attributes.url.path.grouped'));
           }
-          def clickTokens = [];
-          addToken(clickTokens, tokenFrom(ctx.click_first, 'attributes.browser.css_selector'));
+          def clickTokens = tokensFrom(ctx.clicks, 'attributes.browser.css_selector');
+          if (clickTokens.length == 0) {
+            addToken(clickTokens, tokenFrom(ctx.click_first, 'attributes.browser.css_selector'));
+          }
           addToken(clickTokens, tokenFrom(ctx.click_last, 'attributes.browser.css_selector'));
           ctx.pages = pageTokens;
           ctx.clicks = clickTokens;
@@ -545,7 +568,7 @@ export const rumSessionsDestPipeline = {
             if (ctx.service == null) { ctx.service = new HashMap(); }
             ctx.service.name = service;
           }
-          // Prefer page_view_count (full filter agg). pageTokens is entry+exit only (ES top_metrics size 1).
+          // Prefer page_view_count (full filter agg). Sequence list is capped at top_metrics size.
           ctx.page_count = countOf(ctx.page_view_count);
           def sid = ctx['session.id'];
           if (sid == null && ctx.session instanceof Map) { sid = ctx.session.id; }
@@ -655,21 +678,21 @@ export const buildRumSessionsTransformBody = (
       cls: sessionVitalAgg('cls'),
       fcp: sessionVitalAgg('fcp'),
       ttfb: sessionVitalAgg('ttfb'),
-      page_first: {
-        filter: PAGE_VIEW_FILTER,
-        aggs: { token: earliestSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
-      },
       page_last: {
         filter: PAGE_VIEW_FILTER,
         aggs: { token: lastSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
       },
-      click_first: {
-        filter: CLICK_FILTER,
-        aggs: { token: earliestSeen(RUM_CLICK_TARGET_FIELD) },
+      pages: {
+        filter: PAGE_VIEW_FILTER,
+        aggs: { token: sequenceSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
       },
       click_last: {
         filter: CLICK_FILTER,
         aggs: { token: lastSeen(RUM_CLICK_TARGET_FIELD) },
+      },
+      clicks: {
+        filter: CLICK_FILTER,
+        aggs: { token: sequenceSeen(RUM_CLICK_TARGET_FIELD) },
       },
       rage_clicks: { filter: RAGE_FILTER },
       dead_clicks: { filter: DEAD_FILTER },
@@ -681,7 +704,7 @@ export const buildRumSessionsTransformBody = (
             top_metrics: {
               metrics: USER_IDENTITY_FIELDS.map((field) => ({ field })),
               sort: { '@timestamp': 'desc' as const },
-              size: RUM_SEQUENCE_TOP_SIZE,
+              size: RUM_LAST_SEEN_TOP_SIZE,
             },
           },
         },
