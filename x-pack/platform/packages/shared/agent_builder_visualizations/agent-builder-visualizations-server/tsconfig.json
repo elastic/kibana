@@ -13,6 +13,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/esql-server-utils",
     "@kbn/esql-utils",
+    "@kbn/field-types",
     "@kbn/lens-embeddable-utils",
     "@kbn/logging",
     "@kbn/palettes",
