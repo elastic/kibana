@@ -308,53 +308,53 @@ const processTransformAssetsPerModule = async (
 
       const currentTransformSameAsPrev = matchingTransformFromPrevInstall !== undefined;
       if (force || !currentTransformSameAsPrev) {
-          // If we are reinstalling the package (i.e. force = true),
-          // force delete old transforms so we can reinstall the same transforms again
-          if (force && matchingTransformFromPrevInstall) {
-            transformsToRemoveWithDestIndex.push(matchingTransformFromPrevInstall);
-          } else {
-            // If upgrading from old json schema to new yml schema
-            // We need to make sure to delete those transforms by matching the legacy naming convention
-            const versionsFromOldJsonSchema = previousInstalledTransformEsAssets.filter((t) =>
-              t.id.startsWith(
-                getLegacyTransformNameForInstallation(
-                  installablePackage,
-                  `${transformModuleId}/default.json`
-                )
+        // If we are reinstalling the package (i.e. force = true),
+        // force delete old transforms so we can reinstall the same transforms again
+        if (force && matchingTransformFromPrevInstall) {
+          transformsToRemoveWithDestIndex.push(matchingTransformFromPrevInstall);
+        } else {
+          // If upgrading from old json schema to new yml schema
+          // We need to make sure to delete those transforms by matching the legacy naming convention
+          const versionsFromOldJsonSchema = previousInstalledTransformEsAssets.filter((t) =>
+            t.id.startsWith(
+              getLegacyTransformNameForInstallation(
+                installablePackage,
+                `${transformModuleId}/default.json`
               )
-            );
+            )
+          );
 
-            if (versionsFromOldJsonSchema.length > 0) {
-              transformsToRemoveWithDestIndex.push(...versionsFromOldJsonSchema);
-            }
-
-            // If upgrading from yml to newer version of yaml
-            // Match using new naming convention — use a deterministic prefix to avoid
-            // splitting on a version string that may appear in the module id.
-            const installNameWithoutVersion = getTransformAssetNameForInstallation(
-              installablePackage,
-              transformModuleId,
-              'default-'
-            );
-            const prevVersions = previousInstalledTransformEsAssets.filter((t) =>
-              t.id.startsWith(installNameWithoutVersion)
-            );
-            if (prevVersions.length > 0) {
-              transformsToRemove.push(...prevVersions);
-            }
+          if (versionsFromOldJsonSchema.length > 0) {
+            transformsToRemoveWithDestIndex.push(...versionsFromOldJsonSchema);
           }
-          transforms.push({
+
+          // If upgrading from yml to newer version of yaml
+          // Match using new naming convention — use a deterministic prefix to avoid
+          // splitting on a version string that may appear in the module id.
+          const installNameWithoutVersion = getTransformAssetNameForInstallation(
+            installablePackage,
             transformModuleId,
-            installationName,
-            installationOrder,
-            transformVersion,
-            content,
-            runAsKibanaSystem,
-          });
-          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
-          if (aliasNames.length > 0) {
-            aliasesRefs.push(...aliasNames);
+            'default-'
+          );
+          const prevVersions = previousInstalledTransformEsAssets.filter((t) =>
+            t.id.startsWith(installNameWithoutVersion)
+          );
+          if (prevVersions.length > 0) {
+            transformsToRemove.push(...prevVersions);
           }
+        }
+        transforms.push({
+          transformModuleId,
+          installationName,
+          installationOrder,
+          transformVersion,
+          content,
+          runAsKibanaSystem,
+        });
+        transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
+        if (aliasNames.length > 0) {
+          aliasesRefs.push(...aliasNames);
+        }
       } else {
         transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
       }

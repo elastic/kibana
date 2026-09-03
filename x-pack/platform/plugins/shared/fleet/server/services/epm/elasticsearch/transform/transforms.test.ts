@@ -528,8 +528,14 @@ _meta:
     const previousInstallation: Installation = {
       installed_es: [
         { id: 'metrics-endpoint.policy-0.16.0-dev.0', type: ElasticsearchAssetType.ingestPipeline },
-        { id: 'logs-endpoint.metadata_current-default-0.1.0', type: ElasticsearchAssetType.transform },
-        { id: 'logs-endpoint.metadata_current-default-0.15.0', type: ElasticsearchAssetType.transform },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.15.0',
+          type: ElasticsearchAssetType.transform,
+        },
       ],
     } as unknown as Installation;
 

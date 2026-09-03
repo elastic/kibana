@@ -57,7 +57,9 @@ export const reconcileTransforms = async (
     if (orphanIds.length === 0) return;
 
     logger.info(
-      `[Fleet] Reconciling ${orphanIds.length} orphaned transform(s) for package ${pkgName}: ${orphanIds.join(', ')}`
+      `[Fleet] Reconciling ${
+        orphanIds.length
+      } orphaned transform(s) for package ${pkgName}: ${orphanIds.join(', ')}`
     );
 
     // Never delete destination indices for ES-discovered orphans — a destination
@@ -65,7 +67,9 @@ export const reconcileTransforms = async (
     await deleteTransforms(esClient, orphanIds, false);
   } catch (err) {
     logger.warn(
-      `[Fleet] Transform reconciliation for package ${pkgName} failed (non-fatal): ${err?.message ?? err}`
+      `[Fleet] Transform reconciliation for package ${pkgName} failed (non-fatal): ${
+        err?.message ?? err
+      }`
     );
   }
 };

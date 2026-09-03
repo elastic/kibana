@@ -79,9 +79,15 @@ describe('reconcileTransforms', () => {
         // @ts-expect-error incomplete data
         { id: 'endpoint.metadata_current-default-0.1.0', _meta: { package: { name: 'endpoint' } } },
         // @ts-expect-error incomplete data
-        { id: 'endpoint.metadata_current-default-0.15.0', _meta: { package: { name: 'endpoint' } } },
+        {
+          id: 'endpoint.metadata_current-default-0.15.0',
+          _meta: { package: { name: 'endpoint' } },
+        },
         // @ts-expect-error incomplete data
-        { id: 'endpoint.metadata_current-default-0.16.0', _meta: { package: { name: 'endpoint' } } },
+        {
+          id: 'endpoint.metadata_current-default-0.16.0',
+          _meta: { package: { name: 'endpoint' } },
+        },
       ],
     });
 
@@ -143,9 +149,7 @@ describe('reconcileTransforms', () => {
     });
 
     await expect(reconcileTransforms(esClient, logger, 'endpoint', [])).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('cluster unreachable')
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unreachable'));
   });
 
   test('swallows deleteTransform errors and logs a warning', async () => {
