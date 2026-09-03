@@ -59,7 +59,7 @@ spaceTest.describe('Lens dimension editor', { tag: '@local-stateful-classic' }, 
         // Existing style PO does not close the dimension editor (FTR did). Close first.
         await lens.closeDimensionEditor();
         await lens.style.openStyleSettingsFlyout();
-        await lens.style.setCurvedLines('CURVE_MONOTONE_X');
+        await lens.style.setCurvedLines('Smooth');
         await lens.style.editMissingValues('Linear');
         // The SuperSelect button also renders a hidden screen-reader suffix ("Linear, ").
         await expect(lens.style.missingValuesSelect).toContainText('Linear');
