@@ -10,6 +10,7 @@
 import type {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
+  InjectedMetadataDisplayLanguage,
   InjectedMetadataExternalUrlPolicy,
   InjectedMetadataPlugin,
   InjectedMetadataTheme,
@@ -43,6 +44,7 @@ export interface InternalInjectedMetadataSetup {
   };
   getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
+  getI18nInfo: () => InjectedMetadataDisplayLanguage;
   /**
    * An array of frontend plugins in topological order.
    */

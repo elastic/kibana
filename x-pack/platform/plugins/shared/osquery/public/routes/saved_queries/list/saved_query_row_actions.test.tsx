@@ -94,23 +94,27 @@ describe('SavedQueryRowActions', () => {
   });
 
   describe('menu items for prebuilt query with write permissions', () => {
-    it('should show Edit and Duplicate but NOT Delete for prebuilt query', () => {
+    it('should show View query and Duplicate but NOT Edit or Delete for prebuilt query', () => {
       renderComponent(createSavedQuery({ prebuilt: true }));
       openKebabMenu();
 
-      expect(screen.getByText('Edit query')).toBeInTheDocument();
+      // A prebuilt query opens as a read-only details page even for a writer,
+      // so the kebab must not offer "Edit query".
+      expect(screen.getByText('View query')).toBeInTheDocument();
+      expect(screen.queryByText('Edit query')).not.toBeInTheDocument();
       expect(screen.getByText('Duplicate query')).toBeInTheDocument();
       expect(screen.queryByText('Delete query')).not.toBeInTheDocument();
     });
   });
 
   describe('menu items without write permissions', () => {
-    it('should only show Edit when user lacks writeSavedQueries', () => {
+    it('should show View query (not Edit query) when user lacks writeSavedQueries', () => {
       setupKibana(ROLE_CAPABILITIES.reader);
       renderComponent(createSavedQuery());
       openKebabMenu();
 
-      expect(screen.getByText('Edit query')).toBeInTheDocument();
+      expect(screen.getByText('View query')).toBeInTheDocument();
+      expect(screen.queryByText('Edit query')).not.toBeInTheDocument();
       expect(screen.queryByText('Duplicate query')).not.toBeInTheDocument();
       expect(screen.queryByText('Delete query')).not.toBeInTheDocument();
     });

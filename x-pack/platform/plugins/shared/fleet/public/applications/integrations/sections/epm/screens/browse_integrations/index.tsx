@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
+import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
 import { CardIcon } from '../../../../../../components/package_icon';
 import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
@@ -32,8 +33,6 @@ import {
   ManageIntegrationsTable,
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
-
-const OBLT_DEFAULT_CATEGORIES = ['opentelemetry', 'observability'];
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
