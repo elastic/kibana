@@ -136,6 +136,28 @@ export async function getAgentPolicyRevision(
 }
 
 /**
+ * Forces an immediate run of `SyncPrivateLocationMonitorsTask` — the task that
+ * actually creates/updates a private location's Fleet package policies —
+ * instead of waiting out its default 5-minute (`MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL`)
+ * schedule. A monitor's package policy (even the sentinel-`condition` one a
+ * scalable location stamps before any agent enrolls) only exists once this
+ * task has run at least once; without triggering it, a freshly-created
+ * monitor has no package policy at all until the next natural tick, which is
+ * far outside any reasonable test-polling window.
+ */
+export async function triggerPrivateLocationsSync(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>
+) {
+  const res = await apiClient.post(
+    'internal/synthetics/trigger_task_run/syncPrivateLocationMonitors',
+    { headers, responseType: 'json' }
+  );
+  expect(res).toHaveStatusCode(200);
+  return res;
+}
+
+/**
  * Force-deletes a single Fleet package policy by id. Mirrors the FTR
  * `deletePackagePolicyDirectly` helper used to simulate a corrupted/missing
  * package policy before a reset.

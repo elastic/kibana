@@ -20,6 +20,7 @@ import {
   indexFakeFleetAgent,
   setFleetAgentLastCheckin,
   deleteFleetAgents,
+  triggerPrivateLocationsSync,
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
@@ -100,6 +101,12 @@ apiTest.describe('ScalablePrivateLocationRebalance', { tag: ['@local-stateful-cl
         });
         monitorIds.push((res.body as { id: string }).id);
       }
+
+      // A monitor has no package policy at all until SyncPrivateLocationMonitorsTask
+      // has run at least once; its natural schedule is 5 minutes
+      // (MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL), far outside the poll window
+      // below, so force it to run now instead of waiting it out.
+      await triggerPrivateLocationsSync(apiClient, editorHeaders);
 
       const initialAssignment = new Map<string, string>();
       await tryForTime(90_000, async () => {
