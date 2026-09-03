@@ -22,6 +22,16 @@ export async function areNodeModulesPresent() {
 }
 
 /**
+ * Detect a node_modules left behind by a prior yarn install. Installing pnpm on
+ * top of it corrupts package state (e.g. cypress' postinstall fails), so callers
+ * should force a clean reinstall when this returns true.
+ * @returns {boolean}
+ */
+export function hasYarnInstallLeftovers() {
+  return Fs.existsSync(Path.resolve(REPO_ROOT, 'node_modules', '.yarn-integrity'));
+}
+
+/**
  * Verify pnpm is available before we spawn it, and warn on version drift.
  * We deliberately don't ship a package.json "packageManager" field: while the
  * repo is mid-migration it still relies on yarn (the `yarn kbn` entrypoint and

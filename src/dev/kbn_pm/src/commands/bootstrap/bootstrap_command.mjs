@@ -11,7 +11,7 @@ import { run } from '../../lib/spawn.mjs';
 import { moonRun } from '../../lib/moon.mjs';
 import External from '../../lib/external_packages.js';
 
-import { pnpmInstallDeps, ensurePnpmAvailable } from './pnpm.mjs';
+import { pnpmInstallDeps, ensurePnpmAvailable, hasYarnInstallLeftovers } from './pnpm.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
@@ -68,7 +68,13 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
-    const forceInstall = args.getBooleanValue('force-install');
+    let forceInstall = args.getBooleanValue('force-install');
+    if (!forceInstall && hasYarnInstallLeftovers()) {
+      log.warning(
+        'detected a leftover yarn install (node_modules/.yarn-integrity); forcing a clean pnpm reinstall'
+      );
+      forceInstall = true;
+    }
     const skipPrebuilt =
       args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
 
