@@ -136,6 +136,8 @@ describe('conversation model converters', () => {
         updated_at: '2025-08-04T06:44:19.123Z',
         read: false,
         read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-1',
@@ -201,6 +203,41 @@ describe('conversation model converters', () => {
       expect(deserialized.read_by).toEqual([{ userId: 'other_user_id' }]);
     });
 
+    it('seeds pinned_by for a legacy owner-pinned document', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(true);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner pinned_by for a legacy pinned document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit pinned_by instead of overwriting it from the legacy pinned flag', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+      serialized._source.pinned_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
     it('deserializes the conversation with legacy rounds field', () => {
       const serialized = documentBase();
       // @ts-ignore simulating legacy document
@@ -248,6 +285,8 @@ describe('conversation model converters', () => {
         updated_at: '2025-08-04T06:44:19.123Z',
         read: false,
         read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-legacy',
@@ -770,6 +809,8 @@ describe('conversation model converters', () => {
           ...conversationBase(),
           read: true,
           read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
           access_control: {
             access_mode: ConversationAccessControlMode.Private,
             entries: [],
@@ -781,7 +822,9 @@ describe('conversation model converters', () => {
       });
 
       expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
       expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
     });
 
     it('deserializes template metadata through the injected resolver', () => {
@@ -824,6 +867,8 @@ describe('conversation model converters', () => {
                 ...conversationBase(),
                 read: true,
                 read_by: [{ userId: 'user_id' }],
+                pinned: true,
+                pinned_by: [{ userId: 'user_id' }],
                 access_control: {
                   access_mode: ConversationAccessControlMode.Private,
                   entries: [],
@@ -834,6 +879,7 @@ describe('conversation model converters', () => {
               'space'
             ),
             read_by: [{ userId: 'user_id' }],
+            pinned_by: [{ userId: 'user_id' }],
           },
         },
         user: requestingUser,
@@ -841,11 +887,31 @@ describe('conversation model converters', () => {
       });
 
       expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
       expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
     });
   });
 
   describe('toEs', () => {
+    it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
+      const serialized = toEs(
+        {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
+        },
+        'space'
+      );
+
+      expect(serialized.read_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
+
     it('serializes the conversation using new conversation_rounds field', () => {
       const conversation = conversationBase();
       const serialized = toEs(conversation, 'another-space');
@@ -885,6 +951,7 @@ describe('conversation model converters', () => {
         // Legacy field explicitly set to undefined
         rounds: undefined,
         read_by: [],
+        pinned_by: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
@@ -1167,6 +1234,20 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('creates an unpinned, unread conversation with empty per-user lists', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.read_by).toEqual([]);
+      expect(serialized.pinned_by).toEqual([]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
+
     it('includes state property when creating new conversation', () => {
       const conversation = {
         agent_id: 'agent_id',
