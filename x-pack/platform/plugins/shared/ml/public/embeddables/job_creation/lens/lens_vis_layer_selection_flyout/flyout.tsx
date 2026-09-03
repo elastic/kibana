@@ -18,9 +18,11 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { getTitle } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
+import { loadMlServerInfo } from '../../../../application/services/ml_server_info';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
@@ -33,21 +35,45 @@ interface Props {
 
 export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const {
-    services: { data, lens },
+    services: {
+      data,
+      lens,
+      mlServices: { mlApi },
+    },
   } = useMlFromLensKibanaContext();
 
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const visExtractor = new VisualizationExtractor();
-    visExtractor
-      .getResultLayersFromEmbeddable(embeddable, lens)
-      .then(setLayerResults)
-      .catch((error) => {
+    let cancelled = false;
+
+    async function fetchLayerResults() {
+      setIsLoading(true);
+      try {
+        await loadMlServerInfo(mlApi);
+        const visExtractor = new VisualizationExtractor();
+        const results = await visExtractor.getResultLayersFromEmbeddable(embeddable, lens);
+        if (cancelled) {
+          return;
+        }
+        setLayerResults(results);
+        setIsLoading(false);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
         // eslint-disable-next-line no-console
         console.error('Layers could not be extracted from embeddable', error);
         onClose();
-      });
+      }
+    }
+
+    void fetchLayerResults();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, lens, embeddable]);
 
@@ -72,9 +98,11 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {layerResults.map((layer, i) => (
-          <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
-        ))}
+        <EuiSkeletonText lines={4} isLoading={isLoading}>
+          {layerResults.map((layer, i) => (
+            <Layer layer={layer} layerIndex={i} key={layer.id} embeddable={embeddable} />
+          ))}
+        </EuiSkeletonText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

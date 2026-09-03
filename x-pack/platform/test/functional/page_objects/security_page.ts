@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { adminTestUser } from '@kbn/test';
 import type {
   AuthenticatedUser,
@@ -575,7 +576,7 @@ export class SecurityPageObject extends FtrService {
   }
 
   async backToUsersList() {
-    await this.find.clickByButtonText('Back to users');
+    await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
   }
 
   async createUser(user: UserFormValues) {
