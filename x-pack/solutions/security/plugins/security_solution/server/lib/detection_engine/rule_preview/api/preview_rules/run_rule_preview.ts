@@ -258,7 +258,7 @@ export const runRulePreview = async (
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       savedObjectsClient,
-      internalUserEsClient
+      scopedClusterClientWithCps.asCurrentUser
     );
 
     while (invocationCount > 0 && !isAborted) {
