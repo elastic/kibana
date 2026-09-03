@@ -148,7 +148,7 @@ export KBN_EVALS_HTTP_RETRIES="${KBN_EVALS_HTTP_RETRIES:-3}"
 # measured worst case -- the suite-level budget catches a truly wedged run.
 export KBN_EVALS_HTTP_TIMEOUT_MS="${KBN_EVALS_HTTP_TIMEOUT_MS:-1500000}"
 export EVAL_REPETITIONS="${EVAL_REPETITIONS:-1}"
-export PERSONA_MATRIX_TIMEOUT_MINUTES="${PERSONA_MATRIX_TIMEOUT_MINUTES:-30}"
+export PERSONA_MATRIX_TIMEOUT_MINUTES="${PERSONA_MATRIX_TIMEOUT_MINUTES:-120}"
 export AGENT_BUILDER_INFERENCE_TIMEOUT_MS=600000
 export SCOUT_READY_TIMEOUT_MS=900000
 CCM_KEY=$(python3 -c "import json; d=json.load(open('/home/orcaeval/.elastic/eis-ccm-key.json')); print(d.get('api_key','') or d.get('key',''))")

@@ -116,7 +116,16 @@ def suite_profile(suite: Optional[str] = None) -> dict:
 # never finish -- GLM has never exceeded 10/21 in three weeks of attempts.
 # 180 min leaves headroom above the measured worst case without hiding a hang:
 # a genuinely wedged run still dies on the per-request KBN_EVALS_HTTP_TIMEOUT_MS.
-MODEL_ENV = {"eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATRIX_CONCURRENCY=3"}
+MODEL_ENV = {
+    "eis-zai-glm-5-2": "PERSONA_MATRIX_TIMEOUT_MINUTES=180 PERSONA_MATRIX_CONCURRENCY=3",
+    # GLM-5.3-flash via OpenRouter is the same slow class: measured ~4.8
+    # min/example on a healthy run. A 3-example shard therefore needs ~15 min
+    # of model work, but a shard that draws several slow examples plus retries
+    # blew the 30-min suite default (run 8, "Test timeout of 1800000ms
+    # exceeded" at attempt 2/3). 120 min per shard leaves headroom without
+    # hiding a wedge: per-request KBN_EVALS_HTTP_TIMEOUT_MS still bounds a hang.
+    "openrouter-zai-glm-5-3-flash": "PERSONA_MATRIX_TIMEOUT_MINUTES=120",
+}
 # Vars forwarded to every VM. EVAL_CONNECTOR_ID must stay here: run_model.sh only
 # honours an override it actually receives, and otherwise re-derives its Anthropic
 # default — a judge-panel sweep would then grade with the incumbent judge and still
