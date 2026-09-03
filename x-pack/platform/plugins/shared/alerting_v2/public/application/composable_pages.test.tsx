@@ -9,7 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
-import type { AlertingV2PageProps } from './composable_pages';
+import type { Container } from 'inversify';
+import type { InternalPageProps } from './composable_pages';
 
 const ALL_CAPABILITIES = {
   alerting_v2_rules: { read: true, all: true },
@@ -100,9 +101,9 @@ const createMockCoreStart = () => {
   } as unknown as CoreStart;
 };
 
-const defaultProps = () => ({
+const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
-  container: createMockContainer() as any,
+  container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
 });
 
@@ -110,11 +111,11 @@ const renderInRouter = (ui: React.ReactElement, path = '/') =>
   render(<MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>);
 
 describe('composable pages', () => {
-  let AlertingV2RulesPage: React.ComponentType<any>;
-  let AlertingV2RuleLibraryPage: React.ComponentType<any>;
-  let AlertingV2EpisodesPage: React.ComponentType<any>;
-  let AlertingV2ActionPoliciesPage: React.ComponentType<any>;
-  let AlertingV2ExecutionHistoryPage: React.ComponentType<any>;
+  let AlertingV2RulesPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2RuleLibraryPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2EpisodesPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2ActionPoliciesPage: React.ComponentType<InternalPageProps>;
+  let AlertingV2ExecutionHistoryPage: React.ComponentType<InternalPageProps>;
 
   beforeAll(async () => {
     const mod = await import('./composable_pages');

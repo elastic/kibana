@@ -43,7 +43,7 @@ export interface AlertingV2PageProps {
 }
 
 /** Internal props — includes the DI container injected by the lazy wrapper. */
-interface InternalPageProps extends AlertingV2PageProps {
+export interface InternalPageProps extends AlertingV2PageProps {
   container: Container;
 }
 
