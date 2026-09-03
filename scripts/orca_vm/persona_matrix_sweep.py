@@ -697,6 +697,15 @@ def self_test() -> int:
         check("TEST_RUN_ID reaches the VM",
               "export TEST_RUN_ID=sweep-1-s1of2 && " in
               build_env_prefix("m", {"TEST_RUN_ID": shard_run_id("sweep-1", "1/2")}), True)
+        # The gate's "latest execution for this model" lookup must be pinned to
+        # the shard's own run id. Unpinned, it returned whichever shard wrote
+        # last and both shards gated against one id (154 vs a 140 gate) --
+        # every earlier check still passed while the sweep stayed broken.
+        _gate_src = inspect.getsource(check_golden)
+        check("gate lookup filters by shard run id",
+              'shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)' in _gate_src, True)
+        check("gate lookup uses an execution_id prefix",
+              'metadata.execution_id.keyword' in _gate_src, True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
 
@@ -883,14 +892,23 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
         except Exception as exc:
             return {"count": -1, "error": f"cannot count local evaluators: {exc}"}
 
+    # With sharding, several VMs run the SAME model against the same suite and
+    # each writes its own execution_id. A "latest for this model" lookup then
+    # returns whichever shard finished last, and every shard gates against that
+    # one id -- shard 2/2 counted shard 1/2's 154 docs against its 140 gate.
+    # Pin the lookup to this shard's own run id prefix.
+    _latest_must = [
+        {"term": {"task.model.id": stored_id}},
+        {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
+    ]
+    if shard:
+        _run_id = shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)
+        _latest_must.append({"prefix": {"metadata.execution_id.keyword": f"{_run_id}::"}})
     latest_cmd_q = json.dumps({
         "size": 1,
         "_source": ["metadata.execution_id"],
         "sort": [{"@timestamp": {"order": "desc"}}],
-        "query": {"bool": {"must": [
-            {"term": {"task.model.id": stored_id}},
-            {"term": {"metadata.suite_id": suite_profile()["gate_suite_id"]}},
-        ]}},
+        "query": {"bool": {"must": _latest_must}},
     })
     # NOTE: cmd is passed to ssh as a single argv (no local shell), so the
     # remote shell is the ONLY quoting layer — use plain double quotes.
