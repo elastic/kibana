@@ -518,6 +518,26 @@ describe('RuleBuilderAlertConditionStep', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders optional as a label append instead of in the field title', () => {
+    const builderState = makeBuilderState();
+
+    render(
+      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    expect(screen.getAllByText('Filter')).toHaveLength(2);
+    expect(screen.getAllByText('optional')).toHaveLength(2);
+    expect(screen.queryByText('Filter (optional)')).not.toBeInTheDocument();
+    expect(screen.getByText('Evaluations')).toBeInTheDocument();
+    expect(screen.queryByText('Evaluations (optional)')).not.toBeInTheDocument();
+  });
+
   it('sets and displays filter input value', () => {
     const onBuilderStateChange = jest.fn();
     const builderState = makeBuilderState();

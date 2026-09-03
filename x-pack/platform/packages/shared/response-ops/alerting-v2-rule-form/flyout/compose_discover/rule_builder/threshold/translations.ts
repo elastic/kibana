@@ -109,6 +109,10 @@ export const THRESHOLD_CREATE_FLYOUT_TITLE = i18n.translate(
   { defaultMessage: 'Create Threshold rule' }
 );
 
+export const OPTIONAL_LABEL = i18n.translate('xpack.alertingV2.ruleBuilder.optionalLabel', {
+  defaultMessage: 'optional',
+});
+
 export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(
   'xpack.alertingV2.ruleBuilder.stats.labelRequiredError',
   { defaultMessage: 'Label is required.' }

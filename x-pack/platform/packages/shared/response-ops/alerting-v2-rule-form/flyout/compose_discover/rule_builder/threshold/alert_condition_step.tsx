@@ -67,6 +67,7 @@ import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
+  OPTIONAL_LABEL,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
@@ -543,8 +544,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
       <EuiFormRow
         label={i18n.translate('xpack.alertingV2.ruleBuilder.filterLabel', {
-          defaultMessage: 'Filter (optional)',
+          defaultMessage: 'Filter',
         })}
+        labelAppend={OPTIONAL_LABEL}
         fullWidth
       >
         <EuiFieldText
@@ -696,8 +698,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
               <EuiSpacer size="xs" />
               <EuiFormRow
                 label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.filterLabel', {
-                  defaultMessage: 'Filter (optional)',
+                  defaultMessage: 'Filter',
                 })}
+                labelAppend={<EuiText size="xs">{OPTIONAL_LABEL}</EuiText>}
                 fullWidth
               >
                 <EuiFieldText
@@ -735,7 +738,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <h4>
           <FormattedMessage
             id="xpack.alertingV2.ruleBuilder.evaluationsTitle"
-            defaultMessage="Evaluations (optional)"
+            defaultMessage="Evaluations"
           />
         </h4>
       </EuiTitle>
