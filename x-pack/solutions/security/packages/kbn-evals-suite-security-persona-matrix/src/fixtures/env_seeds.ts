@@ -93,16 +93,40 @@ async function ensureIndexWithDocs(
       (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
     if (status !== 400) throw err;
   });
-  await esClient.bulk({
-    index,
-    refresh: 'wait_for',
-    operations: [
-      ...docs.flatMap((doc) => [{ create: {} }, doc] as const),
-      // marker doc so idempotent reruns skip
-      { create: { _id: markerId } },
-      { seeded: true, seeded_at: new Date().toISOString() },
-    ],
-  });
+  // The bulk can transiently fail right after boot (ES still initializing,
+  // index going yellow, master flap). A single-shot failure here kills the
+  // whole eval attempt (~60min of model work on slow models), so retry the
+  // seed with backoff instead of letting a 5-second blip fail the run.
+  const bulkOperations = [
+    ...docs.flatMap((doc) => [{ create: {} }, doc] as const),
+    // marker doc so idempotent reruns skip
+    { create: { _id: markerId } },
+    { seeded: true, seeded_at: new Date().toISOString() },
+  ];
+  const MAX_SEED_ATTEMPTS = 5;
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_SEED_ATTEMPTS; attempt++) {
+    try {
+      await esClient.bulk({
+        index,
+        refresh: 'wait_for',
+        operations: bulkOperations,
+      });
+      lastError = undefined;
+      break;
+    } catch (err) {
+      lastError = err;
+      const isLast = attempt === MAX_SEED_ATTEMPTS;
+      log.warning(
+        `[env-seed] bulk into ${index} failed (attempt ${attempt}/${MAX_SEED_ATTEMPTS}): ${String(
+          err
+        )}`
+      );
+      if (isLast) throw err;
+      await new Promise((r) => setTimeout(r, attempt * 10_000));
+    }
+  }
+  if (lastError !== undefined) throw lastError;
   log.info(`[env-seed] seeded ${docs.length} docs into ${index}`);
 }
 
