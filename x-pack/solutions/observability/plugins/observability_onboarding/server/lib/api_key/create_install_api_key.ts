@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import type { CreateAPIKeyParams } from '@kbn/security-plugin/server';
 
 /**
