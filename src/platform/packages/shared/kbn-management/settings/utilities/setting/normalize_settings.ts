@@ -108,6 +108,7 @@ export const normalizeSettings = (rawSettings: RawSettings): Record<string, UiSe
   entries.forEach(([id, rawSetting]) => {
     const type = deriveType(rawSetting);
     if (!type) {
+      // eslint-disable-next-line no-console
       console.warn(`Ignoring incompatible UiSetting '${id}'.`);
       return;
     }
