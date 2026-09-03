@@ -315,6 +315,14 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
           default: medium
       required:
         - reason`,
+        `- name: ask_in_slack
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      slack_api:
+        connector-id: my-slack-api-connector
+        channels: ['C0123456789', '#alerts']`,
       ],
     },
   },
@@ -343,7 +351,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         connector-id: my-slack-webhook-connector
       slack_api:
         connector-id: my-slack-api-connector
-        channels: ['C0123456789']`,
+        channels: ['C0123456789', '#alerts']`,
       ],
     },
   },

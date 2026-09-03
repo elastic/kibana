@@ -20,13 +20,14 @@ const mockProductFeaturesService = {
 } as unknown as ProductFeaturesService;
 
 describe('getRuleMigrationStatsTool', () => {
-  const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
+  const { mockCore, mockLogger, mockEsClient, mockSecurityStart, mockRequest } =
+    createToolTestMocks();
   const tool = getRuleMigrationStatsTool(mockCore, mockLogger, mockProductFeaturesService);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient, mockSecurityStart);
     mockFetch = jest.fn();
     (mockCoreStart.http.selfClient.asScoped as unknown as jest.Mock).mockReturnValue({
       fetch: mockFetch,
@@ -62,9 +63,7 @@ describe('getRuleMigrationStatsTool', () => {
     expect(result.results[0].data).toEqual(stats);
   });
 
-  it('should normalize a 204 (no items) to an explicit empty zero-shape', async () => {
-    // 204 No Content → body is null/undefined. The tool must return a readable empty shape
-    // so the skill/state-matrix zero-checks (items.pending === 0) always have a shape.
+  it('should return an error result for a 204 (migration has no rule items)', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/stats' },
       request: new Request('http://localhost/x'),
@@ -77,21 +76,8 @@ describe('getRuleMigrationStatsTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(result.results[0].type).toBe(ToolResultType.other);
-    const data = result.results[0].data as {
-      id: string;
-      status: string;
-      items: Record<string, number>;
-    };
-    expect(data.id).toBe('abc');
-    expect(data.status).toBe('finished');
-    expect(data.items).toEqual({
-      total: 0,
-      pending: 0,
-      processing: 0,
-      completed: 0,
-      failed: 0,
-    });
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect((result.results[0].data as { message: string }).message).toContain('abc');
   });
 
   it('should return an error result when the call fails', async () => {
