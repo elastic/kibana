@@ -104,6 +104,11 @@ const QUERY_SANDBOX_LABEL = i18n.translate(
   }
 );
 
+const PREVIEW_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.previewButtonLabel',
+  { defaultMessage: 'Preview' }
+);
+
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
   defaultMessage: 'Edit mode selection',
 });
@@ -1287,19 +1292,43 @@ export function ComposeDiscoverFlyout({
                     />
                   </EuiFlexItem>
                 )}
-                {isBuilderMode && isEditing && onSwitchToEsql && (
+                {isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={BUILDER_MODE_LEGEND}
-                      options={BUILDER_MODE_OPTIONS}
-                      idSelected="builder"
-                      onChange={(id) => {
-                        if (id === 'esql') onSwitchToEsql();
-                      }}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverSwitchToEsql"
-                    />
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="chevronLimitLeft"
+                          isDisabled={uiState.childOpen}
+                          onClick={() =>
+                            dispatch({
+                              type: 'OPEN_CHILD_FOR_STEP',
+                              step: uiState.step,
+                              isAlert,
+                            })
+                          }
+                          data-test-subj="ruleBuilderOpenPreview"
+                        >
+                          {PREVIEW_BUTTON_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {isEditing && onSwitchToEsql ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={BUILDER_MODE_LEGEND}
+                            options={BUILDER_MODE_OPTIONS}
+                            idSelected="builder"
+                            onChange={(id) => {
+                              if (id === 'esql') onSwitchToEsql();
+                            }}
+                            isIconOnly
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverSwitchToEsql"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
                 {!isBuilderMode && (

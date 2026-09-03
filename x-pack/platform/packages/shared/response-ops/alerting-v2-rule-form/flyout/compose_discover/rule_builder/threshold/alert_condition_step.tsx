@@ -432,37 +432,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   return (
     <>
-      {/* ── Header with preview icon ── */}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.alertingV2.ruleBuilder.dataSource.title"
-                defaultMessage="Data source"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.ruleBuilder.alertCondition.previewTooltip', {
-              defaultMessage: 'Preview results',
-            })}
-          >
-            <EuiButtonIcon
-              iconType="inspect"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
-                { defaultMessage: 'Preview results' }
-              )}
-              isDisabled={state.childOpen}
-              onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-              data-test-subj="ruleBuilderOpenPreview"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleBuilder.dataSource.title"
+            defaultMessage="Data source"
+          />
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
 
       {/* ── Field-load error ── */}
