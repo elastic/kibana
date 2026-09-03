@@ -6,11 +6,13 @@
  */
 
 /**
- * Validates a single RFC 5545 BYMONTHDAY value: 1 to 31 counts forward from the start of the month,
- * -31 to -1 counts backward from the end, and 0 is not a valid day.
+ * Validates a single BYMONTHDAY value where 1 to 31 counts forward from the start of the month and
+ * -1 is the last day of it. RFC 5545 also allows -31 to -2, but the recurring schedule form cannot
+ * express those, so accepting them would let API clients store schedules the edit UI silently
+ * rewrites.
  */
 export const validateMonthDay = (value: number, fieldName: string) => {
   if (!Number.isInteger(value) || value === 0) {
-    return `${fieldName} must be an integer between 1 and 31, or between -31 and -1.`;
+    return `${fieldName} must be an integer between 1 and 31, or -1 for the last day of the month.`;
   }
 };

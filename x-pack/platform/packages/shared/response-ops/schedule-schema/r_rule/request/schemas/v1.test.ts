@@ -123,39 +123,40 @@ describe('rRuleRequestSchema', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [32] })).toThrow();
     });
 
-    test('returns an error for negative values unless negative month days are allowed', () => {
+    test('returns an error for -1 unless the last day of the month is allowed', () => {
       expect(() => rRuleRequestSchema.validate({ ...basicRequest, bymonthday: [-1] })).toThrow();
     });
   });
 
-  describe('bymonthday with allowNegativeMonthDay', () => {
-    const negativeMonthDaySchema = getRRuleRequestSchema({ allowNegativeMonthDay: true });
+  describe('bymonthday with allowLastDayOfMonth', () => {
+    const lastDayOfMonthSchema = getRRuleRequestSchema({ allowLastDayOfMonth: true });
 
-    test('accepts negative values counting back from the end of the month', () => {
+    test('accepts -1 for the last day of the month', () => {
       expect(
-        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-1] }).bymonthday
+        lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [-1] }).bymonthday
       ).toEqual([-1]);
       expect(
-        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [1, -31] }).bymonthday
-      ).toEqual([1, -31]);
+        lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [1, -1] }).bymonthday
+      ).toEqual([1, -1]);
     });
 
     test('returns an error if the values are zero', () => {
-      expect(() => negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [0] })).toThrow();
+      expect(() => lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [0] })).toThrow();
     });
 
-    test('returns an error if the values are outside -31 to 31', () => {
-      expect(() =>
-        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-32] })
-      ).toThrow();
-      expect(() =>
-        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [32] })
-      ).toThrow();
+    test('returns an error for negative values other than -1', () => {
+      // The recurring schedule form cannot express -31 to -2, so the API does not accept them.
+      expect(() => lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [-2] })).toThrow();
+      expect(() => lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [-31] })).toThrow();
+    });
+
+    test('returns an error if the values are outside -1 to 31', () => {
+      expect(() => lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [32] })).toThrow();
     });
 
     test('returns an error if the values are not integers', () => {
       expect(() =>
-        negativeMonthDaySchema.validate({ ...basicRequest, bymonthday: [-1.5] })
+        lastDayOfMonthSchema.validate({ ...basicRequest, bymonthday: [25.5] })
       ).toThrow();
     });
   });

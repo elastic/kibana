@@ -94,10 +94,12 @@ export class RRule {
         }
       } else {
         const refDT = moment(current).tz(tzid);
+        // The first iteration examines the dtstart period itself, so no interval is applied.
+        const appliedInterval = isFirstIteration ? 0 : this.options.interval ?? 1;
         getNextRecurrences({
           refDT,
           ...this.options,
-          interval: isFirstIteration ? 0 : this.options.interval,
+          interval: appliedInterval,
           wkst: this.options.wkst ? (this.options.wkst as Weekday) : Weekday.MO,
         }).forEach((r) => nextRecurrences.push(r));
         isFirstIteration = false;
@@ -114,9 +116,9 @@ export class RRule {
             byweekday: this.options.byweekday,
             bysetpos: this.options.bysetpos,
           });
-          current = moment(refDT)
-            .add(this.options.interval ?? 1, FREQUENCY_UNITS[freq])
-            .toDate();
+          // Step by the interval that was actually applied, otherwise an empty dtstart period
+          // would also skip the period right after it.
+          current = moment(refDT).add(appliedInterval, FREQUENCY_UNITS[freq]).toDate();
         } else {
           consecutiveEmptyPeriods = 0;
         }

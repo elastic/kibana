@@ -10,7 +10,7 @@ import { getRRuleRequestSchema, getRRuleResponseSchema } from '@kbn/response-ops
 
 export const rRuleRequestSchema = getRRuleRequestSchema({
   meta: { id: 'maintenance_window_r_rule_request' },
-  allowNegativeMonthDay: true,
+  allowLastDayOfMonth: true,
 });
 export const rRuleResponseSchema = getRRuleResponseSchema({
   meta: { id: 'maintenance_window_r_rule_response' },

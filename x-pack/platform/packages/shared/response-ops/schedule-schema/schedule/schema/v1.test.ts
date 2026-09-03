@@ -231,8 +231,8 @@ describe('scheduleRequestSchema', () => {
   });
 });
 
-describe('getScheduleRequestSchema with allowNegativeMonthDay', () => {
-  const negativeMonthDaySchema = getScheduleRequestSchema({ allowNegativeMonthDay: true });
+describe('getScheduleRequestSchema with allowLastDayOfMonth', () => {
+  const lastDayOfMonthSchema = getScheduleRequestSchema({ allowLastDayOfMonth: true });
   const mockCurrentDate = new Date('2021-05-05T00:00:00.000Z');
 
   beforeEach(() => {
@@ -244,9 +244,9 @@ describe('getScheduleRequestSchema with allowNegativeMonthDay', () => {
     jest.useRealTimers();
   });
 
-  it('accepts negative onMonthDay values counting back from the end of the month', async () => {
+  it('accepts -1 for the last day of the month', async () => {
     expect(
-      negativeMonthDaySchema.validate({
+      lastDayOfMonthSchema.validate({
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [-1] },
       }).recurring?.onMonthDay
@@ -255,34 +255,35 @@ describe('getScheduleRequestSchema with allowNegativeMonthDay', () => {
 
   it('throws an error when onMonthDay is zero', async () => {
     expect(() =>
-      negativeMonthDaySchema.validate({
+      lastDayOfMonthSchema.validate({
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [0] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or between -31 and -1."`
+      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."`
     );
   });
 
-  it('throws an error when onMonthDay is less than -31', async () => {
+  it('throws an error for negative onMonthDay values other than -1', async () => {
+    // The recurring schedule form cannot express -31 to -2, so the API does not accept them.
     expect(() =>
-      negativeMonthDaySchema.validate({
+      lastDayOfMonthSchema.validate({
         ...defaultSchedule,
-        recurring: { ...recurring, onMonthDay: [-32] },
+        recurring: { ...recurring, onMonthDay: [-30] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [-31]."`
+      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [-1]."`
     );
   });
 
   it('throws an error when onMonthDay is not an integer', async () => {
     expect(() =>
-      negativeMonthDaySchema.validate({
+      lastDayOfMonthSchema.validate({
         ...defaultSchedule,
-        recurring: { ...recurring, onMonthDay: [-25.5] },
+        recurring: { ...recurring, onMonthDay: [25.5] },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or between -31 and -1."`
+      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."`
     );
   });
 });

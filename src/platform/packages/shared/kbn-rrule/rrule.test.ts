@@ -934,6 +934,42 @@ describe('RRule', () => {
         ]
       `);
     });
+
+    it('does not skip the period after an empty dtstart period', () => {
+      const rule = new RRule({
+        dtstart: new Date('2025-06-01T00:00:00.000Z'),
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonthday: [31],
+      });
+      // June has 30 days, so the dtstart period is empty. July must still be examined.
+      expect(rule.all(3)).toMatchInlineSnapshot(`
+        Array [
+          2025-07-31T00:00:00.000Z,
+          2025-08-31T00:00:00.000Z,
+          2025-10-31T00:00:00.000Z,
+        ]
+      `);
+    });
+
+    it('does not skip a year when the dtstart year has no matching day', () => {
+      const rule = new RRule({
+        dtstart: new Date('2019-06-01T00:00:00.000Z'),
+        freq: Frequency.YEARLY,
+        interval: 1,
+        tzid: 'UTC',
+        bymonth: [2],
+        bymonthday: [29],
+      });
+      // February 2019 already passed and is not a leap year, so 2020 is the first match.
+      expect(rule.all(2)).toMatchInlineSnapshot(`
+        Array [
+          2020-02-29T00:00:00.000Z,
+          2024-02-29T00:00:00.000Z,
+        ]
+      `);
+    });
   });
 
   describe('negative bymonthday', () => {
