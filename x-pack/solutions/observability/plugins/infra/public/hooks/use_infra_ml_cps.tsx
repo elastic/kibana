@@ -7,6 +7,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { matchPath, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ProjectRoutingAccess, useCpsPickerAccess, useIsCpsMultiProject } from '@kbn/cps-utils';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -15,6 +16,7 @@ import {
   OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
 } from '../../common/cps_feature_flag';
 import { LoadingPage } from '../components/loading_page';
+import { getLogsAppRoutes } from '../pages/logs/routes';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 type MlApi = NonNullable<MlPluginStart['mlApi']>;
@@ -33,12 +35,38 @@ const mlCpsCapabilityLoadingMessage = i18n.translate(
  */
 export const MlCpsCapabilityContext = createContext<boolean>(false);
 
-// Fails closed: an unreachable or erroring ML info API reads as capability-off.
-const loadMlCpsCapability = (mlApi: MlApi): Promise<boolean> =>
-  mlApi
-    .mlInfo()
-    .then((mlInfo) => mlInfo.isMlCpsEnabled)
-    .catch(() => false);
+// Outlasts the server-side ES client timeouts (30s per call), so when Elasticsearch is the
+// slow part the route's own error resolves the promise first; this only fires when the
+// request never settles at all, e.g. a wedged Kibana route or a silently stalled connection.
+const ML_CPS_CAPABILITY_TIMEOUT_MS = 35_000;
+
+// Fails closed: an unreachable, erroring, or unresponsive ML info API reads as capability-off.
+const loadMlCpsCapability = async (mlApi: MlApi): Promise<boolean> => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      mlApi.mlInfo().then((mlInfo) => mlInfo.isMlCpsEnabled),
+      new Promise<boolean>((resolve) => {
+        timeoutId = setTimeout(() => resolve(false), ML_CPS_CAPABILITY_TIMEOUT_MS);
+      }),
+    ]);
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+/**
+ * Whether the current route is one of the Logs ML pages the capability applies to. The other
+ * logs app routes (redirects, not-found) consume nothing behind the gate, so the provider
+ * skips the capability fetch for them.
+ */
+const useIsOnMlCpsPage = (): boolean => {
+  const { pathname } = useLocation();
+  const { logsAnomalies, logsCategories } = getLogsAppRoutes();
+  return matchPath(pathname, { path: [logsAnomalies.path, logsCategories.path] }) !== null;
+};
 
 /**
  * The feature flag, pricing tier, and CPS manager conditions of the Logs ML CPS gate —
@@ -62,18 +90,20 @@ const useIsCpsPlatformGateEnabled = (): boolean => {
  * Resolves whether Elasticsearch supports ML cross-project search and holds rendering on a
  * loading page until the answer is known, so everything below — including the log view state
  * machine, which captures its project routing when its actor is created — sees a settled
- * synchronous value. Deployments that fail the synchronous gate render immediately without
- * issuing a request.
+ * synchronous value. Deployments that fail the synchronous gate, and routes other than the
+ * Logs ML pages (which consume nothing behind the gate), render immediately as capability-off
+ * without issuing a request.
  */
 export const MlCpsCapabilityProvider: FC<PropsWithChildren> = ({ children }) => {
   const { services } = useKibanaContextForPlugin();
   const isPlatformGateEnabled = useIsCpsPlatformGateEnabled();
+  const isOnMlCpsPage = useIsOnMlCpsPage();
   const mlApi = services.ml?.mlApi;
 
   const [fetchedCapability, setFetchedCapability] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
-    if (!isPlatformGateEnabled || !mlApi) {
+    if (!isOnMlCpsPage || !isPlatformGateEnabled || !mlApi) {
       return;
     }
 
@@ -86,9 +116,9 @@ export const MlCpsCapabilityProvider: FC<PropsWithChildren> = ({ children }) => 
     return () => {
       cancelled = true;
     };
-  }, [isPlatformGateEnabled, mlApi]);
+  }, [isOnMlCpsPage, isPlatformGateEnabled, mlApi]);
 
-  const capability = isPlatformGateEnabled && mlApi ? fetchedCapability : false;
+  const capability = isOnMlCpsPage && isPlatformGateEnabled && mlApi ? fetchedCapability : false;
 
   if (capability === undefined) {
     return <LoadingPage message={mlCpsCapabilityLoadingMessage} />;

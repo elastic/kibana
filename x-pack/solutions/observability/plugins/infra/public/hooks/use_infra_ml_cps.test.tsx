@@ -7,8 +7,9 @@
 
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
-import { render, renderHook, screen, waitFor } from '@testing-library/react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { type ICPSManager, ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
@@ -263,11 +264,13 @@ describe('MlCpsCapabilityProvider', () => {
     return <div>{isEnabled ? 'cps-enabled' : 'cps-disabled'}</div>;
   };
 
-  const renderProvider = () =>
+  const renderProvider = ({ initialPath = '/anomalies' }: { initialPath?: string } = {}) =>
     render(
-      <MlCpsCapabilityProvider>
-        <CapabilityProbe />
-      </MlCpsCapabilityProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <MlCpsCapabilityProvider>
+          <CapabilityProbe />
+        </MlCpsCapabilityProvider>
+      </MemoryRouter>
     );
 
   it('renders children immediately without requesting ML info when the platform gate fails', () => {
@@ -288,14 +291,57 @@ describe('MlCpsCapabilityProvider', () => {
     expect(screen.getByText('cps-disabled')).toBeInTheDocument();
   });
 
-  it('holds rendering on a loading page while the capability is fetched', () => {
-    const mlInfo = jest.fn().mockReturnValue(new Promise(() => {}));
+  it('renders children immediately without requesting ML info outside the ML pages', () => {
+    const mlInfo = jest.fn();
     mockServices({ cps: enabledCps(), mlInfo });
 
-    renderProvider();
+    renderProvider({ initialPath: '/stream' });
 
-    expect(screen.getByText(LOADING_MESSAGE)).toBeInTheDocument();
-    expect(screen.queryByText(/cps-/)).not.toBeInTheDocument();
+    expect(screen.getByText('cps-disabled')).toBeInTheDocument();
+    expect(mlInfo).not.toHaveBeenCalled();
+  });
+
+  it('fetches on the log categories page as well', async () => {
+    const mlInfo = jest.fn().mockResolvedValue({ isMlCpsEnabled: true });
+    mockServices({ cps: enabledCps(), mlInfo });
+
+    renderProvider({ initialPath: '/log-categories' });
+
+    expect(await screen.findByText('cps-enabled')).toBeInTheDocument();
+  });
+
+  it('holds rendering on a loading page while the capability is fetched', () => {
+    jest.useFakeTimers();
+    try {
+      const mlInfo = jest.fn().mockReturnValue(new Promise(() => {}));
+      mockServices({ cps: enabledCps(), mlInfo });
+
+      renderProvider();
+
+      expect(screen.getByText(LOADING_MESSAGE)).toBeInTheDocument();
+      expect(screen.queryByText(/cps-/)).not.toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('fails closed when the request never settles, once the timeout elapses', async () => {
+    jest.useFakeTimers();
+    try {
+      const mlInfo = jest.fn().mockReturnValue(new Promise(() => {}));
+      mockServices({ cps: enabledCps(), mlInfo });
+
+      renderProvider();
+      expect(screen.getByText(LOADING_MESSAGE)).toBeInTheDocument();
+
+      await act(async () => {
+        jest.advanceTimersByTime(35_000);
+      });
+
+      expect(screen.getByText('cps-disabled')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('provides an enabled capability to consumers once fetched', async () => {
