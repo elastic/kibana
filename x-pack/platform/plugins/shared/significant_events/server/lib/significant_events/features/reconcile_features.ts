@@ -57,7 +57,7 @@ export function reconcileComputedFeatures({
   }));
 }
 
-type FeatureMatchTier = 'exact' | 'alias' | 'normalized' | 'fingerprint';
+type FeatureMatchTier = 'exact' | 'normalized' | 'fingerprint';
 
 interface FeatureMatch {
   candidate: FeatureCandidate;
@@ -72,14 +72,10 @@ interface FeatureCandidate {
 
 interface FeatureCandidateIndexes {
   byExactId: Map<string, FeatureCandidate[]>;
-  byAlias: Map<string, FeatureCandidate[]>;
   byNormalizedId: Map<string, FeatureCandidate[]>;
 }
 
 const getTypedFeatureKey = (type: string, id: string): string => `${type}:${id}`;
-
-const getStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 
 const addFeatureCandidate = (
   candidatesByKey: Map<string, FeatureCandidate[]>,
@@ -96,7 +92,7 @@ const addFeatureCandidate = (
 
 const indexFeatureCandidate = (
   candidate: FeatureCandidate,
-  { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
+  { byExactId, byNormalizedId }: FeatureCandidateIndexes
 ): void => {
   const { feature } = candidate;
   // Slug-only on purpose: the uuid is v5(stream, slug) with no type, so same-slug features
@@ -107,13 +103,6 @@ const indexFeatureCandidate = (
     getTypedFeatureKey(feature.type, normalizeFeatureSlugForMatching(feature.id)),
     candidate
   );
-
-  for (const alias of getStringArray(feature.meta?.aliases)) {
-    const normalizedAlias = normalizeFeatureSlug(alias);
-    if (normalizedAlias.length > 0) {
-      addFeatureCandidate(byAlias, getTypedFeatureKey(feature.type, normalizedAlias), candidate);
-    }
-  }
 };
 
 const pickLatestCandidate = (
@@ -158,19 +147,12 @@ const routeToFamilySurvivor = (
 const findDirectMatch = (
   raw: BaseFeature,
   candidates: ReadonlyArray<FeatureCandidate>,
-  { byExactId, byAlias, byNormalizedId }: FeatureCandidateIndexes
+  { byExactId, byNormalizedId }: FeatureCandidateIndexes
 ): FeatureMatch | undefined => {
   const normalizedRawId = normalizeFeatureSlug(raw.id);
   const exactMatch = pickLatestCandidate(byExactId.get(normalizedRawId));
   if (exactMatch) {
     return { candidate: exactMatch, tier: 'exact' };
-  }
-
-  const aliasMatch = pickLatestCandidate(
-    byAlias.get(getTypedFeatureKey(raw.type, normalizedRawId))
-  );
-  if (aliasMatch) {
-    return { candidate: aliasMatch, tier: 'alias' };
   }
 
   const matchingRawId = normalizeFeatureSlugForMatching(raw.id);
@@ -274,7 +256,6 @@ export function reconcileInferredFeatures({
   }));
   const indexes: FeatureCandidateIndexes = {
     byExactId: new Map(),
-    byAlias: new Map(),
     byNormalizedId: new Map(),
   };
   for (const candidate of candidates) {
