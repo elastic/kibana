@@ -101,6 +101,8 @@ Flag **only major** changes or drops — coverage that genuinely weakens. Skip b
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:
+  - **Establish the baseline before asserting any delta.** A parity finding needs the old suite as evidence, not the list of deleted paths. For every removed file you cite: read its body; read the `index.ts` / `loadTestFile()` and FTR config(s) that referenced it, to establish which deployments actually ran it; then quote the old `describe` / `it` titles you claim were lost. If you cannot quote them, you have no parity finding.
+  - **Never infer coverage from a path.** A file under `test/serverless/**` proves only that some serverless suite existed, not that it covered the flow you're flagging. A `// Serverless test (remove during Scout migration): <path>` marker names the counterpart of the one file it sits in — it says nothing about sibling files in the same directory.
   - Treat parity gaps as `blocker` unless explicitly de-scoped.
   - Confirm the suite is the right **test type** (UI vs API): if the old FTR suite is primarily “data correctness”, prefer migrating it to a Scout API test (or unit/integration) rather than a Scout UI test.
   - Build a parity map from old scenarios → new Scout coverage (roles, setup/teardown, assertions, cleanup).
