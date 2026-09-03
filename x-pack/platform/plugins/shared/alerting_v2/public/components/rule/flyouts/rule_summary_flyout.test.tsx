@@ -28,41 +28,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
-  RuleActionsMenu: ({
-    rule,
-    onEdit,
-    onClone,
-    onDelete,
-    onToggleEnabled,
-    onRun,
-    onUpdateApiKey,
-  }: any) => (
-    <div data-test-subj={`ruleActionsMenu-${rule.id}`}>
-      <button data-test-subj="mockEdit" onClick={() => onEdit(rule)}>
-        Edit
-      </button>
-      <button data-test-subj="mockClone" onClick={() => onClone(rule)}>
-        Clone
-      </button>
-      <button data-test-subj="mockDelete" onClick={() => onDelete(rule)}>
-        Delete
-      </button>
-      <button data-test-subj="mockToggleEnabled" onClick={() => onToggleEnabled(rule)}>
-        Toggle
-      </button>
-      <button data-test-subj="mockRun" onClick={() => onRun(rule)}>
-        Run
-      </button>
-      {onUpdateApiKey ? (
-        <button data-test-subj="mockUpdateApiKey" onClick={() => onUpdateApiKey(rule)}>
-          Update API key
-        </button>
-      ) : null}
-    </div>
-  ),
-}));
-
 jest.mock('../../rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
   RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
@@ -96,7 +61,6 @@ const renderFlyout = (overrides: Partial<React.ComponentProps<typeof RuleSummary
     rule: baseRule,
     onClose: jest.fn(),
     onEdit: jest.fn(),
-    onQuickEdit: jest.fn(),
     onClone: jest.fn(),
     onDelete: jest.fn(),
     onToggleEnabled: jest.fn(),
@@ -128,12 +92,6 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('mockRuleMetadata')).toBeInTheDocument();
   });
 
-  it('passes the rule to the actions menu via context', () => {
-    renderFlyout();
-
-    expect(screen.getByTestId('ruleActionsMenu-rule-1')).toBeInTheDocument();
-  });
-
   it('calls onClose when the close icon button is clicked', () => {
     const { props } = renderFlyout();
 
@@ -142,85 +100,153 @@ describe('RuleSummaryFlyout', () => {
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when the cancel button is clicked', () => {
+  it('calls onClose when the footer close button is clicked', () => {
     const { props } = renderFlyout();
 
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutCancelButton'));
+    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton'));
 
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the open details button with a basePath-prefixed rule details href', () => {
+  it('does not render any rule actions in the header', () => {
     renderFlyout();
 
-    const openDetailsButton = screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton');
-    expect(openDetailsButton).toHaveAttribute(
-      'href',
-      '/base/app/management/alertingV2/rules/rule-1'
-    );
-  });
-
-  it('url-encodes the rule id when building the details href', () => {
-    renderFlyout({
-      rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
-    });
-
-    const openDetailsButton = screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton');
-    expect(openDetailsButton).toHaveAttribute(
-      'href',
-      `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
-    );
-  });
-
-  it('calls onQuickEdit with the rule when the pencil icon is clicked', () => {
-    const { props } = renderFlyout();
-
-    fireEvent.click(screen.getByTestId('ruleSummaryFlyoutQuickEditButton'));
-
-    expect(props.onQuickEdit).toHaveBeenCalledWith(baseRule);
-  });
-
-  it('hides the quick edit and actions menu when canWrite is false', () => {
-    renderFlyout({ canWrite: false });
-
+    // Header actions were moved to the footer Take action menu.
     expect(screen.queryByTestId('ruleSummaryFlyoutQuickEditButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ruleActionsMenu-rule-1')).not.toBeInTheDocument();
-    // Read-only affordances remain available.
-    expect(screen.getByTestId('ruleSummaryFlyoutOpenDetailsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+    // The close control remains in the header.
     expect(screen.getByTestId('ruleSummaryFlyoutCloseButton')).toBeInTheDocument();
   });
 
-  it('forwards action callbacks to the RuleActionsMenu with the rule', () => {
-    const { props } = renderFlyout();
+  describe('Take action menu', () => {
+    const openMenu = () => fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-    fireEvent.click(screen.getByTestId('mockEdit'));
-    expect(props.onEdit).toHaveBeenCalledWith(baseRule);
+    it('opens the View details item with a basePath-prefixed rule details href', () => {
+      renderFlyout();
+      openMenu();
 
-    fireEvent.click(screen.getByTestId('mockClone'));
-    expect(props.onClone).toHaveBeenCalledWith(baseRule);
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/base/app/management/alertingV2/rules/rule-1'
+      );
+    });
 
-    fireEvent.click(screen.getByTestId('mockDelete'));
-    expect(props.onDelete).toHaveBeenCalledWith(baseRule);
+    it('url-encodes the rule id when building the details href', () => {
+      renderFlyout({
+        rule: { ...baseRule, id: 'rule with spaces/and slash' } as RuleApiResponse,
+      });
+      fireEvent.click(screen.getByTestId('ruleSummaryFlyoutTakeActionButton'));
 
-    fireEvent.click(screen.getByTestId('mockToggleEnabled'));
-    expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+      expect(screen.getByTestId('viewRuleDetails-rule with spaces/and slash')).toHaveAttribute(
+        'href',
+        `/base/app/management/alertingV2/rules/${encodeURIComponent('rule with spaces/and slash')}`
+      );
+    });
 
-    fireEvent.click(screen.getByTestId('mockRun'));
-    expect(props.onRun).toHaveBeenCalledWith(baseRule);
-  });
+    it('forwards write action callbacks with the rule', () => {
+      const { props } = renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
 
-  it('forwards onUpdateApiKey to the RuleActionsMenu when provided', () => {
-    const onUpdateApiKey = jest.fn();
-    renderFlyout({ onUpdateApiKey });
+      fireEvent.click(screen.getByTestId('editRule-rule-1'));
+      expect(props.onEdit).toHaveBeenCalledWith(baseRule);
 
-    fireEvent.click(screen.getByTestId('mockUpdateApiKey'));
-    expect(onUpdateApiKey).toHaveBeenCalledWith(baseRule);
-  });
+      openMenu();
+      fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
+      expect(props.onClone).toHaveBeenCalledWith(baseRule);
 
-  it('omits the update API key action when onUpdateApiKey is not provided', () => {
-    renderFlyout();
+      openMenu();
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+      expect(props.onRun).toHaveBeenCalledWith(baseRule);
 
-    expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
+      openMenu();
+      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      expect(props.onToggleEnabled).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+      expect(props.onUpdateApiKey).toHaveBeenCalledWith(baseRule);
+
+      openMenu();
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+      expect(props.onDelete).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('renders the actions in grouped order separated by dividers', () => {
+      renderFlyout({ onUpdateApiKey: jest.fn() });
+      openMenu();
+
+      const expectedOrder = [
+        'viewRuleDetails-rule-1',
+        'editRule-rule-1',
+        'cloneRule-rule-1',
+        'runRule-rule-1',
+        'toggleEnabledRule-rule-1',
+        'updateRuleApiKey-rule-1',
+        'deleteRule-rule-1',
+      ];
+      const panel = screen.getByTestId('viewRuleDetails-rule-1').closest('.euiContextMenuPanel');
+
+      // Items appear in the expected document order.
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => expectedOrder.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(expectedOrder);
+
+      // Three dividers separate the four groups (read / edit-clone / run-disable-apiKey / delete).
+      expect(panel?.querySelectorAll('hr')).toHaveLength(3);
+    });
+
+    it('omits the update API key action when onUpdateApiKey is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('updateRuleApiKey-rule-1')).not.toBeInTheDocument();
+    });
+
+    it('shows only read actions when canWrite is false', () => {
+      renderFlyout({ canWrite: false, onViewChangeHistory: jest.fn() });
+      openMenu();
+
+      // Read actions stay available.
+      expect(screen.getByTestId('viewRuleDetails-rule-1')).toBeInTheDocument();
+      expect(screen.getByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+      // Write actions are hidden.
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+      // Close still available.
+      expect(screen.getByTestId('ruleSummaryFlyoutFooterCloseButton')).toBeInTheDocument();
+    });
+
+    it('shows View change history in the read group when onViewChangeHistory is provided', () => {
+      const onViewChangeHistory = jest.fn();
+      renderFlyout({ onViewChangeHistory });
+      openMenu();
+
+      const changeHistory = screen.getByTestId('viewChangeHistoryRule-rule-1');
+      expect(changeHistory).toBeInTheDocument();
+
+      // View change history sits in the first (read) group, right after View details.
+      const panel = changeHistory.closest('.euiContextMenuPanel');
+      const readGroup = [
+        'viewRuleDetails-rule-1',
+        'viewChangeHistoryRule-rule-1',
+        'editRule-rule-1',
+      ];
+      const renderedOrder = Array.from(panel?.querySelectorAll('[data-test-subj]') ?? [])
+        .map((element) => element.getAttribute('data-test-subj'))
+        .filter((testId) => readGroup.includes(testId ?? ''));
+      expect(renderedOrder).toEqual(readGroup);
+
+      fireEvent.click(changeHistory);
+      expect(onViewChangeHistory).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('omits View change history when onViewChangeHistory is not provided', () => {
+      renderFlyout();
+      openMenu();
+
+      expect(screen.queryByTestId('viewChangeHistoryRule-rule-1')).not.toBeInTheDocument();
+    });
   });
 
   describe('Agent Builder auto-attach', () => {
