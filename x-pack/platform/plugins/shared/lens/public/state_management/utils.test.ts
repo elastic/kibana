@@ -31,24 +31,24 @@ describe('getDatasourceLayers', () => {
   });
 
   it('passes the layer inspector table into getPublicAPI', () => {
-    const layerTable = dateColumnTable([{ col1: 1 }]);
+    const activeDataTable = dateColumnTable([{ col1: 1 }]);
     getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns, {
-      layer1: layerTable,
+      layer1: activeDataTable,
     });
     expect(datasource.getPublicAPI).toHaveBeenCalledWith(
       expect.objectContaining({
         layerId: 'layer1',
-        activeData: layerTable,
+        activeDataTable,
       })
     );
   });
 
-  it('omits overlay when activeData is not passed', () => {
+  it('omits overlay when the layer table is not passed', () => {
     getDatasourceLayers(datasourceStates, datasourceMap, indexPatterns);
     expect(datasource.getPublicAPI).toHaveBeenCalledWith(
       expect.objectContaining({
         layerId: 'layer1',
-        activeData: undefined,
+        activeDataTable: undefined,
       })
     );
   });
@@ -57,15 +57,15 @@ describe('getDatasourceLayers', () => {
 describe('getUpdatedFrameWithDatasourceState', () => {
   it('passes the layer inspector table into getPublicAPI', () => {
     const datasource = createMockDatasource('formBased');
-    const layerTable = dateColumnTable([{ col1: 1 }]);
+    const activeDataTable = dateColumnTable([{ col1: 1 }]);
     const frame = createMockFramePublicAPI({
-      activeData: { layer1: layerTable },
+      activeData: { layer1: activeDataTable },
     });
     getUpdatedFrameWithDatasourceState(frame, datasource, {}, 'layer1');
     expect(datasource.getPublicAPI).toHaveBeenCalledWith(
       expect.objectContaining({
         layerId: 'layer1',
-        activeData: layerTable,
+        activeDataTable,
       })
     );
   });

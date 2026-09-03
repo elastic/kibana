@@ -1483,7 +1483,7 @@ describe('Textbased Data Source', () => {
           state,
           layerId: 'a',
           indexPatterns,
-          activeData: {
+          activeDataTable: {
             type: 'datatable',
             columns: [
               {
@@ -1527,7 +1527,7 @@ describe('Textbased Data Source', () => {
           state,
           layerId: 'a',
           indexPatterns,
-          activeData: {
+          activeDataTable: {
             type: 'datatable',
             columns: [{ id: 'col1', name: '@timestamp', meta: { type: 'date' } }],
             rows: [],
@@ -1566,7 +1566,7 @@ describe('Textbased Data Source', () => {
           state,
           layerId: 'a',
           indexPatterns,
-          activeData: {
+          activeDataTable: {
             type: 'datatable',
             columns: [{ id: 'col1', name: 'bytes', meta: { type: 'number' } }],
             rows: [],

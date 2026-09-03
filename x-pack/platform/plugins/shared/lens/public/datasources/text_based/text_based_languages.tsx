@@ -775,7 +775,7 @@ export function getTextBasedDatasource({
       state,
       layerId,
       indexPatterns,
-      activeData,
+      activeDataTable,
     }: PublicAPIProps<TextBasedPrivateState>) {
       return {
         datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
@@ -799,7 +799,7 @@ export function getTextBasedDatasource({
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
           const resolvedType = resolveTextBasedColumnType(
             column,
-            activeData?.columns.find((col) => col.id === columnId)
+            activeDataTable?.columns.find((col) => col.id === columnId)
           );
           const { dataType, isBucketed, scale } = operationFromDataType(resolvedType);
 
