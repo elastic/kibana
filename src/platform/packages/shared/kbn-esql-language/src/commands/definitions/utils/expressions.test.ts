@@ -10,7 +10,7 @@ import { isAssignment, Parser } from '@elastic/esql';
 import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
 import type { ESQLColumnData } from '../../registry/types';
-import { Location } from '../../registry/types';
+import { Location, UnmappedFieldsStrategy } from '../../registry/types';
 import { buildPartialMatcher, getAssignmentExpressionRoot, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
 import { TIME_SYSTEM_PARAMS } from './literals';
@@ -265,6 +265,12 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('accepts_dates("", "")'))).toBe('keyword');
     });
 
+    it('infers the COALESCE return type from a nullable CASE result', () => {
+      expect(getExpressionType(getASTForExpression('COALESCE(CASE(true, 1, NULL), 2)'))).toBe(
+        'integer'
+      );
+    });
+
     it('deals with functions that do not exist', () => {
       expect(getExpressionType(getASTForExpression('does_not_exist()'))).toBe('unknown');
     });
@@ -281,6 +287,35 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('CASE(true, 1, 2)'))).toBe('integer');
 
       expect(getExpressionType(getASTForExpression('CASE(true, 1., true, 1., 2.)'))).toBe('double');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1)'))).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, NULL)'))).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, NULL, NULL)'))).toBe('null');
+
+      expect(getExpressionType(getASTForExpression('CASE(false, NULL, false, NULL, 2)'))).toBe(
+        'integer'
+      );
+
+      expect(getExpressionType(getASTForExpression('CASE(true, CASE(false, 1, NULL), NULL)'))).toBe(
+        'integer'
+      );
+
+      // Without a columns map, unresolved columns fall back to the generic unknown type.
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, unmappedField)'))).toBe(
+        'unknown'
+      );
+
+      expect(
+        getExpressionType(
+          getASTForExpression('CASE(true, 1, unmappedField)'),
+          new Map<string, ESQLColumnData>(),
+          UnmappedFieldsStrategy.NULLIFY
+        )
+      ).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, ?value)'))).toBe('param');
 
       expect(
         getExpressionType(
