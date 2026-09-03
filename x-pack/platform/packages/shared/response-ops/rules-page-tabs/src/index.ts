@@ -9,6 +9,5 @@ export { RULES_PAGE_TAB_IDS, type RulesPageTabId } from './constants';
 export {
   getRulesPageHeaderTabs,
   type GetRulesPageHeaderTabsParams,
+  type RulesPageTabBinding,
 } from './get_rules_page_header_tabs';
-export { canReadV1Rules } from './can_read_v1_rules';
-export { shouldShowAlertingV2RulesTab } from './should_show_v2_rules_tab';

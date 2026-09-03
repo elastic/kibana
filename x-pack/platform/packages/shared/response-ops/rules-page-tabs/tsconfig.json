@@ -7,12 +7,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/app-header",
-    "@kbn/i18n",
-    "@kbn/rule-data-utils",
-    "@kbn/alerting-v2-constants",
-    "@kbn/alerting-v2-utils",
-    "@kbn/core",
-    "@kbn/core-capabilities-common",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/i18n"
   ]
 }
