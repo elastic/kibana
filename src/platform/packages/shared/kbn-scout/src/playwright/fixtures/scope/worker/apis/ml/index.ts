@@ -186,9 +186,15 @@ export interface MlIndicesApi {
   cleanAll: () => Promise<void>;
 }
 
+export interface MlNotificationsApi {
+  /** Poll until at least one notification for the given job ID appears in .ml-notifications* */
+  waitForToIndex: (jobId: string, timeout?: number) => Promise<void>;
+}
+
 export interface MlApiService {
   anomalyDetection: MlADJobsApi;
   dataFrameAnalytics: MlDataFrameAnalyticsApi;
+  notifications: MlNotificationsApi;
   trainedModels: MlTrainedModelsApi;
   ingestPipelines: MlIngestPipelinesApi;
   savedObjects: MlSavedObjectsApi;
@@ -843,6 +849,24 @@ export const getMlApiHelper = (
     },
   };
 
+  const notifications: MlNotificationsApi = {
+    async waitForToIndex(jobId: string, timeout: number = 60 * 1000): Promise<void> {
+      await waitForCondition(
+        `notifications for '${jobId}' to exist in .ml-notifications*`,
+        async () => {
+          const resp = await esClient.search({
+            index: '.ml-notifications*',
+            size: 1,
+            query: { term: { job_id: { value: jobId } } },
+          });
+          if (resp.hits.hits.length > 0) return true;
+          throw new Error(`Notifications for '${jobId}' not yet indexed`);
+        },
+        timeout
+      );
+    },
+  };
+
   const indices: MlIndicesApi = {
     async cleanAnomalyDetection() {
       await measurePerformanceAsync(log, 'mlApi.indices.cleanAnomalyDetection', async () => {
@@ -882,6 +906,7 @@ export const getMlApiHelper = (
   return {
     anomalyDetection,
     dataFrameAnalytics,
+    notifications,
     trainedModels,
     ingestPipelines,
     savedObjects,
