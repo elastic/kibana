@@ -70,8 +70,10 @@ consts:
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
-  # Written onto every alert that reached a decision (by the proposal workflow),
-  # and filtered out here, so a later sweep cannot rediagnose the same alerts.
+  # Written onto every alert that reached a decision (by the proposal workflow).
+  # The harvest treats the newest tagged alert as a per-rule watermark: any false
+  # positive at or before it counts as addressed, tagged or not, so even FPs past
+  # the 1000-id tag cap cannot be rediagnosed.
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
   # Scoped to one space because the tag API writes to the space's own alerts index, so
@@ -80,8 +82,8 @@ steps:
   # fp_count and return a short alert_ids list, leaving alerts that drove a decision
   # untagged. TOP bounds the per-rule id collection at 1000 inside the aggregation
   # (VALUES would buffer every id first), which also keeps the proposal's bulk tag
-  # request inside Kibana's payload limit; a rule noisier than that surfaces again
-  # on the next sweep.
+  # request inside Kibana's payload limit; FPs past the cap stay untagged but the
+  # reviewed watermark still retires them once the batch resolves.
   # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
   # includes reviewed false positives so processing a batch does not dilute the rule's
   # measured FP rate; `fp_count` and `alert_ids` include only work still to review.
@@ -99,8 +101,12 @@ steps:
           AND `kibana.alert.building_block_type` IS NULL
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
+        | EVAL reviewed_ts = CASE(
+            COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"), false),
+            @timestamp, NULL)
+        | INLINE STATS reviewed_watermark = MAX(reviewed_ts) BY `kibana.alert.rule.uuid`
         | EVAL is_unreviewed_fp = is_fp
-            AND NOT COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"), false)
+            AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
         | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)
         | STATS total_count = COUNT(*),
             fp_rate_count = COUNT(*) WHERE is_fp,

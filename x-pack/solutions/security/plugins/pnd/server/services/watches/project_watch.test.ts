@@ -690,10 +690,19 @@ describe('project watch', () => {
       const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
       const tagSteps = proposalSteps.filter(({ type }) => type === 'security.setAlertTags');
 
-      it('filters the reviewed tag out of the harvest', () => {
+      // The newest reviewed alert is a per-rule watermark: every FP at or before it
+      // counts as addressed, tagged or not, so FPs past the 1000-id tag cap cannot
+      // be rediagnosed on the next sweep.
+      it('retires everything at or before the newest reviewed alert', () => {
         expect(reviewedTag).toEqual(expect.any(String));
-        expect(harvestQuery).toContain('NOT COALESCE(MV_CONTAINS(`kibana.alert.workflow_tags`');
+        expect(harvestQuery).toContain('MV_CONTAINS(`kibana.alert.workflow_tags`');
         expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
+        expect(harvestQuery).toContain(
+          'INLINE STATS reviewed_watermark = MAX(reviewed_ts) BY `kibana.alert.rule.uuid`'
+        );
+        expect(harvestQuery).toContain(
+          '(reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)'
+        );
       });
 
       it('measures FP rate independently from the unreviewed work queue', () => {
