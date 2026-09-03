@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { Role } from '@kbn/security-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -100,7 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(columnDescription).to.equal(updatedRoleDescription);
 
       const updatedRole = await security.role.get(roleName);
-      expect(updatedRole.elasticsearch.global?.data_source).to.eql(expectedDataSourcePrivileges);
+      expect((updatedRole as Role).elasticsearch.global?.data_source).to.eql(
+        expectedDataSourcePrivileges
+      );
     });
 
     it('can delete a role with data source privileges', async () => {
@@ -119,4 +122,3 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   });
 }
-
