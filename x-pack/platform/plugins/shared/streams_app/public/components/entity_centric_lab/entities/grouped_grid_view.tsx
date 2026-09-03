@@ -37,6 +37,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
+  EuiRadioGroup,
   EuiRange,
   EuiSelect,
   EuiSpacer,
@@ -57,11 +58,17 @@ import {
   useEntityDisplayName,
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId } from './fake_entities';
-import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
+import {
+  getCategoryDescriptor,
+  getVisibleEntityCategories,
+  isCategoryHiddenInElasticOn,
+} from './fake_entities';
+import { labThings } from '../lab_terminology';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import {
   ENTITY_HEALTH_METRIC,
   STAT_OPTIONS,
+  alertHintFromEntity,
   bucketKeyFor,
   effectiveStatForMetric,
   findMetric,
@@ -71,6 +78,7 @@ import {
   resolveMetricReading,
   resolveMetricSparkline,
   setMetricRefreshSalt,
+  TONE_LABEL,
   toneColor,
   type BucketKey,
   type MetricDescriptor,
@@ -91,6 +99,7 @@ import {
   MIN_RULES,
   MIN_STEPS,
   PALETTE_OPTIONS,
+  STEP_RULES_VERSION,
   getPaletteColors,
   resolveColoringRange,
   resolvePaletteColor,
@@ -108,6 +117,7 @@ import {
   filterEntitiesByCluster,
   getKubernetesClusterNames,
 } from './kubernetes_cluster_filter';
+import { getK8sPopoverLines } from './kubernetes_hierarchy';
 
 interface Props {
   readonly entities: readonly Entity[];
@@ -233,20 +243,18 @@ const solidToneColor = (tone: MetricTone, euiTheme: EuiThemeComputed): string =>
 
 /**
  * Default Steps rules for a numeric metric: one threshold per severity
- * band (Good / Warning / Critical) at the metric's own warn/crit values,
- * coloured with the *exact* solid tones the tiles use in Automatic mode.
- * Derived from the live metric so the "out of the box" Steps setup always
- * mirrors Automatic coloring (colours + thresholds) — the seed is never
- * persisted, so it can't drift from Automatic as the theme/metric change.
+ * band (Healthy / At risk / Unhealthy) at the metric's own warn/crit values,
+ * coloured with the same translucent `toneColor` Automatic tiles paint.
+ * Unedited Steps therefore stays pixel-identical to Automatic after
+ * Apply. The editor flattens these for the colour picker; Apply drops
+ * the seed rather than persisting picker-normalized hexes, so a
+ * round-trip through Custom → Steps → Apply cannot drift the grid.
  */
 const buildDefaultStepRules = (
   metric: MetricDescriptor,
   euiTheme: EuiThemeComputed
 ): StepRule[] => {
   if (metric.kind !== 'numeric') return [];
-  // Use the exact same (semi-transparent) tones the tiles paint in
-  // Automatic mode so a fresh Steps setup is pixel-identical to Automatic.
-  // The little color-picker swatch flattens these for display only.
   const goodColor = toneColor('good', euiTheme);
   const warningColor = toneColor('warning', euiTheme);
   const dangerColor = toneColor('danger', euiTheme);
@@ -254,32 +262,55 @@ const buildDefaultStepRules = (
   const minValue = Math.round(metric.range.min);
   if (direction === 'asc') {
     return [
-      { color: goodColor, label: 'Good', value: minValue },
-      { color: warningColor, label: 'Warning', value: warn },
-      { color: dangerColor, label: 'Critical', value: crit },
+      { color: goodColor, label: TONE_LABEL.good, value: minValue },
+      { color: warningColor, label: TONE_LABEL.warning, value: warn },
+      { color: dangerColor, label: TONE_LABEL.danger, value: crit },
     ];
   }
   return [
-    { color: dangerColor, label: 'Critical', value: minValue },
-    { color: warningColor, label: 'Warning', value: crit },
-    { color: goodColor, label: 'Good', value: warn },
+    { color: dangerColor, label: TONE_LABEL.danger, value: minValue },
+    { color: warningColor, label: TONE_LABEL.warning, value: crit },
+    { color: goodColor, label: TONE_LABEL.good, value: warn },
   ];
 };
 
+/** Earlier Steps seeds used Infrastructure "Good / Warning / Critical". */
+const LEGACY_STEP_LABEL: Record<string, string> = {
+  Good: TONE_LABEL.good,
+  Warning: TONE_LABEL.warning,
+  Critical: TONE_LABEL.danger,
+};
+
+const withCurrentStepLabels = (rules: readonly StepRule[]): StepRule[] =>
+  rules.map((rule) => ({
+    ...rule,
+    label: LEGACY_STEP_LABEL[rule.label] ?? rule.label,
+  }));
+
 /**
  * The rules a Steps config should render with: the user's persisted rules
- * once they've edited them, otherwise the freshly-derived defaults. Keeping
- * unedited buckets on the derived defaults means stale rules from earlier
- * builds can never override the Automatic-matching seed.
+ * once they've edited them *for this metric*, otherwise the freshly-
+ * derived Automatic-matching defaults. Rules from another Color-by
+ * metric (or from an earlier seed) must not override the current bands.
  */
 const effectiveStepRules = (
   coloring: ColoringConfig,
   metric: MetricDescriptor,
   euiTheme: EuiThemeComputed
 ): readonly StepRule[] =>
-  coloring.rules && coloring.rules.length > 0
-    ? coloring.rules
+  coloring.rules && coloring.rules.length > 0 && coloring.rulesMetricId === metric.id
+    ? withCurrentStepLabels(coloring.rules)
     : buildDefaultStepRules(metric, euiTheme);
+
+/** User-edited Steps rules for this metric — not the Automatic seed. */
+const hasCustomStepRules = (coloring: ColoringConfig, metricId: string): boolean =>
+  Boolean(
+    coloring.mode === 'palette' &&
+      coloring.type === 'steps' &&
+      coloring.rules &&
+      coloring.rules.length > 0 &&
+      coloring.rulesMetricId === metricId
+  );
 
 // ---------------------------------------------------------------------------
 // Tile
@@ -549,6 +580,8 @@ const MetricTileTooltip = ({
 }) => {
   const { entity, reading, x, y, placeLeft, placeAbove } = hover;
   const displayName = useEntityDisplayName(entity.name, entity.type);
+  const showK8sContext = useContext(PaletteColoringEnabledContext);
+  const contextLines = showK8sContext ? getK8sPopoverLines(entity) : [];
   // Categorical metrics (Status, Phase, …) get no sparkline — a trend
   // line over an enum is meaningless.
   const sparkline =
@@ -581,8 +614,15 @@ const MetricTileTooltip = ({
       <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {displayName}
       </div>
-      <div style={{ opacity: 0.7, marginBottom: 6 }}>{entity.type}</div>
-      <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.15)', margin: '0 0 6px' }} />
+      <div style={{ opacity: 0.7, marginBottom: contextLines.length > 0 ? 4 : 6 }}>
+        {entity.type}
+      </div>
+      {contextLines.map((line) => (
+        <div key={line.label} style={{ opacity: 0.7, fontSize: 11 }}>
+          {line.label} {line.value}
+        </div>
+      ))}
+      <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.15)', margin: '6px 0' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <span
           aria-hidden
@@ -635,6 +675,13 @@ interface BucketTileRowProps {
    */
   readonly coloring?: ColoringConfig | null;
   readonly paletteRange?: { readonly min: number; readonly max: number } | null;
+  /**
+   * Tile sort direction. `false` (default) orders worst → best; `true`
+   * flips to best → worst. Passed separately from `coloring` because the
+   * latter is nulled out when palette mode is off, but the sort preference
+   * applies to severity-tone buckets too.
+   */
+  readonly sortReverse?: boolean;
 }
 
 const BucketTileRow = ({
@@ -644,6 +691,7 @@ const BucketTileRow = ({
   onSelectEntity,
   coloring = null,
   paletteRange = null,
+  sortReverse = false,
 }: BucketTileRowProps) => {
   const { euiTheme } = useEuiTheme();
   // Auto-refresh cache-buster: listed in the `ordered` memo deps so tiles
@@ -658,10 +706,15 @@ const BucketTileRow = ({
         return undefined;
       }
       if (coloring.type === 'steps') {
-        return resolveStepColor(
-          reading.rawValue,
-          effectiveStepRules(coloring, metric, euiTheme),
-          euiTheme.colors.lightShade
+        // Unedited Steps is a preview of Automatic thresholds — keep the
+        // Automatic tile tones so Custom → Steps → Apply (no edits) is a
+        // no-op on the grid. Only user-saved rules paint via resolveStepColor.
+        if (!hasCustomStepRules(coloring, metric.id)) {
+          return undefined;
+        }
+        return flattenColor(
+          resolveStepColor(reading.rawValue, coloring.rules ?? [], euiTheme.colors.lightShade),
+          euiTheme.colors.emptyShade
         );
       }
       if (!paletteRange) return undefined;
@@ -687,7 +740,14 @@ const BucketTileRow = ({
   // Ties fall back to the entity name for a stable, alphabetic secondary
   // order so tiles keep their position across re-renders and don't
   // visually shuffle when the user changes stat.
-  const sortByValue = Boolean(coloring && coloring.mode === 'palette' && metric.kind === 'numeric');
+  const sortByValue = Boolean(
+    coloring &&
+      coloring.mode === 'palette' &&
+      metric.kind === 'numeric' &&
+      (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
+  );
+  // `sortReverse` (prop) flips the default worst → best ordering to
+  // best → worst, for both the value-based (palette) and severity-tone sorts.
   const ordered = useMemo(() => {
     // Re-seed the shared reading salt from the refresh tick so tiles re-roll
     // on Inventory (auto-)refresh. Tick 0 keeps the empty (stable) salt so
@@ -700,9 +760,18 @@ const BucketTileRow = ({
       // entity-list Health column — `healthy` entities trend green,
       // `atRisk` yellow, `unhealthy` red — so toggling between views
       // doesn't change the story for a given entity.
-      reading: resolveMetricReading(entity.name, metric, effectiveStat, entity.health),
+      reading: resolveMetricReading(
+        entity.name,
+        metric,
+        effectiveStat,
+        entity.health,
+        alertHintFromEntity(entity.alerts)
+      ),
     }));
     const direction = metric.kind === 'numeric' ? metric.thresholds.direction : 'asc';
+    // Flip the primary comparator when "Reverse order" is on; the name
+    // tiebreak stays ascending so equal tiles keep a stable position.
+    const flip = sortReverse ? -1 : 1;
     withReadings.sort((a, b) => {
       if (sortByValue) {
         const aValue = a.reading.rawValue ?? 0;
@@ -710,15 +779,15 @@ const BucketTileRow = ({
         // asc  → higher is worse → descending (worst first)
         // desc → lower  is worse → ascending  (worst first)
         const delta = direction === 'asc' ? bValue - aValue : aValue - bValue;
-        if (delta !== 0) return delta;
+        if (delta !== 0) return delta * flip;
         return a.entity.name.localeCompare(b.entity.name);
       }
       const rank = TONE_RANK[a.reading.tone] - TONE_RANK[b.reading.tone];
-      if (rank !== 0) return rank;
+      if (rank !== 0) return rank * flip;
       return a.entity.name.localeCompare(b.entity.name);
     });
     return withReadings;
-  }, [entities, metric, effectiveStat, sortByValue, refreshTick]);
+  }, [entities, metric, effectiveStat, sortByValue, sortReverse, refreshTick]);
   // No truncation — every entity in the bucket renders as its own tile
   // so the grid view stays consistent with the count shown in the
   // header (and with the list-view count). Instead of a flat
@@ -769,7 +838,7 @@ const BucketTileRow = ({
 
   // Enough vertical room above the pointer for the card (~1 title + type
   // + metric line + sparkline); flip below when hovering near the top.
-  const CARD_FLIP_ABOVE_PX = 170;
+  const CARD_FLIP_ABOVE_PX = 230;
   const CARD_FLIP_LEFT_PX = 240;
 
   const showFromEvent: TileHoverHandler = (entity, reading, event) => {
@@ -952,7 +1021,7 @@ const StepRulesLegend = ({
                 style={{
                   width: 10,
                   height: 10,
-                  borderRadius: 2,
+                  borderRadius: '50%',
                   backgroundColor: rule.color,
                   display: 'inline-block',
                   flex: '0 0 10px',
@@ -1011,7 +1080,7 @@ const BucketMetricLegend = ({
   // set of threshold-rule swatches. Placed after all hooks so hook order
   // stays stable across renders.
   if (coloring && coloring.mode === 'palette') {
-    if (coloring.type === 'steps') {
+    if (coloring.type === 'steps' && hasCustomStepRules(coloring, metric.id)) {
       return (
         <StepRulesLegend metric={metric} rules={effectiveStepRules(coloring, metric, euiTheme)} />
       );
@@ -1093,8 +1162,25 @@ const StepRulesEditor = ({
     ],
     [euiTheme]
   );
-  const updateRule = (index: number, patch: Partial<StepRule>) =>
-    onChange(rules.map((rule, i) => (i === index ? { ...rule, ...patch } : rule)));
+  // Colour-picker onChange must not run until the user opens a swatch.
+  // Mount/normalization callbacks are ignored so Apply can't persist junk.
+  const colorArmedRef = useRef(false);
+  const updateRule = (index: number, patch: Partial<StepRule>) => {
+    const next = rules.map((rule, i) => (i === index ? { ...rule, ...patch } : rule));
+    if (
+      next.length === rules.length &&
+      next.every(
+        (rule, i) =>
+          rule.label === rules[i].label &&
+          rule.value === rules[i].value &&
+          flattenColor(rule.color, euiTheme.colors.emptyShade).toLowerCase() ===
+            flattenColor(rules[i].color, euiTheme.colors.emptyShade).toLowerCase()
+      )
+    ) {
+      return;
+    }
+    onChange(next);
+  };
   const deleteRule = (index: number) => onChange(rules.filter((_, i) => i !== index));
   const addRule = () => onChange([...rules, { color: newStepColor, label: '', value: 0 }]);
 
@@ -1136,23 +1222,29 @@ const StepRulesEditor = ({
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiFlexItem grow={false} style={{ width: 44 }}>
               <EuiColorPicker
-                onChange={(color) => updateRule(index, { color })}
-                color={rule.color}
+                onChange={(color) => {
+                  if (!colorArmedRef.current) return;
+                  updateRule(index, {
+                    color: flattenColor(color, euiTheme.colors.emptyShade),
+                  });
+                }}
+                color={flattenColor(rule.color, euiTheme.colors.emptyShade)}
                 compressed
-                showAlpha
                 swatches={toneSwatches}
                 button={
-                  <EuiColorPickerSwatch
-                    // The stored colour may be a semi-transparent tone
-                    // (so tiles match Automatic exactly); flatten it over
-                    // the panel so the swatch shows the true colour instead
-                    // of a washed-out / white square.
-                    color={flattenColor(rule.color, euiTheme.colors.emptyShade)}
-                    aria-label={i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.bucket.controls.stepColorAriaLabel',
-                      { defaultMessage: 'Select color' }
-                    )}
-                  />
+                  <span
+                    onPointerDown={() => {
+                      colorArmedRef.current = true;
+                    }}
+                  >
+                    <EuiColorPickerSwatch
+                      color={flattenColor(rule.color, euiTheme.colors.emptyShade)}
+                      aria-label={i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.bucket.controls.stepColorAriaLabel',
+                        { defaultMessage: 'Select color' }
+                      )}
+                    />
+                  </span>
                 }
               />
             </EuiFlexItem>
@@ -1164,7 +1256,10 @@ const StepRulesEditor = ({
                   'xpack.streams.entityCentricLab.entities.bucket.controls.stepLabelPlaceholder',
                   { defaultMessage: 'Label' }
                 )}
-                onChange={(event) => updateRule(index, { label: event.target.value })}
+                onChange={(event) => {
+                  if (event.currentTarget !== document.activeElement) return;
+                  updateRule(index, { label: event.target.value });
+                }}
                 aria-label={i18n.translate(
                   'xpack.streams.entityCentricLab.entities.bucket.controls.stepLabelAriaLabel',
                   { defaultMessage: 'Step label' }
@@ -1176,8 +1271,14 @@ const StepRulesEditor = ({
                 compressed
                 value={rule.value}
                 onChange={(event) => {
-                  const parsed = parseFloat(event.target.value);
-                  updateRule(index, { value: isNaN(parsed) ? 0 : parsed });
+                  if (event.currentTarget !== document.activeElement) return;
+                  const raw = event.currentTarget.value;
+                  // Empty is a blur artifact (e.g. clicking Apply) — never
+                  // treat it as a threshold of 0.
+                  if (raw.trim() === '') return;
+                  const parsed = parseFloat(raw);
+                  if (Number.isNaN(parsed) || parsed === rule.value) return;
+                  updateRule(index, { value: parsed });
                 }}
                 aria-label={i18n.translate(
                   'xpack.streams.entityCentricLab.entities.bucket.controls.stepValueAriaLabel',
@@ -1222,55 +1323,96 @@ interface BucketMetricControlsProps {
   readonly bucketKey: BucketKey;
   readonly label: string;
   readonly metric: MetricDescriptor;
+  readonly metrics: readonly MetricDescriptor[];
   readonly statId: StatId;
   readonly coloring: ColoringConfig;
   readonly enablePaletteColoring: boolean;
   readonly onApply: (next: BucketSelection) => void;
+  readonly onMetricChange: (metricId: string) => void;
 }
 
 /**
- * Compact edit affordance rendered next to a bucket header. Rather
- * than exposing the "Color by" / "Stat" dropdowns inline (two controls
- * per bucket, several buckets per card — visually noisy), we surface a
- * single pencil icon that opens a flyout holding the same options. The
- * grid stays clean; the controls are one click away.
+ * Compact edit affordance rendered next to a bucket header. When
+ * ElasticOn (`enablePaletteColoring`) the Color-by dropdown is surfaced
+ * inline for quick access and the icon switches to a gear; the rest of
+ * the display options (Stat, Sort, Coloring) stay in the flyout. When
+ * off, a single pencil icon opens the full flyout as before.
  */
 const BucketMetricControls = ({
   bucketKey,
   label,
   metric,
+  metrics,
   statId,
   coloring,
   enablePaletteColoring,
   onApply,
+  onMetricChange,
 }: BucketMetricControlsProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const editLabel = i18n.translate(
-    'xpack.streams.entityCentricLab.entities.bucket.controls.editDisplay',
-    { defaultMessage: 'Edit display' }
+
+  const editLabel = enablePaletteColoring
+    ? i18n.translate(
+        'xpack.streams.entityCentricLab.entities.bucket.controls.displayOptions',
+        { defaultMessage: 'Display options' }
+      )
+    : i18n.translate(
+        'xpack.streams.entityCentricLab.entities.bucket.controls.editDisplay',
+        { defaultMessage: 'Edit display' }
+      );
+
+  const metricOptions = useMemo(
+    () => metrics.map((descriptor) => ({ value: descriptor.id, text: descriptor.label })),
+    [metrics]
   );
+
+  const iconButton = (
+    <EuiToolTip content={editLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType={enablePaletteColoring ? 'gear' : 'pencil'}
+        color="text"
+        display="base"
+        size="s"
+        aria-label={editLabel}
+        onClick={() => setIsFlyoutOpen(true)}
+        data-test-subj={`entityCentricLabBucketEdit-${bucketKey}`}
+      />
+    </EuiToolTip>
+  );
+
   return (
     <>
-      <EuiToolTip content={editLabel} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="pencil"
-          color="text"
-          display="base"
-          size="s"
-          aria-label={editLabel}
-          onClick={() => setIsFlyoutOpen(true)}
-          data-test-subj={`entityCentricLabBucketEdit-${bucketKey}`}
-        />
-      </EuiToolTip>
+      {enablePaletteColoring ? (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              compressed
+              options={metricOptions}
+              value={metric.id}
+              onChange={(event) => onMetricChange(event.target.value)}
+              aria-label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
+                { defaultMessage: 'Color by' }
+              )}
+              data-test-subj={`entityCentricLabBucketColorByInline-${bucketKey}`}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{iconButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        iconButton
+      )}
       {isFlyoutOpen ? (
         <BucketMetricControlsFlyout
           bucketKey={bucketKey}
           label={label}
           metric={metric}
+          metrics={metrics}
           statId={statId}
           coloring={coloring}
           enablePaletteColoring={enablePaletteColoring}
           onApply={onApply}
+          onMetricChange={onMetricChange}
           onClose={() => setIsFlyoutOpen(false)}
         />
       ) : null}
@@ -1292,16 +1434,19 @@ const BucketMetricControlsFlyout = ({
   bucketKey,
   label,
   metric,
+  metrics: _metrics,
   statId,
   coloring,
   enablePaletteColoring,
   onApply,
+  onMetricChange: _onMetricChange,
   onClose,
 }: BucketMetricControlsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketControlsFlyout' });
   const colorModeGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketColorMode' });
   const paletteTypeGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketPaletteType' });
+  const sortGroupId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketSort' });
   const metrics = getBucketMetrics(bucketKey);
   const metricOptions = useMemo(
     () => metrics.map((descriptor) => ({ value: descriptor.id, text: descriptor.label })),
@@ -1316,6 +1461,9 @@ const BucketMetricControlsFlyout = ({
   const [draftMetricId, setDraftMetricId] = useState<string>(metric.id);
   const [draftStatId, setDraftStatId] = useState<StatId>(statId);
   const [draftColoring, setDraftColoring] = useState<ColoringConfig>(coloring);
+  // Picker/number fields fire onChange on mount and on Apply-click blur.
+  // Those must not count as "the user edited Steps" or Apply persists junk.
+  const userEditedStepsRef = useRef(false);
 
   const draftMetric = findMetric(bucketKey, draftMetricId) ?? metrics[0];
   const isCategorical = draftMetric.kind === 'categorical';
@@ -1344,10 +1492,10 @@ const BucketMetricControlsFlyout = ({
   );
 
   // Default Steps rules seeded from the metric's own warn/crit thresholds
-  // AND the exact tile tones the severity view uses (`toneColor`) — so
-  // switching to Steps opens identical to today's default colouring, then
-  // the user tweaks colours / labels / thresholds. `desc` metrics (higher
-  // is better) map the danger band to the low end.
+  // AND the opaque tones Automatic tiles show — so switching to Steps
+  // opens identical to today's default colouring, then the user tweaks
+  // colours / labels / thresholds. `desc` metrics (higher is better) map
+  // the danger band to the low end.
   const defaultStepRules = useMemo<StepRule[]>(
     () => buildDefaultStepRules(draftMetric, euiTheme),
     [draftMetric, euiTheme]
@@ -1356,17 +1504,72 @@ const BucketMetricControlsFlyout = ({
   const updateColoring = (patch: Partial<ColoringConfig>) =>
     setDraftColoring((current) => ({ ...current, ...patch }));
 
+  // Changing Color-by drops step rules that belonged to the previous
+  // metric so Steps re-seeds Healthy / At risk / Unhealthy from the new one
+  // (CPU util must not keep Restarts' 3 / 10 bands).
+  const handleMetricChange = (nextMetricId: string) => {
+    setDraftMetricId(nextMetricId);
+    setDraftColoring((current) => {
+      if (!current.rules || current.rulesMetricId === nextMetricId) return current;
+      return {
+        ...current,
+        rules: undefined,
+        rulesVersion: undefined,
+        rulesMetricId: undefined,
+      };
+    });
+  };
+
   // Switching type never persists the seeded rules: unedited Steps
   // buckets derive their rules from the metric at render time (see
   // `effectiveStepRules`) so they always mirror Automatic and can't be
   // overridden by stale rules from an earlier build. Rules are only
   // persisted once the user actually edits a colour / label / threshold.
   const handleTypeChange = (nextType: PaletteType) => {
+    // Fresh switch onto Steps (from Gradient or from leftover storage):
+    // always seed from Automatic rather than reusing a previous Apply.
+    if (nextType === 'steps' && draftColoring.type !== 'steps') {
+      userEditedStepsRef.current = false;
+      updateColoring({
+        type: nextType,
+        rules: undefined,
+        rulesVersion: undefined,
+        rulesMetricId: undefined,
+      });
+      return;
+    }
     updateColoring({ type: nextType });
   };
 
   const handleApply = () => {
-    onApply({ metricId: draftMetricId, statId: draftStatId, coloring: draftColoring });
+    let coloringToSave = draftColoring;
+    if (draftColoring.mode === 'palette' && draftColoring.type === 'steps') {
+      if (!userEditedStepsRef.current) {
+        // Custom → Steps with no real edits: persist the type, not a
+        // picker-stamped seed. The grid then keeps Automatic tones.
+        coloringToSave = {
+          ...draftColoring,
+          rules: undefined,
+          rulesVersion: undefined,
+          rulesMetricId: undefined,
+        };
+      } else {
+        const displayed =
+          draftColoring.rules && draftColoring.rulesMetricId === draftMetricId
+            ? draftColoring.rules
+            : defaultStepRules;
+        coloringToSave = {
+          ...draftColoring,
+          rules: displayed.map((rule) => ({
+            ...rule,
+            color: flattenColor(rule.color, euiTheme.colors.emptyShade),
+          })),
+          rulesVersion: STEP_RULES_VERSION,
+          rulesMetricId: draftMetricId,
+        };
+      }
+    }
+    onApply({ metricId: draftMetricId, statId: draftStatId, coloring: coloringToSave });
     onClose();
   };
   return (
@@ -1389,25 +1592,29 @@ const BucketMetricControlsFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="div">
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.streams.entityCentricLab.entities.bucket.controls.colorBy',
-              { defaultMessage: 'Color by' }
-            )}
-            fullWidth
-          >
-            <EuiSelect
-              fullWidth
-              options={metricOptions}
-              value={draftMetricId}
-              onChange={(event) => setDraftMetricId(event.target.value)}
-              aria-label={i18n.translate(
-                'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
+          {/* When ElasticOn the Color by dropdown is surfaced inline
+              next to the gear icon, so we skip it inside the flyout. */}
+          {!enablePaletteColoring && (
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.colorBy',
                 { defaultMessage: 'Color by' }
               )}
-              data-test-subj={`entityCentricLabBucketColorBy-${bucketKey}`}
-            />
-          </EuiFormRow>
+              fullWidth
+            >
+              <EuiSelect
+                fullWidth
+                options={metricOptions}
+                value={draftMetricId}
+                onChange={(event) => handleMetricChange(event.target.value)}
+                aria-label={i18n.translate(
+                  'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
+                  { defaultMessage: 'Color by' }
+                )}
+                data-test-subj={`entityCentricLabBucketColorBy-${bucketKey}`}
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label={i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.stat', {
               defaultMessage: 'Stat',
@@ -1445,6 +1652,46 @@ const BucketMetricControlsFlyout = ({
               data-test-subj={`entityCentricLabBucketStat-${bucketKey}`}
             />
           </EuiFormRow>
+          <EuiHorizontalRule margin="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.sort', {
+              defaultMessage: 'Sort',
+            })}
+            fullWidth
+          >
+            <EuiRadioGroup
+              name={sortGroupId}
+              idSelected={draftColoring.sortReverse ? 'reverse' : 'metricValue'}
+              onChange={(id) => updateColoring({ sortReverse: id === 'reverse' })}
+              options={[
+                {
+                  id: 'metricValue',
+                  label: (
+                    <>
+                      {i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.bucket.controls.sortMetricValue',
+                        { defaultMessage: 'Metric value' }
+                      )}
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.bucket.controls.sortMetricValueHelp',
+                          { defaultMessage: 'Show worst things first, best last' }
+                        )}
+                      </EuiText>
+                    </>
+                  ),
+                },
+                {
+                  id: 'reverse',
+                  label: i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.bucket.controls.sortReverse',
+                    { defaultMessage: 'Reverse order' }
+                  ),
+                },
+              ]}
+              data-test-subj={`entityCentricLabBucketSort-${bucketKey}`}
+            />
+          </EuiFormRow>
           {showColoringSection ? (
             <>
               <EuiHorizontalRule margin="m" />
@@ -1479,7 +1726,24 @@ const BucketMetricControlsFlyout = ({
                       ),
                     },
                   ]}
-                  onChange={(id) => updateColoring({ mode: id as ColorMode })}
+                  onChange={(id) => {
+                    const mode = id as ColorMode;
+                    if (mode === 'palette') {
+                      // Custom opens on Steps with a clean Automatic seed.
+                      // Leaving type as Gradient (the storage default) is
+                      // what previously painted the cool/warm ramp on Apply.
+                      userEditedStepsRef.current = false;
+                      updateColoring({
+                        mode,
+                        type: 'steps',
+                        rules: undefined,
+                        rulesVersion: undefined,
+                        rulesMetricId: undefined,
+                      });
+                      return;
+                    }
+                    updateColoring({ mode });
+                  }}
                   data-test-subj={`entityCentricLabBucketColorMode-${bucketKey}`}
                   name={colorModeGroupId}
                 />
@@ -1646,9 +1910,20 @@ const BucketMetricControlsFlyout = ({
                     >
                       <StepRulesEditor
                         bucketKey={bucketKey}
-                        rules={draftColoring.rules ?? defaultStepRules}
+                        rules={
+                          draftColoring.rules && draftColoring.rulesMetricId === draftMetricId
+                            ? withCurrentStepLabels(draftColoring.rules)
+                            : defaultStepRules
+                        }
                         newStepColor={euiTheme.colors.textSubdued}
-                        onChange={(rules) => updateColoring({ rules })}
+                        onChange={(rules) => {
+                          userEditedStepsRef.current = true;
+                          updateColoring({
+                            rules,
+                            rulesVersion: STEP_RULES_VERSION,
+                            rulesMetricId: draftMetricId,
+                          });
+                        }}
                       />
                     </EuiFormRow>
                   )}
@@ -1749,7 +2024,13 @@ const computePaletteRange = (
   const effectiveStat = effectiveStatForMetric(metric, statId);
   const values = entities.map(
     (entity) =>
-      resolveMetricReading(entity.name, metric, effectiveStat, entity.health).rawValue ?? 0
+      resolveMetricReading(
+        entity.name,
+        metric,
+        effectiveStat,
+        entity.health,
+        alertHintFromEntity(entity.alerts)
+      ).rawValue ?? 0
   );
   return resolveColoringRange(values, metric.range, coloring);
 };
@@ -1781,7 +2062,22 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
   // Validate metric against the current catalog; if a persisted id is
   // unknown (catalog drift) the hook returns the bucket default — fall
   // back gracefully so the row still renders.
-  const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
+  const metrics = getBucketMetrics(bucketKey);
+  const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
+
+  // Inline Color-by change (ElasticOn): apply immediately and clear
+  // stale step rules that belonged to the previous metric.
+  const handleInlineMetricChange = useCallback(
+    (nextMetricId: string) => {
+      const current = selection.coloring;
+      const newColoring =
+        current.rules && current.rulesMetricId !== nextMetricId
+          ? { ...current, rules: undefined, rulesVersion: undefined, rulesMetricId: undefined }
+          : current;
+      setSelection({ ...selection, metricId: nextMetricId, coloring: newColoring });
+    },
+    [selection, setSelection]
+  );
   const { coloring } = selection;
   // Steps no longer needs persisted rules to be active — unedited buckets
   // derive defaults from the metric (see `effectiveStepRules`).
@@ -1793,7 +2089,12 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         : null,
     [paletteActive, coloring, entities, metric, selection.statId]
   );
-  const coloringForRender = paletteActive ? coloring : null;
+  // Unedited Steps must render as Automatic (same tones, legend, sort).
+  // Only Gradient or user-saved step rules take over the grid.
+  const coloringForRender =
+    paletteActive && (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
+      ? coloring
+      : null;
   return (
     <div data-test-subj={`entityCentricLabBucket-${bucketKey}`}>
       {/* Row 1: sub-type label + count on the left, dropdowns on the
@@ -1818,10 +2119,12 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
             bucketKey={bucketKey}
             label={label}
             metric={metric}
+            metrics={metrics}
             statId={selection.statId}
             coloring={selection.coloring}
             enablePaletteColoring={paletteEnabled}
             onApply={setSelection}
+            onMetricChange={handleInlineMetricChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -1842,6 +2145,7 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         onSelectEntity={onSelectEntity}
         coloring={coloringForRender}
         paletteRange={paletteRange}
+        sortReverse={selection.coloring.sortReverse}
       />
     </div>
   );
@@ -1886,6 +2190,7 @@ const KubernetesCard = ({
   entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
 }) => {
+  const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { euiTheme } = useEuiTheme();
   const subRowClass = css`
     padding: ${euiTheme.size.s} 0;
@@ -1953,7 +2258,10 @@ const KubernetesCard = ({
         <EuiText size="s" color="subdued">
           {i18n.translate(
             'xpack.streams.entityCentricLab.entities.bucket.kubernetes.clusterFilter.empty',
-            { defaultMessage: 'No Kubernetes entities match the current cluster filter.' }
+            {
+              defaultMessage: 'No Kubernetes {things} match the current cluster filter.',
+              values: { things: labThings(paletteEnabled) },
+            }
           )}
         </EuiText>
       ) : (
@@ -2229,8 +2537,23 @@ const CategoryCardInner = ({
 }: CategoryCardInnerProps) => {
   const paletteEnabled = useContext(PaletteColoringEnabledContext);
   const { selection, setSelection } = useBucketMetricSelection(bucketKey);
-  const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
+  const metrics = getBucketMetrics(bucketKey);
+  const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
   const categoryLabel = labelOverride ?? getCategoryDescriptor(category)?.label ?? category;
+
+  // Inline Color-by change (ElasticOn): apply immediately and clear
+  // stale step rules that belonged to the previous metric.
+  const handleInlineMetricChange = useCallback(
+    (nextMetricId: string) => {
+      const current = selection.coloring;
+      const newColoring =
+        current.rules && current.rulesMetricId !== nextMetricId
+          ? { ...current, rules: undefined, rulesVersion: undefined, rulesMetricId: undefined }
+          : current;
+      setSelection({ ...selection, metricId: nextMetricId, coloring: newColoring });
+    },
+    [selection, setSelection]
+  );
   const { coloring } = selection;
   // Steps no longer needs persisted rules to be active — unedited buckets
   // derive defaults from the metric (see `effectiveStepRules`).
@@ -2242,7 +2565,12 @@ const CategoryCardInner = ({
         : null,
     [paletteActive, coloring, entities, metric, selection.statId]
   );
-  const coloringForRender = paletteActive ? coloring : null;
+  // Unedited Steps must render as Automatic (same tones, legend, sort).
+  // Only Gradient or user-saved step rules take over the grid.
+  const coloringForRender =
+    paletteActive && (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
+      ? coloring
+      : null;
   return (
     <EuiPanel
       hasBorder
@@ -2260,10 +2588,12 @@ const CategoryCardInner = ({
             bucketKey={bucketKey}
             label={categoryLabel}
             metric={metric}
+            metrics={metrics}
             statId={selection.statId}
             coloring={selection.coloring}
             enablePaletteColoring={paletteEnabled}
             onApply={setSelection}
+            onMetricChange={handleInlineMetricChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -2284,6 +2614,7 @@ const CategoryCardInner = ({
         onSelectEntity={onSelectEntity}
         coloring={coloringForRender}
         paletteRange={paletteRange}
+        sortReverse={selection.coloring.sortReverse}
       />
     </EuiPanel>
   );
@@ -2329,9 +2660,165 @@ const GroupBucketHeader = ({ label, total }: { label: string; total: number }) =
 );
 
 /**
+ * Derive the bucket key for a set of entities so custom-grouping buckets
+ * that contain a single category/subType can re-use the per-type metric
+ * catalog (Color by, legend, palette). Returns `undefined` when the
+ * entities span multiple types — those buckets stay on Health-only.
+ */
+const inferBucketKey = (entities: readonly Entity[]): BucketKey | undefined => {
+  if (entities.length === 0) return undefined;
+  const first = entities[0];
+  const category = first.category;
+  const subType =
+    category === 'kubernetes' ? first.subType ?? first.type : first.type;
+  for (let i = 1; i < entities.length; i++) {
+    const entity = entities[i];
+    const entitySubType =
+      entity.category === 'kubernetes' ? entity.subType ?? entity.type : entity.type;
+    if (entity.category !== category || entitySubType !== subType) return undefined;
+  }
+  return bucketKeyFor(category, subType);
+};
+
+/**
+ * Wrapper for custom-group buckets: when the bucket maps to a single
+ * entity type, renders full metric controls + legend + colored tiles;
+ * otherwise falls back to Health-only tiles.
+ */
+const CustomGroupBucketContent = ({
+  entities,
+  label,
+  onSelectEntity,
+}: {
+  entities: readonly Entity[];
+  label: string;
+  onSelectEntity: (entityName: string) => void;
+}) => {
+  const key = useMemo(() => inferBucketKey(entities), [entities]);
+
+  if (!key) {
+    return (
+      <>
+        <GroupBucketHeader label={label} total={entities.length} />
+        <EuiSpacer size="s" />
+        <CustomGroupTiles entities={entities} onSelectEntity={onSelectEntity} />
+      </>
+    );
+  }
+
+  return (
+    <CustomGroupBucketWithControls
+      bucketKey={key}
+      label={label}
+      entities={entities}
+      onSelectEntity={onSelectEntity}
+    />
+  );
+};
+
+/**
+ * Custom-group bucket that maps to a single entity type — renders the
+ * header with metric controls + legend + per-metric colored tiles.
+ */
+const CustomGroupBucketWithControls = ({
+  bucketKey,
+  label,
+  entities,
+  onSelectEntity,
+}: {
+  bucketKey: BucketKey;
+  label: string;
+  entities: readonly Entity[];
+  onSelectEntity: (entityName: string) => void;
+}) => {
+  const paletteEnabled = useContext(PaletteColoringEnabledContext);
+  const { selection, setSelection } = useBucketMetricSelection(bucketKey);
+  const metrics = getBucketMetrics(bucketKey);
+  const metric = findMetric(bucketKey, selection.metricId) ?? metrics[0];
+  const { coloring } = selection;
+
+  const handleInlineMetricChange = useCallback(
+    (nextMetricId: string) => {
+      const current = selection.coloring;
+      const newColoring =
+        current.rules && current.rulesMetricId !== nextMetricId
+          ? { ...current, rules: undefined, rulesVersion: undefined, rulesMetricId: undefined }
+          : current;
+      setSelection({ ...selection, metricId: nextMetricId, coloring: newColoring });
+    },
+    [selection, setSelection]
+  );
+
+  const paletteActive = paletteEnabled && coloring.mode === 'palette' && metric.kind === 'numeric';
+  const paletteRange = useMemo(
+    () =>
+      paletteActive && coloring.type === 'gradient'
+        ? computePaletteRange(entities, metric, selection.statId, coloring)
+        : null,
+    [paletteActive, coloring, entities, metric, selection.statId]
+  );
+  const coloringForRender =
+    paletteActive && (coloring.type === 'gradient' || hasCustomStepRules(coloring, metric.id))
+      ? coloring
+      : null;
+  const effectiveStat = effectiveStatForMetric(metric, selection.statId);
+  const sortReverse = coloring.sortReverse ?? false;
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h4>{label}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{entities.length.toLocaleString()}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <BucketMetricControls
+            bucketKey={bucketKey}
+            label={label}
+            metric={metric}
+            metrics={metrics}
+            statId={selection.statId}
+            coloring={selection.coloring}
+            enablePaletteColoring={paletteEnabled}
+            onApply={setSelection}
+            onMetricChange={handleInlineMetricChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <BucketMetricLegend
+        metric={metric}
+        coloring={coloringForRender}
+        paletteRange={paletteRange}
+      />
+      <EuiSpacer size="xs" />
+      <BucketTileRow
+        entities={entities}
+        metric={metric}
+        statId={effectiveStat}
+        coloring={coloringForRender}
+        paletteRange={paletteRange}
+        sortReverse={sortReverse}
+        onSelectEntity={onSelectEntity}
+      />
+    </>
+  );
+};
+
+/**
  * One card per level-1 bucket of a custom grouping. When a second grouping
  * field is active the card shows a sub-row per level-2 bucket; otherwise the
- * bucket's tiles span the card directly.
+ * bucket's tiles span the card directly. When the bucket maps to a single
+ * entity type, metric controls (Color by, legend) are surfaced.
  */
 const CustomGroupCard = ({
   node,
@@ -2343,29 +2830,28 @@ const CustomGroupCard = ({
   onSelectEntity: (entityName: string) => void;
 }) => (
   <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-    <GroupBucketHeader label={node.label} total={node.entities.length} />
-    <EuiSpacer size="s" />
     {hasSubLevel && node.children.length > 0 ? (
-      <EuiFlexGroup direction="column" gutterSize="m">
-        {node.children.map((child) => (
-          <EuiFlexItem key={child.key} grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>{child.label}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{child.entities.length.toLocaleString()}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <CustomGroupTiles entities={child.entities} onSelectEntity={onSelectEntity} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <>
+        <GroupBucketHeader label={node.label} total={node.entities.length} />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {node.children.map((child) => (
+            <EuiFlexItem key={child.key} grow={false}>
+              <CustomGroupBucketContent
+                entities={child.entities}
+                label={child.label}
+                onSelectEntity={onSelectEntity}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </>
     ) : (
-      <CustomGroupTiles entities={node.entities} onSelectEntity={onSelectEntity} />
+      <CustomGroupBucketContent
+        entities={node.entities}
+        label={node.label}
+        onSelectEntity={onSelectEntity}
+      />
     )}
   </EuiPanel>
 );
@@ -2388,14 +2874,14 @@ export const GroupedGridView = ({
   // is a no-op for everything outside the storyline, so the rest of
   // the grid still honours dataset-defined health.
   const chaosOn = useChaosModeEnabled();
-  const effectiveEntities = useMemo<Entity[]>(
-    () =>
-      entities.map((entity) => {
-        const effective = getEffectiveEntityHealth(entity.name, entity.health, chaosOn);
-        return effective === entity.health ? entity : { ...entity, health: effective };
-      }),
-    [entities, chaosOn]
-  );
+  const effectiveEntities = useMemo<Entity[]>(() => {
+    const withHealth = entities.map((entity) => {
+      const effective = getEffectiveEntityHealth(entity.name, entity.health, chaosOn);
+      return effective === entity.health ? entity : { ...entity, health: effective };
+    });
+    if (!enablePaletteColoring) return withHealth;
+    return withHealth.filter((entity) => !isCategoryHiddenInElasticOn(entity.category));
+  }, [entities, chaosOn, enablePaletteColoring]);
 
   // `customGroupBy === undefined` keeps the built-in Category → Type layout;
   // an empty array means "no grouping" (a single flat "All entities" block);
@@ -2428,11 +2914,15 @@ export const GroupedGridView = ({
       list.push(entity);
       buckets.set(entity.category, list);
     }
-    return ENTITY_CATEGORIES.map((descriptor) => ({
-      category: descriptor.id,
-      rows: buckets.get(descriptor.id) ?? [],
-    })).filter((section) => section.rows.length > 0);
-  }, [effectiveEntities]);
+    // ElasticOn (`enablePaletteColoring`) hides infra-parked categories
+    // such as APM Services so they cannot reappear as a hex-map row.
+    return getVisibleEntityCategories(enablePaletteColoring)
+      .map((descriptor) => ({
+        category: descriptor.id,
+        rows: buckets.get(descriptor.id) ?? [],
+      }))
+      .filter((section) => section.rows.length > 0);
+  }, [effectiveEntities, enablePaletteColoring]);
 
   const isEmpty = useCustomGrouping ? customGroups.length === 0 : grouped.length === 0;
 
@@ -2443,7 +2933,8 @@ export const GroupedGridView = ({
         title={
           <h2>
             {i18n.translate('xpack.streams.entityCentricLab.entities.grid.empty.title', {
-              defaultMessage: 'No entities match your filters',
+              defaultMessage: 'No {things} match your filters',
+              values: { things: labThings(enablePaletteColoring) },
             })}
           </h2>
         }
@@ -2451,7 +2942,8 @@ export const GroupedGridView = ({
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.streams.entityCentricLab.entities.grid.empty.body', {
-                defaultMessage: 'Try removing one or more filters to see entities.',
+                defaultMessage: 'Try removing one or more filters to see {things}.',
+                values: { things: labThings(enablePaletteColoring) },
               })}
             </p>
           </EuiText>

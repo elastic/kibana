@@ -31,16 +31,12 @@ import {
 } from './bucket_metrics';
 import { DEFAULT_COLORING, normalizeColoring, type ColoringConfig } from './palette_coloring';
 
-// Bumped to v3 to force every bucket back to the shared "Entity
-// health" default. v2 already made Health the default, but any bucket
-// where the user (or ourselves during earlier lab work) had picked a
-// different Color-by kept overriding it — the design intent is that
-// every category card and every Kubernetes sub-type row opens on the
-// consolidated Healthy / At risk / Unhealthy score. The user can
-// still change Color-by per bucket via the pencil; the change just
-// re-persists under v3. As before, older keys are left behind (no
-// cleanup) so rolling back to the previous build keeps prior setups.
-const STORAGE_KEY = 'entityCentricLab.bucketMetricSelection.v3';
+// Bumped to v4 to drop persisted Custom/Steps colouring that was seeded
+// by picker mount (wrong thresholds / a Gradient ramp). v3 had already
+// reset Color-by to Health; this pass also resets per-bucket palette
+// config so unedited Steps can match Automatic again. Older keys are
+// left behind so rolling back a lab build keeps prior setups.
+const STORAGE_KEY = 'entityCentricLab.bucketMetricSelection.v4';
 const DEFAULT_STAT: StatId = 'last';
 
 export interface BucketSelection {

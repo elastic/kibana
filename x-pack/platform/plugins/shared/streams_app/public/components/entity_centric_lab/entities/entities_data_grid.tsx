@@ -40,7 +40,16 @@ import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
 import { HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 import {
+  K8S_CONTEXT_KEYS,
+  K8S_CONTEXT_LABEL,
+  getK8sContextColumnIds,
+  getK8sContextValue,
+  type K8sContextKey,
+} from './kubernetes_hierarchy';
+import {
   ENTITY_HEALTH_METRIC_ID,
+  ENTITY_ALERTS_METRIC_ID,
+  alertHintFromEntity,
   bucketKeyFor,
   findMetric,
   getBucketMetrics,
@@ -68,22 +77,42 @@ const HEALTH_LABEL: Record<EntityHealth, string> = {
   }),
 };
 
+const ALERT_BADGE_COLOR: Record<string, 'danger' | 'success' | 'hollow'> = {
+  active: 'danger',
+  clear: 'success',
+  na: 'hollow',
+};
+
+const ALERT_SORT_RANK: Record<string, number> = { active: 0, clear: 1, na: 2 };
+
+const alertStatusId = (entity: Entity): string => {
+  if (!entity.alerts) return 'na';
+  return entity.alerts.active > 0 ? 'active' : 'clear';
+};
+
+const alertBadgeLabel = (entity: Entity): string => {
+  if (!entity.alerts) return 'N/A';
+  const { total, active } = entity.alerts;
+  if (active > 0) return `Alerting (${active}/${total})`;
+  return `OK (${total}/${total})`;
+};
+
 const METRIC_PREFIX = 'metric:';
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const STORAGE_PREFIX = 'entityCentricLab.listColumns.v1:';
+const STORAGE_PREFIX = 'entityCentricLab.listColumns.v2:';
 
 interface CatalogColumn {
   readonly id: string;
   readonly label: string;
 }
 
-// Identity / tag columns shown by default — mirrors the classic list view so
-// the ElasticOn grid opens looking identical.
+// Identity / tag columns shown by default. Application and Anomaly
+// detection are omitted in ElasticOn (infra-first); this grid is ElasticOn-only.
 const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
   {
     id: 'name',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.name', {
-      defaultMessage: 'Entity name',
+      defaultMessage: 'Name',
     }),
   },
   {
@@ -93,9 +122,9 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
     }),
   },
   {
-    id: 'application',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.application', {
-      defaultMessage: 'Application',
+    id: 'alerts',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.alerts', {
+      defaultMessage: 'Alerts',
     }),
   },
   {
@@ -126,12 +155,6 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
     id: 'age',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.age', {
       defaultMessage: 'Age',
-    }),
-  },
-  {
-    id: 'anomalyDetection',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.anomalyDetection', {
-      defaultMessage: 'Anomaly detection',
     }),
   },
 ];
@@ -165,12 +188,24 @@ const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
   {
     id: 'id',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.id', {
-      defaultMessage: 'Entity ID',
+      defaultMessage: 'Resource ID',
     }),
   },
 ];
 
 const DEFAULT_VISIBLE_IDS: readonly string[] = BASE_VISIBLE_COLUMNS.map((column) => column.id);
+
+const k8sContextCatalogColumn = (id: K8sContextKey): CatalogColumn => ({
+  id,
+  label: K8S_CONTEXT_LABEL[id],
+});
+
+const defaultVisibleIdsFor = (bucketKey: string): string[] => {
+  const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
+  if (extra.length === 0) return [...DEFAULT_VISIBLE_IDS];
+  const [name, health, ...rest] = DEFAULT_VISIBLE_IDS;
+  return [name, health, ...extra, ...rest];
+};
 
 const PROVIDER_LABEL: Record<string, string> = Object.fromEntries(
   CLOUD_PROVIDERS.map((provider) => [provider.id, provider.label])
@@ -221,7 +256,8 @@ const removeVisible = (bucketKey: BucketKey): void => {
  */
 const useColumnConfig = (
   bucketKey: BucketKey,
-  catalogIds: readonly string[]
+  catalogIds: readonly string[],
+  defaultVisibleIds: readonly string[]
 ): {
   visibleColumns: string[];
   setVisibleColumns: (ids: string[]) => void;
@@ -229,6 +265,8 @@ const useColumnConfig = (
 } => {
   const catalogRef = useRef(catalogIds);
   catalogRef.current = catalogIds;
+  const defaultRef = useRef(defaultVisibleIds);
+  defaultRef.current = defaultVisibleIds;
 
   const sanitize = useCallback(
     (ids: readonly string[]): string[] => ids.filter((id) => catalogRef.current.includes(id)),
@@ -237,12 +275,12 @@ const useColumnConfig = (
 
   const [visibleColumns, setVisibleColumnsState] = useState<string[]>(() => {
     const stored = readVisible(bucketKey);
-    return stored ? sanitize(stored) : [...DEFAULT_VISIBLE_IDS];
+    return stored ? sanitize(stored) : [...defaultVisibleIds];
   });
 
   useEffect(() => {
     const stored = readVisible(bucketKey);
-    setVisibleColumnsState(stored ? sanitize(stored) : [...DEFAULT_VISIBLE_IDS]);
+    setVisibleColumnsState(stored ? sanitize(stored) : [...defaultRef.current]);
   }, [bucketKey, sanitize]);
 
   const setVisibleColumns = useCallback(
@@ -255,7 +293,7 @@ const useColumnConfig = (
   );
 
   const reset = useCallback(() => {
-    setVisibleColumnsState([...DEFAULT_VISIBLE_IDS]);
+    setVisibleColumnsState([...defaultRef.current]);
     removeVisible(bucketKey);
   }, [bucketKey]);
 
@@ -344,6 +382,8 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
       return entity.name.toLowerCase();
     case 'health':
       return HEALTH_RANK[entity.health];
+    case 'alerts':
+      return ALERT_SORT_RANK[alertStatusId(entity)] ?? 2;
     case 'application':
     case 'environment':
     case 'team':
@@ -353,8 +393,6 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
       return entity.lastHealthChange;
     case 'age':
       return entity.age;
-    case 'anomalyDetection':
-      return entity.anomalyDetection;
     case 'type':
       return entity.type;
     case 'subType':
@@ -368,10 +406,19 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
     default:
       break;
   }
+  if (K8S_CONTEXT_KEYS.includes(columnId as K8sContextKey)) {
+    return getK8sContextValue(entity, columnId as K8sContextKey).toLowerCase();
+  }
   if (columnId.startsWith(METRIC_PREFIX)) {
     const metric = findMetric(bucketKey, columnId.slice(METRIC_PREFIX.length));
     if (!metric) return '';
-    const reading = resolveMetricReading(entity.name, metric, 'last', entity.health);
+    const reading = resolveMetricReading(
+      entity.name,
+      metric,
+      'last',
+      entity.health,
+      alertHintFromEntity(entity.alerts)
+    );
     // Numeric metrics sort by their synthesized value; categorical ones sort
     // by their displayed label.
     return reading.rawValue ?? reading.displayValue;
@@ -430,23 +477,39 @@ export const EntityDataGridSection = ({
     return bucketKeyFor(category, groupLabel);
   }, [category, rows]);
 
-  // Metric columns for this bucket (minus the shared "Entity health" metric,
-  // which the Health column already covers).
+  // Metric columns for this bucket (minus Health and Alerts which have
+  // dedicated first-class columns already).
   const metricColumns = useMemo<CatalogColumn[]>(
     () =>
       getBucketMetrics(bucketKey)
-        .filter((metric) => metric.id !== ENTITY_HEALTH_METRIC_ID)
+        .filter(
+          (metric) =>
+            metric.id !== ENTITY_HEALTH_METRIC_ID && metric.id !== ENTITY_ALERTS_METRIC_ID
+        )
         .map((metric) => ({ id: `${METRIC_PREFIX}${metric.id}`, label: metric.label })),
     [bucketKey]
   );
 
+  const k8sContext = useMemo(() => getK8sContextColumnIds(bucketKey), [bucketKey]);
+  const defaultVisibleIds = useMemo(() => defaultVisibleIdsFor(bucketKey), [bucketKey]);
+
   const catalog = useMemo<CatalogColumn[]>(
-    () => [...BASE_VISIBLE_COLUMNS, ...BASE_HIDDEN_COLUMNS, ...metricColumns],
-    [metricColumns]
+    () => [
+      ...BASE_VISIBLE_COLUMNS,
+      ...k8sContext.defaultVisible.map(k8sContextCatalogColumn),
+      ...k8sContext.hidden.map(k8sContextCatalogColumn),
+      ...BASE_HIDDEN_COLUMNS,
+      ...metricColumns,
+    ],
+    [k8sContext, metricColumns]
   );
   const catalogIds = useMemo(() => catalog.map((column) => column.id), [catalog]);
 
-  const { visibleColumns, setVisibleColumns, reset } = useColumnConfig(bucketKey, catalogIds);
+  const { visibleColumns, setVisibleColumns, reset } = useColumnConfig(
+    bucketKey,
+    catalogIds,
+    defaultVisibleIds
+  );
   const { euiTheme } = useEuiTheme();
 
   const gridColumns = useMemo<EuiDataGridColumn[]>(
@@ -456,7 +519,15 @@ export const EntityDataGridSection = ({
         displayAsText: column.label,
         isSortable: true,
         initialWidth:
-          column.id === 'name' ? 240 : column.id.startsWith(METRIC_PREFIX) ? 130 : undefined,
+          column.id === 'name'
+            ? 240
+            : column.id === 'alerts'
+            ? 140
+            : column.id.startsWith(METRIC_PREFIX)
+            ? 130
+            : K8S_CONTEXT_KEYS.includes(column.id as K8sContextKey)
+            ? 150
+            : undefined,
       })),
     [catalog]
   );
@@ -506,6 +577,12 @@ export const EntityDataGridSection = ({
               {HEALTH_LABEL[entity.health]}
             </EuiBadge>
           );
+        case 'alerts':
+          return (
+            <EuiBadge color={ALERT_BADGE_COLOR[alertStatusId(entity)] ?? 'hollow'}>
+              {alertBadgeLabel(entity)}
+            </EuiBadge>
+          );
         case 'application':
         case 'environment':
         case 'team':
@@ -515,8 +592,6 @@ export const EntityDataGridSection = ({
           return entity.lastHealthChange;
         case 'age':
           return entity.age;
-        case 'anomalyDetection':
-          return entity.anomalyDetection;
         case 'type':
           return entity.type;
         case 'subType':
@@ -530,10 +605,20 @@ export const EntityDataGridSection = ({
         default:
           break;
       }
+      if (K8S_CONTEXT_KEYS.includes(columnId as K8sContextKey)) {
+        const value = getK8sContextValue(entity, columnId as K8sContextKey);
+        return value ? <EuiBadge color="hollow">{value}</EuiBadge> : '—';
+      }
       if (columnId.startsWith(METRIC_PREFIX)) {
         const metric = findMetric(bucketKey, columnId.slice(METRIC_PREFIX.length));
         if (!metric) return '—';
-        const reading = resolveMetricReading(entity.name, metric, 'last', entity.health);
+        const reading = resolveMetricReading(
+          entity.name,
+          metric,
+          'last',
+          entity.health,
+          alertHintFromEntity(entity.alerts)
+        );
         if (metric.kind !== 'numeric') return reading.displayValue;
         return (
           <NumericMetricCell
@@ -553,18 +638,26 @@ export const EntityDataGridSection = ({
     ? `${descriptor?.label ?? category} · ${subTypeLabel}`
     : descriptor?.label ?? category;
 
+  // When nested without a sub-type label the category header is already
+  // rendered outside the panel — skip the in-panel duplicate.
+  const showInPanelHeader = !nested || Boolean(subTypeLabel);
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <GridSectionHeader
-        category={category}
-        subTypeLabel={subTypeLabel}
-        total={rows.length}
-        nested={nested}
-      />
-      <EuiSpacer size="s" />
+      {showInPanelHeader && (
+        <>
+          <GridSectionHeader
+            category={category}
+            subTypeLabel={subTypeLabel}
+            total={rows.length}
+            nested={nested}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiDataGrid
         aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.grid.ariaLabel', {
-          defaultMessage: '{label} entities',
+          defaultMessage: '{label} resources',
           values: { label: captionLabel },
         })}
         columns={gridColumns}

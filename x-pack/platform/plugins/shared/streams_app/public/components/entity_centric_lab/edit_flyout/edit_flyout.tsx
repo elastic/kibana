@@ -26,11 +26,7 @@ import {
   type EuiStepsHorizontalProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  entityTypeToKind,
-  setEntityDisplayConfig,
-  setFlyoutTemplateOverride,
-} from '@kbn/entity-centric-lab-flyout';
+import { setEntityDisplayConfig, setFlyoutTemplateOverride } from '@kbn/entity-centric-lab-flyout';
 import type { FakeEntityType } from '../fake_entity_types';
 import { addUserEntityType } from '../user_entity_types';
 import type {
@@ -58,6 +54,7 @@ import { OwnershipStep } from './steps/ownership_step';
 import { FlyoutContentStep } from './steps/flyout_content_step';
 import { SubsetsStep } from './steps/subsets_step';
 import { SubsetEditorBody } from './subset_editor';
+import { labThing, labThings, useIsElasticOn } from '../lab_terminology';
 
 /**
  * The wizard runs in two modes:
@@ -111,6 +108,7 @@ type View = { kind: 'wizard' } | { kind: 'subset-editor'; subset: SubsetDraft };
 
 const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
   const isCreate = mode === 'create';
+  const isElasticOn = useIsElasticOn();
   const titleId = useGeneratedHtmlId({
     prefix: isCreate ? 'createEntityTypeFlyoutTitle' : 'editEntityTypeFlyoutTitle',
   });
@@ -261,34 +259,32 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
   //      concatenates with the hardcoded `FAKE_ENTITY_TYPES` catalogue so
   //      the new row shows up in the table immediately.
   const handleSaveModifications = useCallback(() => {
-    // Kind resolution uses the *edited* name from `general`, not the
-    // seed `entityType.name`. In edit mode the user can rename a row;
-    // in create mode the seed name is empty and only `general.name`
-    // carries the user's input.
-    const kind = entityTypeToKind(draft.general.name);
-    if (kind) {
-      // The seeded blank row (and any rows the user added but never filled
-      // in) shouldn't pollute the runtime override — `url` is the minimum
-      // signal that an entry was intentional. We persist the *unfiltered*
-      // list to the wizard store below so re-opening the form still shows
-      // the user's in-progress rows.
-      const meaningfulLinks = draft.customLinks
-        .filter((link) => link.url.trim().length > 0)
-        .map((link) => ({
-          id: link.id,
-          type: link.type,
-          url: link.url,
-          label: link.label,
-        }));
-      setFlyoutTemplateOverride(kind, {
-        flyoutTabs: draft.flyoutTabs.map((tab) => ({
-          id: tab.id,
-          label: tab.label,
-          enabled: tab.enabled,
-        })),
-        customLinks: meaningfulLinks,
-      });
-    }
+    // Flyout overrides are keyed by the stable `FakeEntityType.id` (the same
+    // dimension the display-config store uses), so customizing one type
+    // affects only that type — not every type sharing its coarse `EntityKind`
+    // (e.g. all cloud services). The flyout read path resolves the same id via
+    // `resolveEntityTypeIdForName`.
+    // The seeded blank row (and any rows the user added but never filled
+    // in) shouldn't pollute the runtime override — `url` is the minimum
+    // signal that an entry was intentional. We persist the *unfiltered*
+    // list to the wizard store below so re-opening the form still shows
+    // the user's in-progress rows.
+    const meaningfulLinks = draft.customLinks
+      .filter((link) => link.url.trim().length > 0)
+      .map((link) => ({
+        id: link.id,
+        type: link.type,
+        url: link.url,
+        label: link.label,
+      }));
+    setFlyoutTemplateOverride(draft.entityType.id, {
+      flyoutTabs: draft.flyoutTabs.map((tab) => ({
+        id: tab.id,
+        label: tab.label,
+        enabled: tab.enabled,
+      })),
+      customLinks: meaningfulLinks,
+    });
     // Push the per-type display config to the shared store so every
     // renderer (entity flyout title, Streams entities list/grid,
     // dependency rows, Discover logs panel) instantly re-labels entities
@@ -313,7 +309,8 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
           trimmedName.length > 0
             ? trimmedName
             : i18n.translate('xpack.streams.entityCentricLab.createFlyout.untitledRow', {
-                defaultMessage: 'Untitled entity type',
+                defaultMessage: 'Untitled {thing} type',
+                values: { thing: labThing(isElasticOn) },
               }),
         generatedBy: 'User',
         category: trimmedCategory.length > 0 ? trimmedCategory : 'Custom',
@@ -327,7 +324,7 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
     }
     persistEntityTypeDraft(draft.entityType.id, draft);
     onClose();
-  }, [draft, isCreate, onClose]);
+  }, [draft, isCreate, isElasticOn, onClose]);
 
   const isSubsetEditor = view.kind === 'subset-editor';
 
@@ -348,7 +345,7 @@ const EntityTypeWizardFlyout = ({ mode, entityType, onClose }: WizardProps) => {
             // In create mode the seed `entityType.name` is empty until the
             // user fills in General. Falling back to a placeholder keeps
             // the breadcrumb readable.
-            entityTypeName={draft.general.name || newEntityTypeFallbackName()}
+            entityTypeName={draft.general.name || newEntityTypeFallbackName(isElasticOn)}
             subsetName={view.subset.name}
             onBack={handleCancelSubset}
           />
@@ -418,21 +415,23 @@ const WizardHeader = ({
 }: WizardHeaderProps) => {
   const isCreate = mode === 'create';
   const isManaged = entityType.generatedBy === 'Elastic';
+  const isElasticOn = useIsElasticOn();
   const titleText = isCreate
     ? // Create mode: show a static "New entity type" title until the user
       // types a name, then mirror the entered name so the header tracks
       // what the user is building.
       entityTypeName.trim().length > 0
       ? i18n.translate('xpack.streams.entityCentricLab.createFlyout.titleWithName', {
-          defaultMessage: '{name} entity type',
-          values: { name: entityTypeName },
+          defaultMessage: '{name} {thing} type',
+          values: { name: entityTypeName, thing: labThing(isElasticOn) },
         })
       : i18n.translate('xpack.streams.entityCentricLab.createFlyout.title', {
-          defaultMessage: 'New entity type',
+          defaultMessage: 'New {thing} type',
+          values: { thing: labThing(isElasticOn) },
         })
     : i18n.translate('xpack.streams.entityCentricLab.editFlyout.title', {
-        defaultMessage: '{name} entity type',
-        values: { name: entityType.name },
+        defaultMessage: '{name} {thing} type',
+        values: { name: entityType.name, thing: labThing(isElasticOn) },
       });
 
   return (
@@ -480,8 +479,8 @@ const WizardHeader = ({
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow">
                 {i18n.translate('xpack.streams.entityCentricLab.editFlyout.matchingEntitiesBadge', {
-                  defaultMessage: '{count} matching entities',
-                  values: { count: entityType.entitiesCount },
+                  defaultMessage: '{count} matching {things}',
+                  values: { count: entityType.entitiesCount, things: labThings(isElasticOn) },
                 })}
               </EuiBadge>
             </EuiFlexItem>
@@ -522,9 +521,10 @@ const WizardHeader = ({
  * hasn't named the entity type yet in create mode. Pulled out so the
  * subset editor and any other surface stays consistent.
  */
-const newEntityTypeFallbackName = () =>
+const newEntityTypeFallbackName = (isElasticOn: boolean) =>
   i18n.translate('xpack.streams.entityCentricLab.createFlyout.fallbackName', {
-    defaultMessage: 'new entity type',
+    defaultMessage: 'new {thing} type',
+    values: { thing: labThing(isElasticOn) },
   });
 
 interface SubsetEditorHeaderProps {
@@ -540,12 +540,13 @@ const SubsetEditorHeader = ({
   subsetName,
   onBack,
 }: SubsetEditorHeaderProps) => {
+  const isElasticOn = useIsElasticOn();
   return (
     <>
       <EuiLink onClick={onBack} data-test-subj="entityCentricLabEditFlyoutSubsetEditorBack">
         {i18n.translate('xpack.streams.entityCentricLab.editFlyout.subsetEditor.backLink', {
-          defaultMessage: '← Back to {name} entity type',
-          values: { name: entityTypeName },
+          defaultMessage: '← Back to {name} {thing} type',
+          values: { name: entityTypeName, thing: labThing(isElasticOn) },
         })}
       </EuiLink>
       <EuiSpacer size="s" />
@@ -644,13 +645,15 @@ const FooterWizard = ({
   onSaveModifications,
   onNext,
 }: FooterWizardProps) => {
+  const isElasticOn = useIsElasticOn();
   // "Save modifications" reads weird when the entity type doesn't exist
   // yet — relabel to "Create entity type" in create mode so the primary
   // action matches the user's intent.
   const saveLabel =
     mode === 'create'
       ? i18n.translate('xpack.streams.entityCentricLab.createFlyout.save', {
-          defaultMessage: 'Create entity type',
+          defaultMessage: 'Create {thing} type',
+          values: { thing: labThing(isElasticOn) },
         })
       : i18n.translate('xpack.streams.entityCentricLab.editFlyout.save', {
           defaultMessage: 'Save modifications',

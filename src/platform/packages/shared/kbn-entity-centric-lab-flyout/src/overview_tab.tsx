@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
+import { labThingLabel } from './lab_terminology';
 import type { EntityOverview, GoldenSignal, GoldenSignalLevel } from './fake_entity_overview';
 import { formatGoldenSignalValue } from './fake_entity_overview';
 
@@ -44,6 +45,7 @@ interface OverviewTabProps {
 }
 
 export const OverviewTab = ({ overview, dashboardSlot }: OverviewTabProps) => {
+  const { resourceCopy = false } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
   const dashboardAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabDashboard' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
@@ -58,7 +60,8 @@ export const OverviewTab = ({ overview, dashboardSlot }: OverviewTabProps) => {
         buttonContent={
           <SectionTitle
             title={i18n.translate('entityCentricLabFlyout.flyout.overview.entitySummaryTitle', {
-              defaultMessage: 'Entity Summary',
+              defaultMessage: '{thing} Summary',
+              values: { thing: labThingLabel(resourceCopy) },
             })}
             adornment={<AssistanceSparklesIcon />}
           />
@@ -116,7 +119,8 @@ export const OverviewTab = ({ overview, dashboardSlot }: OverviewTabProps) => {
             buttonContent={
               <SectionTitle
                 title={i18n.translate('entityCentricLabFlyout.flyout.overview.entityDetailsTitle', {
-                  defaultMessage: 'Entity details',
+                  defaultMessage: '{thing} details',
+                  values: { thing: labThingLabel(resourceCopy) },
                 })}
               />
             }
@@ -124,10 +128,19 @@ export const OverviewTab = ({ overview, dashboardSlot }: OverviewTabProps) => {
             data-test-subj="entityCentricLabOverviewEntityDetails"
           >
             <KeyValueGrid
-              rows={overview.details}
+              rows={
+                resourceCopy
+                  ? overview.details.map((row) =>
+                      row.label === 'Entity id' ? { ...row, label: 'Resource id' } : row
+                    )
+                  : overview.details
+              }
               ariaLabel={i18n.translate(
                 'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
-                { defaultMessage: 'Entity details' }
+                {
+                  defaultMessage: '{thing} details',
+                  values: { thing: labThingLabel(resourceCopy) },
+                }
               )}
             />
           </EuiAccordion>

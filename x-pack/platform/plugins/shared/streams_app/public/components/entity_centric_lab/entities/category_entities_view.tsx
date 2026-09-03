@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { isKnownCategoryId } from './fake_entities';
+import { useKibana } from '../../../hooks/use_kibana';
+import { isCategoryHiddenInElasticOn, isKnownCategoryId } from './fake_entities';
 import { isKnownCloudProviderId, isKnownCloudServiceId } from './cloud_providers';
 import { AllEntitiesView } from './all_entities_view';
 
@@ -31,6 +33,26 @@ export const CategoryEntitiesView = () => {
   const {
     path: { category: rawCategory },
   } = useStreamsAppParams('/entities/{category}');
+  const router = useStreamsAppRouter();
+  const {
+    core: { uiSettings },
+  } = useKibana();
+  const labMode = useObservable(
+    uiSettings.get$<string>('discover:labMode', 'off'),
+    uiSettings.get<string>('discover:labMode', 'off')
+  );
+  const isElasticOn = labMode === 'elasticOn';
+  const isHiddenElasticOnCategory =
+    isKnownCategoryId(rawCategory) && isElasticOn && isCategoryHiddenInElasticOn(rawCategory);
+
+  useEffect(() => {
+    if (!isHiddenElasticOnCategory) return;
+    router.push('/entities', { path: {}, query: {} });
+  }, [isHiddenElasticOnCategory, router]);
+
+  if (isHiddenElasticOnCategory) {
+    return null;
+  }
 
   if (isKnownCategoryId(rawCategory)) {
     return <AllEntitiesView categoryScope={rawCategory} />;
@@ -81,11 +103,19 @@ export const CloudServiceView = () => {
 
 /**
  * Shared empty prompt for any unknown category / provider / service
- * segment (typos, stale bookmarks) — links back to All entities rather
- * than rendering an empty grid.
+ * segment (typos, stale bookmarks) — links back to the inventory landing
+ * rather than rendering an empty grid.
  */
 const UnknownEntitiesScope = ({ label }: { label: string }) => {
   const router = useStreamsAppRouter();
+  const {
+    core: { uiSettings },
+  } = useKibana();
+  const labMode = useObservable(
+    uiSettings.get$<string>('discover:labMode', 'off'),
+    uiSettings.get<string>('discover:labMode', 'off')
+  );
+  const isElasticOn = labMode === 'elasticOn';
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -109,13 +139,21 @@ const UnknownEntitiesScope = ({ label }: { label: string }) => {
           }
           body={
             <p>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.entities.category.unknownPromptBody',
-                {
-                  defaultMessage:
-                    'This category isn\u2019t part of the entity-centric lab. Head back to All entities to see the full picture.',
-                }
-              )}
+              {isElasticOn
+                ? i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.category.unknownPromptBodyResources',
+                    {
+                      defaultMessage:
+                        'This category isn\u2019t part of the entity-centric lab. Head back to All resources to see the full picture.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.category.unknownPromptBody',
+                    {
+                      defaultMessage:
+                        'This category isn\u2019t part of the entity-centric lab. Head back to All entities to see the full picture.',
+                    }
+                  )}
             </p>
           }
           actions={
@@ -126,9 +164,14 @@ const UnknownEntitiesScope = ({ label }: { label: string }) => {
               }}
               data-test-subj="entityCentricLabCategoryBackToAll"
             >
-              {i18n.translate('xpack.streams.entityCentricLab.entities.category.backToAll', {
-                defaultMessage: 'Back to All entities',
-              })}
+              {isElasticOn
+                ? i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.category.backToAllResources',
+                    { defaultMessage: 'Back to All resources' }
+                  )
+                : i18n.translate('xpack.streams.entityCentricLab.entities.category.backToAll', {
+                    defaultMessage: 'Back to All entities',
+                  })}
             </EuiButtonEmpty>
           }
         />

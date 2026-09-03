@@ -21,6 +21,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from './fake_entities';
+import { labThings, useIsElasticOn } from '../lab_terminology';
 
 export const KUBERNETES_CLUSTER_FILTER_ALL = '__all__';
 
@@ -69,6 +70,8 @@ export const assignClusterForEntity = (
 ): string | null => {
   if (clusterNames.length === 0) return null;
   if (entity.subType === 'Clusters') return entity.name;
+  const stored = entity.attributes?.cluster;
+  if (stored && clusterNames.includes(stored)) return stored;
   const lower = entity.name.toLowerCase();
   const matched = clusterNames.find((cluster) => {
     const region = cluster.includes('eu') ? 'eu' : cluster.includes('us') ? 'us' : null;
@@ -127,6 +130,7 @@ export const KubernetesClusterFilter = ({
   value,
   onChange,
 }: KubernetesClusterFilterProps) => {
+  const isElasticOn = useIsElasticOn();
   const options = useMemo(
     () => [
       {
@@ -158,7 +162,10 @@ export const KubernetesClusterFilter = ({
             onChange={(event) => onChange(event.target.value)}
             aria-label={i18n.translate(
               'xpack.streams.entityCentricLab.entities.kubernetesClusterFilter.ariaLabel',
-              { defaultMessage: 'Filter Kubernetes entities by cluster' }
+              {
+                defaultMessage: 'Filter Kubernetes {things} by cluster',
+                values: { things: labThings(isElasticOn) },
+              }
             )}
             data-test-subj="entityCentricLabKubernetesClusterFilter"
           />

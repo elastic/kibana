@@ -35,6 +35,8 @@ import type {
 import { buildTopologyLayout } from './topology_graph';
 import type { TopologyLayoutEdge, TopologyLayoutNode } from './topology_graph';
 import { useEntityDisplayName } from './entity_display_name';
+import { useEntityFlyoutServices } from './services_context';
+import { labThing, labThingLabel, labThings } from './lab_terminology';
 import { entityTypeToKind, inferEntityKind, type EntityKind } from './kind_templates';
 
 interface RelationshipsTabProps {
@@ -102,12 +104,14 @@ const DependencyGroupPanel = ({
   readonly items: readonly RelatedEntity[];
   readonly onSelectEntity?: OnSelectEntity;
 }) => {
+  const { resourceCopy = false } = useEntityFlyoutServices();
   const columns = useMemo<Array<EuiBasicTableColumn<RelatedEntity>>>(
     () => [
       {
         field: 'name',
         name: i18n.translate('entityCentricLabFlyout.flyout.dependencies.columns.entityName', {
-          defaultMessage: 'Entity name',
+          defaultMessage: '{thing} name',
+          values: { thing: labThingLabel(resourceCopy) },
         }),
         render: (name: string, row: RelatedEntity) => (
           <DependencyEntityCell
@@ -131,7 +135,8 @@ const DependencyGroupPanel = ({
       {
         field: 'entityType',
         name: i18n.translate('entityCentricLabFlyout.flyout.dependencies.columns.entityType', {
-          defaultMessage: 'Entity type',
+          defaultMessage: '{thing} type',
+          values: { thing: labThingLabel(resourceCopy) },
         }),
         width: '180px',
       },
@@ -154,7 +159,7 @@ const DependencyGroupPanel = ({
         },
       },
     ],
-    [onSelectEntity]
+    [onSelectEntity, resourceCopy]
   );
 
   return (
@@ -164,8 +169,12 @@ const DependencyGroupPanel = ({
       </EuiTitle>
       <EuiText size="xs" color="subdued">
         {i18n.translate('entityCentricLabFlyout.flyout.dependencies.groupCount', {
-          defaultMessage: '{count, plural, one {# related entity} other {# related entities}}',
-          values: { count: items.length },
+          defaultMessage: '{count, plural, one {# related {thing}} other {# related {things}}}',
+          values: {
+            count: items.length,
+            thing: labThing(resourceCopy),
+            things: labThings(resourceCopy),
+          },
         })}
       </EuiText>
       <EuiSpacer size="s" />

@@ -442,7 +442,12 @@ function createNavTree({
   // view id is dynamic (no static deep link exists). Hidden when there are no
   // views, to avoid an empty section header.
   // Filter the saved views by the panel search query (Latest only).
-  const filteredSavedViews = savedViews.filter((view) => matchesLatestSearch(view.name));
+  const filteredSavedViews = savedViews.filter((view) => {
+    if (!matchesLatestSearch(view.name)) return false;
+    // ElasticOn parks APM Services; hide views that would deep-link there.
+    if (elasticOnEnabled && view.category === 'services') return false;
+    return true;
+  });
   // ElasticOn: surface the session-landing default first and mark it with a star
   // glyph. `latest` never sets a default, so leave its list untouched. (The star
   // survives the nav's sentence-case label formatter, which only touches the
@@ -571,9 +576,13 @@ function createNavTree({
       {
         id: 'entityCentricLab-entitiesAll',
         link: 'streams:entitiesAll' as const,
-        title: i18n.translate('xpack.observability.obltNav.latest.allEntities', {
-          defaultMessage: 'All entities',
-        }),
+        title: elasticOnEnabled
+          ? i18n.translate('xpack.observability.obltNav.elasticOn.allResources', {
+              defaultMessage: 'All resources',
+            })
+          : i18n.translate('xpack.observability.obltNav.latest.allEntities', {
+              defaultMessage: 'All entities',
+            }),
         getIsActive: categoryGetIsActive('/app/streams/entities', true),
       },
     ].filter((child) => matchesLatestSearch(child.title)),
@@ -581,7 +590,9 @@ function createNavTree({
 
   // Latest categories render as a flat, untitled group — but Cloud is pulled out
   // into its own collapsible section (see `latestCloudSection`) and slotted back
-  // into its original position (after Services) by splitting the list in two.
+  // into its original position (after Databases, or after Services in Latest)
+  // by splitting the list in two. ElasticOn omits APM Services entirely
+  // (infra-first); do not add the node here or chrome will keep showing it.
   const latestCategoryChildrenTop = [
     {
       id: 'entityCentricLab-entitiesHosts',
@@ -607,14 +618,18 @@ function createNavTree({
       }),
       getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
     },
-    {
-      id: 'entityCentricLab-entitiesServices',
-      link: 'streams:entitiesServices' as const,
-      title: i18n.translate('xpack.observability.obltNav.latest.services', {
-        defaultMessage: 'Services',
-      }),
-      getIsActive: categoryGetIsActive('/app/streams/entities/services'),
-    },
+    ...(elasticOnEnabled
+      ? []
+      : [
+          {
+            id: 'entityCentricLab-entitiesServices',
+            link: 'streams:entitiesServices' as const,
+            title: i18n.translate('xpack.observability.obltNav.latest.services', {
+              defaultMessage: 'Services',
+            }),
+            getIsActive: categoryGetIsActive('/app/streams/entities/services'),
+          },
+        ]),
   ].filter((child) => matchesLatestSearch(child.title));
 
   const latestCategoryChildrenBottom = [
@@ -763,6 +778,13 @@ function createNavTree({
       {
         id: 'entityCentricLab-manage-fromEntities',
         link: 'streams:manageEntityTypes' as const,
+        ...(elasticOnEnabled
+          ? {
+              title: i18n.translate('xpack.observability.obltNav.elasticOn.manageResourceTypes', {
+                defaultMessage: 'Manage resource types',
+              }),
+            }
+          : {}),
       },
     ],
   };
@@ -778,8 +800,9 @@ function createNavTree({
   // section, so the providers land at the bottom of the category list with no
   // dividers bracketing them.
   const elasticOnCategoryChildren = [
+    // ElasticOn is infra-first: APM Services is omitted from
+    // `latestCategoryChildrenTop` above; also drop the "Other" catch-all.
     ...latestCategoryChildrenTop,
-    // ElasticOn-only: drop the "Other" catch-all category from the list.
     ...latestCategoryChildrenBottom.filter(
       (child) => child.id !== 'entityCentricLab-entitiesOther'
     ),

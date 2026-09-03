@@ -20,7 +20,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActiveTagFilters, TagKey } from './fake_entities';
-import { TAG_KEYS, TAG_KEY_LABEL } from './fake_entities';
+import { getVisibleTagKeys, TAG_KEY_LABEL } from './fake_entities';
+import { labThingLabel, labThings } from '../lab_terminology';
 
 // The Streams page body is a column flex container with `height: 100%`.
 // `EuiFlexGroup` bakes `flex-grow: 1` directly into its CSS with no prop to
@@ -44,6 +45,11 @@ interface Props {
    * unified clear button that resets these plus other filters (ElasticOn).
    */
   readonly hideClear?: boolean;
+  /**
+   * ElasticOn hides Application (infra-first). Other modes keep the full
+   * Team / Application / Environment / Region set.
+   */
+  readonly isElasticOn?: boolean;
 }
 
 const TagFilterPopover = ({
@@ -51,11 +57,13 @@ const TagFilterPopover = ({
   options,
   selected,
   onChange,
+  isElasticOn,
 }: {
   tagKey: TagKey;
   options: readonly string[];
   selected: readonly string[];
   onChange: (next: string[]) => void;
+  isElasticOn: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: `entityCentricLabTagFilter-${tagKey}` });
@@ -105,8 +113,8 @@ const TagFilterPopover = ({
         aria-label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.tagFilter.selectableAriaLabel',
           {
-            defaultMessage: 'Filter entities by {label}',
-            values: { label: label.toLowerCase() },
+            defaultMessage: 'Filter {things} by {label}',
+            values: { label: label.toLowerCase(), things: labThings(isElasticOn) },
           }
         )}
         options={selectableOptions}
@@ -137,10 +145,12 @@ export const EntitiesTagFilters = ({
   onChange,
   compressed = false,
   hideClear = false,
+  isElasticOn = false,
 }: Props) => {
+  const visibleKeys = useMemo(() => getVisibleTagKeys(isElasticOn), [isElasticOn]);
   const totalActive = useMemo(
-    () => TAG_KEYS.reduce((sum, key) => sum + activeFilters[key].length, 0),
-    [activeFilters]
+    () => visibleKeys.reduce((sum, key) => sum + activeFilters[key].length, 0),
+    [activeFilters, visibleKeys]
   );
 
   const handleKeyChange = (key: TagKey) => (next: string[]) => {
@@ -165,7 +175,7 @@ export const EntitiesTagFilters = ({
           compressed={compressed}
           aria-label={i18n.translate(
             'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
-            { defaultMessage: 'Entity tag filters' }
+            { defaultMessage: '{thing} tag filters', values: { thing: labThingLabel(isElasticOn) } }
           )}
         >
           {/*
@@ -173,30 +183,37 @@ export const EntitiesTagFilters = ({
             Team leads because org-based triage ("what does my squad
             own?") is the most common entry point on this page; keeping
             it consistent everywhere avoids muscle-memory misclicks.
+            ElasticOn drops Application (infra-first).
           */}
           <TagFilterPopover
             tagKey="team"
             options={facets.team}
             selected={activeFilters.team}
             onChange={handleKeyChange('team')}
+            isElasticOn={isElasticOn}
           />
-          <TagFilterPopover
-            tagKey="application"
-            options={facets.application}
-            selected={activeFilters.application}
-            onChange={handleKeyChange('application')}
-          />
+          {visibleKeys.includes('application') ? (
+            <TagFilterPopover
+              tagKey="application"
+              options={facets.application}
+              selected={activeFilters.application}
+              onChange={handleKeyChange('application')}
+              isElasticOn={isElasticOn}
+            />
+          ) : null}
           <TagFilterPopover
             tagKey="environment"
             options={facets.environment}
             selected={activeFilters.environment}
             onChange={handleKeyChange('environment')}
+            isElasticOn={isElasticOn}
           />
           <TagFilterPopover
             tagKey="region"
             options={facets.region}
             selected={activeFilters.region}
             onChange={handleKeyChange('region')}
+            isElasticOn={isElasticOn}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

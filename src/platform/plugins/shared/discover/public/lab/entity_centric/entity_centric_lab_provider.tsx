@@ -23,6 +23,7 @@ import { LAB_MODE_SETTING } from './constants';
 
 interface EntityCentricLabContextValue {
   readonly enabled: boolean;
+  readonly resourceCopy: boolean;
   readonly currentEntityName: string | null;
   readonly openEntity: (entityName: string) => void;
   readonly closeEntity: () => void;
@@ -48,6 +49,7 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
   // `entityCentric`; keep them all wired to the same behavior so they can
   // diverge later without re-plumbing.
   const enabled = labMode === 'entityCentric' || labMode === 'latest' || labMode === 'elasticOn';
+  const resourceCopy = labMode === 'elasticOn';
 
   // Two flyout slots so the shared flyout's parent/child session can dock
   // two entities side by side: `currentEntityName` is the parent (session
@@ -125,13 +127,13 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
   );
 
   const value = useMemo<EntityCentricLabContextValue>(
-    () => ({ enabled, currentEntityName, openEntity, closeEntity }),
-    [enabled, currentEntityName, openEntity, closeEntity]
+    () => ({ enabled, resourceCopy, currentEntityName, openEntity, closeEntity }),
+    [enabled, resourceCopy, currentEntityName, openEntity, closeEntity]
   );
 
   const flyoutServices = useMemo(
-    () => ({ agentBuilder, notifications, charts }),
-    [agentBuilder, notifications, charts]
+    () => ({ agentBuilder, notifications, charts, resourceCopy }),
+    [agentBuilder, notifications, charts, resourceCopy]
   );
 
   return (
@@ -175,6 +177,7 @@ export const useEntityCentricLab = (): EntityCentricLabContextValue => {
   if (!ctx) {
     return {
       enabled: false,
+      resourceCopy: false,
       currentEntityName: null,
       openEntity: () => undefined,
       closeEntity: () => undefined,

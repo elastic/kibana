@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EntityTypeDraft, SubsetDraft } from '../fake_entity_type_draft';
+import { labThing, useIsElasticOn } from '../../lab_terminology';
 
 interface Props {
   readonly draft: EntityTypeDraft;
@@ -30,6 +31,7 @@ interface Props {
 
 export const SubsetsStep = ({ draft, onChange, onAddSubset, onEditSubset }: Props) => {
   const { subsets, entityType } = draft;
+  const isElasticOn = useIsElasticOn();
 
   const toggleSubset = (subsetId: string, enabled: boolean) => {
     onChange(subsets.map((subset) => (subset.id === subsetId ? { ...subset, enabled } : subset)));
@@ -45,7 +47,8 @@ export const SubsetsStep = ({ draft, onChange, onAddSubset, onEditSubset }: Prop
         <p>
           {i18n.translate('xpack.streams.entityCentricLab.editFlyout.subsets.intro', {
             defaultMessage:
-              'You can define subsets of entity types that would override some settings.',
+              'You can define subsets of {thing} types that would override some settings.',
+            values: { thing: labThing(isElasticOn) },
           })}
         </p>
       </EuiText>

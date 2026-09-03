@@ -44,6 +44,11 @@ export interface EntityFlyoutServices {
   readonly notifications: NotificationsStart;
   readonly charts: ChartsPluginStart;
   readonly renderEntityDashboard?: (context: EntityDashboardRenderContext) => ReactNode;
+  /**
+   * ElasticOn inventory copy uses "resource(s)" instead of "entity/entities".
+   * Latest / entity-centric leave this unset (or false).
+   */
+  readonly resourceCopy?: boolean;
 }
 
 const EntityFlyoutServicesContext = createContext<EntityFlyoutServices | null>(null);

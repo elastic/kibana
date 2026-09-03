@@ -102,7 +102,7 @@ const levelToColor = (level: FakeLogLevel) => {
 
 const FakeLogRow = ({ entry }: { entry: FakeLogEntry }) => {
   const rowStyles = useMemoCss(styles);
-  const { openEntity } = useEntityCentricLab();
+  const { openEntity, resourceCopy } = useEntityCentricLab();
 
   // Resolve the entity-type id that gates the flyout trigger for this
   // service name and subscribe to its enablement. When the type is
@@ -137,8 +137,11 @@ const FakeLogRow = ({ entry }: { entry: FakeLogEntry }) => {
           // the entity in the UI.
           data-test-subj={`entityCentricLabServiceLink-${entry.serviceName}`}
           aria-label={i18n.translate('discover.entityCentricLab.fakeLogs.serviceLinkAriaLabel', {
-            defaultMessage: 'Open entity details for {serviceName}',
-            values: { serviceName: displayServiceName },
+            defaultMessage: 'Open {thing} details for {serviceName}',
+            values: {
+              serviceName: displayServiceName,
+              thing: resourceCopy ? 'resource' : 'entity',
+            },
           })}
         >
           {displayServiceName}
@@ -147,7 +150,8 @@ const FakeLogRow = ({ entry }: { entry: FakeLogEntry }) => {
         <EuiToolTip
           content={i18n.translate('discover.entityCentricLab.fakeLogs.serviceLinkDisabledTooltip', {
             defaultMessage:
-              'The flyout trigger for this entity type is turned off in Manage entity types.',
+              'The flyout trigger for this {thing} type is turned off in Manage {thing} types.',
+            values: { thing: resourceCopy ? 'resource' : 'entity' },
           })}
         >
           <span
@@ -156,8 +160,11 @@ const FakeLogRow = ({ entry }: { entry: FakeLogEntry }) => {
             aria-label={i18n.translate(
               'discover.entityCentricLab.fakeLogs.serviceLinkDisabledAriaLabel',
               {
-                defaultMessage: '{serviceName} (entity flyout disabled for this type)',
-                values: { serviceName: displayServiceName },
+                defaultMessage: '{serviceName} ({thing} flyout disabled for this type)',
+                values: {
+                  serviceName: displayServiceName,
+                  thing: resourceCopy ? 'resource' : 'entity',
+                },
               }
             )}
           >

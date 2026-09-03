@@ -18,10 +18,10 @@
 import { i18n } from '@kbn/i18n';
 import type { Entity, EntityCategoryId } from './fake_entities';
 import {
-  TAG_KEYS,
   TAG_KEY_LABEL,
   getCategoryDescriptor,
   getCategoryExtraFilters,
+  getVisibleTagKeys,
 } from './fake_entities';
 import { CLOUD_PROVIDERS } from './cloud_providers';
 
@@ -48,11 +48,11 @@ const UNKNOWN = i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.
 
 /**
  * Header shown for the single bucket when the user clears the grouping entirely
- * (an empty selection = flat / ungrouped, all entities in one block).
+ * (an empty selection = flat / ungrouped, all resources in one block).
  */
 export const UNGROUPED_LABEL = i18n.translate(
   'xpack.streams.entityCentricLab.entities.groupBy.ungrouped',
-  { defaultMessage: 'All entities' }
+  { defaultMessage: 'All resources' }
 );
 
 const HEALTH_LABEL: Record<string, string> = {
@@ -101,19 +101,24 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
     valueOf: (entity) =>
       entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : UNKNOWN,
   },
-  ...TAG_KEYS.map((key) => ({
+];
+
+const tagGroupByFields = (isElasticOn: boolean): GroupByFieldDef[] =>
+  getVisibleTagKeys(isElasticOn).map((key) => ({
     id: `tag:${key}`,
     label: TAG_KEY_LABEL[key],
     valueOf: (entity: Entity) => entity.tags[key] || UNKNOWN,
-  })),
-];
+  }));
 
 /**
  * Fields offered in the Group by dropdown. Includes the per-category "extra"
  * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the page is
- * scoped to a category that declares them.
+ * scoped to a category that declares them. ElasticOn omits Application.
  */
-export const getGroupByFields = (categoryScope?: EntityCategoryId): GroupByFieldDef[] => {
+export const getGroupByFields = (
+  categoryScope?: EntityCategoryId,
+  isElasticOn = false
+): GroupByFieldDef[] => {
   const attrFields: GroupByFieldDef[] = categoryScope
     ? getCategoryExtraFilters(categoryScope).map((def) => ({
         id: `attr:${def.key}`,
@@ -121,7 +126,7 @@ export const getGroupByFields = (categoryScope?: EntityCategoryId): GroupByField
         valueOf: (entity: Entity) => entity.attributes?.[def.key] || UNKNOWN,
       }))
     : [];
-  return [...CORE_FIELDS, ...attrFields];
+  return [...CORE_FIELDS, ...tagGroupByFields(isElasticOn), ...attrFields];
 };
 
 export const getGroupByFieldDef = (

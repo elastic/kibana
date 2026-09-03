@@ -21,10 +21,17 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import type { EntityTypeDraft, GeneralFields } from '../fake_entity_type_draft';
 import { FAKE_ENTITY_TYPES } from '../../fake_entity_types';
 import { useUserEntityTypes } from '../../user_entity_types';
-import { ENTITY_CATEGORIES } from '../../entities/fake_entities';
+import { useKibana } from '../../../../hooks/use_kibana';
+import {
+  ENTITY_CATEGORIES,
+  isCategoryHiddenInElasticOn,
+  normalizeCategoryToId,
+} from '../../entities/fake_entities';
+import { labThing, labThingLabel } from '../../lab_terminology';
 
 /** Sentinel value used by the category dropdown to mean "I want a new one". */
 const CREATE_NEW_CATEGORY_SENTINEL = '__create_new_category__';
@@ -41,10 +48,13 @@ const CATEGORY_EXTRAS_DIVIDER_SENTINEL = '__category_extras_divider__';
  * pick would be confusing. Additional categories pulled from seed
  * data or user-created entity types are still appended below a
  * divider so legacy / experimental labels stay reachable.
+ * ElasticOn also drops infra-parked categories (currently Services).
  */
-const CANONICAL_CATEGORIES: readonly string[] = ENTITY_CATEGORIES.filter(
-  (category) => category.id !== 'other'
-).map((category) => category.label);
+const canonicalCategoryLabels = (isElasticOn: boolean): readonly string[] =>
+  ENTITY_CATEGORIES.filter(
+    (category) =>
+      category.id !== 'other' && (!isElasticOn || !isCategoryHiddenInElasticOn(category.id))
+  ).map((category) => category.label);
 
 /**
  * Mock list of Elastic data streams the user can pick from. Curated to
@@ -157,18 +167,27 @@ interface Props {
 export const GeneralStep = ({ draft, onChange }: Props) => {
   const isManaged = draft.entityType.generatedBy === 'Elastic';
   const { general } = draft;
+  const {
+    core: { uiSettings },
+  } = useKibana();
+  const labMode = useObservable(
+    uiSettings.get$<string>('discover:labMode', 'off'),
+    uiSettings.get<string>('discover:labMode', 'off')
+  );
+  const isElasticOn = labMode === 'elasticOn';
+  const canonicalCategories = useMemo(() => canonicalCategoryLabels(isElasticOn), [isElasticOn]);
 
   const update = (patch: Partial<GeneralFields>) => onChange({ ...general, ...patch });
 
   // Live list of "extra" categories — values coming from seed data or
   // previous user-created entity types that don't appear in the
-  // curated `CANONICAL_CATEGORIES`. We keep them so anything authored
+  // curated canonical list. We keep them so anything authored
   // historically stays addressable, but they're rendered separately at
   // the bottom of the dropdown so the curated order stays stable.
   const userEntityTypes = useUserEntityTypes();
   const canonicalLookup = useMemo(
-    () => new Set(CANONICAL_CATEGORIES.map((category) => category.toLowerCase())),
-    []
+    () => new Set(canonicalCategories.map((category) => category.toLowerCase())),
+    [canonicalCategories]
   );
   const extraCategories = useMemo(() => {
     const seen = new Map<string, string>();
@@ -177,10 +196,11 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
       if (trimmed.length === 0) continue;
       const key = trimmed.toLowerCase();
       if (canonicalLookup.has(key)) continue;
+      if (isElasticOn && isCategoryHiddenInElasticOn(normalizeCategoryToId(trimmed))) continue;
       if (!seen.has(key)) seen.set(key, trimmed);
     }
     return [...seen.values()].sort((a, b) => a.localeCompare(b));
-  }, [userEntityTypes, canonicalLookup]);
+  }, [userEntityTypes, canonicalLookup, isElasticOn]);
 
   const trimmedCategory = general.category.trim();
   const isCategoryKnown =
@@ -226,7 +246,7 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
     const head = [
       { value: CREATE_NEW_CATEGORY_SENTINEL, text: createNewLabel },
       { value: CATEGORY_DIVIDER_SENTINEL, text: dividerText, disabled: true },
-      ...CANONICAL_CATEGORIES.map((category) => ({ value: category, text: category })),
+      ...canonicalCategories.map((category) => ({ value: category, text: category })),
     ];
     if (extraCategories.length === 0) return head;
     return [
@@ -234,7 +254,7 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
       { value: CATEGORY_EXTRAS_DIVIDER_SENTINEL, text: dividerText, disabled: true },
       ...extraCategories.map((category) => ({ value: category, text: category })),
     ];
-  }, [extraCategories]);
+  }, [extraCategories, canonicalCategories]);
 
   // The visible "selected value" of the dropdown is derived: if we're in
   // create-new mode, snap to the sentinel so the option text shows up;
@@ -244,10 +264,10 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
   // option in the dropdown.
   const canonicalMatch = useMemo(
     () =>
-      CANONICAL_CATEGORIES.find(
+      canonicalCategories.find(
         (category) => category.toLowerCase() === trimmedCategory.toLowerCase()
       ),
-    [trimmedCategory]
+    [trimmedCategory, canonicalCategories]
   );
   const categorySelectValue = isCreatingNewCategory
     ? CREATE_NEW_CATEGORY_SENTINEL
@@ -396,11 +416,14 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
                 ? i18n.translate(
                     'xpack.streams.entityCentricLab.editFlyout.general.subtitleManaged',
                     {
-                      defaultMessage: 'Managed entity types general data cannot be all customised.',
+                      defaultMessage:
+                        'Managed {thing} types general data cannot be all customised.',
+                      values: { thing: labThing(isElasticOn) },
                     }
                   )
                 : i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.subtitleUser', {
-                    defaultMessage: 'Define how this entity type is identified in your data.',
+                    defaultMessage: 'Define how this {thing} type is identified in your data.',
+                    values: { thing: labThing(isElasticOn) },
                   })}
             </p>
           </EuiText>
@@ -409,7 +432,7 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
           <EuiFormRow
             label={i18n.translate(
               'xpack.streams.entityCentricLab.editFlyout.general.entityTypeName',
-              { defaultMessage: 'Entity type name' }
+              { defaultMessage: '{thing} type name', values: { thing: labThingLabel(isElasticOn) } }
             )}
             fullWidth
           >
@@ -590,7 +613,8 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
               title={i18n.translate(
                 'xpack.streams.entityCentricLab.editFlyout.general.managedCalloutTitle',
                 {
-                  defaultMessage: 'This entity type is managed by Elastic',
+                  defaultMessage: 'This {thing} type is managed by Elastic',
+                  values: { thing: labThing(isElasticOn) },
                 }
               )}
             >

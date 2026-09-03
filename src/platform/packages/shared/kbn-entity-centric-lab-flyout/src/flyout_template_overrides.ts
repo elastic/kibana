@@ -8,31 +8,42 @@
  */
 
 /**
- * Per-`EntityKind` overrides for the flyout's tab list.
+ * Per-entity-type overrides for the flyout's tab list.
  *
  * The "Manage entity types" wizard in the Streams app lets users reorder /
  * toggle / rename the tabs that appear in the entity flyout. The wizard
  * writes the resulting list here via {@link setFlyoutTemplateOverride}; the
  * flyout reads it back at render time via {@link useFlyoutTemplateOverride}.
  *
+ * Keyed by the specific `FakeEntityType.id` (e.g. `aws-ec2`, `k8s-pod`) —
+ * the same id the display-config and enablement stores use. Both sides
+ * resolve that id the same way (write: `draft.entityType.id`; read:
+ * `resolveEntityTypeIdForName(name, type)`), so customizing e.g. AWS EC2
+ * affects only EC2 and not every cloud type. (It used to be keyed by the
+ * coarse `EntityKind`, which collapsed all cloud types onto one `'cloud'`
+ * bucket — editing one silently overwrote the others.)
+ *
  * Storage strategy:
  *   - In-memory `Map` for fast synchronous reads inside React renders.
  *   - `localStorage` mirror so the demo survives a hard reload, which makes
- *     the flow feel real ("I configured Service, refreshed, my config is
+ *     the flow feel real ("I configured EC2, refreshed, my config is
  *     still there").
  *   - Tiny pub-sub so multiple flyouts open in the same session see updates
  *     immediately (no React context required, which keeps both sides of the
  *     shared/`streams_app` boundary loosely coupled).
  *
  * NB this is lab-only state — no migration story, no schema versioning
- * beyond the v1 storage key. Bumping the key cleanly invalidates legacy
- * payloads if/when the shape changes.
+ * beyond the storage key. The key is `v2` because the key dimension changed
+ * from `EntityKind` to entity-type id; that cleanly drops legacy kind-keyed
+ * payloads rather than mis-applying them.
  */
 
 import { useSyncExternalStore } from 'react';
-import type { EntityKind } from './kind_templates';
 
-const STORAGE_KEY = 'entityCentricLab.flyoutTemplateOverrides.v1';
+/** A specific entity type's id, e.g. `aws-ec2` / `k8s-pod` (`FakeEntityType.id`). */
+export type EntityTypeId = string;
+
+const STORAGE_KEY = 'entityCentricLab.flyoutTemplateOverrides.v2';
 
 /**
  * Single tab entry in a flyout-template override.
@@ -77,7 +88,7 @@ export interface FlyoutTemplateOverride {
 
 type Listener = () => void;
 
-const overrides = new Map<EntityKind, FlyoutTemplateOverride>();
+const overrides = new Map<EntityTypeId, FlyoutTemplateOverride>();
 const listeners = new Set<Listener>();
 let hasHydrated = false;
 
@@ -110,7 +121,7 @@ const hydrateOnce = (): void => {
   if (hasHydrated) return;
   hasHydrated = true;
   const stored = readStorage();
-  for (const [kind, value] of Object.entries(stored)) {
+  for (const [entityTypeId, value] of Object.entries(stored)) {
     if (!value || !Array.isArray(value.flyoutTabs)) continue;
     // `customLinks` is optional, but if present must be an array — drop it
     // silently otherwise rather than feeding garbage to the renderer.
@@ -118,14 +129,14 @@ const hydrateOnce = (): void => {
       value.customLinks !== undefined && !Array.isArray(value.customLinks)
         ? { flyoutTabs: value.flyoutTabs }
         : value;
-    overrides.set(kind as EntityKind, sanitized);
+    overrides.set(entityTypeId, sanitized);
   }
 };
 
 const snapshotForStorage = (): Record<string, FlyoutTemplateOverride> => {
   const out: Record<string, FlyoutTemplateOverride> = {};
-  for (const [kind, value] of overrides.entries()) {
-    out[kind] = value;
+  for (const [entityTypeId, value] of overrides.entries()) {
+    out[entityTypeId] = value;
   }
   return out;
 };
@@ -137,20 +148,20 @@ const notify = (): void => {
 };
 
 /**
- * Replace the override for `kind` and persist it. Pass `undefined` for
- * `override` to clear the override (returning the entity flyout to its
- * built-in tab set for that kind).
+ * Replace the override for `entityTypeId` and persist it. Pass `undefined`
+ * for `override` to clear it (returning the entity flyout to its built-in
+ * tab set for that type).
  */
 export const setFlyoutTemplateOverride = (
-  kind: EntityKind,
+  entityTypeId: EntityTypeId,
   override: FlyoutTemplateOverride | undefined
 ): void => {
   hydrateOnce();
   if (override === undefined) {
-    if (!overrides.has(kind)) return;
-    overrides.delete(kind);
+    if (!overrides.has(entityTypeId)) return;
+    overrides.delete(entityTypeId);
   } else {
-    overrides.set(kind, override);
+    overrides.set(entityTypeId, override);
   }
   writeStorage(snapshotForStorage());
   notify();
@@ -158,16 +169,16 @@ export const setFlyoutTemplateOverride = (
 
 /**
  * Synchronous lookup — returns `undefined` when no override is registered
- * for `kind` (or when `kind` itself is `undefined`, e.g. for an entity whose
- * kind couldn't be inferred). Callers should fall back to their built-in
- * tab list in that case.
+ * for `entityTypeId` (or when it's `undefined`, e.g. for an entity whose
+ * type couldn't be resolved to an id). Callers should fall back to their
+ * built-in tab list in that case.
  */
 export const getFlyoutTemplateOverride = (
-  kind: EntityKind | undefined
+  entityTypeId: EntityTypeId | undefined
 ): FlyoutTemplateOverride | undefined => {
   hydrateOnce();
-  if (!kind) return undefined;
-  return overrides.get(kind);
+  if (!entityTypeId) return undefined;
+  return overrides.get(entityTypeId);
 };
 
 /**
@@ -184,17 +195,17 @@ export const subscribeFlyoutTemplateOverrides = (listener: Listener): (() => voi
 
 /**
  * React hook variant of {@link getFlyoutTemplateOverride}. Re-renders the
- * caller whenever an override for any kind changes — the per-kind filter
+ * caller whenever an override for any type changes — the per-type filter
  * happens inside the snapshot getter, which keeps the subscription itself
  * cheap (one global set of listeners regardless of how many flyouts are
  * open).
  */
 export const useFlyoutTemplateOverride = (
-  kind: EntityKind | undefined
+  entityTypeId: EntityTypeId | undefined
 ): FlyoutTemplateOverride | undefined =>
   useSyncExternalStore(
     subscribeFlyoutTemplateOverrides,
-    () => getFlyoutTemplateOverride(kind),
+    () => getFlyoutTemplateOverride(entityTypeId),
     // SSR snapshot: never resolves an override server-side — the lab is a
     // pure browser feature anyway, and this keeps Node renders deterministic.
     () => undefined

@@ -27,7 +27,13 @@ import {
   useEntityDisplayName,
 } from '@kbn/entity-centric-lab-flyout';
 import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
-import { ENTITY_CATEGORIES, HEALTH_RANK, getCategoryDescriptor } from './fake_entities';
+import {
+  HEALTH_RANK,
+  getCategoryDescriptor,
+  getVisibleEntityCategories,
+  isCategoryHiddenInElasticOn,
+} from './fake_entities';
+import { labThings } from '../lab_terminology';
 import { CLOUD_PROVIDERS, type CloudProviderDescriptor } from './cloud_providers';
 import { EntityDataGridSection } from './entities_data_grid';
 import { UNGROUPED_LABEL, groupEntities, type GroupByFieldDef } from './entity_group_by';
@@ -116,6 +122,24 @@ const useColumns = (
         render: (health: EntityHealth) => (
           <EuiBadge color={HEALTH_BADGE_COLOR[health]}>{HEALTH_LABEL[health]}</EuiBadge>
         ),
+      },
+      {
+        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.alerts', {
+          defaultMessage: 'Alerts',
+        }),
+        width: '150px',
+        sortable: (row: Entity) => {
+          if (!row.alerts) return 2;
+          return row.alerts.active > 0 ? 0 : 1;
+        },
+        render: (row: Entity) => {
+          if (!row.alerts) return <EuiBadge color="hollow">N/A</EuiBadge>;
+          const { total, active } = row.alerts;
+          if (active > 0) {
+            return <EuiBadge color="danger">{`Alerting (${active}/${total})`}</EuiBadge>;
+          }
+          return <EuiBadge color="success">{`OK (${total}/${total})`}</EuiBadge>;
+        },
       },
       {
         name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.application', {
@@ -313,15 +337,23 @@ const TableSection = ({
   const captionLabel = subTypeLabel
     ? `${descriptor?.label ?? category} · ${subTypeLabel}`
     : descriptor?.label ?? category;
+  // When nested without a sub-type label the category header is already
+  // rendered outside the panel — skip the in-panel duplicate.
+  const showInPanelHeader = !nested || Boolean(subTypeLabel);
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <SectionHeader
-        category={category}
-        subTypeLabel={subTypeLabel}
-        total={rows.length}
-        nested={nested}
-      />
-      <EuiSpacer size="s" />
+      {showInPanelHeader && (
+        <>
+          <SectionHeader
+            category={category}
+            subTypeLabel={subTypeLabel}
+            total={rows.length}
+            nested={nested}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiInMemoryTable<Entity>
         tableCaption={i18n.translate('xpack.streams.entityCentricLab.entities.list.tableCaption', {
           defaultMessage: '{label} entities',
@@ -475,14 +507,14 @@ export const EntitiesListView = ({
   // no-op for any non-storyline entity, so non-PayFlow rows keep
   // their dataset-defined health.
   const chaosOn = useChaosModeEnabled();
-  const effectiveEntities = useMemo<Entity[]>(
-    () =>
-      entities.map((entity) => {
-        const effective = getEffectiveEntityHealth(entity.name, entity.health, chaosOn);
-        return effective === entity.health ? entity : { ...entity, health: effective };
-      }),
-    [entities, chaosOn]
-  );
+  const effectiveEntities = useMemo<Entity[]>(() => {
+    const withHealth = entities.map((entity) => {
+      const effective = getEffectiveEntityHealth(entity.name, entity.health, chaosOn);
+      return effective === entity.health ? entity : { ...entity, health: effective };
+    });
+    if (!enableColumnSettings) return withHealth;
+    return withHealth.filter((entity) => !isCategoryHiddenInElasticOn(entity.category));
+  }, [entities, chaosOn, enableColumnSettings]);
 
   // Transient (not persisted) — matches the Grouped grid filter's
   // semantics so the two views feel identical when toggled.
@@ -553,7 +585,7 @@ export const EntitiesListView = ({
     }
 
     const result: ListItem[] = [];
-    for (const descriptor of ENTITY_CATEGORIES) {
+    for (const descriptor of getVisibleEntityCategories(enableColumnSettings)) {
       const rows = buckets.get(descriptor.id);
       if (!rows || rows.length === 0) continue;
       if (descriptor.id === 'kubernetes') {
@@ -642,7 +674,12 @@ export const EntitiesListView = ({
             rows,
           });
         } else {
-          result.push({ kind: 'panel', category: descriptor.id, rows });
+          // Single-type category: emit a standalone header so the
+          // category name sits *above* the bordered panel, visually
+          // separating it from unrelated panels above (e.g. a K8s
+          // sub-type table).
+          result.push({ kind: 'category-header', category: descriptor.id, total: rows.length });
+          result.push({ kind: 'panel', category: descriptor.id, nested: true, rows });
         }
       }
     }
@@ -654,6 +691,7 @@ export const EntitiesListView = ({
     groupCloudByProvider,
     useCustomGrouping,
     customGroupBy,
+    enableColumnSettings,
   ]);
 
   if (effectiveEntities.length === 0) {
@@ -663,7 +701,8 @@ export const EntitiesListView = ({
         title={
           <h2>
             {i18n.translate('xpack.streams.entityCentricLab.entities.list.empty.title', {
-              defaultMessage: 'No entities match your filters',
+              defaultMessage: 'No {things} match your filters',
+              values: { things: labThings(enableColumnSettings) },
             })}
           </h2>
         }
@@ -671,7 +710,8 @@ export const EntitiesListView = ({
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.streams.entityCentricLab.entities.list.empty.body', {
-                defaultMessage: 'Try removing one or more filters to see entities.',
+                defaultMessage: 'Try removing one or more filters to see {things}.',
+                values: { things: labThings(enableColumnSettings) },
               })}
             </p>
           </EuiText>
@@ -683,9 +723,14 @@ export const EntitiesListView = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {items.map((item, index) => {
+        // Extra top margin before group headers (except the very first
+        // item) so new categories are visually distinct from the panels
+        // of the previous group.
+        const groupGap = index > 0 ? { marginTop: 16 } : undefined;
+
         if (item.kind === 'kubernetes-header') {
           return (
-            <EuiFlexItem key={`kubernetes-header-${index}`} grow={false}>
+            <EuiFlexItem key={`kubernetes-header-${index}`} grow={false} style={groupGap}>
               <KubernetesSectionHeader
                 total={item.total}
                 clusterNames={clusterNames}
@@ -697,21 +742,21 @@ export const EntitiesListView = ({
         }
         if (item.kind === 'category-header') {
           return (
-            <EuiFlexItem key={`${item.category}-header-${index}`} grow={false}>
+            <EuiFlexItem key={`${item.category}-header-${index}`} grow={false} style={groupGap}>
               <CategorySectionHeader category={item.category} total={item.total} />
             </EuiFlexItem>
           );
         }
         if (item.kind === 'cloud-provider-header') {
           return (
-            <EuiFlexItem key={`cloud-${item.provider.id}-header-${index}`} grow={false}>
+            <EuiFlexItem key={`cloud-${item.provider.id}-header-${index}`} grow={false} style={groupGap}>
               <CloudProviderSectionHeader provider={item.provider} total={item.total} />
             </EuiFlexItem>
           );
         }
         if (item.kind === 'group-header') {
           return (
-            <EuiFlexItem key={`group-header-${item.label}-${index}`} grow={false}>
+            <EuiFlexItem key={`group-header-${item.label}-${index}`} grow={false} style={groupGap}>
               <GroupSectionHeader label={item.label} total={item.total} />
             </EuiFlexItem>
           );

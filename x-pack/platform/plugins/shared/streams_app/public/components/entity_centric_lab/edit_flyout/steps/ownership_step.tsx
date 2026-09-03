@@ -29,6 +29,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { labThing, labThings, useIsElasticOn } from '../../lab_terminology';
 import type {
   CoveragePreview,
   EntityTypeDraft,
@@ -142,12 +143,14 @@ const OWNERSHIP_TYPE_OPTIONS: ReadonlyArray<{ id: OwnershipType; label: string }
 ];
 
 export const OwnershipStep = ({ draft, onChange }: StepProps) => {
+  const isElasticOn = useIsElasticOn();
   return (
     <div data-test-subj="entityCentricLabEditFlyoutOwnershipStep">
       <EuiText size="s">
         <p>
           {i18n.translate('xpack.streams.entityCentricLab.editFlyout.ownership.intro', {
-            defaultMessage: 'You can define ownership for this entity type.',
+            defaultMessage: 'You can define ownership for this {thing} type.',
+            values: { thing: labThing(isElasticOn) },
           })}
         </p>
       </EuiText>
@@ -651,6 +654,7 @@ interface CoverageBarProps {
 }
 
 const CoverageBar = ({ coverage, testSubjPrefix }: CoverageBarProps) => {
+  const isElasticOn = useIsElasticOn();
   const unmatchedColumns: Array<EuiBasicTableColumn<UnmatchedResolverValue>> = [
     {
       field: 'value',
@@ -663,7 +667,7 @@ const CoverageBar = ({ coverage, testSubjPrefix }: CoverageBarProps) => {
       field: 'unmatchedEntities',
       name: i18n.translate(
         'xpack.streams.entityCentricLab.editFlyout.ownership.coverageColumnUnmatched',
-        { defaultMessage: 'Unmatched entities' }
+        { defaultMessage: 'Unmatched {things}', values: { things: labThings(isElasticOn) } }
       ),
       align: 'right',
       width: '180px',

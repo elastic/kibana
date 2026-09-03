@@ -34,6 +34,11 @@ interface Props {
   readonly onChange: (next: GroupByFieldId[]) => void;
   /** Render at the compact (32px) filter height to line up with the search bar. */
   readonly compressed?: boolean;
+  /**
+   * Field ids to grey out (disabled, not selectable). Used to disable
+   * "Category" when the page is already scoped to a single category.
+   */
+  readonly disabledFieldIds?: readonly GroupByFieldId[];
 }
 
 /**
@@ -43,7 +48,13 @@ interface Props {
  * clicking a selected field removes it. The trigger shows the current
  * selection so the layout is self-describing without opening the menu.
  */
-export const EntityGroupByControls = ({ fields, groupBy, onChange, compressed = false }: Props) => {
+export const EntityGroupByControls = ({
+  fields,
+  groupBy,
+  onChange,
+  compressed = false,
+  disabledFieldIds = [],
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'entityCentricLabGroupBy' });
 
@@ -70,11 +81,12 @@ export const EntityGroupByControls = ({ fields, groupBy, onChange, compressed = 
   const items = fields.map((field) => {
     const selectedIndex = groupBy.indexOf(field.id);
     const isSelected = selectedIndex !== -1;
+    const isFieldDisabled = disabledFieldIds.includes(field.id);
     return (
       <EuiContextMenuItem
         key={field.id}
         icon={isSelected ? 'check' : 'empty'}
-        disabled={!isSelected && atLimit}
+        disabled={isFieldDisabled || (!isSelected && atLimit)}
         onClick={() => toggle(field.id)}
         data-test-subj={`entityCentricLabGroupByOption-${field.id}`}
       >

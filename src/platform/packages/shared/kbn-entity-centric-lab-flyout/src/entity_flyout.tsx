@@ -43,13 +43,14 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEntityFlyoutServices } from './services_context';
+import { labThing } from './lab_terminology';
 import { OverviewTab } from './overview_tab';
 import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
 import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
-import { SecurityTab } from './security_tab';
 import { TracesTab } from './traces_tab';
+import { ProfilingTab } from './profiling_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
 import type { OnSelectEntity } from './fake_entity_tabs';
@@ -60,6 +61,7 @@ import {
   buildEntityFlyoutInitialMessage,
 } from './build_entity_flyout_attachment';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
+import { resolveEntityTypeIdForName } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
 import type { FlyoutCustomLink } from './flyout_template_overrides';
 import { useEntityDisplayName } from './entity_display_name';
@@ -146,11 +148,10 @@ interface EntityFlyoutProps {
    */
   readonly size?: EuiFlyoutSize | number | string;
   /**
-   * Restrict the flyout to the core tab set (Overview, Logs, Traces, Alerts)
+   * Restrict the flyout to the core tab set (everything except Relationships)
    * used by the "Infra-short term" lab scenario. When false/undefined (the
    * default, i.e. the entity-centric long-term scenario) the flyout also
-   * surfaces the Relationships tab. Metrics and Security stay off in both
-   * scenarios.
+   * surfaces the Relationships tab.
    */
   readonly minimalTabs?: boolean;
 }
@@ -162,14 +163,14 @@ type BuiltInTabId =
   | 'traces'
   | 'alerts'
   | 'relationships'
-  | 'security';
+  | 'custom'
+  | 'profiling';
 
 /**
- * Tab ids can be either one of the seven built-in tabs or a free-form
- * string coming from a user override (e.g. `'custom'`, `'profiling'`, or
- * any future id defined in the Manage entity types wizard). Unknown ids
- * render a placeholder so the flyout never crashes if the override schema
- * drifts.
+ * Tab ids are either one of the built-in tabs or a free-form string coming
+ * from a user override (any future id defined in the Manage entity types
+ * wizard). Unknown ids render a placeholder so the flyout never crashes if
+ * the override schema drifts.
  */
 type TabId = BuiltInTabId | string;
 
@@ -180,7 +181,8 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'traces',
   'alerts',
   'relationships',
-  'security',
+  'custom',
+  'profiling',
 ];
 
 const isBuiltInTabId = (id: string): id is BuiltInTabId =>
@@ -189,12 +191,21 @@ const isBuiltInTabId = (id: string): id is BuiltInTabId =>
 /**
  * Tabs the flyout surfaces, in order. The core set is shared by every
  * scenario; the entity-centric (long-term) scenario additionally surfaces
- * Relationships (see {@link EntityFlyoutProps.minimalTabs}). Metrics and
- * Security are intentionally excluded from both. Applied to both the default
- * tab list and the per-kind template override, so any other tab (including
- * wizard-defined custom tabs) is dropped even when a template enables it.
+ * Relationships (see {@link EntityFlyoutProps.minimalTabs}). Every tab the
+ * Manage entity types wizard can emit (Metrics, Custom, Profiling included)
+ * is allowed so wizard customizations surface as configured; only Security
+ * is intentionally gone. Applied to both the default tab list and the
+ * per-type template override.
  */
-const CORE_TAB_IDS: readonly string[] = ['overview', 'logs', 'traces', 'alerts'];
+const CORE_TAB_IDS: readonly string[] = [
+  'overview',
+  'metrics',
+  'logs',
+  'traces',
+  'alerts',
+  'custom',
+  'profiling',
+];
 const FULL_TAB_IDS: readonly string[] = [...CORE_TAB_IDS, 'relationships'];
 
 /**
@@ -233,7 +244,12 @@ export const EntityFlyout = ({
   // the first position will land on Metrics.
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-  const { agentBuilder, notifications, renderEntityDashboard } = useEntityFlyoutServices();
+  const {
+    agentBuilder,
+    notifications,
+    renderEntityDashboard,
+    resourceCopy = false,
+  } = useEntityFlyoutServices();
 
   // Note: the back/forward history toolbar that used to live in the
   // header was removed. `onNavigateEntity` is still accepted as a prop
@@ -508,11 +524,21 @@ export const EntityFlyout = ({
     ];
   }, [handleActionClick, handleRollbackClick, kind]);
 
-  const templateOverride = useFlyoutTemplateOverride(kind);
+  // Flyout tab / custom-link overrides are keyed by the specific entity-type
+  // id (e.g. `aws-ec2`), resolved the same way the wizard wrote it, so a
+  // customization applies to exactly that type — not every type sharing its
+  // coarse `kind`. Falls back to `undefined` (built-in tabs) when the type
+  // can't be resolved to an id.
+  const entityTypeId = useMemo(
+    () => resolveEntityTypeIdForName(entityName, entityType),
+    [entityName, entityType]
+  );
+  const templateOverride = useFlyoutTemplateOverride(entityTypeId);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(() => {
-    // The core scenario shows Overview/Logs/Traces/Alerts; the entity-centric
-    // (long-term) scenario also shows Relationships. Metrics/Security stay off.
+    // Every wizard-configurable tab is surfaced (Metrics, Custom, Profiling
+    // included); the entity-centric (long-term) scenario additionally shows
+    // Relationships. Security is gone entirely.
     const allowedTabIds = minimalTabs ? CORE_TAB_IDS : FULL_TAB_IDS;
     const isAllowedTabId = (id: string): boolean => allowedTabIds.includes(id);
     const defaultTabs: Array<{ id: TabId; label: string; appendBadge?: number }> = [
@@ -522,10 +548,12 @@ export const EntityFlyout = ({
           defaultMessage: 'Overview',
         }),
       },
-      // Note: the "Metrics" tab is intentionally omitted from the default tab
-      // list. `'metrics'` is still a recognised built-in id (see `MetricsTab`
-      // in `TabContent`) so a template override could reference it, but it is
-      // never surfaced (not in `allowedTabIds`).
+      {
+        id: 'metrics',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.metrics', {
+          defaultMessage: 'Metrics',
+        }),
+      },
       {
         id: 'logs',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
@@ -560,6 +588,18 @@ export const EntityFlyout = ({
         id: 'relationships',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
           defaultMessage: 'Relationships',
+        }),
+      },
+      {
+        id: 'custom',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.custom', {
+          defaultMessage: 'Custom',
+        }),
+      },
+      {
+        id: 'profiling',
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.profiling', {
+          defaultMessage: 'Profiling',
         }),
       },
     ].filter((tab) => isAllowedTabId(tab.id));
@@ -740,7 +780,10 @@ export const EntityFlyout = ({
                   <EuiToolTip
                     content={i18n.translate(
                       'entityCentricLabFlyout.flyout.manageEntityTypeTooltip',
-                      { defaultMessage: 'Manage entity type' }
+                      {
+                        defaultMessage: 'Manage {thing} type',
+                        values: { thing: labThing(resourceCopy) },
+                      }
                     )}
                   >
                     <EuiButtonIcon
@@ -749,7 +792,10 @@ export const EntityFlyout = ({
                       onClick={onManageEntityType}
                       aria-label={i18n.translate(
                         'entityCentricLabFlyout.flyout.manageEntityTypeAriaLabel',
-                        { defaultMessage: 'Manage entity type' }
+                        {
+                          defaultMessage: 'Manage {thing} type',
+                          values: { thing: labThing(resourceCopy) },
+                        }
                       )}
                       data-test-subj="entityCentricLabFlyoutManageEntityType"
                     />
@@ -823,6 +869,7 @@ const TabContent = ({
   readonly onSelectEntity?: OnSelectEntity;
   readonly dashboardSlot?: React.ReactNode;
 }) => {
+  const { resourceCopy = false } = useEntityFlyoutServices();
   // Shared fallback: rendered for the `default` branch (unknown tab id from
   // an override) and for the `traces` branch when the active entity has no
   // curated trace payload (e.g. an override enabled the tab on a non-
@@ -837,8 +884,8 @@ const TabContent = ({
           <p>
             {i18n.translate('entityCentricLabFlyout.flyout.customTabPlaceholder', {
               defaultMessage:
-                'This tab was added from "Manage entity types". Configure its content for {entityName} to surface domain-specific data here.',
-              values: { entityName },
+                'This tab was added from "Manage {thing} types". Configure its content for {entityName} to surface domain-specific data here.',
+              values: { entityName, thing: labThing(resourceCopy) },
             })}
           </p>
         </EuiText>
@@ -864,8 +911,10 @@ const TabContent = ({
       return (
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
       );
-    case 'security':
-      return <SecurityTab security={tabsData.security} />;
+    case 'profiling':
+      // Profiling data isn't seeded in the lab — always render the
+      // "Add Universal Profiling" empty-state promo so the tab has content.
+      return <ProfilingTab />;
     default:
       // Custom tab with curated links from the Manage entity types wizard:
       // we render a tidy link list. Anything else (or `custom` with no

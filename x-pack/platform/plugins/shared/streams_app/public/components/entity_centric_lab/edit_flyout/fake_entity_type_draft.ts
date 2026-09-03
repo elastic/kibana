@@ -80,7 +80,6 @@ export type FlyoutTabId =
   | 'logs'
   | 'traces'
   | 'alerts'
-  | 'security'
   | 'relationships'
   | 'custom'
   | 'profiling';
@@ -236,13 +235,13 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
     id: 'custom',
     label: 'Custom',
     description: 'Explanations below',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'profiling',
     label: 'Profiling',
     description: 'Requires you to enable Profiling from {link}',
-    enabled: false,
+    enabled: true,
   },
 ];
 

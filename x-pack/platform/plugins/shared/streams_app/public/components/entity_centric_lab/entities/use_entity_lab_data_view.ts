@@ -26,7 +26,6 @@ const ENTITY_FIELDS: Record<string, FieldSpec> = {
   category: KEYWORD('category'),
   health: KEYWORD('health'),
   'cloud.provider': KEYWORD('cloud.provider'),
-  application: KEYWORD('application'),
   environment: KEYWORD('environment'),
   team: KEYWORD('team'),
   region: KEYWORD('region'),

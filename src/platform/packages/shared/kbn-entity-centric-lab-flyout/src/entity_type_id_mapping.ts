@@ -56,11 +56,19 @@ const TYPE_NAME_TO_ENTITY_TYPE_ID: Readonly<Record<string, string>> = {
   postgres: 'postgres',
   // Services
   'apm service': 'apm-service',
-  // Cloud
+  // Cloud · AWS
   'aws region': 'aws-region',
   'aws ec2 instance': 'aws-ec2',
   'aws lambda function': 'aws-lambda',
   'aws s3 bucket': 'aws-s3',
+  // Cloud · GCP
+  'gcp compute engine': 'gcp-compute',
+  'gcp cloud function': 'gcp-functions',
+  'gcp cloud storage bucket': 'gcp-storage',
+  // Cloud · Azure
+  'azure vm': 'azure-vm',
+  'azure function': 'azure-functions',
+  'azure blob storage': 'azure-blob',
   // Middlewares
   kafka: 'kafka',
   rabbitmq: 'rabbitmq',

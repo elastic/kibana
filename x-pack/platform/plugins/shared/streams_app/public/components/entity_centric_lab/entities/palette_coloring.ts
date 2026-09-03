@@ -54,6 +54,17 @@ export interface StepRule {
 
 export const MIN_RULES = 2;
 export const MAX_RULES = 18;
+
+/**
+ * Schema version for persisted Steps `rules`. Bumped whenever the way we
+ * seed default rule colours or bind them to a metric changes. On load,
+ * any persisted `rules` stamped with an older version (or none at all)
+ * are discarded so the bucket falls back to the *current* Automatic-
+ * matching defaults instead of resurrecting stale colours / thresholds
+ * from an earlier build. Rules the user edits are re-stamped with this
+ * version and persist normally.
+ */
+export const STEP_RULES_VERSION = 3;
 export type PaletteId =
   | 'cool'
   | 'warm'
@@ -81,10 +92,31 @@ export interface ColoringConfig {
   readonly max: number | null;
   /**
    * User-defined threshold rules for Steps mode. Undefined until the
-   * user first switches a bucket to Steps (seeded from the metric's
-   * warn/crit thresholds at that point).
+   * user first edits the rules (before that, buckets derive their rules
+   * from the metric at render time so they always mirror Automatic).
    */
   readonly rules?: readonly StepRule[];
+  /**
+   * Schema version of the persisted {@link rules}. Rules without the
+   * current {@link STEP_RULES_VERSION} are dropped on load — see that
+   * constant. Only set when {@link rules} is set.
+   */
+  readonly rulesVersion?: number;
+  /**
+   * Metric id the persisted {@link rules} were edited against. Rules
+   * from a different Color-by metric (e.g. Restarts thresholds left on
+   * CPU limit utilization) are ignored so Steps re-seeds from the
+   * current metric's Automatic bands.
+   */
+  readonly rulesMetricId?: string;
+  /**
+   * Tile sort direction, independent of the color mode. `false` (default)
+   * orders tiles worst → best (severity tone, or value in palette mode);
+   * `true` flips that to best → worst ("Reverse order"). Persisted here so
+   * the choice survives navigation like every other per-bucket display
+   * option.
+   */
+  readonly sortReverse?: boolean;
 }
 
 export const MIN_STEPS = 2;
@@ -103,6 +135,7 @@ export const DEFAULT_COLORING: ColoringConfig = {
   autoRange: true,
   min: null,
   max: null,
+  sortReverse: false,
 };
 
 const PALETTE_FNS: Record<PaletteId, (steps: number) => string[]> = {
@@ -275,7 +308,22 @@ export const isColoringConfig = (value: unknown): value is ColoringConfig => {
 export const normalizeColoring = (value: unknown): ColoringConfig => {
   if (!isColoringConfig(value)) return DEFAULT_COLORING;
   const paletteValid = PALETTE_OPTIONS.some((option) => option.id === value.paletteId);
-  const rules = Array.isArray(value.rules) ? value.rules.filter(isStepRule) : undefined;
+  // Only honour persisted rules stamped with the current schema version —
+  // older (or unversioned) rules carry stale seed colours from an earlier
+  // build, so we drop them and let the bucket fall back to the current
+  // Automatic-matching defaults.
+  const rulesCurrent = value.rulesVersion === STEP_RULES_VERSION;
+  const parsedRules = Array.isArray(value.rules) ? value.rules.filter(isStepRule) : undefined;
+  const rulesMetricId =
+    typeof value.rulesMetricId === 'string' && value.rulesMetricId.length > 0
+      ? value.rulesMetricId
+      : undefined;
+  // Drop rules that aren't current-version AND bound to a metric — older
+  // payloads carried stale seed colours / another metric's thresholds.
+  const rules =
+    rulesCurrent && rulesMetricId && parsedRules && parsedRules.length > 0
+      ? parsedRules
+      : undefined;
   return {
     mode: value.mode,
     paletteId: paletteValid ? value.paletteId : DEFAULT_COLORING.paletteId,
@@ -285,6 +333,9 @@ export const normalizeColoring = (value: unknown): ColoringConfig => {
     autoRange: value.autoRange,
     min: typeof value.min === 'number' ? value.min : null,
     max: typeof value.max === 'number' ? value.max : null,
-    rules: rules && rules.length > 0 ? rules : undefined,
+    rules,
+    rulesVersion: rules ? STEP_RULES_VERSION : undefined,
+    rulesMetricId: rules ? rulesMetricId : undefined,
+    sortReverse: value.sortReverse === true,
   };
 };

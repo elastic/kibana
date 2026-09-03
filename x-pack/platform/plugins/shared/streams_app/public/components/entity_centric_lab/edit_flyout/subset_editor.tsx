@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { labThing, useIsElasticOn } from '../lab_terminology';
 import type { FakeEntityType } from '../fake_entity_types';
 import type {
   CustomLinkDraft,
@@ -89,6 +90,7 @@ interface SubsetEditorBodyProps {
 }
 
 export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorBodyProps) => {
+  const isElasticOn = useIsElasticOn();
   const detailsAccordionId = useGeneratedHtmlId({ prefix: 'subsetDetails' });
   const filterAccordionId = useGeneratedHtmlId({ prefix: 'subsetFilter' });
 
@@ -167,7 +169,8 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
         <p>
           {i18n.translate('xpack.streams.entityCentricLab.editFlyout.subsetEditor.intro', {
             defaultMessage:
-              'You can define subsets of entity types that override entity type settings.',
+              'You can define subsets of {thing} types that override {thing} type settings.',
+            values: { thing: labThing(isElasticOn) },
           })}
         </p>
       </EuiText>

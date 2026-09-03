@@ -22,6 +22,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { setEntityTypeEnabled, useEntityTypeEnabled } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { CreateEntityTypeFlyout } from './create_entity_type_flyout';
@@ -30,7 +31,14 @@ import type { FakeEntityType } from './fake_entity_types';
 import { FAKE_ENTITY_TYPES } from './fake_entity_types';
 import { useUserEntityTypes } from './user_entity_types';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { getCanonicalCategoryLabel, isCustomCategoryLabel } from './entities/fake_entities';
+import { useKibana } from '../../hooks/use_kibana';
+import {
+  getCanonicalCategoryLabel,
+  isCategoryHiddenInElasticOn,
+  isCustomCategoryLabel,
+  normalizeCategoryToId,
+} from './entities/fake_entities';
+import { labThing, labThingLabel, labThings, labThingsLabel } from './lab_terminology';
 
 type FlyoutState =
   | { kind: 'closed' }
@@ -41,16 +49,27 @@ export const ManageEntityTypesView = () => {
   const {
     query: { edit: editIdFromQuery },
   } = useStreamsAppParams('/manage-entity-types');
+  const {
+    core: { uiSettings },
+  } = useKibana();
+  const labMode = useObservable(
+    uiSettings.get$<string>('discover:labMode', 'off'),
+    uiSettings.get<string>('discover:labMode', 'off')
+  );
+  const isElasticOn = labMode === 'elasticOn';
 
   // User-created rows live in a `localStorage`-backed pub-sub store so
   // a successful create lands in the table without needing the page to
   // re-mount. Hardcoded `FAKE_ENTITY_TYPES` come first so the catalogue
   // order stays familiar; user types are appended at the end.
   const userEntityTypes = useUserEntityTypes();
-  const allEntityTypes = useMemo<readonly FakeEntityType[]>(
-    () => [...FAKE_ENTITY_TYPES, ...userEntityTypes],
-    [userEntityTypes]
-  );
+  const allEntityTypes = useMemo<readonly FakeEntityType[]>(() => {
+    const combined = [...FAKE_ENTITY_TYPES, ...userEntityTypes];
+    if (!isElasticOn) return combined;
+    return combined.filter(
+      (entityType) => !isCategoryHiddenInElasticOn(normalizeCategoryToId(entityType.category))
+    );
+  }, [userEntityTypes, isElasticOn]);
 
   const [flyout, setFlyout] = useState<FlyoutState>({ kind: 'closed' });
   const [search, setSearch] = useState('');
@@ -90,7 +109,8 @@ export const ManageEntityTypesView = () => {
       {
         field: 'name',
         name: i18n.translate('xpack.streams.entityCentricLab.manage.columns.entityType', {
-          defaultMessage: 'Entity type',
+          defaultMessage: '{thing} type',
+          values: { thing: labThingLabel(isElasticOn) },
         }),
         render: (name: string, row: FakeEntityType) => (
           <EuiLink
@@ -140,7 +160,11 @@ export const ManageEntityTypesView = () => {
                     'xpack.streams.entityCentricLab.manage.columns.categoryOtherTooltip',
                     {
                       defaultMessage:
-                        'This category doesn\u2019t match a canonical Entities nav section, so its entity types are bucketed under \u201cOther\u201d.',
+                        'This category doesn\u2019t match a canonical {things} nav section, so its {thing} types are bucketed under \u201cOther\u201d.',
+                      values: {
+                        things: labThingsLabel(isElasticOn),
+                        thing: labThing(isElasticOn),
+                      },
                     }
                   )}
                 >
@@ -159,7 +183,8 @@ export const ManageEntityTypesView = () => {
       {
         field: 'entitiesCount',
         name: i18n.translate('xpack.streams.entityCentricLab.manage.columns.entities', {
-          defaultMessage: 'Entities',
+          defaultMessage: '{things}',
+          values: { things: labThingsLabel(isElasticOn) },
         }),
         align: 'right',
         width: '120px',
@@ -179,7 +204,8 @@ export const ManageEntityTypesView = () => {
               'xpack.streams.entityCentricLab.manage.columns.triggersFlyoutTooltip',
               {
                 defaultMessage:
-                  'When off, clicking an entity name of this type (in Discover logs, the entities list, etc.) no longer opens the entity flyout.',
+                  'When off, clicking a name of this type (in Discover logs, the {things} list, etc.) no longer opens the {thing} flyout.',
+                values: { thing: labThing(isElasticOn), things: labThings(isElasticOn) },
               }
             )}
           >
@@ -195,7 +221,7 @@ export const ManageEntityTypesView = () => {
         render: (row: FakeEntityType) => <TriggersFlyoutSwitch row={row} />,
       },
     ],
-    []
+    [isElasticOn]
   );
 
   return (
@@ -205,7 +231,8 @@ export const ManageEntityTypesView = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.streams.entityCentricLab.manage.title', {
-                defaultMessage: 'Manage entity types',
+                defaultMessage: 'Manage {thing} types',
+                values: { thing: labThing(isElasticOn) },
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -227,7 +254,8 @@ export const ManageEntityTypesView = () => {
             data-test-subj="entityCentricLabCreateEntityTypeButton"
           >
             {i18n.translate('xpack.streams.entityCentricLab.manage.createButton', {
-              defaultMessage: 'Create new entity type',
+              defaultMessage: 'Create new {thing} type',
+              values: { thing: labThing(isElasticOn) },
             })}
           </EuiButton>,
         ]}
@@ -237,7 +265,8 @@ export const ManageEntityTypesView = () => {
           <p>
             {i18n.translate('xpack.streams.entityCentricLab.manage.subtitle', {
               defaultMessage:
-                'Prototype list of entity types. The data is mocked — clicking a row opens a placeholder edit flyout.',
+                'Prototype list of {thing} types. The data is mocked — clicking a row opens a placeholder edit flyout.',
+              values: { thing: labThing(isElasticOn) },
             })}
           </p>
         </EuiText>
@@ -246,26 +275,29 @@ export const ManageEntityTypesView = () => {
           fullWidth
           incremental
           placeholder={i18n.translate('xpack.streams.entityCentricLab.manage.searchPlaceholder', {
-            defaultMessage: 'Filter entity types by name or category',
+            defaultMessage: 'Filter {thing} types by name or category',
+            values: { thing: labThing(isElasticOn) },
           })}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           data-test-subj="entityCentricLabManageEntityTypesSearch"
           aria-label={i18n.translate('xpack.streams.entityCentricLab.manage.searchAriaLabel', {
-            defaultMessage: 'Filter entity types',
+            defaultMessage: 'Filter {thing} types',
+            values: { thing: labThing(isElasticOn) },
           })}
         />
         <EuiSpacer size="m" />
         <EuiBasicTable<FakeEntityType>
           tableCaption={i18n.translate('xpack.streams.entityCentricLab.manage.tableCaption', {
-            defaultMessage: 'Entity types',
+            defaultMessage: '{thing} types',
+            values: { thing: labThingLabel(isElasticOn) },
           })}
           items={filteredEntityTypes}
           columns={columns}
           rowHeader="name"
           noItemsMessage={i18n.translate('xpack.streams.entityCentricLab.manage.noResults', {
-            defaultMessage: 'No entity types match "{query}".',
-            values: { query: search.trim() },
+            defaultMessage: 'No {thing} types match "{query}".',
+            values: { query: search.trim(), thing: labThing(isElasticOn) },
           })}
           data-test-subj="entityCentricLabEntityTypesTable"
         />

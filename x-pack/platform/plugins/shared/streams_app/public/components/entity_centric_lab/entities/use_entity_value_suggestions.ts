@@ -13,8 +13,8 @@ import type { Entity } from './fake_entities';
 
 /**
  * Teaches the unified search bar's autocomplete to suggest *values* for the
- * ElasticOn Inventory fields (e.g. typing `application:` offers the seeded
- * app names, matching the facet dropdowns).
+ * ElasticOn Inventory fields (e.g. typing `environment:` offers the seeded
+ * environment names, matching the facet dropdowns).
  *
  * The bar normally sources value suggestions from Elasticsearch via
  * `kql.autocomplete.getValueSuggestions`, but the lab entities are purely

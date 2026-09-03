@@ -51,13 +51,13 @@ export type MetricTone = 'good' | 'warning' | 'danger' | 'neutral' | 'accent' | 
 
 export const TONE_LABEL: Record<MetricTone, string> = {
   good: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.tone.good', {
-    defaultMessage: 'Good',
+    defaultMessage: 'Healthy',
   }),
   warning: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.tone.warning', {
-    defaultMessage: 'Warning',
+    defaultMessage: 'At risk',
   }),
   danger: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.tone.danger', {
-    defaultMessage: 'Critical',
+    defaultMessage: 'Unhealthy',
   }),
   accent: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.tone.accent', {
     defaultMessage: 'In progress',
@@ -266,6 +266,47 @@ export const ENTITY_HEALTH_METRIC: MetricDescriptor = {
   }),
   kind: 'categorical',
   values: ENTITY_HEALTH_VALUES,
+};
+
+/**
+ * Shared "Alerts" categorical metric. Surfaced both as a Color-by option
+ * in the hex map and as a dedicated table column. The three states map
+ * directly to an entity's `alerts` field: active (red), clear (green),
+ * and N/A (grey / no alerts configured).
+ */
+export const ENTITY_ALERTS_METRIC_ID = 'entity-alerts';
+
+const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
+  {
+    id: 'active',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.active', {
+      defaultMessage: 'Alerting',
+    }),
+    tone: 'danger',
+  },
+  {
+    id: 'clear',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.clear', {
+      defaultMessage: 'OK',
+    }),
+    tone: 'good',
+  },
+  {
+    id: 'na',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.na', {
+      defaultMessage: 'N/A',
+    }),
+    tone: 'neutral',
+  },
+];
+
+export const ENTITY_ALERTS_METRIC: MetricDescriptor = {
+  id: ENTITY_ALERTS_METRIC_ID,
+  label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.metric.entityAlerts', {
+    defaultMessage: 'Alerts',
+  }),
+  kind: 'categorical',
+  values: ENTITY_ALERTS_VALUES,
 };
 
 const POD_PHASE_VALUES: readonly CategoricalValue[] = [
@@ -1058,27 +1099,31 @@ const FALLBACK_METRICS: readonly MetricDescriptor[] = [
  * etc.) so the fallback doesn't override them.
  */
 /**
- * Prepend the shared {@link ENTITY_HEALTH_METRIC} so every bucket
- * defaults to coloring by the consolidated Healthy / At risk /
- * Unhealthy axis. Kept idempotent so a bucket that already lists a
- * metric with the reserved id (defensive; nothing in-tree does today)
- * doesn't render two duplicate entries in the Color-by dropdown.
+ * Prepend the shared {@link ENTITY_HEALTH_METRIC} and
+ * {@link ENTITY_ALERTS_METRIC} so every bucket defaults to coloring by
+ * the consolidated axes. Kept idempotent so a bucket that already lists
+ * a metric with a reserved id doesn't render duplicate entries.
  */
-const withHealthDefault = (metrics: readonly MetricDescriptor[]): readonly MetricDescriptor[] => {
-  if (metrics.some((metric) => metric.id === ENTITY_HEALTH_METRIC_ID)) {
-    return metrics;
+const withSharedMetrics = (metrics: readonly MetricDescriptor[]): readonly MetricDescriptor[] => {
+  const result: MetricDescriptor[] = [];
+  if (!metrics.some((metric) => metric.id === ENTITY_HEALTH_METRIC_ID)) {
+    result.push(ENTITY_HEALTH_METRIC);
   }
-  return [ENTITY_HEALTH_METRIC, ...metrics];
+  if (!metrics.some((metric) => metric.id === ENTITY_ALERTS_METRIC_ID)) {
+    result.push(ENTITY_ALERTS_METRIC);
+  }
+  result.push(...metrics);
+  return result;
 };
 
 export const getBucketMetrics = (bucketKey: BucketKey): readonly MetricDescriptor[] => {
-  if (CATALOG[bucketKey]) return withHealthDefault(CATALOG[bucketKey]);
+  if (CATALOG[bucketKey]) return withSharedMetrics(CATALOG[bucketKey]);
   const colonIdx = bucketKey.indexOf(':');
   if (colonIdx > 0) {
     const parentKey = bucketKey.slice(0, colonIdx);
-    if (CATALOG[parentKey]) return withHealthDefault(CATALOG[parentKey]);
+    if (CATALOG[parentKey]) return withSharedMetrics(CATALOG[parentKey]);
   }
-  return withHealthDefault(FALLBACK_METRICS);
+  return withSharedMetrics(FALLBACK_METRICS);
 };
 
 export const getDefaultMetricId = (bucketKey: BucketKey): string => {
@@ -1325,11 +1370,22 @@ const healthHintWindow = (hint?: EntityHealthHint): { centre: number; half: numb
  * ~45 % green — matching the entity health distribution and giving
  * the Grouped grid the variety it needs to be useful.
  */
+export type EntityAlertHint = 'active' | 'clear' | 'na';
+
+/** Derive alert hint from entity alert data. */
+export const alertHintFromEntity = (
+  alerts: { readonly total: number; readonly active: number } | undefined
+): EntityAlertHint => {
+  if (!alerts) return 'na';
+  return alerts.active > 0 ? 'active' : 'clear';
+};
+
 export const resolveMetricReading = (
   entityName: string,
   metric: MetricDescriptor,
   statId: StatId,
-  entityHealth?: EntityHealthHint
+  entityHealth?: EntityHealthHint,
+  alertHint?: EntityAlertHint
 ): MetricReading => {
   // Shared "Entity health" metric short-circuits the hash pipeline —
   // its whole point is to mirror the entity's canonical health exactly
@@ -1341,6 +1397,21 @@ export const resolveMetricReading = (
     const value =
       metric.values.find((candidate) => candidate.id === hintId) ??
       metric.values.find((candidate) => candidate.id === 'unknown') ??
+      metric.values[0];
+    return {
+      tone: value.tone,
+      displayValue: value.label,
+      displayLabel: value.label,
+      categoryId: value.id,
+    };
+  }
+
+  // Shared "Alerts" metric mirrors the entity's alert status directly.
+  if (metric.id === ENTITY_ALERTS_METRIC_ID && metric.kind === 'categorical') {
+    const hintId = alertHint ?? 'na';
+    const value =
+      metric.values.find((candidate) => candidate.id === hintId) ??
+      metric.values.find((candidate) => candidate.id === 'na') ??
       metric.values[0];
     return {
       tone: value.tone,

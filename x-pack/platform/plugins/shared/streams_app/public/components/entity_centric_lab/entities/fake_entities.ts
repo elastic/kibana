@@ -16,6 +16,7 @@
  */
 
 import { CLOUD_PROVIDERS, type CloudProviderId } from './cloud_providers';
+import { withKubernetesHierarchy } from './kubernetes_hierarchy';
 
 export type EntityHealth = 'healthy' | 'atRisk' | 'unhealthy';
 
@@ -75,6 +76,24 @@ export const ENTITY_CATEGORIES: readonly EntityCategoryDescriptor[] = [
   // categories + "+ Create new category" instead).
   { id: 'other', label: 'Other', icon: 'package' },
 ];
+
+/**
+ * ElasticOn is infra-first for now. These categories stay in the
+ * catalogue (Latest / entity-centric still render them) but are
+ * stripped from nav, inventory, and Manage entity types when
+ * `labMode === 'elasticOn'`.
+ */
+export const ELASTICON_HIDDEN_CATEGORY_IDS: ReadonlySet<EntityCategoryId> = new Set(['services']);
+
+export const isCategoryHiddenInElasticOn = (categoryId: EntityCategoryId): boolean =>
+  ELASTICON_HIDDEN_CATEGORY_IDS.has(categoryId);
+
+export const getVisibleEntityCategories = (
+  isElasticOn: boolean
+): readonly EntityCategoryDescriptor[] =>
+  isElasticOn
+    ? ENTITY_CATEGORIES.filter((category) => !isCategoryHiddenInElasticOn(category.id))
+    : ENTITY_CATEGORIES;
 
 export const getCategoryDescriptor = (id: EntityCategoryId): EntityCategoryDescriptor | undefined =>
   ENTITY_CATEGORIES.find((category) => category.id === id);
@@ -146,6 +165,12 @@ export const TAG_KEY_LABEL: Record<TagKey, string> = {
   region: 'Region',
 };
 
+/** ElasticOn inventory drops Application (infra-first; tags stay on the data). */
+export const ELASTICON_HIDDEN_TAG_KEYS: ReadonlySet<TagKey> = new Set(['application']);
+
+export const getVisibleTagKeys = (isElasticOn: boolean): readonly TagKey[] =>
+  isElasticOn ? TAG_KEYS.filter((key) => !ELASTICON_HIDDEN_TAG_KEYS.has(key)) : TAG_KEYS;
+
 export type EntityTags = Record<TagKey, string>;
 
 export interface Entity {
@@ -169,12 +194,22 @@ export interface Entity {
   readonly tags: EntityTags;
   /**
    * Extra, entity-type-specific attributes (e.g. Hosts carry
-   * `os` / `cloudProvider` / `serviceName`). These power the per-category
-   * "extra filters" shown to the right of the shared tag filters — see
-   * {@link CATEGORY_EXTRA_FILTERS}. Only seeded for categories that declare
-   * extra filters; `undefined` elsewhere.
+   * `os` / `cloudProvider` / `serviceName`; Kubernetes carries parent
+   * context like `cluster` / `namespace` / `node`). Hosts attributes
+   * power extra filters; Kubernetes attributes power table columns and
+   * hex popovers. `undefined` when the category has none.
    */
   readonly attributes?: Readonly<Record<string, string>>;
+  /**
+   * Alert summary for this entity. `undefined` means no alert rules are
+   * configured (renders as grey "N/A"). When present, `total` is the
+   * number of configured alert rules and `active` is how many are
+   * currently firing.
+   */
+  readonly alerts?: {
+    readonly total: number;
+    readonly active: number;
+  };
 }
 
 export interface EntityCategoryCounts {
@@ -319,18 +354,19 @@ const HOST_SERVICE_NAME_VALUES: readonly string[] = [
  * filter something real, seed the matching attributes in the builders below)
  * to expose type-specific facets on that category's inventory page.
  */
-export const CATEGORY_EXTRA_FILTERS: Partial<Record<EntityCategoryId, readonly ExtraFilterDef[]>> = {
-  hosts: [
-    { key: 'os', label: 'Operating system', pool: HOST_OS_VALUES },
-    { key: 'cloudProvider', label: 'Cloud provider', pool: HOST_CLOUD_PROVIDER_VALUES },
-    {
-      key: 'serviceName',
-      label: 'Service name',
-      help: 'Services detected running on the host (from the system integration).',
-      pool: HOST_SERVICE_NAME_VALUES,
-    },
-  ],
-};
+export const CATEGORY_EXTRA_FILTERS: Partial<Record<EntityCategoryId, readonly ExtraFilterDef[]>> =
+  {
+    hosts: [
+      { key: 'os', label: 'Operating system', pool: HOST_OS_VALUES },
+      { key: 'cloudProvider', label: 'Cloud provider', pool: HOST_CLOUD_PROVIDER_VALUES },
+      {
+        key: 'serviceName',
+        label: 'Service name',
+        help: 'Services detected running on the host (from the system integration).',
+        pool: HOST_SERVICE_NAME_VALUES,
+      },
+    ],
+  };
 
 /** Extra filters declared for a category, or an empty list when none. */
 export const getCategoryExtraFilters = (category: EntityCategoryId): readonly ExtraFilterDef[] =>
@@ -359,6 +395,33 @@ const buildTags = (scope: string, index: number): EntityTags => ({
   team: pickTag(TEAM_VALUES, `${scope}-team`, index),
   region: pickTag(REGION_VALUES, `${scope}-region`, index),
 });
+
+/**
+ * Seed fake alert data correlated with entity health:
+ * - unhealthy → 70 % active alerts, 20 % clear, 10 % none
+ * - atRisk   → 30 % active, 50 % clear, 20 % none
+ * - healthy  → 5 % active, 70 % clear, 25 % none
+ */
+const buildAlerts = (
+  name: string,
+  health: EntityHealth
+): { total: number; active: number } | undefined => {
+  const h = stableHash(`alerts-${name}`) % 100;
+  const thresholds: Record<EntityHealth, { readonly activeMax: number; readonly clearMax: number }> =
+    {
+      unhealthy: { activeMax: 70, clearMax: 90 },
+      atRisk: { activeMax: 30, clearMax: 80 },
+      healthy: { activeMax: 5, clearMax: 75 },
+    };
+  const { activeMax, clearMax } = thresholds[health];
+  if (h >= clearMax) return undefined; // no alerts configured
+  const total = (stableHash(`alerts-total-${name}`) % 7) + 1; // 1–7 rules
+  if (h < activeMax) {
+    const active = (stableHash(`alerts-active-${name}`) % total) + 1; // 1–total firing
+    return { total, active };
+  }
+  return { total, active: 0 }; // all clear
+};
 
 // Deterministically seed the extra, category-specific attributes (e.g. a
 // host's OS / cloud provider / detected service) from each filter def's pool,
@@ -595,17 +658,19 @@ const buildCategoryEntities = (spec: CategorySpec): Entity[] => {
     const type = seed?.type ?? spec.typeCycle[i % spec.typeCycle.length];
     const tags = buildTags(spec.category, i);
     const baseHealth = seed?.health ?? seededHealth(salt + i * 3, i);
+    const health = regionAdjustedHealth(baseHealth, tags.region);
     entities.push({
       id: `${spec.category}-${i + 1}`,
       name,
       category: spec.category,
       type,
-      health: regionAdjustedHealth(baseHealth, tags.region),
+      health,
       lastHealthChange: '2026-04-14 12:34',
       age: AGE_SAMPLES[i % AGE_SAMPLES.length],
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
       tags,
       attributes: buildExtraAttributes(spec.category, spec.category, i),
+      alerts: buildAlerts(name, health),
     });
   }
   return sortByHealth(entities);
@@ -623,17 +688,19 @@ const buildKubernetesEntities = (): Entity[] => {
       const globalIndex = runningOffset + i;
       const tags = buildTags(`kubernetes-${sub.label}`, globalIndex);
       const baseHealth = seed?.health ?? seededHealth(salt + globalIndex * 3, globalIndex);
+      const health = regionAdjustedHealth(baseHealth, tags.region);
       subEntities.push({
         id: `kubernetes-${sub.label.toLowerCase()}-${i + 1}`,
         name,
         category: 'kubernetes',
         subType: sub.label,
         type: sub.type,
-        health: regionAdjustedHealth(baseHealth, tags.region),
+        health,
         lastHealthChange: '2026-04-14 12:34',
         age: AGE_SAMPLES[i % AGE_SAMPLES.length],
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
         tags,
+        alerts: buildAlerts(name, health),
       });
     }
     entities.push(...sortByHealth(subEntities));
@@ -657,6 +724,7 @@ const buildCloudEntities = (): Entity[] => {
       const serviceEntities: Entity[] = [];
       for (const instance of service.instances) {
         const tags = buildTags(`cloud-${provider.id}`, index);
+        const health = regionAdjustedHealth(instance.health, tags.region);
         serviceEntities.push({
           id: `cloud-${provider.id}-${service.id}-${index + 1}`,
           name: instance.name,
@@ -664,11 +732,12 @@ const buildCloudEntities = (): Entity[] => {
           provider: provider.id,
           subType: service.label,
           type: service.entityType,
-          health: regionAdjustedHealth(instance.health, tags.region),
+          health,
           lastHealthChange: '2026-04-14 12:34',
           age: AGE_SAMPLES[index % AGE_SAMPLES.length],
           anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
           tags,
+          alerts: buildAlerts(instance.name, health),
         });
         index += 1;
       }
@@ -694,7 +763,7 @@ const findSpec = (category: EntityCategoryId): CategorySpec => {
 };
 
 export const buildFakeEntities = (): FakeEntitiesDataset => {
-  const entities: Entity[] = [
+  const entities: Entity[] = withKubernetesHierarchy([
     ...buildCategoryEntities(findSpec('hosts')),
     ...buildKubernetesEntities(),
     ...buildCategoryEntities(findSpec('databases')),
@@ -702,7 +771,7 @@ export const buildFakeEntities = (): FakeEntitiesDataset => {
     ...buildCloudEntities(),
     ...buildCategoryEntities(findSpec('middlewares')),
     ...buildCategoryEntities(findSpec('llms')),
-  ];
+  ]);
 
   const categoryCounts: EntityCategoryCounts[] = ENTITY_CATEGORIES.map((descriptor) => {
     if (descriptor.id === 'kubernetes') {
@@ -769,11 +838,15 @@ export const EMPTY_TAG_FILTERS: ActiveTagFilters = {
   region: [],
 };
 
-export const isAnyFilterActive = (filters: ActiveTagFilters): boolean =>
-  TAG_KEYS.some((key) => filters[key].length > 0);
+export const isAnyFilterActive = (filters: ActiveTagFilters, isElasticOn = false): boolean =>
+  getVisibleTagKeys(isElasticOn).some((key) => filters[key].length > 0);
 
-export const matchesTagFilters = (entity: Entity, filters: ActiveTagFilters): boolean => {
-  for (const key of TAG_KEYS) {
+export const matchesTagFilters = (
+  entity: Entity,
+  filters: ActiveTagFilters,
+  isElasticOn = false
+): boolean => {
+  for (const key of getVisibleTagKeys(isElasticOn)) {
     const values = filters[key];
     if (values.length > 0 && !values.includes(entity.tags[key])) {
       return false;

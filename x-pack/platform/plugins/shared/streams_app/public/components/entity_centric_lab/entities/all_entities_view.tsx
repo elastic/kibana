@@ -109,11 +109,13 @@ import {
   EMPTY_EXTRA_FILTERS,
   EMPTY_TAG_FILTERS,
   TAG_KEYS,
+  getVisibleTagKeys,
   buildFakeEntities,
   getCategoryDescriptor,
   getCategoryExtraFilters,
   getExtraFacets,
   getTagFacets,
+  isCategoryHiddenInElasticOn,
   matchesExtraFilters,
   matchesTagFilters,
 } from './fake_entities';
@@ -124,6 +126,7 @@ import { GeomapView } from './geomap_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
 import { EntityExtraFilters } from './entity_extra_filters';
 import { EntityGroupByControls } from './entity_group_by_controls';
+import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import {
   DEFAULT_GROUP_BY,
   getGroupByFields,
@@ -435,6 +438,14 @@ export const AllEntitiesView = ({
   // session landing) is ElasticOn-only per product scope; `latest` keeps saved
   // views without a default.
   const isElasticOn = labMode === 'elasticOn';
+  // ElasticOn is infra-first: APM Services (and any other parked
+  // category) must not stay as a live inventory page. Bounce stale
+  // bookmarks / saved views to All entities.
+  useEffect(() => {
+    if (!isElasticOn || !categoryScope) return;
+    if (!isCategoryHiddenInElasticOn(categoryScope)) return;
+    router.push('/entities', { path: {}, query: {} });
+  }, [isElasticOn, categoryScope, router]);
   // URL-state-backed time range, shared with every other Streams page
   // through the same `rangeFrom`/`rangeTo` search params. The lab dataset
   // is static so the picked range doesn't actually filter the entities
@@ -492,16 +503,22 @@ export const AllEntitiesView = ({
         list = list.filter((entity) => entity.type === service.entityType);
       }
     }
+    // ElasticOn hides APM Services (and any other infra-parked
+    // categories) from the inventory. Seed data stays intact so Latest
+    // and the flyout name lookup can still resolve those entities.
+    if (isElasticOn) {
+      list = list.filter((entity) => !isCategoryHiddenInElasticOn(entity.category));
+    }
     return list;
-  }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope]);
+  }, [dataset.entities, categoryScope, cloudProviderScope, cloudServiceScope, isElasticOn]);
   // Feed the unified search bar's value autocomplete from the visible slice,
-  // so suggestions match the facet dropdowns (e.g. `application:` offers the
-  // same app names). ElasticOn-only; no-op otherwise.
+  // so suggestions match the facet dropdowns (e.g. `environment:` offers the
+  // same environment names). ElasticOn-only; no-op otherwise.
   useEntityValueSuggestions(isElasticOn, labDataView, scopedEntities);
   // Tag facets must be computed from the visible slice. If we kept them
   // global, a scoped page would show filter options that always empty the
-  // grid (e.g. "Application: ml-platform" on the Databases page when no
-  // database is tagged with that application).
+  // grid (e.g. "Team: payments" on the Databases page when no
+  // database is tagged with that team).
   const tagFacets = useMemo(() => getTagFacets(scopedEntities), [scopedEntities]);
   // Entity-type-specific "extra" filters (e.g. Hosts → OS / Cloud provider /
   // Service name). Only surfaced when the inventory is scoped to a category
@@ -569,7 +586,10 @@ export const AllEntitiesView = ({
   // health-coloured layout. A selection whose fields don't resolve on the
   // current page (e.g. a Hosts-only attribute after navigating away) collapses
   // back to the default layout rather than rendering an empty grouping.
-  const groupByFields = useMemo(() => getGroupByFields(categoryScope), [categoryScope]);
+  const groupByFields = useMemo(
+    () => getGroupByFields(categoryScope, isElasticOn),
+    [categoryScope, isElasticOn]
+  );
   const activeGroupByFields = useMemo(
     () => resolveGroupByFields(groupBy, groupByFields),
     [groupBy, groupByFields]
@@ -718,6 +738,8 @@ export const AllEntitiesView = ({
       cloudProvider: viewProvider,
       cloudService: viewService,
     } = view.state;
+    // Don't bounce into a category ElasticOn currently hides (APM Services).
+    if (viewCategory && isCategoryHiddenInElasticOn(viewCategory)) return;
     let pathname = '/entities';
     if (viewCategory === 'cloud' && viewProvider && viewService) {
       pathname = `/entities/cloud/${viewProvider}/${viewService}`;
@@ -737,7 +759,7 @@ export const AllEntitiesView = ({
       const predicate = compileEntityKql(search);
       return scopedEntities.filter(
         (entity) =>
-          matchesTagFilters(entity, activeTagFilters) &&
+          matchesTagFilters(entity, activeTagFilters, true) &&
           matchesExtraFilters(entity, activeExtraFilters, extraFilterDefs) &&
           predicate(entity) &&
           entityMatchesFilters(labFilters, entity)
@@ -773,7 +795,7 @@ export const AllEntitiesView = ({
   // Any filter dimension active (tags, extra facets, "+ Add filter" chips, or a
   // typed KQL query) — drives the unified "Clear filters" affordance below.
   const hasActiveFilters =
-    TAG_KEYS.some((key) => activeTagFilters[key].length > 0) ||
+    getVisibleTagKeys(isElasticOn).some((key) => activeTagFilters[key].length > 0) ||
     Object.values(activeExtraFilters).some((values) => values.length > 0) ||
     labFilters.length > 0 ||
     search.trim() !== '';
@@ -944,8 +966,14 @@ export const AllEntitiesView = ({
   // AI chat with the same payload Discover uses. When it's missing the
   // button is hidden and the rest of the flyout keeps working.
   const flyoutServices = useMemo(
-    () => ({ agentBuilder, notifications, charts, renderEntityDashboard }),
-    [agentBuilder, notifications, charts, renderEntityDashboard]
+    () => ({
+      agentBuilder,
+      notifications,
+      charts,
+      renderEntityDashboard,
+      resourceCopy: isElasticOn,
+    }),
+    [agentBuilder, notifications, charts, renderEntityDashboard, isElasticOn]
   );
 
   // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
@@ -1150,6 +1178,10 @@ export const AllEntitiesView = ({
               */}
               {headerLabel
                 ? headerLabel
+                : isElasticOn
+                ? i18n.translate('xpack.streams.entityCentricLab.entities.titleResources', {
+                    defaultMessage: 'All resources',
+                  })
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
                     defaultMessage: 'All entities',
                   })}
@@ -1215,7 +1247,8 @@ export const AllEntitiesView = ({
                   data-test-subj="entityCentricLabManageEntityTypesButton"
                 >
                   {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
-                    defaultMessage: 'Manage entity types',
+                    defaultMessage: 'Manage {thing} types',
+                    values: { thing: labThing(isElasticOn) },
                   })}
                 </EuiButton>,
               ]
@@ -1285,7 +1318,8 @@ export const AllEntitiesView = ({
                       'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
                       {
                         defaultMessage:
-                          'Search entities — e.g. health:unhealthy AND environment:production',
+                          'Search {things} — e.g. health:unhealthy AND environment:production',
+                        values: { things: labThings(isElasticOn) },
                       }
                     )}
                   />
@@ -1299,6 +1333,7 @@ export const AllEntitiesView = ({
                       onChange={setActiveTagFilters}
                       compressed
                       hideClear
+                      isElasticOn
                     />
                   </EuiFlexItem>
                   {extraFilterDefs.length > 0 ? (
@@ -1318,6 +1353,7 @@ export const AllEntitiesView = ({
                       groupBy={groupBy}
                       onChange={setGroupBy}
                       compressed
+                      disabledFieldIds={categoryScope ? ['category'] : []}
                     />
                   </EuiFlexItem>
                   {hasActiveFilters ? (
@@ -1348,9 +1384,10 @@ export const AllEntitiesView = ({
                     <EuiTitle size="xxs">
                       <h3>
                         {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                          defaultMessage: '{entities} Entities · {groups} Groups',
+                          defaultMessage: '{count} {things} · {groups} Groups',
                           values: {
-                            entities: filteredEntities.length.toLocaleString(),
+                            count: filteredEntities.length.toLocaleString(),
+                            things: labThingsLabel(isElasticOn),
                             groups: isElasticOn
                               ? elasticOnGroupCount
                               : categoryScope
@@ -1540,9 +1577,10 @@ export const AllEntitiesView = ({
                     <EuiTitle size="xxs">
                       <h3>
                         {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                          defaultMessage: '{entities} Entities · {groups} Groups',
+                          defaultMessage: '{count} {things} · {groups} Groups',
                           values: {
-                            entities: filteredEntities.length.toLocaleString(),
+                            count: filteredEntities.length.toLocaleString(),
+                            things: labThingsLabel(isElasticOn),
                             // On the cross-category page the dataset-wide group
                             // total is the right summary. When scoped to one
                             // category the grid only ever renders that single
