@@ -6,7 +6,9 @@
  */
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { i18n } from '@kbn/i18n';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { Improvement } from '../common/http_api/improvements';
 import type { AnalyzeAndImproveContext, AnalyzeChatOptions } from './types';
 
 const workflowIdsOf = (aiIndex: AiIndexHttpItem): string[] =>
@@ -32,8 +34,45 @@ const buildIndexSummary = (aiIndex: AiIndexHttpItem): string => {
   return lines.filter((line): line is string => Boolean(line)).join('\n');
 };
 
+/**
+ * The proposed change and where it came from, verbose enough to discuss.
+ *
+ * This goes in an attachment rather than the message body: pasted into the chat, a workflow
+ * definition or a KI's content is unreadable and buries the question being asked.
+ */
+const buildImprovementBriefing = (improvement: Improvement): string => {
+  const { action, title, rationale, target, payload, provenance, status, resolution } = improvement;
+
+  const lines: Array<string | undefined> = [
+    `Improvement: ${title}`,
+    `Action: ${action}`,
+    `Status: ${status}`,
+    `Rationale: ${rationale}`,
+    target?.ki_id ? `Target KI: ${target.ki_id}` : undefined,
+    target?.workflow_id ? `Target workflow: ${target.workflow_id}` : undefined,
+    target?.source_value ? `Target source: ${target.source_value}` : undefined,
+    target?.subject ? `Subject: ${target.subject}` : undefined,
+    payload.ki ? `Proposed KI:\n${JSON.stringify(payload.ki, null, 2)}` : undefined,
+    payload.ki_patch
+      ? `Proposed KI changes:\n${JSON.stringify(payload.ki_patch, null, 2)}`
+      : undefined,
+    payload.workflow_yaml ? `Proposed workflow:\n${payload.workflow_yaml}` : undefined,
+    payload.source ? `Proposed source: ${payload.source.type} ${payload.source.value}` : undefined,
+    `Derived from ${provenance.signal_count} signal(s) between ${provenance.signal_window.from} and ${provenance.signal_window.to}`,
+    provenance.tags?.length ? `Signal tags: ${provenance.tags.join(', ')}` : undefined,
+    provenance.signal_ids.length ? `Signal IDs:\n${provenance.signal_ids.join('\n')}` : undefined,
+    resolution?.error ? `Previous apply error: ${resolution.error}` : undefined,
+    resolution?.reason ? `Previously rejected because: ${resolution.reason}` : undefined,
+  ];
+
+  return lines.filter((line): line is string => Boolean(line)).join('\n');
+};
+
 /** Builds Agent Builder `openChat` options for an Analyze & improve hand-off. */
-export const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
+export const buildAnalyzeChat = ({
+  aiIndex,
+  improvement,
+}: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
   agentId: aiIndex.feedback_analysis?.agent_id,
   newConversation: true,
   sessionTag: `context-engine-feedback:${aiIndex.id}`,
@@ -43,5 +82,23 @@ export const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): Analyze
       type: AttachmentType.text,
       data: { content: buildIndexSummary(aiIndex) },
     },
+    ...(improvement
+      ? [
+          {
+            id: `context-engine-improvement:${improvement.improvement_id}`,
+            type: AttachmentType.text,
+            data: { content: buildImprovementBriefing(improvement) },
+          },
+        ]
+      : []),
   ],
+  ...(improvement
+    ? {
+        initialMessage: i18n.translate('xpack.contextEngine.analyzeChat.improvementMessage', {
+          defaultMessage:
+            'Help me decide whether to apply this suggested improvement: "{title}". The proposed change and the signals behind it are attached.',
+          values: { title: improvement.title },
+        }),
+      }
+    : {}),
 });
