@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   CoreSetup,
   CoreStart,
@@ -12,6 +13,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
+import { resolveCompileAllowList, type AgentBuilderDashboardsConfig } from './config';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -32,9 +34,17 @@ export class AgentBuilderDashboardsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly compileAllowList: SupportedChartType[];
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<AgentBuilderDashboardsConfig>) {
     this.logger = initializerContext.logger.get();
+    let rawConfig: unknown = {};
+    try {
+      rawConfig = initializerContext.config.get();
+    } catch {
+      rawConfig = {};
+    }
+    this.compileAllowList = resolveCompileAllowList(rawConfig);
   }
 
   setup(
@@ -57,7 +67,7 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder);
+    registerSkills(setupDeps.agentBuilder, { compileAllowList: this.compileAllowList });
 
     return {};
   }

@@ -144,7 +144,7 @@ describe('createPrettifyDashboardAction', () => {
     showScreenshotOverlayMock.mockReturnValue(hideScreenshotOverlay);
   });
 
-  it('is compatible when a child uses ES|QL', async () => {
+  it('is compatible when the dashboard has a panel', async () => {
     const { action } = createAction();
 
     await expect(
@@ -154,19 +154,7 @@ describe('createPrettifyDashboardAction', () => {
     ).resolves.toBe(true);
   });
 
-  it('is compatible when at least one child uses ES|QL', async () => {
-    const { action } = createAction();
-
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({
-          children: { a: child(true), c: child(false) },
-        }),
-      })
-    ).resolves.toBe(true);
-  });
-
-  it('is incompatible when no child uses ES|QL', async () => {
+  it('is compatible for DSL panels that do not use ES|QL', async () => {
     const { action } = createAction();
 
     await expect(
@@ -175,7 +163,7 @@ describe('createPrettifyDashboardAction', () => {
           children: { c: child(false) },
         }),
       })
-    ).resolves.toBe(false);
+    ).resolves.toBe(true);
   });
 
   it('is incompatible when there are no children', async () => {
@@ -190,7 +178,7 @@ describe('createPrettifyDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
-  it('is incompatible when an ES|QL child is not in layout$.panels', async () => {
+  it('is incompatible when a child is not in layout$.panels', async () => {
     const { action } = createAction();
 
     await expect(
@@ -345,7 +333,8 @@ describe('createPrettifyDashboardAction', () => {
 
     await action.execute!({
       dashboardApi: createDashboardApi({
-        children: { c: child(false) },
+        children: {},
+        layout: createLayout([]),
       }),
     });
 

@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { dashboardGeneration } from './generation_guidance';
+export const markdownHeight = (content: string): number => {
+  if (content.length === 0) {
+    return 3;
+  }
+  return Math.min(12, Math.max(3, content.split('\n').length));
+};

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
@@ -111,6 +112,47 @@ describe('EsqlService.getAllIndices', () => {
 
     expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*', '*:*'] }), {
       signal: undefined,
+    });
+  });
+});
+
+describe('EsqlService.getColumns', () => {
+  it('executes the query with LIMIT 0 and no params by default', async () => {
+    const query = jest.fn().mockResolvedValue({
+      columns: [{ name: 'count', type: 'long' }],
+    });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+
+    await expect(service.getColumns('FROM logs | STATS count = COUNT(*)')).resolves.toEqual([
+      { name: 'count', type: 'long', hasConflict: false, userDefined: false },
+    ]);
+    expect(query).toHaveBeenCalledWith({
+      query: 'FROM logs | STATS count = COUNT(*) | LIMIT 0',
+      format: 'json',
+    });
+  });
+
+  it('forwards named params so time-picker bind parameters can be resolved', async () => {
+    const query = jest.fn().mockResolvedValue({ columns: [] });
+    const service = new EsqlService({
+      client: { esql: { query } } as unknown as ElasticsearchClient,
+    });
+    const params: Array<Record<string, FieldValue>> = [
+      { _tstart: '2026-01-01T00:00:00.000Z' },
+      { _tend: '2026-01-02T00:00:00.000Z' },
+    ];
+
+    await service.getColumns(
+      'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend',
+      params
+    );
+
+    expect(query).toHaveBeenCalledWith({
+      query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | LIMIT 0',
+      format: 'json',
+      params,
     });
   });
 });

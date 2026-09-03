@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
+import { distinctUntilChanged, map, merge, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart, EmbeddableChatAccess } from '@kbn/agent-builder-browser';
 import {
@@ -20,7 +20,6 @@ import {
   type PrettifyDashboardActionContext,
 } from '@kbn/dashboard-plugin/public';
 import type { FilesStart } from '@kbn/files-plugin/public';
-import { apiPublishesEsqlUsage } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { IdGenerator } from '../attachment_types';
 import { captureDashboardScreenshot } from './capture_dashboard_screenshot';
@@ -47,12 +46,7 @@ const isPrettifiable = (
   canWrite &&
   access.hasRequiredLicense &&
   access.hasLlmConnector &&
-  Object.entries(dashboardApi.children$.getValue()).some(
-    ([id, child]) =>
-      Boolean(dashboardApi.layout$.getValue().panels[id]) &&
-      apiPublishesEsqlUsage(child) &&
-      child.usesEsql$.getValue()
-  );
+  Object.keys(dashboardApi.layout$.getValue().panels).length > 0;
 
 export const createPrettifyDashboardAction = ({
   openChat,
@@ -81,15 +75,6 @@ export const createPrettifyDashboardAction = ({
           map((layout) => Object.keys(layout.panels).length),
           distinctUntilChanged(),
           skip(1)
-        ),
-        dashboardApi.children$.pipe(skip(1)),
-        dashboardApi.children$.pipe(
-          switchMap((children) => {
-            const esqlChildren = Object.values(children).filter(apiPublishesEsqlUsage);
-            return esqlChildren.length === 0
-              ? EMPTY
-              : merge(...esqlChildren.map((child) => child.usesEsql$.pipe(skip(1))));
-          })
         )
       ).pipe(map(() => undefined)),
     execute: async ({ dashboardApi }) => {

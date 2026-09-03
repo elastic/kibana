@@ -12,6 +12,7 @@ import {
   VEGA_VIS_TYPE,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
+import { chartIntentSchema, type ChartIntent } from '@kbn/agent-builder-visualizations-server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -49,6 +50,13 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  title?: string;
+  intent?: ChartIntent;
+  styleOverrides?: Record<string, unknown>;
+  styleRequest?: string;
+  regenerateQuery?: boolean;
+  hideTitle?: boolean;
+  compileAllowList?: SupportedChartType[];
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -101,7 +109,12 @@ const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((c
 export const visPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('vis'),
-  grid: panelGridSchema,
+  key: z
+    .string()
+    .max(256)
+    .optional()
+    .describe('(optional) Client reference for this panel, used to place it in a later set_layout.'),
+  grid: panelGridSchema.optional(),
   config: visPanelConfigSchema.describe(
     'Already-resolved visualization config, passed by value from a visualization attachment\'s `visualization` field: either a Lens API config (has a top-level `type`) or a Vega config (`{ spec }`). Do not hand-build a config for a new visualization here — use source: "request" instead.'
   ),
@@ -113,7 +126,33 @@ const panelRequestBaseSchema = z.object({
     .literal('vis')
     .default('vis')
     .describe('Panel type to resolve. Only "vis" is currently resolvable from a request.'),
-  grid: panelGridSchema,
+  key: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      '(optional) Client reference for this panel, used to place it in a later set_layout.'
+    ),
+  title: z
+    .string()
+    .max(256)
+    .optional()
+    .describe('(optional) Panel title written onto the Lens config.'),
+  intent: chartIntentSchema
+    .optional()
+    .describe(
+      '(optional) Typed presentation intent such as legend statistics, sparkline, secondary metric, units, or gauge bounds.'
+    ),
+  style_overrides: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('(optional) Partial Lens API config merged after intent.'),
+  style_request: z
+    .string()
+    .max(2048)
+    .optional()
+    .describe('(optional) Freeform styling request applied after intent and style_overrides.'),
+  grid: panelGridSchema.optional(),
   query: z
     .string()
     .max(2048)
@@ -130,7 +169,7 @@ const panelRequestBaseSchema = z.object({
     .max(4096)
     .optional()
     .describe(
-      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query. NEVER write or invent an ES|QL query yourself.'
+      '(optional) A validated ES|QL query from a prior tool result or explicit user input. Omit this field when composing new visualizations — the tool generates the query from the natural language query.'
     ),
 });
 
@@ -180,7 +219,15 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
     query: z
       .string()
       .max(2048)
+      .optional()
       .describe('A natural language query describing how to update the panel.'),
+    regenerate_query: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) When true, regenerate the ES|QL query from the natural-language query. When omitted or false, the existing query is pinned.'
+      ),
+    hide_title: z.boolean().optional().describe('(optional) Hide or show the panel title chrome.'),
     chartType: z
       .nativeEnum(SupportedChartType)
       .optional()

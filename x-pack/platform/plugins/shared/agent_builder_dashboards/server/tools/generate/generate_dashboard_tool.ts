@@ -8,13 +8,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  type SupportedChartType,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isSection,
+  type AttachmentPanel,
   type DashboardAttachmentData,
+  type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -27,6 +32,10 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { getPanelQuerySource, type PanelQuerySource } from './core/lens_config';
+import type { NormalizePanelChange, NormalizePanelSkipped } from './core/operations/types';
+import { deriveRowsFromGrid } from './core/layout';
+import type { PanelFailure } from './core/utils';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
@@ -43,6 +52,82 @@ const generateDashboardSchema = z.object({
   operations: z.array(dashboardOperationSchema).min(1),
 });
 
+interface DashboardPanelSummary {
+  id: string;
+  key?: string;
+  title?: string;
+  chart_type: string;
+  source: PanelQuerySource;
+  hide_title?: boolean;
+  grid: AttachmentPanel['grid'];
+  row?: number;
+  authoring_note?: string;
+  warnings?: string[];
+}
+
+interface DashboardSectionSummary {
+  id: string;
+  title: string;
+  collapsed: boolean;
+  grid: DashboardSection['grid'];
+  panels: DashboardPanelSummary[];
+}
+
+interface DashboardSummary {
+  title: string;
+  description?: string;
+  panels: Array<DashboardPanelSummary | DashboardSectionSummary>;
+  controls: Array<{ id?: string; type?: string; title?: string }>;
+}
+
+interface GenerateDashboardResultData {
+  attachment_id: string;
+  version: number;
+  dashboard: DashboardSummary;
+  rows?: string[][];
+  failures?: PanelFailure[];
+  changes?: NormalizePanelChange[];
+  skipped?: NormalizePanelSkipped[];
+}
+
+const findPanelKey = (panelId: string, panelKeys: Map<string, string>): string | undefined => {
+  for (const [key, id] of panelKeys) {
+    if (id === panelId) {
+      return key;
+    }
+  }
+  return undefined;
+};
+
+const summarizePanel = (
+  panel: AttachmentPanel,
+  authoringNotesByPanelId: Map<string, string>,
+  panelKeys: Map<string, string>,
+  rowByPanelId: Map<string, number>,
+  warningsByPanelId: Map<string, string[]>
+): DashboardPanelSummary => {
+  const config = panel.config;
+  const title = typeof config.title === 'string' ? config.title : undefined;
+  const chartType = typeof config.type === 'string' ? config.type : panel.type;
+  const hideTitle = typeof config.hide_title === 'boolean' ? config.hide_title : undefined;
+  const key = findPanelKey(panel.id, panelKeys);
+  const row = rowByPanelId.get(panel.id);
+  const warnings = warningsByPanelId.get(panel.id);
+
+  return {
+    id: panel.id,
+    ...(key !== undefined ? { key } : {}),
+    title,
+    chart_type: chartType,
+    source: getPanelQuerySource(panel.type, config),
+    ...(hideTitle !== undefined ? { hide_title: hideTitle } : {}),
+    grid: panel.grid,
+    ...(row !== undefined ? { row } : {}),
+    authoring_note: authoringNotesByPanelId.get(panel.id),
+    ...(warnings !== undefined ? { warnings } : {}),
+  };
+};
+
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
@@ -54,39 +139,61 @@ const generateDashboardSchema = z.object({
  * authored in this run, keyed by panel id. Panels that were not authored now
  * (or whose engine returned no note) simply have no `authoring_note`.
  */
+const indexRows = (rows: string[][]): Map<string, number> => {
+  const index = new Map<string, number>();
+  rows.forEach((row, rowIndex) => {
+    for (const panelId of row) {
+      index.set(panelId, rowIndex);
+    }
+  });
+  return index;
+};
+
 const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
-  authoringNotesByPanelId: Map<string, string>
-) => ({
-  title: dashboardData.title,
-  description: dashboardData.description,
-  panels: dashboardData.panels.map((widget) => {
-    if (isSection(widget)) {
-      return {
-        id: widget.id,
-        title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-          authoring_note: authoringNotesByPanelId.get(panel.id),
-        })),
-      };
-    }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-      authoring_note: authoringNotesByPanelId.get(widget.id),
-    };
-  }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
-});
+  authoringNotesByPanelId: Map<string, string>,
+  panelKeys: Map<string, string>,
+  layoutRows: string[][],
+  warningsByPanelId: Map<string, string[]>
+): DashboardSummary => {
+  const topRowByPanelId = indexRows(layoutRows);
+
+  return {
+    title: dashboardData.title,
+    description: dashboardData.description,
+    panels: dashboardData.panels.map((widget) => {
+      if (isSection(widget)) {
+        const sectionRows = indexRows(deriveRowsFromGrid({ title: '', panels: widget.panels }).rows);
+        return {
+          id: widget.id,
+          title: widget.title,
+          collapsed: widget.collapsed,
+          grid: widget.grid,
+          panels: widget.panels.map((panel) =>
+            summarizePanel(
+              panel,
+              authoringNotesByPanelId,
+              panelKeys,
+              sectionRows,
+              warningsByPanelId
+            )
+          ),
+        };
+      }
+      return summarizePanel(
+        widget,
+        authoringNotesByPanelId,
+        panelKeys,
+        topRowByPanelId,
+        warningsByPanelId
+      );
+    }),
+    controls: (dashboardData.pinned_panels ?? []).map((control) => {
+      const c = control as { id?: string; type?: string; config?: { title?: string } };
+      return { id: c.id, type: c.type, title: c.config?.title };
+    }),
+  };
+};
 
 /**
  * Kibana dashboard generation tool.
@@ -100,9 +207,11 @@ const summarizeDashboard = (
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
  */
-export const generateDashboardTool = (): BuiltinSkillBoundedTool<
-  typeof generateDashboardSchema
-> => {
+export const generateDashboardTool = ({
+  compileAllowList,
+}: {
+  compileAllowList?: SupportedChartType[];
+} = {}): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
@@ -112,13 +221,13 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
-4. update panel layouts without changing content
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
-8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express`,
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens). Use \`key\` to place them later. Omit \`grid\`.
+3. edit existing Lens, Vega, or markdown panel content (\`regenerate_query: true\` only for data edits)
+4. set_layout (rows/sections of panel refs, or \`auto: true\` to repack in place)
+5. remove panels
+6. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
+7. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express
+8. normalize existing Lens panels (house-style defects or a full restyle)`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -135,7 +244,17 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
+        const {
+          dashboardData,
+          failures,
+          panelAuthoringNotes,
+          touchedRequestPanelData,
+          panelKeys,
+          normalizeChanges,
+          normalizeSkipped,
+          layoutRows,
+          layoutWarnings,
+        } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -144,6 +263,7 @@ Use operations[] to:
             modelProvider,
             events,
             esClient,
+            compileAllowList,
           }),
           resolveCustomContentTemplate: createCustomContentTemplateResolver({
             logger,
@@ -152,12 +272,13 @@ Use operations[] to:
           }),
         });
 
-        // Data-aware default time range computation
-        const finalDashboardData = await applyDefaultDashboardTimeRange({
-          dashboardData,
-          esClient,
-          logger,
-        });
+        const finalDashboardData = touchedRequestPanelData
+          ? await applyDefaultDashboardTimeRange({
+              dashboardData,
+              esClient,
+              logger,
+            })
+          : dashboardData;
 
         const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard
@@ -178,25 +299,43 @@ Use operations[] to:
 
         logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
 
+        const ranNormalize = operations.some(
+          (operation) => operation.operation === 'normalize_panels'
+        );
+
+        const warningsByPanelId = new Map<string, string[]>();
+        for (const warning of layoutWarnings) {
+          if (!warning.panelId) {
+            continue;
+          }
+          const existing = warningsByPanelId.get(warning.panelId) ?? [];
+          existing.push(warning.message);
+          warningsByPanelId.set(warning.panelId, existing);
+        }
+
+        const data: GenerateDashboardResultData = {
+          attachment_id: attachment.id,
+          version: attachment.current_version ?? 1,
+          dashboard: summarizeDashboard(
+            finalDashboardData,
+            new Map(
+              panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
+            ),
+            panelKeys,
+            layoutRows,
+            warningsByPanelId
+          ),
+          rows: layoutRows,
+          failures: failures.length > 0 ? failures : undefined,
+          ...(ranNormalize ? { changes: normalizeChanges, skipped: normalizeSkipped } : {}),
+        };
+
         return {
           results: [
             {
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
-              data: {
-                attachment_id: attachment.id,
-                version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(
-                  finalDashboardData,
-                  new Map(
-                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
-                      panelId,
-                      authoringNote,
-                    ])
-                  )
-                ),
-                failures: failures.length > 0 ? failures : undefined,
-              },
+              data,
             },
           ],
         };

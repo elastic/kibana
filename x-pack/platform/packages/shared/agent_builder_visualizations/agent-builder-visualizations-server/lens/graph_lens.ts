@@ -8,58 +8,31 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { EsqlService } from '@kbn/esql-server-utils';
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
+import { author, type AuthorInvoker } from './author';
+import { fallbackBind } from './binder/fallback_bind';
+import { classifyColumns } from './binder/classify_columns';
+import { compileConfig, isCompileSuccess } from './compile/compile_config';
+import { decompileConfig, isDecompileSuccess } from './decompile/decompile_config';
+import { applyHouseStyle } from './house_style';
+import type { ChartIntent } from './intent';
+import { stripPanelLevelKeys } from './panel_level';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './chart_type_registry';
-import {
-  GENERATE_ESQL_NODE,
-  GENERATE_CONFIG_NODE,
-  VALIDATE_CONFIG_NODE,
-  MAX_RETRY_ATTEMPTS,
-  type Action,
-  type GenerateEsqlAction,
-  type GenerateConfigAction,
-  type ValidateConfigAction,
-  isGenerateEsqlAction,
-  isGenerateConfigAction,
-  isValidateConfigAction,
-} from './actions_lens';
-import { createGenerateConfigPrompt } from './prompts';
+import { probeColumns, type ProbedColumn } from './probe_columns';
+import { GENERATE_ESQL_NODE, PROBE_NODE, COMPILE_NODE, FINALIZE_NODE } from './actions_lens';
 
-// Regex to extract JSON from markdown code blocks
-const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+const DEFAULT_COMPILE_ALLOW_LIST = Object.values(SupportedChartType);
 
-const parseConfigAuthoringResponse = (
-  responseText: string
-): { config: Record<string, unknown>; authoringNote?: string } => {
-  const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
-  const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
-  const parsed = JSON.parse(jsonText);
-
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Response is not a valid JSON object');
-  }
-
-  const { config, authoring_note: authoringNote } = parsed as {
-    config?: unknown;
-    authoring_note?: unknown;
-  };
-  if (!config || typeof config !== 'object' || Array.isArray(config)) {
-    throw new Error('Response must include a valid "config" object');
-  }
-  const normalizedNote = typeof authoringNote === 'string' ? authoringNote.trim() : '';
-  return {
-    config: config as Record<string, unknown>,
-    ...(normalizedNote ? { authoringNote: normalizedNote } : {}),
-  };
-};
-
-const validateConfigForChartType = (
-  chartType: SupportedChartType,
-  config: unknown
-): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
+/**
+ * Default range used only to bind `?_tstart`/`?_tend` when probing columns.
+ * Kibana applies the live dashboard range at render time.
+ */
+const DEFAULT_VALIDATION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
 
 export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
@@ -79,12 +52,7 @@ export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrie
     : [config as EsqlDataSourceCarrier];
 };
 
-/**
- * Helper to extract ESQL queries from a visualization config.
- * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
- * For XY charts with multiple layers, returns all unique ESQL queries.
- */
-function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+const getExistingEsqlQueries = (config: VisualizationConfig | null): string[] => {
   if (!config) return [];
 
   const queries: string[] = [];
@@ -96,24 +64,21 @@ function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
   }
 
   return queries;
-}
+};
 
 const VisualizationStateAnnotation = Annotation.Root({
-  // inputs
   nlQuery: Annotation<string>(),
   index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
-  schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
-  // internal
   esqlQuery: Annotation<string>(),
-  currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
-  actions: Annotation<Action[]>({
-    reducer: (a, b) => [...a, ...b],
-    default: () => [],
-  }),
-  // outputs
+  columns: Annotation<ProbedColumn[]>(),
+  intent: Annotation<ChartIntent | undefined>(),
+  title: Annotation<string | undefined>(),
+  styleOverrides: Annotation<Record<string, unknown> | undefined>(),
+  styleRequest: Annotation<string | undefined>(),
+  compileAllowList: Annotation<SupportedChartType[]>(),
   validatedConfig: Annotation<VisualizationConfig | null>(),
   authoringNote: Annotation<string | null>(),
   error: Annotation<string | null>(),
@@ -121,25 +86,128 @@ const VisualizationStateAnnotation = Annotation.Root({
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
+type AmbiguousSlot = 'secondary' | 'breakdown' | 'x' | 'ems' | 'collapse';
+
+type CompileDispatchResult =
+  | { status: 'ok'; config: Record<string, unknown>; authoringNote: string | null }
+  | { status: 'error'; error: string };
+
+const isAmbiguousSlot = (slot: string): slot is AmbiguousSlot =>
+  slot === 'secondary' ||
+  slot === 'breakdown' ||
+  slot === 'x' ||
+  slot === 'ems' ||
+  slot === 'collapse';
+
+const formatClassifiedColumns = (query: string, columns: ProbedColumn[]): string => {
+  const classified = classifyColumns(query, columns);
+  return classified.columns
+    .map((column) => `- "${column.name}" (${column.type}, ${column.role})`)
+    .join('\n');
+};
+
+const bindFailure = (message: string, query: string, columns: ProbedColumn[]): string =>
+  `${message}\nClassified columns:\n${formatClassifiedColumns(query, columns)}`;
+
+const formatZodError = (error: {
+  issues: Array<{ path: PropertyKey[]; message: string }>;
+}): string =>
+  error.issues.map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`).join('; ');
+
+const slotIsHinted = (intent: ChartIntent | undefined, slot: AmbiguousSlot): boolean => {
+  switch (slot) {
+    case 'secondary':
+      return Boolean(intent?.secondary?.column);
+    case 'breakdown':
+    case 'collapse':
+      return Boolean(intent?.breakdown_field);
+    case 'x':
+      return Boolean(intent?.x_field);
+    case 'ems':
+      return Boolean(intent?.region);
+    default: {
+      const exhaustive: never = slot;
+      return exhaustive;
+    }
+  }
+};
+
+const applySlotHint = (
+  intent: ChartIntent | undefined,
+  slot: AmbiguousSlot,
+  column: string
+): ChartIntent => {
+  const next: ChartIntent = { ...intent };
+  switch (slot) {
+    case 'secondary':
+      return { ...next, secondary: { ...next.secondary, column } };
+    case 'breakdown':
+    case 'collapse':
+      return { ...next, breakdown_field: column };
+    case 'x':
+      return { ...next, x_field: column };
+    case 'ems':
+      return { ...next, region: { boundaries: 'world_countries', join: 'iso2' } };
+    default: {
+      const exhaustive: never = slot;
+      return exhaustive;
+    }
+  }
+};
+
+const prepareEditInput = (
+  state: VisualizationState
+): {
+  mode: 'new' | 'edit';
+  intent: ChartIntent | undefined;
+  styleOverrides: Record<string, unknown> | undefined;
+} => {
+  if (!state.parsedExistingConfig) {
+    return {
+      mode: 'new',
+      intent: state.intent,
+      styleOverrides: state.styleOverrides,
+    };
+  }
+  const decompiled = decompileConfig(state.parsedExistingConfig as Record<string, unknown>);
+  if (!isDecompileSuccess(decompiled)) {
+    return {
+      mode: 'edit',
+      intent: state.intent,
+      styleOverrides: state.styleOverrides,
+    };
+  }
+  const intent = { ...decompiled.intent, ...state.intent };
+  const styleOverrides =
+    state.chartType === decompiled.chartType
+      ? { ...decompiled.overrides, ...state.styleOverrides }
+      : state.styleOverrides;
+  return { mode: 'edit', intent, styleOverrides };
+};
+
+const attachDataSource = (config: Record<string, unknown>, query: string): void => {
+  for (const carrier of getEsqlDataSourceCarriers(config)) {
+    carrier.data_source = { type: 'esql', query };
+  }
+};
+
 export const createVisualizationGraph = async (
   modelProvider: ModelProvider,
   logger: Logger,
   events: ToolEventEmitter,
   esClient: IScopedClusterClient
 ) => {
-  const defaultModel = await modelProvider.getDefaultModel();
+  const invokeAuthor: AuthorInvoker = async (messages) => {
+    const defaultModel = await modelProvider.getDefaultModel();
+    return extractTextFromMessage(await defaultModel.chatModel.invoke(messages));
+  };
 
-  // Node: Generate ES|QL query
   const generateESQLNode = async (state: VisualizationState) => {
     logger.debug('Generating ES|QL query for visualization');
 
-    let action: GenerateEsqlAction;
     try {
       const generated = await generateVisualizationEsql({
         nlQuery: state.nlQuery,
-        // On edit, seed generation with the existing per-layer queries so a
-        // query-changing edit can modify them instead of being stuck with the
-        // original columns.
         existingQueries: getExistingEsqlQueries(state.parsedExistingConfig),
         index: state.index,
         modelProvider,
@@ -149,278 +217,245 @@ export const createVisualizationGraph = async (
       });
 
       if (!generated.query) {
-        action = {
-          type: 'generate_esql',
-          success: false,
-          error: generated.error ?? 'No queries generated',
-        };
-      } else {
-        logger.debug(`Generated ES|QL query: ${generated.query}`);
-        action = {
-          type: 'generate_esql',
-          success: true,
-          query: generated.query,
+        return {
+          error: `Could not resolve a valid ES|QL query for the visualization: ${
+            generated.error ?? 'No queries generated'
+          }`,
         };
       }
+
+      logger.debug(`Generated ES|QL query: ${generated.query}`);
+      return { esqlQuery: generated.query, error: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error(`Failed to generate ES|QL query: ${errorMessage}`);
-      action = {
-        type: 'generate_esql',
-        success: false,
-        error: errorMessage,
-      };
-    }
-
-    return {
-      actions: [action],
-    };
-  };
-
-  // Node: Generate configuration
-  const generateConfigNode = async (state: VisualizationState) => {
-    const attempt = state.currentAttempt + 1;
-    logger.debug(
-      `Generating visualization configuration (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`
-    );
-
-    // Extract ES|QL query from previous actions
-    const lastGenerateEsqlAction = state.actions
-      .filter((action): action is GenerateEsqlAction => action.type === 'generate_esql')
-      .filter((action) => action.success && action.query)
-      .pop();
-    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
-
-    // Build context from previous actions for retry attempts
-    const previousActionContext = state.actions
-      .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
-      .map((action) => {
-        if (isGenerateConfigAction(action)) {
-          return `Previous generation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        if (isValidateConfigAction(action)) {
-          return `Validation attempt ${action.attempt}: ${
-            action.success ? 'SUCCESS' : `FAILED - ${action.error}`
-          }`;
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const additionalContext = previousActionContext
-      ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
-      : undefined;
-
-    const prompt = createGenerateConfigPrompt({
-      nlQuery: state.nlQuery,
-      esqlQuery,
-      chartType: state.chartType,
-      schema: state.schema,
-      existingConfig: state.existingConfig,
-      additionalContext,
-    });
-
-    let action: GenerateConfigAction;
-    try {
-      // Invoke model without schema validation
-      const response = await defaultModel.chatModel.invoke(prompt);
-      const responseText = extractTextFromMessage(response);
-      const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
-
-      // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
-      // config generation only binds columns from it.
-      if (esqlQuery) {
-        for (const carrier of getEsqlDataSourceCarriers(configResponse)) {
-          carrier.data_source = { type: 'esql', query: esqlQuery };
-        }
-      }
-
-      action = {
-        type: 'generate_config',
-        success: true,
-        config: configResponse,
-        authoringNote,
-        attempt,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn(
-        `Config generation failed (attempt ${attempt}/${MAX_RETRY_ATTEMPTS}): ${errorMessage}`
-      );
-      logger.debug(`Full error details: ${JSON.stringify(error, null, 2)}`);
-
-      action = {
-        type: 'generate_config',
-        success: false,
-        attempt,
-        error: errorMessage,
-      };
-    }
-
-    return {
-      currentAttempt: attempt,
-      actions: [action],
-    };
-  };
-
-  // Node: Validate configuration
-  const validateConfigNode = async (state: VisualizationState) => {
-    const attempt = state.currentAttempt;
-    logger.debug(`Validating configuration (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
-
-    // Get the last generate_config action
-    const lastGenerateAction = [...state.actions].reverse().find(isGenerateConfigAction);
-
-    if (!lastGenerateAction || !lastGenerateAction.config) {
-      const action: ValidateConfigAction = {
-        type: 'validate_config',
-        success: false,
-        attempt,
-        error: 'No configuration found to validate',
-      };
       return {
-        actions: [action],
+        error: `Could not resolve a valid ES|QL query for the visualization: ${errorMessage}`,
       };
     }
+  };
 
-    let action: ValidateConfigAction;
+  const probeNode = async (state: VisualizationState) => {
+    logger.debug('Probing visualization query columns');
     try {
-      const config = lastGenerateAction.config;
-
-      // Check if the generation itself failed
-      if ('error' in config && typeof config.error === 'string') {
-        logger.warn(`Configuration generation reported error: ${config.error}`);
-        action = {
-          type: 'validate_config',
-          success: false,
-          attempt,
-          error: config.error,
-        };
-      } else {
-        // Validate configuration based on chart type
-        const validatedConfig = validateConfigForChartType(state.chartType, config);
-
-        logger.debug('Configuration validated successfully');
-        action = {
-          type: 'validate_config',
-          success: true,
-          config: validatedConfig,
-          authoringNote: lastGenerateAction.authoringNote,
-          attempt,
-        };
-      }
+      const esqlService = new EsqlService({ client: esClient.asCurrentUser });
+      const timeRangeParams = buildTimeRangeParams(DEFAULT_VALIDATION_TIME_RANGE);
+      const columns = await probeColumns(state.esqlQuery, async (query) => {
+        const probed = await esqlService.getColumns(query, timeRangeParams);
+        return probed.map((column) => ({ name: column.name, type: column.type }));
+      });
+      return { columns, error: null };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.warn(`Configuration validation failed: ${errorMessage}`);
+      logger.error(`Failed to probe visualization columns: ${errorMessage}`);
+      return {
+        error: `Could not probe columns for the visualization query: ${errorMessage}`,
+      };
+    }
+  };
 
-      action = {
-        type: 'validate_config',
-        success: false,
-        attempt,
-        error: errorMessage,
+  const finishWithOptionalStyle = async (
+    state: VisualizationState,
+    config: Record<string, unknown>,
+    authoringNote: string | null
+  ): Promise<CompileDispatchResult> => {
+    if (!state.styleRequest) {
+      return { status: 'ok', config, authoringNote };
+    }
+    const styled = await author(
+      {
+        mode: 'style',
+        chartType: state.chartType,
+        compiledConfig: config,
+        styleRequest: state.styleRequest,
+      },
+      invokeAuthor
+    );
+    if ('error' in styled) {
+      return { status: 'error', error: styled.error };
+    }
+    return {
+      status: 'ok',
+      config: styled.config,
+      authoringNote: styled.authoringNote ?? authoringNote,
+    };
+  };
+
+  const authorFromScratch = async (state: VisualizationState): Promise<CompileDispatchResult> => {
+    const authored = await author(
+      {
+        mode: 'from_scratch',
+        chartType: state.chartType,
+        nlQuery: state.nlQuery,
+        esqlQuery: state.esqlQuery,
+        columns: state.columns,
+        existingConfig: state.existingConfig,
+      },
+      invokeAuthor
+    );
+    if ('error' in authored) {
+      return { status: 'error', error: authored.error };
+    }
+
+    const styled = applyHouseStyle(authored.config, {
+      chartType: state.chartType,
+      mode: 'new',
+      rules: 'defects',
+      colors: 'keep',
+    });
+    const live = styled.config;
+    attachDataSource(live, state.esqlQuery);
+    const stripped = stripPanelLevelKeys(structuredClone(live));
+    const parsed = chartTypeRegistry[state.chartType].schema.safeParse(stripped.config);
+    if (!parsed.success) {
+      return { status: 'error', error: formatZodError(parsed.error) };
+    }
+    const merged = { ...live, ...styled.panelLevel, ...stripped.panelLevel };
+    return finishWithOptionalStyle(state, merged, authored.authoringNote ?? null);
+  };
+
+  const dispatchCompile = async (state: VisualizationState): Promise<CompileDispatchResult> => {
+    const allowList = state.compileAllowList ?? DEFAULT_COMPILE_ALLOW_LIST;
+    if (!allowList.includes(state.chartType)) {
+      return authorFromScratch(state);
+    }
+
+    const prepared = prepareEditInput(state);
+    const compileParams = {
+      chartType: state.chartType,
+      query: state.esqlQuery,
+      columns: state.columns,
+      mode: prepared.mode,
+      title: state.title,
+      intent: prepared.intent,
+      styleOverrides: prepared.styleOverrides,
+      styleRequest: state.styleRequest,
+    };
+
+    const first = compileConfig(compileParams);
+    if (isCompileSuccess(first)) {
+      return finishWithOptionalStyle(state, first.config, null);
+    }
+    if ('error' in first) {
+      return {
+        status: 'error',
+        error: bindFailure(first.error, state.esqlQuery, state.columns),
       };
     }
 
-    return {
-      actions: [action],
-    };
-  };
-
-  // Node: Finalize - extract outputs from actions
-  const finalizeNode = async (state: VisualizationState) => {
-    const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
-    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
-
-    // Surface an ES|QL resolution failure (a query that was never generated, so
-    // no config was attempted) so the caller gets the real root cause.
-    const esqlError =
-      lastGenerateEsqlAction && !lastGenerateEsqlAction.success
-        ? `Could not resolve a valid ES|QL query for the visualization: ${
-            lastGenerateEsqlAction.error ?? 'Unknown error'
-          }`
-        : null;
-
-    return {
-      validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
-      error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
-      esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
-    };
-  };
-
-  // Router: Check if we should retry or end after validation
-  const shouldRetryRouter = (state: VisualizationState): string => {
-    const lastValidateAction = [...state.actions].reverse().find(isValidateConfigAction);
-
-    if (lastValidateAction?.success) {
-      logger.debug('Configuration validated successfully, finalizing');
-      return 'finalize';
+    if (!isAmbiguousSlot(first.ambiguous) || slotIsHinted(prepared.intent, first.ambiguous)) {
+      return {
+        status: 'error',
+        error: bindFailure(`Could not bind ${first.ambiguous}`, state.esqlQuery, state.columns),
+      };
     }
 
-    // Failure case - max attempts reached
-    if (state.currentAttempt >= MAX_RETRY_ATTEMPTS) {
-      logger.warn(`Max retry attempts (${MAX_RETRY_ATTEMPTS}) reached, finalizing`);
-      return 'finalize';
-    }
-
-    // Retry case - loop back to generate with previous actions providing context
-    logger.debug(
-      `Retry ${state.currentAttempt}/${MAX_RETRY_ATTEMPTS}, generating again with action context`
+    const classified = classifyColumns(state.esqlQuery, state.columns);
+    const lowEffort = await modelProvider.selectModel({ effortLevel: 'low' });
+    const fallback = await fallbackBind(
+      {
+        slot: first.ambiguous,
+        candidates: first.candidates,
+        columns: classified.columns,
+      },
+      async (prompt) =>
+        extractTextFromMessage(
+          await lowEffort.chatModel.invoke([
+            ['system', prompt],
+            ['human', 'Choose the column.'],
+          ])
+        )
     );
-    return GENERATE_CONFIG_NODE;
-  };
-
-  // Router: A config authored without a query can never validate (data_source
-  // is pinned from the generated query), so when ES|QL generation failed route
-  // straight to finalize with the ES|QL error instead of burning config
-  // generation retries.
-  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
-    const lastGenerateEsqlAction = [...state.actions].reverse().find(isGenerateEsqlAction);
-    if (!lastGenerateEsqlAction?.success) {
-      logger.warn('ES|QL generation failed; finalizing without generating a config');
-      return 'finalize';
+    if (!('column' in fallback)) {
+      const message = 'error' in fallback ? fallback.error : `Could not bind ${fallback.ambiguous}`;
+      return {
+        status: 'error',
+        error: bindFailure(message, state.esqlQuery, state.columns),
+      };
     }
-    return GENERATE_CONFIG_NODE;
+
+    const second = compileConfig({
+      ...compileParams,
+      intent: applySlotHint(prepared.intent, first.ambiguous, fallback.column),
+    });
+    if (!isCompileSuccess(second)) {
+      const message = 'error' in second ? second.error : `Could not bind ${second.ambiguous}`;
+      return {
+        status: 'error',
+        error: bindFailure(message, state.esqlQuery, state.columns),
+      };
+    }
+    return finishWithOptionalStyle(state, second.config, null);
   };
 
-  // Router: Use an explicit ES|QL query when provided, otherwise generate one.
-  // Existing config is still valuable because generateESQLNode includes the
-  // prior query as context when regenerating edits.
+  const compileNode = async (state: VisualizationState) => {
+    logger.debug(`Compiling ${state.chartType} visualization`);
+    const result = await dispatchCompile(state);
+    if (result.status === 'ok') {
+      return {
+        validatedConfig: result.config as VisualizationConfig,
+        authoringNote: result.authoringNote,
+        error: null,
+      };
+    }
+    return {
+      validatedConfig: null,
+      authoringNote: null,
+      error: result.error,
+    };
+  };
+
+  const finalizeNode = async (state: VisualizationState) => ({
+    validatedConfig: state.validatedConfig ?? null,
+    authoringNote: state.authoringNote ?? null,
+    error: state.error ?? null,
+    esqlQuery: state.esqlQuery,
+  });
+
+  const afterGenerateEsqlRouter = (state: VisualizationState): string => {
+    if (state.error) {
+      logger.warn('ES|QL generation failed; finalizing without compiling a config');
+      return FINALIZE_NODE;
+    }
+    return PROBE_NODE;
+  };
+
+  const afterProbeRouter = (state: VisualizationState): string => {
+    if (state.error) {
+      logger.warn('Column probe failed; finalizing without compiling a config');
+      return FINALIZE_NODE;
+    }
+    return COMPILE_NODE;
+  };
+
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
     if (state.esqlQuery) {
       logger.debug('Using provided ES|QL query');
-      return GENERATE_CONFIG_NODE;
+      return PROBE_NODE;
     }
-
     logger.debug('No ES|QL query provided, generating ES|QL query');
     return GENERATE_ESQL_NODE;
   };
 
-  // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
-    // Add nodes
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
-    .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
-    .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
-    .addNode('finalize', finalizeNode)
-    // Add edges
+    .addNode(PROBE_NODE, probeNode)
+    .addNode(COMPILE_NODE, compileNode)
+    .addNode(FINALIZE_NODE, finalizeNode)
     .addConditionalEdges('__start__', shouldGenerateESQLRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      [PROBE_NODE]: PROBE_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      finalize: 'finalize',
+      [PROBE_NODE]: PROBE_NODE,
+      [FINALIZE_NODE]: FINALIZE_NODE,
     })
-    .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
-    .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
-      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
-      finalize: 'finalize',
+    .addConditionalEdges(PROBE_NODE, afterProbeRouter, {
+      [COMPILE_NODE]: COMPILE_NODE,
+      [FINALIZE_NODE]: FINALIZE_NODE,
     })
-    .addEdge('finalize', '__end__')
+    .addEdge(COMPILE_NODE, FINALIZE_NODE)
+    .addEdge(FINALIZE_NODE, '__end__')
     .compile();
 
   return graph;

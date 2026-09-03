@@ -6,13 +6,19 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export {
-  getChartTypeReviewPromptContent,
-  getChartTypeSelectionPromptContent,
-} from './lens/chart_type_guidance';
-export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';
+export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
+export { applyHouseStyle } from './lens/house_style';
+export type { HouseStylePreserve } from './lens/house_style';
+export { normalizeLensPanelConfig } from './lens/normalize_lens_panel_config';
+export { compileConfig } from './lens/compile/compile_config';
+export { decompileConfig } from './lens/decompile/decompile_config';
+export { chartIntentSchema } from './lens/intent';
+export type { ChartIntent } from './lens/intent';
+export { probeColumns } from './lens/probe_columns';
+export { chartTypeLayouts } from './lens/chart_type_layouts';
+export type { ChartTypeLayout } from './lens/chart_type_layouts';
 export { selectDefaultTimeRange } from './time_range/select_default_time_range';
 export type {
   SelectDefaultTimeRangeParams,

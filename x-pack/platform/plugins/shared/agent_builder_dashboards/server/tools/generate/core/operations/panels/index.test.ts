@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { addPanelsItemSchema, addSectionPanelItemSchema, editPanelItemSchema } from '.';
+import { addPanelsItemSchema, editPanelItemSchema } from '.';
 
 const lensRequest = {
   source: 'request' as const,
@@ -16,23 +16,51 @@ const lensRequest = {
 };
 
 describe('panel item schemas', () => {
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('routes a Lens request without renderer through the %s schema', (_, schema) => {
+  it('routes a Lens request without renderer through the add_panels schema', () => {
     expect(
-      schema.safeParse({
+      addPanelsItemSchema.safeParse({
         ...lensRequest,
         chartType: SupportedChartType.Metric,
       }).success
     ).toBe(true);
   });
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('requires chartType for a Lens request through the %s schema', (_, schema) => {
-    expect(schema.safeParse(lensRequest).success).toBe(false);
+  it('allows add_panels request items to omit grid', () => {
+    expect(
+      addPanelsItemSchema.safeParse({
+        source: 'request',
+        type: 'vis',
+        query: 'show total requests',
+        chartType: SupportedChartType.Metric,
+      }).success
+    ).toBe(true);
+  });
+
+  it('allows config-source add_panels items to omit grid', () => {
+    expect(
+      addPanelsItemSchema.safeParse({
+        source: 'config',
+        type: 'markdown',
+        key: 'intro',
+        config: { content: '### Notes' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a key on config-source add_panels items', () => {
+    expect(
+      addPanelsItemSchema.safeParse({
+        source: 'config',
+        type: 'markdown',
+        key: 'intro',
+        grid: { x: 0, y: 0, w: 48, h: 4 },
+        config: { content: '### Notes' },
+      }).success
+    ).toBe(true);
+  });
+
+  it('requires chartType for a Lens request through the add_panels schema', () => {
+    expect(addPanelsItemSchema.safeParse(lensRequest).success).toBe(false);
   });
 });
 
@@ -44,19 +72,13 @@ const customContentBase = {
 };
 
 describe('custom_content panel schemas', () => {
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('accepts a minimal custom_content panel (prompt only) through %s', (_, schema) => {
-    expect(schema.safeParse(customContentBase).success).toBe(true);
+  it('accepts a minimal custom_content panel (prompt only)', () => {
+    expect(addPanelsItemSchema.safeParse(customContentBase).success).toBe(true);
   });
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('accepts a custom_content panel with template and esqlQuery through %s', (_, schema) => {
+  it('accepts a custom_content panel with template and esqlQuery', () => {
     expect(
-      schema.safeParse({
+      addPanelsItemSchema.safeParse({
         ...customContentBase,
         config: {
           prompt: 'Error rate by service',
@@ -67,12 +89,9 @@ describe('custom_content panel schemas', () => {
     ).toBe(true);
   });
 
-  it.each([
-    ['add_panels', addPanelsItemSchema],
-    ['add_section', addSectionPanelItemSchema],
-  ])('rejects a custom_content panel missing prompt through %s', (_, schema) => {
+  it('rejects a custom_content panel missing prompt', () => {
     expect(
-      schema.safeParse({
+      addPanelsItemSchema.safeParse({
         ...customContentBase,
         config: {},
       }).success

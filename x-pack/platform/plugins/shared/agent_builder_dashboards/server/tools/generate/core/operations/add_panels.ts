@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { appendPanelsToDashboard } from '../dashboard_state';
+import { appendPanelsToDashboard, resolveAddedPanelGrid } from '../dashboard_state';
 import { defineOperation } from './types';
 import { addPanelsItemSchema } from './panels';
 import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
@@ -46,9 +46,23 @@ export const addPanelsOperation = defineOperation({
       const panelId = uuidv4();
       nextDashboardData = appendPanelsToDashboard({
         dashboardData: nextDashboardData,
-        panelsToAdd: [{ id: panelId, ...panel.panelContent, grid: item.grid }],
-        sectionId: item.sectionId,
+        panelsToAdd: [
+          {
+            id: panelId,
+            ...panel.panelContent,
+            grid: resolveAddedPanelGrid(item.grid, nextDashboardData.panels),
+          },
+        ],
       });
+      if (item.key) {
+        context.panelKeys.set(item.key, panelId);
+      }
+      if (item.grid === undefined) {
+        context.unspecifiedGridPanelIds.add(panelId);
+      }
+      if (item.source === 'request') {
+        context.touchedRequestPanelData = true;
+      }
       if (panel.authoringNote) {
         context.panelAuthoringNotes.push({
           panelId,

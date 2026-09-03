@@ -248,12 +248,12 @@ describe('executeDashboardOperations', () => {
     expect(result.failures).toEqual([]);
   });
 
-  it('adds mixed panel kinds in input order across top-level and section targets', async () => {
+  it('adds mixed panel kinds and places a section through set_layout', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
-        panels: [createSection('section-a', 'Section A', 8)],
+        panels: [],
       },
       operations: [
         {
@@ -262,38 +262,41 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
+              key: 'summary',
               config: { content: '### Summary' },
-              grid: { x: 0, y: 0, w: 24, h: 4 },
-            },
-            {
-              source: 'config',
-              type: 'vis',
-              config: { type: 'metric' },
-              sectionId: 'section-a',
-              grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              key: 'requests',
               chartType: SupportedChartType.Metric,
               query: 'show total requests',
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
             {
               source: 'config',
               type: 'vis',
+              key: 'errors',
               config: { type: 'metric' },
-              grid: { x: 0, y: 9, w: 24, h: 9 },
+            },
+            {
+              source: 'config',
+              type: 'vis',
+              key: 'section-metric',
+              config: { type: 'metric' },
             },
             {
               source: 'request',
               type: 'vis',
+              key: 'latency',
               chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
-              sectionId: 'section-a',
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          rows: [['summary', 'requests', 'errors']],
+          sections: [{ title: 'Section A', rows: [['section-metric']] }],
         },
       ],
       logger,
@@ -324,19 +327,16 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 24, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 0, y: 9, w: 24, h: 9 },
       }),
     ]);
     expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
     ]);
     expect(result.failures).toEqual([
@@ -346,12 +346,10 @@ describe('executeDashboardOperations', () => {
         error: 'ES|QL generation failed',
       },
     ]);
-    const generatedPanel = getPanelsOnly(result.dashboardData.panels).find(
-      (panel) => panel.grid.x === 24 && panel.grid.y === 0
-    );
+    const generatedPanelId = result.panelKeys.get('requests');
     expect(result.panelAuthoringNotes).toEqual([
       {
-        panelId: generatedPanel?.id,
+        panelId: generatedPanelId,
         authoringNote: 'Created a titleless metric showing total requests.',
       },
     ]);
@@ -393,35 +391,27 @@ describe('executeDashboardOperations', () => {
     expect(result.dashboardData.panels).toHaveLength(2); // 1 section + 1 panel
   });
 
-  it('adds an empty section with generated sectionId and default collapsed=false', async () => {
+  it('drops empty sections created by set_layout', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
-        panels: [],
+        panels: [createLensPanel('top-1')],
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 12 },
+          operation: 'set_layout',
+          rows: [['top-1']],
+          sections: [{ title: 'Overview', rows: [] }],
         },
       ],
       logger,
     });
 
-    const sections = getSections(result.dashboardData.panels);
-    expect(sections).toHaveLength(1);
-    expect(sections[0]).toEqual({
-      id: expect.any(String),
-      title: 'Overview',
-      collapsed: false,
-      grid: { y: 12 },
-      panels: [],
-    });
+    expect(getSections(result.dashboardData.panels)).toHaveLength(0);
   });
 
-  it('adds a section with inline visualization panels in a single operation', async () => {
+  it('creates a section from add_panels keys in the same call', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -430,25 +420,27 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 12 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'request',
               type: 'vis',
+              key: 'requests',
               chartType: SupportedChartType.Metric,
               query: 'show total requests',
-              grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              key: 'errors',
               chartType: SupportedChartType.Metric,
               query: 'show error rate',
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [{ key: 'overview', title: 'Overview', rows: [['requests', 'errors']] }],
         },
       ],
       logger,
@@ -473,23 +465,22 @@ describe('executeDashboardOperations', () => {
       id: expect.any(String),
       title: 'Overview',
       collapsed: false,
-      grid: { y: 12 },
+      grid: { y: 0 },
       panels: [
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
-          grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar' },
-          grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ],
     });
+    expect(result.panelKeys.get('overview')).toBe(sections[0].id);
   });
 
-  it('records inline visualization failures when adding a section and keeps successful panels', async () => {
+  it('records inline visualization failures when creating a section and keeps successful panels', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -498,25 +489,27 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 12 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'request',
               type: 'vis',
+              key: 'requests',
               chartType: SupportedChartType.Metric,
               query: 'show total requests',
-              grid: { x: 0, y: 0, w: 24, h: 9 },
             },
             {
               source: 'request',
               type: 'vis',
+              key: 'latency',
               chartType: SupportedChartType.Metric,
               query: 'show p95 latency',
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [{ title: 'Overview', rows: [['requests']] }],
         },
       ],
       logger,
@@ -528,7 +521,7 @@ describe('executeDashboardOperations', () => {
         'show p95 latency': {
           type: 'failure',
           failure: {
-            type: 'add_section',
+            type: 'add_panels',
             identifier: 'show p95 latency',
             error: 'ES|QL generation failed',
           },
@@ -543,12 +536,11 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
     ]);
     expect(result.failures).toEqual([
       {
-        type: 'add_section',
+        type: 'add_panels',
         identifier: 'show p95 latency',
         error: 'ES|QL generation failed',
       },
@@ -569,23 +561,25 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 12 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'config',
               type: 'markdown',
+              key: 'summary',
               config: { content: '### Section Summary' },
-              grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
               source: 'config',
               type: 'vis',
+              key: 'metric',
               config: { type: 'metric' },
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [{ title: 'Overview', rows: [['summary', 'metric']] }],
         },
       ],
       logger,
@@ -601,7 +595,6 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 24, y: 0, w: 24, h: 9 },
       }),
     ]);
   });
@@ -628,31 +621,34 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 0 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'request',
               type: 'vis',
+              key: 'requests',
               chartType: SupportedChartType.Metric,
               query: 'show total requests',
-              grid: { x: 0, y: 0, w: 24, h: 9 },
             },
           ],
         },
         {
-          operation: 'add_section',
-          title: 'Errors',
-          grid: { y: 1 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'request',
               type: 'vis',
+              key: 'errors',
               chartType: SupportedChartType.Metric,
               query: 'show error rate',
-              grid: { x: 24, y: 0, w: 24, h: 9 },
             },
+          ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [
+            { title: 'Overview', rows: [['requests']] },
+            { title: 'Errors', rows: [['errors']] },
           ],
         },
       ],
@@ -667,7 +663,7 @@ describe('executeDashboardOperations', () => {
       1,
       expect.objectContaining({
         type: 'vis',
-        operationType: 'add_section',
+        operationType: 'add_panels',
         identifier: 'show total requests',
       })
     );
@@ -675,7 +671,7 @@ describe('executeDashboardOperations', () => {
       2,
       expect.objectContaining({
         type: 'vis',
-        operationType: 'add_section',
+        operationType: 'add_panels',
         identifier: 'show error rate',
       })
     );
@@ -729,16 +725,14 @@ describe('executeDashboardOperations', () => {
       },
       operations: [
         {
-          operation: 'add_section',
-          title: 'Overview',
-          grid: { y: 0 },
+          operation: 'add_panels',
           panels: [
             {
               source: 'request',
               type: 'vis',
+              key: 'requests',
               chartType: SupportedChartType.Metric,
               query: 'show total requests',
-              grid: { x: 0, y: 0, w: 24, h: 9 },
             },
           ],
         },
@@ -748,11 +742,16 @@ describe('executeDashboardOperations', () => {
             {
               source: 'request',
               type: 'vis',
+              key: 'errors',
               chartType: SupportedChartType.Metric,
               query: 'show error rate',
-              grid: { x: 0, y: 1, w: 24, h: 9 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          rows: [['errors']],
+          sections: [{ title: 'Overview', rows: [['requests']] }],
         },
       ],
       logger,
@@ -765,7 +764,7 @@ describe('executeDashboardOperations', () => {
     expect(resolvePanelContent).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        operationType: 'add_section',
+        operationType: 'add_panels',
         identifier: 'show total requests',
       })
     );
@@ -813,28 +812,19 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'add_section',
-            title: 'Overview',
-            grid: { y: 0 },
-            panels: [
-              {
-                source: 'request',
-                type: 'vis',
-                chartType: SupportedChartType.Metric,
-                query: 'show total requests',
-                grid: { x: 0, y: 0, w: 24, h: 9 },
-              },
-            ],
-          },
-          {
             operation: 'add_panels',
             panels: [
               {
                 source: 'request',
                 type: 'vis',
                 chartType: SupportedChartType.Metric,
+                query: 'show total requests',
+              },
+              {
+                source: 'request',
+                type: 'vis',
+                chartType: SupportedChartType.Metric,
                 query: 'show error rate',
-                grid: { x: 24, y: 0, w: 24, h: 9 },
               },
             ],
           },
@@ -844,12 +834,12 @@ describe('executeDashboardOperations', () => {
     ).rejects.toThrow('Inline panel resolver is required for panel creation operations.');
   });
 
-  it('adds config-source panels into a target section when sectionId is provided', async () => {
+  it('adds config-source panels into a new section', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
-        panels: [createSection('section-a', 'Section A', 8)],
+        panels: [],
       },
       operations: [
         {
@@ -858,11 +848,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'vis',
+              key: 'kpi',
               config: { type: 'metric' },
-              sectionId: 'section-a',
-              grid: { x: 12, y: 0, w: 12, h: 5 },
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [{ title: 'Section A', rows: [[{ ref: 'kpi', width: 12 }]] }],
         },
       ],
       logger,
@@ -875,7 +868,7 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
-        grid: { x: 12, y: 0, w: 12, h: 5 },
+        grid: { x: 0, y: 0, w: 12, h: 5 },
       }),
     ]);
   });
@@ -893,15 +886,20 @@ describe('executeDashboardOperations', () => {
           ]),
         ],
       },
-      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'promote' }],
+      operations: [
+        {
+          operation: 'set_layout',
+          rows: [['top-1', 'section-a-1', 'section-a-2']],
+        },
+      ],
       logger,
     });
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
-    expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ id: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
-      expect.objectContaining({ id: 'section-a-1', grid: { x: 0, y: 9, w: 24, h: 9 } }),
-      expect.objectContaining({ id: 'section-a-2', grid: { x: 0, y: 18, w: 24, h: 9 } }),
+    expect(getPanelsOnly(result.dashboardData.panels).map((panel) => panel.id)).toEqual([
+      'top-1',
+      'section-a-1',
+      'section-a-2',
     ]);
   });
 
@@ -915,7 +913,10 @@ describe('executeDashboardOperations', () => {
           createSection('section-a', 'Section A', 10, [createLensPanel('section-a-1', 0)]),
         ],
       },
-      operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'delete' }],
+      operations: [
+        { operation: 'remove_panels', panelIds: ['section-a-1'] },
+        { operation: 'set_layout', rows: [['top-1']] },
+      ],
       logger,
     });
 
@@ -955,12 +956,12 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  it('adds markdown panel into a target section when sectionId is provided', async () => {
+  it('adds a markdown panel into a new section', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
         description: 'Description',
-        panels: [createSection('section-a', 'Section A', 0)],
+        panels: [],
       },
       operations: [
         {
@@ -969,11 +970,14 @@ describe('executeDashboardOperations', () => {
             {
               source: 'config',
               type: 'markdown',
+              key: 'summary',
               config: { content: '### Section Summary' },
-              grid: { x: 0, y: 0, w: 24, h: 4 },
-              sectionId: 'section-a',
             },
           ],
+        },
+        {
+          operation: 'set_layout',
+          sections: [{ title: 'Section A', rows: [['summary']] }],
         },
       ],
       logger,
@@ -986,13 +990,13 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: MARKDOWN_EMBEDDABLE_TYPE,
         config: { content: '### Section Summary' },
-        grid: { x: 0, y: 0, w: 24, h: 4 },
+        grid: { x: 0, y: 0, w: 48, h: 3 },
       }),
     ]);
   });
 
-  describe('update_panel_layouts', () => {
-    it('updates panel grid without changing its current location', async () => {
+  describe('set_layout', () => {
+    it('keeps a panel in its section and applies an explicit width', async () => {
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test dashboard',
@@ -1003,11 +1007,11 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
-            panels: [
+            operation: 'set_layout',
+            sections: [
               {
-                panelId: 'section-panel-1',
-                grid: { x: 12, y: 4, w: 12, h: 6 },
+                ref: 'section-a',
+                rows: [[{ ref: 'section-panel-1', width: 12 }]],
               },
             ],
           },
@@ -1019,7 +1023,7 @@ describe('executeDashboardOperations', () => {
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
           id: 'section-panel-1',
-          grid: { x: 12, y: 4, w: 12, h: 6 },
+          grid: { x: 0, y: 0, w: 12, h: 5 },
           config: { type: 'metric' },
         }),
       ]);
@@ -1034,14 +1038,8 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
-            panels: [
-              {
-                panelId: 'top-1',
-                sectionId: 'section-a',
-                grid: { x: 24, y: 0, w: 24, h: 9 },
-              },
-            ],
+            operation: 'set_layout',
+            sections: [{ ref: 'section-a', rows: [['top-1']] }],
           },
         ],
         logger,
@@ -1054,13 +1052,12 @@ describe('executeDashboardOperations', () => {
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
           id: 'top-1',
-          grid: { x: 24, y: 0, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
       ]);
     });
 
-    it('promotes a section panel to the top level when sectionId is null', async () => {
+    it('promotes a section panel to the top level', async () => {
       const result = await executeDashboardOperations({
         dashboardData: {
           title: 'Test dashboard',
@@ -1071,14 +1068,8 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
-            panels: [
-              {
-                panelId: 'section-panel-1',
-                sectionId: null,
-                grid: { x: 0, y: 20, w: 24, h: 9 },
-              },
-            ],
+            operation: 'set_layout',
+            rows: [['section-panel-1']],
           },
         ],
         logger,
@@ -1087,11 +1078,10 @@ describe('executeDashboardOperations', () => {
       const panelsOnly = getPanelsOnly(result.dashboardData.panels);
       const sections = getSections(result.dashboardData.panels);
 
-      expect(sections[0].panels).toEqual([]);
+      expect(sections).toHaveLength(0);
       expect(panelsOnly).toEqual([
         expect.objectContaining({
           id: 'section-panel-1',
-          grid: { x: 0, y: 20, w: 24, h: 9 },
           config: { type: 'metric' },
         }),
       ]);
@@ -1106,8 +1096,8 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'update_panel_layouts',
-            panels: [{ panelId: 'missing-panel', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+            operation: 'set_layout',
+            rows: [['missing-panel']],
           },
         ],
         logger,
@@ -1115,11 +1105,78 @@ describe('executeDashboardOperations', () => {
 
       expect(result.failures).toEqual([
         {
-          type: 'update_panel_layouts',
+          type: 'set_layout',
           identifier: 'missing-panel',
-          error: 'Panel "missing-panel" not found.',
+          error: 'Panel "missing-panel" was not found.',
         },
       ]);
+    });
+
+    it('keeps unmentioned sections after the declared structure', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [
+            createLensPanel('top-1'),
+            createSection('section-a', 'Section A', 8, [createLensPanel('section-a-1', 0)]),
+            createSection('section-b', 'Section B', 9, [createLensPanel('section-b-1', 0)]),
+          ],
+        },
+        operations: [{ operation: 'set_layout', rows: [['top-1']] }],
+        logger,
+      });
+
+      expect(getSections(result.dashboardData.panels).map((section) => section.id)).toEqual([
+        'section-a',
+        'section-b',
+      ]);
+    });
+
+    it('applies only the last set_layout and records extras as failures', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('a'), createLensPanel('b')],
+        },
+        operations: [
+          { operation: 'set_layout', rows: [['a'], ['b']] },
+          { operation: 'set_layout', rows: [['a', 'b']] },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          type: 'set_layout',
+          identifier: 'operations[0]',
+        }),
+      ]);
+      expect(result.layoutRows).toEqual([['a', 'b']]);
+    });
+
+    it('packs four metrics that omit grid into one equal-split row', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test dashboard', description: 'Description', panels: [] },
+        operations: [
+          {
+            operation: 'add_panels',
+            panels: ['m1', 'm2', 'm3', 'm4'].map((key) => ({
+              source: 'config' as const,
+              type: 'vis' as const,
+              key,
+              config: { type: 'metric' },
+            })),
+          },
+        ],
+        logger,
+      });
+
+      const panels = getPanelsOnly(result.dashboardData.panels);
+      expect(panels.map((panel) => panel.grid.w)).toEqual([12, 12, 12, 12]);
+      expect(new Set(panels.map((panel) => panel.grid.y)).size).toBe(1);
+      expect(result.layoutRows).toHaveLength(1);
     });
   });
 
@@ -1129,7 +1186,7 @@ describe('executeDashboardOperations', () => {
         dashboardData: {
           title: 'Test',
           description: 'Desc',
-          panels: [createSection('section-a', 'Section A', 0)],
+          panels: [],
         },
         operations: [
           {
@@ -1138,19 +1195,23 @@ describe('executeDashboardOperations', () => {
               {
                 source: 'request',
                 type: 'vis',
+                key: 'requests',
                 chartType: SupportedChartType.Metric,
                 query: 'show total requests',
-                grid: { x: 0, y: 0, w: 24, h: 9 },
               },
               {
                 source: 'request',
                 type: 'vis',
+                key: 'errors',
                 chartType: SupportedChartType.Metric,
                 query: 'show error rate',
-                sectionId: 'section-a',
-                grid: { x: 24, y: 0, w: 24, h: 9 },
               },
             ],
+          },
+          {
+            operation: 'set_layout',
+            rows: [['requests']],
+            sections: [{ title: 'Section A', rows: [['errors']] }],
           },
         ],
         logger,
@@ -1173,14 +1234,12 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'metric' },
-          grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
           config: { type: 'bar' },
-          grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ]);
     });
@@ -1979,33 +2038,6 @@ describe('executeDashboardOperations', () => {
     });
   });
 
-  it('throws when add_panels markdown item references an invalid sectionId', async () => {
-    await expect(
-      executeDashboardOperations({
-        dashboardData: {
-          title: 'Test dashboard',
-          description: 'Description',
-          panels: [],
-        },
-        operations: [
-          {
-            operation: 'add_panels',
-            panels: [
-              {
-                source: 'config',
-                type: 'markdown',
-                config: { content: '### Summary' },
-                grid: { x: 0, y: 0, w: 48, h: 5 },
-                sectionId: 'nonexistent-section',
-              },
-            ],
-          },
-        ],
-        logger,
-      })
-    ).rejects.toThrow('Section "nonexistent-section" not found.');
-  });
-
   it('adds a custom_content panel and maps it to the custom_content embeddable type', async () => {
     const result = await executeDashboardOperations({
       dashboardData: { title: 'Test', description: 'Desc', panels: [] },
@@ -2158,6 +2190,387 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  describe('normalize_panels', () => {
+    const esqlMetricConfig = {
+      type: 'metric',
+      title: 'Total requests',
+      data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+      metrics: [{ type: 'primary', column: 'count' }],
+    };
+
+    it('normalizes top-level and section Lens panels', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'top-1',
+              config: esqlMetricConfig,
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+            createSection('section-a', 'Section A', 10, [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                id: 'section-1',
+                config: esqlMetricConfig,
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ]),
+          ],
+        },
+        operations: [{ operation: 'normalize_panels' }],
+        logger,
+      });
+
+      expect(getPanelsOnly(result.dashboardData.panels)[0].config.hide_title).toBe(true);
+      expect(getSections(result.dashboardData.panels)[0].panels[0].config.hide_title).toBe(true);
+      expect(result.normalizeChanges.some((change) => change.panelId === 'top-1')).toBe(true);
+      expect(result.normalizeChanges.some((change) => change.panelId === 'section-1')).toBe(true);
+      expect(result.touchedRequestPanelData).toBe(false);
+    });
+
+    it('records skipped reasons without failing the operation', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [
+            createMarkdownPanel('md-1', '### Hi'),
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'raw-1',
+              config: { title: 'Raw', visualizationType: 'lnsXY', state: {}, references: [] },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'legacy-1',
+              config: { type: 'legacy_metric', title: 'Old' },
+              grid: { x: 0, y: 10, w: 24, h: 9 },
+            },
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              id: 'broken-1',
+              config: { type: 'metric' },
+              grid: { x: 0, y: 20, w: 24, h: 9 },
+            },
+          ],
+        },
+        operations: [
+          {
+            operation: 'normalize_panels',
+            panelIds: ['md-1', 'raw-1', 'legacy-1', 'broken-1', 'missing-1'],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.normalizeSkipped).toEqual(
+        expect.arrayContaining([
+          { id: 'md-1', reason: 'not_lens' },
+          { id: 'raw-1', reason: 'raw_lens_attributes' },
+          { id: 'legacy-1', reason: 'unsupported_chart_type' },
+          { id: 'broken-1', reason: 'conversion_failed' },
+          { id: 'missing-1', reason: 'not_found' },
+        ])
+      );
+      expect(
+        getPanelsOnly(result.dashboardData.panels).find((panel) => panel.id === 'raw-1')?.config
+      ).toEqual({
+        title: 'Raw',
+        visualizationType: 'lnsXY',
+        state: {},
+        references: [],
+      });
+    });
+  });
+
+  it('keeps panel-level keys when applying an edit', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test',
+        description: 'Desc',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'panel-1',
+            config: {
+              type: 'metric',
+              title: 'Existing title',
+              description: 'Keep me',
+              hide_title: true,
+              hide_border: true,
+            },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+        ],
+      },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              panelId: 'panel-1',
+              query: 'use a clearer title',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent: createResolvePanelContent({
+        'panel-1': createResolvedPanelContent({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric', title: 'New title' },
+        }),
+      }),
+    });
+
+    expect(getPanelsOnly(result.dashboardData.panels)[0].config).toEqual({
+      type: 'metric',
+      title: 'New title',
+      description: 'Keep me',
+      hide_title: true,
+      hide_border: true,
+    });
+  });
+
+  it('fails DSL data and chart-family edits before resolve', async () => {
+    const resolvePanelContent = jest.fn();
+    const dslPanel: AttachmentPanel = {
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'dsl-1',
+      config: { type: 'xy', title: 'DSL chart' },
+      grid: { x: 0, y: 0, w: 24, h: 9 },
+    };
+
+    const dataEdit = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [dslPanel] },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              panelId: 'dsl-1',
+              query: 'use p95 instead',
+              regenerate_query: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent,
+    });
+
+    expect(resolvePanelContent).not.toHaveBeenCalled();
+    expect(dataEdit.failures[0].error).toContain('Presentation edits');
+    expect(dataEdit.failures[0].error).toContain('data edits');
+
+    const chartFamilyEdit = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [dslPanel] },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              panelId: 'dsl-1',
+              chartType: SupportedChartType.Metric,
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent,
+    });
+
+    expect(resolvePanelContent).not.toHaveBeenCalled();
+    expect(chartFamilyEdit.failures[0].error).toContain('chart-family');
+  });
+
+  it('allows DSL title, hide_title, and intent edits', async () => {
+    const resolvePanelContent = jest.fn().mockResolvedValue(
+      createResolvedPanelContent({
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'xy', title: 'Renamed' },
+      })
+    );
+
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test',
+        description: 'Desc',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'dsl-1',
+            config: { type: 'xy', title: 'DSL chart', hide_border: true },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+        ],
+      },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              panelId: 'dsl-1',
+              title: 'Renamed',
+              hide_title: true,
+              intent: { sparkline: true },
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent,
+    });
+
+    expect(resolvePanelContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        identifier: 'dsl-1',
+        title: 'Renamed',
+        hideTitle: true,
+        intent: { sparkline: true },
+        regenerateQuery: false,
+      })
+    );
+    expect(result.failures).toEqual([]);
+    expect(getPanelsOnly(result.dashboardData.panels)[0].config).toEqual({
+      type: 'xy',
+      title: 'Renamed',
+      hide_border: true,
+    });
+  });
+
+  it('records request-panel keys and a default grid when grid is omitted', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test',
+        description: 'Desc',
+        panels: [createLensPanel('existing', 0)],
+      },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              chartType: SupportedChartType.Metric,
+              query: 'show total requests',
+              key: 'requests',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent: createResolvePanelContent(),
+    });
+
+    const added = getPanelsOnly(result.dashboardData.panels).find(
+      (panel) => panel.id !== 'existing'
+    );
+    expect(added?.grid).toEqual({ x: 0, y: 9, w: 12, h: 5 });
+    expect(result.panelKeys.get('requests')).toBe(added?.id);
+    expect(result.touchedRequestPanelData).toBe(true);
+  });
+
+  it('records keys for config-source add_panels items', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'markdown',
+              key: 'intro',
+              config: { content: '### Notes' },
+              grid: { x: 0, y: 0, w: 48, h: 4 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const added = getPanelsOnly(result.dashboardData.panels)[0];
+    expect(result.panelKeys.get('intro')).toBe(added.id);
+    expect(result.touchedRequestPanelData).toBe(false);
+  });
+
+  it('sets touchedRequestPanelData only for request creates and data edits', async () => {
+    const created = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'vis',
+              config: { type: 'metric' },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+    expect(created.touchedRequestPanelData).toBe(false);
+
+    const dataEdited = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Test',
+        description: 'Desc',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: 'esql-1',
+            config: {
+              type: 'metric',
+              data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+            },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+        ],
+      },
+      operations: [
+        {
+          operation: 'edit_panels',
+          panels: [
+            {
+              source: 'request',
+              type: 'vis',
+              panelId: 'esql-1',
+              query: 'use p95',
+              regenerate_query: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      resolvePanelContent: createResolvePanelContent({
+        'esql-1': createResolvedPanelContent({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+        }),
+      }),
+    });
+    expect(dataEdited.touchedRequestPanelData).toBe(true);
   });
 });
 

@@ -12,6 +12,25 @@ import type { ResolvePanelContent } from './panels';
 import type { PanelFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
+import type { LayoutWarning } from '../layout';
+
+export type NormalizePanelSkipReason =
+  | 'not_found'
+  | 'not_lens'
+  | 'raw_lens_attributes'
+  | 'unsupported_chart_type'
+  | 'conversion_failed';
+
+export interface NormalizePanelChange {
+  panelId: string;
+  id: string;
+  detail?: string;
+}
+
+export interface NormalizePanelSkipped {
+  id: string;
+  reason: NormalizePanelSkipReason;
+}
 
 export type ResolveCustomContentTemplate = (params: {
   prompt: string;
@@ -28,6 +47,13 @@ export interface OperationExecutionContext {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
+  panelKeys: Map<string, string>;
+  normalizeChanges: NormalizePanelChange[];
+  normalizeSkipped: NormalizePanelSkipped[];
+  touchedRequestPanelData: boolean;
+  unspecifiedGridPanelIds: Set<string>;
+  layoutWarnings: LayoutWarning[];
+  layoutRows: string[][];
 }
 
 export interface OperationHandlerParams<TOperation> {
@@ -41,7 +67,7 @@ type OperationHandler<TOperation> = (
   params: OperationHandlerParams<TOperation>
 ) => DashboardAttachmentData | Promise<DashboardAttachmentData>;
 
-type OperationSchema = z.ZodObject<{ operation: z.ZodLiteral<string> }>;
+type OperationSchema = z.ZodType<{ operation: string }>;
 
 export interface OperationDefinition<
   TSchema extends OperationSchema,

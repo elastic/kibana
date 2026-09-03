@@ -16,7 +16,7 @@ import {
   SOURCES_TYPES,
 } from '@kbn/esql-types';
 import type { EsqlFieldType, EsqlViewsResult } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ESQLSourceResult,
   EsqlDatasetsResult,
@@ -302,14 +302,19 @@ export class EsqlService {
   /**
    * Get columns for an ES|QL query by executing it with LIMIT 0.
    * @param esqlQuery The ES|QL query to get columns for.
+   * @param params Named ES|QL parameters (e.g. `_tstart` / `_tend`) required when the query references them.
    * @returns A promise that resolves to an array of ESQLFieldWithMetadata.
    */
-  public async getColumns(esqlQuery: string): Promise<ESQLFieldWithMetadata[]> {
+  public async getColumns(
+    esqlQuery: string,
+    params?: Array<Record<string, FieldValue>>
+  ): Promise<ESQLFieldWithMetadata[]> {
     const { client } = this.options;
 
     const response = await client.esql.query({
       query: `${esqlQuery} | LIMIT 0`,
       format: 'json',
+      ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
     });
 
     return (

@@ -45,7 +45,12 @@ const customContentEditConfigSchema = customContentUpdateSchema;
 export const customContentPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('custom_content'),
-  grid: panelGridSchema,
+  key: z
+    .string()
+    .max(256)
+    .optional()
+    .describe('(optional) Client reference for this panel, used to place it in a later set_layout.'),
+  grid: panelGridSchema.optional(),
   config: customContentPanelConfigSchema.describe('Custom content panel config.'),
 });
 

@@ -23,7 +23,6 @@ import {
   type CustomContentPanelConfig,
   type NewPanelInput,
   type PanelContent,
-  type PanelRequestInput,
   type ResolvePanelContent,
 } from './panels';
 
@@ -34,18 +33,11 @@ export interface MaterializedPanelInput {
   authoringNote?: string;
 }
 
-export type PanelCreationRequest =
-  | {
-      operationType: 'add_section';
-      panelInput: PanelRequestInput;
-      panelInputIndex: number;
-    }
-  | {
-      operationType: 'add_panels';
-      panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
-      panelInputIndex: number;
-      sectionId?: string;
-    };
+export type PanelCreationRequest = {
+  operationType: 'add_panels';
+  panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
+  panelInputIndex: number;
+};
 
 export interface ResolvedPanelCreationRequest {
   request: PanelCreationRequest;
@@ -63,28 +55,6 @@ const collectPanelCreationRequests = (
 
   for (const [operationIndex, operation] of operations.entries()) {
     switch (operation.operation) {
-      case 'add_section': {
-        if (!operation.panels) {
-          break;
-        }
-
-        const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
-          panelInput.source === 'request'
-            ? [
-                {
-                  operationType: operation.operation,
-                  panelInput,
-                  panelInputIndex,
-                },
-              ]
-            : []
-        );
-
-        if (panelRequests.length > 0) {
-          requestsByOperationIndex.set(operationIndex, panelRequests);
-        }
-        break;
-      }
       case 'add_panels': {
         const panelRequests = operation.panels.flatMap((panelInput, panelInputIndex) =>
           panelInput.source === 'request'
@@ -93,7 +63,6 @@ const collectPanelCreationRequests = (
                   operationType: operation.operation,
                   panelInput,
                   panelInputIndex,
-                  sectionId: panelInput.sectionId,
                 },
               ]
             : []
@@ -152,6 +121,10 @@ export const resolvePanelCreationRequests = async ({
                 chartType: request.panelInput.chartType,
                 esql: request.panelInput.esql,
                 renderer: request.panelInput.renderer,
+                title: request.panelInput.title,
+                intent: request.panelInput.intent,
+                styleOverrides: request.panelInput.style_overrides,
+                styleRequest: request.panelInput.style_request,
               }),
             }))
           ),

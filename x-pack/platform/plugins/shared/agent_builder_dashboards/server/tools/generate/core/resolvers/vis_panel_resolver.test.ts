@@ -14,10 +14,14 @@ import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createVisPanelResolver } from './vis_panel_resolver';
 
-jest.mock('@kbn/agent-builder-visualizations-server', () => ({
-  buildLensConfig: jest.fn(),
-  buildVegaConfig: jest.fn(),
-}));
+jest.mock('@kbn/agent-builder-visualizations-server', () => {
+  const actual = jest.requireActual('@kbn/agent-builder-visualizations-server');
+  return {
+    ...actual,
+    buildLensConfig: jest.fn(),
+    buildVegaConfig: jest.fn(),
+  };
+});
 
 const mockedBuildLensConfig = jest.mocked(buildLensConfig);
 const mockedBuildVegaConfig = jest.mocked(buildVegaConfig);
@@ -33,7 +37,7 @@ const createMockLogger = (): Logger =>
 describe('createVisPanelResolver', () => {
   const logger = createMockLogger();
   const modelProvider = {} as ModelProvider;
-  const events = {} as ToolEventEmitter;
+  const events = { reportProgress: jest.fn() } as unknown as ToolEventEmitter;
   const esClient = {} as IScopedClusterClient;
   const createBuildLensConfigResult = (
     validatedConfig: Record<string, unknown>
@@ -48,6 +52,7 @@ describe('createVisPanelResolver', () => {
   beforeEach(() => {
     mockedBuildLensConfig.mockReset();
     mockedBuildVegaConfig.mockReset();
+    (events.reportProgress as jest.Mock).mockClear();
   });
 
   it('creates Lens panel content for create requests', async () => {
@@ -269,5 +274,164 @@ describe('createVisPanelResolver', () => {
     });
     expect(mockedBuildLensConfig).not.toHaveBeenCalled();
     expect(mockedBuildVegaConfig).not.toHaveBeenCalled();
+  });
+
+  it('reports progress at entry and on success', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    await resolveVisPanel({
+      type: 'vis',
+      operationType: 'add_panels',
+      identifier: 'show total requests',
+      nlQuery: 'show total requests',
+      chartType: SupportedChartType.Metric,
+    });
+
+    expect(events.reportProgress).toHaveBeenCalledTimes(2);
+    expect(events.reportProgress).toHaveBeenNthCalledWith(
+      1,
+      'Building metric panel: show total requests'
+    );
+    expect(events.reportProgress).toHaveBeenNthCalledWith(
+      2,
+      'Building metric panel: show total requests'
+    );
+  });
+
+  it('forwards new Lens fields to buildLensConfig on create and does not pin', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+    const resolveVisPanel = createVisPanelResolver({
+      logger,
+      modelProvider,
+      events,
+      esClient,
+      compileAllowList: [SupportedChartType.Metric],
+    });
+
+    await resolveVisPanel({
+      type: 'vis',
+      operationType: 'add_panels',
+      identifier: 'show total requests',
+      nlQuery: 'show total requests',
+      chartType: SupportedChartType.Metric,
+      title: 'Total requests',
+      intent: { sparkline: true },
+      styleOverrides: { legend: { position: 'right' } },
+      styleRequest: 'make it compact',
+    });
+
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Total requests',
+        intent: { sparkline: true },
+        styleOverrides: { legend: { position: 'right' } },
+        styleRequest: 'make it compact',
+        compileAllowList: [SupportedChartType.Metric],
+        pinnedQueries: undefined,
+      })
+    );
+  });
+
+  it('pins existing ES|QL queries unless regenerateQuery is set', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+    const existingConfig = {
+      type: 'metric',
+      hide_title: true,
+      description: 'Keep me',
+      data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+    };
+
+    await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'hide the title',
+      existingPanel: {
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: existingConfig,
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs | STATS count = COUNT(*)',
+        pinnedQueries: ['FROM logs | STATS count = COUNT(*)'],
+      })
+    );
+  });
+
+  it('does not pin queries when regenerateQuery is true', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'use p95',
+      regenerateQuery: true,
+      existingPanel: {
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: {
+          type: 'metric',
+          data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: undefined,
+        pinnedQueries: undefined,
+      })
+    );
+  });
+
+  it('merges panel-level keys so incoming title and hide_title win', async () => {
+    mockedBuildLensConfig.mockResolvedValue(
+      createBuildLensConfigResult({ type: 'metric', title: 'Compiled title' })
+    );
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    const result = await resolveVisPanel({
+      type: 'vis',
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'rename it',
+      title: 'Incoming title',
+      hideTitle: false,
+      existingPanel: {
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: {
+          type: 'metric',
+          title: 'Old title',
+          description: 'Keep me',
+          hide_title: true,
+          data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT(*)' },
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    expect(result).toEqual({
+      type: 'success',
+      panelContent: {
+        type: LENS_EMBEDDABLE_TYPE,
+        config: {
+          type: 'metric',
+          title: 'Incoming title',
+          description: 'Keep me',
+          hide_title: false,
+        },
+      },
+      authoringNote: 'Created a titleless metric showing total requests.',
+    });
   });
 });
