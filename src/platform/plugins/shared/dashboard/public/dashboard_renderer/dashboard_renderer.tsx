@@ -229,7 +229,7 @@ export function DashboardRenderer({
             <DashboardContext.Provider value={dashboard.api}>
               <DashboardInternalContext.Provider value={dashboard.internalApi}>
                 <QueryClientProvider client={dashboardQueryClient}>
-                  <DashboardChangeHistoryProvider dashboardId={dashboard.api.uuid}>
+                  <DashboardChangeHistoryProvider dashboardId={savedObjectId ?? 'new-dashboard'}>
                     {dashboard.showControlGroup && <DashboardControlsRenderer />}
                     <DashboardViewport />
                   </DashboardChangeHistoryProvider>
