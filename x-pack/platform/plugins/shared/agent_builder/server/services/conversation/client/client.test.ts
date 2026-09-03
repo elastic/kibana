@@ -1127,9 +1127,7 @@ describe('ConversationClient', () => {
     });
 
     it('does not overwrite a workspace already set on the stored conversation', async () => {
-      mockGetDocumentResponse(
-        createConversationDocument({ workspaceId: 'workspace-existing' })
-      );
+      mockGetDocumentResponse(createConversationDocument({ workspaceId: 'workspace-existing' }));
 
       await client.upsertRound({
         id: 'conversation-1',
@@ -1356,12 +1354,8 @@ describe('ConversationClient', () => {
     });
 
     it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
-      mockGetDocumentResponseOnce(
-        createConversationDocument({ seqNo: 1, rounds: [round] })
-      );
-      mockGetDocumentResponse(
-        createConversationDocument({ seqNo: 2, rounds: [round] })
-      );
+      mockGetDocumentResponseOnce(createConversationDocument({ seqNo: 1, rounds: [round] }));
+      mockGetDocumentResponse(createConversationDocument({ seqNo: 2, rounds: [round] }));
       mockEsClient.index.mockRejectedValueOnce(createConflictError()).mockResolvedValue({});
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'down' });
