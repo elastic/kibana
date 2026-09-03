@@ -66,7 +66,8 @@ export class StreamsApp {
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
   // Streams layout
-  public readonly streamsLayoutSourcesPlaceholder;
+  public readonly streamsSourcesTable;
+  public readonly streamsAddSourceButton;
   public readonly streamsLayoutPipelinesPlaceholder;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
@@ -130,9 +131,8 @@ export class StreamsApp {
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
     // Streams layout locators
-    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutSourcesPlaceholder'
-    );
+    this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
+    this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
       'streamsLayoutPipelinesPlaceholder'
     );
@@ -215,8 +215,22 @@ export class StreamsApp {
     return this.page.locator(`.react-flow__node[aria-label="${ariaLabel}"]`);
   }
 
+  /**
+   * Click near the top of a node card so the floating toolbar (bottom-center)
+   * cannot intercept the pointer when a node sits toward the bottom of the pane.
+   */
+  async clickCanvasNode(
+    node: Locator,
+    options: { button?: 'left' | 'right'; modifiers?: Array<'Shift'> } = {}
+  ) {
+    await node.click({
+      position: { x: 24, y: 16 },
+      ...options,
+    });
+  }
+
   async rightClickCanvasNode(node: Locator) {
-    await node.click({ button: 'right' });
+    await this.clickCanvasNode(node, { button: 'right' });
   }
 
   async openCanvasPaneContextMenu() {
