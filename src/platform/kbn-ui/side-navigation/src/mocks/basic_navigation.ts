@@ -6,14 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MenuItem, SideNavLogo } from '../../types';
-
-export const LOGO: SideNavLogo = {
-  id: 'home',
-  href: '/',
-  label: 'Solution',
-  iconType: 'logoElastic',
-};
+import type { MenuItem } from '../../types';
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
@@ -106,7 +99,6 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
 ];
 
 export const basicMock = {
-  logo: LOGO,
   navItems: {
     primaryItems: PRIMARY_MENU_ITEMS,
     overflowItems: [],

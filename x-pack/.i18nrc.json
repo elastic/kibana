@@ -70,7 +70,10 @@
     "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
-    "xpack.lens": "platform/plugins/shared/lens",
+    "xpack.lens": [
+      "platform/plugins/shared/lens",
+      "../src/platform/packages/shared/kbn-lens-common"
+    ],
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",
     "xpack.licenseMgmt": "platform/plugins/shared/license_management",
     "xpack.licensing": "platform/plugins/shared/licensing",
@@ -94,6 +97,7 @@
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshiftInvestigations": ["platform/plugins/shared/nightshift_investigations"],
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",

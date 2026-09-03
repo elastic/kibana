@@ -13,7 +13,10 @@ import {
 } from '../../../common/services/output_helpers';
 
 import type { AgentPolicySOAttributes, AgentPolicy, PackagePolicy } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../common/constants';
+import {
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+  AGENTLESS_MANAGED_BULK_OUTPUT_IDS,
+} from '../../../common/constants';
 import { policyHasFleetServer, policyHasSyntheticsIntegration } from '../../../common/services';
 import { appContextService } from '..';
 import { outputService } from '../output';
@@ -52,6 +55,19 @@ export async function validateOutputForPolicy(
   existingData: Partial<AgentPolicySOAttributes> = {},
   allowedOutputTypeForPolicy: string[]
 ) {
+  const data = { ...existingData, ...newData };
+
+  if (!data.supports_agentless) {
+    const managedBulkOutputId = [data.data_output_id, data.monitoring_output_id].find(
+      (outputId) => outputId && AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(outputId)
+    );
+    if (managedBulkOutputId) {
+      throw new OutputInvalidError(
+        `Output "${managedBulkOutputId}" can only be used with an agentless agent policy.`
+      );
+    }
+  }
+
   if (
     Object.keys(existingData).length !== 0 &&
     newData.data_output_id === existingData.data_output_id &&
@@ -59,8 +75,6 @@ export async function validateOutputForPolicy(
   ) {
     return;
   }
-
-  const data = { ...existingData, ...newData };
 
   const dataOutput = await getDataOutputForAgentPolicy(soClient, data).catch((err) => {
     if (err instanceof OutputNotFoundError) {

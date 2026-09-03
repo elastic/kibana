@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/esql-language'
   - '@kbn/saved-search-constants'
+  - '@kbn/cps'
 tags:
   - shared-common
   - package

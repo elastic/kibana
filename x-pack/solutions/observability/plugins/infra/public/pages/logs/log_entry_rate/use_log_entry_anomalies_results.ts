@@ -206,6 +206,11 @@ export const useLogEntryAnomaliesResults = ({
           services.http.fetch
         );
       },
+      onReject: (error) => {
+        if (!(error instanceof CanceledPromiseError)) {
+          setLogEntryAnomalies([]);
+        }
+      },
       onResolve: ({ data: { anomalies, paginationCursors: requestCursors, hasMoreEntries } }) => {
         const { paginationCursor } = reducerState;
         if (requestCursors) {
@@ -349,6 +354,7 @@ export const useLogEntryAnomaliesResults = ({
     isLoadingLogEntryAnomalies,
     isLoadingDatasets,
     hasFailedLoadingDatasets,
+    getLogEntryAnomaliesDatasets,
     datasets: logEntryAnomaliesDatasets,
     hasFailedLoadingLogEntryAnomalies,
     changeSortOptions,

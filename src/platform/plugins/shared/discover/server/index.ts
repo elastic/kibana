@@ -63,7 +63,10 @@ export type {
   DiscoverSessionApiResponse,
   DiscoverSessionApiData,
   DiscoverSessionApiDataInput,
+  DiscoverSessionSanitizeResponse,
+  DiscoverSessionWarning,
 } from './api/schema';
+export type { DiscoverSessionSanitizeRequest } from './api/session_sanitize';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');

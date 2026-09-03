@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Conversation, ExecutionFailedEvent, TimelineEvent } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  CurrentUser,
+  ExecutionFailedEvent,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import {
   AgentBuilderErrorCode,
   CONVERSATION_SCHEMA_VERSION,
@@ -17,6 +22,7 @@ import {
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
@@ -29,8 +35,9 @@ import { roundsToEvents } from './rounds_to_events';
 import {
   fromEs,
   toEs,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
-  isEventsNativeVersion,
   updateConversation,
   type Document as ConversationDocument,
 } from './converters';
@@ -55,6 +62,8 @@ const createTestState = () => ({
     'security.alerts',
   ],
 });
+
+const requestingUser: CurrentUser = { id: 'user_id', username: 'user_name', isAdmin: false };
 
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
@@ -108,7 +117,7 @@ describe('conversation model converters', () => {
     it('deserializes the conversation with new conversation_rounds field', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -125,6 +134,10 @@ describe('conversation model converters', () => {
         read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        read: false,
+        read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-1',
@@ -155,6 +168,76 @@ describe('conversation model converters', () => {
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
     });
 
+    it('seeds read_by for a legacy owner-read document', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(true);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner read_by for a legacy read document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit read_by instead of overwriting it from the legacy read flag', () => {
+      const serialized = documentBase();
+      serialized._source.read = true;
+      serialized._source.read_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.read).toBe(false);
+      expect(deserialized.read_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
+    it('seeds pinned_by for a legacy owner-pinned document', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(true);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves owner pinned_by for a legacy pinned document viewed by a non-owner', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+
+      const deserialized = fromEs(serialized, {
+        id: 'other_user_id',
+        username: 'other_user_name',
+        isAdmin: false,
+      });
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+    });
+
+    it('preserves explicit pinned_by instead of overwriting it from the legacy pinned flag', () => {
+      const serialized = documentBase();
+      serialized._source.pinned = true;
+      serialized._source.pinned_by = [{ userId: 'other_user_id' }];
+
+      const deserialized = fromEs(serialized, requestingUser);
+
+      expect(deserialized.pinned).toBe(false);
+      expect(deserialized.pinned_by).toEqual([{ userId: 'other_user_id' }]);
+    });
+
     it('deserializes the conversation with legacy rounds field', () => {
       const serialized = documentBase();
       // @ts-ignore simulating legacy document
@@ -183,7 +266,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -200,6 +283,10 @@ describe('conversation model converters', () => {
         read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
+        read: false,
+        read_by: [],
+        pinned: false,
+        pinned_by: [],
         rounds: [
           {
             id: 'round-legacy',
@@ -248,7 +335,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].steps).toEqual([
         {
@@ -294,7 +381,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -331,7 +418,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -362,7 +449,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -380,7 +467,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -398,7 +485,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBeUndefined();
@@ -417,7 +504,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.registry);
@@ -443,7 +530,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toEqual([
         {
@@ -468,7 +555,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No attachments field - old format
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toBeUndefined();
     });
@@ -477,7 +564,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.state = createTestState();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toEqual(serialized._source!.state);
     });
@@ -486,7 +573,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No state field - old format
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toBeUndefined();
     });
@@ -494,7 +581,7 @@ describe('conversation model converters', () => {
     it('defaults access control to private for legacy conversations', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
@@ -508,7 +595,7 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -530,7 +617,7 @@ describe('conversation model converters', () => {
         ],
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -551,7 +638,7 @@ describe('conversation model converters', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -561,7 +648,7 @@ describe('conversation model converters', () => {
     it('defaults read_only to false when the document has no such field', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(false);
     });
@@ -570,7 +657,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.read_only = true;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(true);
     });
@@ -586,7 +673,7 @@ describe('conversation model converters', () => {
         type: ConversationOriginType.Slack,
       };
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].origin).toEqual({
         type: 'slack',
@@ -621,7 +708,7 @@ describe('conversation model converters', () => {
       serialized._source!.schema_version = 1;
       serialized._source!.events = storedEvents;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBe(1);
       expect(deserialized.events).toEqual(storedEvents);
@@ -632,7 +719,7 @@ describe('conversation model converters', () => {
       serialized._source!.schema_version = 1;
       serialized._source!.events = [];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       // Version still lands on the domain object so subsequent writes stay events-native.
       expect(deserialized.schema_version).toBe(1);
@@ -643,7 +730,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.schema_version = 1;
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBe(1);
       expect(deserialized.events?.[0]?.id).toBe('round-1::user_message');
@@ -652,7 +739,7 @@ describe('conversation model converters', () => {
     it('does not set schema_version on the domain object for legacy docs', () => {
       const serialized = documentBase();
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBeUndefined();
       // Legacy docs still get a derived timeline on read for API compatibility.
@@ -674,7 +761,7 @@ describe('conversation model converters', () => {
         } as TimelineEvent,
       ];
 
-      const deserialized = fromEs(serialized);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.schema_version).toBeUndefined();
       // Derived from rounds, not the orphan stored event.
@@ -682,39 +769,148 @@ describe('conversation model converters', () => {
     });
   });
 
-  describe('toEs', () => {
-    const conversationBase = (): Conversation => {
-      return {
-        id: 'conv_id',
-        agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
-        title: 'conv_title',
-        created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [
-          {
-            id: 'round-1',
-            status: ConversationRoundStatus.completed,
-            input: {
-              message: 'some message',
-            },
-            steps: [],
-            response: {
-              message: 'some response',
-            },
-            started_at: roundCreationDate,
-            time_to_first_token: 42,
-            time_to_last_token: 100,
-            model_usage: {
-              connector_id: 'unknown',
-              llm_calls: 1,
-              input_tokens: 12,
-              output_tokens: 42,
-            },
+  const conversationBase = (): Conversation => {
+    return {
+      id: 'conv_id',
+      agent_id: 'agent_id',
+      user: { id: 'user_id', username: 'user_name' },
+      title: 'conv_title',
+      created_at: creationDate,
+      updated_at: updateDate,
+      rounds: [
+        {
+          id: 'round-1',
+          status: ConversationRoundStatus.completed,
+          input: {
+            message: 'some message',
           },
-        ],
-      };
+          steps: [],
+          response: {
+            message: 'some response',
+          },
+          started_at: roundCreationDate,
+          time_to_first_token: 42,
+          time_to_last_token: 100,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
+        },
+      ],
     };
+  };
+
+  describe('toConversationResponse', () => {
+    it('strips internal fields from normalized conversations', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          events: [],
+        },
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
+      expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
+    });
+
+    it('deserializes template metadata through the injected resolver', () => {
+      const response = toConversationResponse({
+        conversation: {
+          ...conversationBase(),
+          read: false,
+          read_by: [],
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [],
+          },
+          read_only: false,
+          template_id: 'test-template',
+          metadata: { is_urgent: 'true' },
+          events: [],
+        },
+        resolveTemplate: () => ({
+          id: 'test-template',
+          name: 'Test template',
+          version: 1,
+          fields: {
+            is_urgent: { input_type: 'TOGGLE' },
+          },
+        }),
+      });
+
+      expect(response.metadata).toEqual({ is_urgent: true });
+    });
+
+    it('strips internal fields from document responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: {
+          _id: 'conv_id',
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            ...toEs(
+              {
+                ...conversationBase(),
+                read: true,
+                read_by: [{ userId: 'user_id' }],
+                pinned: true,
+                pinned_by: [{ userId: 'user_id' }],
+                access_control: {
+                  access_mode: ConversationAccessControlMode.Private,
+                  entries: [],
+                },
+                read_only: false,
+                events: [],
+              },
+              'space'
+            ),
+            read_by: [{ userId: 'user_id' }],
+            pinned_by: [{ userId: 'user_id' }],
+          },
+        },
+        user: requestingUser,
+        resolveTemplate: jest.fn(),
+      });
+
+      expect(response).not.toHaveProperty('read_by');
+      expect(response).not.toHaveProperty('pinned_by');
+      expect(response.read).toBe(true);
+      expect(response.pinned).toBe(true);
+    });
+  });
+
+  describe('toEs', () => {
+    it('persists the per-user lists and clears the legacy read and pinned booleans', () => {
+      const serialized = toEs(
+        {
+          ...conversationBase(),
+          read: true,
+          read_by: [{ userId: 'user_id' }],
+          pinned: true,
+          pinned_by: [{ userId: 'user_id' }],
+        },
+        'space'
+      );
+
+      expect(serialized.read_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.pinned_by).toEqual([{ userId: 'user_id' }]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
 
     it('serializes the conversation using new conversation_rounds field', () => {
       const conversation = conversationBase();
@@ -754,6 +950,8 @@ describe('conversation model converters', () => {
         attachments: [],
         // Legacy field explicitly set to undefined
         rounds: undefined,
+        read_by: [],
+        pinned_by: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
@@ -937,12 +1135,15 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.read_only = true;
 
-      const roundTripped = fromEs({
-        _id: conversation.id,
-        _seq_no: 1,
-        _primary_term: 1,
-        _source: toEs(conversation, 'space'),
-      });
+      const roundTripped = fromEs(
+        {
+          _id: conversation.id,
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: toEs(conversation, 'space'),
+        },
+        requestingUser
+      );
 
       expect(roundTripped.read_only).toBe(true);
     });
@@ -1033,6 +1234,20 @@ describe('conversation model converters', () => {
   });
 
   describe('createRequestToEs', () => {
+    it('creates an unpinned, unread conversation with empty per-user lists', () => {
+      const serialized = createRequestToEs({
+        conversation: { agent_id: 'agent_id', title: 'conv_title', rounds: [] },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.read_by).toEqual([]);
+      expect(serialized.pinned_by).toEqual([]);
+      expect(serialized.read).toBeUndefined();
+      expect(serialized.pinned).toBeUndefined();
+    });
+
     it('includes state property when creating new conversation', () => {
       const conversation = {
         agent_id: 'agent_id',
@@ -1196,7 +1411,7 @@ describe('conversation model converters', () => {
       expect(serialized.events).toEqual([]);
     });
 
-    it('derives events from rounds on create (never trusts a supplied events array)', () => {
+    it('derives events from rounds on create when no explicit events are supplied', () => {
       const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
         agent_id: 'agent_id',
         title: 'conv_title',
@@ -1233,6 +1448,32 @@ describe('conversation model converters', () => {
         'round-seed::execution_started',
         'round-seed::execution_terminated',
       ]);
+    });
+
+    it('seeds the timeline from a caller-supplied events array when rounds is empty (atomic create-with-event path)', () => {
+      const seedEvent: TimelineEvent = {
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: '2025-01-01T00:00:00.000Z',
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'hello', attachment_refs: [] },
+      };
+      const conversation: Parameters<typeof createRequestToEs>[0]['conversation'] = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        events: [seedEvent],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      // Caller-supplied events win over the empty round-derived projection.
+      expect(serialized.events?.map((event) => event.id)).toEqual(['round-1::user_message']);
     });
   });
 
@@ -1540,26 +1781,18 @@ describe('conversation model converters', () => {
       ]);
     });
 
-    it('discards events and schema_version supplied in the update payload', () => {
+    it('discards a schema_version supplied in the update payload (version is server-owned)', () => {
       const conversation = eventsNativeStored();
-      const injectedEvent: TimelineEvent = {
-        id: 'injected::user_message',
-        type: TimelineEventType.userMessage,
-        created_at: roundCreationDate,
-        actor: { type: EventActorType.user, id: 'attacker' },
-        data: { message: 'should be discarded' },
-      };
+      const originalEventIds = conversation.events!.map((event) => event.id);
 
       const updated = updateConversation({
         conversation,
-        // Cast: routes never accept these, but the strip must be defensive.
+        // Cast: routes never accept schema_version, but the strip must be defensive.
         update: {
           id: conversation.id,
           title: 'renamed',
-          events: [injectedEvent],
           schema_version: 42,
         } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
           schema_version: number;
         },
         space: 'space',
@@ -1569,42 +1802,86 @@ describe('conversation model converters', () => {
       // Version comes from the stored conversation (re-stamped at the current
       // format), never from the payload.
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      // Injected event never appears in the reconciled output.
-      expect(updated.events?.some((event) => event.id === 'injected::user_message')).toBe(false);
+      // Reconciled events come from rounds; the same ids as before the update.
+      expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
     });
 
-    it('does not promote a legacy conversation even if events/schema_version are supplied in the update', () => {
-      const conversation = legacyStored();
+    it('trusts events supplied in the update payload (appendEvents path derives rounds from them)', () => {
+      const conversation = eventsNativeStored();
+      const appended: TimelineEvent = {
+        id: 'appended::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: roundCreationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'from appendEvents' },
+      };
 
       const updated = updateConversation({
         conversation,
-        // Same defensive strip on the legacy path: a payload cannot escalate.
         update: {
           id: conversation.id,
-          title: 'renamed',
-          events: [
-            {
-              id: 'attempt::user_message',
-              type: TimelineEventType.userMessage,
-              created_at: roundCreationDate,
-              actor: { type: EventActorType.user, id: 'attacker' },
-              data: { message: 'attempt' },
-            },
-          ],
-          schema_version: CONVERSATION_SCHEMA_VERSION,
+          events: [...conversation.events!, appended],
         } as Parameters<typeof updateConversation>[0]['update'] & {
           events: TimelineEvent[];
-          schema_version: number;
         },
         space: 'space',
         updateDate: new Date(updateDate),
       });
 
-      expect(updated.schema_version).toBeUndefined();
-      // Legacy conversations do not reconcile — they stay rounds-only end to
-      // end. `toEs` will further guarantee no events/schema_version are
-      // persisted for these docs.
-      expect(updated.events).toBeUndefined();
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.some((event) => event.id === 'appended::user_message')).toBe(true);
+    });
+
+    it('honors caller-supplied rounds alongside events, skipping the rounds rebuild (step-only appendEvents batches)', () => {
+      const conversation = eventsNativeStored();
+      const passedThroughRounds = [
+        { ...conversation.rounds[0], response: { message: 'stored truth' } },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: conversation.events!,
+          rounds: passedThroughRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.rounds).toBe(passedThroughRounds);
+      expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
+      const conversation = legacyStored();
+      const seededEvents: TimelineEvent[] = [
+        {
+          id: 'seed::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: roundCreationDate,
+          actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+          data: { message: 'seed' },
+        },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: seededEvents,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
     it('keeps events-native docs stamped with the native marker on update', () => {
@@ -1668,7 +1945,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = fromEs(doc);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBe('phishing');
         expect(result.template_version).toBe(2);
@@ -1692,7 +1969,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = fromEs(doc);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBeUndefined();
         expect(result.template_version).toBeUndefined();

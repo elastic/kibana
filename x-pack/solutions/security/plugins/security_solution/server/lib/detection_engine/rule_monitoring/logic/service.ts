@@ -138,7 +138,8 @@ export const createRuleMonitoringService = (
             config,
             childLogger,
             coreSetup,
-            savedObjectsClient
+            savedObjectsClient,
+            ruleResultService
           );
 
           const eventLogWriter = createEventLogWriter(pluginsSetup.eventLog);

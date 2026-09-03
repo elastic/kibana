@@ -23,6 +23,10 @@ import { AppHeaderDescription } from './app_header_description';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 export type AppHeaderViewProps = DistributiveOmit<AppHeaderConfig, 'back'> & {
+  /**
+   * Explicit registrations pass one `{ href, label }`. The array form is
+   * fallback-only (breadcrumb-derived ancestors) and is deprecated for explicit use.
+   */
   back?: AppHeaderBack | AppHeaderBack[];
   /**
    * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
@@ -135,7 +139,14 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} size={titleSize} />}
+        title={
+          <TitleArea
+            title={title}
+            back={back}
+            size={titleSize}
+            compact={resolvedSpacing === 'compact'}
+          />
+        }
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={share} favorite={favorite} />}
         titleAppend={titleAppend}

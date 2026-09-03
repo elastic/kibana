@@ -21,7 +21,6 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 } from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
@@ -31,7 +30,6 @@ import { isActiveFromUrl } from './utils/is_active_from_url';
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
 export interface NavigationItems {
-  logoItem?: SideNavLogo;
   navItems: NavigationStructure;
   activeItemId?: string;
 }
@@ -43,12 +41,11 @@ export interface NavigationItems {
  *
  * Structural Assumptions and Mapping
  *
- * - Root node (1st level) is used for the "logo" item and application branding
- * - 2nd level nodes are transformed into primary navigation items:
+ * - Top-level body nodes are transformed into primary navigation items:
  *   - Accordion nodes are flattened (not supported) - their children become primary items
  *   - Nodes without links that aren't panel openers are treated as section dividers and not supported in new nav - their children are flattened
  *   - panelOpener nodes create flyout secondary navigation panels, they can't have links directly, but can have sections with links
- * - 3rd level is used for secondary navigation (children of panelOpener):
+ * - Children of panel-opener nodes become secondary navigation:
  *   - If all 3rd level items have links, they're treated as menu items and wrapped in a single section
  *   - If some don't have links, they're treated as section headers with their children becoming menu items
  * - Footer is limited to 5 items maximum (extras are dropped with warning)
@@ -57,16 +54,14 @@ export interface NavigationItems {
  * @param navLinks
  * @param activeNodes
  * @param panelStateManager - Manager for panel opener state
- * @param isNextChrome - Whether the navigation is in the next chrome
  */
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
   activeNodes: ChromeProjectNavigationNode[][],
   overflowItemIds: string[] = [],
-  panelStateManager: PanelStateManager,
-  isNextChrome: boolean = false
+  panelStateManager: PanelStateManager
 ): NavigationItems => {
-  let primaryNodes: ChromeProjectNavigationNode[] = navigationTree.body;
+  const primaryNodes: ChromeProjectNavigationNode[] = navigationTree.body;
   const footerNodes: ChromeProjectNavigationNode[] = navigationTree.footer ?? [];
 
   let deepestActiveItemId: string | undefined;
@@ -105,34 +100,6 @@ export const toNavigationItems = (
       ...append
     );
   };
-
-  let logoItem: SideNavLogo | undefined;
-
-  const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
-  if (homeNodeIndex !== -1) {
-    const homeNode = primaryNodes[homeNodeIndex];
-    maybeMarkActive(homeNode, 0);
-
-    if (!isNextChrome) {
-      primaryNodes = primaryNodes.filter((_, i) => i !== homeNodeIndex);
-      logoItem = {
-        href: warnIfMissing(homeNode, 'href', '/missing-href-😭'),
-        iconType: getNavigationNodeIcon(homeNode),
-        id: warnIfMissing(homeNode, 'id', 'kibana'),
-        label: warnIfMissing(homeNode, 'title', 'Kibana'),
-        'data-test-subj': getTestSubj(homeNode, ['nav-item-home']),
-      };
-    }
-    // In Chrome Next the home node stays in `primaryNodes` as a regular,
-    // customizable sidebar item. Its title/icon are normalized upstream in
-    // `applyCustomization`, so no override is needed here.
-    // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
-    // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
-  } else {
-    warnOnce(
-      `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
-    );
-  }
 
   // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
   // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
@@ -276,13 +243,12 @@ export const toNavigationItems = (
   }
 
   if (!SKIP_WARNINGS) {
-    warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
-    warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
+    warnAboutDuplicateIds(primaryItems, footerItems);
+    warnAboutDuplicateIcons(primaryItems, footerItems);
     warnAboutTooManyNewItems(primaryItems, footerItems);
   }
 
   return {
-    logoItem,
     navItems: { primaryItems, overflowItems, footerItems },
     activeItemId: deepestActiveItemId,
   };
@@ -374,13 +340,9 @@ function warnAboutDuplicates(
   });
 }
 
-function warnAboutDuplicateIcons(
-  logoItem: SideNavLogo | undefined,
-  primaryItems: MenuItem[],
-  footerItems: MenuItem[]
-) {
+function warnAboutDuplicateIcons(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
-  const icons = [...(logoItem ? [logoItem] : []), ...primaryItems, ...footerItems]
+  const icons = [...primaryItems, ...footerItems]
     .filter(
       (item) =>
         item.iconType &&
@@ -396,13 +358,9 @@ function warnAboutDuplicateIcons(
   );
 }
 
-function warnAboutDuplicateIds(
-  logoItem: SideNavLogo | undefined,
-  primaryItems: MenuItem[],
-  footerItems: MenuItem[]
-) {
+function warnAboutDuplicateIds(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
-  let allIds: string[] = logoItem ? [logoItem.id] : [];
+  let allIds: string[] = [];
 
   // Helper to extract IDs from menu items including their secondary sections
   const collectIds = (items: MenuItem[]) => {

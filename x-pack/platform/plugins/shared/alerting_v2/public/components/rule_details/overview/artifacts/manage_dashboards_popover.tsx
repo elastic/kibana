@@ -26,11 +26,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import {
   getDashboardId,
   mapArtifacts,
   partitionArtifactsByDashboardType,
-  resolveArtifactId,
   resolveDashboardsByIds,
   searchRelatedDashboard,
   type Dashboard,

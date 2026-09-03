@@ -77,6 +77,8 @@ await expect(page.testSubj.locator('successToast')).toBeVisible();
 
 When an action triggers async UI work (navigation, saving, loading data), wait for the resulting state before your next step. This ensures the UI is ready and prevents flaky interactions with elements that haven’t rendered yet.
 
+Wait for the *exact* element or value your next step reads — not an earlier proxy. Guarding the click (with `{ force: true }` or a retry), or waiting for a spinner to disappear, while the element you actually read still races, is the most common wait that silently fails. Asserting on the target with a web-first assertion (`expect(locator).toBeVisible()`, `toHaveText`) usually *is* the wait. If there is no element to wait on, expose one in the app (a `data-test-subj` or a `data-loaded` attribute) — it reflects the real render and survives endpoint changes — rather than reaching for `page.waitForResponse(...)`, a last resort that only fits a gate with no UI at all — and is unreliable when several requests hit the same endpoint (e.g. a dashboard).
+
 :::::{dropdown} Example
 
 ```ts
@@ -89,6 +91,8 @@ await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
 ## Don't use manual retry loops [dont-use-manual-retry-loops]
 
 If an action fails, don't wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs). Fix the component or make your waiting/locators explicit and stable.
+
+Re-running a *read* is different from re-running an *action*: polling a value with `expect.poll`/`toPass` until a late re-render settles is a legitimate wait (re-query *inside* the loop). Re-issuing a click, type, or navigation to make it "land" is the anti-pattern — it hides an actionability bug and re-fires side effects.
 
 :::::{dropdown} Examples
 ❌ **Don't:** retry actions in a loop:
@@ -125,17 +129,42 @@ await page.click('[data-test-subj="myButton"]');
 await page.getByText('Delete').click();
 ```
 
-❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices)), as they break on non-clean environments where tests run without server restart and extra data may exist:
-
-```ts
-await page.testSubj.locator('tableRow').nth(0).click();
-```
-
 ✔️ **Do:** use `page.testSubj` or scoped `getByRole`:
 
 ```ts
 await page.testSubj.click('myButton');
 await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'Delete' }).click();
+```
+
+:::::
+
+## Avoid selecting elements by index or position [dont-select-elements-by-index]
+
+Avoid nth methods such as `.first()`, `.last()`, and `.nth()`. Instead:
+
+- Locate elements with `data-test-subj`, or scope the locator to a specific container, rather than silencing a strict-mode "resolved to N elements" error.
+- Expose the loading state in the DOM (e.g. a `data-test-subj` such as `myTable-loading` / `myTable-loaded`) rather than reaching for these methods because the UI isn't actionable yet.
+
+Use them alongside `toHaveCount` when the number of elements is known in advance:
+
+```ts
+// the number of buttons is known in advance
+await expect(stepButtons).toHaveCount(4);
+// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one
+const failedStep = stepButtons.last();
+```
+
+:::::{dropdown} Examples
+❌ **Don’t:** match a prefix and take the first hit — when nothing matches, the failure only says the locator found no elements:
+
+```ts
+await page.locator('[data-test-subj^="monitor-page-link-"]').first().click();
+```
+
+✔️ **Do:** name the element you expect (or identify it with `filter({ hasText })` when the subject isn't unique):
+
+```ts
+await page.testSubj.click('monitor-page-link-0001-up');
 ```
 
 :::::

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/284764
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-08-18
-- product: kibana
-title: Add MCP tool annotations framework to Agent Builder
-description: Introduces MCP Tool Annotations (`readOnlyHint`, `destructiveHint`, and more) to tools exposed by the Agent Builder MCP Server.

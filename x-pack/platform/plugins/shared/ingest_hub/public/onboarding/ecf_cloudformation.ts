@@ -105,7 +105,14 @@ export const getEcfServiceConfigs = (
     if (!entry?.ecfLogType) continue;
 
     const entryVars = serviceVars[instanceId];
-    const enabledInputs = entryVars?.enabledInputs ?? [];
+
+    // ECF services are single-DS. Read ARNs from the first DS's varsByInput.
+    // Prefer ecfDataStream (set on OTel twins where the DS path differs from the entry id),
+    // then the first runtime dataStream (populated once the manifest is fetched), then the
+    // entry.id as a last resort. AWS_SERVICES_MAP always has dataStreams:[] at module load.
+    const dsId = entry.ecfDataStream ?? entry.dataStreams?.[0] ?? entry.id;
+    const dsVars = entryVars?.varsByDataStream?.[dsId];
+    const enabledInputs = dsVars?.enabledInputs ?? [];
 
     // Gate each ARN on the enabled inputs so stale values from a previous transport
     // selection don't end up in the launch URL and misconfigure the ECF stack.
@@ -120,10 +127,10 @@ export const getEcfServiceConfigs = (
         : [];
 
     const bucketArns = enabledInputs.includes('aws-s3')
-      ? splitArns(entryVars?.varsByInput?.['aws-s3']?.bucket_arn)
+      ? splitArns(dsVars?.varsByInput?.['aws-s3']?.bucket_arn)
       : [];
     const logGroupArns = enabledInputs.includes('aws-cloudwatch')
-      ? splitArns(entryVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
+      ? splitArns(dsVars?.varsByInput?.['aws-cloudwatch']?.log_group_arn)
       : [];
 
     const existing = configsByServiceId.get(serviceId);

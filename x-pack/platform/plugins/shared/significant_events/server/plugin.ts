@@ -18,10 +18,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -43,6 +43,7 @@ import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types
 import type {
   SignificantEventsPluginSetupDependencies,
   SignificantEventsPluginStartDependencies,
+  SignificantEventsServer,
 } from './types';
 import {
   type KnowledgeIndicatorClient,
@@ -71,8 +72,6 @@ import {
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
-import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
-import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
@@ -95,7 +94,7 @@ export class SignificantEventsPlugin
     >
 {
   public logger: Logger;
-  public server?: StreamsServer;
+  public server?: SignificantEventsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private getScopedClients?: GetScopedClients;
@@ -120,11 +119,13 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
       cloud: plugins.cloud,
       kibanaVersion: this.kibanaVersion,
-    } as StreamsServer;
+    } as SignificantEventsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -145,6 +146,7 @@ export class SignificantEventsPlugin
       rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
+      const isServerless = plugins.cloud?.isServerlessEnabled ?? false;
 
       const scopedSoClient = coreStart.savedObjects.getScopedClient(request);
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
@@ -157,11 +159,7 @@ export class SignificantEventsPlugin
       // they model all data available to a stream - so extraction must always read across every
       // linked project.
       //
-      // This currently splits generation from detection: rule execution still follows the
-      // space's project routing expression, so a rule can be blind to data its knowledge
-      // indicator was derived from. That split is transitional: once alerting v2 supports
-      // per-rule project routing, significant events rules will opt into all linked projects
-      // too, and both scopes will match.
+      // Detection matches that all-projects scope on serverless via `withAllProjectsRouting`.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'expression',
@@ -210,6 +208,7 @@ export class SignificantEventsPlugin
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({
           getAlertingV2RulesClient,
+          isServerless,
         });
 
       const createKnowledgeIndicatorClient = (context: SignificantEventsAlertingContext) =>
@@ -272,7 +271,6 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
-      registerInvestigationAgentType(plugins.agentBuilder);
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
       void core
         .getStartServices()
@@ -372,7 +370,7 @@ export class SignificantEventsPlugin
   public start(core: CoreStart, plugins: SignificantEventsPluginStartDependencies): void {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.isServerless = this.server.cloud?.isServerlessEnabled ?? false;
       this.server.security = plugins.security;
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
@@ -382,6 +380,7 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+      this.server.nightshiftInvestigations = plugins.nightshiftInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
     }
@@ -437,11 +436,10 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery agents: installed via agents.ensure when
-    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
-    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
-    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
-    // and manual discovery execute (discovery).
+    // Editable discovery agents: installed via agents.ensure when significant events is
+    // available. skip(1) on availabilityEnabled$ drops the initial emission, so catch up at
+    // startup as well. Per-space installs also happen just-in-time from scheduled discovery
+    // enablement and manual discovery execute.
     // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
@@ -449,12 +447,11 @@ export class SignificantEventsPlugin
         server: this.server,
         logger: this.logger,
       });
-      void Promise.all([
-        installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-        installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
-      ]).catch((error: unknown) => {
-        this.logManagedResourceError('significant events agents', error);
-      });
+      void installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }).catch(
+        (error: unknown) => {
+          this.logManagedResourceError('significant events agents', error);
+        }
+      );
     }
 
     if (plugins.agentBuilder && this.server && this.getScopedClients) {

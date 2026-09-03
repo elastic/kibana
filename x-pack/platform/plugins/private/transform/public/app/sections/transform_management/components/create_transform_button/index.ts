@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { CreateTransformButton } from './create_transform_button';
+export {
+  CreateTransformButton,
+  getCreateTransformPrimaryActionItem,
+} from './create_transform_button';

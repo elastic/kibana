@@ -18,8 +18,29 @@ import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from '../../aws_service_ma
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
-// Build the matrix with minimal mocked packages so signalType is derived from data_stream.type.
-// AWS_SERVICES_MAP would have signalType:undefined (no manifest data), breaking signal-filter tests.
+// Build the matrix with minimal mocked packages so signalTypes is derived from data_stream.type.
+// AWS_SERVICES_MAP would have signalTypes:[] (no manifest data), breaking signal-filter tests.
+// METRICS_PT_IDS lists PT names whose primary signal type is metrics so the heuristic works
+// with the new PT-keyed static entries (no _metrics suffix in PT names).
+const METRICS_PT_IDS = new Set([
+  'billing',
+  'usage',
+  'ecs',
+  'awshealth',
+  'cloudwatch',
+  'natgateway',
+  'ebs',
+  'dynamodb',
+  'rds',
+  'redshift',
+  'kafka',
+  'kinesis',
+  'sns',
+  'sqs',
+  'vpn',
+  'transitgateway',
+  's3_storage_lens',
+]);
 const MOCK_PACKAGES: Record<string, any> = {
   aws: {
     policy_templates: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
@@ -29,7 +50,7 @@ const MOCK_PACKAGES: Record<string, any> = {
     })),
     data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
       path: e.id,
-      type: e.id.includes('_metrics') || e.id === 'billing' ? 'metrics' : 'logs',
+      type: METRICS_PT_IDS.has(e.id) ? 'metrics' : 'logs',
       streams: [{ input: 'aws-s3', vars: [], enabled: true }],
     })),
   },
@@ -77,12 +98,13 @@ const MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 function setupFlow(initial: string[] = []) {
   let ids = initial;
   mockUseOnboardingFlow.mockImplementation(() => ({
-    servicesStep: { selectedServiceIds: ids },
+    servicesStep: { selectedServiceIds: ids, dataFormat: 'ecs' as const },
     setSelectedServiceIds: jest.fn((next: string[]) => {
       ids = next;
       // Re-mock so next render picks up the new ids.
       setupFlow(ids);
     }),
+    setDataFormat: jest.fn(),
     awsServiceMatrix: MATRIX,
   }));
 }
@@ -121,16 +143,16 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     // Find a category that has services of both signal types.
     const mixedCat = result.current.categories.find((cat) => {
       const allInCat = MATRIX.filter((s) => s.showInUI && s.category === cat);
-      const hasLogs = allInCat.some((s) => s.signalType === 'logs');
-      const hasMetrics = allInCat.some((s) => s.signalType === 'metrics');
+      const hasLogs = allInCat.some((s) => s.signalTypes.includes('logs'));
+      const hasMetrics = allInCat.some((s) => s.signalTypes.includes('metrics'));
       return hasLogs && hasMetrics;
     });
 
     if (!mixedCat) return; // No mixed category in the matrix — skip.
 
     const allInMixed = MATRIX.filter((s) => s.showInUI && s.category === mixedCat);
-    const expectedLogsTotal = allInMixed.filter((s) => s.signalType === 'logs').length;
-    const expectedMetricsTotal = allInMixed.filter((s) => s.signalType === 'metrics').length;
+    const expectedLogsTotal = allInMixed.filter((s) => s.signalTypes.includes('logs')).length;
+    const expectedMetricsTotal = allInMixed.filter((s) => s.signalTypes.includes('metrics')).length;
 
     act(() => result.current.setSignalFilter('logs'));
     const logsStats = result.current.categoryStats.get(mixedCat);
@@ -151,7 +173,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     expect(firstCat).toBeDefined();
 
     const metricsInCat = MATRIX.filter(
-      (s) => s.showInUI && s.category === firstCat && s.signalType === 'metrics'
+      (s) => s.showInUI && s.category === firstCat && s.signalTypes.includes('metrics')
     );
     expect(metricsInCat.length).toBeGreaterThan(0);
 
@@ -175,28 +197,33 @@ describe('useServicesStep — categories hidden when signal has no matching serv
       id: 'svc_logs',
       name: 'Logs Service',
       category: 'compute',
-      signalType: 'logs',
+      signalTypes: ['logs'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       showInUI: true,
       defaultEnabled: true,
+      defaultEnabledInputs: [],
       packageName: 'aws',
     },
     {
       id: 'svc_metrics',
       name: 'Metrics Service',
       category: 'databases',
-      signalType: 'metrics',
+      signalTypes: ['metrics'],
+      dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       showInUI: true,
       defaultEnabled: true,
+      defaultEnabledInputs: [],
       packageName: 'aws',
     },
   ] as AwsServiceMatrixEntry[];
 
   beforeEach(() => {
     mockUseOnboardingFlow.mockImplementation(() => ({
-      servicesStep: { selectedServiceIds: [] },
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
       setSelectedServiceIds: jest.fn(),
+      setDataFormat: jest.fn(),
       awsServiceMatrix: SPLIT_MATRIX,
     }));
   });

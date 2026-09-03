@@ -7,6 +7,7 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   ruleAttachmentDataSchema,
@@ -14,7 +15,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { RulesClient } from '../../lib/rules_client';
@@ -90,12 +90,12 @@ export const createRuleSmlType = ({
   },
 
   /**
-   * Rules are gated by the Alerting v2 rules read API privilege — the same
-   * gate the rules API checks before surfacing rule data.
+   * Rules are gated by the dedicated `ai_index:alerting_v2_rule/read` action.
+   * The Alerting v2 feature grants it by declaring `aiIndex: { read: [RULE_KI_TYPE] }`
+   * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step
+   * with that declaration.
    */
-  getPermissions: () => ({
-    kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-  }),
+  getPermissions: () => kibanaPermissions({ kiType: RULE_KI_TYPE }),
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

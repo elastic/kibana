@@ -1,21 +1,9 @@
 {
   "sha1": "a8d526687b909582740731e068f3491e77f4ae8f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "d7169ee3bc6bd51-7be94d09c2674e5",
-      "title": "Teardown surrounding docs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "75066322895708e-25b2b42030c54ba",
       "title": "Setup surrounding docs tests data",
@@ -436,6 +424,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
         "line": 108,
         "column": 20
+      }
+    },
+    {
+      "id": "d7169ee3bc6bd51-7be94d09c2674e5",
+      "title": "Teardown surrounding docs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

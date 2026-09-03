@@ -20,16 +20,33 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceVars } from './use_service_settings';
+import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
+import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
+
+function getDefaultDsInputs(
+  dsInfo: DataStreamInfo | undefined,
+  isSingleDs: boolean,
+  serviceDefaultEnabledInputs?: string[]
+): string[] {
+  if (isSingleDs) {
+    // For single-DS services, prefer the entry-level defaultEnabledInputs (which may have been
+    // overridden in the static matrix, e.g. ECF OTel entries default to S3 only). Fall back to
+    // all DS inputs when no override is set (original behaviour for non-ECF services).
+    return serviceDefaultEnabledInputs?.length ? serviceDefaultEnabledInputs : dsInfo?.inputs ?? [];
+  }
+  return dsInfo?.defaultEnabledInputs ?? [];
+}
 
 interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
   config: ServiceVars;
   globalRegion: string;
-  onApply: (varsByInput: Record<string, Record<string, string>>, enabledInputs: string[]) => void;
+  onApply: (
+    varsByDataStream: Record<string, ServiceDataStreamVars>,
+    enabledDataStreams: string[]
+  ) => void;
   onClose: () => void;
 }
 
@@ -41,24 +58,26 @@ export function ServiceSettingsFlyout({
   onClose,
 }: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
-  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(() => ({
-    ...config.varsByInput,
+
+  const isSingleDs = service.dataStreams.length === 1;
+
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
+    ...config.varsByDataStream,
   }));
-  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(config.enabledInputs);
-
-  const handleFieldChange = (input: string, fieldName: string, value: string) => {
-    setDraft((prev) => ({
-      ...prev,
-      [input]: { ...(prev[input] ?? {}), [fieldName]: value },
-    }));
-  };
-
-  const handleInputToggle = (input: string, enabled: boolean) => {
-    setDraftEnabledInputs((prev) => (enabled ? [...prev, input] : prev.filter((i) => i !== input)));
-  };
 
   const handleApply = () => {
-    onApply(draft, draftEnabledInputs);
+    const enabledDataStreams = service.dataStreams.filter((dsId) => {
+      const dsVars = draftByDs[dsId];
+      if (dsVars) return dsVars.enabledInputs.length > 0;
+      return (
+        getDefaultDsInputs(
+          service.varDefsByDataStream?.[dsId],
+          isSingleDs,
+          service.defaultEnabledInputs
+        ).length > 0
+      );
+    });
+    onApply(draftByDs, enabledDataStreams);
   };
 
   return (
@@ -77,18 +96,52 @@ export function ServiceSettingsFlyout({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SignalTypeBadge signalType={service.signalType} />
+            <SignalTypeBadge signalTypes={service.signalTypes} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ServiceFieldsForm
           service={service}
-          varsByInput={draft}
-          enabledInputs={draftEnabledInputs}
+          varsByDataStream={draftByDs}
           globalRegion={globalRegion}
-          onFieldChange={handleFieldChange}
-          onInputToggle={handleInputToggle}
+          onFieldChange={(dsId, input, fieldName, value) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varsByInput: {
+                    ...existing.varsByInput,
+                    [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
+                  },
+                },
+              };
+            })
+          }
+          onInputToggle={(dsId, input, enabled) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  enabledInputs: enabled
+                    ? [...existing.enabledInputs, input]
+                    : existing.enabledInputs.filter((i) => i !== input),
+                },
+              };
+            })
+          }
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

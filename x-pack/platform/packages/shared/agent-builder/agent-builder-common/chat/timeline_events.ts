@@ -27,6 +27,9 @@ export const CONVERSATION_SCHEMA_VERSION = 1;
  */
 export const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
 
+export const isEventsNativeVersion = (version: number | undefined): version is number =>
+  typeof version === 'number' && version >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
+
 /** The kind of participant that produced a timeline event. */
 export enum EventActorType {
   /** An authenticated Kibana user. */
@@ -83,6 +86,7 @@ export enum TimelineEventType {
   promptResponse = 'prompt_response',
   // Execution lifecycle
   executionStarted = 'execution_started',
+  executionStep = 'execution_step',
   executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
@@ -150,12 +154,22 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
   ExecutionStartedEventData
 >;
 
+/** A single completed step of an agent run. */
+export interface ExecutionStepEventData {
+  step: ConversationRoundStep;
+  sequence: number;
+}
+export type ExecutionStepEvent = BaseTimelineEvent<
+  TimelineEventType.executionStep,
+  ExecutionStepEventData
+>;
+
 /**
  * The run summary: everything describing the execution itself, independent of how it ended.
  */
 export interface ExecutionRunSummary {
   /** The intermediate steps (tool calls, reasoning, etc.). */
-  steps: ConversationRoundStep[];
+  steps?: ConversationRoundStep[];
   /** Model usage statistics for the run. */
   model_usage: RoundModelUsageStats;
   /** Time to first token, in ms. */
@@ -214,6 +228,7 @@ export type TimelineEvent =
   | UserMessageEvent
   | PromptResponseEvent
   | ExecutionStartedEvent
+  | ExecutionStepEvent
   | ExecutionTerminatedEvent
   | ExecutionFailedEvent
   | ExecutionAbortedEvent;
@@ -223,6 +238,7 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
   | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionStep, ExecutionStepEventData>
   | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
