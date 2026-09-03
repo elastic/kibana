@@ -98,6 +98,7 @@ export interface RulesListTableProps {
   onNavigateToDetails: (rule: RuleApiResponse) => void;
   onExpand: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
+  onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
@@ -143,6 +144,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
+  onEdit,
   onClone,
   onDelete,
   onToggleEnabled,
@@ -419,6 +421,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                     <RuleActionsMenu
                       rule={rule}
                       canWrite={canWrite}
+                      onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
                       onUpdateApiKey={onUpdateApiKey}
@@ -441,6 +444,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     onNavigateToDetails,
     onExpand,
     onQuickEdit,
+    onEdit,
     onClone,
     onDelete,
     onToggleEnabled,
