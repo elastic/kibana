@@ -143,6 +143,7 @@ export type { RendererTypeDefinition } from './renderers';
 export type {
   SurfaceProjectorDefinition,
   SurfaceProjection,
+  SurfaceProjectionAsset,
   SurfaceProjectionInput,
 } from './surface_projection';
 export type {

@@ -178,6 +178,40 @@ describe('projectRoundForSurface', () => {
 
     expect(projection?.[ConversationOriginType.Slack]).not.toHaveProperty('blocks');
   });
+
+  it('base64-encodes chart assets for the wire', async () => {
+    const { projection } = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
+      event: createRoundCompleteEvent('original'),
+      projector: {
+        surface: ConversationOriginType.Slack,
+        project: async ({ message }) => ({
+          message,
+          blocks: [{ type: 'image', slack_file: { ref: 'c1' } }],
+          assets: [{ ref: 'c1', png: Buffer.from('png-bytes'), altText: 'chart' }],
+        }),
+      },
+      logger: loggerMock.create(),
+    });
+
+    expect(projection?.[ConversationOriginType.Slack]?.assets).toEqual([
+      { ref: 'c1', data: Buffer.from('png-bytes').toString('base64'), alt_text: 'chart' },
+    ]);
+  });
+
+  it('omits assets entirely when the projector renders no chart', async () => {
+    const { projection } = await projectRoundForSurface({
+      execution: createExecution({ slackOrigin: true }),
+      event: createRoundCompleteEvent('original'),
+      projector: {
+        surface: ConversationOriginType.Slack,
+        project: async ({ message }) => ({ message, blocks: [{ type: 'divider' }] }),
+      },
+      logger: loggerMock.create(),
+    });
+
+    expect(projection?.[ConversationOriginType.Slack]).not.toHaveProperty('assets');
+  });
 });
 
 describe('deliverCallbackEvents surface projection', () => {

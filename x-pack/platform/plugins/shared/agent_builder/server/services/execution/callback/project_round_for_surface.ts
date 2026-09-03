@@ -8,9 +8,26 @@
 import type { Logger } from '@kbn/logging';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { ConversationOriginType, RoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution, SurfaceProjectorDefinition } from '@kbn/agent-builder-server';
-import type { SurfaceProjectionPayload } from '../../../../common/http_api/chat_callback';
+import type {
+  AgentExecution,
+  SurfaceProjectionAsset,
+  SurfaceProjectorDefinition,
+} from '@kbn/agent-builder-server';
+import type {
+  SurfaceProjectionAssetPayload,
+  SurfaceProjectionPayload,
+} from '../../../../common/http_api/chat_callback';
 import type { SurfaceProjectionServiceStart } from '../../surface_projection';
+
+const toAssetPayload = ({
+  ref,
+  png,
+  altText,
+}: SurfaceProjectionAsset): SurfaceProjectionAssetPayload => ({
+  ref,
+  data: png.toString('base64'),
+  alt_text: altText,
+});
 
 /** Origin type of the execution, when it came from an external surface. */
 export const getExecutionSurface = (
@@ -97,6 +114,7 @@ export const projectRoundForSurface = async ({
         [projector.surface]: {
           text: projection.message,
           ...(projection.blocks ? { blocks: projection.blocks } : {}),
+          ...(projection.assets?.length ? { assets: projection.assets.map(toAssetPayload) } : {}),
           // Terminal projection is the only projection today, so it is always the last.
           final: true,
         },
