@@ -37,22 +37,28 @@ import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 const severityOrder = ['error', 'warning'];
 
 const copyErrorMessageLabel = i18n.translate(
-  'workflowsManagement.workflowYAMLValidationErrors.copyErrorMessage',
+  'workflowsManagement.workflowYAMLValidationErrors.copyMessage',
   {
-    defaultMessage: 'Copy error message',
+    defaultMessage: 'Copy message',
   }
 );
 
 const copiedErrorMessageLabel = i18n.translate(
-  'workflowsManagement.workflowYAMLValidationErrors.copiedErrorMessage',
+  'workflowsManagement.workflowYAMLValidationErrors.copiedMessage',
   {
     defaultMessage: 'Copied',
   }
 );
 
-const hasTextSelection = (): boolean => {
-  const selectedText = window.getSelection()?.toString();
-  return Boolean(selectedText && selectedText.length > 0);
+/** A selection elsewhere on the page, the editor included, must not block navigation. */
+const hasTextSelectionInside = (node: HTMLElement | null): boolean => {
+  const selection = window.getSelection();
+  if (!node || !selection || selection.isCollapsed || selection.toString().length === 0) {
+    return false;
+  }
+  return Array.from({ length: selection.rangeCount }, (_, index) =>
+    selection.getRangeAt(index)
+  ).some((range) => range.intersectsNode(node));
 };
 
 interface WorkflowYamlValidationAccordionProps {
@@ -129,8 +135,10 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
   const { euiTheme } = useEuiTheme();
   const message = error.message ?? '';
 
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+
   const handleRowClick = useCallback(() => {
-    if (hasTextSelection()) {
+    if (hasTextSelectionInside(triggerRef.current)) {
       return;
     }
     onErrorClick?.(error);
@@ -175,6 +183,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
       </EuiFlexItem>
       <EuiFlexItem css={styles.validationErrorText}>
         <div
+          ref={triggerRef}
           role="button"
           tabIndex={0}
           css={styles.validationErrorTrigger}
@@ -280,11 +289,13 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
   );
   const hasAccordionContent = allValidationErrors.length > 0;
 
+  // Not while loading: validation clears its results when connector types reload, and the
+  // accordion should not snap shut across that gap.
   useEffect(() => {
-    if (!hasAccordionContent && isMounted) {
+    if (!hasAccordionContent && !isLoading && isMounted) {
       setIsOpen(false);
     }
-  }, [hasAccordionContent, isMounted]);
+  }, [hasAccordionContent, isLoading, isMounted]);
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
