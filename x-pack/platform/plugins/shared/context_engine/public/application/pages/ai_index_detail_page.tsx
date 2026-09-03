@@ -31,6 +31,7 @@ import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useKiList } from '../hooks/use_ki_list';
 import { useNavigation } from '../hooks/use_navigation';
+import { usePublishViewedAiIndex } from '../hooks/use_publish_viewed_ai_index';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
@@ -60,6 +61,8 @@ export const AiIndexDetailPage = () => {
     size: KI_SUMMARY_PAGE_SIZE,
     enabled: aiIndex !== undefined,
   });
+
+  usePublishViewedAiIndex(aiIndex);
 
   const isManaged = aiIndex !== undefined && aiIndex.managed;
   const hideEditControls = isLoading || isManaged;
@@ -142,9 +145,10 @@ export const AiIndexDetailPage = () => {
           <EuiSpacer size="m" />
           <SourcesPanel
             isLoading={isLoading}
-            sources={aiIndex?.sources ?? []}
+            aiIndex={aiIndex}
             canEdit={aiIndex !== undefined}
             onEditSources={() => setIsEditingSources(true)}
+            onSaved={refetch}
             isManaged={hideEditControls}
           />
           <EuiSpacer size="m" />

@@ -66,6 +66,7 @@ const suggestResult = (
 ): UseSuggestAutomationResult => ({
   canSuggest: false,
   suggestAutomation: jest.fn(),
+  startGuidedSetup: jest.fn(),
   ...overrides,
 });
 

@@ -18,6 +18,7 @@ interface UseSuggestAutomationParams {
 interface UseSuggestAutomationResult {
   canSuggest: boolean;
   suggestAutomation: () => void;
+  startGuidedSetup: () => void;
 }
 
 export type { UseSuggestAutomationResult };
@@ -64,5 +65,16 @@ export const useSuggestAutomation = ({
     });
   }, [provider, aiIndex, canSuggest]);
 
-  return { canSuggest, suggestAutomation };
+  const startGuidedSetup = useCallback(() => {
+    if (!canSuggest || !aiIndex || !provider) {
+      return;
+    }
+
+    provider.startGuidedSetup({
+      aiIndex,
+      onSaved: () => onSavedRef.current(),
+    });
+  }, [provider, aiIndex, canSuggest]);
+
+  return { canSuggest, suggestAutomation, startGuidedSetup };
 };

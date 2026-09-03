@@ -13,6 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { Observable } from 'rxjs';
 import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
 import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
@@ -54,6 +55,12 @@ export interface SuggestAutomationParams {
 export interface SuggestAutomationProvider {
   canSuggest: (params: { aiIndex: GetAiIndexResponse | undefined; isManaged: boolean }) => boolean;
   suggestAutomation: (params: SuggestAutomationParams) => void;
+  /**
+   * Opens the assistant on an index that has nothing configured yet, so the agent works out which
+   * sources to draw on and which automations to build rather than asking the user to specify them
+   * up front.
+   */
+  startGuidedSetup: (params: SuggestAutomationParams) => void;
   /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
   subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
 }
@@ -70,6 +77,11 @@ export interface ContextEnginePluginSetup {
 export interface ContextEnginePluginStart {
   /** Registers suggest-automation hooks used by the Context Engine UI. */
   registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => void;
+  /**
+   * The AI index the user is currently looking at, or `undefined` when they are anywhere else.
+   * Lets an already-open assistant pick up the page's context without the user re-stating it.
+   */
+  viewedAiIndex$: Observable<GetAiIndexResponse | undefined>;
 }
 
 export interface ContextEngineSetupDependencies {

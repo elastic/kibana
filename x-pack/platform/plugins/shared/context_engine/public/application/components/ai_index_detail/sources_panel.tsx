@@ -7,6 +7,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -15,29 +16,35 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import React, { useMemo } from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { toSourceType } from '../../utils/sources';
 import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 
 interface SourcesPanelProps {
   isLoading: boolean;
-  sources: AiIndexSource[];
+  aiIndex: GetAiIndexResponse | undefined;
   canEdit: boolean;
   onEditSources: () => void;
+  onSaved: () => void;
   isManaged: boolean;
 }
 
 export const SourcesPanel = ({
   isLoading,
-  sources,
+  aiIndex,
   canEdit,
   onEditSources,
+  onSaved,
   isManaged,
 }: SourcesPanelProps) => {
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex]);
   const hasConnectorSources = useMemo(
     () => sources.some((source) => source.type === 'connector'),
     [sources]
@@ -45,6 +52,7 @@ export const SourcesPanel = ({
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
     enabled: hasConnectorSources,
   });
+  const { canSuggest, startGuidedSetup } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
@@ -88,22 +96,59 @@ export const SourcesPanel = ({
       <EuiSpacer size="m" />
       {isLoading ? (
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
-      ) : sources.length === 0 ? (
+      ) : sources.length === 0 && isManaged ? (
         <EuiText size="s" color="subdued" data-test-subj="contextAiIndexSourcesEmpty">
           <p>
-            {isManaged ? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.emptyManaged"
-                defaultMessage="This AI index has no sources."
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.sources.empty"
-                defaultMessage="No sources yet. Add a source to start building context for this AI index."
-              />
-            )}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.sources.emptyManaged"
+              defaultMessage="This AI index has no sources."
+            />
           </p>
         </EuiText>
+      ) : sources.length === 0 ? (
+        <EuiEmptyPrompt
+          iconType="database"
+          titleSize="xs"
+          data-test-subj="contextAiIndexSourcesEmpty"
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
+                defaultMessage="No sources yet"
+              />
+            </h3>
+          }
+          body={
+            <p>
+              {canSuggest ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.emptyWithAssistant"
+                  defaultMessage="Describe the data you want agents to answer from, and the assistant works out which sources to draw on and builds the automations that fill this index."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.empty"
+                  defaultMessage="No sources yet. Add a source to start building context for this AI index."
+                />
+              )}
+            </p>
+          }
+          actions={
+            canSuggest
+              ? [
+                  <AiButton
+                    iconType="productAgent"
+                    onClick={startGuidedSetup}
+                    data-test-subj="contextSetUpAiIndexButton"
+                  >
+                    {i18n.translate('xpack.contextEngine.aiIndexDetail.sources.setUpButton', {
+                      defaultMessage: 'Help me set this up',
+                    })}
+                  </AiButton>,
+                ]
+              : undefined
+          }
+        />
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {sources.map((source) => {

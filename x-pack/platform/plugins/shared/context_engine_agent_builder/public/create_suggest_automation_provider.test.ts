@@ -122,6 +122,40 @@ describe('createSuggestAutomationProvider', () => {
     );
   });
 
+  it('opens guided setup with the same attachment but a setup brief', () => {
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newConversation: true,
+        autoSendInitialMessage: false,
+        initialMessage: expect.stringMatching(
+          new RegExp(
+            `\\[\\/${ANALYZE_AND_IMPROVE_SKILL_ID}\\]\\(skill://${ANALYZE_AND_IMPROVE_SKILL_ID}\\).*help me set up`,
+            's'
+          )
+        ),
+        sessionTag: 'context-engine-ai-index-my-ai-index',
+        attachments: [
+          expect.objectContaining({ id: 'my-ai-index', type: AI_INDEX_ATTACHMENT_TYPE }),
+        ],
+      })
+    );
+  });
+
+  it('asks the agent to work out the sources rather than having the user name them', () => {
+    // Creation no longer collects sources, so the brief has to send the agent looking for them.
+    const { provider, openChat } = createProvider();
+
+    provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
+
+    const [{ initialMessage }] = openChat.mock.calls[0];
+    expect(initialMessage).toMatch(/no sources yet/i);
+    expect(initialMessage).toMatch(/indices or connectors/i);
+  });
+
   it('refreshes the page when save automation succeeds for the current AI index', () => {
     const onSaved = jest.fn();
     const { provider, chatEvents$, getChatEvents$ } = createProvider();

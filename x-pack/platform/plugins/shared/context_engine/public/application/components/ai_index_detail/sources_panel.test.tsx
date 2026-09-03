@@ -12,11 +12,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type {
   UseDataConnectorsOptions,
   UseDataConnectorsResult,
 } from '../../hooks/use_data_connectors';
+import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
+import type { UseSuggestAutomationResult } from '../../hooks/use_suggest_automation';
 import { SourcesPanel } from './sources_panel';
 
 const mockUseDataConnectors = jest.fn(
@@ -33,6 +35,19 @@ const mockUseDataConnectors = jest.fn(
 jest.mock('../../hooks/use_data_connectors', () => ({
   useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
 }));
+
+jest.mock('../../hooks/use_suggest_automation');
+
+const mockUseSuggestAutomation = jest.mocked(useSuggestAutomation);
+
+const suggestResult = (
+  overrides: Partial<UseSuggestAutomationResult> = {}
+): UseSuggestAutomationResult => ({
+  canSuggest: false,
+  suggestAutomation: jest.fn(),
+  startGuidedSetup: jest.fn(),
+  ...overrides,
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -56,21 +71,38 @@ const sources: AiIndexSource[] = [
   { type: 'esql', value: 'FROM c' },
 ];
 
+const buildAiIndex = (aiIndexSources: AiIndexSource[]): GetAiIndexResponse => ({
+  id: 'my-ai-index',
+  managed: false,
+  dest: { type: 'index', value: 'ai-index-idx-my-ai-index' },
+  automations: [],
+  sources: aiIndexSources,
+  date_created: '2026-01-01T00:00:00.000Z',
+  date_modified: '2026-01-01T00:00:00.000Z',
+});
+
+const renderPanel = (props: Partial<React.ComponentProps<typeof SourcesPanel>> = {}) =>
+  renderWithProviders(
+    <SourcesPanel
+      isLoading={false}
+      aiIndex={buildAiIndex(sources)}
+      canEdit
+      onEditSources={jest.fn()}
+      onSaved={jest.fn()}
+      isManaged={false}
+      {...props}
+    />
+  );
+
 describe('SourcesPanel', () => {
   beforeEach(() => {
     mockUseDataConnectors.mockClear();
+    mockUseSuggestAutomation.mockReset();
+    mockUseSuggestAutomation.mockReturnValue(suggestResult());
   });
 
   it('shows the loading skeleton while loading and no rows', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading
-        sources={[]}
-        canEdit={false}
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel({ isLoading: true, aiIndex: undefined, canEdit: false });
 
     expect(screen.getByTestId('contextAiIndexSourcesLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
@@ -78,15 +110,7 @@ describe('SourcesPanel', () => {
   });
 
   it('shows the empty message when not loading and there are no sources', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={[]}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel({ aiIndex: buildAiIndex([]) });
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
     expect(
@@ -96,110 +120,84 @@ describe('SourcesPanel', () => {
   });
 
   it('shows read-only empty copy for managed AI indexes with no sources', () => {
-    renderWithProviders(
-      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} isManaged />
-    );
+    renderPanel({ aiIndex: buildAiIndex([]), isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
     expect(screen.getByText('This AI index has no sources.')).toBeInTheDocument();
   });
 
+  it('offers guided setup when the index has no sources and the assistant is available', () => {
+    const startGuidedSetup = jest.fn();
+    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true, startGuidedSetup }));
+
+    renderPanel({ aiIndex: buildAiIndex([]) });
+
+    fireEvent.click(screen.getByTestId('contextSetUpAiIndexButton'));
+    expect(startGuidedSetup).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer guided setup once the index has sources', () => {
+    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true }));
+
+    renderPanel();
+
+    expect(screen.queryByTestId('contextSetUpAiIndexButton')).not.toBeInTheDocument();
+  });
+
+  it('does not offer guided setup when the assistant is unavailable', () => {
+    renderPanel({ aiIndex: buildAiIndex([]) });
+
+    expect(screen.queryByTestId('contextSetUpAiIndexButton')).not.toBeInTheDocument();
+  });
+
+  it('does not offer guided setup for managed AI indexes', () => {
+    mockUseSuggestAutomation.mockReturnValue(suggestResult({ canSuggest: true }));
+
+    renderPanel({ aiIndex: buildAiIndex([]), isManaged: true });
+
+    expect(screen.queryByTestId('contextSetUpAiIndexButton')).not.toBeInTheDocument();
+  });
+
   it('renders one row per source', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel();
 
     expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
   });
 
   it('does not fetch connectors when there are no connector sources', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel();
 
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
   });
 
   it('fetches connectors when at least one source is a connector', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel({ aiIndex: buildAiIndex([{ type: 'connector', value: 'connector-gdrive' }]) });
 
     expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
   });
 
   it('resolves the connector name for connector sources', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel({ aiIndex: buildAiIndex([{ type: 'connector', value: 'connector-gdrive' }]) });
 
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('Google Drive');
   });
 
   it('disables the edit button when editing is not allowed', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit={false}
-        onEditSources={jest.fn()}
-        isManaged={false}
-      />
-    );
+    renderPanel({ canEdit: false });
 
     expect(screen.getByTestId('contextEditSourcesButton')).toBeDisabled();
   });
 
   it('hides the edit button for managed AI indexes', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={jest.fn()}
-        isManaged
-      />
-    );
+    renderPanel({ isManaged: true });
 
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
   });
 
   it('calls onEditSources when the edit button is clicked', () => {
     const onEditSources = jest.fn();
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={onEditSources}
-        isManaged={false}
-      />
-    );
+    renderPanel({ onEditSources });
 
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
