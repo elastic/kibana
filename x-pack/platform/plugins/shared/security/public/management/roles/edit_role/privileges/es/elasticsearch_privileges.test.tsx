@@ -79,6 +79,34 @@ test('it renders data source privileges section when `isDataFederationEnabled` i
   expect(wrapper.find('DataSourcePrivileges')).toHaveLength(1);
 });
 
+test('it preserves existing global.data_source when editing other fields while data federation is disabled', () => {
+  const props = getProps();
+  const roleWithDataSourcePrivileges = {
+    ...props.role,
+    elasticsearch: {
+      ...props.role.elasticsearch,
+      global: {
+        application: { manage: { applications: ['kibana-*'] } },
+        data_source: [{ names: ['acme_*'], privileges: ['read'] }],
+      },
+    },
+  };
+
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges {...props} role={roleWithDataSourcePrivileges as any} />
+  );
+
+  (wrapper.instance() as ElasticsearchPrivileges).onClusterPrivilegesChange(['monitor']);
+
+  expect(props.onChange).toHaveBeenCalledWith({
+    ...roleWithDataSourcePrivileges,
+    elasticsearch: {
+      ...roleWithDataSourcePrivileges.elasticsearch,
+      cluster: ['monitor'],
+    },
+  });
+});
+
 test('addDataSourcePrivilege appends', () => {
   const props = getProps();
   const roleWithObjectGlobal = {
