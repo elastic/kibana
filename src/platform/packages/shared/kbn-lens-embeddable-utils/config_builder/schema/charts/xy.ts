@@ -26,7 +26,7 @@ import {
   getMetricsWithChartDimensionSchemaWithStaticOps,
   xScaleSchema,
 } from './shared';
-import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { esqlColumnWithFormatSchema, staticOperationDefinitionSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { filterSchema } from '../filter';
 import { cornerPositionSchema } from '../alignments';
@@ -881,18 +881,64 @@ const xyLayerUnionNoESQL = z
     description: 'XY chart layer types for DSL queries',
   });
 
+/**
+ * Annotation layer for ES|QL charts: manual (point/range) annotations only.
+ * Query-based annotations require a data view and are hidden in the ES|QL UI,
+ * so the API surface matches. This is deliberately narrower than
+ * `annotationLayerByValueSchema`; widening it later (e.g. adding an ES|QL-based
+ * event type) is an additive, non-breaking change.
+ */
+const annotationLayerESQLSchema = z
+  .object({
+    ...ignoringGlobalFiltersSchema.shape,
+    // no `data_source`: manual annotations carry no field references and the
+    // Lens XY runtime resolves the data view from the chart's data layers
+    type: z.literal('annotations'),
+    events: z
+      .array(z.union([annotationManualEvent, annotationManualRange]))
+      .min(1)
+      .max(100)
+      .meta({ description: 'Array of manual annotation configurations' }),
+  })
+  .strict()
+  .meta({
+    id: 'xyAnnotationLayerESQL',
+    title: 'Annotation Layer (ES|QL)',
+    description:
+      'Layer containing manual (point and range) annotations. Query-based annotations are not supported on ES|QL charts yet.',
+  });
+
+/**
+ * Reference line layer for ES|QL charts: static value thresholds only.
+ * Field-based operations require a data view and are hidden in the ES|QL UI,
+ * so the API surface matches. Relaxing this constraint later is an additive,
+ * non-breaking change.
+ */
+const referenceLineLayerESQLStaticSchema = z
+  .object({
+    ...layerSettingsSchema.shape,
+    ...dataSourceSchema.shape,
+    type: z.literal('reference_lines'),
+    thresholds: z
+      .array(staticOperationDefinitionSchema.extend(referenceLineLayerSharedShape))
+      .min(1)
+      .max(100)
+      .meta({ description: 'Array of static value reference line thresholds' }),
+  })
+  .strict()
+  .meta({
+    id: 'xyReferenceLineLayerESQLStatic',
+    title: 'Reference Line Layer (ES|QL, static values)',
+    description:
+      'Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.',
+  });
+
 const xyLayerUnionESQL = z
-  .union([
-    xyDataLayerSchemaESQL,
-    referenceLineLayerSchemaESQL,
-    referenceLineLayerSchemaNoESQL,
-    annotationLayerByValueSchema,
-    annotationByRefLayerSchema,
-  ])
+  .union([xyDataLayerSchemaESQL, referenceLineLayerESQLStaticSchema, annotationLayerESQLSchema])
   .meta({
     id: 'xyLayersESQL',
     description:
-      'XY chart layer types for ES|QL queries. Annotation layers may accompany ES|QL data layers: they never use the ES|QL datasource and resolve their own data view (query annotations) or none (manual annotations). Reference line layers may be ES|QL or data-view based.',
+      'XY chart layer types for ES|QL queries. Annotation layers (manual annotations only) and reference line layers (static values only) may accompany ES|QL data layers; neither uses the ES|QL datasource.',
   });
 
 /**
