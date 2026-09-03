@@ -2628,6 +2628,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_x_ray/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
