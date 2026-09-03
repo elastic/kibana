@@ -114,9 +114,15 @@ function MapControlsThemeStyles() {
               width: '24px !important',
               borderRadius: '2px !important',
             },
+            '.maplibregl-ctrl button:not(:disabled):hover': {
+              backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
+            },
           },
           '.mapToolbarOverlay__button': {
             transform: 'translateY(0px) !important',
+          },
+          '.mapToolbarOverlay__button:hover': {
+            backgroundColor: `${euiTheme.colors.backgroundBaseInteractiveHover} !important`,
           },
           // The layer table-of-contents entries live in the right-side overlay
           // (a sibling of `.mapContainer`), so their divider and state background
