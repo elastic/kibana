@@ -1,8 +1,9 @@
 # Vega
 
-Dashboard supports a dedicated by-value `vega` panel. Its stored config holds a `spec` string
-(JSON or HJSON); title, time range, and drilldown fields are optional. The string is preserved
-exactly, so comments and formatting round-trip.
+Dashboard supports a dedicated by-value `vega` panel. Its stored config holds a `spec` object with
+either `{ format: 'hjson', value: string }` or `{ format: 'json', value: object }`; title, time range,
+and drilldown fields are optional. HJSON strings are preserved exactly, so comments and formatting
+round-trip.
 
 Add or edit a panel from Dashboard's **Add panel** menu. Editing does not run the spec's queries as
 you type: **Run Preview** renders the current spec on the panel, **Apply and close** commits it to the
@@ -28,9 +29,13 @@ controls server schema registration, enable it before starting Kibana.
 
 - **Either flag disabled (default)**: migration returns no results.
 - **Both flags enabled**:
-  - **By-value** `legacy_vis` Vega panels are converted by mapping `savedVis.params.spec` to `spec`.
+  - **By-value** `legacy_vis` Vega panels use the same format inference as the legacy editor. Specs
+    that parse as strict JSON objects become `spec: { format: 'json', value: parsedSpec }`; all
+    others become `spec: { format: 'hjson', value: savedVis.params.spec }`, preserving their exact
+    text.
   - **By-reference** `legacy_vis` Vega panels are intentionally **not** migrated yet. They remain
-    `legacy_vis` until the standalone Vega embeddable supports library (by-reference) state.
+    `legacy_vis` until the standalone Vega embeddable supports library (by-reference) state. A
+    non-empty `savedObjectId` takes precedence when a panel also contains inline `savedVis` state.
 
 When a panel is migrated, supported panel-level fields (titles, hide flags, optional `time_range`,
 and drilldowns) are preserved, and the stored dashboard saved object remains unchanged.

@@ -10,7 +10,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import isPlainObject from 'lodash/isPlainObject';
 import type { VisualizeByValueState } from '@kbn/visualizations-plugin/common';
-import { isVisualizeByValueState } from '@kbn/visualizations-plugin/common';
+import {
+  isVisualizeByReferenceState,
+  isVisualizeByValueState,
+} from '@kbn/visualizations-plugin/common';
 import type {
   PanelTypeMigrationErrorResult,
   PanelTypeMigrationPanel,
@@ -52,6 +55,10 @@ function getByValueVegaResult(
   panelId: string,
   config: Record<string, unknown>
 ): PanelTypeMigrationResult | undefined {
+  if (isVisualizeByReferenceState(config)) {
+    return undefined;
+  }
+
   if (!isVisualizeByValueState(config)) {
     return undefined;
   }
@@ -69,9 +76,22 @@ function getByValueVegaResult(
     panelId,
     config: {
       ...getVegaPanelBaseConfig(config),
-      spec,
+      spec: getStandaloneVegaSpec(spec),
     },
   };
+}
+
+function getStandaloneVegaSpec(spec: string) {
+  try {
+    const parsedSpec: unknown = JSON.parse(spec);
+    if (isPlainObject(parsedSpec)) {
+      return { format: 'json' as const, value: parsedSpec };
+    }
+  } catch {
+    // The legacy editor treated specs that do not parse as strict JSON as HJSON.
+  }
+
+  return { format: 'hjson' as const, value: spec };
 }
 
 function getVegaSpecFromSavedVis(savedVis: VisualizeByValueState['savedVis']): string | undefined {

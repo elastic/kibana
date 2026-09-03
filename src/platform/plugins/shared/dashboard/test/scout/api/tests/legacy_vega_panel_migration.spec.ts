@@ -19,6 +19,7 @@ import {
   KBN_ARCHIVES,
   LEGACY_VEGA_DASHBOARD_ID,
   LEGACY_VEGA_BY_VALUE_DASHBOARD_ID,
+  LEGACY_VEGA_HYBRID_DASHBOARD_ID,
   LEGACY_VEGA_VISUALIZATION_ID,
 } from '../fixtures';
 
@@ -74,7 +75,14 @@ apiTest.describe(
         expect(response.body.data.panels[0]).toMatchObject({
           type: 'vega',
           config: {
-            spec: '{ $schema: https://vega.github.io/schema/vega/v5.json, data: [], marks: [] }',
+            spec: {
+              format: 'json',
+              value: {
+                $schema: 'https://vega.github.io/schema/vega/v5.json',
+                data: [],
+                marks: [],
+              },
+            },
           },
         });
 
@@ -135,6 +143,38 @@ apiTest.describe(
 
         const response = await apiClient.get(
           `${DASHBOARD_APP_API_PATH}/${LEGACY_VEGA_DASHBOARD_ID}`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              'elastic-api-version': DASHBOARD_APP_API_VERSION,
+              ...viewerCookieHeader,
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.data.panels).toHaveLength(1);
+        expect(response.body.data.panels[0]).toMatchObject({
+          type: 'legacy_vis',
+          config: {
+            savedObjectId: LEGACY_VEGA_VISUALIZATION_ID,
+          },
+        });
+      }
+    );
+
+    apiTest(
+      'internal app read gives a visualization reference precedence over inline state',
+      async ({ apiClient, apiServices }) => {
+        await apiServices.core.settings({
+          'feature_flags.overrides': {
+            [LEGACY_VEGA_MIGRATION_FLAG]: true,
+          },
+        });
+
+        const response = await apiClient.get(
+          `${DASHBOARD_APP_API_PATH}/${LEGACY_VEGA_HYBRID_DASHBOARD_ID}`,
           {
             headers: {
               ...COMMON_HEADERS,

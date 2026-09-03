@@ -36,3 +36,4 @@ export const TEST_DASHBOARD_ID = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
 export const LEGACY_VEGA_DASHBOARD_ID = 'legacy_vega_dashboard';
 export const LEGACY_VEGA_VISUALIZATION_ID = 'legacy_vega_visualization';
 export const LEGACY_VEGA_BY_VALUE_DASHBOARD_ID = 'legacy_vega_by_value_dashboard';
+export const LEGACY_VEGA_HYBRID_DASHBOARD_ID = 'legacy_vega_hybrid_dashboard';

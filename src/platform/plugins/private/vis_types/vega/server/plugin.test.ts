@@ -128,7 +128,12 @@ describe('VisTypeVegaPlugin (server)', () => {
 
     flag$.next(true);
     const resultEnabled = await migration.migrateOut([panel], { savedObjectsClient });
-    expect(resultEnabled).toEqual([{ panelId: '1', config: { spec: '{a: 1}' } }]);
+    expect(resultEnabled).toEqual([
+      {
+        panelId: '1',
+        config: { spec: { format: 'hjson', value: '{a: 1}' } },
+      },
+    ]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
@@ -199,7 +204,51 @@ describe('VisTypeVegaPlugin (server)', () => {
     );
 
     expect(result).toEqual([
-      { panelId: '1', config: { title: 'My panel', hide_border: true, spec: '{a: 1}' } },
+      {
+        panelId: '1',
+        config: {
+          title: 'My panel',
+          hide_border: true,
+          spec: { format: 'hjson', value: '{a: 1}' },
+        },
+      },
+    ]);
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  test('preserves strict JSON specs as JSON', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = embeddableSetup.registerPanelTypeMigration.mock.calls[0][0];
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+    await new Promise(process.nextTick);
+
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const result = await migration.migrateOut(
+      [
+        {
+          id: 'json',
+          config: { savedVis: { type: 'vega', params: { spec: '{"mark":"point"}' } } },
+        },
+      ],
+      { savedObjectsClient }
+    );
+
+    expect(result).toEqual([
+      {
+        panelId: 'json',
+        config: { spec: { format: 'json', value: { mark: 'point' } } },
+      },
     ]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
@@ -224,14 +273,75 @@ describe('VisTypeVegaPlugin (server)', () => {
     const savedObjectsClient = savedObjectsClientMock.create();
 
     const result = await migration.migrateOut(
+      [{ id: '1', config: { savedVis: { type: 'pie', params: {} } } }],
+      { savedObjectsClient }
+    );
+
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  test('does not migrate by-reference legacy visualization panels', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = embeddableSetup.registerPanelTypeMigration.mock.calls[0][0];
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+    await new Promise(process.nextTick);
+
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const result = await migration.migrateOut(
+      [{ id: 'by-reference', config: { savedObjectId: 'vis-1' } }],
+      { savedObjectsClient }
+    );
+
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  test('does not migrate hybrid by-reference and by-value legacy visualization panels', async () => {
+    const plugin = new VisTypeVegaPlugin(coreMock.createPluginInitializerContext());
+    const coreSetup = coreMock.createSetup();
+    const embeddableSetup = createEmbeddableSetupMock();
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockResolvedValue(true);
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    plugin.setup(coreSetup, { embeddable: embeddableSetup });
+
+    const migration = embeddableSetup.registerPanelTypeMigration.mock.calls[0][0];
+
+    const flag$ = new BehaviorSubject<boolean>(true);
+    coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(flag$.asObservable());
+    plugin.start(coreStart);
+    await new Promise(process.nextTick);
+
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const result = await migration.migrateOut(
       [
-        { id: '1', config: { savedVis: { type: 'pie', params: {} } } },
-        { id: '2', config: { savedObjectId: 'vis-1' } },
+        {
+          id: 'hybrid',
+          config: {
+            savedObjectId: 'vis-1',
+            savedVis: { type: 'vega', params: { spec: '{a: 1}' } },
+          },
+        },
       ],
       { savedObjectsClient }
     );
 
     expect(result).toEqual([]);
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
