@@ -7,6 +7,7 @@
 
 import { MAX_ID_LENGTH, type Feature } from '@kbn/significant-events-schema';
 import { getCodePredictiveSourceId } from '../../../../lib/knowledge_indicators/code_intelligence';
+import { CodeExtractionScopeConflictError } from '../../../../lib/workflows/code_extraction_scope_conflict_error';
 import { internalKICodeFeaturesRoutes } from './route';
 
 const mockClassifyLoggingSites = jest.fn();
@@ -16,6 +17,8 @@ const mockIdentifyCodeQueries = jest.fn();
 const mockExtractOtelSignalsResult = jest.fn();
 const mockGenerateOtelQueries = jest.fn();
 const mockResolveConnectorForFeature = jest.fn();
+const mockCodeboxListRepos = jest.fn().mockResolvedValue([]);
+const mockCodeboxResolveHead = jest.fn();
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
@@ -26,7 +29,8 @@ jest.mock('../../../utils/resolve_connector_for_feature', () => ({
 jest.mock('../../../../lib/knowledge_indicators/code_intelligence/codebox_client', () => ({
   getCodeboxClient: jest.fn().mockReturnValue({
     health: jest.fn().mockResolvedValue({ status: 'ok' }),
-    listRepos: jest.fn().mockResolvedValue([]),
+    listRepos: (...args: unknown[]) => mockCodeboxListRepos(...args),
+    resolveHead: (...args: unknown[]) => mockCodeboxResolveHead(...args),
     grep: jest.fn().mockResolvedValue([]),
     show: jest.fn().mockResolvedValue(''),
     tree: jest.fn().mockResolvedValue([]),
@@ -56,6 +60,8 @@ const serviceDistributionRoute =
 const reconcileRoute =
   internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_reconcile'];
 const runRoute = internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_run'];
+const listReposRoute =
+  internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_list_repos'];
 const identifyOtelSignalsRoute =
   internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_identify_otel_signals'];
 const runStatusRoute =
@@ -67,6 +73,7 @@ type ResetHandlerParams = Parameters<typeof resetRoute.handler>[0];
 type ServiceDistributionHandlerParams = Parameters<typeof serviceDistributionRoute.handler>[0];
 type ReconcileHandlerParams = Parameters<typeof reconcileRoute.handler>[0];
 type RunHandlerParams = Parameters<typeof runRoute.handler>[0];
+type ListReposHandlerParams = Parameters<typeof listReposRoute.handler>[0];
 type IdentifyOtelHandlerParams = Parameters<typeof identifyOtelSignalsRoute.handler>[0];
 type RunStatusHandlerParams = Parameters<typeof runStatusRoute.handler>[0];
 
@@ -634,6 +641,110 @@ describe('Code Intelligence routes', () => {
       })
     );
     expect(result).toEqual({ executionId: 'exec-1', isNew: true });
+  });
+
+  it('passes an exact repository scope to the extraction workflow', async () => {
+    mockResolveConnectorForFeature.mockResolvedValue('.some-user-configured-connector');
+    const run = jest.fn().mockResolvedValue({ executionId: 'exec-1', isNew: true });
+
+    await runRoute.handler({
+      params: { body: { repository: 'elastic/eis-gateway' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      workflowClients: {
+        codeExtractionClient: {
+          isInstalled: jest.fn().mockResolvedValue(true),
+          getStatus: jest.fn().mockResolvedValue({ available: true }),
+          run,
+        },
+      },
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: {
+        core: { featureFlags: enabledFeatureFlags },
+        searchInferenceEndpoints: {},
+      },
+      logger: { get: jest.fn().mockReturnValue({ info: jest.fn(), warn: jest.fn() }) },
+      maintenanceService: createMaintenanceService(),
+    } as unknown as RunHandlerParams);
+
+    expect(run).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: {
+          agentConnectorId: '.some-user-configured-connector',
+          repository: 'elastic/eis-gateway',
+        },
+      })
+    );
+  });
+
+  it('returns conflict when another repository scope is already running', async () => {
+    mockResolveConnectorForFeature.mockResolvedValue('.some-user-configured-connector');
+    const run = jest
+      .fn()
+      .mockRejectedValue(
+        new CodeExtractionScopeConflictError(
+          'Code Intelligence extraction is already running for all repositories.'
+        )
+      );
+
+    await expect(
+      runRoute.handler({
+        params: { body: { repository: 'elastic/eis-gateway' } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+        workflowClients: {
+          codeExtractionClient: {
+            isInstalled: jest.fn().mockResolvedValue(true),
+            getStatus: jest.fn().mockResolvedValue({ available: true }),
+            run,
+          },
+        },
+        getSpaceId: jest.fn().mockResolvedValue('default'),
+        server: {
+          core: { featureFlags: enabledFeatureFlags },
+          searchInferenceEndpoints: {},
+        },
+        logger: { get: jest.fn().mockReturnValue({ info: jest.fn(), warn: jest.fn() }) },
+        maintenanceService: createMaintenanceService(),
+      } as unknown as RunHandlerParams)
+    ).rejects.toMatchObject({ output: { statusCode: 409 } });
+  });
+
+  it('filters the workflow repository list to an exact repository', async () => {
+    mockCodeboxListRepos.mockResolvedValueOnce([
+      { name: 'elastic/eis-gateway', status: 'ready' },
+      { name: 'elastic/kibana', status: 'ready' },
+    ]);
+    mockCodeboxResolveHead
+      .mockResolvedValueOnce('eis-gateway-sha')
+      .mockResolvedValueOnce('kibana-sha');
+
+    const result = await listReposRoute.handler({
+      params: { body: { repository: 'elastic/eis-gateway' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      server: { core: { featureFlags: enabledFeatureFlags }, actions: {} },
+      logger: { get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      maintenanceService: createMaintenanceService(),
+    } as unknown as ListReposHandlerParams);
+
+    expect(result.repos).toEqual([
+      {
+        repository: 'elastic/eis-gateway',
+        org: 'elastic',
+        repo: 'eis-gateway',
+        gitSha: 'eis-gateway-sha',
+        ref: 'HEAD',
+      },
+    ]);
+  });
+
+  it('validates optional repository run scope', () => {
+    expect(runRoute.params.parse({})).toEqual({});
+    expect(runRoute.params.parse({ body: { repository: 'elastic/eis-gateway' } })).toEqual({
+      body: { repository: 'elastic/eis-gateway' },
+    });
+    expect(() => runRoute.params.parse({ body: { repository: '' } })).toThrow();
   });
 
   it('preserves the small run-status response unless details are requested', async () => {

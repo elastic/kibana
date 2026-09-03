@@ -15,11 +15,14 @@ import {
   getCodeExtractionRunDetails,
   type CodeExtractionRunDetails,
 } from './code_extraction_run_status';
+import { CodeExtractionScopeConflictError } from './code_extraction_scope_conflict_error';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 interface CodeExtractionWorkflowInputPayload {
   /** Connector for the code-intelligence agent steps. Omitted -> YAML default. */
   agentConnectorId?: string;
+  /** Exact Codebox repository to process. Omitted -> all indexed repositories. */
+  repository?: string;
 }
 
 export interface CodeExtractionRunParams {
@@ -54,13 +57,38 @@ export class SignificantEventsCodeExtractionClient {
   }> {
     const lastExecution = await this.workflowExecutionService.getLastExecution(spaceId);
     if (lastExecution && !isTerminalStatus(lastExecution.status)) {
-      return { executionId: lastExecution.id, isNew: false };
+      const activeExecution = await this.workflowExecutionService.getExecution({
+        id: lastExecution.id,
+        spaceId,
+        options: { includeInput: true },
+      });
+      const activeInputs = activeExecution?.context?.inputs;
+      const activeRepositoryInput =
+        typeof activeInputs === 'object' && activeInputs !== null && 'repository' in activeInputs
+          ? activeInputs.repository
+          : undefined;
+      const activeRepository =
+        typeof activeRepositoryInput === 'string' && activeRepositoryInput.length > 0
+          ? activeRepositoryInput
+          : undefined;
+      const requestedRepository = inputs?.repository;
+      if (activeRepository === requestedRepository) {
+        return { executionId: lastExecution.id, isNew: false };
+      }
+      throw new CodeExtractionScopeConflictError(
+        `Code Intelligence extraction is already running for ${
+          activeRepository ? `repository "${activeRepository}"` : 'all repositories'
+        }.`
+      );
     }
 
     onBeforeStart?.();
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,
-      inputs: inputs?.agentConnectorId ? { agentConnectorId: inputs.agentConnectorId } : {},
+      inputs: {
+        ...(inputs?.agentConnectorId ? { agentConnectorId: inputs.agentConnectorId } : {}),
+        ...(inputs?.repository ? { repository: inputs.repository } : {}),
+      },
       request,
     });
     return { executionId, isNew: true };

@@ -33,6 +33,7 @@ import type {
 } from '../../../../lib/knowledge_indicators/knowledge_indicator_client';
 import { REVISION_SIZE_LIMIT } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/revision_reader';
 import type { SignificantEventsCodeExtractionClient } from '../../../../lib/workflows/code_extraction_workflow_client';
+import { CodeExtractionScopeConflictError } from '../../../../lib/workflows/code_extraction_scope_conflict_error';
 import {
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
   FALLBACK_LOG_INDEX_PATTERN,
@@ -1352,8 +1353,16 @@ const listReposRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z
+      .object({
+        /** Exact repository to return. Empty or omitted means all indexed repositories. */
+        repository: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  }),
   handler: async ({
+    params,
     request,
     getScopedClients,
     server,
@@ -1374,7 +1383,10 @@ const listReposRoute = createServerRoute({
       logger: routeLogger,
     });
     const repos = await listIndexedRepos({ codebox, logger: routeLogger });
-    return { repos };
+    const repository = params?.body?.repository;
+    return {
+      repos: repository ? repos.filter((repo) => repo.repository === repository) : repos,
+    };
   },
 });
 
@@ -1530,8 +1542,16 @@ const runCodeIntelligenceRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z
+      .object({
+        /** Exact Codebox repository to process. Omitted means all indexed repositories. */
+        repository: z.string().min(1).max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  }),
   handler: async ({
+    params,
     request,
     getScopedClients,
     workflowClients,
@@ -1572,7 +1592,24 @@ const runCodeIntelligenceRoute = createServerRoute({
       featureName: 'code intelligence extraction',
       request,
     });
-    return codeExtractionClient.run({ request, spaceId, inputs: { agentConnectorId } });
+    try {
+      return await codeExtractionClient.run({
+        request,
+        spaceId,
+        inputs: {
+          agentConnectorId,
+          ...(params?.body?.repository ? { repository: params.body.repository } : {}),
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof CodeExtractionScopeConflictError ||
+        (error instanceof Error && error.name === 'CodeExtractionScopeConflictError')
+      ) {
+        throw new StatusError(error.message, 409);
+      }
+      throw error;
+    }
   },
 });
 
