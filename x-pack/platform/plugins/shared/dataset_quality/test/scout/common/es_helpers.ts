@@ -305,12 +305,14 @@ const putLogIndexTemplateMeta = async ({
     modification_date: modificationDate,
     created_date_millis: createdDateMillis,
     modified_date_millis: modifiedDateMillis,
+    registry_installed: registryInstalled,
     ...safeTemplate
   } = indexTemplates[0].index_template as IndicesIndexTemplate & {
     created_date: number;
     created_date_millis: number;
     modification_date: number;
     modified_date_millis: number;
+    registry_installed: boolean;
   };
 
   await esClient.indices.putIndexTemplate({
