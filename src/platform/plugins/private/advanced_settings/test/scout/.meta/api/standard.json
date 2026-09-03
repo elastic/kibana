@@ -1,0 +1,92 @@
+{
+  "sha1": "3652bacd95595e8ac59ee24cabb0e0b673b4325e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "fb1600ba4d9fa5a-54669fb7265099b",
+      "title": "Advanced settings feature controls settings can be saved with the advancedSettings: [\"all\"] feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 96,
+        "column": 23
+      }
+    },
+    {
+      "id": "fb1600ba4d9fa5a-e9fc33f47b3713a",
+      "title": "Advanced settings feature controls settings cannot be saved with the advancedSettings: [\"read\"] feature privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 102,
+        "column": 5
+      }
+    },
+    {
+      "id": "fb1600ba4d9fa5a-13e3df37a6e8ff1",
+      "title": "Advanced settings feature controls settings cannot be saved with savedObjectsManagement: [\"all\"] but only advancedSettings: [\"read\"] privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 112,
+        "column": 14
+      }
+    },
+    {
+      "id": "fb1600ba4d9fa5a-c68494ea661ffe8",
+      "title": "Advanced settings feature controls user_1 can save settings and telemetry in space_1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 116,
+        "column": 88
+      }
+    },
+    {
+      "id": "fb1600ba4d9fa5a-cbe40e95df750f5",
+      "title": "Advanced settings feature controls user_1 can only save telemetry in space_2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 125,
+        "column": 28
+      }
+    },
+    {
+      "id": "fb1600ba4d9fa5a-3df5d0e1a3e47ca",
+      "title": "Advanced settings feature controls user_1 can't save either settings or telemetry in space_3",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 137,
+        "column": 25
+      }
+    }
+  ]
+}
