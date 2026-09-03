@@ -27,7 +27,9 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerImprovementRoutes } from './routes/improvements';
 import { registerSignalRoutes } from './routes/signals';
+import type { WorkflowProvider } from './workflows/provider';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -66,6 +68,9 @@ export class ContextEnginePlugin
   private scheduleService?: FeedbackAnalysisScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowEnablementApi;
+  /** Registered by `contextEngineAgentBuilder`, which can depend on both this plugin and workflows. */
+  private workflowProvider?: WorkflowProvider;
+  private spaces?: SpacesPluginStart;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
@@ -207,19 +212,45 @@ export class ContextEnginePlugin
       },
     });
 
+    const getSpaces = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.spaces;
+    };
+
+    const getActions = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.actions;
+    };
+
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({
       router,
-      getSpaces: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.spaces;
-      },
+      getSpaces,
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    // Improvement review: list what a run proposed, decide on one, and start a run by hand.
+    registerImprovementRoutes({
+      router,
+      getAiIndexService,
+      getImprovementsService,
+      getWorkflowProvider: () => this.workflowProvider,
+      getScheduleService,
+      getActions,
+      getSpaces,
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+      logger: this.logger.get('routes'),
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      registerWorkflowProvider: (provider) => {
+        if (this.workflowProvider) {
+          throw new Error('A workflow provider is already registered for the Context Engine');
+        }
+        this.workflowProvider = provider;
+      },
     };
   }
 

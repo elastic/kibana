@@ -45,6 +45,17 @@ export interface FeedbackAnalysisScheduleService {
   /** Brings the managed workflow for one AI index in line with its configuration. */
   reconcile(params: ReconcileScheduleParams): Promise<void>;
 
+  /**
+   * Runs one analysis immediately, off-schedule, and returns the execution id.
+   *
+   * Only possible while analysis is enabled: disabling uninstalls the per-index workflow, so with
+   * it off there is no instance to execute. The caller checks the configuration and explains that,
+   * rather than offering an action that would fail here.
+   *
+   * Takes no space: the instance lives where it was installed, not where the request came from.
+   */
+  run(params: { aiIndexId: string; request: KibanaRequest }): Promise<string>;
+
   /** Tears the schedule down when the AI index it analyzes is deleted. */
   remove(params: { aiIndexId: string }): Promise<void>;
 }
@@ -131,6 +142,21 @@ export const createFeedbackAnalysisScheduleService = ({
       log.info(
         `Scheduled feedback analysis for AI index '${aiIndexId}' every ${intervalMinutes}m, running as the user who enabled it`
       );
+    },
+
+    async run({ aiIndexId, request }) {
+      const client = await getManagedWorkflowsClient();
+      const executionId = await client.execute(
+        request,
+        CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+        {
+          spaceId: SCHEDULE_SPACE_ID,
+          workflowIdSuffix: aiIndexId,
+          triggeredBy: 'manual',
+        }
+      );
+      log.info(`Started an off-schedule feedback analysis run for AI index '${aiIndexId}'`);
+      return executionId;
     },
 
     async remove({ aiIndexId }) {
