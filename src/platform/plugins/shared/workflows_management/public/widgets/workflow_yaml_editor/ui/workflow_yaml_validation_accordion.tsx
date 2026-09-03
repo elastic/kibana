@@ -332,6 +332,7 @@ const componentStyles = {
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: euiThemeContext.euiTheme.size.s,
+      userSelect: 'text',
       '&:hover': {
         textDecoration: 'underline',
       },
