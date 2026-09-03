@@ -509,6 +509,7 @@ const CreatePackagePolicyProps = {
       ),
     ])
   ),
+  vars: schema.maybe(RestConfigRecordSchema),
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
   inputs: schema.arrayOf(
