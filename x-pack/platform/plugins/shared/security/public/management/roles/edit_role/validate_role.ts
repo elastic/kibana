@@ -287,20 +287,6 @@ export class RoleValidator {
 
     const dataSourcePrivileges = role.elasticsearch.global?.data_source ?? [];
 
-    if (!Array.isArray(dataSourcePrivileges)) {
-      throw new TypeError(
-        i18n.translate(
-          'xpack.security.management.editRole.validateRole.dataSourcePrivilegesTypeErrorMessage',
-          {
-            defaultMessage: 'Expected {dataSourcePrivileges} to be an array',
-            values: {
-              dataSourcePrivileges: '"role.elasticsearch.global.data_source"',
-            },
-          }
-        )
-      );
-    }
-
     const areDataSourcesInvalid = dataSourcePrivileges.reduce((isInvalid, privilege) => {
       if (
         this.validateDataSourcePrivilegeNamesField(privilege).isInvalid ||
