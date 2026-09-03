@@ -10,8 +10,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { LineCounter } from 'yaml';
+import type { StepNameInfo, YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllStepNames } from './collect_all_step_names';
-import type { StepNameInfo, YamlValidationResult } from '../model/types';
 
 export function validateStepNameUniqueness(
   yamlDocument: any,

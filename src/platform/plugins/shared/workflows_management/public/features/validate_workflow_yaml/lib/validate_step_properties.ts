@@ -9,6 +9,7 @@
 
 import type { SelectionDetails, SelectionOption } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import type { StepPropertyItem, StepPropertyValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { isTemplateReference } from './is_template_reference';
 import { stepSchemas } from '../../../../common/step_schemas';
@@ -18,7 +19,6 @@ import {
   getStepPropertyValidationOutcomeCacheKey,
   setCachedStepPropertyValidationOutcome,
 } from '../../../shared/lib/step_property_selection_cache';
-import type { StepPropertyItem, StepPropertyValidationResult } from '../model/types';
 
 export { clearStepPropertyValidationOutcomeCache } from '../../../shared/lib/step_property_selection_cache';
 

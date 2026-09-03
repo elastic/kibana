@@ -16,9 +16,10 @@ import {
   MAP_BINDING_IDENTIFIER_REGEX,
   MAP_DIRECTIVE,
 } from '@kbn/workflows-extensions/common';
-import { inferZodType, matchVariable } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
-import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
+import { matchVariable } from '../../regex';
+import { inferZodType } from '../../zod/infer_zod_type';
+import { parseVariablePath } from '../parse_variable_path';
 
 interface DataMapContextSchemaEntries {
   item: z.ZodType;

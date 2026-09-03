@@ -10,11 +10,11 @@
 import { isSeq } from 'yaml';
 import type { LineCounter } from 'yaml';
 import { PARALLEL_MODE_REFINEMENT_MESSAGE } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type {
   StepInfo,
   WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 const PARALLEL_STEP_TYPE = 'parallel';
 

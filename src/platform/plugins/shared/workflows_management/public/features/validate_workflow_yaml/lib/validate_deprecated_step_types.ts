@@ -9,9 +9,9 @@
 
 import type { LineCounter } from 'yaml';
 import { getDeprecatedStepMessage } from '@kbn/workflows';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getDeprecatedStepMetadata } from '../../../../common/schema';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 export function validateDeprecatedStepTypes(
   workflowLookup: WorkflowLookup,

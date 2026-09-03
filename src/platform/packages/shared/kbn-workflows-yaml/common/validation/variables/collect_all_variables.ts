@@ -11,8 +11,8 @@ import type { Document, LineCounter } from 'yaml';
 import { visit } from 'yaml';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { matchAllVariables } from '@kbn/workflows-yaml';
-import type { VariableItem } from '../model/types';
+import { matchAllVariables } from '../../regex';
+import type { VariableItem } from '../types';
 
 interface ScalarEntry {
   start: number;

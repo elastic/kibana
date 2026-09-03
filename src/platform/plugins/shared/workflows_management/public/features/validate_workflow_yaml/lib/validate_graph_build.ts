@@ -8,9 +8,9 @@
  */
 
 import type { LineCounter } from 'yaml';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/workflow_detail/types';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../model/types';
 
 /**
  * Surfaces a graph-build failure (compiling the parsed workflow definition into

@@ -9,14 +9,11 @@
 
 import type { WorkflowValidationRuleId } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { YamlValidationDiagnostic, YamlValidationResult } from '@kbn/workflows-yaml';
 import type {
   WorkflowStepTriggerTab,
   WorkflowTriggerTab,
 } from '../../features/run_workflow/ui/types';
-import type {
-  YamlValidationDiagnostic,
-  YamlValidationResult,
-} from '../../features/validate_workflow_yaml/model/types';
 import {
   WorkflowAiChatEventTypes,
   workflowEventNames,

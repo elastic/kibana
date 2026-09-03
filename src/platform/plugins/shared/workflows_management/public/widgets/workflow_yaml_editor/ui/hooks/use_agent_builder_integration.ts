@@ -13,6 +13,7 @@ import { v4 } from 'uuid';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
   AttachmentBridge,
@@ -26,7 +27,6 @@ import {
   WORKFLOW_EDITOR_ATTACHMENT_ID,
 } from '../../../../features/ai_integration';
 import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTelemetry } from '../../../../hooks/use_telemetry';
 

@@ -11,6 +11,7 @@ import './use_workflow_change_history_preview_validation.test_mocks';
 
 import { act, renderHook, type RenderHookResult, waitFor } from '@testing-library/react';
 import type { MutableRefObject } from 'react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
   applyWorkflowYamlValidationToEditor,
@@ -39,7 +40,6 @@ import {
   getWorkflowYamlValidationContextError,
   useWorkflowYamlValidationContextRef,
 } from '../validate_workflow_yaml/lib/use_workflow_yaml_validation_context';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../validate_workflow_yaml/model/use_workflow_json_schema';
 
 const mockApplyValidation = applyWorkflowYamlValidationToEditor as jest.Mock;

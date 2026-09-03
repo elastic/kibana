@@ -11,8 +11,8 @@ import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryPreviewFooter } from './workflow_change_history_preview_footer';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
 
 jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => ({
   WorkflowYamlValidationAccordion: ({

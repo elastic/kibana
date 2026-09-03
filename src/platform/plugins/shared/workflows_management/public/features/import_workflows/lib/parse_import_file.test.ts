@@ -13,6 +13,7 @@ import { parseImportFile } from './parse_import_file';
 import { MAX_AGGREGATE_IMPORT_BYTES } from '../../../../common/lib/import';
 
 jest.mock('@kbn/workflows-yaml', () => ({
+  ...jest.requireActual('@kbn/workflows-yaml'),
   parseYamlToJSONWithoutValidation: (yamlString: string) => {
     try {
       const json = jest.requireActual('yaml').parse(yamlString) as Record<string, unknown>;

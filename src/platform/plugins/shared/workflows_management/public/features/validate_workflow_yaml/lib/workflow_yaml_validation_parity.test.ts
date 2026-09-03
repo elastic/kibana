@@ -8,10 +8,13 @@
  */
 
 import { monaco } from '@kbn/code-editor';
+import {
+  filterHighlightableValidationResults,
+  validationResultsFingerprint,
+} from '@kbn/workflows-yaml';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
-import { filterHighlightableValidationResults, validationResultsFingerprint } from '../model/types';
 
 jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
   validateEsqlSteps: jest.fn(async () => []),

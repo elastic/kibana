@@ -13,7 +13,7 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { ConnectorStep } from '@kbn/workflows/spec/schema';
-import { matchAllVariables } from '@kbn/workflows-yaml';
+import { matchAllVariables } from '../../regex';
 import {
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_VALIDATION_YAML,
@@ -25,22 +25,21 @@ import {
 import { collectAllVariables } from './collect_all_variables';
 import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
 import { validateVariables } from './validate_variables';
-import { createFakeMonacoModel } from '../../../../common/mocks/monaco_model';
-import { extendContextWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
-import { FOREACH_ITEM_SCHEMA_DESC } from '../../workflow_context/lib/get_foreach_state_schema';
+import { positionAt } from './__fixtures__/text_position';
+import { extendContextWithTemplateLocals } from '../context/extend_context_with_template_locals';
+import { FOREACH_ITEM_SCHEMA_DESC } from '../context/get_foreach_state_schema';
 
 describe('validateVariables for-loop integration', () => {
   const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
   const lineCounter = new LineCounter();
   const yamlDocument = parseDocument(FOR_LOOP_VALIDATION_YAML, { lineCounter });
-  const model = createFakeMonacoModel(FOR_LOOP_VALIDATION_YAML);
 
   function variableItemForKey(key: string) {
     const match = matchAllVariables(FOR_LOOP_VALIDATION_YAML).find((m) => m.groups.key === key);
     expect(match).toBeDefined();
     const startOffset = match!.index ?? 0;
-    const startPosition = model.getPositionAt(startOffset);
-    const endPosition = model.getPositionAt(startOffset + match![0].length);
+    const startPosition = positionAt(FOR_LOOP_VALIDATION_YAML, startOffset);
+    const endPosition = positionAt(FOR_LOOP_VALIDATION_YAML, startOffset + match![0].length);
     return {
       id: `${key}-var`,
       type: 'regexp' as const,
@@ -134,12 +133,11 @@ steps:
     };
     const graph = WorkflowGraph.fromWorkflowDefinition(definition);
     const doc = parseDocument(templateYaml);
-    const innerModel = createFakeMonacoModel(templateYaml);
     const match = matchAllVariables(templateYaml).find((m) => m.groups?.key === 'forloop.index');
     expect(match).toBeDefined();
     const offset = match!.index ?? 0;
-    const start = innerModel.getPositionAt(offset);
-    const end = innerModel.getPositionAt(offset + match![0].length);
+    const start = positionAt(templateYaml, offset);
+    const end = positionAt(templateYaml, offset + match![0].length);
 
     const results = validateVariables(
       [
@@ -231,10 +229,9 @@ steps:
     };
     const literalGraph = WorkflowGraph.fromWorkflowDefinition(literalDefinition);
     const literalDoc = parseDocument(yamlSource);
-    const literalModel = createFakeMonacoModel(yamlSource);
     const varOffset = yamlSource.indexOf('{{ yy.name }}');
-    const start = literalModel.getPositionAt(varOffset);
-    const end = literalModel.getPositionAt(varOffset + '{{ yy.name }}'.length);
+    const start = positionAt(yamlSource, varOffset);
+    const end = positionAt(yamlSource, varOffset + '{{ yy.name }}'.length);
 
     const results = validateVariables(
       [
@@ -262,14 +259,13 @@ steps:
   it('treats inner and outer loop variables as valid in nested for-loop body', () => {
     const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
     const nestedDoc = parseDocument(FOR_LOOP_NESTED_YAML);
-    const nestedModel = createFakeMonacoModel(FOR_LOOP_NESTED_YAML);
     const innerMatch = matchAllVariables(FOR_LOOP_NESTED_YAML).find(
       (m) => m.groups?.key === 'inner'
     );
     expect(innerMatch).toBeDefined();
     const innerOffset = innerMatch!.index ?? 0;
-    const innerStart = nestedModel.getPositionAt(innerOffset);
-    const innerEnd = nestedModel.getPositionAt(innerOffset + innerMatch![0].length);
+    const innerStart = positionAt(FOR_LOOP_NESTED_YAML, innerOffset);
+    const innerEnd = positionAt(FOR_LOOP_NESTED_YAML, innerOffset + innerMatch![0].length);
 
     const innerResults = validateVariables(
       [
