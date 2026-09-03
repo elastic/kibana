@@ -64,7 +64,7 @@ describe('getSchemaForAuthType()', () => {
 
     expect(schema.meta()).toEqual({
       authMode: 'shared',
-      label: 'Elastic app',
+      label: 'Elastic app (bot user)',
       isInternal: true,
     });
   });
