@@ -12,7 +12,7 @@ import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inferen
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { ResolvedInferenceEndpoints } from './types';
+import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from './types';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -24,24 +24,15 @@ import type { ResolvedInferenceEndpoints } from './types';
  * @param getConnectorById - Function that returns a connector by ID.
  * @param featureId - The feature to resolve endpoints for.
  * @param logger - Logger instance for warnings.
+ * @param opts - Optional resolution options (see {@link GetForFeatureOptions}).
  */
-export interface GetForFeatureOpts {
-  /**
-   * When true, skips the KIBANA_DEFAULT_CHAT_COMPLETION fallback so that an empty list is
-   * returned when no configured or recommended endpoints are available in the deployment.
-   * Use this when the caller wants a clean "nothing available" signal and handles the fallback
-   * itself (e.g. Agent Builder falling back to the user's execution model).
-   */
-  onlyReturnConfigured?: boolean;
-}
-
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
   logger: Logger,
-  opts?: GetForFeatureOpts
+  opts?: GetForFeatureOptions
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
     ids,
@@ -110,7 +101,7 @@ export const resolveFeatureEndpointIds = (
   soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
   logger: Logger,
-  opts?: GetForFeatureOpts
+  opts?: GetForFeatureOptions
 ): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
@@ -213,7 +204,7 @@ const resolveEndpointIds = async (
   soClient: SavedObjectsClientContract,
   featureId: string,
   logger: Logger,
-  opts?: GetForFeatureOpts
+  opts?: GetForFeatureOptions
 ): Promise<ResolvedEndpointIds> => {
   const soFeatures = await readSettingsFeatures(soClient, logger);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));

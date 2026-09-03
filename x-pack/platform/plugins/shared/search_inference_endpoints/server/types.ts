@@ -61,9 +61,14 @@ export interface ResolvedInferenceApiEndpoints {
 
 export interface GetForFeatureOptions {
   /**
-   * When true, skips the KIBANA_DEFAULT_CHAT_COMPLETION fallback so that an empty list is
-   * returned when no configured or recommended endpoints are available in the deployment.
-   * Use this when the caller handles the empty-list case itself (e.g. falling back to the
+   * When true, bypasses the global-default-prepend logic in `resolveModelsForFeature` and
+   * skips the `KIBANA_DEFAULT_CHAT_COMPLETION` ultimate fallback.
+   *
+   * - SO overrides and `recommendedEndpoints` are still returned normally.
+   * - An empty list signals "nothing explicitly configured for this feature".
+   *
+   * Use this when the caller wants a clean "nothing configured" signal and
+   * handles the fallback itself (e.g. Agent Builder falling back to the
    * user's current execution model).
    */
   onlyReturnConfigured?: boolean;

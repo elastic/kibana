@@ -14,7 +14,7 @@ import {
 import { mergeConnectors, type ApiInferenceConnector } from './merge_connectors';
 import type { ResolvedInferenceEndpoints } from '../types';
 
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
+export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface ResolvedConnectorsForFeature {
   connectors: ApiInferenceConnector[];
