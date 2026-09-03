@@ -138,7 +138,7 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 :::::
 
-## Don't select elements by index [dont-select-elements-by-index]
+## Avoid selecting elements by index or position [dont-select-elements-by-index]
 
 Avoid nth methods such as `.first()`, `.last()`, and `.nth()`. Instead:
 
