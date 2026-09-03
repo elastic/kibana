@@ -548,7 +548,7 @@ describe('createExecuteApiTool', () => {
     });
   });
 
-  it('executes an NDJSON API by serializing its payload into newline-delimited lines', async () => {
+  it('executes an NDJSON API by handing its payload to the client as bulk lines', async () => {
     esLoadApi.mockResolvedValue(
       createLoadedApi(
         {
@@ -591,18 +591,18 @@ describe('createExecuteApiTool', () => {
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'POST',
       path: '/_bulk',
-      bulkBody: '{"index":{"_index":"logs"}}\n{"field":1}\n',
+      bulkBody: [{ index: { _index: 'logs' } }, { field: 1 }],
     });
     const data = result.results[0].data as ApiExecuteResultData;
     expect(data.response).toEqual({ errors: false });
   });
 
-  it('passes the raw text lines of an NDJSON payload through unquoted', async () => {
+  it('passes the raw text lines of an NDJSON payload through unwrapped', async () => {
     esLoadApi.mockResolvedValue(
       createLoadedApi(
         {
-          name: 'find_structure',
-          namespace: 'text_structure',
+          name: 'find-structure',
+          namespace: 'text-structure',
           description: 'Find the structure of some text',
           method: 'POST',
           path: '/_text_structure/find_structure',
@@ -631,7 +631,7 @@ describe('createExecuteApiTool', () => {
     await tool.handler(
       {
         target: 'elasticsearch',
-        api: 'text_structure.find_structure',
+        api: 'text-structure.find_structure',
         params: { text_files: ['first,line', 'second,line'] },
       },
       context
@@ -640,7 +640,7 @@ describe('createExecuteApiTool', () => {
     expect(transportRequest).toHaveBeenCalledWith({
       method: 'POST',
       path: '/_text_structure/find_structure',
-      bulkBody: 'first,line\nsecond,line\n',
+      bulkBody: ['first,line', 'second,line'],
     });
   });
 
