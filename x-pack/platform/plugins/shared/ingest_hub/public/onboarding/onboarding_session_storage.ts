@@ -9,7 +9,7 @@
 export const SESSION_KEY_SUFFIXES = [
   'authenticateAndDeployStep',
   'servicesStep',
-  'deployAndDetectStep',
+  'detectAndReviewStep',
   'serviceSettingsStep',
   'stepState',
   'ecfLaunchStep',
