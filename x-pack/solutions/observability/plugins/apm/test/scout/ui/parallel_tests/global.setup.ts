@@ -21,6 +21,8 @@ import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
+import { generateMultipleServicesData } from '../fixtures/synthtrace/multiple_services';
+import { generateMobileMostUsedData } from '../fixtures/synthtrace/mobile_most_used';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -90,6 +92,22 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
+
+    // Bulk services dataset for service inventory pagination tests.
+    const multipleServicesData = generateMultipleServicesData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(multipleServicesData);
+    log.info('Multiple services data indexed');
+
+    // Mobile app data with device/os/network dimensions for most-used charts.
+    const mobileMostUsedData = generateMobileMostUsedData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileMostUsedData);
+    log.info('Mobile most-used charts data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

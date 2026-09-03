@@ -31,7 +31,8 @@ export class AgentConfigurationsPage {
     // Wait for the page to be fully loaded
     await this.page.getByRole('heading', { name: 'Configurations', exact: true }).waitFor();
 
-    return this.page.getByText('Create configuration');
+    await this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton').waitFor();
+    return this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton');
   }
 
   async isCreateConfigurationButtonAvailable() {
