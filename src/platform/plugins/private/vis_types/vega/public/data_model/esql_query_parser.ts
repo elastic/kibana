@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getTime } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getESQLTimeField, hasStartEndParams, getStartEndParams } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLTimeField, getNamedParams } from '@kbn/esql-utils';
 import { getHttp } from '../services';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
@@ -83,17 +84,20 @@ export class EsqlQueryParser {
   readonly _searchAPI: SearchAPI;
   readonly _filters: Bool;
   readonly _onWarning: (...args: string[]) => void;
+  readonly _esqlVariables?: ESQLControlVariable[];
 
   constructor(
     timeCache: TimeCache,
     searchAPI: SearchAPI,
     filters: Bool,
-    onWarning: (...args: string[]) => void
+    onWarning: (...args: string[]) => void,
+    esqlVariables?: ESQLControlVariable[]
   ) {
     this._timeCache = timeCache;
     this._searchAPI = searchAPI;
     this._filters = filters;
     this._onWarning = onWarning;
+    this._esqlVariables = esqlVariables;
   }
 
   /**
@@ -211,11 +215,7 @@ export class EsqlQueryParser {
   }
 
   private _buildTimeFilterDsl(timeField: string): ReturnType<typeof buildEsQuery> | undefined {
-    const bounds = this._timeCache.getTimeBounds();
-    const timeRange = {
-      from: new Date(bounds.min).toISOString(),
-      to: new Date(bounds.max).toISOString(),
-    };
+    const timeRange = this._getTimeRange();
     const timeFilter = getTime(undefined, timeRange, { fieldName: timeField });
     if (!timeFilter) {
       return undefined;
@@ -223,25 +223,33 @@ export class EsqlQueryParser {
     return buildEsQuery(undefined, [], [timeFilter]);
   }
 
+  private _getTimeRange() {
+    const bounds = this._timeCache.getTimeBounds();
+    return {
+      from: new Date(bounds.min).toISOString(),
+      to: new Date(bounds.max).toISOString(),
+    };
+  }
+
   /**
-   * Inject named parameters for time range
+   * Bind dashboard ES|QL variables and time params, then leftover spec `url.params`.
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
-    const params: Record<string, unknown>[] = [];
+    const params: Record<string, unknown>[] = [
+      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables),
+    ];
+    const boundKeys = new Set(params.flatMap((param) => Object.keys(param)));
 
-    // Bind time params whenever present in the query (independent of %timefield%)
-    if (hasStartEndParams(query)) {
-      const bounds = this._timeCache.getTimeBounds();
-      const timeRange = {
-        from: new Date(bounds.min).toISOString(),
-        to: new Date(bounds.max).toISOString(),
-      };
-      params.push(...getStartEndParams(query, timeRange));
-    }
-
-    // Include any params that were explicitly provided in the URL object
+    // Static spec params remain an escape hatch; dashboard control keys win collisions.
     if (url.params && Array.isArray(url.params)) {
-      params.push(...url.params);
+      for (const specParam of url.params) {
+        const keys = Object.keys(specParam);
+        if (keys.some((key) => boundKeys.has(key))) {
+          continue;
+        }
+        params.push(specParam);
+        keys.forEach((key) => boundKeys.add(key));
+      }
     }
 
     return { query, params };

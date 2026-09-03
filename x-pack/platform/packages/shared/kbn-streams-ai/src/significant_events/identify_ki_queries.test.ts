@@ -206,6 +206,8 @@ interface HarnessOptions {
   getFeaturesError?: Error;
   /** Wall-clock budget forwarded to the reasoning agent. */
   maxDurationMs?: number;
+  /** Overrides the ES client, so tests can script probe/validation responses. */
+  esClient?: ElasticsearchClient;
 }
 
 const scriptedQuery = (
@@ -253,7 +255,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
 
   const result = await identifyKIQueries({
     stream: options.stream ?? stream,
-    esClient: createEsClient().esClient,
+    esClient: options.esClient ?? createEsClient().esClient,
     getFeatures,
     inferenceClient,
     signal,
@@ -650,6 +652,85 @@ describe('identifyKIQueries agent', () => {
         response: { queries: Array<{ status: string }> };
       };
       expect(response.response.queries.map((q) => q.status)).toEqual(['Added', 'Added']);
+    });
+  });
+
+  describe('mapping-conflict-aware validation', () => {
+    // One mock routes all ES calls by query text: STATS = volume probe, `\n| LIMIT 0` = candidate validation, else = source-wide conflict probe.
+    const createScriptedClient = (probeColumns: unknown[]) => {
+      const candidateCalls: Array<Record<string, unknown>> = [];
+      const query = jest.fn(async (params: Record<string, unknown>) => {
+        const q = String(params.query);
+        if (q.includes('STATS')) {
+          // Dense => narrow (now-10m) lookback, so a filter would prune history.
+          return countResponse(100_000);
+        }
+        if (q.includes('\n| LIMIT 0')) {
+          candidateCalls.push(params);
+          return { columns: [], values: [] };
+        }
+        return { columns: probeColumns, values: [] };
+      });
+      return {
+        esClient: { esql: { query } } as unknown as ElasticsearchClient,
+        candidateCalls,
+      };
+    };
+
+    const CONFLICT_COLUMNS = [
+      {
+        name: 'exception.message',
+        type: 'unsupported',
+        original_types: ['keyword', 'text'],
+        suggested_cast: 'keyword',
+      },
+    ];
+
+    it('drops the lookback filter for a candidate that references a union field', async () => {
+      const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [
+          [scriptedQuery('FROM logs | WHERE exception.message::keyword == "boom"')],
+        ],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0]).not.toHaveProperty('filter');
+    });
+
+    it('keeps the lookback filter for a candidate that references no union field, even when the source has conflicts', async () => {
+      const { esClient, candidateCalls } = createScriptedClient(CONFLICT_COLUMNS);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "boom"')]],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0].filter).toEqual({
+        range: { '@timestamp': { gte: 'now-10m', lte: 'now' } },
+      });
+    });
+
+    it('keeps the narrow lookback filter when the stream has no conflicts', async () => {
+      const { esClient, candidateCalls } = createScriptedClient([
+        { name: 'message', type: 'text' },
+      ]);
+
+      const { result } = await runIdentifyKIQueries({
+        esClient,
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "boom"')]],
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(candidateCalls).toHaveLength(1);
+      expect(candidateCalls[0].filter).toEqual({
+        range: { '@timestamp': { gte: 'now-10m', lte: 'now' } },
+      });
     });
   });
 });

@@ -43,7 +43,7 @@ const initialState: WorkflowDetailState = {
   connectors: undefined,
   connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
+  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,

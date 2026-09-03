@@ -583,7 +583,7 @@ export class WorkflowsService {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();

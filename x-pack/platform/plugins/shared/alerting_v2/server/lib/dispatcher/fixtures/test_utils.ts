@@ -7,11 +7,21 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { EpisodeScan, PolicyCatalog, RuleCatalog } from '../state';
 import { DEFAULT_GROUPING_MODE } from '../constants';
+import {
+  DispatchOutcome,
+  DispatchPlan,
+  EpisodeScan,
+  EpisodeTriage,
+  PolicyCatalog,
+  RuleCatalog,
+  SuppressionIndex,
+  type SuppressedEpisode,
+} from '../state';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
+  ActionGroupId,
   ActionPolicy,
   ActionPolicyId,
   AlertEpisode,
@@ -52,22 +62,71 @@ export function createDispatcherPipelineInput(
  * into the value objects here.
  */
 export interface DispatcherPipelineStateOverrides
-  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'scan' | 'rules' | 'policies'> {
+  extends Omit<
+    Partial<DispatcherPipelineState>,
+    'input' | 'scan' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
+  > {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
+  suppressions?: AlertEpisodeSuppression[];
+  dispatchable?: AlertEpisode[];
+  suppressed?: SuppressedEpisode[];
   rules?: Map<RuleId, Rule>;
   policies?: Map<ActionPolicyId, ActionPolicy>;
+  dispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+  dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchFailures?: DispatchFailure[];
 }
 
 export function createDispatcherPipelineState(
   state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const { episodes, rules, policies, input, ...rest } = state;
+  const {
+    episodes,
+    suppressions,
+    dispatchable,
+    suppressed,
+    rules,
+    policies,
+    dispatch,
+    throttled,
+    dispatchedExecutions,
+    dispatchFailures,
+    input,
+    ...rest
+  } = state;
   return {
     ...rest,
     ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
+    ...(suppressions ? { suppressions: SuppressionIndex.of(suppressions) } : {}),
+    ...(dispatchable || suppressed
+      ? {
+          triage: EpisodeTriage.of({
+            dispatchable: dispatchable ?? [],
+            suppressed: suppressed ?? [],
+          }),
+        }
+      : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    ...(dispatch || throttled || dispatchable
+      ? {
+          plan: DispatchPlan.of({
+            toDispatch: dispatch ?? [],
+            throttled: throttled ?? [],
+            dispatchable: dispatchable ?? [],
+          }),
+        }
+      : {}),
+    ...(dispatchedExecutions || dispatchFailures
+      ? {
+          outcome: DispatchOutcome.of({
+            executionsByGroup: dispatchedExecutions ?? new Map(),
+            failures: dispatchFailures ?? [],
+          }),
+        }
+      : {}),
     input: input ?? createDispatcherPipelineInput(),
   };
 }

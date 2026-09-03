@@ -17,15 +17,15 @@ import {
   isManualTrigger,
   LegacyWorkflowInputSchema,
 } from './schema/triggers/manual_trigger_schema';
+import { CONNECTOR_ID_MAX_LENGTH, IF_CONDITION_MAX_LENGTH } from '../common/constants';
 import {
   HITL_EXTERNAL_CHANNELS_DESCRIPTION,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
-  MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
-  MAX_HITL_SLACK_CHANNEL_ID_LENGTH,
+  MAX_HITL_SLACK_CHANNEL_LENGTH,
 } from '../common/hitl';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
@@ -60,11 +60,6 @@ export const WorkflowRetrySchema = z.object({
   jitter: z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
-
-// Upper bound on a KQL condition. The parser recurses, so nesting depth has to stay
-// well inside the stack limit, and this bounds it. A longer expression can be hoisted
-// into a `data.set` step and compared here as a short flag.
-export const IF_CONDITION_MAX_LENGTH = 2000;
 
 const IfConditionSchema = z
   .string()
@@ -282,7 +277,7 @@ export const WaitForApprovalSlackChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack webhook connector saved object id or name (posts to the webhook channel)'),
   message: z
     .string()
@@ -297,12 +292,20 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
   'connector-id': z
     .string()
     .min(1)
-    .max(MAX_HITL_CHANNEL_CONNECTOR_ID_LENGTH)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .describe('Slack API connector saved object id or name'),
   channels: z
-    .array(z.string().min(1).max(MAX_HITL_SLACK_CHANNEL_ID_LENGTH))
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+        .describe('Slack channel ID (e.g. C0123456789) or channel name (e.g. #alerts)')
+    )
     .min(1)
-    .describe('Slack channel ids to post approval actions to'),
+    .describe(
+      'Slack channels to notify. Each entry may be a channel ID (e.g. C0123456789) or a channel name (e.g. #alerts). Must be allowed on the Slack API connector when an allowlist is configured.'
+    ),
   message: z
     .string()
     .max(MAX_HITL_MESSAGE_LENGTH)
@@ -314,8 +317,12 @@ export const WaitForApprovalSlackApiChannelSchema = z.object({
 
 export const WaitForApprovalChannelsSchema = z
   .object({
-    slack: WaitForApprovalSlackChannelSchema.optional(),
-    slack_api: WaitForApprovalSlackApiChannelSchema.optional(),
+    slack: WaitForApprovalSlackChannelSchema.optional().describe(
+      'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)'
+    ),
+    slack_api: WaitForApprovalSlackApiChannelSchema.optional().describe(
+      'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.'
+    ),
   })
   .optional()
   .describe(HITL_EXTERNAL_CHANNELS_DESCRIPTION);
@@ -1150,7 +1157,7 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
   stepId: z.string().max(512).describe('Id of the step that produced this usage.'),
   connectorId: z
     .string()
-    .max(512)
+    .max(CONNECTOR_ID_MAX_LENGTH)
     .optional()
     .describe('Id of the LLM connector the step resolved to, when reported by the model.'),
 });
