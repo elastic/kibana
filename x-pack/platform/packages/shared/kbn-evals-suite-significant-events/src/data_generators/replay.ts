@@ -10,7 +10,9 @@ export {
   SIGEVENTS_SNAPSHOT_RUN,
   SIGEVENTS_GROUND_TRUTH_SOURCE,
   resolveBasePath,
+  resolveGroundTruthMode,
 } from './snapshot_run_config';
+export type { SigEventsGroundTruthMode } from './snapshot_run_config';
 
 export { listAvailableSnapshots } from './list_snapshots';
 

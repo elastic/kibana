@@ -12,6 +12,7 @@ import { ensureGroundTruthDir } from '@kbn/evals';
 import {
   SIGEVENTS_GROUND_TRUTH_SOURCE,
   SIGEVENTS_SNAPSHOT_RUN,
+  resolveGroundTruthMode,
   replaySignificantEventsSnapshot,
   listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
@@ -121,7 +122,12 @@ const formatDiscovery = (discovery: SignificantEvent): string[] => {
 
 run(
   async ({ log, flags }) => {
-    await ensureGroundTruthDir({ source: SIGEVENTS_GROUND_TRUTH_SOURCE, log: (m) => log.info(m) });
+    if (resolveGroundTruthMode() === 'gcs') {
+      await ensureGroundTruthDir({
+        source: SIGEVENTS_GROUND_TRUTH_SOURCE,
+        log: (m) => log.info(m),
+      });
+    }
     const datasetIds = getAllDatasetIds();
     const datasetId = String(flags.dataset || datasetIds[0]);
 

@@ -6,7 +6,10 @@
  */
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
-import { SIGEVENTS_GROUND_TRUTH_SOURCE } from './src/data_generators/snapshot_run_config';
+import {
+  SIGEVENTS_GROUND_TRUTH_SOURCE,
+  resolveGroundTruthMode,
+} from './src/data_generators/snapshot_run_config';
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
@@ -14,6 +17,7 @@ export default createPlaywrightEvalsConfig({
   // Keep this high enough to avoid spurious timeouts, and use CI step timeouts to bound runtime.
   timeout: 30 * 60_000, // 30 minutes
   // Ground truth (criteria, expected features) lives in GCS next to the snapshots; the global
-  // setup downloads it once per run. See README "Ground truth".
-  groundTruth: SIGEVENTS_GROUND_TRUTH_SOURCE,
+  // setup downloads it once per run. `SIGEVENTS_GROUND_TRUTH_MODE=ts` uses the transitional
+  // TypeScript fallback instead and skips the download. See README "Ground truth".
+  ...(resolveGroundTruthMode() === 'gcs' ? { groundTruth: SIGEVENTS_GROUND_TRUTH_SOURCE } : {}),
 });

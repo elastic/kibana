@@ -23,9 +23,11 @@ const write = (root: string, relativePath: string, value: unknown) => {
 describe('datasets registry (GCS-backed)', () => {
   const ORIGINAL_DIR = process.env.KBN_EVALS_GROUND_TRUTH_DIR;
   const ORIGINAL_SELECTION = process.env.SIGEVENTS_DATASET;
+  const ORIGINAL_MODE = process.env.SIGEVENTS_GROUND_TRUTH_MODE;
   let dir: string;
 
   beforeAll(() => {
+    process.env.SIGEVENTS_GROUND_TRUTH_MODE = 'gcs';
     dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'sigevents-registry-'));
     write(dir, 'otel-demo/dataset.json', {
       schema_version: 1,
@@ -51,6 +53,20 @@ describe('datasets registry (GCS-backed)', () => {
     else process.env.KBN_EVALS_GROUND_TRUTH_DIR = ORIGINAL_DIR;
     if (ORIGINAL_SELECTION === undefined) delete process.env.SIGEVENTS_DATASET;
     else process.env.SIGEVENTS_DATASET = ORIGINAL_SELECTION;
+    if (ORIGINAL_MODE === undefined) delete process.env.SIGEVENTS_GROUND_TRUTH_MODE;
+    else process.env.SIGEVENTS_GROUND_TRUTH_MODE = ORIGINAL_MODE;
+  });
+
+  it('SIGEVENTS_GROUND_TRUTH_MODE=ts serves the TypeScript fallback without a directory', () => {
+    delete process.env.KBN_EVALS_GROUND_TRUTH_DIR;
+    process.env.SIGEVENTS_GROUND_TRUTH_MODE = 'ts';
+    expect(getAllDatasetIds().sort()).toEqual([
+      'bank-of-anthos',
+      'otel-demo',
+      'quarkus-super-heroes',
+    ]);
+    expect(getDatasetById('otel-demo')?.kiFeatureExtraction.length).toBeGreaterThan(0);
+    process.env.SIGEVENTS_GROUND_TRUTH_MODE = 'gcs';
   });
 
   it('reads the tree lazily on first access and stamps snapshot_source', () => {

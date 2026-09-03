@@ -33,3 +33,20 @@ export const SIGEVENTS_GROUND_TRUTH_SOURCE: GroundTruthSource = {
   bucket: GCS_BUCKET,
   prefix: `${SIGEVENTS_SNAPSHOT_RUN}/`,
 };
+
+export type SigEventsGroundTruthMode = 'gcs' | 'ts';
+
+/**
+ * Where the registry reads ground truth from. `gcs` (default) downloads the JSON files from the
+ * bucket; `ts` uses the TypeScript datasets kept in `src/datasets/` as a transitional fallback
+ * until they are removed. The bucket is the source of record in both modes.
+ */
+export const resolveGroundTruthMode = (
+  env: NodeJS.ProcessEnv = process.env
+): SigEventsGroundTruthMode => {
+  const raw = (env.SIGEVENTS_GROUND_TRUTH_MODE ?? 'gcs').trim();
+  if (raw === 'gcs' || raw === 'ts') {
+    return raw;
+  }
+  throw new Error(`SIGEVENTS_GROUND_TRUTH_MODE must be "gcs" or "ts", got "${raw}".`);
+};
