@@ -18,8 +18,9 @@ This is **stock-only** attribution (what is retained *now*). It is not flow
 and
 [`/Users/rudolf/dev/node/tasks/docs/otel-trace-memory-plugin-design.md`](/Users/rudolf/dev/node/tasks/docs/otel-trace-memory-plugin-design.md).
 
-Label cardinality is bounded to **registered task types** (`task.type`). Never
-`task.id`, `runAt`, saved-object id, or alert-instance id.
+Label cardinality is bounded to **registered task types** (`task.type`) and
+HTTP route+method (`http.route`, `http.request.method`). Never `task.id`,
+`runAt`, saved-object id, or alert-instance id.
 
 ## Why a custom Node binary
 
@@ -108,6 +109,13 @@ global OTel meter (`metrics.getMeter('nodejs.heap_profile')`) and scrapes
 The standalone harness in this directory remains for local runs without
 booting Kibana.
 
+Core HTTP handlers run under `v8.withHeapProfileLabels({ 'http.route',
+'http.request.method' })` in
+`src/core/packages/http/router-server-internal/src/router.ts`. Those keys
+match `kibana.http.server` so the two datasets join. A label set with
+`http.route` is exported as a route row (no `task.type`). Sets with
+`task.type` stay as task rows. Sets with neither stay `task.type=_unlabeled`.
+
 ## Metrics
 
 Meter: `nodejs.heap_profile` (Kibana's global `@kbn/metrics` meter; the
@@ -115,12 +123,46 @@ harness still uses an isolated `MeterProvider` for local runs).
 
 | Name | Type | Unit | Attributes |
 | --- | --- | --- | --- |
-| `nodejs.heap_profile.live` | ObservableGauge | `By` | `task.type`, `memory.source` (`exact` \| `sampled_heap`) |
-| `nodejs.heap_profile.sample.count` | ObservableGauge | `{sample}` | `task.type` |
+| `nodejs.heap_profile.live` | ObservableGauge | `By` | task rows: `task.type`, `memory.source`; route rows: `http.route`, `http.request.method`, `memory.source` |
+| `nodejs.heap_profile.sample.count` | ObservableGauge | `{sample}` | task rows: `task.type`; route rows: `http.route`, `http.request.method` |
 | `nodejs.heap_profile.scrape.duration` | ObservableGauge | `ms` | — |
 
-Aggregation: per-`task.type` totals, empty labels → `_unlabeled`, collapse to
-top-256 + `_other`.
+Aggregation: per-`task.type` and per-(`http.route`,`http.request.method`)
+totals. Empty task labels → `_unlabeled`. Missing method →
+`http.request.method=_unlabeled`. Top-256 + `_other` per dimension group.
+
+## Load endpoints (serverless image)
+
+`examples/` plugins do not ship in the serverless image, so two public
+Task Manager routes allocate live memory under the HTTP route labels:
+
+| Route | Defaults |
+| --- | --- |
+| `GET /api/task_manager/_heap_profile_experiment/light` | `latency=0` (ms, 0–60000), `bytes=4096` (max 1 MiB) |
+| `GET /api/task_manager/_heap_profile_experiment/heavy` | `latency=2000`, `bytes=52428800` (50 MiB, max 256 MiB) |
+
+Each handler allocates about half of `bytes` as `Buffer.alloc` (`memory.source=exact`)
+and half as small JS objects (`memory.source=sampled_heap`), keeps both live
+for `latency` ms, then responds `{ route, latency, bytes, elapsedMs }`.
+`options.access: 'public'`; authz is disabled (no tenant data).
+
+```bash
+cd /Users/rudolf/dev/kibana
+node experiments/heap_profile_label_otel/load.js \
+  --base-url https://kibana-pr-288826-security-d9bc71.kb.eu-west-1.aws.qa.elastic.cloud \
+  --api-key "$KBN_API_KEY" \
+  --light 100 \
+  --heavy 1 \
+  --latency 2000
+```
+
+ES|QL for route rows:
+
+```esql
+FROM serverless-metrics-*:metrics-generic.otel-*
+| WHERE scope.name == "nodejs.heap_profile" AND attributes.`http.route` IS NOT NULL
+| STATS MAX(metrics.nodejs.heap_profile.live) BY attributes.`http.route`, attributes.`http.request.method`, attributes.`memory.source`
+```
 
 ## Expected Kibana Lens panels
 
@@ -164,8 +206,9 @@ experiment.
   `AsyncLocalStorage` + ContinuationPreservedEmbedderData. Default ON;
   `--no-async-context-frame` empties every `labels` object (Node emits
   `NODE_HEAP_PROFILE_LABELS_NO_ASYNC_CONTEXT`).
-- **Cardinality bounds.** Only `task.type` (tens–hundreds of registered
-  types). Top-N 256 + `_other`. Unbounded ids would pin interned label sets
+- **Cardinality bounds.** `task.type` (registered types) and
+  `http.route` + `http.request.method` (router path templates, not raw URLs).
+  Top-N 256 + `_other` per group. Unbounded ids would pin interned label sets
   for the profiler lifetime.
 - **Pooled Buffer origin ≠ owner.** A `Buffer` allocated under task A and
   later reused/held by task B still attributes to A's label context

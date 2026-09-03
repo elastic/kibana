@@ -41,6 +41,10 @@ import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import type { InternalRouteConfig } from './route';
 import { buildRoute } from './route';
+import {
+  httpRouteLabelsFromHapiRequest,
+  withHttpRouteHeapProfileLabels,
+} from './heap_profile_labels';
 
 export type ContextEnhancer<
   P,
@@ -207,7 +211,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     let apmSpan: Span | null | undefined;
     try {
       apmSpan = apm.startSpan('route handler');
-      const kibanaResponse = await handler(request);
+      const routeLabels = httpRouteLabelsFromHapiRequest(request);
+      const kibanaResponse = routeLabels
+        ? await withHttpRouteHeapProfileLabels(routeLabels, () => handler(request))
+        : await handler(request);
       apmSpan?.end();
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({

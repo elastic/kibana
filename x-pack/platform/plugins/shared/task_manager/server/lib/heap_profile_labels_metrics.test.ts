@@ -40,6 +40,8 @@ import {
   UNLABELED,
   aggregateProfile,
   collapseTopN,
+  dimensionFromLabels,
+  routeKey,
   snapshotFromProfile,
   startHeapProfileLabelsMetrics,
   taskTypeFromLabels,
@@ -92,7 +94,7 @@ describe('heap_profile_labels_metrics', () => {
   });
 
   test('aggregateProfile splits exact external bytes from sampled heap', () => {
-    const { external, sampled, sampleCounts } = aggregateProfile({
+    const { task } = aggregateProfile({
       externalBytes: [
         { labels: { 'task.type': 'reports:execute' }, bytes: 100 },
         { labels: { 'task.type': 'reports:execute' }, bytes: 50 },
@@ -104,19 +106,63 @@ describe('heap_profile_labels_metrics', () => {
       ],
     });
 
-    expect(external.get('reports:execute')).toBe(150);
-    expect(external.get(UNLABELED)).toBe(7);
-    expect(sampled.get('alerting:monitoring')).toBe(512);
-    expect(sampled.get(UNLABELED)).toBe(128);
-    expect(sampleCounts.get('alerting:monitoring')).toBe(4);
+    expect(task.external.get('reports:execute')).toBe(150);
+    expect(task.external.get(UNLABELED)).toBe(7);
+    expect(task.sampled.get('alerting:monitoring')).toBe(512);
+    expect(task.sampled.get(UNLABELED)).toBe(128);
+    expect(task.sampleCounts.get('alerting:monitoring')).toBe(4);
   });
 
   test('aggregateProfile treats missing externalBytes as empty', () => {
-    const { external, sampled } = aggregateProfile({
+    const { task } = aggregateProfile({
       samples: [{ size: 10, count: 2, labels: { 'task.type': 'reports:execute' } }],
     });
-    expect(external.size).toBe(0);
-    expect(sampled.get('reports:execute')).toBe(20);
+    expect(task.external.size).toBe(0);
+    expect(task.sampled.get('reports:execute')).toBe(20);
+  });
+
+  test('dimensionFromLabels prefers http.route over task.type', () => {
+    expect(
+      dimensionFromLabels({
+        'http.route': '/api/status',
+        'http.request.method': 'GET',
+        'task.type': 'reports:execute',
+      })
+    ).toEqual({ kind: 'route', key: routeKey('/api/status', 'GET') });
+  });
+
+  test('aggregateProfile keys HTTP rows by route and method', () => {
+    const { task, route } = aggregateProfile({
+      externalBytes: [
+        {
+          labels: {
+            'http.route': '/api/task_manager/_heap_profile_experiment/light',
+            'http.request.method': 'GET',
+          },
+          bytes: 80,
+        },
+        { labels: { 'http.route': '/api/status' }, bytes: 10 },
+      ],
+      samples: [
+        {
+          size: 16,
+          count: 2,
+          labels: {
+            'http.route': '/api/task_manager/_heap_profile_experiment/light',
+            'http.request.method': 'GET',
+          },
+        },
+      ],
+    });
+
+    expect(task.external.size).toBe(0);
+    expect(
+      route.external.get(routeKey('/api/task_manager/_heap_profile_experiment/light', 'GET'))
+    ).toBe(80);
+    expect(route.external.get(routeKey('/api/status', UNLABELED))).toBe(10);
+    expect(
+      route.sampled.get(routeKey('/api/task_manager/_heap_profile_experiment/light', 'GET'))
+    ).toBe(32);
   });
 
   test('collapseTopN folds overflow into _other', () => {
@@ -147,6 +193,34 @@ describe('heap_profile_labels_metrics', () => {
       { taskType: 'reports:execute', source: 'sampled_heap', bytes: 24 },
     ]);
     expect(snapshot.sampleCount).toEqual([{ taskType: 'reports:execute', count: 3 }]);
+  });
+
+  test('snapshotFromProfile emits HTTP rows without task.type', () => {
+    const snapshot = snapshotFromProfile(
+      {
+        externalBytes: [
+          {
+            labels: { 'http.route': '/api/status', 'http.request.method': 'GET' },
+            bytes: 40,
+          },
+        ],
+        samples: [
+          {
+            size: 8,
+            count: 3,
+            labels: { 'http.route': '/api/status', 'http.request.method': 'GET' },
+          },
+        ],
+      },
+      2
+    );
+    expect(snapshot.live).toEqual([
+      { httpRoute: '/api/status', httpRequestMethod: 'GET', source: 'exact', bytes: 40 },
+      { httpRoute: '/api/status', httpRequestMethod: 'GET', source: 'sampled_heap', bytes: 24 },
+    ]);
+    expect(snapshot.sampleCount).toEqual([
+      { httpRoute: '/api/status', httpRequestMethod: 'GET', count: 3 },
+    ]);
   });
 
   test('snapshotFromProfile is empty when getAllocationProfile returns undefined', () => {
@@ -200,6 +274,39 @@ describe('heap_profile_labels_metrics', () => {
     started?.stop();
     expect(removeBatchObservableCallback).toHaveBeenCalled();
     expect(mockStopProfile).toHaveBeenCalled();
+  });
+
+  test('observes HTTP rows with http.route attributes', () => {
+    mockGetAllocationProfile.mockReturnValue({
+      externalBytes: [
+        { labels: { 'http.route': '/api/status', 'http.request.method': 'GET' }, bytes: 40 },
+      ],
+      samples: [
+        {
+          size: 8,
+          count: 3,
+          labels: { 'http.route': '/api/status', 'http.request.method': 'GET' },
+        },
+      ],
+    });
+
+    const { meter, instruments, addBatchObservableCallback } = createMeter();
+    const started = startHeapProfileLabelsMetrics(logger, { meter });
+    const [callback] = addBatchObservableCallback.mock.calls[0];
+    const observe = jest.fn();
+    callback({ observe } as unknown as BatchObservableResult);
+
+    expect(observe).toHaveBeenCalledWith(instruments[HEAP_PROFILE_LIVE_METRIC], 40, {
+      'http.route': '/api/status',
+      'http.request.method': 'GET',
+      'memory.source': 'exact',
+    });
+    expect(observe).toHaveBeenCalledWith(instruments[HEAP_PROFILE_SAMPLE_COUNT_METRIC], 3, {
+      'http.route': '/api/status',
+      'http.request.method': 'GET',
+    });
+    expect(observe.mock.calls.some(([, , attrs]) => attrs && 'task.type' in attrs)).toBe(false);
+    started?.stop();
   });
 
   test('does not start when opted out', () => {

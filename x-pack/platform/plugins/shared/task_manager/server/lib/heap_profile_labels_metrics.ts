@@ -6,8 +6,8 @@
  */
 
 /**
- * Scrapes a labels-enabled heap profile and exports per-task.type gauges on
- * Kibana's global OTel meter (scope `nodejs.heap_profile`).
+ * Scrapes a labels-enabled heap profile and exports per-task.type and
+ * per-http.route gauges on Kibana's global OTel meter (scope `nodejs.heap_profile`).
  */
 
 import type { BatchObservableResult, Meter, ObservableGauge } from '@opentelemetry/api';
@@ -31,17 +31,36 @@ export const UNLABELED = '_unlabeled';
 export const OTHER = '_other';
 export const TOP_N = 256;
 
+export const HTTP_ROUTE_LABEL_KEY = 'http.route';
+export const HTTP_REQUEST_METHOD_LABEL_KEY = 'http.request.method';
+export const ROUTE_KEY_SEPARATOR = '\0';
+
 export type MemorySource = 'exact' | 'sampled_heap';
 
 export interface HeapProfileLiveRow {
-  readonly taskType: string;
   readonly source: MemorySource;
   readonly bytes: number;
+  readonly taskType?: string;
+  readonly httpRoute?: string;
+  readonly httpRequestMethod?: string;
 }
 
 export interface HeapProfileSampleCountRow {
-  readonly taskType: string;
   readonly count: number;
+  readonly taskType?: string;
+  readonly httpRoute?: string;
+  readonly httpRequestMethod?: string;
+}
+
+export interface HeapProfileDimensionMaps {
+  readonly external: Map<string, number>;
+  readonly sampled: Map<string, number>;
+  readonly sampleCounts: Map<string, number>;
+}
+
+export interface HeapProfileAggregates {
+  readonly task: HeapProfileDimensionMaps;
+  readonly route: HeapProfileDimensionMaps;
 }
 
 export interface HeapProfileSnapshot {
@@ -69,27 +88,57 @@ export const taskTypeFromLabels = (labels: Record<string, string> | undefined): 
   return value;
 };
 
-export const aggregateProfile = (
-  profile: HeapAllocationProfile
-): {
-  external: Map<string, number>;
-  sampled: Map<string, number>;
-  sampleCounts: Map<string, number>;
-} => {
-  const external = new Map<string, number>();
-  const sampled = new Map<string, number>();
-  const sampleCounts = new Map<string, number>();
+export const routeKey = (route: string, method: string): string => {
+  return `${route}${ROUTE_KEY_SEPARATOR}${method}`;
+};
+
+export const parseRouteKey = (key: string): { httpRoute: string; httpRequestMethod: string } => {
+  if (key === OTHER) {
+    return { httpRoute: OTHER, httpRequestMethod: OTHER };
+  }
+  const sep = key.indexOf(ROUTE_KEY_SEPARATOR);
+  if (sep === -1) {
+    return { httpRoute: key, httpRequestMethod: UNLABELED };
+  }
+  return { httpRoute: key.slice(0, sep), httpRequestMethod: key.slice(sep + 1) };
+};
+
+export const dimensionFromLabels = (
+  labels: Record<string, string> | undefined
+): { kind: 'route' | 'task'; key: string } => {
+  const route = labels?.[HTTP_ROUTE_LABEL_KEY];
+  if (typeof route === 'string' && route.length > 0) {
+    const method = labels?.[HTTP_REQUEST_METHOD_LABEL_KEY];
+    const normalizedMethod = typeof method === 'string' && method.length > 0 ? method : UNLABELED;
+    return { kind: 'route', key: routeKey(route, normalizedMethod) };
+  }
+  return { kind: 'task', key: taskTypeFromLabels(labels) };
+};
+
+const emptyDimensionMaps = (): HeapProfileDimensionMaps => ({
+  external: new Map<string, number>(),
+  sampled: new Map<string, number>(),
+  sampleCounts: new Map<string, number>(),
+});
+
+export const aggregateProfile = (profile: HeapAllocationProfile): HeapProfileAggregates => {
+  const task = emptyDimensionMaps();
+  const route = emptyDimensionMaps();
+  const bucket = (kind: 'route' | 'task'): HeapProfileDimensionMaps =>
+    kind === 'route' ? route : task;
 
   for (const row of profile.externalBytes ?? []) {
-    addToMap(external, taskTypeFromLabels(row.labels), Number(row.bytes) || 0);
+    const dim = dimensionFromLabels(row.labels);
+    addToMap(bucket(dim.kind).external, dim.key, Number(row.bytes) || 0);
   }
   for (const sample of profile.samples ?? []) {
-    const key = taskTypeFromLabels(sample.labels);
-    addToMap(sampled, key, (Number(sample.size) || 0) * (Number(sample.count) || 0));
-    addToMap(sampleCounts, key, Number(sample.count) || 0);
+    const dim = dimensionFromLabels(sample.labels);
+    const group = bucket(dim.kind);
+    addToMap(group.sampled, dim.key, (Number(sample.size) || 0) * (Number(sample.count) || 0));
+    addToMap(group.sampleCounts, dim.key, Number(sample.count) || 0);
   }
 
-  return { external, sampled, sampleCounts };
+  return { task, route };
 };
 
 export const collapseTopN = (map: Map<string, number>, n = TOP_N): Map<string, number> => {
@@ -115,18 +164,27 @@ export const snapshotFromProfile = (
   if (profile === undefined) {
     return { live: [], sampleCount: [], scrapeDurationMs: durationMs };
   }
-  const { external, sampled, sampleCounts } = aggregateProfile(profile);
+  const { task, route } = aggregateProfile(profile);
   const live: HeapProfileLiveRow[] = [];
-  for (const [taskType, bytes] of collapseTopN(external)) {
+  const sampleCount: HeapProfileSampleCountRow[] = [];
+  for (const [taskType, bytes] of collapseTopN(task.external)) {
     live.push({ taskType, source: 'exact', bytes });
   }
-  for (const [taskType, bytes] of collapseTopN(sampled)) {
+  for (const [taskType, bytes] of collapseTopN(task.sampled)) {
     live.push({ taskType, source: 'sampled_heap', bytes });
   }
-  const sampleCount = [...collapseTopN(sampleCounts)].map(([taskType, count]) => ({
-    taskType,
-    count,
-  }));
+  for (const [key, bytes] of collapseTopN(route.external)) {
+    live.push({ ...parseRouteKey(key), source: 'exact', bytes });
+  }
+  for (const [key, bytes] of collapseTopN(route.sampled)) {
+    live.push({ ...parseRouteKey(key), source: 'sampled_heap', bytes });
+  }
+  for (const [taskType, count] of collapseTopN(task.sampleCounts)) {
+    sampleCount.push({ taskType, count });
+  }
+  for (const [key, count] of collapseTopN(route.sampleCounts)) {
+    sampleCount.push({ ...parseRouteKey(key), count });
+  }
   return { live, sampleCount, scrapeDurationMs: durationMs };
 };
 
@@ -149,13 +207,28 @@ const observeSnapshot = (
   scrapeDurationGauge: ObservableGauge
 ): void => {
   for (const row of snapshot.live) {
-    result.observe(liveGauge, row.bytes, {
-      'task.type': row.taskType,
-      'memory.source': row.source,
-    });
+    if (row.httpRoute !== undefined) {
+      result.observe(liveGauge, row.bytes, {
+        'http.route': row.httpRoute,
+        'http.request.method': row.httpRequestMethod ?? UNLABELED,
+        'memory.source': row.source,
+      });
+    } else {
+      result.observe(liveGauge, row.bytes, {
+        'task.type': row.taskType ?? UNLABELED,
+        'memory.source': row.source,
+      });
+    }
   }
   for (const row of snapshot.sampleCount) {
-    result.observe(sampleCountGauge, row.count, { 'task.type': row.taskType });
+    if (row.httpRoute !== undefined) {
+      result.observe(sampleCountGauge, row.count, {
+        'http.route': row.httpRoute,
+        'http.request.method': row.httpRequestMethod ?? UNLABELED,
+      });
+    } else {
+      result.observe(sampleCountGauge, row.count, { 'task.type': row.taskType ?? UNLABELED });
+    }
   }
   result.observe(scrapeDurationGauge, snapshot.scrapeDurationMs);
 };
@@ -184,12 +257,12 @@ export const startHeapProfileLabelsMetrics = (
     const meter = options?.meter ?? metrics.getMeter(HEAP_PROFILE_METER_NAME);
     const liveGauge = meter.createObservableGauge(HEAP_PROFILE_LIVE_METRIC, {
       description:
-        'Live bytes attributed to a Task Manager task type (exact external vs sampled heap).',
+        'Live bytes attributed to a Task Manager task type or HTTP route (exact external vs sampled heap).',
       unit: 'By',
       valueType: ValueType.INT,
     });
     const sampleCountGauge = meter.createObservableGauge(HEAP_PROFILE_SAMPLE_COUNT_METRIC, {
-      description: 'Count of live heap-profile samples attributed to a task type.',
+      description: 'Count of live heap-profile samples attributed to a task type or HTTP route.',
       unit: '{sample}',
       valueType: ValueType.INT,
     });

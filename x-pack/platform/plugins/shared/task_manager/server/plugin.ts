@@ -53,6 +53,7 @@ import { TaskScheduling } from './task_scheduling';
 import {
   backgroundTaskUtilizationRoute,
   healthRoute,
+  heapProfileExperimentRoutes,
   metricsRoute,
   executionControlRoutes,
 } from './routes';
@@ -277,6 +278,7 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    heapProfileExperimentRoutes({ router });
     executionControlRoutes({
       router,
       logger: this.logger,
