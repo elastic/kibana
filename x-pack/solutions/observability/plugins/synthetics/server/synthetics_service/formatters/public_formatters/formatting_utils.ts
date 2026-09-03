@@ -60,10 +60,10 @@ export const publicTimeoutFormatter: FormatterFn = (fields) => {
   }
 
   // 16s is the Heartbeat default for lightweight monitors, so omit it.
-  if (
-    parseInt((fields[ConfigKey.TIMEOUT] as string) ?? '', 10) ===
-    LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS
-  ) {
+  // `TimeoutString` accepts any numeric string, so compare with `Number` rather
+  // than `parseInt` -- the latter truncates `16.5` to the default and would
+  // silently drop a timeout the user explicitly asked for.
+  if (Number((fields[ConfigKey.TIMEOUT] as string) ?? '') === LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS) {
     return null;
   }
 

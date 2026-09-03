@@ -119,7 +119,10 @@ export const privateTimeoutFormatter: FormatterFn = (fields) => {
 
   // Lightweight monitors default to a 16s timeout, which is also Heartbeat's
   // default, so it can be omitted from the policy (elastic/kibana#241818).
-  if (parseInt(value, 10) === LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS) {
+  // `TimeoutString` accepts any numeric string, so compare with `Number` rather
+  // than `parseInt` -- the latter truncates `16.5` to the default and would
+  // silently drop a timeout the user explicitly asked for.
+  if (Number(value) === LIGHTWEIGHT_DEFAULT_TIMEOUT_SECONDS) {
     return null;
   }
 
