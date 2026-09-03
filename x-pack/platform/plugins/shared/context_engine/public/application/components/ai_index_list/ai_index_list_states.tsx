@@ -8,7 +8,6 @@
 import { EuiEmptyPrompt, EuiFlexGrid, EuiSkeletonRectangle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { CreateAiIndexButton } from '../create_ai_index_button';
 
 const SKELETON_CARD_COUNT = 3;
 const GRID_COLUMNS = 3;
@@ -41,29 +40,5 @@ export const AiIndexListError = ({ error }: { error: Error }) => (
       </h2>
     }
     body={<p>{error.message}</p>}
-  />
-);
-
-export const AiIndexListEmpty = () => (
-  <EuiEmptyPrompt
-    iconType="index"
-    data-test-subj="contextAiIndexCardsEmpty"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.contextEngine.landing.emptyTitle"
-          defaultMessage="No AI Indexes yet"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.contextEngine.landing.emptyBody"
-          defaultMessage="Create an AI Index to organize and retrieve contextual knowledge for your agents."
-        />
-      </p>
-    }
-    actions={<CreateAiIndexButton />}
   />
 );
