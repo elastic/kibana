@@ -20,7 +20,7 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import type { ServiceAccountsServiceStart } from './types';
 import { UiamServiceAccounts } from './uiam_service_accounts';
-import type { AuthenticatedUser, SecurityLicense } from '../../common';
+import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 import type { UiamServicePublic } from '../uiam';
 

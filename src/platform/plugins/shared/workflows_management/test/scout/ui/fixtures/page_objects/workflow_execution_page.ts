@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { PLUGIN_ID } from '../../../../../common';
 
 /**
  * Page object for the workflow execution detail view.
@@ -23,6 +24,16 @@ export class WorkflowExecutionPage {
 
   constructor(private readonly page: ScoutPage) {
     this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+  }
+
+  /**
+   * Navigate directly to a workflow execution.
+   */
+  async gotoWorkflowExecution(workflowId: string, executionId: string): Promise<void> {
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
+      params: { executionId },
+    });
+    await this.waitForExecutionView();
   }
 
   /**

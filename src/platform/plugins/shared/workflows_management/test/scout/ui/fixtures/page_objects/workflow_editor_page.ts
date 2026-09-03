@@ -25,6 +25,10 @@ export class WorkflowEditorPage {
   public actionsMenuButton: Locator;
   public actionsMenuSearch: Locator;
   public readOnlyBadge: Locator;
+  public runAsButton: Locator;
+  public appMenuMoreButton: Locator;
+  public runAsFlyout: Locator;
+  public runAsApplyButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.yamlEditor = this.page.testSubj.locator('workflowYamlEditor');
@@ -45,6 +49,12 @@ export class WorkflowEditorPage {
     this.actionsMenuButton = this.page.testSubj.locator('workflowBottomBarActionsMenu');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
     this.readOnlyBadge = this.page.testSubj.locator('workflowEditorReadOnlyBadge');
+    this.runAsButton = this.page.testSubj.locator('workflowRunAsButton');
+    this.appMenuMoreButton = this.page
+      .getByRole('navigation', { name: 'App menu' })
+      .getByRole('button', { name: 'More' });
+    this.runAsFlyout = this.page.testSubj.locator('workflowRunAsFlyout');
+    this.runAsApplyButton = this.page.testSubj.locator('workflowRunAsApply');
   }
 
   /**
@@ -359,6 +369,22 @@ export class WorkflowEditorPage {
   async saveWorkflow() {
     await this.saveButton.click();
     await this.page.testSubj.waitForSelector('workflowSavedChangesBadge');
+  }
+
+  /**
+   * Select a service account in the Run as flyout and apply it to the YAML.
+   */
+  async selectRunAsServiceAccount(serviceAccountName: string): Promise<void> {
+    if (!(await this.runAsButton.isVisible())) {
+      await this.appMenuMoreButton.click();
+    }
+    await this.runAsButton.click();
+    await this.runAsFlyout.waitFor({ state: 'visible' });
+    await this.page.components
+      .comboBox('workflowRunAsSelect', this.runAsFlyout)
+      .setSelectedOptions([serviceAccountName]);
+    await this.runAsApplyButton.click();
+    await this.runAsFlyout.waitFor({ state: 'hidden' });
   }
 
   /**

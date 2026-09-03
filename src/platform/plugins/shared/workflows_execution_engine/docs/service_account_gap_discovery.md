@@ -7,6 +7,8 @@ This document records the boundary probes run from the Workflows integration on 
 
 - A saved workflow can bind and rebind a UIAM organization service account through
   `settings.run_as`; a run after rebinding uses the replacement identity.
+- The Workflows browser can select a named service account, persist `settings.run_as`, start the
+  saved workflow, render the account name and id, and return the seeded Elasticsearch document.
 - Manual and scheduled executions exchange short-lived credentials inside Kibana Security.
 - `elasticsearch.request` can query a real index with the exchanged service-account identity.
 - `ai.agent` can create and execute an Agent Builder conversation with the scoped
@@ -17,8 +19,25 @@ This document records the boundary probes run from the Workflows integration on 
   admin-only and execution follows the Workflows space privilege, but it does not resolve the
   longer-term per-account use policy.
 
-The repeatable probe is
-[`service_account_workflow_execution.spec.ts`](../../workflows_management/test/scout_uiam_local/api/tests/service_account_workflow_execution.spec.ts).
+The repeatable probes are under
+[`scout_uiam_local`](../../workflows_management/test/scout_uiam_local/).
+
+## Automated result matrix
+
+Results from the UIAM `git-810cfd82cc58` and ES Serverless `git-9216c1af6e3d` stack:
+
+| Workflow or scenario | How it was tested | Expected outcome | Observed outcome |
+| --- | --- | --- | --- |
+| UI bind and save | Selected the named account in **Run as** and saved in the browser | Saved YAML contains the selected account id | **Passed** |
+| Manual Elasticsearch run | Ran the UI-bound workflow and read the execution API | Completed with the seeded document, triggering admin, and bound account | **Passed** |
+| Execution identity UI | Opened a completed execution in the browser | Account name and id are visible | **Passed** |
+| Scheduled Elasticsearch run | Waited for the first scheduled execution and read its output | Completed with the seeded document and bound account | **Passed** |
+| Rebound Elasticsearch run | Changed account A to B and ran the workflow | Account B is effective and account A is not | **Passed** |
+| Agent Builder run | Ran `ai.agent` against the LLM proxy | Mocked answer and bound account are present | **Passed** |
+| Agent Builder conversation access | Read the generated conversation as the triggering admin | Product contract must define visibility | **Contract unclear:** returned `404` |
+| Wait and resume | Compared `_security/_authenticate` before and after `waitForInput` | Both requests use the bound account | **Failed:** resumed request used `TaskManager: workflow:resume` |
+| Admin authorization | Created/listed an account, bound it, and ran as admin | Required operations are allowed | **Passed** |
+| Editor authorization | Listed/rebound/ran as editor | List and rebind return `403`, never `500`; allowed run works | **Failed:** list returned `403` and run passed, but rebind returned `500` |
 
 ## Probe matrix
 
