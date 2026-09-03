@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applyYAxisModeToDomain, calculateDomain } from './calculate_domain';
+import { applyHeadroomToDomain, applyYAxisModeToDomain, calculateDomain } from './calculate_domain';
 import type { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerYAxisMode,
@@ -70,6 +70,22 @@ describe('calculateDomain()', () => {
 
     expect(calculateDomain(seriesWithZero, metrics)).toEqual({ min: 0, max: 2 });
   });
+
+  it('should return an ordered domain for a constant negative series', () => {
+    const constantNegativeSeries: MetricsExplorerSeries = {
+      ...series,
+      rows: [
+        { timestamp: 1562860500000, metric_0: -5, metric_1: -5 },
+        { timestamp: 1562860600000, metric_0: -5, metric_1: -5 },
+      ],
+    };
+
+    expect(calculateDomain(constantNegativeSeries, metrics)).toEqual({ min: -5, max: -5 });
+    expect(calculateDomain(constantNegativeSeries, metrics, true)).toEqual({
+      min: -11,
+      max: -5,
+    });
+  });
 });
 
 describe('applyYAxisModeToDomain()', () => {
@@ -100,5 +116,34 @@ describe('applyYAxisModeToDomain()', () => {
     const domain = { min: -5, max: 5 };
 
     expect(applyYAxisModeToDomain(domain, MetricsExplorerYAxisMode.auto)).toBe(domain);
+  });
+});
+
+describe('applyHeadroomToDomain()', () => {
+  it('should add 10% headroom above a positive max', () => {
+    expect(applyHeadroomToDomain({ min: 1, max: 10 })).toEqual({ min: 1, max: 11 });
+  });
+
+  it('should keep min less than or equal to max for an all-negative range', () => {
+    expect(applyHeadroomToDomain({ min: -10, max: -1 })).toEqual({ min: -10, max: -1.1 });
+  });
+
+  it('should keep min less than or equal to max for a constant negative domain', () => {
+    expect(applyHeadroomToDomain({ min: -5, max: -5 })).toEqual({ min: -5.5, max: -5 });
+  });
+
+  it('should add 10% headroom above a mixed-sign max', () => {
+    expect(applyHeadroomToDomain({ min: -4, max: 2 })).toEqual({ min: -4, max: 2.2 });
+  });
+
+  it('should apply custom min and max factors without inverting the domain', () => {
+    expect(applyHeadroomToDomain({ min: 1, max: 10 }, { min: 0.9, max: 1.1 })).toEqual({
+      min: 0.9,
+      max: 11,
+    });
+    expect(applyHeadroomToDomain({ min: -10, max: -1 }, { min: 0.9, max: 1.1 })).toEqual({
+      min: -9,
+      max: -1.1,
+    });
   });
 });

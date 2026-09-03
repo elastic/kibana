@@ -33,35 +33,39 @@ export const calculateDomain = (
   metrics: MetricsExplorerOptionsMetric[],
   stacked = false
 ): Domain => {
-  const values = series.rows.reduce((acc, row) => {
+  const values = series.rows.flatMap((row) => {
     const rowValues = metrics
       .map((metric, index) => row[getMetricId(metric, index)])
       .filter((value): value is number => isNumber(value) && Number.isFinite(value));
 
     if (rowValues.length === 0) {
-      return acc;
+      return [];
     }
 
-    const minValue = getMin(rowValues);
     // For stacked domains we want to add 10% head room so the charts have
     // enough room to draw the 2 pixel line as well.
-    const maxValue = stacked ? sum(rowValues) * 1.1 : getMax(rowValues);
-
-    if (minValue !== undefined) {
-      acc.push(minValue);
-    }
-    if (maxValue !== undefined) {
-      acc.push(maxValue);
-    }
-
-    return acc;
-  }, [] as number[]);
+    return [getMin(rowValues), stacked ? sum(rowValues) * 1.1 : getMax(rowValues)].filter(
+      (value): value is number => value !== undefined
+    );
+  });
   const minValue = getMin(values) ?? 0;
   const maxValue = getMax(values) ?? 0;
 
   return {
-    min: Math.min(minValue, maxValue),
-    max: Math.max(minValue, maxValue),
+    min: minValue,
+    max: maxValue,
+  };
+};
+
+export const applyHeadroomToDomain = (
+  domain: Domain,
+  headroom: { min?: number; max?: number } = { max: 1.1 }
+): Domain => {
+  const min = domain.min * (headroom.min ?? 1);
+  const max = domain.max * (headroom.max ?? 1);
+  return {
+    min: Math.min(min, max),
+    max: Math.max(min, max),
   };
 };
 
