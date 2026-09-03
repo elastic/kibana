@@ -1016,3 +1016,30 @@ describe('getActiveSolutionNavId$()', () => {
     expect(activeId).toBe('oblt');
   });
 });
+
+describe('registerNavigationLinks', () => {
+  it('registers hover lists and rejects a second registration on the same target', async () => {
+    const { projectNavigation } = setup();
+
+    projectNavigation.registerNavigationLinks({
+      id: 'dashboardLinks',
+      target: 'dashboards',
+      lists: [{ id: 'recentlyViewed', title: 'Recently viewed', items$: of([]) }],
+    });
+
+    const afterFirst = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterFirst).toHaveLength(1);
+
+    expect(() =>
+      projectNavigation.registerNavigationLinks({
+        id: 'otherDashboardLinks',
+        target: 'dashboards',
+        lists: [{ id: 'favorites', title: 'Favorites', items$: of([]) }],
+      })
+    ).toThrow('A second hover registration on target "dashboards" is not allowed.');
+
+    const afterSecond = await firstValueFrom(projectNavigation.getRegisteredNavigationLinks$());
+    expect(afterSecond).toHaveLength(1);
+    expect(afterSecond[0].id).toBe('dashboardLinks');
+  });
+});

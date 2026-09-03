@@ -40,4 +40,18 @@ describe('getHasSubmenu', () => {
 
     expect(getHasSubmenu(item)).toBe(true);
   });
+
+  it('returns true when the item has popover-only sections', () => {
+    expect(
+      getHasSubmenu({
+        ...createItem(),
+        popoverSections: [
+          {
+            id: 'recent',
+            items: [{ id: 'child-1', label: 'Child', href: '/child' }],
+          },
+        ],
+      })
+    ).toBe(true);
+  });
 });

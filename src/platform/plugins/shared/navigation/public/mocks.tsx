@@ -50,6 +50,7 @@ const createStartContract = (): jest.Mocked<Start> => {
     },
     addSolutionNavigation: jest.fn(),
     initNavigation: jest.fn(),
+    registerNavigationLinks: jest.fn(),
     isSolutionNavEnabled$: of(false),
   };
   return startContract;

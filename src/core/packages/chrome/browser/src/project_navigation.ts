@@ -301,6 +301,35 @@ export interface NavigationTreeDefinitionUI {
   footer?: Array<ChromeProjectNavigationNode>;
 }
 
+/** Chrome-owned popover row. Not a re-export of SecondaryMenuItem. */
+export interface ProjectNavigationLinkItem {
+  id: string;
+  href: string;
+  label: string;
+  badgeType?: BadgeType;
+  isExternal?: boolean;
+}
+
+/** One titled list inside a hover registration. */
+export interface ProjectNavigationLinkList {
+  /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
+  id: string;
+  title: string;
+  items$: Observable<readonly ProjectNavigationLinkItem[]>;
+}
+
+/** Everything one feature contributes to an existing deep link's hover popover. One per target. */
+export interface ProjectNavigationLinks {
+  id: string;
+  target: AppDeepLinkId;
+  lists: readonly ProjectNavigationLinkList[];
+  /** Footer row. Label defaults to "View all". Shown only when at least one list has items. */
+  viewAll?: {
+    href: string;
+    label?: string;
+  };
+}
+
 /**
  * @public
  *
