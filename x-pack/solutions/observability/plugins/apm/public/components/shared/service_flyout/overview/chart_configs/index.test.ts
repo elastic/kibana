@@ -136,7 +136,14 @@ describe('service flyout chart_configs', () => {
       const yAxis = layer && 'yAxis' in layer ? layer.yAxis?.[0] : undefined;
 
       expect(yAxis).toEqual(
-        expect.objectContaining({ format: 'duration', fromUnit: 'ms', toUnit: 'auto' })
+        expect.objectContaining({
+          format: 'duration',
+          // Duration field formatter unit names — the legacy LensConfigBuilder
+          // forwards these verbatim; short API names ('ms'/'auto') break it.
+          fromUnit: 'milliseconds',
+          toUnit: 'humanizePrecise',
+          compactValues: true,
+        })
       );
     });
 

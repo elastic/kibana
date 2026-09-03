@@ -91,9 +91,14 @@ export function getLatencyChart({
         value: aggregation,
         // The queries EVAL a `duration_ms` column; let Lens auto-scale the unit
         // (µs/ms/s) like the APM duration formatter instead of a fixed ms suffix.
+        // These are the duration field formatter's own unit names: the legacy
+        // LensConfigBuilder forwards fromUnit/toUnit verbatim into the formatter
+        // params (short names like 'ms'/'auto' belong to the new Lens API schema
+        // and break the formatter). compactValues gives short suffixes ("µs").
         format: 'duration',
-        fromUnit: 'ms',
-        toUnit: 'auto',
+        fromUnit: 'milliseconds',
+        toUnit: 'humanizePrecise',
+        compactValues: true,
         seriesColor: seriesColor(getLatencyChartType(latencyAggregationType)),
       },
     ],
