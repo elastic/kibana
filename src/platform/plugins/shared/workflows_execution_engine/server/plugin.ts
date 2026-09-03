@@ -41,6 +41,7 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { executeWorkflowSync } from './execution_functions/execute_workflow_sync';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
@@ -89,6 +90,7 @@ import {
 } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
+
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -966,7 +968,10 @@ export class WorkflowsExecutionEnginePlugin
     return {};
   }
 
-  public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+  public start(
+    coreStart: CoreStart,
+    plugins: WorkflowsExecutionEnginePluginStartDeps
+  ): WorkflowsExecutionEnginePluginStart {
     this.logger.debug('workflows-execution-engine: Start');
 
     if (!this.setupDependencies) {
@@ -1018,6 +1023,7 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      executionId?: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string;
@@ -1041,7 +1047,11 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: {
+        refresh: boolean | 'wait_for';
+        executionId?: string;
+        metadata?: Record<string, string>;
+      } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -1054,14 +1064,17 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
+      const executionContext = options.metadata
+        ? { ...context, metadata: options.metadata }
+        : context;
       const workflowExecution = await buildExecutionDocument({
         workflow,
-        context,
+        executionId: options.executionId,
+        context: executionContext,
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
       });
-
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
         workflowExecutionRepository,
@@ -1104,8 +1117,37 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request, options = {}) => {
       await checkLicense(plugins.licensing);
+
+      if (
+        options.executionMode !== 'sync' &&
+        (options.capabilities !== undefined || options.abortSignal !== undefined)
+      ) {
+        throw new Error('Request-local capabilities and abort signals require sync execution');
+      }
+
+      if (options.executionMode === 'sync' && this.config.syncExecution.enabled) {
+        if (!request) {
+          throw new Error('Synchronous workflows cannot be executed without the user context');
+        }
+        if (!this.coreSetup) {
+          throw new Error('Core setup not available');
+        }
+        const coreSetup = this.coreSetup;
+        return executeWorkflowSync({
+          workflow,
+          context,
+          request,
+          options,
+          logger: this.logger,
+          dependencies,
+          getWorkflowsExecutionEngine: async () => {
+            const [, , workflowsExecutionEngine] = await coreSetup.getStartServices();
+            return workflowsExecutionEngine;
+          },
+        });
+      }
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
       const isRunningInTaskManager =
@@ -1138,7 +1180,10 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'manual',
         request,
-        { refresh: true }
+        {
+          refresh: true,
+          executionId: options.executionId,
+        }
       );
 
       const inputsValid = await validateWorkflowInputs(
@@ -1698,6 +1743,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     return {
+      supportsSynchronousExecution: true,
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
@@ -1714,7 +1760,7 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {
+  public async stop() {
     void this.dataClientBundle.stop();
   }
 
