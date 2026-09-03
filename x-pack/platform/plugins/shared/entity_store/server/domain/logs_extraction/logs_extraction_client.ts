@@ -553,9 +553,7 @@ export class LogsExtractionClient {
           // TODO CURSOR-TEST temporary local instrumentation, do not commit
           if (type === 'user') {
             this.logger.info(
-              `==================== [CURSOR-TEST] probe SKIPPED (resume): reusing pinned sliceEnd=${
-                resumeSliceEnd.timestampCursor
-              } idCursor=${resumeEntityPagination?.idCursor} windowFrom=${fromDateISO}`
+              `==================== [CURSOR-TEST] probe SKIPPED (resume): reusing pinned sliceEnd=${resumeSliceEnd.timestampCursor} idCursor=${resumeEntityPagination?.idCursor} windowFrom=${fromDateISO}`
             );
           }
         } else {
