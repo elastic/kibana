@@ -337,9 +337,9 @@ const engineDescriptorSchemaV7 = schema.object({
   ),
 });
 
-// Adds logExtractionState.sliceEndTimestamp (nullable, defaults null — no backfill needed).
-// No mappings addition: runtime cursor fields are stored but not indexed (dynamic: false),
-// same as checkpointTimestamp in v6.
+// Adds logExtractionState.sliceEndTimestamp. Nullable with a null default, so no data
+// backfill is needed. Runtime cursor fields are stored but not indexed (mappings are
+// dynamic: false), so there is no mappings addition either.
 const version7: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {

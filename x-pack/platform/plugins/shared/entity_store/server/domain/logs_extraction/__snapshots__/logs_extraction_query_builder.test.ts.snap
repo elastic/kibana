@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -257,7 +259,9 @@ asset*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for host entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -856,7 +860,9 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for service entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE
@@ -1084,7 +1090,9 @@ data_stream*,
 @timestamp"
 `;
 
-exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
+exports[
+  `buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM test-index-*
   | WHERE

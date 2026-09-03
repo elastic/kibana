@@ -1666,7 +1666,7 @@ describe('LogsExtractionClient mid-slice resume', () => {
     expect(result.success).toBe(true);
     const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
     // First query re-enters the slice: an extraction bounded by the persisted slice end,
-    // paginating past the persisted id cursor — the probe is not re-run for this slice.
+    // paginating past the persisted id cursor; the probe is not re-run for this slice.
     expect(isExtractionQuery(queries[0])).toBe(true);
     expect(queries[0]).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
     expect(queries[0]).toContain('> "entity-cursor"');
@@ -1674,11 +1674,11 @@ describe('LogsExtractionClient mid-slice resume', () => {
     expect(ctx.mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Resuming mid-slice'));
   });
 
-  it('discards an id cursor persisted without a pinned slice end (legacy state) and re-processes the slice', async () => {
+  it('discards an id cursor persisted without a pinned slice end and re-processes the slice', async () => {
     ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
       createMockEngineDescriptor('user', {
         checkpointTimestamp,
-        paginationId: 'stale-legacy-cursor',
+        paginationId: 'stale-cursor',
       }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
     );
     mockExtractSuccessSequence({ columns: extractionColumns, values: [] });
@@ -1687,10 +1687,10 @@ describe('LogsExtractionClient mid-slice resume', () => {
 
     expect(result.success).toBe(true);
     const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
-    // Legacy fallback: probe-first flow from the checkpoint, id cursor discarded entirely.
+    // Without a pinned slice end the cursor is discarded: probe-first flow from the checkpoint.
     expect(isProbeQuery(queries[0])).toBe(true);
     expect(queries[0]).toContain(checkpointTimestamp);
-    expect(queries.every((q) => !q.includes('stale-legacy-cursor'))).toBe(true);
+    expect(queries.every((q) => !q.includes('stale-cursor'))).toBe(true);
     expect(ctx.mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('without a pinned slice end')
     );

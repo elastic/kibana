@@ -880,12 +880,12 @@ export class LogsExtractionClient {
       return {};
     }
     if (!sliceEndTimestamp) {
-      // Mid-slice state written by a previous release (timestamp-keyset cursor, no pinned slice
-      // end): the id cursor cannot be trusted without the exact bounds it was created under.
-      // Re-process the slice from the checkpoint instead — upserts are idempotent, so this costs
-      // re-processing one slice, once, after upgrade.
+      // An id cursor is only meaningful together with the exact slice bounds it was created
+      // under. Without a pinned slice end those bounds cannot be reproduced (the probe is
+      // sampled), so discard the cursor and re-process the slice from the checkpoint; upserts
+      // are idempotent, so re-processing is safe.
       this.logger.warn(
-        `Found a mid-slice entity cursor (${paginationId}) without a pinned slice end (state written by a previous release). Discarding the cursor and re-processing the slice from ${fromDateISO}.`
+        `Found a mid-slice entity cursor (${paginationId}) without a pinned slice end. Discarding the cursor and re-processing the slice from ${fromDateISO}.`
       );
       return {};
     }

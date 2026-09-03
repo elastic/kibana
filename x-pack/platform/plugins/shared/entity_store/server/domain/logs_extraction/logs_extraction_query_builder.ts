@@ -128,9 +128,7 @@ export function buildLogsExtractionEsqlQuery({
   // If there is no post aggregation filter we can paginate before the lookup join
   // and save some performance
   if (!entityDefinition.postAggFilter) {
-    parts.push(
-      ...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination)
-    );
+    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
   // Builds the main entity id
@@ -153,9 +151,7 @@ export function buildLogsExtractionEsqlQuery({
       )
     );
     // then we can paginate after the post aggregation filter
-    parts.push(
-      ...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination)
-    );
+    parts.push(...buildPaginationSection(docsLimit, MAIN_EXTRACTION_PAGINATION_FIELDS, pagination));
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {

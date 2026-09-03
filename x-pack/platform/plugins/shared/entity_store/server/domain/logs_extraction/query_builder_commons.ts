@@ -46,8 +46,8 @@ export const TIMESTAMP_FIELD = '@timestamp';
 
 export const NULLIFY_UNMAPPED_FIELDS_SETTING = 'SET unmapped_fields="nullify";';
 
-/** Entity-page cursor: the entity id alone. Slice time bounds are fixed by the boundary probe,
- * so the id is the only component that must stay stable across query re-executions. */
+/** Entity-page cursor within a log slice. The entity id is derived purely from identity fields,
+ * so it is stable across query re-executions; the slice time bounds are owned by the probe. */
 export interface PaginationParams {
   idCursor: string;
 }
