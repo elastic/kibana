@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useRef } from 'react';
+import React, { Suspense, useMemo, useRef, type RefObject } from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
@@ -59,98 +59,54 @@ const runDiagnosisLabel = i18n.translate('xpack.reporting.listing.diagnosticButt
   defaultMessage: 'Run diagnosis',
 });
 
-export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }> = ({
+const ReportingPageHeader = ({
   config,
+  tabs,
+  diagnosticRef,
+}: {
+  config: ClientConfigType;
+  tabs: AppHeaderTab[];
+  diagnosticRef: RefObject<ReportDiagnosticHandle | null>;
 }) => {
-  const { section } = useParams<MatchParams>();
-  const history = useHistory();
-  const diagnosticRef = useRef<ReportDiagnosticHandle>(null);
+  if (!config.statefulSettings.enabled) {
+    return (
+      <AppHeader
+        title={reportingTitle}
+        description={reportingDescription}
+        tabs={tabs}
+        spacing="bleed"
+      />
+    );
+  }
 
-  const { apiClient } = useInternalApiClient();
+  return <StatefulReportingPageHeader config={config} tabs={tabs} diagnosticRef={diagnosticRef} />;
+};
+
+const StatefulReportingPageHeader = ({
+  config,
+  tabs,
+  diagnosticRef,
+}: {
+  config: ClientConfigType;
+  tabs: AppHeaderTab[];
+  diagnosticRef: RefObject<ReportDiagnosticHandle | null>;
+}) => {
   const {
     services: {
-      application: { capabilities, navigateToApp, navigateToUrl },
-      http,
-      notifications,
+      application: { capabilities },
       share: { url: urlService },
-      license$,
     },
   } = useKibana();
-  const license = useObservable<ILicense | null>(license$ ?? new Observable(), null);
   const ilmPolicyContextValue = useIlmPolicyStatus();
-
-  const licensingInfo = useMemo(() => {
-    if (!license) {
-      return { enableLinks: false, showLinks: false };
-    }
-    if (!license || !license.type) {
-      return {
-        showLinks: true,
-        enableLinks: false,
-        message:
-          'You cannot use Reporting because license information is not available at this time.',
-      };
-    }
-
-    if (!license.isActive) {
-      return {
-        showLinks: true,
-        enableLinks: false,
-        message: 'You cannot use Reporting because your ${license.type} license has expired.',
-      };
-    }
-
-    if (!SCHEDULED_REPORT_VALID_LICENSES.includes(license.type)) {
-      return {
-        showLinks: false,
-        enableLinks: false,
-        message:
-          'Your {licenseType} license does not support Scheduled reports. Please upgrade your license.',
-      };
-    }
-
-    return {
-      showLinks: true,
-      enableLinks: true,
-    };
-  }, [license]);
-
-  const { enableLinks, showLinks } = licensingInfo;
-  const configAllowsImageReports =
-    config.export_types.pdf.enabled || config.export_types.png.enabled;
   const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
   const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
   const showIlmPolicyLink = Boolean(
-    config.statefulSettings.enabled &&
-      capabilities?.management?.data?.index_lifecycle_management &&
-      ilmLocator &&
-      hasIlmPolicy
+    capabilities?.management?.data?.index_lifecycle_management && ilmLocator && hasIlmPolicy
   );
-
-  const tabs: AppHeaderTab[] = [
-    {
-      id: 'exports',
-      label: exportsTabLabel,
-      href: history.createHref({ pathname: '/exports' }),
-      onClick: () => history.push('/exports'),
-      isSelected: section === 'exports',
-      'data-test-subj': 'reportingTabs-exports',
-    },
-    {
-      id: 'schedules',
-      label: schedulesTabLabel,
-      href: history.createHref({ pathname: '/schedules' }),
-      onClick: () => history.push('/schedules'),
-      isSelected: section === 'schedules',
-      'data-test-subj': 'reportingTabs-schedules',
-    },
-  ];
+  const configAllowsImageReports =
+    config.export_types.pdf.enabled || config.export_types.png.enabled;
 
   const menu = useMemo<AppHeaderMenu | undefined>(() => {
-    if (!config.statefulSettings.enabled) {
-      return undefined;
-    }
-
     const items: NonNullable<AppHeaderMenu['items']> = [];
 
     if (showIlmPolicyLink && ilmLocator) {
@@ -193,22 +149,103 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
       ...(primaryActionItem ? { primaryActionItem } : {}),
     };
   }, [
-    config.statefulSettings.enabled,
     configAllowsImageReports,
+    diagnosticRef,
     ilmLocator,
     ilmPolicyContextValue?.isLoading,
     showIlmPolicyLink,
   ]);
 
   return (
+    <AppHeader
+      title={reportingTitle}
+      description={reportingDescription}
+      tabs={tabs}
+      menu={menu}
+      spacing="bleed"
+    />
+  );
+};
+
+export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }> = ({
+  config,
+}) => {
+  const { section } = useParams<MatchParams>();
+  const history = useHistory();
+  const diagnosticRef = useRef<ReportDiagnosticHandle>(null);
+
+  const { apiClient } = useInternalApiClient();
+  const {
+    services: {
+      application: { capabilities, navigateToApp, navigateToUrl },
+      http,
+      notifications,
+      share: { url: urlService },
+      license$,
+    },
+  } = useKibana();
+  const license = useObservable<ILicense | null>(license$ ?? new Observable(), null);
+
+  const licensingInfo = useMemo(() => {
+    if (!license) {
+      return { enableLinks: false, showLinks: false };
+    }
+    if (!license || !license.type) {
+      return {
+        showLinks: true,
+        enableLinks: false,
+        message:
+          'You cannot use Reporting because license information is not available at this time.',
+      };
+    }
+
+    if (!license.isActive) {
+      return {
+        showLinks: true,
+        enableLinks: false,
+        message: 'You cannot use Reporting because your ${license.type} license has expired.',
+      };
+    }
+
+    if (!SCHEDULED_REPORT_VALID_LICENSES.includes(license.type)) {
+      return {
+        showLinks: false,
+        enableLinks: false,
+        message:
+          'Your {licenseType} license does not support Scheduled reports. Please upgrade your license.',
+      };
+    }
+
+    return {
+      showLinks: true,
+      enableLinks: true,
+    };
+  }, [license]);
+
+  const { enableLinks, showLinks } = licensingInfo;
+
+  const tabs: AppHeaderTab[] = [
+    {
+      id: 'exports',
+      label: exportsTabLabel,
+      href: history.createHref({ pathname: '/exports' }),
+      onClick: () => history.push('/exports'),
+      isSelected: section === 'exports',
+      'data-test-subj': 'reportingTabs-exports',
+    },
+    {
+      id: 'schedules',
+      label: schedulesTabLabel,
+      href: history.createHref({ pathname: '/schedules' }),
+      onClick: () => history.push('/schedules'),
+      isSelected: section === 'schedules',
+      'data-test-subj': 'reportingTabs-schedules',
+    },
+  ];
+
+  return (
     <>
-      <AppHeader
-        title={reportingTitle}
-        description={reportingDescription}
-        tabs={tabs}
-        menu={menu}
-        spacing="bleed"
-      />
+      <ReportingPageHeader config={config} tabs={tabs} diagnosticRef={diagnosticRef} />
       <EuiSpacer size="l" />
       {config.statefulSettings.enabled ? (
         <IlmPolicyWrapper ref={diagnosticRef} config={config} apiClient={apiClient} />

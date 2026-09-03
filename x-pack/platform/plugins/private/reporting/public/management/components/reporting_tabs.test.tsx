@@ -39,7 +39,7 @@ import { shareService } from '@kbn/dashboard-plugin/public/services/kibana_servi
 import type { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 
-import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
+import { PolicyStatusContextProvider } from '../../lib/default_status_context';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import { ReportDiagnostic } from './report_diagnostic';
 
@@ -146,7 +146,7 @@ describe('Reporting tabs', () => {
             }}
           >
             <InternalApiClientProvider apiClient={updatedReportingAPIClient} http={http}>
-              <IlmPolicyStatusContextProvider>
+              <PolicyStatusContextProvider config={renderProps.config}>
                 <IntlProvider locale="en">
                   <Router history={renderProps.history ?? props.history}>
                     <QueryClientProvider client={queryClient}>
@@ -154,7 +154,7 @@ describe('Reporting tabs', () => {
                     </QueryClientProvider>
                   </Router>
                 </IntlProvider>
-              </IlmPolicyStatusContextProvider>
+              </PolicyStatusContextProvider>
             </InternalApiClientProvider>
           </KibanaContextProvider>
         </MockAppHeaderProvider>
@@ -255,6 +255,10 @@ describe('Reporting tabs', () => {
       // @ts-expect-error we don't need to provide all props for the test
       render(renderComponent({ ...props, shareService: updatedShareService, config: newConfig }));
 
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Reporting'
+      );
+      expect(await screen.findByTestId('reportExportsTable')).toBeInTheDocument();
       expect(screen.queryByTestId('ilmPolicyLink')).not.toBeInTheDocument();
     });
   });
