@@ -103,7 +103,7 @@ function parseToolDefinitions(raw: unknown): GenAiToolDefinition[] | undefined {
   for (const value of parsed) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
 
-    const { type, name, description, parameters } = value as Record<string, unknown>;
+    const { type, name, description, parameters } = value as GenAiToolDefinition;
     if (
       typeof type !== 'string' ||
       typeof name !== 'string' ||
