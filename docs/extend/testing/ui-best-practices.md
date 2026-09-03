@@ -140,11 +140,11 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 ## Don't select elements by index [dont-select-elements-by-index]
 
-`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, which comes from [Playwright's own recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of test failures caused by clicking by index, and Scout raises the stakes: to keep CI cheap and closer to real usage, suites share a cluster and run without a server restart, so data left behind by an earlier suite shifts the ordering under you.
+`.first()`, `.nth()`, and `.last()` are restricted by the `playwright/no-nth-methods` ESLint rule, part of [Playwright's recommended set](https://playwright.dev/docs/best-practices). Kibana has hit years of failures from clicking by index, and Scout raises the stakes: suites deliberately share a cluster and run without a server restart, so data from an earlier suite shifts the ordering under you.
 
-`.first()` in particular is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug: two things matched when you expected one — scope the locator to a container, or add a `data-test-subj` to the component. If the UI is genuinely rendering duplicates, that is worth reporting to the owning team rather than hiding. If you added it because the collection was not ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that instead.
+`.first()` is usually a symptom rather than a solution. If you added it to silence a strict-mode "resolved to N elements" error, the selector is the bug — scope the locator to a container, or add a `data-test-subj` to the component. If you added it because the collection was not ready yet, the wait is the bug: expose the component's loading state in the DOM (`myTable-loading` / `myTable-loaded`) and wait on that.
 
-For every other case, there is a replacement that doesn't need an index:
+Otherwise, use the replacement instead of an index:
 
 | You need                               | Use                                                                                                                                                                         |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -152,14 +152,11 @@ For every other case, there is a replacement that doesn't need an index:
 | To assert the order of a list or table | `await expect(rows).toHaveText([...])` or `toContainText([...])` — an ordered array needs no index                                                                          |
 | One row identified by its content      | `rows.filter({ hasText: 'Second' })` or `getByRole('row', { name: 'Second' })`                                                                                              |
 | To act on every item in a collection   | `for (const item of await items.all())`. Never loop on `while ((await items.count()) > 0)`: `count()` returns immediately without waiting for rendering, so it races the UI |
-| A genuinely positional element         | The third legend entry, the last step of a run — allowed only through the escape hatch below, once the rows above are ruled out                                             |
+| A genuinely positional element         | Only through the escape hatch below, once the rows above are ruled out                                                                                                      |
 
 **Never reach for a file-level suppression.** `/* eslint-disable playwright/no-nth-methods */` silences the rest of the file, including code added later, and turns CI green without fixing anything.
 
-Two cases do survive review. Both need a single-line disable that states the reason, preceded by a `toHaveCount` assertion so the index is bounded rather than hopeful:
-
-- the collection is genuinely ordered — the last step of a run, the third legend entry;
-- the elements are genuinely indistinguishable, typically a duplicated `data-test-subj` inside a component you don't own. Say so in the reason, and raise it with the owning team.
+Two cases survive review: a genuinely ordered collection (the last step of a run, the third legend entry), or elements that are truly indistinguishable — typically a duplicated `data-test-subj` in a component you don't own, worth raising with the owning team. Both need a single-line disable stating the reason, preceded by a `toHaveCount` that bounds the index:
 
 ```ts
 await expect(stepButtons).toHaveCount(4);
@@ -178,25 +175,6 @@ await page.testSubj.locator('tableRow').nth(0).click();
 
 ```ts
 await page.testSubj.locator('tableRow').filter({ hasText: 'nginx-logs' }).click();
-```
-
-❌ **Don’t:** loop on a live count while clicking, and don’t reach for `.first()` because the locator matches several elements:
-
-```ts
-const removeBtn = page.testSubj.locator('indexPattern-dimension-remove');
-while ((await removeBtn.count()) > 0) {
-  await removeBtn.first().click();
-}
-```
-
-✔️ **Do:** snapshot the collection once, then act on each element:
-
-```ts
-const metricsPanel = page.testSubj.locator('lnsDatatable_metrics');
-const removeBtn = metricsPanel.locator('[data-test-subj="indexPattern-dimension-remove"]');
-for (const button of await removeBtn.all()) {
-  await button.click();
-}
 ```
 
 :::::
