@@ -46,6 +46,7 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   profileState: {},
   expandedDoc: undefined,
   expandedDocOwner: undefined,
+  expandedDocCascadePath: undefined,
   renderDocumentViewMeta: undefined,
   uiState: {},
 };

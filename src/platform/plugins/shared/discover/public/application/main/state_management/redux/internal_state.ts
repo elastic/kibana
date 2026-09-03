@@ -47,6 +47,7 @@ import {
   TabsBarVisibility,
   type ProfileAppStateDefaultField,
   type DiscoverInternalState,
+  type ExpandedDocCascadePath,
   type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
@@ -241,6 +242,7 @@ const internalStateSliceDef = createSlice({
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         expandedDocOwner?: string;
+        expandedDocCascadePath?: ExpandedDocCascadePath;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
@@ -262,6 +264,9 @@ const internalStateSliceDef = createSlice({
 
         tab.expandedDoc = action.payload.expandedDoc;
         tab.expandedDocOwner = nextExpandedDocOwner;
+        tab.expandedDocCascadePath = action.payload.expandedDoc
+          ? action.payload.expandedDocCascadePath
+          : undefined;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -437,6 +442,7 @@ const internalStateSliceDef = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.expandedDocOwner = undefined;
+        tab.expandedDocCascadePath = undefined;
         tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
