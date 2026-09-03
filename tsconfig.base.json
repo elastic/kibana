@@ -1327,6 +1327,8 @@
       "@kbn/evals-suite-attack-discovery/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/*"],
       "@kbn/evals-suite-attack-discovery-agent-builder": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder"],
       "@kbn/evals-suite-attack-discovery-agent-builder/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/*"],
+      "@kbn/evals-suite-deep-watch-forensics": ["./x-pack/solutions/security/packages/kbn-evals-suite-deep-watch-forensics"],
+      "@kbn/evals-suite-deep-watch-forensics/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-deep-watch-forensics/*"],
       "@kbn/evals-suite-endpoint": ["./x-pack/solutions/security/packages/kbn-evals-suite-endpoint"],
       "@kbn/evals-suite-endpoint/*": ["./x-pack/solutions/security/packages/kbn-evals-suite-endpoint/*"],
       "@kbn/evals-suite-entity-analytics": ["./x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics"],

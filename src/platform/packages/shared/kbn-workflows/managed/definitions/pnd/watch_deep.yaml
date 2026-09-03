@@ -271,6 +271,15 @@ steps:
             body: >-
               {{ steps.reconstruct_attack.output.structured_output.attackTimeline
               | default: "Not reconstructed." }}
+          # Indicators belong in the durable record, not only in `emit_result`:
+          # an Evaluation Record that a reviewer can label has to carry the
+          # pivots the forensic step produced. Joined to one line because a
+          # section body is a string, and `join` on the empty-array fallback
+          # yields an empty string rather than dropping the section.
+          - title: Indicators of compromise
+            body: >-
+              {{ steps.reconstruct_attack.output.structured_output.iocs
+              | default: consts.no_iocs | join: "; " }}
 
   - name: emit_result
     type: workflow.output

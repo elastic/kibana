@@ -1830,6 +1830,7 @@
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",
     "@kbn/evals-suite-attack-discovery": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery",
     "@kbn/evals-suite-attack-discovery-agent-builder": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder",
+    "@kbn/evals-suite-deep-watch-forensics": "link:x-pack/solutions/security/packages/kbn-evals-suite-deep-watch-forensics",
     "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
     "@kbn/evals-suite-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics",
     "@kbn/evals-suite-lead-generation": "link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation",

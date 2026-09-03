@@ -389,6 +389,24 @@ describe('watch_deep.yaml as an invokable investigation worker (kibana-tjil.7)',
         'steps.triage_alerts.output.structured_output.rationale'
       );
     });
+
+    const sectionTitled = (title: string) =>
+      getStep('record_reasoning').with?.reasoning?.sections?.find(
+        (section) => section.title === title
+      );
+
+    it.each(['Patient zero', 'Attack timeline', 'Indicators of compromise'])(
+      'carries the forensic field %s into the durable reasoning record',
+      (title) => {
+        expect(sectionTitled(title)).toBeDefined();
+      }
+    );
+
+    it('renders indicators through the empty-array const so the section survives a skipped forensic step', () => {
+      const body = sectionTitled('Indicators of compromise')?.body ?? '';
+      expect(body).toContain('steps.reconstruct_attack.output.structured_output.iocs');
+      expect(body).toContain('consts.no_iocs');
+    });
   });
 
   describe('emit_result', () => {
