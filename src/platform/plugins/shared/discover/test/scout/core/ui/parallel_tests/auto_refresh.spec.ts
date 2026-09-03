@@ -27,13 +27,6 @@ spaceTest.describe('auto refresh', { tag: tags.deploymentAgnostic }, () => {
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterEach(async ({ pageObjects }) => {
-    if (await pageObjects.inspector.panel.isVisible()) {
-      await pageObjects.inspector.close();
-    }
-    await pageObjects.datePicker.pauseAutoRefresh();
-  });
-
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
