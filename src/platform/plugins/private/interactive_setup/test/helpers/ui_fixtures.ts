@@ -8,7 +8,7 @@
  */
 
 import type { KibanaUrl, PageObjects, ScoutPage, ScoutWorkerFixtures } from '@kbn/scout';
-import { apiClientFixture, createLazyPageObject, test as baseTest, mergeTests } from '@kbn/scout';
+import { apiClientFixture, test as baseTest, createLazyPageObject, mergeTests } from '@kbn/scout';
 
 import { InteractiveSetupPage } from './interactive_setup_page';
 

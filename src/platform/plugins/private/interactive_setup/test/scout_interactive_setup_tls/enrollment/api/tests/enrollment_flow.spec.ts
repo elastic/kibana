@@ -22,8 +22,7 @@ import { getElasticsearchCaCertificate } from '../../../../helpers/tls_tools';
 const ENROLL_ROUTE = '/internal/interactive_setup/enroll';
 
 /** A CA fingerprint that is well-formed but belongs to no cluster we talk to. */
-const UNRELATED_CA_FINGERPRINT =
-  '3FDAEE71A3604070E6AE6B01412D19772DE5AE129F69C413F0453B293D9BE65D';
+const UNRELATED_CA_FINGERPRINT = '3FDAEE71A3604070E6AE6B01412D19772DE5AE129F69C413F0453B293D9BE65D';
 
 /**
  * Enrollment against a TLS-enabled cluster with `xpack.security.enrollment.enabled`. Enrolling
@@ -109,33 +108,30 @@ apiTest.describe(
       });
     });
 
-    apiTest(
-      'rejects enrollment with an invalidated API key',
-      async ({ apiClient, esClient }) => {
-        // Invalidating here — rather than passing a bogus key — is the point of the test: the key
-        // was genuinely issued, so only Elasticsearch rejecting it can make the enrollment fail.
-        // `afterEach` then invalidates again, which is a harmless no-op.
-        await esClient.security.invalidateApiKey({ name: ENROLLMENT_API_KEY_NAME });
+    apiTest('rejects enrollment with an invalidated API key', async ({ apiClient, esClient }) => {
+      // Invalidating here — rather than passing a bogus key — is the point of the test: the key
+      // was genuinely issued, so only Elasticsearch rejecting it can make the enrollment fail.
+      // `afterEach` then invalidates again, which is a harmless no-op.
+      await esClient.security.invalidateApiKey({ name: ENROLLMENT_API_KEY_NAME });
 
-        const response = await apiClient.post(ENROLL_ROUTE, {
-          headers: { 'kbn-xsrf': 'xxx' },
-          body: {
-            apiKey: enrollmentApiKey,
-            code: verificationCode,
-            caFingerprint,
-            hosts: [elasticsearchHost],
-          },
-        });
+      const response = await apiClient.post(ENROLL_ROUTE, {
+        headers: { 'kbn-xsrf': 'xxx' },
+        body: {
+          apiKey: enrollmentApiKey,
+          code: verificationCode,
+          caFingerprint,
+          hosts: [elasticsearchHost],
+        },
+      });
 
-        expect(response).toHaveStatusCode(500);
-        expect(response.body).toStrictEqual({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Failed to enroll.',
-          attributes: { type: ERROR_ENROLL_FAILURE },
-        });
-      }
-    );
+      expect(response).toHaveStatusCode(500);
+      expect(response.body).toStrictEqual({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'Failed to enroll.',
+        attributes: { type: ERROR_ENROLL_FAILURE },
+      });
+    });
 
     // Must stay last: enrolling ends the `preboot` stage and reboots Kibana, so any test declared
     // after this one would run against a Kibana that no longer serves the route.
