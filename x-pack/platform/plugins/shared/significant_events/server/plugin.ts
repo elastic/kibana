@@ -127,7 +127,7 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
-      
+
     registerSignificantEventsFeature(plugins.features);
 
     this.ebtTelemetryService.setup(core.analytics);
