@@ -450,6 +450,13 @@ def deploy(ip: str) -> None:
     # them inside its openrouter- branch.
     scp(str(base / "openrouter_proxy.py"), ip, "/tmp/openrouter_proxy.py")
     scp(str(base / "create_openrouter_endpoint.py"), ip, "/tmp/create_openrouter_endpoint.py")
+    # Matrix config carries the OpenRouter API model ids (matchIds) that the
+    # connectors cache does NOT. The VM's Kibana checkout is main, not this
+    # branch — it lacks the persona-matrix suite entirely, so ship the config.
+    matrix_cfg = base.parent.parent / (
+        "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/"
+        "persona_matrix.config.json")
+    scp(str(matrix_cfg), ip, "/tmp/persona_matrix.config.json")
     scp(os.path.expanduser("~/.elastic/eis-connectors-cache.json"), ip,
         ".elastic/eis-connectors-cache.json")
     scp(os.path.expanduser("~/.elastic/eis-ccm-key.json"), ip,
@@ -778,11 +785,22 @@ def launch(ip: str, model: str, shard: Optional[str] = None) -> subprocess.Popen
         # run id keeps the slices independently countable.
         base = env.get("TEST_RUN_ID") or f"sweep-{int(time.time())}"
         env["TEST_RUN_ID"] = shard_run_id(base, shard)
+    # Detach on the VM: the eval runs 30-60+ min and holding one long SSH
+    # stream is fragile — mid-run stream death (rc 255) previously killed the
+    # controller's view while the eval kept running (observed 2026-09-03:
+    # every shard FAILED with an unparseable scores response while node/evals
+    # was alive on the VM). run_model.sh writes /tmp/unit.done + .rc when it
+    # finishes; we poll those over short-lived SSH connections instead.
+    run_cmd = (
+        f"rm -f /tmp/unit.done /tmp/unit.rc; "
+        f"{build_env_prefix(model, env)}nohup bash /tmp/run_model.sh {model} "
+        f"> /tmp/unit-run.log 2>&1 < /dev/null & echo launched"
+    )
     return subprocess.Popen(
         ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
          "-o", "LogLevel=ERROR",
          "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=60",
-         "-i", SSH_KEY, f"{SSH_USER}@{ip}", f"{build_env_prefix(model, env)}bash /tmp/run_model.sh {model}"],
+         "-i", SSH_KEY, f"{SSH_USER}@{ip}", run_cmd],
         stdout=open(log, "w"), stderr=subprocess.STDOUT)
 
 
@@ -1215,7 +1233,26 @@ def main() -> int:
 
     print("\nAll launches issued. Waiting for completion + golden gate.", flush=True)
     for model, shard, ip, p in procs:
-        rc = p.wait()
+        p.wait()  # returns when the quick "launch" ssh exits (immediately)
+        # Poll the detached VM-side markers. Cap at 6h (slow reasoning models
+        # at 240-min per-example timeouts can legitimately run for hours).
+        deadline = time.time() + 6 * 3600
+        rc = None
+        while time.time() < deadline:
+            probe = subprocess.run(
+                ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
+                 "-o", "LogLevel=ERROR", "-o", "ConnectTimeout=15",
+                 "-i", SSH_KEY, f"{SSH_USER}@{ip}",
+                 "if [ -f /tmp/unit.done ]; then echo done $(cat /tmp/unit.rc 2>/dev/null); fi"],
+                capture_output=True, text=True, timeout=60)
+            out = probe.stdout.strip()
+            if out.startswith("done"):
+                parts = out.split()
+                rc = int(parts[1]) if len(parts) > 1 and parts[1].lstrip("-").isdigit() else 1
+                break
+            time.sleep(60)
+        if rc is None:
+            rc = 1  # timed out or markers unreadable — never green by default
         result = check_golden(model, ip, shard)
         # Expected size is derived inside check_golden from the live evaluator
         # count on the VM (21 examples x (evaluators + 1 task doc) x reps).

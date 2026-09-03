@@ -156,11 +156,15 @@ export KIBANA_EIS_CCM_API_KEY=$CCM_KEY
 CONNS=$(python3 -c "import json,base64; c=json.load(open('/home/orcaeval/.elastic/eis-connectors-cache.json')); conns=c.get('connectors',c); print(base64.b64encode(json.dumps(conns).encode()).decode())")
 
 # ─── OpenRouter path (models named openrouter-*) ────────────────────────────
-# The connector cache's providerConfig.url is None for openrouter-* connectors:
-# they need an ES inference endpoint pointing at the ON-VM SSE-normalizing
-# proxy (localhost:8088), never openrouter.ai directly — ES cannot parse
-# OpenRouter's raw SSE (reasoning:null in finish chunks → XContentParse
-# exception → 500s). The proxy also injects max_tokens and retries 503s.
+# The connector cache's providerConfig.url is must-point-at-proxy for
+# openrouter-* connectors: they need an ES inference endpoint pointing at
+# the on-VM SSE-normalizing proxy (localhost:8088), never openrouter.ai
+# directly — ES cannot parse OpenRouter's raw SSE (reasoning:null in finish
+# chunks → XContentParse exception → 500s). The proxy also injects max_tokens
+# and retries 503s.
+# Stale markers from a previous invocation would kill the endpoint watcher
+# loop below and confuse the sweep controller — clear BEFORE starting it.
+rm -f /tmp/unit.done /tmp/unit.rc
 OR_PROXY_PORT=8088
 if [ "${MODEL#openrouter-}" != "$MODEL" ]; then
   echo "=== OpenRouter model detected: $MODEL ==="
@@ -183,7 +187,7 @@ if [ "${MODEL#openrouter-}" != "$MODEL" ]; then
   # carry — read it from the matrix config's matchIds. Judge connectors are
   # untouched — they ride EIS as usual.
   CONNS=$(OPENROUTER_MODEL="$MODEL" OR_PORT=$OR_PROXY_PORT \
-    MATRIX_CONFIG="$HOME/Projects/kibana/x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/persona_matrix.config.json" \
+    MATRIX_CONFIG=/tmp/persona_matrix.config.json \
     python3 -c "
 import json, base64, os, sys
 raw = os.environ.get('KIBANA_TESTING_AI_CONNECTORS_B64', '')
@@ -217,10 +221,11 @@ import json, base64
 c = json.loads(base64.b64decode('$CONNS'))
 cfg = c['$MODEL']['config']
 print(cfg['providerConfig']['model_id'])")
-  OR_ENDPOINT_ID=$(python3 -c "
-import json, base64
-c = json.loads(base64.b64decode('$CONNS'))
-print(c['$MODEL']['config']['inferenceId'])")
+  # converse resolves the model by CONNECTOR id — "No connector or inference
+  # endpoint found for ID 'openrouter-zai-glm-5-3-flash'" if the endpoint id
+  # is the inferenceId (openrouter-glm-5-3-flash-chat_completion). EIS models
+  # work because CCM auto-creates endpoints named exactly after the connector.
+  OR_ENDPOINT_ID="$MODEL"
   OR_KEY=$(python3 -c "
 import json, base64
 c = json.loads(base64.b64decode('$CONNS'))
@@ -228,9 +233,19 @@ print(c['$MODEL']['config']['providerConfig']['api_key'])")
   echo "endpoint: $OR_ENDPOINT_ID | model: $OR_MODEL_ID"
   # nohup: `evals start` blocks; the watcher creates the endpoint the moment
   # ES accepts connections, which is well before Playwright needs it.
-  nohup python3 /tmp/create_openrouter_endpoint.py \
-    "$OR_ENDPOINT_ID" "$OR_MODEL_ID" "$OR_KEY" $OR_PROXY_PORT \
-    > /tmp/or-endpoint.log 2>&1 &
+  # LOOP: the eval retry loop wipes ES data between attempts (rm -rf), which
+  # deletes the inference endpoint. A one-shot watcher leaves attempts 2/3
+  # with no endpoint → converse 404. Loop until /tmp/unit.done, re-creating
+  # the endpoint idempotently (create_openrouter_endpoint.py reuses an
+  # endpoint that already points at the proxy, so each iteration is a no-op
+  # once the endpoint exists).
+  nohup bash -c '
+    while [ ! -f /tmp/unit.done ]; do
+      python3 /tmp/create_openrouter_endpoint.py "$1" "$2" "$3" "$4" >> /tmp/or-endpoint.log 2>&1
+      sleep 10
+    done
+  ' _ "$OR_ENDPOINT_ID" "$OR_MODEL_ID" "$OR_KEY" $OR_PROXY_PORT \
+    > /dev/null 2>&1 &
   echo "endpoint watcher started (log: /tmp/or-endpoint.log)"
 fi
 export KIBANA_TESTING_AI_CONNECTORS=$CONNS
@@ -303,5 +318,11 @@ echo "=== DONE: $MODEL (EVAL_EXIT=$EVAL_EXIT, EXPORT_EXIT=$EXPORT_EXIT) ==="
 # Propagate eval failure as the process exit code so the sweep controller's
 # ssh rc reflects it (export still runs above either way; the controller
 # treats rc and the golden doc count as the two independent gates.
+
+# Detached mode: the controller launches us under nohup and polls these
+# markers over short-lived SSH connections — a dead controller SSH stream
+# must never look like a dead eval.
+echo "$EVAL_EXIT" > /tmp/unit.rc
+touch /tmp/unit.done
 
 exit $EVAL_EXIT

@@ -61,7 +61,17 @@ def endpoint_points_at_proxy(endpoint_id: str, model_id: str, port: int) -> bool
     """
     try:
         _, body = es_req("GET", f"/_inference/chat_completion/{endpoint_id}")
-        cfg = json.loads(body).get("service_settings", {})
+        # GET wraps the result: {"endpoints": [{...}]} — read through the
+        # wrapper or service_settings is always {} and the watcher loop
+        # delete/recreates the endpoint every cycle (converse 404 races).
+        doc = json.loads(body)
+        if isinstance(doc, dict) and "endpoints" in doc:
+            eps = doc["endpoints"] or []
+            if not eps:
+                return False
+            cfg = eps[0].get("service_settings", {})
+        else:
+            cfg = doc.get("service_settings", {})
         return (
             cfg.get("url") == f"http://127.0.0.1:{port}"
             and cfg.get("model_id") == model_id
@@ -102,7 +112,9 @@ def main() -> int:
             "model_id": model_id,
             "url": f"http://127.0.0.1:{port}",
             "api_key": api_key,
-            "task_type": "chat_completion",
+            # task_type goes ONLY in the URL path, never service_settings —
+            # "Configuration contains settings [{task_type=chat_completion}]
+            # unknown to the [openai] service" (400) if included.
             "rate_limit": {"requests_per_minute": 500},
         },
     }).encode()
