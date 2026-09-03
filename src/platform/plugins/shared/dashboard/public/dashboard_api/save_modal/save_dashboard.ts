@@ -13,6 +13,7 @@ import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import { showDashboardSavedToast } from './show_dashboard_saved_toast';
 import type { SaveDashboardProps } from './types';
+import { getDashboardChangeHistoryService } from '../../services/change_history_service';
 
 export const saveDashboard = async ({
   lastSavedId,
@@ -43,6 +44,9 @@ export const saveDashboard = async ({
         return { redirectRequired: true, id: newId };
       }
     }
+    console.log({ dashboardState });
+    await getDashboardChangeHistoryService().addToHistory(newId, dashboardState);
+
     return { id: newId };
   } catch (error) {
     coreServices.notifications.toasts.addDanger(
