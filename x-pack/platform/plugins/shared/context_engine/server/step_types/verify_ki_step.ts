@@ -10,17 +10,16 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
-import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
+import type { KiVerificationService } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
 export const createVerifyKiStepDefinition = (
   coreSetup: CoreSetup,
   logger: Logger,
-  analyticsService: ContextEngineAnalyticsService
+  analyticsService: ContextEngineAnalyticsService,
+  service: KiVerificationService
 ) => {
-  const service = new KiVerificationService(createKiVerifierRegistry());
-
   return createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {
@@ -36,6 +35,14 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
+      const verifiers = context.input.verifiers as string[] | undefined;
+      if (!verifiers || verifiers.length === 0) {
+        throw new ExecutionError({
+          type: 'InputValidationError',
+          message: 'verifiers must list at least one verifier id.',
+        });
+      }
+
       const summary = await withKiVerificationTelemetry({
         analyticsService,
         logger,
@@ -45,6 +52,8 @@ export const createVerifyKiStepDefinition = (
             esClient: context.contextManager.getScopedEsClient(),
             logger,
             abortSignal: context.abortSignal,
+            esqlAttributes: context.input.esql_attributes,
+            verifiers,
           }),
       });
 

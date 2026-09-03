@@ -49,6 +49,139 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('does not write when enforced verification fails', async () => {
+    const esClient = { index: jest.fn() };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki: kiInput,
+        verification: {
+          verifiers: ['esql-valid-syntax'],
+          esql_attributes: ['aggregation_query'],
+        },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const stepServices = mockKiStepTelemetry();
+    stepServices.kiVerificationService.verifyKi.mockResolvedValue({
+      passed: false,
+      results: [
+        {
+          verifier: 'esql-valid-syntax',
+          passed: false,
+          reason: 'Unknown function',
+        },
+      ],
+    });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...stepServices,
+    });
+    const thrown = await handler(context).catch((error) => error);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('VerificationError');
+    expect(thrown.details).toEqual({
+      verification: {
+        passed: false,
+        results: [
+          {
+            verifier: 'esql-valid-syntax',
+            passed: false,
+            reason: 'Unknown function',
+          },
+        ],
+      },
+    });
+    expect(stepServices.kiVerificationService.verifyKi).toHaveBeenCalledWith(
+      kiInput,
+      expect.objectContaining({
+        isEnabled: true,
+        esClient,
+        esqlAttributes: ['aggregation_query'],
+        verifiers: ['esql-valid-syntax'],
+      })
+    );
+    expect(esClient.index).not.toHaveBeenCalled();
+    expect(stepServices.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+      outcome: 'success',
+      passed: false,
+      verifiersRun: 1,
+      failedVerifierIds: ['esql-valid-syntax'],
+    });
+    expect(stepServices.analyticsService.reportKiWrite).toHaveBeenCalledWith({
+      action: 'create',
+      aiIndexId: 'my-ai-index',
+      managed: false,
+      outcome: 'failure',
+      errorType: 'VerificationError',
+    });
+  });
+
+  it('writes when enforced verification has no applicable verifiers', async () => {
+    const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki: kiInput,
+        verification: { verifiers: ['esql-valid-syntax'] },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const stepServices = mockKiStepTelemetry();
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...stepServices,
+    });
+
+    await expect(handler(context)).resolves.toEqual({ output: { id: 'ki-1' } });
+    expect(esClient.index).toHaveBeenCalled();
+    expect(stepServices.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+      outcome: 'success',
+      passed: true,
+      verifiersRun: 0,
+      failedVerifierIds: [],
+    });
+  });
+
+  it('does not write when verifier execution throws', async () => {
+    const cause = new Error('Elasticsearch unavailable');
+    const esClient = { index: jest.fn() };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki: kiInput,
+        verification: { verifiers: ['esql-valid-runtime'] },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const stepServices = mockKiStepTelemetry();
+    stepServices.kiVerificationService.verifyKi.mockRejectedValue(cause);
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...stepServices,
+    });
+
+    await expect(handler(context)).rejects.toBe(cause);
+    expect(esClient.index).not.toHaveBeenCalled();
+    expect(stepServices.analyticsService.reportKiVerification).toHaveBeenCalledWith({
+      outcome: 'failure',
+      errorType: 'Error',
+    });
+  });
+
   it('uses op_type create for a data stream dest', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({

@@ -120,6 +120,137 @@ describe('getUpdateKiStepDefinition', () => {
     );
   });
 
+  it('verifies the merged KI and blocks an invalid update', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      get: jest.fn().mockResolvedValue({
+        _source: {
+          type: 'detection',
+          title: 'Stored title',
+          tags: ['stored'],
+          attributes: {
+            esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)',
+            preserved: true,
+          },
+        },
+      }),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: {
+          title: 'Updated title',
+          tags: ['updated'],
+          attributes: { added: 'value' },
+        },
+        verification: { verifiers: ['esql-valid-syntax'] },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const stepServices = mockKiStepTelemetry();
+    stepServices.kiVerificationService.verifyKi.mockResolvedValue({
+      passed: false,
+      results: [
+        {
+          verifier: 'esql-valid-syntax',
+          passed: false,
+          reason: 'Unknown function',
+        },
+      ],
+    });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...stepServices,
+    });
+    const thrown = await handler(context).catch((error) => error);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('VerificationError');
+    expect(esClient.get).toHaveBeenCalledWith(
+      { index: 'ai-index-idx-my-ai-index', id: 'ki-1' },
+      { signal: context.abortSignal }
+    );
+    expect(stepServices.kiVerificationService.verifyKi).toHaveBeenCalledWith(
+      {
+        type: 'detection',
+        title: 'Updated title',
+        tags: ['updated'],
+        attributes: {
+          esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)',
+          preserved: true,
+          added: 'value',
+        },
+      },
+      expect.objectContaining({
+        isEnabled: true,
+        esClient,
+        verifiers: ['esql-valid-syntax'],
+      })
+    );
+    expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('applies the original patch after merged verification passes', async () => {
+    const patch = { description: 'Updated' };
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      get: jest.fn().mockResolvedValue({
+        _source: {
+          type: 'detection',
+          title: 'Stored title',
+          attributes: { esql: 'FROM logs-* | LIMIT 1' },
+        },
+      }),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: patch,
+        verification: { verifiers: ['esql-valid-syntax'] },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const stepServices = mockKiStepTelemetry();
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...stepServices,
+    });
+
+    await expect(handler(context)).resolves.toEqual({
+      output: { id: 'ki-1', result: 'updated' },
+    });
+    expect(stepServices.kiVerificationService.verifyKi).toHaveBeenCalledWith(
+      {
+        type: 'detection',
+        title: 'Stored title',
+        description: 'Updated',
+        attributes: { esql: 'FROM logs-* | LIMIT 1' },
+      },
+      expect.anything()
+    );
+    expect(esClient.update).toHaveBeenCalledWith(
+      {
+        index: 'ai-index-idx-my-ai-index',
+        id: 'ki-1',
+        doc: patch,
+        refresh: 'wait_for',
+      },
+      { signal: context.abortSignal }
+    );
+  });
+
   it('returns noop when the update did not change the document', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),

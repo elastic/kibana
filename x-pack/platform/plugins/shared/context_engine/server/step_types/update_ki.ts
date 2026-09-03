@@ -8,12 +8,15 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import type { KnowledgeIndicator } from '../ki_verification';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
+  enforceKiVerification,
   findKiBackingIndex,
   kiNotFoundError,
+  mergeKiForVerification,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
@@ -22,6 +25,7 @@ export const getUpdateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   checkWritePrivilege,
+  kiVerificationService,
   analyticsService,
   logger,
 }: KiStepDependencies) =>
@@ -31,7 +35,7 @@ export const getUpdateKiStepDefinition = ({
       const request = context.contextManager.getFakeRequest();
       await assertContextEngineEnabled(isContextEngineEnabled, request);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
+      const { ai_index_id: aiIndexId, ki_id: kiId, ki, verification } = context.input;
       return withKiWriteTelemetry({
         action: 'update',
         aiIndexId,
@@ -51,6 +55,36 @@ export const getUpdateKiStepDefinition = ({
             kiId,
             abortSignal: context.abortSignal,
           });
+
+          if (verification) {
+            const storedKiResponse = await esClient
+              .get<KnowledgeIndicator>(
+                {
+                  index: backingIndex,
+                  id: kiId,
+                },
+                { signal: context.abortSignal }
+              )
+              .catch((error) => {
+                if (isResponseError(error) && error.statusCode === 404) {
+                  throw kiNotFoundError(aiIndexId, kiId);
+                }
+                throw error;
+              });
+            if (!storedKiResponse._source) {
+              throw kiNotFoundError(aiIndexId, kiId);
+            }
+
+            await enforceKiVerification({
+              ki: mergeKiForVerification(storedKiResponse._source, ki),
+              verification,
+              kiVerificationService,
+              esClient,
+              analyticsService,
+              logger,
+              abortSignal: context.abortSignal,
+            });
+          }
 
           const response = await esClient
             .update(

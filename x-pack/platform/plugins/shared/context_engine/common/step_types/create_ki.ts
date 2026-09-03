@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { aiIndexIdSchema, kiFieldsSchema, kiIdSchema } from './ki';
+import { kiWriteVerificationSchema } from './ki_write_verification';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
@@ -21,6 +22,11 @@ export const createKiInputSchema = z.object({
       'Optional document id for the knowledge indicator (index-backed AI indices only); a KI with the same id is replaced. When omitted, the id is generated.'
     ),
   ki: kiFieldsSchema.describe('The knowledge indicator document to create'),
+  verification: kiWriteVerificationSchema
+    .optional()
+    .describe(
+      'Verification to enforce before creating the KI. When omitted, the KI is written without verification.'
+    ),
 });
 
 export const createKiOutputSchema = z.object({
@@ -48,7 +54,8 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'Indexes a knowledge indicator document into the backing store of the specified AI index. ' +
         'When the AI index does not exist yet, it is created automatically with an index backing ' +
         'store derived from its id. Pass ki_id to set a stable document id (index-backed only); ' +
-        're-runs with the same id replace the KI. The step returns the document id of the ' +
+        're-runs with the same id replace the KI. Pass verification to run the listed verifiers ' +
+        'and reject the write if any verifier fails. The step returns the document id of the ' +
         'created KI, which can be used by later steps to update or delete it.',
     }),
     examples: [
@@ -66,6 +73,9 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
       content: "Backing index: logs-*"
       tags:
         - "logs"
+    verification:
+      verifiers:
+        - esql-valid-syntax
 \`\`\``,
     ],
   },
