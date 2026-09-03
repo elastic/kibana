@@ -1056,7 +1056,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        const {
+        // eslint-disable-next-line prefer-const
+        let {
           id,
           spaceIds: _spaceIds,
           ...pkgPolicyWithoutId
@@ -1730,7 +1731,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
-    const {
+    // eslint-disable-next-line prefer-const
+    let {
       version,
       id: _id,
       spaceIds: _spaceIds,
@@ -2217,7 +2219,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const { version } = packagePolicyUpdate;
         // id, version, and spaceIds are not part of the saved object attributes
 
-        const {
+        // eslint-disable-next-line prefer-const
+        let {
           version: _version,
           id: _id,
           spaceIds: _spaceIds,
