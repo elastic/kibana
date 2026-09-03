@@ -13,6 +13,10 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon, type SupportedLogo } from '../shared/logo_icon';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
 
+// Repeated category query params are Fleet's multi-filter encoding. A path
+// category like /browse/observability drops the OpenTelemetry default.
+const CATALOGUE_PATH = '/browse?category=opentelemetry&category=observability';
+
 const CHIP_LOGOS: readonly SupportedLogo[] = [
   'nginx',
   'logstash',
@@ -30,7 +34,7 @@ export const BrowseAllIntegrationsTile = () => {
 
   const handleClick = useCallback(() => {
     application.navigateToApp('integrations', {
-      path: addPathParamToUrl('/browse/observability', {}),
+      path: addPathParamToUrl(CATALOGUE_PATH, {}),
     });
   }, [application]);
 
