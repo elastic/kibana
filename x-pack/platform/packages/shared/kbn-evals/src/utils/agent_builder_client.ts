@@ -7,6 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import pRetry from 'p-retry';
 
 export interface ConverseStep {
@@ -53,12 +54,21 @@ export interface AgentBuilderClientResponse {
    * or `confirmation`). Empty when the agent did not ask any prompts.
    */
   prompts: unknown[];
+  /** Token counts for this round, summed across all LLM calls. */
+  tokensUsed?: ChatCompletionTokenCount;
+}
+
+interface RoundModelUsage {
+  input_tokens: number;
+  output_tokens: number;
+  cached_input_tokens?: number;
 }
 
 interface AgentBuilderConverseApiResponse {
   conversation_id?: string;
   trace_id?: string;
   steps?: ConverseStep[];
+  model_usage?: RoundModelUsage;
   response?: { message?: string; structured_output?: unknown; prompts?: unknown[] };
 }
 
@@ -127,6 +137,7 @@ export function createAgentBuilderClient({
         }),
       });
 
+      const { model_usage } = response;
       return {
         message: response.response?.message ?? '',
         steps: response.steps ?? [],
@@ -134,6 +145,14 @@ export function createAgentBuilderClient({
         conversationId: response.conversation_id,
         traceId: response.trace_id,
         prompts: response.response?.prompts ?? [],
+        tokensUsed: model_usage
+          ? {
+              prompt: model_usage.input_tokens,
+              completion: model_usage.output_tokens,
+              total: model_usage.input_tokens + model_usage.output_tokens,
+              cached: model_usage.cached_input_tokens,
+            }
+          : undefined,
       };
     };
 

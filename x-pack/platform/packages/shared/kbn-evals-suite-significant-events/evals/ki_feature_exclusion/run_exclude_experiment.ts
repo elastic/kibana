@@ -6,7 +6,7 @@
  */
 
 import { isDuplicateFeature } from '@kbn/significant-events-schema';
-import { type ExcludedFeatureSummary } from '@kbn/streams-ai';
+import { type ExcludedFeatureSummary, sumTokens } from '@kbn/streams-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
@@ -47,9 +47,6 @@ export async function runExcludeExperiment({
   const initialUserMessage = buildFeatureIdentificationUserMessage({
     streamName: MANAGED_STREAM_NAME,
     sampleDocuments: JSON.stringify(sampleDocuments),
-    previouslyIdentifiedFeatures: '',
-    knownFeatureIds: '',
-    excludedFeatures: '',
   });
 
   const initialResult = await agentBuilderClient.converse({
@@ -61,6 +58,7 @@ export async function runExcludeExperiment({
     initialResult.steps,
     MANAGED_STREAM_NAME
   );
+  let tokensUsed = sumTokens({ added: initialResult.tokensUsed });
 
   log.info(`Initial identification returned ${initialFeatures.length} features`);
 
@@ -72,7 +70,7 @@ export async function runExcludeExperiment({
       initialFeatures,
       excludedFeatures: [],
       followUpRuns: [],
-      tokens_used: undefined,
+      tokens_used: tokensUsed,
     };
   }
 
@@ -94,8 +92,6 @@ export async function runExcludeExperiment({
     const followUpUserMessage = buildFeatureIdentificationUserMessage({
       streamName: MANAGED_STREAM_NAME,
       sampleDocuments: JSON.stringify(sampleDocuments),
-      previouslyIdentifiedFeatures: '',
-      knownFeatureIds: '',
       excludedFeatures: JSON.stringify(excludedFeatures),
     });
 
@@ -108,6 +104,7 @@ export async function runExcludeExperiment({
       followUpResult.steps,
       MANAGED_STREAM_NAME
     );
+    tokensUsed = sumTokens({ accumulated: tokensUsed, added: followUpResult.tokensUsed });
 
     const features = rawFeatures.filter(
       (feature) =>
@@ -128,6 +125,6 @@ export async function runExcludeExperiment({
     initialFeatures,
     excludedFeatures,
     followUpRuns: outputs,
-    tokens_used: undefined,
+    tokens_used: tokensUsed,
   };
 }

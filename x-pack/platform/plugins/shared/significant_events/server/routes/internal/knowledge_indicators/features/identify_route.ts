@@ -210,14 +210,8 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const {
-      scopedClusterClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-      tuningConfig,
-      licensing,
-    } = scopedClients;
+    const { scopedClusterClient, streamsClient, inferenceClient, tuningConfig, licensing } =
+      scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -255,7 +249,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
         kiClient,
-        soClient,
         agentBuilder: server.agentBuilder,
         request,
         connectorId,

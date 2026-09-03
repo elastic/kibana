@@ -48,8 +48,6 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
-    // The significant_event_search tool is only registered when significant
-    // events availability is on (defaults to false); enable it before any run.
     await kbnClient.request({
       path: '/internal/core/_settings',
       method: 'PUT',
@@ -160,9 +158,6 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                 const userMessage = buildFeatureIdentificationUserMessage({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: JSON.stringify(heavy.sampleDocuments),
-                  previouslyIdentifiedFeatures: '',
-                  knownFeatureIds: '',
-                  excludedFeatures: '',
                 });
 
                 const result = await agentBuilderClient.converse({

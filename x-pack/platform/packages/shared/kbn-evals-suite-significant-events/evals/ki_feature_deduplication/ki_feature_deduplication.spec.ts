@@ -329,9 +329,7 @@ evaluate.describe(
                       previouslyIdentifiedFeatures:
                         previouslyIdentifiedFeatures.length > 0
                           ? JSON.stringify(previouslyIdentifiedFeatures)
-                          : '',
-                      knownFeatureIds: '',
-                      excludedFeatures: '',
+                          : undefined,
                     });
 
                     const converseResult = await agentBuilderClient.converse({

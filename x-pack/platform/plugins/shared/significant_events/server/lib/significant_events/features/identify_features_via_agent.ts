@@ -59,9 +59,9 @@ export function buildFeatureIdentificationUserMessage({
 }: {
   streamName: string;
   sampleDocuments: string;
-  previouslyIdentifiedFeatures: string;
-  knownFeatureIds: string;
-  excludedFeatures: string;
+  previouslyIdentifiedFeatures?: string;
+  knownFeatureIds?: string;
+  excludedFeatures?: string;
 }): string {
   const parts: string[] = [];
   parts.push(`\`stream_name\`: ${streamName}`);
@@ -107,9 +107,11 @@ export async function executeFeatureIdentificationAgent({
     streamName,
     sampleDocuments: JSON.stringify(formattedDocuments),
     previouslyIdentifiedFeatures:
-      previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '',
-    knownFeatureIds,
-    excludedFeatures: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
+      previouslyIdentifiedFeatures.length > 0
+        ? JSON.stringify(previouslyIdentifiedFeatures)
+        : undefined,
+    knownFeatureIds: knownFeatureIds || undefined,
+    excludedFeatures: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : undefined,
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({

@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
@@ -404,7 +403,6 @@ async function runInferredIteration({
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
-  soClient: SavedObjectsClientContract;
   agentBuilder?: AgentBuilderPluginStart;
   request: KibanaRequest;
   connectorId: string;
