@@ -16,7 +16,7 @@ import type { TaskContext } from '../task_context';
 
 const winVersion = (path: string) => (process.platform === 'win32' ? `${path}.cmd` : path);
 
-export async function yarnInstall({ log, buildDir, config }: TaskContext) {
+export async function installDependencies({ log, buildDir, config }: TaskContext) {
   const pkgJson = Path.resolve(buildDir, 'package.json');
 
   if (config?.skipInstallDependencies || !Fs.existsSync(pkgJson)) {
