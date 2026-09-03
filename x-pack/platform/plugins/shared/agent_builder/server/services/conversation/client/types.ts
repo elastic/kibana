@@ -61,18 +61,11 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'template_id'
       | 'template_version'
     >
-  > & { read_by?: ConversationReadByEntry[] };
+  > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  | 'id'
-  | 'title'
-  | 'attachments'
-  | 'read'
-  | 'pinned'
-  | 'metadata'
-  | 'template_id'
-  | 'template_version'
+  'id' | 'title' | 'attachments' | 'read' | 'metadata' | 'template_id' | 'template_version'
 >;
 
 export interface GetEventsOptions {
@@ -189,7 +182,19 @@ export interface ConversationReadByEntry {
 }
 
 /**
- * Server-internal persistence shape of a conversation, carrying the per-user
- * `read_by` list that backs the public `Conversation.read` boolean.
+ * One user who has pinned a conversation. An entry object rather than a bare id string
+ * so fields such as `pinned_at` can be added later without another shape migration.
  */
-export type NormalizedConversation = Conversation & { read_by?: ConversationReadByEntry[] };
+export interface ConversationPinnedByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` and `pinned_by` lists that back the public `Conversation.read` and
+ * `Conversation.pinned` booleans.
+ */
+export type NormalizedConversation = Conversation & {
+  read_by?: ConversationReadByEntry[];
+  pinned_by?: ConversationPinnedByEntry[];
+};
