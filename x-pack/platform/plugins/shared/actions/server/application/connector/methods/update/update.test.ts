@@ -259,8 +259,8 @@ describe('update()', () => {
     });
   });
 
-  describe('internal auth types', () => {
-    test('rejects switching an existing connector to an internal auth type', async () => {
+  describe('Kibana managed auth types', () => {
+    test('rejects switching an existing connector to a Kibana managed auth type', async () => {
       const soResult = makeSavedObjectResult({
         actionTypeId: '.slack2',
         authMode: 'shared',

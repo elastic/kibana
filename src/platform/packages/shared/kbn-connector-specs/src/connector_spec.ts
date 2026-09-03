@@ -145,8 +145,8 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTyp
    * authenticating the axios client. Defaults to false.
    */
   usesRelayTransport?: boolean;
-  /** Kibana owns these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
-  isInternal?: boolean;
+  /** Kibana manages these credentials: the UI hides the auth type and create/update rejects it, but connectors Kibana already provisioned keep executing. */
+  isKibanaManaged?: boolean;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;

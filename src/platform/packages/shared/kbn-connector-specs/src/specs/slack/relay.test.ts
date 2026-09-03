@@ -47,14 +47,14 @@ describe('getRelayConnection', () => {
     const relay = { trigger: jest.fn() };
 
     expect(getRelayConnection(createContext(relaySecrets, relay))).toEqual({
-      relay,
+      client: relay,
       tenantKey: 'team-A',
     });
   });
 
-  it('throws when the deployment has no Relay configured', () => {
+  it('throws when there is no Relay configured', () => {
     expect(() => getRelayConnection(createContext(relaySecrets))).toThrow(
-      /not available on this deployment/
+      /Elastic Slack app, which is not configured/
     );
   });
 
@@ -69,7 +69,7 @@ describe('relaySendMessage', () => {
   const send = async (input: Record<string, unknown>, trigger: jest.Mock) => {
     const ctx = createContext(relaySecrets, { trigger });
     return relaySendMessage(
-      { relay: { trigger } as never, tenantKey: 'team-A' },
+      { client: { trigger } as never, tenantKey: 'team-A' },
       ctx,
       input as Parameters<typeof relaySendMessage>[2]
     );
@@ -103,7 +103,7 @@ describe('relaySendMessage', () => {
     const trigger = jest.fn().mockRejectedValue(relayError(403));
 
     await expect(send({ channel: 'C123', text: 'hello' }, trigger)).rejects.toThrow(
-      'Channel C123 is not connected to this deployment. Connect it in the Elastic Slack app settings, then try again.'
+      'Channel C123 is not connected. Connect it in the Elastic Slack app settings, then try again.'
     );
   });
 
@@ -126,7 +126,7 @@ describe('relaySendMessage', () => {
 describe('relayListChannels', () => {
   const list = async (input: Record<string, unknown>, listBindings: jest.Mock) =>
     relayListChannels(
-      { relay: { listBindings } as never, tenantKey: 'team-A' },
+      { client: { listBindings } as never, tenantKey: 'team-A' },
       createContext(relaySecrets, { listBindings }),
       { limit: 100, ...input } as Parameters<typeof relayListChannels>[2]
     );
@@ -218,7 +218,7 @@ describe('relayListChannels', () => {
     const listBindings = jest.fn().mockRejectedValue(relayError(403));
 
     await expect(list({}, listBindings)).rejects.toThrow(
-      'This deployment is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
+      'This connector is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
     );
   });
 
@@ -239,7 +239,7 @@ describe('relayListChannels', () => {
 describe('relayResolveChannelId', () => {
   const resolve = async (input: Record<string, unknown>, listBindings: jest.Mock) =>
     relayResolveChannelId(
-      { relay: { listBindings } as never, tenantKey: 'team-A' },
+      { client: { listBindings } as never, tenantKey: 'team-A' },
       createContext(relaySecrets, { listBindings }),
       { match: 'exact', limit: 100, maxPages: 3, ...input } as Parameters<
         typeof relayResolveChannelId
@@ -332,7 +332,7 @@ describe('relayTest', () => {
 
     await expect(
       relayTest(
-        { relay: { listBindings } as never, tenantKey: 'team-A' },
+        { client: { listBindings } as never, tenantKey: 'team-A' },
         createContext(relaySecrets, { listBindings })
       )
     ).resolves.toEqual({});
@@ -344,7 +344,7 @@ describe('relayTest', () => {
 
     await expect(
       relayTest(
-        { relay: { listBindings } as never, tenantKey: 'team-A' },
+        { client: { listBindings } as never, tenantKey: 'team-A' },
         createContext(relaySecrets, { listBindings })
       )
     ).rejects.toThrow(/no longer installed/);

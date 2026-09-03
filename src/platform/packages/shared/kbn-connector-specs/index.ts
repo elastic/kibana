@@ -62,7 +62,7 @@ export {
   getAuthModeForAuthTypeId,
   USES_RELAY_BY_AUTH_TYPE_ID,
   authTypeUsesRelay,
-  isInternalAuthTypeId,
+  isKibanaManagedAuthTypeId,
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';

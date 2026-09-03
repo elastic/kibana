@@ -63,12 +63,12 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  // Never default to a legacy option (backwards-compat only) or an internal one (set
+  // Never default to a legacy option (backwards-compat only) or a Kibana-managed one (set
   // programmatically, nothing for a user to fill in).
   return (
     options.find((option) => {
       const optionMeta = getMeta(option) as Record<string, unknown>;
-      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isInternal);
+      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isKibanaManaged);
     }) ?? options[0]
   );
 };
@@ -143,12 +143,12 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const label = optionMeta.label;
         const isRecommended = Boolean((optionMeta as Record<string, unknown>).isRecommended);
         const isLegacy = Boolean((optionMeta as Record<string, unknown>).isLegacy);
-        const isInternal = Boolean((optionMeta as Record<string, unknown>).isInternal);
+        const isKibanaManaged = Boolean((optionMeta as Record<string, unknown>).isKibanaManaged);
         const isChecked = selectedOption === discriminatorValue;
 
         // Neither is offered as a choice, but both still render while active so an existing
         // connector's credentials stay viewable.
-        if ((isLegacy || isInternal) && !isChecked) return null;
+        if ((isLegacy || isKibanaManaged) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {

@@ -33,8 +33,8 @@ describe('RelayAuth', () => {
     expect(RelayAuth.usesRelayTransport).toBe(true);
   });
 
-  it('is internal so a user can never configure it', () => {
-    expect(RelayAuth.isInternal).toBe(true);
+  it('is Kibana managed so a user can never configure it', () => {
+    expect(RelayAuth.isKibanaManaged).toBe(true);
   });
 
   describe('schema', () => {

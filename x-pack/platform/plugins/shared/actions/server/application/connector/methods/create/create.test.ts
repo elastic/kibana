@@ -336,8 +336,8 @@ describe('create()', () => {
     });
   });
 
-  describe('internal auth types', () => {
-    test('throws an error when creating a connector with an internal auth type', async () => {
+  describe('Kibana managed auth types', () => {
+    test('throws an error when creating a connector with a Kibana managed auth type', async () => {
       await expect(
         create({
           context: mockContext,
@@ -353,7 +353,7 @@ describe('create()', () => {
       );
     });
 
-    test('throws when the internal auth type is only present in config', async () => {
+    test('throws when the Kibana managed auth type is only present in config', async () => {
       await expect(
         create({
           context: mockContext,
@@ -369,7 +369,7 @@ describe('create()', () => {
       );
     });
 
-    test('throws for a connector type whose spec does not offer the internal auth type', async () => {
+    test('throws for a connector type whose spec does not offer the Kibana managed auth type', async () => {
       await expect(
         create({
           context: mockContext,

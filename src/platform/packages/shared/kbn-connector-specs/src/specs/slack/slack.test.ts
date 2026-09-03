@@ -8,7 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { getConnectorSpec, isInternalAuthTypeId } from '../../..';
+import { getConnectorSpec, isKibanaManagedAuthTypeId } from '../../..';
 import { Slack } from './slack';
 import {
   SlackGetConversationHistoryInputSchema,
@@ -67,8 +67,8 @@ describe('Slack', () => {
     expect(types).toContain('relay');
   });
 
-  it('treats the relay auth type as internal so a user can never configure it', () => {
-    expect(isInternalAuthTypeId('relay')).toBe(true);
+  it('treats the relay auth type as Kibana managed so a user can never configure it', () => {
+    expect(isKibanaManagedAuthTypeId('relay')).toBe(true);
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {

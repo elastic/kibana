@@ -25,8 +25,7 @@ const authSchema = lazySchema(() =>
 type AuthSchemaType = z.infer<typeof authSchema>;
 
 /**
- * The Elastic-hosted Relay holds the third-party credentials and authenticates the deployment with
- * mTLS, so a connector using it holds none: `tenantKey` only names the workspace it speaks for.
+ * Relay is an Elastic hosted multi-tenant service responsible for holding the relevant third party credentials.
  *
  * `configure` is a deliberate no-op — specs reach the third party through the Relay, so an axios
  * instance that cannot authenticate is the right outcome if a request ever escapes.
@@ -36,7 +35,7 @@ export const RelayAuth: AuthTypeSpec<AuthSchemaType> = {
   schema: authSchema,
   authMode: 'shared',
   usesRelayTransport: true,
-  isInternal: true,
+  isKibanaManaged: true,
   configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
     return axiosInstance;
   },

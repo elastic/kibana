@@ -271,7 +271,7 @@ export const Slack: ConnectorSpec = {
         defaults: {},
         overrides: {
           label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
-            defaultMessage: 'Elastic Slack app',
+            defaultMessage: 'Elastic Slack app (Bot Token)',
           }),
         },
       },

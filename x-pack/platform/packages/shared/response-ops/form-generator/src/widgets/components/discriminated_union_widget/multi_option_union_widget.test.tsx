@@ -608,7 +608,7 @@ describe('MultiOptionUnionWidget', () => {
     });
   });
 
-  describe('legacy and internal options', () => {
+  describe('legacy and Kibana-managed options', () => {
     const renderOptions = (
       options: Array<z.ZodObject<z.ZodRawShape>>,
       fieldConfig: Record<string, unknown> = {}
@@ -668,31 +668,31 @@ describe('MultiOptionUnionWidget', () => {
       expect(screen.getByLabelText('Legacy Token', { selector: 'input' })).toBeInTheDocument();
     });
 
-    const internalRelay = () =>
+    const kibanaManagedRelay = () =>
       z
         .object({
           type: z.literal('relay'),
           tenantKey: z.string().meta({ label: 'Tenant Key' }),
         })
-        .meta({ label: 'Elastic app', isInternal: true });
+        .meta({ label: 'Elastic app', isKibanaManaged: true });
 
-    it('does not render an internal option that is not selected', () => {
-      renderOptions([ears(), internalRelay()]);
+    it('does not render a Kibana-managed option that is not selected', () => {
+      renderOptions([ears(), kibanaManagedRelay()]);
 
       expect(screen.getByText('Quick Connect')).toBeInTheDocument();
       expect(screen.queryByText('Elastic app')).toBeNull();
     });
 
-    it('skips internal options when picking the default', () => {
-      // internal option listed FIRST — default selection should still land on the other option
-      renderOptions([internalRelay(), ears()]);
+    it('skips Kibana-managed options when picking the default', () => {
+      // Kibana-managed option listed FIRST — default selection should still land on the other option
+      renderOptions([kibanaManagedRelay(), ears()]);
 
       expect(screen.getByLabelText('Quick Token', { selector: 'input' })).toBeInTheDocument();
       expect(screen.queryByText('Elastic app')).toBeNull();
     });
 
-    it('renders an internal option when it is the active selection (e.g. provisioned connector)', () => {
-      renderOptions([ears(), internalRelay()], {
+    it('renders a Kibana-managed option when it is the active selection (e.g. provisioned connector)', () => {
+      renderOptions([ears(), kibanaManagedRelay()], {
         defaultValue: { type: 'relay', tenantKey: 'tenant-A' },
       });
 

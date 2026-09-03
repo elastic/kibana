@@ -20,8 +20,11 @@ const RELAY_SUPPORTED_ACTIONS = new Set(['sendMessage', 'listChannels', 'resolve
 /** The Relay's own max page size; the Slack schemas allow far larger limits. */
 const RELAY_MAX_BINDINGS_PAGE = 200;
 
+/** Marks results as coming from the connected bindings rather than a `conversations.list` call. */
+const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
+
 export interface SlackRelayConnection {
-  relay: RelayActionClient;
+  client: RelayActionClient;
   tenantKey: string;
 }
 
@@ -40,9 +43,7 @@ export function getRelayConnection(ctx: ActionContext): SlackRelayConnection | n
   }
 
   if (!ctx.relay) {
-    throw new Error(
-      'This connector sends through the Elastic Slack app, which is not available on this deployment.'
-    );
+    throw new Error('This connector uses the Elastic Slack app, which is not configured.');
   }
 
   const tenantKey = (ctx.secrets as { tenantKey?: string } | undefined)?.tenantKey;
@@ -52,7 +53,7 @@ export function getRelayConnection(ctx: ActionContext): SlackRelayConnection | n
     );
   }
 
-  return { relay: ctx.relay, tenantKey };
+  return { client: ctx.relay, tenantKey };
 }
 
 const getStatusCode = (error: unknown): number | undefined => {
@@ -61,7 +62,7 @@ const getStatusCode = (error: unknown): number | undefined => {
 };
 
 /**
- * Restates the two Relay failures a rule author can act on. Anything else is a deployment or
+ * Restates the two Relay failures a rule author can act on. Anything else is a configuration or
  * upstream problem, so it passes through unchanged.
  */
 function toUserFacingError(error: unknown, channel?: string): unknown {
@@ -69,8 +70,8 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
     case 403:
       return new Error(
         channel
-          ? `Channel ${channel} is not connected to this deployment. Connect it in the Elastic Slack app settings, then try again.`
-          : 'This deployment is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
+          ? `Channel ${channel} is not connected. Connect it in the Elastic Slack app settings, then try again.`
+          : 'This connector is not allowed to read the connected channels. Reconnect the Elastic Slack app, then try again.'
       );
     case 409:
       return new Error(
@@ -83,7 +84,7 @@ function toUserFacingError(error: unknown, channel?: string): unknown {
 
 /** Posts through the Relay, returning the timestamp as `ts` so callers can thread on it as usual. */
 export async function relaySendMessage(
-  { relay, tenantKey }: SlackRelayConnection,
+  { client, tenantKey }: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
 ): Promise<{ ok: true; channel: string; ts: string }> {
@@ -96,7 +97,7 @@ export async function relaySendMessage(
   ctx.log.debug(`Slack sendMessage request through relay: channel=${input.channel}`);
 
   try {
-    const { ref } = await relay.trigger({
+    const { ref } = await client.trigger({
       surface: 'slack',
       tenantKey,
       channel: input.channel,
@@ -136,12 +137,12 @@ const toChannels = (bindings: RelayBindings): RelayChannel[] =>
   );
 
 const fetchBindingsPage = async (
-  { relay, tenantKey }: SlackRelayConnection,
+  { client, tenantKey }: SlackRelayConnection,
   ctx: ActionContext,
   { cursor, limit }: { cursor?: string; limit: number }
 ) => {
   try {
-    return await relay.listBindings(tenantKey, {
+    return await client.listBindings(tenantKey, {
       limit: Math.min(limit, RELAY_MAX_BINDINGS_PAGE),
       ...(cursor ? { cursor } : {}),
     });
@@ -152,8 +153,8 @@ const fetchBindingsPage = async (
 };
 
 /**
- * Lists the channels connected to this deployment rather than the whole workspace — the only ones
- * this connector could post to anyway.
+ * Lists the channels connected to the Elastic Slack app rather than the whole workspace — the only
+ * ones this connector could post to anyway.
  *
  * `types` and `excludeArchived` are ignored: the bindings are already an admin-built allow-list, and
  * the schema's `public_channel`-only default would drop every connected private channel from callers
@@ -174,7 +175,7 @@ export async function relayListChannels(
   // `raw` is ignored: there is no Slack API body to pass through.
   return {
     ok: true as const,
-    source: 'relay-bindings' as const,
+    source: RELAY_CHANNEL_SOURCE,
     channels: toChannels(page.bindings),
     nextCursor: page.nextCursor,
     hasMore: Boolean(page.nextCursor),
@@ -209,7 +210,7 @@ export async function relayResolveChannelId(
         found: true,
         id: found.id,
         name: found.name,
-        source: 'relay-bindings',
+        source: RELAY_CHANNEL_SOURCE,
         pagesFetched,
         nextCursor: page.nextCursor,
       };
@@ -227,7 +228,7 @@ export async function relayResolveChannelId(
     found: false,
     id: undefined,
     name: nameNorm,
-    source: 'relay-bindings',
+    source: RELAY_CHANNEL_SOURCE,
     pagesFetched,
     nextCursor: cursor,
   };
