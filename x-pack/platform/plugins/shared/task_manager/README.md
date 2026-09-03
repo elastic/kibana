@@ -118,6 +118,11 @@ export class Plugin {
         // This defaults to what is configured at the task manager level.
         maxAttempts: 5,
 
+        // Optional, the claim ordering tier for this task type, named after what the task
+        // is for. Omit it unless the task needs a tier other than the `TaskPriority.Standard`
+        // default. See "Task priority" below.
+        priority: TaskPriority.Deferrable,
+
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
         // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
         // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
@@ -163,6 +168,49 @@ export class Plugin {
   public start(core: CoreStart, plugins: { taskManager }) {}
 }
 ```
+
+### Task priority
+
+`priority` is the tier a task type sits in when Task Manager decides what to claim next. Available
+capacity is filled highest priority first, and tasks within a tier are claimed oldest first. The
+members are named after *what the task is for*, so the right tier should be readable from the name
+alone:
+
+| Priority | Value | Use it for |
+|---|---|---|
+| `TaskPriority.UserInteractive` | 100 | Work a user is directly waiting on, or work with a tight latency budget — a delay here is user-visible. Reserve it for exactly that; every one of these tasks displaces `Standard` work. |
+| `TaskPriority.Standard` | 50 | The default, and correct for almost every task. Applied when no priority is set on the task type or the task instance. |
+| `TaskPriority.Deferrable` | 40 | Long-running work that should yield to `Standard` tasks rather than hold the regular pool while it grinds through a large workload. |
+| `TaskPriority.Maintenance` | 1 | Background bookkeeping that may be deferred under load — cleanup, telemetry rollups, backfills. Nothing is waiting on it. |
+
+Two things `priority` is **not**:
+
+- It is not `cost`. `priority` decides claim *order*; `cost` (`TaskCost`) decides how much of the
+  finite capacity pool a running task occupies. A cheap task can be high priority, and an expensive
+  task can be low priority.
+- It is not importance. Raising a task's priority because it matters to your plugin, rather than
+  because something is waiting on it, starves every other plugin's work. `Standard` is the right
+  answer unless the task genuinely needs to preempt or yield.
+
+A task instance may override its task type's priority via the `priority` field on the instance (see
+[Task instances](#task-instances)); the instance value wins when both are set.
+
+Omit `priority` rather than setting it to `Standard` explicitly — they behave identically, and any
+task type that sets the field at all is counted by the `task_priority_check` integration test, which
+will fail until its snapshot is updated. That failure is deliberate: it exists so ResponseOps
+reviews the change.
+
+#### Deprecated priority names
+
+The members used to be named after their position in the claim ordering. The old names remain as
+deprecated aliases with identical numeric values, so claim ordering is unchanged, but new code
+should use the intent-based names:
+
+| Deprecated | Replacement |
+|---|---|
+| `TaskPriority.Low` | `TaskPriority.Maintenance` |
+| `TaskPriority.NormalLongRunning` | `TaskPriority.Deferrable` |
+| `TaskPriority.Normal` | `TaskPriority.Standard` |
 
 When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its createTaskRunner's method, passing it a run context which looks like this:
 
@@ -279,6 +327,11 @@ The data stored for a task instance looks something like this:
   // Indicates that this is a recurring task. We support interval syntax
   // with days such as '1d', hours '3h', minutes such as `5m`, seconds `10s`.
   schedule: { interval: '5m' },
+
+  // Optional, overrides the claim ordering tier defined by the task type for
+  // this instance only. Defaults to the task type's priority, which itself
+  // defaults to `TaskPriority.Standard`. See "Task priority" above.
+  priority: 50,
 
   // How many times this task has been unsuccesfully attempted,
   // this will be reset to 0 if the task ever succesfully completes.
