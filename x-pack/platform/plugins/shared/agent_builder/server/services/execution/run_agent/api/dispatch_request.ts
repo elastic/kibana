@@ -34,6 +34,9 @@ const isAlertingRuleCreate = (method: string, path: string): boolean =>
 // tells alerting to mint the rule its own framework-managed key instead.
 const cloneApiKeyHeaders = { [ALERTING_CLONE_API_KEY_HEADER]: 'true' };
 
+const toNdjsonBody = (lines: readonly unknown[]): string =>
+  lines.map((line) => `${typeof line === 'string' ? line : JSON.stringify(line)}\n`).join('');
+
 /**
  * Sends a prepared API request to its backend on behalf of the current user.
  *
@@ -49,7 +52,7 @@ export const dispatchApiRequest = async ({
   selfClient,
   request,
 }: DispatchApiRequestParams): Promise<unknown> => {
-  const { method, path, querystring, body } = apiRequest;
+  const { method, path, querystring, body, bulkBody } = apiRequest;
 
   if (target === 'kibana') {
     return selfClient.asScoped(request).fetch(path, {
@@ -69,7 +72,9 @@ export const dispatchApiRequest = async ({
   if (querystring != null) {
     transportParams.querystring = querystring;
   }
-  if (isRecord(body)) {
+  if (Array.isArray(bulkBody)) {
+    transportParams.bulkBody = toNdjsonBody(bulkBody);
+  } else if (isRecord(body)) {
     transportParams.body = body;
   }
 

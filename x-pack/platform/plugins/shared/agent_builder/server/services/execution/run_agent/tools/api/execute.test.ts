@@ -475,7 +475,80 @@ describe('createExecuteApiTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
   });
 
-  it('refuses APIs that take an NDJSON request body', async () => {
+  it('sends a body-root payload as the body rather than under its parameter name', async () => {
+    esLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'index',
+          namespace: null,
+          description: 'Index a document',
+          method: 'PUT',
+          path: '/logs/_doc/1',
+          input: {
+            type: 'object',
+            properties: {
+              document: { 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
+          destructive: false,
+        },
+        { method: 'PUT', path: '/logs/_doc/1', body: { document: { field: 1 } } }
+      )
+    );
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    transportRequest.mockResolvedValue({ result: 'created' });
+
+    const tool = createExecuteApiTool({ selfClient });
+    await tool.handler(
+      { target: 'elasticsearch', api: 'index', params: { document: { field: 1 } } },
+      context
+    );
+
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/logs/_doc/1',
+      body: { field: 1 },
+    });
+  });
+
+  it('sends a Kibana body-root payload as the body itself', async () => {
+    kibanaLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'create-case',
+          namespace: 'cases',
+          description: 'Create a case',
+          method: 'POST',
+          path: '/api/cases',
+          input: {
+            type: 'object',
+            properties: { body: { 'x-found-in': 'body', 'x-body-root': true } },
+          },
+          destructive: false,
+        },
+        { method: 'POST', path: '/api/cases', body: { body: { title: 'Investigation' } } }
+      )
+    );
+    mockFetch.mockResolvedValue({ id: 'case-1' });
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const tool = createExecuteApiTool({ selfClient });
+    await tool.handler(
+      { target: 'kibana', api: 'cases.create-case', params: { body: { title: 'Investigation' } } },
+      context
+    );
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/cases', {
+      method: 'POST',
+      query: undefined,
+      body: { title: 'Investigation' },
+      access: 'public',
+    });
+  });
+
+  it('executes an NDJSON API by serializing its payload into newline-delimited lines', async () => {
     esLoadApi.mockResolvedValue(
       createLoadedApi(
         {
@@ -485,64 +558,90 @@ describe('createExecuteApiTool', () => {
           method: 'POST',
           path: '/_bulk',
           bodyFormat: 'ndjson',
+          input: {
+            type: 'object',
+            properties: {
+              operations: { type: 'array', 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
           destructive: false,
         },
-        { method: 'POST', path: '/_bulk' }
+        {
+          method: 'POST',
+          path: '/_bulk',
+          bulkBody: { operations: [{ index: { _index: 'logs' } }, { field: 1 }] },
+        }
       )
     );
 
     const context = agentBuilderMocks.tools.createHandlerContext();
     const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
-
-    const tool = createExecuteApiTool({ selfClient });
-    const result = (await tool.handler(
-      { target: 'elasticsearch', api: 'bulk', params: {} },
-      context
-    )) as ToolHandlerStandardReturn;
-
-    expect(result.results[0].type).toBe(ToolResultType.error);
-    const data = result.results[0].data as ErrorResultData;
-    expect(data.message).toContain('NDJSON');
-    expect(transportRequest).not.toHaveBeenCalled();
-  });
-
-  it('reports the NDJSON refusal ahead of any complaint about the params', async () => {
-    esLoadApi.mockResolvedValue(
-      createLoadedApi(
-        {
-          name: 'bulk',
-          namespace: null,
-          description: 'Bulk operations',
-          method: 'POST',
-          path: '/{index}/_bulk',
-          bodyFormat: 'ndjson',
-          input: {
-            type: 'object',
-            properties: { index: { type: 'string', 'x-found-in': 'path' } },
-            required: ['index'],
-          },
-          destructive: false,
-        },
-        { method: 'POST', path: '/logs/_bulk' }
-      )
-    );
-
-    const context = agentBuilderMocks.tools.createHandlerContext();
+    transportRequest.mockResolvedValue({ errors: false });
 
     const tool = createExecuteApiTool({ selfClient });
     const result = (await tool.handler(
       {
         target: 'elasticsearch',
         api: 'bulk',
-        params: { index: 'logs', operations: [{ index: {} }] },
+        params: { operations: [{ index: { _index: 'logs' } }, { field: 1 }] },
       },
       context
     )) as ToolHandlerStandardReturn;
 
-    const data = result.results[0].data as ErrorResultData;
-    expect(data.message).toContain('NDJSON');
-    expect(data.message).toContain('Do not retry it');
-    expect(data.message).not.toContain('Invalid params');
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_bulk',
+      bulkBody: '{"index":{"_index":"logs"}}\n{"field":1}\n',
+    });
+    const data = result.results[0].data as ApiExecuteResultData;
+    expect(data.response).toEqual({ errors: false });
+  });
+
+  it('passes the raw text lines of an NDJSON payload through unquoted', async () => {
+    esLoadApi.mockResolvedValue(
+      createLoadedApi(
+        {
+          name: 'find_structure',
+          namespace: 'text_structure',
+          description: 'Find the structure of some text',
+          method: 'POST',
+          path: '/_text_structure/find_structure',
+          bodyFormat: 'ndjson',
+          input: {
+            type: 'object',
+            properties: {
+              text_files: { type: 'array', 'x-found-in': 'body', 'x-body-root': true },
+            },
+          },
+          destructive: false,
+        },
+        {
+          method: 'POST',
+          path: '/_text_structure/find_structure',
+          bulkBody: { text_files: ['first,line', 'second,line'] },
+        }
+      )
+    );
+
+    const context = agentBuilderMocks.tools.createHandlerContext();
+    const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+    transportRequest.mockResolvedValue({ num_lines_analyzed: 2 });
+
+    const tool = createExecuteApiTool({ selfClient });
+    await tool.handler(
+      {
+        target: 'elasticsearch',
+        api: 'text_structure.find_structure',
+        params: { text_files: ['first,line', 'second,line'] },
+      },
+      context
+    );
+
+    expect(transportRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/_text_structure/find_structure',
+      bulkBody: 'first,line\nsecond,line\n',
+    });
   });
 
   it('returns an error result when the request fails', async () => {
