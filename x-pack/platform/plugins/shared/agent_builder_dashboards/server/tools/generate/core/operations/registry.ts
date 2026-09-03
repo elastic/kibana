@@ -11,6 +11,7 @@ import { addControlsOperation } from './add_controls';
 import { addPanelsOperation } from './add_panels';
 import { addSectionOperation } from './add_section';
 import { editPanelsOperation } from './edit_panels';
+import { normalizePanelsOperation } from './normalize_panels';
 import { removeControlsOperation } from './remove_controls';
 import { removePanelsOperation } from './remove_panels';
 import { removeSectionOperation } from './remove_section';
@@ -23,6 +24,7 @@ const operationDefinitions = [
   setMetadataOperation,
   addPanelsOperation,
   editPanelsOperation,
+  normalizePanelsOperation,
   updatePanelLayoutsOperation,
   addSectionOperation,
   removeSectionOperation,
@@ -73,6 +75,10 @@ export const prepareOperationExecution = async ({
     resolvedPanelCreationRequests,
     resolvePanelContent,
     resolveCustomContentTemplate,
+    panelKeys: new Map(),
+    normalizeChanges: [],
+    normalizeSkipped: [],
+    touchedRequestPanelData: false,
   };
 };
 

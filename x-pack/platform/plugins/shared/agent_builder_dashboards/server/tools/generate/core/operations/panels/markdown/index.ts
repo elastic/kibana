@@ -45,6 +45,11 @@ export const markdownPanelConfigSchema = z.object({
 export const markdownPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('markdown'),
+  key: z
+    .string()
+    .max(256)
+    .optional()
+    .describe('(optional) Client reference for this panel, used to place it in a later set_layout.'),
   grid: panelGridSchema,
   config: markdownPanelConfigSchema.describe('Markdown panel config (e.g. { content }).'),
 });
@@ -55,7 +60,7 @@ export const markdownPanelConfigInputSchema = z.object({
  * `source`/`type`/`config` shape stays in sync.
  */
 export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
-  .omit({ grid: true })
+  .omit({ grid: true, key: true })
   .extend({
     panelId: z.string().max(256).describe('Existing markdown panel id to update.'),
     config: markdownPanelConfigSchema.describe(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -19,9 +20,18 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import {
+  collectExistingEsqlQueries,
+  isEsqlLensConfig,
+  isLensApiConfig,
+  pickPanelKeys,
+  unsupportedLensDataEditMessage,
+} from '../lens_config';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { getErrorMessage } from '../utils';
 import type { VisPanelResolutionRequest } from '../operations/panels';
+
+const ALL_SUPPORTED_CHART_TYPES = Object.values(SupportedChartType);
 
 /** Host plumbing the vis resolver needs to call the visualization builder. */
 export interface VisPanelResolverDeps {
@@ -29,6 +39,7 @@ export interface VisPanelResolverDeps {
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
   esClient: IScopedClusterClient;
+  compileAllowList?: SupportedChartType[];
 }
 
 /**
@@ -59,6 +70,26 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
   return typeof spec === 'string' ? spec : undefined;
 };
 
+const isUnsupportedLensDataOrChartFamilyEdit = (
+  existingPanel: AttachmentPanel,
+  regenerateQuery: boolean,
+  chartType: SupportedChartType | undefined
+): boolean => {
+  if (existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
+    return false;
+  }
+
+  const existingType = isLensApiConfig(existingPanel.config)
+    ? existingPanel.config.type
+    : undefined;
+  const isChartFamilyEdit = chartType !== undefined && chartType !== existingType;
+  if (!regenerateQuery && !isChartFamilyEdit) {
+    return false;
+  }
+
+  return !isEsqlLensConfig(existingPanel.config);
+};
+
 /**
  * Default implementation of the generate core's `ResolvePanelContent` seam for
  * `vis` panels.
@@ -80,6 +111,7 @@ export const createVisPanelResolver = ({
   modelProvider,
   events,
   esClient,
+  compileAllowList = ALL_SUPPORTED_CHART_TYPES,
 }: VisPanelResolverDeps) => {
   return async ({
     operationType,
@@ -90,7 +122,16 @@ export const createVisPanelResolver = ({
     esql,
     renderer: requestedRenderer,
     existingPanel,
+    title,
+    intent,
+    styleOverrides,
+    styleRequest,
+    regenerateQuery,
+    hideTitle,
+    compileAllowList: requestCompileAllowList,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
+    events.reportProgress(`Building ${chartType ?? 'visualization'} panel: ${nlQuery}`);
+
     try {
       const renderer = resolveRenderer(existingPanel, requestedRenderer);
       if (!renderer) {
@@ -101,8 +142,23 @@ export const createVisPanelResolver = ({
         );
       }
 
+      if (
+        existingPanel &&
+        isUnsupportedLensDataOrChartFamilyEdit(existingPanel, regenerateQuery === true, chartType)
+      ) {
+        return createPanelFailureResult(
+          operationType,
+          identifier,
+          unsupportedLensDataEditMessage(identifier)
+        );
+      }
+
       if (renderer === 'vega') {
-        const { spec, title, authoringNote } = await buildVegaConfig({
+        const {
+          spec,
+          title: vegaTitle,
+          authoringNote,
+        } = await buildVegaConfig({
           nlQuery,
           index,
           esql,
@@ -114,15 +170,13 @@ export const createVisPanelResolver = ({
           esClient,
         });
 
-        // Store the (future) native Vega API shape in the attachment: a `vega`
-        // panel whose `config.spec` is the serialized spec. A temporary converter
-        // expands this to the legacy-vis embeddable when the dashboard is
-        // materialized for rendering.
+        events.reportProgress(`Building ${chartType ?? 'visualization'} panel: ${nlQuery}`);
+
         return {
           type: 'success',
           panelContent: {
             type: VEGA_VIS_TYPE,
-            config: { spec, ...(title ? { title } : {}) },
+            config: { spec, ...(vegaTitle ? { title: vegaTitle } : {}) },
           },
           ...(authoringNote ? { authoringNote } : {}),
         };
@@ -133,24 +187,47 @@ export const createVisPanelResolver = ({
           ? (existingPanel?.config as VisualizationConfig)
           : undefined;
 
+      const existingQueries = existingConfig ? collectExistingEsqlQueries(existingConfig) : [];
+      const shouldPin = existingConfig !== undefined && regenerateQuery !== true;
+      const pinnedQueries = shouldPin ? existingQueries : undefined;
+      const pinnedOrSuppliedEsql = esql ?? (shouldPin ? existingQueries[0] : undefined);
+
       const result = await buildLensConfig({
         nlQuery,
         index,
         chartType,
-        esql,
+        esql: pinnedOrSuppliedEsql,
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
+        intent,
+        title,
+        styleOverrides,
+        styleRequest,
+        pinnedQueries,
+        compileAllowList: requestCompileAllowList ?? compileAllowList,
         modelProvider,
         logger,
         events,
         esClient,
       });
 
+      const config =
+        existingConfig !== undefined
+          ? {
+              ...pickPanelKeys(existingConfig),
+              ...result.validatedConfig,
+              ...(title !== undefined ? { title } : {}),
+              ...(hideTitle !== undefined ? { hide_title: hideTitle } : {}),
+            }
+          : result.validatedConfig;
+
+      events.reportProgress(`Building ${chartType ?? 'visualization'} panel: ${nlQuery}`);
+
       return {
         type: 'success',
         panelContent: {
           type: LENS_EMBEDDABLE_TYPE,
-          config: result.validatedConfig,
+          config,
         },
         ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };

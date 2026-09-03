@@ -11,7 +11,14 @@ import {
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
+import {
+  isEsqlLensConfig,
+  isLensApiConfig,
+  pickPanelKeys,
+  unsupportedLensDataEditMessage,
+} from '../lens_config';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
@@ -24,6 +31,28 @@ import {
 } from './panels';
 import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
+
+const isUnsupportedLensDataOrChartFamilyEdit = (
+  existingPanel: AttachmentPanel,
+  panelInput: EditPanelRequestInput
+): boolean => {
+  if (existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
+    return false;
+  }
+
+  const regenerate = panelInput.regenerate_query === true;
+  const existingType = isLensApiConfig(existingPanel.config)
+    ? existingPanel.config.type
+    : undefined;
+  const isChartFamilyEdit =
+    panelInput.chartType !== undefined && panelInput.chartType !== existingType;
+  if (!regenerate && !isChartFamilyEdit) {
+    return false;
+  }
+
+  const isDslOrRaw = !isEsqlLensConfig(existingPanel.config);
+  return isDslOrRaw;
+};
 
 /** An edit that passed validation, always carrying the existing panel snapshot. */
 interface ValidEdit {
@@ -41,7 +70,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports Lens and Vega visualization panels (source: "request", which keep their existing renderer), markdown panels (source: "config", type: "markdown"), and custom content panels (source: "config", type: "custom_content").'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -97,8 +126,11 @@ export const editPanelsOperation = defineOperation({
         continue;
       }
 
-      // Panel request edits: the resolver enforces the Lens-type check and
-      // returns a failure attempt if the existing panel isn't supported.
+      if (isUnsupportedLensDataOrChartFamilyEdit(existingPanel, panelInput)) {
+        recordFailure(panelInput.panelId, unsupportedLensDataEditMessage(panelInput.panelId));
+        continue;
+      }
+
       validEdits.push({ panelInput, existingPanel });
     }
 
@@ -115,17 +147,29 @@ export const editPanelsOperation = defineOperation({
       }
 
       const attempts = await Promise.all(
-        validPanelRequestEdits.map(({ panelInput, existingPanel }) =>
-          resolvePanelContent({
+        validPanelRequestEdits.map(({ panelInput, existingPanel }) => {
+          const regenerate = panelInput.regenerate_query === true;
+          const styleRequest =
+            panelInput.style_request ??
+            (!regenerate && panelInput.query ? panelInput.query : undefined);
+          const nlQuery = panelInput.query ?? 'Update panel';
+
+          return resolvePanelContent({
             type: panelInput.type,
             operationType: operation.operation,
             identifier: panelInput.panelId,
-            nlQuery: panelInput.query,
+            nlQuery,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
             existingPanel,
-          })
-        )
+            title: panelInput.title,
+            intent: panelInput.intent,
+            styleOverrides: panelInput.style_overrides,
+            styleRequest,
+            regenerateQuery: regenerate,
+            hideTitle: panelInput.hide_title,
+          });
+        })
       );
       validPanelRequestEdits.forEach(({ panelInput }, i) => {
         panelContentAttemptByPanelId.set(panelInput.panelId, attempts[i]);
@@ -188,7 +232,14 @@ export const editPanelsOperation = defineOperation({
       const updateResult = updatePanelInDashboard({
         dashboardData: nextDashboardData,
         panelId: panelInput.panelId,
-        transformPanel: (panel) => ({ ...panel, ...attempt.panelContent }),
+        transformPanel: (panel) => ({
+          ...panel,
+          ...attempt.panelContent,
+          config: {
+            ...pickPanelKeys(panel.config),
+            ...attempt.panelContent.config,
+          },
+        }),
       });
 
       if (!updateResult.updated) {
@@ -197,6 +248,9 @@ export const editPanelsOperation = defineOperation({
       }
 
       nextDashboardData = updateResult.dashboardData;
+      if (panelInput.regenerate_query === true) {
+        context.touchedRequestPanelData = true;
+      }
       if (attempt.authoringNote) {
         context.panelAuthoringNotes.push({
           panelId: panelInput.panelId,

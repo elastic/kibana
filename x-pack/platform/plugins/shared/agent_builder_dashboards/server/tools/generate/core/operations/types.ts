@@ -13,6 +13,24 @@ import type { PanelFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
+export type NormalizePanelSkipReason =
+  | 'not_found'
+  | 'not_lens'
+  | 'raw_lens_attributes'
+  | 'unsupported_chart_type'
+  | 'conversion_failed';
+
+export interface NormalizePanelChange {
+  panelId: string;
+  id: string;
+  detail?: string;
+}
+
+export interface NormalizePanelSkipped {
+  id: string;
+  reason: NormalizePanelSkipReason;
+}
+
 export type ResolveCustomContentTemplate = (params: {
   prompt: string;
   esqlQuery?: string;
@@ -28,6 +46,10 @@ export interface OperationExecutionContext {
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
+  panelKeys: Map<string, string>;
+  normalizeChanges: NormalizePanelChange[];
+  normalizeSkipped: NormalizePanelSkipped[];
+  touchedRequestPanelData: boolean;
 }
 
 export interface OperationHandlerParams<TOperation> {

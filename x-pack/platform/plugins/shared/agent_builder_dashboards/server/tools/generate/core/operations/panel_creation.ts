@@ -44,7 +44,6 @@ export type PanelCreationRequest =
       operationType: 'add_panels';
       panelInput: Extract<AddPanelsItemInput, { source: 'request' }>;
       panelInputIndex: number;
-      sectionId?: string;
     };
 
 export interface ResolvedPanelCreationRequest {
@@ -93,7 +92,6 @@ const collectPanelCreationRequests = (
                   operationType: operation.operation,
                   panelInput,
                   panelInputIndex,
-                  sectionId: panelInput.sectionId,
                 },
               ]
             : []
@@ -152,6 +150,10 @@ export const resolvePanelCreationRequests = async ({
                 chartType: request.panelInput.chartType,
                 esql: request.panelInput.esql,
                 renderer: request.panelInput.renderer,
+                title: request.panelInput.title,
+                intent: request.panelInput.intent,
+                styleOverrides: request.panelInput.style_overrides,
+                styleRequest: request.panelInput.style_request,
               }),
             }))
           ),

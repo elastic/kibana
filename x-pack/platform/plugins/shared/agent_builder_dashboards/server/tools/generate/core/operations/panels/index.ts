@@ -71,25 +71,10 @@ export const PANEL_TYPE_DEFINITIONS: Record<PanelType, PanelTypeDefinition> = {
   custom_content: customContentPanelDefinition,
 };
 
-const sectionIdField = z
-  .string()
-  .max(256)
-  .optional()
-  .describe(
-    'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
-  );
-
-/** A single panel item accepted by `add_panels` (any panel type, optionally targeting a section). */
+/** A single panel item accepted by `add_panels` (any panel type). */
 export const addPanelsItemSchema = z.discriminatedUnion('source', [
-  z.discriminatedUnion('type', [
-    visPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-    markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-    customContentPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
-  ]),
-  z.discriminatedUnion('renderer', [
-    lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
-    vegaPanelRequestSchema.extend({ sectionId: sectionIdField }),
-  ]),
+  configPanelInputSchema,
+  z.discriminatedUnion('renderer', [lensPanelRequestSchema, vegaPanelRequestSchema]),
 ]);
 
 export type AddPanelsItemInput = z.infer<typeof addPanelsItemSchema>;
@@ -103,8 +88,7 @@ export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
 /**
  * A "create a new panel" input — either an already-resolved `source: 'config'`
  * panel or a `source: 'request'` to resolve. The common shape that `add_panels`
- * and `add_section` materialize into panel content (`add_panels` items also carry
- * a `sectionId`, which is assignable to this base).
+ * and `add_section` materialize into panel content.
  */
 export type NewPanelInput = z.infer<typeof addSectionPanelItemSchema>;
 

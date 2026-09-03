@@ -34,6 +34,11 @@ export const indexPanelsById = (
 /**
  * Returns the lowest occupied y-position across top-level panels and section contents.
  */
+export const resolveAddedPanelGrid = (
+  grid: AttachmentPanel['grid'] | undefined,
+  widgets: DashboardWidget[]
+): AttachmentPanel['grid'] => grid ?? { x: 0, y: getWidgetsBottomY(widgets), w: 24, h: 10 };
+
 export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
   return widgets.reduce((maxY, widget) => {
     if (isSection(widget)) {

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { sectionGridSchema } from '@kbn/agent-builder-dashboards-common';
 import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
+import { resolveAddedPanelGrid } from '../dashboard_state';
 import { createPanelInputMaterializer, applyCustomContentTemplates } from './panel_creation';
 import { defineOperation } from './types';
 import { addSectionPanelItemSchema } from './panels';
@@ -62,7 +63,17 @@ export const addSectionOperation = defineOperation({
         if (panel === undefined) continue;
 
         const panelId = uuidv4();
-        sectionPanels.push({ id: panelId, ...panel.panelContent, grid: item.grid });
+        sectionPanels.push({
+          id: panelId,
+          ...panel.panelContent,
+          grid: resolveAddedPanelGrid(item.grid, sectionPanels),
+        });
+        if (item.key) {
+          context.panelKeys.set(item.key, panelId);
+        }
+        if (item.source === 'request') {
+          context.touchedRequestPanelData = true;
+        }
         if (panel.authoringNote) {
           context.panelAuthoringNotes.push({
             panelId,

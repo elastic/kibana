@@ -28,6 +28,29 @@ describe('panel item schemas', () => {
     ).toBe(true);
   });
 
+  it('allows add_panels request items to omit grid', () => {
+    expect(
+      addPanelsItemSchema.safeParse({
+        source: 'request',
+        type: 'vis',
+        query: 'show total requests',
+        chartType: SupportedChartType.Metric,
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a key on config-source add_panels items', () => {
+    expect(
+      addPanelsItemSchema.safeParse({
+        source: 'config',
+        type: 'markdown',
+        key: 'intro',
+        grid: { x: 0, y: 0, w: 48, h: 4 },
+        config: { content: '### Notes' },
+      }).success
+    ).toBe(true);
+  });
+
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],

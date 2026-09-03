@@ -8,7 +8,11 @@
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import type { ResolvePanelContent } from './operations/panels';
-import type { ResolveCustomContentTemplate } from './operations/types';
+import type {
+  NormalizePanelChange,
+  NormalizePanelSkipped,
+  ResolveCustomContentTemplate,
+} from './operations/types';
 import type { PanelFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import {
@@ -46,6 +50,10 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: PanelFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
+  touchedRequestPanelData: boolean;
+  panelKeys: Map<string, string>;
+  normalizeChanges: NormalizePanelChange[];
+  normalizeSkipped: NormalizePanelSkipped[];
 }> => {
   let nextDashboardData = structuredClone(
     dashboardData ?? {
@@ -79,5 +87,9 @@ export const executeDashboardOperations = async ({
     dashboardData: nextDashboardData,
     failures,
     panelAuthoringNotes,
+    touchedRequestPanelData: context.touchedRequestPanelData,
+    panelKeys: context.panelKeys,
+    normalizeChanges: context.normalizeChanges,
+    normalizeSkipped: context.normalizeSkipped,
   };
 };
