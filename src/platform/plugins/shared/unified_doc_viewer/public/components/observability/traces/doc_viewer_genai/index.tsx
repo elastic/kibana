@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiCode, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { GenAiTab } from '@kbn/apm-ui-shared';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
 import {
@@ -32,7 +34,8 @@ export function DocViewerObsTracesGenAi({
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: DocViewRenderProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { genAi, loading } = useGenAiData({ hit });
+  const isEsqlMode = Array.isArray(textBasedHits);
+  const { genAi, loading, unrecoverableLongFields } = useGenAiData({ hit, isEsqlMode });
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -51,6 +54,15 @@ export function DocViewerObsTracesGenAi({
     return null;
   }
 
+  // Whether values were dropped is unknowable without `_ignored`, so this is
+  // phrased as a possibility. Suppressed once a conversation renders, to avoid
+  // pointing at an absent `system_instructions` on an otherwise complete span.
+  const conversationEmpty =
+    genAi.inputMessages.length === 0 &&
+    genAi.outputMessages.length === 0 &&
+    !genAi.systemInstructions;
+  const showMetadataHint = unrecoverableLongFields && conversationEmpty;
+
   return (
     <div
       ref={setContainerRef}
@@ -65,6 +77,32 @@ export function DocViewerObsTracesGenAi({
       }
     >
       <EuiSpacer size="m" />
+      {showMetadataHint && (
+        <>
+          <KbnInfoCallout
+            announceOnMount
+            data-test-subj="unifiedDocViewerObsTracesGenAiMetadataHint"
+            title={
+              <FormattedMessage
+                id="unifiedDocViewer.observability.traces.genAi.metadataHint.title"
+                defaultMessage="Messages may be incomplete"
+              />
+            }
+            text={
+              <FormattedMessage
+                id="unifiedDocViewer.observability.traces.genAi.metadataHint.description"
+                defaultMessage="Messages longer than 1024 characters aren't indexed and must be read from the document source. Add {metadata} to your query to load them."
+                values={{
+                  metadata: (
+                    <EuiCode css={{ display: 'inline-block' }}>{'METADATA _id, _index'}</EuiCode>
+                  ),
+                }}
+              />
+            }
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <GenAiTab
         genAi={genAi}
         ebt={{ element: TRACES_DOC_VIEWER_EBT_ELEMENTS.GENAI_TAB }}
