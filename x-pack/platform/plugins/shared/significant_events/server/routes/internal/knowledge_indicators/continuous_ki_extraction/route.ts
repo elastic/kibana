@@ -15,7 +15,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import {
-  STREAMS_API_PRIVILEGES,
+  SIGNIFICANT_EVENTS_API_PRIVILEGES,
   MIN_EXTRACTION_INTERVAL_HOURS,
 } from '../../../../../common/constants';
 
@@ -36,7 +36,7 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

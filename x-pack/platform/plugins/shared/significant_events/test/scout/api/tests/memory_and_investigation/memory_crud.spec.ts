@@ -38,7 +38,7 @@ apiTest.describe(
     apiTest(
       'smoke: create, read, search, categories, soft-delete, and restore by name',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
         const pageName = `scout-memory-${uuidv4().slice(0, 8)}`;
@@ -209,7 +209,7 @@ apiTest.describe(
     apiTest(
       'a freshly written page is immediately readable without polling',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
         const pageName = `scout-refresh-${uuidv4().slice(0, 8)}`;
@@ -298,7 +298,7 @@ apiTest.describe(
     apiTest(
       'removing a category does not return the stale older version',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
         const pageName = `scout-stale-${uuidv4().slice(0, 8)}`;
@@ -372,7 +372,7 @@ apiTest.describe(
     apiTest(
       'search does not return a page whose latest version no longer matches the filter',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
         const pageName = `scout-search-filter-${uuidv4().slice(0, 8)}`;
@@ -435,7 +435,7 @@ apiTest.describe(
     apiTest(
       'search does not return a soft-deleted page even if its latest version matches the filter',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
         const pageName = `scout-search-deleted-${uuidv4().slice(0, 8)}`;

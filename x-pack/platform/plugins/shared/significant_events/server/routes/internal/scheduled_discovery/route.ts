@@ -26,7 +26,7 @@ import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_
 import { StatusError } from '../../../lib/errors/status_error';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
-  STREAMS_API_PRIVILEGES,
+  SIGNIFICANT_EVENTS_API_PRIVILEGES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -165,7 +165,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

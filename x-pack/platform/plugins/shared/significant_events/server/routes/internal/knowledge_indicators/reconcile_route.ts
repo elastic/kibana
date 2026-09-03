@@ -10,7 +10,7 @@ import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
 
 const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_reconcile',
@@ -20,7 +20,7 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

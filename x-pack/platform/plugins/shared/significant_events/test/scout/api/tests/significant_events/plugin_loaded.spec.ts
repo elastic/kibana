@@ -24,7 +24,7 @@ apiTest.describe(
     apiTest(
       'availability API is registered when the plugin is enabled',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
 
         const response = await apiClient.get(AVAILABILITY_PATH, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },

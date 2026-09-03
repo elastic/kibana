@@ -34,7 +34,7 @@ apiTest.describe(
   () => {
     for (const workflowId of MANAGED_WORKFLOW_IDS) {
       apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const { cookieHeader } = await samlAuth.asSignificantEventsAdmin();
         const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };
 
         await expect

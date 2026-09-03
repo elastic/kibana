@@ -60,7 +60,7 @@ export function SignificantEventsPage() {
     core: {
       application: {
         getUrlForApp,
-        capabilities: { streams },
+        capabilities: { significantEvents },
       },
       chrome,
       notifications: { toasts },
@@ -70,7 +70,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const canManageStreams = streams?.manage === true;
+  const canManage = significantEvents?.manage === true;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -285,7 +285,7 @@ export function SignificantEventsPage() {
                         'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
                     })}
                   </p>
-                  {canManageStreams && (
+                  {canManage && (
                     <EuiButton
                       href={router.link('/{tab}', { path: { tab: 'settings' } })}
                       color="danger"
@@ -314,14 +314,14 @@ export function SignificantEventsPage() {
                   })}
                 >
                   <p>
-                    {canManageStreams
+                    {canManage
                       ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
                           defaultMessage:
                             'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
                         })
                       : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
                           defaultMessage:
-                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Streams manage privilege must resume activity from Settings.',
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Significant Events manage privilege must resume activity from Settings.',
                         })}
                   </p>
                   {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
@@ -332,7 +332,7 @@ export function SignificantEventsPage() {
                       })}
                     </p>
                   )}
-                  {canManageStreams && (
+                  {canManage && (
                     <EuiButton
                       href={router.link('/{tab}', { path: { tab: 'settings' } })}
                       color="warning"

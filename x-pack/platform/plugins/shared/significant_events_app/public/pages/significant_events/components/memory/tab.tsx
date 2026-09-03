@@ -57,11 +57,11 @@ export function MemoryTab() {
   const {
     core: {
       application: {
-        capabilities: { streams },
+        capabilities: { significantEvents },
       },
     },
   } = useKibana();
-  const canManage = streams?.manage === true;
+  const canManage = significantEvents?.manage === true;
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -127,7 +127,7 @@ export function MemoryTab() {
         defaultMessage: 'Detect Gaps',
       }),
       testSubj: 'streamsMemoryDetectGapsButton',
-      requiresManage: false,
+      requiresManage: true,
       mutation: detectGaps,
     },
   ];
@@ -219,135 +219,134 @@ export function MemoryTab() {
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    aria-label={i18n.translate(
-                      'xpack.significantEventsApp.memory.workflowActionsButton',
-                      {
-                        defaultMessage: 'Workflow actions',
-                      }
-                    )}
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.significantEventsApp.memory.workflowActionsButton',
-                          {
-                            defaultMessage: 'Workflow actions',
-                          }
-                        )}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType="boxesVertical"
-                          aria-label={i18n.translate(
+                {canManage && (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      aria-label={i18n.translate(
+                        'xpack.significantEventsApp.memory.workflowActionsButton',
+                        {
+                          defaultMessage: 'Workflow actions',
+                        }
+                      )}
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.significantEventsApp.memory.workflowActionsButton',
                             {
                               defaultMessage: 'Workflow actions',
                             }
                           )}
-                          onClick={() => setIsActionsPopoverOpen((v) => !v)}
-                          data-test-subj="streamsMemoryWorkflowActionsButton"
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={isActionsPopoverOpen}
-                    closePopover={() => setIsActionsPopoverOpen(false)}
-                    panelPaddingSize="none"
-                    anchorPosition="downRight"
-                  >
-                    <EuiContextMenuPanel
-                      items={[
-                        ...(canManage
-                          ? [
-                              <EuiContextMenuItem
-                                key="toggleWorkflows"
-                                icon={
-                                  isWorkflowsEnabledLoading || toggleWorkflows.isLoading ? (
-                                    <EuiLoadingSpinner size="s" />
-                                  ) : workflowsEnabled ? (
-                                    'pause'
-                                  ) : (
-                                    'play'
-                                  )
-                                }
-                                onClick={() => {
-                                  toggleWorkflows.mutate(!workflowsEnabled, {
-                                    onSettled: () => setIsActionsPopoverOpen(false),
-                                  });
-                                }}
-                                disabled={
-                                  isWorkflowsEnabledLoading ||
-                                  toggleWorkflows.isLoading ||
-                                  // Allow disable while paused; only block re-enable
-                                  // (server allows disable-while-paused for recovery).
-                                  (blocksActivity && !workflowsEnabled)
-                                }
-                                toolTipContent={
-                                  isBlocked && !workflowsEnabled ? activityBlockTooltip : undefined
-                                }
-                                data-test-subj="streamsMemoryToggleWorkflowsButton"
-                              >
-                                {workflowsEnabled
-                                  ? i18n.translate(
-                                      'xpack.significantEventsApp.memory.disableWorkflowsButton',
-                                      {
-                                        defaultMessage: 'Disable background workflows',
-                                      }
-                                    )
-                                  : i18n.translate(
-                                      'xpack.significantEventsApp.memory.enableWorkflowsButton',
-                                      {
-                                        defaultMessage: 'Enable background workflows',
-                                      }
-                                    )}
-                              </EuiContextMenuItem>,
-                            ]
-                          : []),
-                        ...workflowActions.map((action) => {
-                          const isDisabled =
-                            action.mutation.isLoading ||
-                            (action.requiresManage && !canManage) ||
-                            areWorkflowActionsDisabled ||
-                            blocksActivity;
-
-                          return (
-                            <EuiContextMenuItem
-                              key={action.key}
-                              icon={
-                                action.mutation.isLoading ? (
-                                  <EuiLoadingSpinner size="s" />
-                                ) : (
-                                  action.icon
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="boxesVertical"
+                            aria-label={i18n.translate(
+                              'xpack.significantEventsApp.memory.workflowActionsButton',
+                              {
+                                defaultMessage: 'Workflow actions',
+                              }
+                            )}
+                            onClick={() => setIsActionsPopoverOpen((v) => !v)}
+                            data-test-subj="streamsMemoryWorkflowActionsButton"
+                          />
+                        </EuiToolTip>
+                      }
+                      isOpen={isActionsPopoverOpen}
+                      closePopover={() => setIsActionsPopoverOpen(false)}
+                      panelPaddingSize="none"
+                      anchorPosition="downRight"
+                    >
+                      <EuiContextMenuPanel
+                        items={[
+                          <EuiContextMenuItem
+                            key="toggleWorkflows"
+                            icon={
+                              isWorkflowsEnabledLoading || toggleWorkflows.isLoading ? (
+                                <EuiLoadingSpinner size="s" />
+                              ) : workflowsEnabled ? (
+                                'pause'
+                              ) : (
+                                'play'
+                              )
+                            }
+                            onClick={() => {
+                              toggleWorkflows.mutate(!workflowsEnabled, {
+                                onSettled: () => setIsActionsPopoverOpen(false),
+                              });
+                            }}
+                            disabled={
+                              isWorkflowsEnabledLoading ||
+                              toggleWorkflows.isLoading ||
+                              // Allow disable while paused; only block re-enable
+                              // (server allows disable-while-paused for recovery).
+                              (blocksActivity && !workflowsEnabled)
+                            }
+                            toolTipContent={
+                              isBlocked && !workflowsEnabled ? activityBlockTooltip : undefined
+                            }
+                            data-test-subj="streamsMemoryToggleWorkflowsButton"
+                          >
+                            {workflowsEnabled
+                              ? i18n.translate(
+                                  'xpack.significantEventsApp.memory.disableWorkflowsButton',
+                                  {
+                                    defaultMessage: 'Disable background workflows',
+                                  }
                                 )
-                              }
-                              onClick={() => {
-                                action.mutation.mutate();
-                                setIsActionsPopoverOpen(false);
-                              }}
-                              disabled={isDisabled}
-                              toolTipContent={
-                                blocksActivity
-                                  ? activityBlockTooltip
-                                  : !workflowsEnabled && !isWorkflowsEnabledLoading
-                                  ? i18n.translate(
-                                      'xpack.significantEventsApp.memory.workflowActionRequiresEnabledTooltip',
-                                      {
-                                        defaultMessage:
-                                          'Enable background workflows before running this action.',
-                                      }
+                              : i18n.translate(
+                                  'xpack.significantEventsApp.memory.enableWorkflowsButton',
+                                  {
+                                    defaultMessage: 'Enable background workflows',
+                                  }
+                                )}
+                          </EuiContextMenuItem>,
+                          ...workflowActions
+                            .filter((action) => !action.requiresManage || canManage)
+                            .map((action) => {
+                              const isDisabled =
+                                action.mutation.isLoading ||
+                                areWorkflowActionsDisabled ||
+                                blocksActivity;
+
+                              return (
+                                <EuiContextMenuItem
+                                  key={action.key}
+                                  icon={
+                                    action.mutation.isLoading ? (
+                                      <EuiLoadingSpinner size="s" />
+                                    ) : (
+                                      action.icon
                                     )
-                                  : undefined
-                              }
-                              data-test-subj={action.testSubj}
-                            >
-                              {action.label}
-                            </EuiContextMenuItem>
-                          );
-                        }),
-                      ]}
-                    />
-                  </EuiPopover>
-                </EuiFlexItem>
+                                  }
+                                  onClick={() => {
+                                    action.mutation.mutate();
+                                    setIsActionsPopoverOpen(false);
+                                  }}
+                                  disabled={isDisabled}
+                                  toolTipContent={
+                                    blocksActivity
+                                      ? activityBlockTooltip
+                                      : !workflowsEnabled && !isWorkflowsEnabledLoading
+                                      ? i18n.translate(
+                                          'xpack.significantEventsApp.memory.workflowActionRequiresEnabledTooltip',
+                                          {
+                                            defaultMessage:
+                                              'Enable background workflows before running this action.',
+                                          }
+                                        )
+                                      : undefined
+                                  }
+                                  data-test-subj={action.testSubj}
+                                >
+                                  {action.label}
+                                </EuiContextMenuItem>
+                              );
+                            }),
+                        ]}
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem
@@ -407,10 +406,15 @@ export function MemoryTab() {
                 />
               ) : (
                 <EuiText color="subdued">
-                  {i18n.translate('xpack.significantEventsApp.memory.empty', {
-                    defaultMessage:
-                      'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
-                  })}
+                  {canManage
+                    ? i18n.translate('xpack.significantEventsApp.memory.empty', {
+                        defaultMessage:
+                          'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
+                      })
+                    : i18n.translate('xpack.significantEventsApp.memory.emptyReadOnly', {
+                        defaultMessage:
+                          'No memory entries yet. Agents will automatically create entries as they learn.',
+                      })}
                 </EuiText>
               )}
             </EuiFlexItem>
@@ -456,7 +460,11 @@ export function MemoryTab() {
       </EuiFlexGroup>
 
       {selectedEntryId && (
-        <EntryFlyout entryId={selectedEntryId} onClose={() => setSelectedEntryId(null)} />
+        <EntryFlyout
+          entryId={selectedEntryId}
+          onClose={() => setSelectedEntryId(null)}
+          canManage={canManage}
+        />
       )}
       {selectedChange && (
         <ChangeFlyout

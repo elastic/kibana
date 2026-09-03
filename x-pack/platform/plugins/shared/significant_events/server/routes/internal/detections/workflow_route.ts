@@ -10,7 +10,7 @@ import type { QueryLink } from '@kbn/significant-events-schema';
 import {
   MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
-  STREAMS_API_PRIVILEGES,
+  SIGNIFICANT_EVENTS_API_PRIVILEGES,
 } from '../../../../common/constants';
 import { StatusError } from '../../../lib/errors/status_error';
 import { createSignificantEventsTracedEsClient } from '../../../lib/significant_events/create_significant_events_traced_es_client';
@@ -98,7 +98,7 @@ const countAlertsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -144,7 +144,7 @@ const changePointScanRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

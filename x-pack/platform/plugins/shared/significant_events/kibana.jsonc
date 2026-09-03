@@ -15,6 +15,7 @@
       "alerting",
       "alertingVTwo",
       "encryptedSavedObjects",
+      "features",
       "inference",
       "licensing",
       "security",

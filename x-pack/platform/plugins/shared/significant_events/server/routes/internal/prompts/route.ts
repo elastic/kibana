@@ -10,7 +10,7 @@ import type { PromptsConfigAttributes } from '@kbn/streams-plugin/server';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import { StatusError } from '../../../lib/errors/status_error';
 import { createServerRoute } from '../../create_server_route';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../common/constants';
 
 export const setStreamsPromptRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_prompts',
@@ -21,7 +21,7 @@ export const setStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -60,7 +60,7 @@ export const resetStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -86,7 +86,7 @@ export const getStreamsPromptRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),

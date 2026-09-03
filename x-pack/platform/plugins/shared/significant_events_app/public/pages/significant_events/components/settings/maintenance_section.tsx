@@ -185,7 +185,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               <p>
                 {i18n.translate('xpack.significantEventsApp.settings.maintenance.noManageBody', {
                   defaultMessage:
-                    'You can view pause status, but pausing or resuming Significant Events activity requires the Streams manage privilege.',
+                    'You can view pause status, but pausing or resuming Significant Events activity requires the Significant Events manage privilege.',
                 })}
               </p>
             </EuiCallOut>

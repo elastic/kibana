@@ -14,7 +14,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -24,7 +23,6 @@ import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-s
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
 import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -245,11 +243,10 @@ export class StreamsPlugin
       }),
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
-      app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
+      app: [STREAMS_FEATURE_ID],
       privileges: {
         all: {
-          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
-          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
+          app: [STREAMS_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],
@@ -258,8 +255,7 @@ export class StreamsPlugin
           ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
         },
         read: {
-          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
-          aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
+          app: [STREAMS_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],

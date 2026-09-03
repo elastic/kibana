@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/significant_events
 dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/features-plugin'
   - '@kbn/streams-plugin'
   - '@kbn/core'
   - '@kbn/core-pricing-common'

@@ -18,7 +18,7 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { formatInferenceProviderError } from '../../../utils/create_connector_sse_error';
@@ -106,7 +106,7 @@ const prepareInferredSamplingRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -181,7 +181,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -346,7 +346,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -439,7 +439,7 @@ const shouldIdentifyRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

@@ -13,7 +13,7 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/errors/query_not_found_error';
 import { queryFromLink } from '../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import {
@@ -90,7 +90,7 @@ const listQueriesRoute = createServerRoute({
   }),
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
@@ -149,7 +149,7 @@ const upsertQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -228,7 +228,7 @@ const deleteQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -310,7 +310,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
