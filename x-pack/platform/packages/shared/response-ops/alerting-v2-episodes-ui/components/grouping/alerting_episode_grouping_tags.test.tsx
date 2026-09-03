@@ -50,6 +50,35 @@ describe('AlertingEpisodeGroupingTags', () => {
     expect(await screen.findByText('host.name')).toBeInTheDocument();
   });
 
+  it('renders the badges in a flex row by default', () => {
+    render(
+      <AlertingEpisodeGroupingTags
+        fields={['host.name', 'service.name']}
+        data={{ host: { name: 'server-1' }, service: { name: 'checkout' } }}
+        data-test-subj="groupingTags"
+      />
+    );
+
+    expect(screen.getByTestId('groupingTags')).toHaveClass('euiFlexGroup');
+  });
+
+  it('renders the badges as inline content when inline is set', () => {
+    render(
+      <AlertingEpisodeGroupingTags
+        inline
+        fields={['host.name', 'service.name']}
+        data={{ host: { name: 'server-1' }, service: { name: 'checkout' } }}
+        data-test-subj="groupingTags"
+      />
+    );
+
+    const container = screen.getByTestId('groupingTags');
+    expect(container.tagName).toBe('SPAN');
+    expect(container).not.toHaveClass('euiFlexGroup');
+    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
+    expect(screen.getByLabelText('service.name: checkout')).toBeInTheDocument();
+  });
+
   it('flattens object-shaped values without a data view (e.g. IP objects) into readable text', () => {
     render(
       <AlertingEpisodeGroupingTags

@@ -7,7 +7,7 @@
 
 import type { Ast, AstFunction } from '@kbn/interpreter';
 import type { TextBasedPrivateState } from '@kbn/lens-common';
-import type { OriginalColumn } from '../../../common/types';
+import type { OriginalColumn } from '@kbn/lens-common';
 import { toExpression } from './to_expression';
 
 const findExpressionFunction = (

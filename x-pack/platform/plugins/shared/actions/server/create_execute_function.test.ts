@@ -1261,7 +1261,7 @@ describe('bulkExecute()', () => {
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
           actionTypeId: 'mock-action',
-          priority: TaskPriority.Low,
+          priority: TaskPriority.Maintenance,
         },
         {
           id: '123',
