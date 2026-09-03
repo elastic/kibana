@@ -36,8 +36,9 @@ describe('createTraceBasedEvaluator', () => {
       debug: jest.fn(),
     } as any;
 
-    // Longer than the factory's full 62s backoff, so the retry budget is always drained.
-    exhaustRetries = () => jest.advanceTimersByTimeAsync(300_000);
+    // Longer than the factory's full backoff (~515s with 8 retries, 5s min /
+    // 120s max), so the retry budget is always drained.
+    exhaustRetries = () => jest.advanceTimersByTimeAsync(600_000);
 
     mockConfig = {
       name: 'Test Evaluator',

@@ -163,10 +163,15 @@ export function createTraceBasedEvaluator({
 
       try {
         const score = await pRetry(fetchStats, {
-          retries: 5,
+          // The budget must exceed the OTel collector's flush lag (~3-7 min on
+          // sweep VMs): `Unknown column [trace.id]` means no traces-* index
+          // exists yet, and a 62s budget (5 x factor-2 retries) burns entirely
+          // inside that empty window, erroring every trace evaluator on
+          // otherwise healthy runs (observed on Azure shard 1/2, run 9).
+          retries: 8,
           factor: 2,
-          minTimeout: 2000,
-          maxTimeout: 60000,
+          minTimeout: 5000,
+          maxTimeout: 120000,
           onFailedAttempt: (error) => {
             log.debug(
               `${name} query failed on attempt ${error.attemptNumber}, ${error.retriesLeft} retries left (traceId: ${traceId}): ${error.message}`
