@@ -917,7 +917,7 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('attaches the current workflow YAML when auto-sending a new conversation', async () => {
+    it('attaches the current workflow YAML when a new conversation replaces a persisted one', async () => {
       const agentBuilder = createMockAgentBuilder();
       mockHasPersistedConversation.mockReturnValue(true);
       setupKibanaMock(agentBuilder);
@@ -937,7 +937,6 @@ describe('useAgentBuilderIntegration', () => {
       act(() => {
         result.current.openAgentChat({
           initialMessage: 'Fix this workflow',
-          autoSendInitialMessage: true,
           newConversation: true,
         });
       });
