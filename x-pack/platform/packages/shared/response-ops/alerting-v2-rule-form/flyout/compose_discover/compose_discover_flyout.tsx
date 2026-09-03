@@ -104,6 +104,11 @@ const QUERY_SANDBOX_LABEL = i18n.translate(
   }
 );
 
+const PREVIEW_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.builderMode.previewButtonLabel',
+  { defaultMessage: 'Preview' }
+);
+
 const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
   defaultMessage: 'Edit mode selection',
 });
@@ -1094,21 +1099,23 @@ export function ComposeDiscoverFlyout({
    * field on RuleQuery itself, gate this on query shape instead.
    */
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
-    if (!uiState.yamlMode) {
-      return getSandboxTabs(isAlert, {
-        step: uiState.step,
-        recoveryType: uiState.recoveryType,
-        manualSplitEnabled: uiState.manualSplitEnabled,
-      });
-    }
     /*
-     * In YAML mode the sandbox stays open (and is forced open for non-representable
-     * rules). A standalone query can't be represented as base/alert tabs, so it uses
-     * the single unified editor; composed queries keep the split tabs.
+     * Builder preview and YAML sandbox show the full query (base, alert, and
+     * recovery when custom recovery is selected) regardless of the current step.
+     * A standalone query can't be represented as base/alert tabs, so it uses
+     * the single unified editor.
      */
-    if (sandboxQuery.format === 'standalone') return undefined;
-    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    if (isBuilderMode || uiState.yamlMode) {
+      if (sandboxQuery.format === 'standalone') return undefined;
+      return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+    }
+    return getSandboxTabs(isAlert, {
+      step: uiState.step,
+      recoveryType: uiState.recoveryType,
+      manualSplitEnabled: uiState.manualSplitEnabled,
+    });
   }, [
+    isBuilderMode,
     uiState.yamlMode,
     uiState.recoveryType,
     uiState.step,
@@ -1287,19 +1294,37 @@ export function ComposeDiscoverFlyout({
                     />
                   </EuiFlexItem>
                 )}
-                {isBuilderMode && isEditing && onSwitchToEsql && (
+                {isBuilderMode && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={BUILDER_MODE_LEGEND}
-                      options={BUILDER_MODE_OPTIONS}
-                      idSelected="builder"
-                      onChange={(id) => {
-                        if (id === 'esql') onSwitchToEsql();
-                      }}
-                      isIconOnly
-                      buttonSize="compressed"
-                      data-test-subj="composeDiscoverSwitchToEsql"
-                    />
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          color="text"
+                          iconType="chevronLimitLeft"
+                          isDisabled={uiState.childOpen}
+                          onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                          data-test-subj="ruleBuilderOpenPreview"
+                        >
+                          {PREVIEW_BUTTON_LABEL}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      {isEditing && onSwitchToEsql ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={BUILDER_MODE_LEGEND}
+                            options={BUILDER_MODE_OPTIONS}
+                            idSelected="builder"
+                            onChange={(id) => {
+                              if (id === 'esql') onSwitchToEsql();
+                            }}
+                            isIconOnly
+                            buttonSize="compressed"
+                            data-test-subj="composeDiscoverSwitchToEsql"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
                 {!isBuilderMode && (

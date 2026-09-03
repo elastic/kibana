@@ -213,22 +213,4 @@ describe('BuilderRecoveryForm', () => {
     expect(call.recovery!.conditions[0].comparator).toBe(Comparator.LTE);
     expect(call.recovery!.conditions[0].threshold).toEqual([100]);
   });
-
-  it('disables preview button when childOpen is true', () => {
-    const builderState = makeBuilderState({
-      recovery: {
-        conditions: [{ id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] }],
-        conditionOperator: 'AND',
-      },
-    });
-
-    render(
-      <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <BuilderRecoveryForm state={createState({ childOpen: true })} dispatch={dispatch} />
-      </Wrapper>
-    );
-
-    const previewBtn = screen.getByTestId('ruleBuilderRecoveryPreview');
-    expect(previewBtn).toBeDisabled();
-  });
 });

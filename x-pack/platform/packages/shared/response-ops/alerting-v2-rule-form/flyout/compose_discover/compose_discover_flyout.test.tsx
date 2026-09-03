@@ -25,6 +25,7 @@ import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
+import type { QueryTab } from './types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -133,6 +134,7 @@ interface SandboxFlyoutMockProps {
   onClose: () => void;
   helpText?: React.ReactNode;
   headerActions?: React.ReactNode;
+  tabs?: QueryTab[];
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -473,6 +475,77 @@ describe('ComposeDiscoverFlyout', () => {
     it('shows "Clone rule" in clone mode', () => {
       renderFlyout({ mode: 'clone' });
       expect(screen.getByText('Clone rule')).toBeInTheDocument();
+    });
+  });
+
+  describe('builder Preview button', () => {
+    const thresholdEditRule: ComposeDiscoverFlyoutProps['rule'] = {
+      id: 'rule-1',
+      kind: 'alert',
+      enabled: true,
+      metadata: { name: 'CPU high', version: 1, owner: 'test', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '5m' },
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      },
+      created_by: 'test',
+      created_at: '2026-01-01T00:00:00Z',
+      updated_by: 'test',
+      updated_at: '2026-01-01T00:00:00Z',
+    };
+
+    it.each([
+      ['create', { mode: 'create' as const, builderType: 'threshold' }],
+      [
+        'edit',
+        {
+          mode: 'edit' as const,
+          builderType: 'threshold',
+          ruleId: 'rule-1',
+          rule: thresholdEditRule,
+        },
+      ],
+    ])('renders a labeled Preview button in the header in %s mode', (_mode, props) => {
+      renderFlyout(props);
+
+      expect(screen.getByTestId('ruleBuilderOpenPreview')).toHaveTextContent('Preview');
+    });
+
+    it('does not render Preview outside builder mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(screen.queryByTestId('ruleBuilderOpenPreview')).not.toBeInTheDocument();
+    });
+
+    it('opens the query sandbox with base and alert tabs', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+    });
+
+    it('includes the recovery tab only when custom recovery is selected', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+      fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
+
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+    });
+
+    it('disables Preview while the sandbox is open', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
+
+      expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
     });
   });
 
