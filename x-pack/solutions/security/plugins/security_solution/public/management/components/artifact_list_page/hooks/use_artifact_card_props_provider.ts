@@ -6,15 +6,10 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useCallback, useEffect, useMemo } from 'react';
-import type { PolicyData } from '../../../../../common/endpoint/types';
-import { useBulkFetchFleetIntegrationPolicies } from '../../../hooks/policy/use_bulk_fetch_fleet_integration_policies';
-import { getPolicyIdsFromArtifact } from '../../../../../common/endpoint/service/artifacts';
+import { useCallback, useMemo } from 'react';
 import type { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
-import { useEndpointPoliciesToArtifactPolicies } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { getLoadPoliciesError } from '../../../common/translations';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useArtifactAssignedPolicies } from './use_artifact_assigned_policies';
 
 const EMPTY_EXCEPTION_LIST_ITEMS: ExceptionListItemSchema[] = [];
 
@@ -48,22 +43,9 @@ export const useArtifactCardPropsProvider = ({
   disabled = false,
 }: UseArtifactCardPropsProviderProps): ArtifactCardPropsProvider => {
   const getTestId = useTestIdGenerator(dataTestSubj);
-  const toasts = useToasts();
 
   const itemsToUse = disabled ? EMPTY_EXCEPTION_LIST_ITEMS : items;
-
-  const itemsPolicyIds = useMemo(() => {
-    return itemsToUse.map((item) => getPolicyIdsFromArtifact(item)).flat();
-  }, [itemsToUse]);
-
-  const { data: policyData, error } = useBulkFetchFleetIntegrationPolicies<PolicyData>(
-    { ids: itemsPolicyIds },
-    { enabled: itemsPolicyIds.length > 0 }
-  );
-
-  const policies: ArtifactEntryCardProps['policies'] = useEndpointPoliciesToArtifactPolicies(
-    policyData?.items
-  );
+  const { policies } = useArtifactAssignedPolicies(itemsToUse);
 
   const artifactCardPropsPerItem = useMemo(() => {
     const cachedCardProps: Record<string, ArtifactEntryCardProps> = {};
@@ -117,12 +99,6 @@ export const useArtifactCardPropsProvider = ({
     onAction,
     cardActionDeleteLabel,
   ]);
-
-  useEffect(() => {
-    if (error) {
-      toasts.addDanger(getLoadPoliciesError(error));
-    }
-  }, [error, toasts]);
 
   return useCallback(
     (artifactItem: ExceptionListItemSchema) => {
