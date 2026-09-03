@@ -80,7 +80,6 @@ describe('EnterParallelNodeImpl', () => {
       setCurrentStepState: jest.fn((s: ParallelStepState) => {
         persistedState = s;
       }),
-      restoreEvictedOutputs: jest.fn(),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
         renderValueAccordingToContext: jest.fn((x) => x),

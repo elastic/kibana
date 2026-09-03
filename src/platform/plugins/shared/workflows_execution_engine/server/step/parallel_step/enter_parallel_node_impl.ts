@@ -122,13 +122,8 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     this.stepExecutionRuntime.startStep();
 
     const branches = this.isStatic ? this.initStaticBranches() : this.initDynamicBranches();
-    if (branches.length === 0) {
-      // Empty dynamic fan-out: finish with an empty aggregate.
-      this.workflowLogger.logDebug(
-        `Parallel step "${this.node.stepId}" has no items to fan out over. Skipping execution.`,
-        { workflow: { step_id: this.node.stepId } }
-      );
-      await this.finish([]);
+    if (branches === undefined) {
+      // Empty dynamic fan-out: already finished with an empty aggregate.
       return;
     }
 
@@ -162,10 +157,10 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
   }
 
   /**
-   * Dynamic fan-out: one branch per resolved `foreach` item. An empty list
-   * yields an empty array; the caller finishes with an empty aggregate.
+   * Dynamic fan-out: one branch per resolved `foreach` item. Returns `undefined`
+   * when the list is empty (the step is finished with an empty aggregate here).
    */
-  private initDynamicBranches(): ParallelBranchState[] {
+  private initDynamicBranches(): ParallelBranchState[] | undefined {
     const foreachConfig = this.node.configuration.foreach;
     // Persist the expression as input so the context builder can re-evaluate the
     // per-branch item without storing the whole list in state.
@@ -183,7 +178,12 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     }
 
     if (items.length === 0) {
-      return [];
+      this.workflowLogger.logDebug(
+        `Parallel step "${this.node.stepId}" has no items to fan out over. Skipping execution.`,
+        { workflow: { step_id: this.node.stepId } }
+      );
+      this.finish([]);
+      return undefined;
     }
 
     // Snapshot each item as the branch's `key` at init. `finish` reads this back
@@ -211,7 +211,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         `Parallel step "${this.node.stepId}" exceeded its overall timeout of ${this.node.configuration.timeout}.`,
         { workflow: { step_id: this.node.stepId } }
       );
-      await this.finish(state.branches);
+      this.finish(state.branches);
       return;
     }
 
@@ -369,7 +369,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
     const allTerminal = state.branches.every((b) => TERMINAL_BRANCH_STATUSES.has(b.status));
     if (allTerminal) {
-      await this.finish(state.branches);
+      this.finish(state.branches);
       return;
     }
 
@@ -786,27 +786,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     return new Date(now + RETICK_FLOOR_MS);
   }
 
-  private async finish(branches: ParallelBranchState[]): Promise<void> {
-    // Branches that settled on an earlier task tick had their terminal node's
-    // output deferred-evicted when this resume task loaded. Rehydrate before
-    // reading, or the aggregate would record those branch outputs as empty.
-    const branchRuntimes = new Map<number, StepExecutionRuntime>();
-    for (const branch of branches) {
-      if (branch.status !== 'skipped' && branch.status !== 'timed_out') {
-        branchRuntimes.set(
-          branch.index,
-          this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-            // The terminal output/error lives on the last node the branch ran.
-            nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
-            stackFrames: this.buildBranchStackFrames(branch.index),
-          })
-        );
-      }
-    }
-    await this.stepExecutionRuntime.restoreEvictedOutputs(
-      Array.from(branchRuntimes.values(), (runtime) => runtime.stepExecutionId)
-    );
-
+  private finish(branches: ParallelBranchState[]): void {
     const results: ParallelBranchResult[] = branches.map((branch) => {
       const timing = {
         ...(branch.startedAt !== undefined && { startedAt: branch.startedAt }),
@@ -838,7 +818,13 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           },
         };
       }
-      const branchResult = branchRuntimes.get(branch.index)?.getCurrentStepResult();
+      const branchStackFrames = this.buildBranchStackFrames(branch.index);
+      const branchRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        // The terminal output/error lives on the last node the branch ran.
+        nodeId: branch.currentNodeId ?? this.getBranchStartNodeId(branch.index),
+        stackFrames: branchStackFrames,
+      });
+      const branchResult = branchRuntime.getCurrentStepResult();
       return {
         ...correlation,
         ...timing,

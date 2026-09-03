@@ -135,16 +135,6 @@ export class StepExecutionRuntime {
     };
   }
 
-  /**
-   * Rehydrates the given step executions' outputs from ES if they were
-   * evicted (e.g. deferred on task resume). Aggregate builders (parallel
-   * fan-in) call this before reading sibling results that completed on an
-   * earlier task tick.
-   */
-  public async restoreEvictedOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
-  }
-
   public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
