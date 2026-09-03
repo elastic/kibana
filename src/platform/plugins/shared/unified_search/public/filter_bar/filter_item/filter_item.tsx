@@ -32,6 +32,7 @@ import type { FilterPanelOption } from '../../types';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_editor';
 import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
+import { layoutVar } from '@kbn/ui-chrome-layout';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -394,6 +395,8 @@ const filterItemStyles = {
     css({
       width: FILTER_EDITOR_WIDTH,
       maxWidth: '100%',
+      maxHeight: `calc(80vh - max(${layoutVar('application.content.top')}, 80px))`,
+      overflow: 'auto',
     }),
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({

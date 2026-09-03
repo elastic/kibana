@@ -67,7 +67,6 @@ import { flattenFilters } from '../lib/flatten_filters';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
-  filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
@@ -390,7 +389,6 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         <div
           role="region"
           aria-label=""
-          className={cx(filtersBuilderMaxHeightCss(this.props.theme.euiTheme), 'eui-yScroll')}
         >
           <EuiToolTip
             position="top"
