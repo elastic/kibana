@@ -110,7 +110,12 @@ export const EntityField = lazySchema(() =>
       /**
        * Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).
        */
-      created_by: z.string().optional(),
+      created_by: z
+        .string()
+        .optional()
+        .describe(
+          'Identifies which engine created this entity (for example, logs_extraction or risk_score_maintainer).'
+        ),
       EngineMetadata: EngineMetadata.optional(),
       /**
        * Boolean flags describing characteristics of the entity.
