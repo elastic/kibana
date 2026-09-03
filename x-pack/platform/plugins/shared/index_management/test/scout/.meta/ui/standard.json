@@ -684,8 +684,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 31,
-        "column": 63
+        "line": 28,
+        "column": 20
       }
     },
     {
@@ -702,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 44,
-        "column": 86
+        "line": 31,
+        "column": 98
       }
     },
     {

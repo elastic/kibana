@@ -1,5 +1,5 @@
 {
-  "sha1": "8bbfe37f81ef135a14a29d8f43f8b42c597c28ff",
+  "sha1": "f8e60a2e31fd011a52f7c7d158cabe8bc04082c0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -307,7 +307,6 @@
       }
     },
     {
-<<<<<<< HEAD
       "id": "7bf445453bc0eb8-09afb294d1a4cfa",
       "title": "last selected space recollection redirects to the last selected space when preference is already enabled",
       "expectedStatus": "passed",
@@ -333,7 +332,9 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
         "line": 52,
         "column": 23
-=======
+      }
+    },
+    {
       "id": "189eab9ce25b4bf-c5fc0b050726c79",
       "title": "Spaces feature visibility in serverless does not offer feature visibility when creating a space",
       "expectedStatus": "passed",
@@ -367,7 +368,6 @@
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/serverless_feature_visibility.spec.ts",
         "line": 46,
         "column": 7
->>>>>>> 63e08a4b809d ([Scout] Migrate management FTR tests to Scout)
       }
     },
     {

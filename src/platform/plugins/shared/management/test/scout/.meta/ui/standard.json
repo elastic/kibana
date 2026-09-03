@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
-        "line": 55,
+        "line": 47,
         "column": 46
       }
     },
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/tests/management_plugin.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 68,
+        "column": 11
       }
     }
   ]

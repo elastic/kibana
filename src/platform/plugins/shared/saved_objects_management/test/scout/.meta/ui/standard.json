@@ -1,8 +1,7 @@
 {
-  "sha1": "78718d8a737cc6d19eeefca7bad57e3d6be85990",
+  "sha1": "943ed87b83882c5ae3e649eca6280caeeef0382f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -132,8 +131,8 @@
       }
     },
     {
-      "id": "919736241b0bdf7-b94d3db5345d8a2",
-      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "id": "919736241b0bdf7-1e96bcd7fbdc5cb",
+      "title": "Saved objects management - import conflicts drops a visualization whose saved search keeps an unresolvable data view",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -146,6 +145,20 @@
       }
     },
     {
+      "id": "919736241b0bdf7-b94d3db5345d8a2",
+      "title": "Saved objects management - import conflicts imports a visualization whose saved search had an unresolved data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_conflicts.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
       "id": "9f7d4f477606ab1-10f2c4f8f00ccf4",
       "title": "Saved objects management - import objects imports a visualization and lists it as a child of its data view",
       "expectedStatus": "passed",
@@ -155,8 +168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
-        "line": 43,
-        "column": 23
+        "line": 36,
+        "column": 21
       }
     },
     {
@@ -169,8 +182,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/import_objects.spec.ts",
-        "line": 72,
-        "column": 10
+        "line": 65,
+        "column": 7
       }
     },
     {
