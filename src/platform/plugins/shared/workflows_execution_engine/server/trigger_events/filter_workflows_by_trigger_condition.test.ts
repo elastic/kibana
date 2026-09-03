@@ -182,6 +182,50 @@ describe('workflowMatchesTriggerCondition', () => {
     ).toBe(false);
   });
 
+  it('returns false when event.connectorId does not match the trigger connector-id', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-b' },
+        mockLogger
+      )
+    ).toBe(false);
+  });
+
+  it('returns true when event.connectorId matches the trigger connector-id', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-a' },
+        mockLogger
+      )
+    ).toBe(true);
+  });
+
   it('should match when condition uses array field like Elasticsearch multi-valued semantics', () => {
     const workflow = createMockWorkflow({
       definition: {
@@ -260,6 +304,28 @@ describe('classifyWorkflowTriggerMatch', () => {
       'kql_error'
     );
     expect(mockLogger.warn).toHaveBeenCalled();
+  });
+
+  it('returns kql_false when connector-id does not match the event', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      classifyWorkflowTriggerMatch(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-b' },
+        mockLogger
+      )
+    ).toBe('kql_false');
   });
 
   it('returns matched when trigger has no condition', () => {

@@ -418,6 +418,32 @@ describe('get()', () => {
       });
     });
 
+    test('does not return last-saver identity fields', async () => {
+      getConnectorSoMock.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'Inbound',
+          actionTypeId: '.inboundWebhook',
+          config: {},
+          isMissingSecrets: false,
+          apiKey: 'should-not-leak',
+          uiamApiKey: 'should-not-leak-uiam',
+          uiamApiKeyExternal: false,
+        },
+        references: [],
+      });
+
+      const result = await get({
+        context: mockContext,
+        id: '1',
+      });
+
+      expect(result).not.toHaveProperty('apiKey');
+      expect(result).not.toHaveProperty('uiamApiKey');
+      expect(result).not.toHaveProperty('uiamApiKeyExternal');
+    });
+
     test('gets a connector with authMode "shared"', async () => {
       getConnectorSoMock.mockResolvedValueOnce({
         id: '1',

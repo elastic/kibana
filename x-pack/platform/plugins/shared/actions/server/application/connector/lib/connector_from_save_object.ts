@@ -15,7 +15,13 @@ export function connectorFromSavedObject(
   isDeprecated: boolean,
   isConnectorTypeDeprecated: boolean
 ): Connector {
-  const { authMode: savedAuthMode, ...restAttributes } = savedObject.attributes;
+  const {
+    authMode: savedAuthMode,
+    apiKey: _apiKey,
+    uiamApiKey: _uiamApiKey,
+    uiamApiKeyExternal: _uiamApiKeyExternal,
+    ...restAttributes
+  } = savedObject.attributes;
   const authMode = getAuthMode(savedAuthMode as Connector['authMode'] | undefined);
   return {
     id: savedObject.id,

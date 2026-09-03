@@ -292,5 +292,8 @@ describe('transform connector for export', () => {
         },
       },
     ]);
+    expect(
+      transformConnectorsForExport([connector], actionTypeRegistry)[0].attributes
+    ).not.toHaveProperty('uiamApiKeyExternal');
   });
 });

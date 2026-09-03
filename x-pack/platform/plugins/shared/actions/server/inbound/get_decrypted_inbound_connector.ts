@@ -7,10 +7,24 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import type { RawAction } from '../types';
+
+const getEncryptedSavedObjectsStart = (pluginsStart: unknown): EncryptedSavedObjectsPluginStart => {
+  if (
+    typeof pluginsStart === 'object' &&
+    pluginsStart !== null &&
+    'encryptedSavedObjects' in pluginsStart &&
+    typeof (pluginsStart.encryptedSavedObjects as EncryptedSavedObjectsPluginStart | undefined)
+      ?.getClient === 'function'
+  ) {
+    return pluginsStart.encryptedSavedObjects as EncryptedSavedObjectsPluginStart;
+  }
+
+  throw new Error('Encrypted Saved Objects plugin is not available');
+};
 
 /**
  * Decrypts the inbound connector SO as the internal user so ingest can read
@@ -27,11 +41,7 @@ export async function getDecryptedInboundConnector({
   spaceId: string;
 }): Promise<RawAction> {
   const [, pluginsStart] = await getStartServices();
-  const { encryptedSavedObjects } = pluginsStart as {
-    encryptedSavedObjects: {
-      getClient: (opts: { includedHiddenTypes: string[] }) => EncryptedSavedObjectsClient;
-    };
-  };
+  const encryptedSavedObjects = getEncryptedSavedObjectsStart(pluginsStart);
   const client = encryptedSavedObjects.getClient({
     includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
   });

@@ -144,5 +144,34 @@ describe('Connector Model Versions', () => {
       expect(version3.schemas?.create).toBeDefined();
       expect(version3.schemas?.forwardCompatibility).toBeDefined();
     });
+
+    it('leaves existing documents unchanged so old docs still decrypt', () => {
+      const version3 = versions['3'] as SavedObjectsFullModelVersion;
+      const backfillChange = version3.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
+      const mockDocument = {
+        id: 'old-connector',
+        type: 'action',
+        attributes: {
+          actionTypeId: '.inboundWebhook',
+          name: 'legacy',
+          isMissingSecrets: false,
+          config: {},
+          secrets: '{}',
+        },
+        references: [],
+      };
+
+      expect(
+        backfillFn!(mockDocument as never, {
+          log: { get: () => ({ debug: jest.fn() }) } as never,
+          modelVersion: 3,
+          namespaceType: 'single',
+        })
+      ).toBe(mockDocument);
+    });
   });
 });

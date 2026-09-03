@@ -94,21 +94,15 @@ describe('loadPreviousConnectorEventIdentity', () => {
     expect(identity).toEqual({ apiKey: encodeApiKey('old-id', 'old-secret') });
   });
 
-  test('logs and returns undefined when decrypt fails', async () => {
+  test('throws when decrypt fails so update does not remint over an unread key', async () => {
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
       new Error('cannot decrypt')
     );
 
-    const identity = await loadPreviousConnectorEventIdentity(
-      createContext({ encryptedSavedObjectsClient }),
-      'c1'
-    );
-
-    expect(identity).toBeUndefined();
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to decrypt previous connector event identity')
-    );
+    await expect(
+      loadPreviousConnectorEventIdentity(createContext({ encryptedSavedObjectsClient }), 'c1')
+    ).rejects.toThrow('cannot decrypt');
   });
 });
 
@@ -156,5 +150,24 @@ describe('invalidateInboundConnectorEventIdentity', () => {
     expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
       ids: ['old-id'],
     });
+  });
+
+  test('logs and continues delete when decrypt fails', async () => {
+    const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+      new Error('cannot decrypt')
+    );
+
+    await expect(
+      invalidateInboundConnectorEventIdentity(
+        createContext({ encryptedSavedObjectsClient }),
+        'c1',
+        '.inboundWebhook'
+      )
+    ).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('may remain valid after delete')
+    );
   });
 });

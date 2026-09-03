@@ -71,17 +71,8 @@ export const loadPreviousConnectorEventIdentity = async (
   context: ActionsClientContext,
   connectorId: string
 ): Promise<ConnectorEventIdentity | undefined> => {
-  try {
-    const attributes = await getDecryptedAction(context, connectorId);
-    return identityFromRawAction(attributes);
-  } catch (err) {
-    context.logger.error(
-      `Failed to decrypt previous connector event identity for "${connectorId}": ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
-    return undefined;
-  }
+  const attributes = await getDecryptedAction(context, connectorId);
+  return identityFromRawAction(attributes);
 };
 
 export const invalidateStoredConnectorEventIdentity = async (
@@ -110,6 +101,14 @@ export const invalidateInboundConnectorEventIdentity = async (
     return;
   }
 
-  const identity = await loadPreviousConnectorEventIdentity(context, connectorId);
-  await invalidateStoredConnectorEventIdentity(context, connectorId, identity);
+  try {
+    const identity = await loadPreviousConnectorEventIdentity(context, connectorId);
+    await invalidateStoredConnectorEventIdentity(context, connectorId, identity);
+  } catch (err) {
+    context.logger.error(
+      `Failed to decrypt previous connector event identity for "${connectorId}"; the stored framework key may remain valid after delete: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
 };

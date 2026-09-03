@@ -645,6 +645,25 @@ describe('TriggerEventHandler', () => {
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
   });
 
+  it('skips schedule when connector-id does not match', async () => {
+    mockClassifyWorkflowTriggerMatch.mockReturnValueOnce('kql_false');
+    const scheduleWorkflow = jest.fn();
+    const deps = createDeps({
+      scheduleWorkflow,
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
+    });
+    const handler = new TriggerEventHandler(deps);
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { connectorId: 'inbound-b' },
+      request: { headers: { authorization: 'ApiKey encoded-key' } } as KibanaRequest,
+    });
+
+    expect(scheduleWorkflow).not.toHaveBeenCalled();
+    expect(mockClassifyWorkflowTriggerMatch).toHaveBeenCalled();
+  });
+
   it('still schedules Manual Run events that have no Authorization header', async () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
