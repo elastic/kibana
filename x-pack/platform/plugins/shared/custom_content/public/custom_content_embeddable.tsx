@@ -34,6 +34,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   BehaviorSubject,
   catchError,
+  combineLatest,
   distinctUntilChanged,
   EMPTY,
   from,
@@ -85,6 +86,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[] | undefined>(undefined);
+    // Seeded from the parent for the first render, then driven by fetch$, which dedupes.
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
+      apiPublishesTimeRange(parentApi) ? parentApi.timeRange$.getValue() ?? undefined : undefined
+    );
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
@@ -191,11 +196,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             };
 
             function FlyoutWithReactiveState() {
-              const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
-                apiPublishesTimeRange(parentApi)
-                  ? parentApi.timeRange$.getValue() ?? undefined
-                  : undefined
-              );
+              const [timeRange, setTimeRange] = useState(timeRange$.getValue());
               const [isApproximate, setIsApproximate] = useState(isApproximate$.getValue());
               const [projectRouting, setProjectRouting] = useState(projectRouting$.getValue());
               const [query, setQuery] = useState(query$.getValue());
@@ -206,9 +207,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               useEffect(() => {
                 const subs = [
-                  ...(apiPublishesTimeRange(parentApi)
-                    ? [parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined))]
-                    : []),
+                  timeRange$.subscribe(setTimeRange),
                   isApproximate$.subscribe(setIsApproximate),
                   projectRouting$.subscribe(setProjectRouting),
                   query$.subscribe(setQuery),
@@ -270,10 +269,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       .subscribe((usesEsql) => usesEsql$.next(usesEsql));
 
     // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = esqlQuery$
+    const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
       .pipe(
-        distinctUntilChanged(),
-        switchMap((esqlQueryValue) => {
+        distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
+        switchMap(([esqlQueryValue, routingValue]) => {
           if (!esqlQueryValue) return of(undefined);
           const { core, dataViews } = getServices();
           return from(
@@ -281,6 +280,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               dataViewsService: dataViews,
               query: esqlQueryValue,
               http: core.http,
+              projectRouting: routingValue,
             })
           ).pipe(catchError(() => of(undefined)));
         })
@@ -293,6 +293,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       query$.next(ctx.query);
       filters$.next(ctx.filters);
       esqlVariables$.next(ctx.esqlVariables);
+      timeRange$.next(ctx.timeRange);
       if (!ctx.isReload) {
         previewHtml$.next(null);
       }
@@ -311,6 +312,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters,
           esqlVariables,
           previewHtml,
+          timeRange,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -320,14 +322,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           query$,
           filters$,
           esqlVariables$,
-          previewHtml$
+          previewHtml$,
+          timeRange$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
-        const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
-          apiPublishesTimeRange(parentApi)
-            ? parentApi.timeRange$.getValue() ?? undefined
-            : undefined
-        );
 
         useEffect(() => {
           return () => {
@@ -340,12 +338,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         useEffect(() => {
           if (!apiPublishesReload(parentApi)) return;
           const sub = parentApi.reload$.subscribe(() => setGenerationVersion((v) => v + 1));
-          return () => sub.unsubscribe();
-        }, []);
-
-        useEffect(() => {
-          if (!apiPublishesTimeRange(parentApi)) return;
-          const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
           return () => sub.unsubscribe();
         }, []);
 
