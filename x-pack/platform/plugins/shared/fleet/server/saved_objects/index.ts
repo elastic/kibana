@@ -58,6 +58,7 @@ import {
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
   CloudOnboardingDeploymentSchemaV1,
+  CloudOnboardingDeploymentSchemaV2,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2073,6 +2074,18 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV1,
+          },
+        },
+        2: {
+          // Schema-only addition: adds the optional `ecfStacks` array. No data migration needed
+          // because the field is optional and existing documents remain valid under V2.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV2.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV2,
           },
         },
       },
