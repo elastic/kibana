@@ -108,8 +108,14 @@ function MapControlsThemeStyles() {
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'center',
             },
+            '.maplibregl-ctrl button:not(:disabled)': {
+              margin: '4px !important',
+              height: '24px !important',
+              width: '24px !important',
+              borderRadius: '2px !important',
+            },
           },
-          '.mapToolbarOverlay__button':{
+          '.mapToolbarOverlay__button': {
             transform: 'translateY(0px) !important',
           },
           // The layer table-of-contents entries live in the right-side overlay
