@@ -95,11 +95,26 @@ describe('rumSessionsTransformBody', () => {
 
   it('builds sequences from native top_metrics, not scripted_metric', () => {
     const { aggregations } = rumSessionsTransformBody.pivot;
-    expect(aggregations.pages.filter).toEqual(
-      expect.objectContaining({
-        bool: expect.objectContaining({ minimum_should_match: 1 }),
-      })
-    );
+    expect(aggregations.pages.filter).toEqual({
+      bool: {
+        filter: [
+          expect.objectContaining({
+            bool: expect.objectContaining({ minimum_should_match: 1 }),
+          }),
+          { exists: { field: 'attributes.url.path.grouped' } },
+        ],
+      },
+    });
+    expect(aggregations.clicks.filter).toEqual({
+      bool: {
+        filter: [
+          expect.objectContaining({
+            bool: expect.objectContaining({ minimum_should_match: 1 }),
+          }),
+          { exists: { field: 'attributes.browser.css_selector' } },
+        ],
+      },
+    });
     expect(aggregations.pages.aggs.token.top_metrics.sort).toEqual({
       '@timestamp': 'asc',
     });
@@ -135,6 +150,7 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('resource.attributes.client.geo.country_iso_code');
     expect(source).toContain('tokensFrom');
     expect(source).toContain('token.top');
+    expect(source).toContain('if (top instanceof List && top.length > 0)');
     expect(source).toContain('ctx.pages');
     expect(source).toContain('ctx.page_first');
     expect(source).toContain('ctx.replay_event_count');

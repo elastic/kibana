@@ -141,6 +141,13 @@ const sequenceSeen = (field: string) => ({
   },
 });
 
+/** size>1 top_metrics AIOOBEs on shards where the metric field is unmapped. */
+const withMetricField = (eventFilter: object, field: string) => ({
+  bool: {
+    filter: [eventFilter, { exists: { field } }],
+  },
+});
+
 const LAST_SEEN_FIELDS = [
   'attributes.user.key',
   RUM_CANONICAL_BROWSER_NAME_FIELD,
@@ -423,6 +430,13 @@ export const rumSessionsDestPipeline = {
             if ((bucket instanceof Map) == false) { return ''; }
             def token = fieldOf(bucket.token, field);
             if (token != '') { return token; }
+            def top = bucket.token instanceof Map ? bucket.token.top : null;
+            if (top instanceof List && top.length > 0) {
+              def hit = top[top.length - 1];
+              def metrics = hit instanceof Map ? hit.metrics : null;
+              token = fieldOf(metrics, field);
+              if (token != '') { return token; }
+            }
             return fieldOf(bucket.first, field);
           }
           def addToken(def tokens, def token) {
@@ -435,18 +449,17 @@ export const rumSessionsDestPipeline = {
             def out = [];
             if ((bucket instanceof Map) == false) { return out; }
             def token = bucket.token;
-            def one = fieldOf(token, field);
-            if (one != '') {
-              addToken(out, one);
-              return out;
-            }
+            // Prefer token.top[]; flattened hit[0] is a fallback (ES size>1 still emits it).
             def top = token instanceof Map ? token.top : null;
-            if (top instanceof List) {
+            if (top instanceof List && top.length > 0) {
               for (hit in top) {
                 def metrics = hit instanceof Map ? hit.metrics : null;
                 addToken(out, fieldOf(metrics, field));
               }
+              if (out.length > 0) { return out; }
             }
+            def one = fieldOf(token, field);
+            if (one != '') { addToken(out, one); }
             return out;
           }
           def joinTokens(def tokens, def sep) {
@@ -679,19 +692,19 @@ export const buildRumSessionsTransformBody = (
       fcp: sessionVitalAgg('fcp'),
       ttfb: sessionVitalAgg('ttfb'),
       page_last: {
-        filter: PAGE_VIEW_FILTER,
+        filter: withMetricField(PAGE_VIEW_FILTER, RUM_CANONICAL_URL_PATH_GROUPED_FIELD),
         aggs: { token: lastSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
       },
       pages: {
-        filter: PAGE_VIEW_FILTER,
+        filter: withMetricField(PAGE_VIEW_FILTER, RUM_CANONICAL_URL_PATH_GROUPED_FIELD),
         aggs: { token: sequenceSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
       },
       click_last: {
-        filter: CLICK_FILTER,
+        filter: withMetricField(CLICK_FILTER, RUM_CLICK_TARGET_FIELD),
         aggs: { token: lastSeen(RUM_CLICK_TARGET_FIELD) },
       },
       clicks: {
-        filter: CLICK_FILTER,
+        filter: withMetricField(CLICK_FILTER, RUM_CLICK_TARGET_FIELD),
         aggs: { token: sequenceSeen(RUM_CLICK_TARGET_FIELD) },
       },
       rage_clicks: { filter: RAGE_FILTER },
