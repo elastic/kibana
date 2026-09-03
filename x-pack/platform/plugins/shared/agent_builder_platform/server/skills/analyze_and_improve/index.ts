@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const KI_AUTOMATION_GENERATION_SKILL_ID = 'ki-automation-generation' as const;
-
-export const KI_RETRIEVAL_SKILL_ID = 'ki-retrieval' as const;
-
-export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve' as const;
+export { analyzeAndImproveSkill } from './analyze_and_improve_skill';
