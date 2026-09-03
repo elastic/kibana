@@ -487,13 +487,15 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
-  // use TEST_MESSAGE for HTTP sourced, except when the service is JSON (for testing)
+  const baseSubject = useTestMessage ? TEST_MESSAGE : params.subject;
+
+  // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
+  // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
+  // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
-      ? prefixTrialSubject(TEST_MESSAGE)
-      : useTestMessage
-      ? TEST_MESSAGE
-      : params.subject;
+      ? prefixTrialSubject(baseSubject)
+      : baseSubject;
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,

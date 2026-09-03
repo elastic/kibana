@@ -2347,7 +2347,7 @@ describe('execute() Elastic Cloud trial subject prefix', () => {
     await trialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
 
     expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
-      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} This is a test email from Kibana`
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
     );
   });
 
@@ -2392,7 +2392,7 @@ describe('execute() Elastic Cloud trial subject prefix', () => {
     });
 
     expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
-      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} This is a test email from Kibana`
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
     );
   });
 });
