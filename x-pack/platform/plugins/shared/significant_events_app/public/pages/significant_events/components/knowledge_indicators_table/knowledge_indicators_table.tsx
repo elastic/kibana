@@ -183,8 +183,8 @@ export function KnowledgeIndicatorsTable() {
   });
 
   const generationRow = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ width: '100%' }}>
+      <EuiFlexItem css={{ minWidth: 0 }}>
         <StreamPicker
           streams={filteredStreams}
           isStreamsLoading={isStreamsLoading}
@@ -241,7 +241,12 @@ export function KnowledgeIndicatorsTable() {
         color="plain"
         css={css`
           && {
-            max-width: 400px;
+            max-width: 560px;
+          }
+
+          .euiEmptyPrompt__actions {
+            width: 100%;
+            max-width: 100%;
           }
         `}
         icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}

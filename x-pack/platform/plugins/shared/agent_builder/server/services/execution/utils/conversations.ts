@@ -14,8 +14,13 @@ import type {
   ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
+import {
+  ConversationParentRelation,
+  normalizeConversationAccessControl,
+  DEFAULT_CONVERSATION_TITLE,
+} from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -28,7 +33,10 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
+  conversation: Pick<
+    Conversation,
+    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation' | 'read_only'
+  >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -38,16 +46,25 @@ export const createConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
+      // Persistent sub-agent creations: link to the parent and snapshot the parent's user
+      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation);
+      const hasResolvedParentUser =
+        Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+
       return conversationClient.create({
         id: conversation.id,
         title,
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
         origin: conversation.origin,
+        read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
-        read: false,
         rounds: [roundCompletedEvent.data.round],
+        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
+        ...(conversation.parent_conversation
+          ? { parent_conversation: conversation.parent_conversation }
+          : {}),
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
@@ -63,18 +80,21 @@ export const createConversation$ = ({
 };
 
 /**
- * Update an existing conversation and emit the corresponding event
+ * Update an existing conversation and emit the corresponding event.
+ * When `title$` is provided, the generated title is persisted alongside the round upsert.
  */
 export const updateConversation$ = ({
   conversationClient,
   conversation,
   roundCompletedEvents$,
   action,
+  title$,
 }: {
   conversation: Conversation;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
   action?: ConversationAction;
+  title$?: Observable<string>;
 }) => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) => {
@@ -88,7 +108,7 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.upsertRound(
+      const roundUpserted$ = conversationClient.upsertRound(
         {
           id: conversation.id,
           round,
@@ -105,6 +125,18 @@ export const updateConversation$ = ({
           workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
+      );
+
+      if (!title$) {
+        return roundUpserted$;
+      }
+
+      // Persist the generated title if provided
+      return forkJoin({ updated: roundUpserted$, title: title$ }).pipe(
+        switchMap(({ title }) => {
+          // system-driven write of generated title, not a user-initiated rename, so converse access is the right check.
+          return conversationClient.update({ id: conversation.id, title }, { access: 'converse' });
+        })
       );
     }),
     switchMap((updatedConversation) => {
@@ -132,13 +164,20 @@ export const getConversation = async ({
   conversationClient,
   accessControl,
   origin,
+  subagentCreation,
+  readOnly,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  subagentCreation?: {
+    parentConversationId: string;
+    subagentName: string;
+  };
+  readOnly?: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
@@ -152,7 +191,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, origin }),
+      ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',
     };
   }
@@ -173,12 +212,60 @@ export const getConversation = async ({
       ...(await conversationClient.get(conversationId)),
       operation: 'UPDATE',
     };
-  } else {
+  }
+
+  // Case 3a: Creating a child conversation for a persistent sub-agent.
+  if (subagentCreation) {
+    const parentLink = {
+      id: subagentCreation.parentConversationId,
+      relation: ConversationParentRelation.subagent,
+    };
+    const parentExists = await conversationClient.exists(subagentCreation.parentConversationId);
+    if (parentExists) {
+      const parent = await conversationClient.get(subagentCreation.parentConversationId);
+      return {
+        ...placeholderConversation({
+          conversationId,
+          agentId,
+          accessControl: parent.access_control,
+          origin,
+        }),
+        title: subagentCreation.subagentName,
+        user: parent.user,
+        parent_conversation: parentLink,
+        operation: 'CREATE',
+      };
+    }
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+      ...placeholderConversation({
+        conversationId,
+        agentId,
+        accessControl,
+        origin,
+        readOnly,
+      }),
+      title: subagentCreation.subagentName,
+      parent_conversation: parentLink,
       operation: 'CREATE',
     };
   }
+
+  return {
+    ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+    operation: 'CREATE',
+  };
+};
+
+/**
+ * Sentinel user attached to a placeholder conversation.
+ */
+export const PLACEHOLDER_USER: UserIdAndName = {
+  id: 'unknown',
+  username: 'unknown',
+};
+
+export const isPlaceholderUser = (user: UserIdAndName | undefined): boolean => {
+  return user?.id === PLACEHOLDER_USER.id && user?.username === PLACEHOLDER_USER.username;
 };
 
 export const placeholderConversation = ({
@@ -186,24 +273,24 @@ export const placeholderConversation = ({
   conversationId,
   accessControl,
   origin,
+  readOnly,
 }: {
   agentId: string;
   conversationId?: string;
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  readOnly?: boolean;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     agent_id: agentId,
-    access_control: accessControl ?? getDefaultConversationAccessControl(),
+    access_control: normalizeConversationAccessControl(accessControl),
+    read_only: readOnly ?? false,
     rounds: [],
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
-    user: {
-      id: 'unknown',
-      username: 'unknown',
-    },
+    user: PLACEHOLDER_USER,
   };
 };

@@ -19,14 +19,14 @@ export const LIST_ACTION_POLICY_EXECUTIONS_RESPONSE: ListPolicyExecutionHistoryR
       episodes: [{ id: 'episode-1' }],
       action_group_count: 1,
       rules: [{ id: 'rule-1', name: 'Host CPU high' }],
-      totalRuleCount: 1,
+      total_rule_count: 1,
       workflows: [{ id: 'workflow-1', name: 'Notify oncall' }],
     },
   ],
   page: 1,
-  perPage: 20,
-  totalEvents: 1,
-  searchMatches: null,
+  per_page: 20,
+  total_events: 1,
+  search_matches: null,
 };
 
 // Mirrors the page * per_page refinement message in listPolicyExecutionHistoryRequestSchema.

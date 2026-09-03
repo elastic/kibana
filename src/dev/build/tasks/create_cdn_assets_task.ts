@@ -20,7 +20,7 @@ import {
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
-import globby from 'globby';
+import { globbySync } from 'globby';
 
 import type { Task } from '../lib';
 import { mkdirp, compressTar, copyAll, write } from '../lib';
@@ -38,7 +38,7 @@ export const CreateCdnAssets: Task = {
     await del(assets);
     await mkdirp(assets);
 
-    const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
+    const plugins = globbySync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
 
     // translation files: discover every locale that any plugin or package
     // ships a translation file for, and bundle one CDN asset per locale.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Condition } from '@kbn/streamlang';
+import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { WiredStream } from '../models/ingest/wired';
 import { definitionToESQLQuery } from './definition_to_esql_query';
 
@@ -13,7 +13,7 @@ const createDraftDefinition = (
   overrides: Partial<{
     name: string;
     fields: WiredStream.Definition['ingest']['wired']['fields'];
-    steps: WiredStream.Definition['ingest']['processing']['steps'];
+    steps: StreamlangDSL['steps'];
   }> = {}
 ): WiredStream.Definition => ({
   type: 'wired',

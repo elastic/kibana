@@ -67,18 +67,6 @@ export const tooFewSucceededText = (min: number) =>
     values: { min },
   });
 
-export const SKIPPED_QUERY_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.skippedQueryTitle',
-  { defaultMessage: 'Some timeline queries could not be merged' }
-);
-
-export const skippedQueryText = (titles: string) =>
-  i18n.translate('xpack.securitySolution.timeline.superTimeline.skippedQueryText', {
-    defaultMessage:
-      'The following timelines could not have their queries merged: {titles}. Their pinned events and notes are still shown.',
-    values: { titles },
-  });
-
 export const ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.superTimeline.errorTitle',
   { defaultMessage: 'Failed to open Super Timeline' }
@@ -114,35 +102,25 @@ export const SUPER_TIMELINE_TOO_MANY = (max: number) =>
     defaultMessage: 'Select no more than {max} timelines.',
   });
 
-export const SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES = (titles: string) =>
-  i18n.translate('xpack.securitySolution.timeline.superTimeline.unsupportedQueryTypes', {
-    values: { titles },
-    defaultMessage: 'Super Timeline cannot merge ES|QL or EQL queries. Deselect: {titles}.',
-  });
-
-export const ESQL_SUPER_TIMELINE_INCOMPATIBLE = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.esqlIncompatible',
-  { defaultMessage: 'This timeline uses ES|QL and cannot be included in a Super Timeline.' }
+export const ESQL_QUERY_NOT_MERGED = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.esqlQueryNotMerged',
+  {
+    defaultMessage:
+      "This timeline's ES|QL query isn't merged into a Super Timeline. Its pinned events and notes are still included.",
+  }
 );
 
-export const EQL_SUPER_TIMELINE_INCOMPATIBLE = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.eqlIncompatible',
-  { defaultMessage: 'This timeline uses EQL and cannot be included in a Super Timeline.' }
+export const EQL_QUERY_NOT_MERGED = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.eqlQueryNotMerged',
+  {
+    defaultMessage:
+      "This timeline's EQL query isn't merged into a Super Timeline. Its pinned events and notes are still included.",
+  }
 );
 
-export const SUPER_TIMELINE_QUERY_TYPE_COLUMN_HEADER = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.queryTypeColumnHeader',
-  { defaultMessage: 'Super Timeline compatibility' }
-);
-
-export const ESQL_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.esqlQueryTypeLabel',
-  { defaultMessage: 'ES|QL' }
-);
-
-export const EQL_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.superTimeline.eqlQueryTypeLabel',
-  { defaultMessage: 'EQL' }
+export const SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.queryMergingColumnHeader',
+  { defaultMessage: 'Super Timeline query merging' }
 );
 
 export const SUPER_TIMELINE_TITLE = i18n.translate(

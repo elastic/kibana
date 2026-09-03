@@ -263,11 +263,9 @@ describe('manageActionPolicyTool', () => {
       );
 
       expect(logger.debug).toHaveBeenCalledWith({
-        message: expect.any(Function),
+        message: 'Invalid manage_action_policy input',
         labels: { space_id: ctx.spaceId },
       });
-      const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-      expect(debugMessage()).toContain('Invalid manage_action_policy input');
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });

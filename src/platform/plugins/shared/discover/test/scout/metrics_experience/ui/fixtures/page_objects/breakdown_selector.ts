@@ -11,7 +11,6 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 
 export interface BreakdownSelector {
   readonly toggleButton: Locator;
-  readonly searchInput: Locator;
   readonly selectable: Locator;
   readonly getToggleWithSelection: (dimensionName: string) => Locator;
   readonly selectDimension: (dimensionName: string) => Promise<void>;
@@ -19,12 +18,12 @@ export interface BreakdownSelector {
 
 export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
   const button = page.testSubj.locator('metricsExperienceBreakdownSelectorButton');
-  const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
-  const searchInput = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch');
+  const selectableSubj = 'metricsExperienceBreakdownSelectorSelectable';
+  const selectableObject = page.components.selectable(selectableSubj);
+  const selectable = page.testSubj.locator(selectableSubj);
 
   return {
     toggleButton: button,
-    searchInput,
     selectable,
     getToggleWithSelection: (dimensionName: string) =>
       page.locator(
@@ -35,7 +34,10 @@ export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
         await button.click();
         await selectable.waitFor({ state: 'visible' });
       }
-      await searchInput.fill(dimensionName);
+      await selectableObject.search(dimensionName);
+      // The dimension options carry a status badge (append) and are shown with
+      // search highlighting, so select by the stable per-option data-test-subj
+      // rather than a label match. The helper still owns the search box.
       await page.testSubj.click(`dimensionSelectorOption-${dimensionName}`);
       if (await selectable.isVisible()) {
         await page.keyboard.press('Escape');

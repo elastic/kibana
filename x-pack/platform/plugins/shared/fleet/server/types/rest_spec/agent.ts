@@ -841,6 +841,12 @@ export const GetActionStatusRequestSchema = {
     latest: schema.maybe(
       schema.number({ meta: { description: 'Return only the latest N actions' } })
     ),
+    scheduledOnly: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'Return only actions whose start_time is in the future' },
+      })
+    ),
     errorSize: schema.number({
       defaultValue: 5,
       meta: { description: 'Number of error details to include per action' },

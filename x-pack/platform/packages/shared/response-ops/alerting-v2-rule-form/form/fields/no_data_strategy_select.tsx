@@ -10,11 +10,12 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
 
+export const DEFAULT_NO_DATA_STRATEGY: NoDataStrategy = 'last_known_status';
+
 interface NoDataStrategySelectProps {
   value: NoDataStrategy;
   onChange: (strategy: NoDataStrategy) => void;
   disabled?: boolean;
-  disabledReason?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
 }
@@ -38,14 +39,13 @@ const LAST_KNOWN_STATUS_DESCRIPTION = i18n.translate(
 
 const RECOVER_TITLE = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.title',
-  { defaultMessage: 'Recover' }
+  { defaultMessage: 'Recover immediately' }
 );
 
 const RECOVER_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.description',
   {
-    defaultMessage:
-      'Automatically transition active alerts to recovered status when no new data is received.',
+    defaultMessage: 'Resolve the alert episode on the first no-data run.',
   }
 );
 
@@ -107,11 +107,10 @@ export const NoDataStrategySelect = ({
   value,
   onChange,
   disabled = false,
-  disabledReason,
   compressed = false,
   'data-test-subj': dataTestSubj = 'ruleV2NoDataStrategySelect',
 }: NoDataStrategySelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth helpText={disabled ? disabledReason : undefined}>
+  <EuiFormRow label={LABEL_TEXT} fullWidth>
     <EuiSuperSelect<NoDataStrategy>
       options={NO_DATA_STRATEGY_OPTIONS}
       valueOfSelected={value}

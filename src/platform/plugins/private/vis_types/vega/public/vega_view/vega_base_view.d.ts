@@ -9,20 +9,21 @@
 
 import type { IExternalUrl } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaEventHandler } from '../types';
 import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
   parentEl: HTMLDivElement;
-  fireEvent: IInterpreterRenderHandlers['event'];
+  fireEvent: VegaEventHandler;
   vegaParser: VegaParser;
   serviceSettings: IServiceSettings;
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
   externalUrl: IExternalUrl;
+  showWarnings: boolean;
 }
 
 export class VegaBaseView {

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/277822
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-07-28
-- product: kibana
-title: Make Attacks API generally available with public OpenAPI documentation
-description: The Attacks API (`/api/detection_engine/attacks/*`) is now generally available and documented in the public Kibana OpenAPI specification.

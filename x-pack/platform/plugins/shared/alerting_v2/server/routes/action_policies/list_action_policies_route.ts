@@ -10,13 +10,19 @@ import {
   findActionPoliciesRequestSchema,
   findActionPoliciesResponseSchema,
   type FindActionPoliciesRequest,
+  type FindActionPoliciesResponse as FindActionPoliciesApiResponse,
+  type FindActionPoliciesSortField as FindActionPoliciesApiSortField,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import type { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
-import type { FindActionPoliciesArgs } from '../../lib/action_policy_client';
+import type {
+  FindActionPoliciesArgs,
+  FindActionPoliciesResponse,
+  FindActionPoliciesSortField,
+} from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { listActionPoliciesOasExamples } from './list_action_policies_oas_example';
@@ -24,6 +30,14 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
+
+/** Maps the snake_case API sort values onto the client's internal camelCase field names. */
+const SORT_FIELD_BY_API_VALUE: Record<FindActionPoliciesApiSortField, FindActionPoliciesSortField> =
+  {
+    name: 'name',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+  };
 
 export const toFindActionPoliciesArgs = ({
   page,
@@ -42,8 +56,24 @@ export const toFindActionPoliciesArgs = ({
     search,
     tags,
     enabled,
-    sortField,
+    sortField: sortField && SORT_FIELD_BY_API_VALUE[sortField],
     sortOrder,
+  };
+};
+
+export const toFindActionPoliciesResponse = ({
+  items,
+  total,
+  page,
+  perPage,
+  ...rest
+}: FindActionPoliciesResponse): Complete<FindActionPoliciesApiResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items,
+    total,
+    page,
+    per_page: perPage,
   };
 };
 
@@ -97,6 +127,6 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     const result = await this.actionPolicyClient.findActionPolicies(
       toFindActionPoliciesArgs(this.request.query ?? {})
     );
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toFindActionPoliciesResponse(result) });
   }
 }

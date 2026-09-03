@@ -52,12 +52,15 @@ import {
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
+  SettingsSchemaV9,
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
+
+import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
@@ -132,6 +135,7 @@ import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
+import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_symbolizer_policy';
 
 /*
  * Saved object types and mappings
@@ -139,6 +143,7 @@ import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
+
 export const getSavedObjectTypes = (
   options = { useSpaceAwareness: false }
 ): { [key: string]: SavedObjectsType } => {
@@ -206,6 +211,7 @@ export const getSavedObjectTypes = (
           integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
           download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
+          otlp_output_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -308,6 +314,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV8.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV8,
+          },
+        },
+        9: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otlp_output_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV9.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV9,
           },
         },
       },
@@ -790,6 +810,11 @@ export const getSavedObjectTypes = (
             type: 'keyword',
             index: false,
           },
+          otlp_exporter: {
+            type: 'object',
+            dynamic: false,
+          },
+          is_default_otel: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -929,6 +954,28 @@ export const getSavedObjectTypes = (
                 string,
                 unknown
               >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otlp_exporter: { type: 'object', dynamic: false },
+                is_default_otel: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const {
+                otlp_exporter: _,
+                is_default_otel: __,
+                ...rest
+              } = unknownAttributes as Record<string, unknown>;
               return rest;
             },
             create: schema.object({}, { unknowns: 'allow' }),
@@ -1230,6 +1277,18 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '25': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1397,6 +1456,18 @@ export const getSavedObjectTypes = (
         },
         '10': {
           changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '11': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
+            },
+          ],
           schemas: {
             forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
@@ -1723,6 +1794,18 @@ export const getSavedObjectTypes = (
               addedMappings: {},
             },
           ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: downloadSourceSchemaV2,
+            create: downloadSourceSchemaV2,
+          },
         },
       },
     },

@@ -13,13 +13,15 @@ import {
   AGENT_BUILDER_NEW_CONVERSATION_PATH,
 } from '../constants';
 
-export const useNavigateToAgentBuilder = () => {
+export const useNavigateToAgentBuilder = (
+  initialMessage: string = CREATE_WITH_AGENT_INITIAL_PROMPT
+) => {
   const { navigateToApp } = useService(CoreStart('application'));
 
   return useCallback(() => {
     navigateToApp(AGENT_BUILDER_APP_ID, {
       path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
-      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+      state: { initialMessage },
     });
-  }, [navigateToApp]);
+  }, [navigateToApp, initialMessage]);
 };

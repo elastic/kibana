@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/connector-events-bridge-plugin",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Phase 1 bridge: forwards Actions inbound connector events to Workflows emitEvent. Replace with the shared event bus in Phase 2 without changing the hub URL.",
+  "plugin": {
+    "id": "connectorEventsBridge",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "connectorEventsBridge"],
+    "requiredPlugins": ["actions"],
+    "optionalPlugins": ["workflowsExtensions"]
+  }
+}

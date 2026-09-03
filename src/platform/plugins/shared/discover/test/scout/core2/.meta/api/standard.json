@@ -1,0 +1,620 @@
+{
+  "sha1": "96e94e3bbd85e59382f7beaaaf7669613e0c0afe",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e32258af1b92b46-a522e7bc42e3503",
+      "title": "POST /api/discover_sessions creates a Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/create_discover_session.spec.ts",
+        "line": 57,
+        "column": 66
+      }
+    },
+    {
+      "id": "e32258af1b92b46-d454e1a3b67f7fc",
+      "title": "POST /api/discover_sessions creates a Discover session with an unresolved data view reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/create_discover_session.spec.ts",
+        "line": 99,
+        "column": 18
+      }
+    },
+    {
+      "id": "e32258af1b92b46-e1be229cdec3fc6",
+      "title": "POST /api/discover_sessions returns 400 for invalid request bodies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/create_discover_session.spec.ts",
+        "line": 116,
+        "column": 22
+      }
+    },
+    {
+      "id": "e32258af1b92b46-0606296c7b40ff7",
+      "title": "POST /api/discover_sessions returns 403 when the user cannot create Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/create_discover_session.spec.ts",
+        "line": 128,
+        "column": 81
+      }
+    },
+    {
+      "id": "8eb7377569afa29-85dc3d09cd6fa87",
+      "title": "DELETE /api/discover_sessions/{id} deletes an existing Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/delete_discover_session.spec.ts",
+        "line": 32,
+        "column": 11
+      }
+    },
+    {
+      "id": "8eb7377569afa29-d3305e240325400",
+      "title": "DELETE /api/discover_sessions/{id} returns 404 when the Discover session does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/delete_discover_session.spec.ts",
+        "line": 50,
+        "column": 22
+      }
+    },
+    {
+      "id": "8eb7377569afa29-d59f9a34d0b583f",
+      "title": "DELETE /api/discover_sessions/{id} returns 403 when the user cannot delete Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/delete_discover_session.spec.ts",
+        "line": 64,
+        "column": 92
+      }
+    },
+    {
+      "id": "28ad0799115a163-ec90e32434d0d62",
+      "title": "dashboards - Discover session panel round trip preserves the public by-reference and by-value panel shapes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/discover_session_dashboard_round_trip.spec.ts",
+        "line": 60,
+        "column": 28
+      }
+    },
+    {
+      "id": "325c4b9fd7bb919-70a59647e23e599",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with no features disabled exposes discover and visualize capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 22,
+        "column": 20
+      }
+    },
+    {
+      "id": "325c4b9fd7bb919-8ba91d697a6db29",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with Discover disabled hides the discover navlink and zeroes discover capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 42,
+        "column": 22
+      }
+    },
+    {
+      "id": "325c4b9fd7bb919-6163915bef68bf6",
+      "title": "POST /s/<space>/api/core/capabilities - Discover space feature controls space with Visualize disabled hides the visualize field action capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_disabled_space.spec.ts",
+        "line": 68,
+        "column": 22
+      }
+    },
+    {
+      "id": "cac8b9bc4c13bdb-809637b073218ce",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:all grants save, short URLs and the CSV export capability",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 48,
+        "column": 23
+      }
+    },
+    {
+      "id": "cac8b9bc4c13bdb-1ead19c2c1a99f8",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read hides save, short URLs and the visualize field action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 60,
+        "column": 16
+      }
+    },
+    {
+      "id": "cac8b9bc4c13bdb-65aa229432faaf4",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read + url_create still hides save but allows short URLs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 73,
+        "column": 16
+      }
+    },
+    {
+      "id": "cac8b9bc4c13bdb-44605e15a84296d",
+      "title": "POST /api/core/capabilities - Discover role privileges discover:read + visualize:read shows the visualize field action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 84,
+        "column": 26
+      }
+    },
+    {
+      "id": "cac8b9bc4c13bdb-52aad5c62ca9ff3",
+      "title": "POST /api/core/capabilities - Discover role privileges no discover privileges hides the navlink and zeroes discover capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/feature_controls/discover_privileges.spec.ts",
+        "line": 91,
+        "column": 16
+      }
+    },
+    {
+      "id": "2835ad9f381c708-ae210e0c4ee2c65",
+      "title": "GET /api/discover_sessions/{id} returns an existing Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
+        "line": 33,
+        "column": 29
+      }
+    },
+    {
+      "id": "2835ad9f381c708-b4a401018cc3293",
+      "title": "GET /api/discover_sessions/{id} returns 404 when the Discover session does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "2835ad9f381c708-a17b967233d8a03",
+      "title": "GET /api/discover_sessions/{id} returns 403 when the user cannot read Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
+        "line": 96,
+        "column": 7
+      }
+    },
+    {
+      "id": "2835ad9f381c708-4ef1bcc58b3e093",
+      "title": "GET /api/discover_sessions/{id} returns warnings and preserves valid controls when a stored control is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/get_discover_session.spec.ts",
+        "line": 110,
+        "column": 14
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-44abdd371c3ee56",
+      "title": "GET /api/discover_sessions returns paginated Discover session summaries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 39,
+        "column": 29
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-548a799f2c813e5",
+      "title": "GET /api/discover_sessions filters summaries by tag ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-803871dd4b2ac3e",
+      "title": "GET /api/discover_sessions paginates beyond the first page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-030e4e3f8ae5961",
+      "title": "GET /api/discover_sessions applies default pagination when page and per_page are omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 131,
+        "column": 17
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-0abab9340a60f37",
+      "title": "GET /api/discover_sessions returns no results when the query matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 149,
+        "column": 17
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-7de45faed1212f4",
+      "title": "GET /api/discover_sessions requires all query terms to match (AND operator)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 161,
+        "column": 12
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-e0b8c96d3ce622b",
+      "title": "GET /api/discover_sessions rejects per page limits above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 184,
+        "column": 97
+      }
+    },
+    {
+      "id": "03a22c2667bebc5-78c54e88713c56a",
+      "title": "GET /api/discover_sessions returns an empty result set when the user cannot read Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/search_discover_sessions.spec.ts",
+        "line": 196,
+        "column": 81
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-8d4c7aff3e4def5",
+      "title": "PUT /api/discover_sessions/{id} creates a Discover session at the requested ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 45,
+        "column": 11
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-254c3dd318a426c",
+      "title": "PUT /api/discover_sessions/{id} fully replaces an existing Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 93,
+        "column": 18
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-1a605ce24e127ec",
+      "title": "PUT /api/discover_sessions/{id} updates an existing session whose ID predates the as-code format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 213,
+        "column": 11
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-c3261ad23aca6e7",
+      "title": "PUT /api/discover_sessions/{id} returns 400 for an invalid ID when creating a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 269,
+        "column": 13
+      }
+    },
+    {
+      "id": "68e22b03ba9cb36-03306eb253dff05",
+      "title": "PUT /api/discover_sessions/{id} returns 403 when the user cannot update Discover sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/api/tests/upsert_discover_session.spec.ts",
+        "line": 287,
+        "column": 15
+      }
+    }
+  ]
+}

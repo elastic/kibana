@@ -6,7 +6,7 @@
  */
 
 import { ALERT_EPISODE_STATUS } from './alert_action_schema';
-import { MAX_EPISODE_DATA_LENGTH } from './constants';
+import { MAX_EPISODE_DATA_LENGTH, MAX_EPISODE_LABEL_LENGTH } from './constants';
 import { EPISODE_ATTACHMENT_TYPE, episodeAttachmentDataSchema } from './episode_attachment_schema';
 
 const baseEpisode = {
@@ -40,6 +40,14 @@ describe('episodeAttachmentDataSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts an optional episode label', () => {
+    const result = episodeAttachmentDataSchema.safeParse({
+      ...baseEpisode,
+      'episode.label': 'Host CPU high alert',
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('accepts the required fields only', () => {
     const result = episodeAttachmentDataSchema.safeParse(baseEpisode);
     expect(result.success).toBe(true);
@@ -67,6 +75,14 @@ describe('episodeAttachmentDataSchema', () => {
     const result = episodeAttachmentDataSchema.safeParse({
       ...baseEpisode,
       episode_data: 'x'.repeat(MAX_EPISODE_DATA_LENGTH + 1),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects oversized episode labels', () => {
+    const result = episodeAttachmentDataSchema.safeParse({
+      ...baseEpisode,
+      'episode.label': 'x'.repeat(MAX_EPISODE_LABEL_LENGTH + 1),
     });
     expect(result.success).toBe(false);
   });

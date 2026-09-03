@@ -1,0 +1,64 @@
+{
+  "sha1": "d29435fcd210ced00af401c70bbe7fe403a0442c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3b7f6be4db14285-b7841368feb3a67",
+      "title": "Cribl routing pipeline creates the routing pipeline with an exact dataId condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/api/tests/cribl_routing_pipeline.spec.ts",
+        "line": 140,
+        "column": 33
+      }
+    },
+    {
+      "id": "3b7f6be4db14285-8a489f0e178439a",
+      "title": "Cribl routing pipeline updates the routing pipeline when route entries change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/api/tests/cribl_routing_pipeline.spec.ts",
+        "line": 149,
+        "column": 22
+      }
+    },
+    {
+      "id": "3b7f6be4db14285-808f71a540f32bc",
+      "title": "Cribl routing pipeline rejects invalid dataId values and leaves the pipeline unchanged",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/api/tests/cribl_routing_pipeline.spec.ts",
+        "line": 193,
+        "column": 23
+      }
+    },
+    {
+      "id": "3b7f6be4db14285-62d91d7c9603cc6",
+      "title": "Cribl routing pipeline rejects create when the caller lacks ingest pipeline privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/api/tests/cribl_routing_pipeline.spec.ts",
+        "line": 227,
+        "column": 28
+      }
+    }
+  ]
+}

@@ -10,9 +10,27 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 import { useForm, useWatch } from 'react-hook-form';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CreateDatasetFlyoutSettings } from './create_dataset_flyout_settings';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
 
 const renderSettings = () => {
   const Wrapper = () => {
@@ -30,8 +48,10 @@ const renderSettings = () => {
 
     return (
       <EuiProvider>
-        <CreateDatasetFlyoutSettings control={control} />
-        <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+          <CreateDatasetFlyoutSettings control={control} />
+          <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+        </KibanaContextProvider>
       </EuiProvider>
     );
   };

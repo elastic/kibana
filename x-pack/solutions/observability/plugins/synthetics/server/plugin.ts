@@ -32,7 +32,12 @@ import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
-import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import {
+  SyncPrivateLocationMonitorsTask,
+  PRIVATE_LOCATIONS_SYNC_TASK_ID,
+} from './tasks/sync_private_locations_monitors_task';
+import { RebalancePrivateLocationShardsTask } from './tasks/rebalance_private_location_shards_task';
+import { flushPendingAgentPolicyRevisionBumps } from './synthetics_service/private_location/package_policy_service';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
@@ -49,6 +54,7 @@ export class Plugin implements PluginType {
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private rebalancePrivateLocationShardsTask?: RebalancePrivateLocationShardsTask;
   private syncGlobalParamsTask?: SyncGlobalParamsPrivateLocationsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
@@ -86,6 +92,7 @@ export class Plugin implements PluginType {
       share: plugins.share,
       alerting: plugins.alerting,
       syntheticsIndicesCache: new SyntheticsIndicesCache(),
+      isCpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
@@ -107,6 +114,12 @@ export class Plugin implements PluginType {
       this.syntheticsMonitorClient
     );
     this.syncPrivateLocationMonitorsTask.registerTaskDefinition(plugins.taskManager);
+
+    this.rebalancePrivateLocationShardsTask = new RebalancePrivateLocationShardsTask(
+      this.server,
+      this.syntheticsMonitorClient
+    );
+    this.rebalancePrivateLocationShardsTask.registerTaskDefinition(plugins.taskManager);
 
     this.syncGlobalParamsTask = new SyncGlobalParamsPrivateLocationsTask(
       this.server,
@@ -159,8 +172,19 @@ export class Plugin implements PluginType {
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
       this.server.getMaintenanceWindowClientInternal = getMaintenanceWindowClientInternal;
     }
-    this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
-      this.logger.error('Failed to start sync private location monitors task', { error: e });
+    this.syncPrivateLocationMonitorsTask
+      ?.start()
+      .then(() => {
+        // Kick the existing TM sync task when MW definitions change so private-location
+        // package policies refresh without waiting for the periodic interval.
+        pluginsStart.maintenanceWindows?.registerSyncTask(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      })
+      .catch((e) => {
+        this.logger.error('Failed to start sync private location monitors task', { error: e });
+      });
+
+    this.rebalancePrivateLocationShardsTask?.start().catch((e) => {
+      this.logger.error('Failed to start rebalance private location shards task', { error: e });
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);
@@ -168,5 +192,21 @@ export class Plugin implements PluginType {
     this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
-  public stop() {}
+  public async stop() {
+    // No server means setup never ran, so nothing was ever batched.
+    if (!this.server) {
+      return;
+    }
+
+    // Scalable private-location package policies are written with
+    // `bumpRevision: false` and rely on a debounced batch to bump the agent
+    // policy afterwards. Dropping a pending batch here would leave those
+    // policies attached to an un-bumped agent policy, so Fleet would never
+    // redeploy and the monitors would silently never reach an agent.
+    try {
+      await flushPendingAgentPolicyRevisionBumps(this.server);
+    } catch (error) {
+      this.logger.error('Failed to flush pending agent policy revision bumps on stop', { error });
+    }
+  }
 }

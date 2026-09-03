@@ -11,13 +11,21 @@ import {
   EVALS_EVALUATE_URL,
   EvaluateRequestBody,
   type EvaluateResponse,
+  type Model,
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { resolveConnectorModel } from '../../lib/resolve_connector_model';
+import {
+  findDuplicateEvaluatorNames,
+  getDuplicateEvaluatorNamesMessage,
+} from '../../lib/duplicate_evaluator_names';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
@@ -29,6 +37,7 @@ export const registerEvaluateRoute = ({
   logger,
   evaluatorRegistry,
   getInferenceStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -63,6 +72,19 @@ export const registerEvaluateRoute = ({
           });
         }
 
+        // Running the same evaluator under two judges is the obvious thing to reach for now
+        // that judges are per evaluator, but the scores would land on one another at ingest
+        // and the caller would be told the run succeeded. Refuse it here instead.
+        const duplicateEvaluatorNames = findDuplicateEvaluatorNames(evaluators);
+        if (duplicateEvaluatorNames.length > 0) {
+          return response.badRequest({
+            body: { message: getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames) },
+          });
+        }
+
+        const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+        const scopedRegistry = evaluatorRegistry.asScoped({ spaceId });
+
         const resolvedEvaluators: Array<{
           config: (typeof evaluators)[number];
           definition: EvaluatorDefinition;
@@ -70,7 +92,7 @@ export const registerEvaluateRoute = ({
         }> = [];
 
         for (const config of evaluators) {
-          const definition = evaluatorRegistry.get(config.name, config.version);
+          const definition = await scopedRegistry.get(config.name, config.version);
           if (!definition) {
             const message = config.version
               ? `Evaluator not found: ${config.name}@${config.version}`
@@ -132,6 +154,17 @@ export const registerEvaluateRoute = ({
         }
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
+        const getInference = (): ReturnType<RouteDependencies['getInferenceStart']> | undefined => {
+          if (!getInferenceStart) {
+            logger.error('Inference start contract is not configured');
+            return undefined;
+          }
+          if (!inferenceStartPromise) {
+            inferenceStartPromise = getInferenceStart();
+          }
+          return inferenceStartPromise;
+        };
+
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
         const getInferenceClient = async (
           connectorId: string
@@ -141,16 +174,12 @@ export const registerEvaluateRoute = ({
             return cachedClient;
           }
 
-          if (!getInferenceStart) {
-            logger.error('Inference start contract is not configured');
+          const inferencePromise = getInference();
+          if (!inferencePromise) {
             return undefined;
           }
 
-          if (!inferenceStartPromise) {
-            inferenceStartPromise = getInferenceStart();
-          }
-
-          const inference = await inferenceStartPromise;
+          const inference = await inferencePromise;
           const inferenceClient = inference.getClient({
             request,
             bindTo: { connectorId },
@@ -160,6 +189,50 @@ export const registerEvaluateRoute = ({
           return inferenceClient;
         };
 
+        // The judge model is reported per evaluator so scores are attributed to the
+        // connector that actually produced them, rather than to a single experiment-wide
+        // model. Memoized because evaluators commonly share one connector.
+        const modelByConnectorId = new Map<string, Promise<Model | undefined>>();
+        const getModel = (connectorId: string): Promise<Model | undefined> | undefined => {
+          const cachedModel = modelByConnectorId.get(connectorId);
+          if (cachedModel) {
+            return cachedModel;
+          }
+
+          const inferencePromise = getInference();
+          if (!inferencePromise) {
+            return undefined;
+          }
+
+          const model = inferencePromise.then((inference) =>
+            resolveConnectorModel({ connectorId, inference, request, logger })
+          );
+          modelByConnectorId.set(connectorId, model);
+
+          return model;
+        };
+
+        /**
+         * Identifies the evaluator on a result, including the judge model for LLM
+         * evaluators. Code evaluators invoke no model and are left unattributed.
+         */
+        const describeEvaluator = async (
+          definition: EvaluatorDefinition,
+          config: (typeof evaluators)[number]
+        ): Promise<EvaluateResponse['results'][number]['evaluator']> => {
+          const base = {
+            name: definition.name,
+            version: definition.version,
+            kind: definition.kind,
+            direction: definition.direction,
+          };
+          if (definition.kind !== 'llm' || !config.connector_id) {
+            return base;
+          }
+          const model = await getModel(config.connector_id);
+          return model ? { ...base, model } : base;
+        };
+
         const results: EvaluateResponse['results'] = [];
         for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
           if (definition.evidenceSchema) {
@@ -167,11 +240,7 @@ export const registerEvaluateRoute = ({
             if (!evidenceParsed.success) {
               results.push({
                 status: 'error',
-                evaluator: {
-                  name: definition.name,
-                  version: definition.version,
-                  kind: definition.kind,
-                },
+                evaluator: await describeEvaluator(definition, config),
                 error: {
                   code: 'evidence_unmet',
                   message: `Evaluator evidence requirements not met: ${formatEvidenceSchemaIssues(
@@ -189,32 +258,26 @@ export const registerEvaluateRoute = ({
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              round,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
+            const result = await withEvaluatorNameBaggage(definition.name, () =>
+              definition.evaluate({
+                trace: traceAccessor,
+                round,
+                referenceData: parsedReferenceData,
+                inferenceClient,
+                log: logger,
+              })
+            );
 
             results.push({
               status: 'ok',
-              evaluator: {
-                name: definition.name,
-                version: definition.version,
-                kind: definition.kind,
-              },
+              evaluator: await describeEvaluator(definition, config),
               scores: result.scores,
             });
           } catch (error) {
             logger.error(`Failed to execute evaluator "${config.name}": ${error}`);
             results.push({
               status: 'error',
-              evaluator: {
-                name: definition.name,
-                version: definition.version,
-                kind: definition.kind,
-              },
+              evaluator: await describeEvaluator(definition, config),
               error: { message: String(error) },
             });
           }

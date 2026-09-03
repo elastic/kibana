@@ -12,6 +12,7 @@ import { useDocumentFlyoutApi } from './use_document_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import {
   FlyoutV2EventTypes,
@@ -105,6 +106,10 @@ describe('useDocumentFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    const sessionContent = (flyoutProviders as jest.Mock).mock.calls[0][0].children;
+    const childContent = sessionContent.props.children.props.children;
+    expect(childContent.type).not.toBe('div');
+    expect(childContent.props.dataTestSubj).toBe(CHILD_DOCUMENT_FLYOUT_TEST_ID);
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.FLYOUT,
       flyoutType: FLYOUT_TYPE.DOCUMENT,

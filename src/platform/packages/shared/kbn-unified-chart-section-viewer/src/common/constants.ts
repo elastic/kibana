@@ -17,6 +17,8 @@ export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrict
 // data-test-subj
 export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
 export const METRICS_GRID_PAGINATION_DATA_TEST_SUBJ = 'metricsExperienceGridPagination';
+export const METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ = 'metricsExperienceToolbarSearch';
+export const METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ = 'metricsExperienceGridToolbarSearch';
 
 // Selection limits
 export const MAX_DIMENSIONS_SELECTIONS = 5;
@@ -75,7 +77,7 @@ export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 // Fallback values used when a feature flag is not configured externally
 export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
-  [FEATURE_FLAGS.IS_SORTING_ENABLED]: false,
+  [FEATURE_FLAGS.IS_SORTING_ENABLED]: true,
 };
 
 // Metrics grid sort options
@@ -89,9 +91,3 @@ export const METRICS_SORT_DIRECTION = {
   asc: 'asc',
   desc: 'desc',
 } as const;
-
-// Default metrics grid sort
-export const DEFAULT_METRICS_SORT = [
-  METRICS_SORT_BY.alphabetically,
-  METRICS_SORT_DIRECTION.asc,
-] as const;

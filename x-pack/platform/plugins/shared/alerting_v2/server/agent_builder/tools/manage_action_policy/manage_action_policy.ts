@@ -156,7 +156,7 @@ Use operations[] to:
                 name: updatedData.name,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
-                groupingMode: updatedData.groupingMode,
+                groupingMode: updatedData.grouping_mode,
                 throttle: updatedData.throttle,
               },
             },
@@ -167,8 +167,11 @@ Use operations[] to:
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof ActionPolicyOperationValidationError) {
         logger.debug({
-          message: () => `Invalid manage_action_policy input: ${message}`,
-          labels: { space_id: spaceId },
+          message: 'Invalid manage_action_policy input',
+          labels: {
+            space_id: spaceId,
+            ...(policyId != null ? { policy_id: policyId } : {}),
+          },
         });
       } else {
         logger.warn({

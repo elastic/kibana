@@ -40,7 +40,16 @@ export const createAdCreateJobTool = (
   type: ToolType.builtin,
   tags: ['ml', 'anomaly-detection'],
   description:
-    'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation.',
+    'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation. ' +
+    'Anomaly detection guide: https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection — ' +
+    'Anomaly detection APIs: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-ml-anomaly',
+  annotations: {
+    title: 'Create Anomaly Detection Job',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   experimental: true,
   schema,
   handler: async (

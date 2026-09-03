@@ -462,6 +462,13 @@ interface Phase1BaseScoringSummary extends StageSummaryBase {
   stage: 'phase1_base_scoring';
   pagesProcessed?: number;
   scoresWritten?: number;
+  /** Pre-create lookup misses; the funnel reserves `droppedNotInStore` for write-time 404s. */
+  scoresMissingFromStore?: number;
+  entitiesCreated?: number;
+  /** Missing scores not written because no alert was found or policy rejected them. */
+  entityCreationsSkipped?: number;
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
+  entityCreationsFailed?: number;
 }
 
 interface Phase2ResolutionScoringSummary extends StageSummaryBase {
@@ -566,6 +573,38 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreM
       scoresWritten: {
         type: 'long',
         _meta: { optional: true, description: 'Risk score docs written in this stage' },
+      },
+      scoresMissingFromStore: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'Raw count of base-scoring scores whose entity_id was absent from the entity store at lookup time, before any create-if-missing attempt (phase1_base_scoring only)',
+        },
+      },
+      entitiesCreated: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'Entities created by the create-if-missing path during base scoring (phase1_base_scoring only)',
+        },
+      },
+      entityCreationsSkipped: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'not_in_store scores the create-if-missing path never attempted to write during base scoring: no representative alert document was found, or the creation policy rejected the candidate',
+        },
+      },
+      entityCreationsFailed: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'not_in_store scores that were policy-eligible but did not end up written during base scoring: the re-derived EUID did not match the score, a reserved field was supplied, or the bulk create itself failed',
+        },
       },
       entitiesIterated: {
         type: 'long',
@@ -2298,6 +2337,11 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   spaceId: string;
   leadsGenerated: number;
+  newLeads: number;
+  revisedLeads: number;
+  resurfacedLeads: number;
+  skippedLeads: number;
+  failedLeads: number;
   sourceType: string;
 }> = {
   eventType: 'lead_generation_execution',
@@ -2311,7 +2355,39 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
     leadsGenerated: {
       type: 'long',
       _meta: {
-        description: 'Number of leads successfully generated',
+        description:
+          'Number of prepared lead candidates in this run (after scoring and the maxLeads cap)',
+      },
+    },
+    newLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of new leads in this run',
+      },
+    },
+    revisedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of reobserved leads with different observations',
+      },
+    },
+    resurfacedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of reobserved leads, without any observations changes',
+      },
+    },
+    skippedLeads: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of reobserved leads skipped because matching one was previously dismissed',
+      },
+    },
+    failedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of leads that failed to persist in the index',
       },
     },
     sourceType: {
@@ -2436,6 +2512,22 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   },
 };
 
+export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
+  projectCount: number;
+}> = {
+  eventType: 'analyzer_cross_project_render',
+  schema: {
+    projectCount: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct projects represented in an Analyzer tree that included at least one linked-project node. Counts only; no document content.',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2459,6 +2551,7 @@ export const events = [
   ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT,
   ENDPOINT_WORKFLOW_INSIGHTS_DISMISSED_EVENT,
+  ANALYZER_CROSS_PROJECT_RENDER_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,

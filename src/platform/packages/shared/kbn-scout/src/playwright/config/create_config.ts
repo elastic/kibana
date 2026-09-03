@@ -21,15 +21,21 @@ import { VALID_CONFIG_MARKER } from '../types';
 
 const DEFAULT_CI_RETRIES = 1;
 
+const isBuildkiteStepRetry = (): boolean => {
+  const retryCount = Number.parseInt(process.env.BUILDKITE_RETRY_COUNT ?? '', 10);
+  return Number.isFinite(retryCount) && retryCount > 0;
+};
+
 /**
- * Number of Playwright retries: 1 on CI, 0 locally. `SCOUT_TEST_RETRIES` overrides both —
+ * Number of Playwright retries: 1 on a step's first CI attempt, 0 locally and on step retries
+ * (which already re-run only the previously failed specs). `SCOUT_TEST_RETRIES` overrides both —
  * e.g. the flaky-test runner sets it to 0.
  */
 const resolveRetries = (): number => {
   const override = process.env.SCOUT_TEST_RETRIES;
 
   if (override === undefined) {
-    return process.env.CI ? DEFAULT_CI_RETRIES : 0;
+    return process.env.CI && !isBuildkiteStepRetry() ? DEFAULT_CI_RETRIES : 0;
   }
 
   const parsed = Number.parseInt(override, 10);

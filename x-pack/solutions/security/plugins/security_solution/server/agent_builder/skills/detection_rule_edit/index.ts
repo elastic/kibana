@@ -59,6 +59,18 @@ This skill only supports the **ES|QL** rule type. If the user asks to create a r
 
 Then stop. Do not create anything. Do not offer alternatives unless the user explicitly asks.
 
+## When NOT to Create a Rule
+
+Before calling \`security.create_detection_rule\`, assess whether the requested detection is actually achievable with the available data sources. Do NOT call the tool if any of the following apply:
+
+- **Wrong data source**: The user specifies a data source (e.g. network flow logs, O365 audit logs) that does not contain the telemetry needed for the detection (e.g. process execution, cloud API calls from a different provider). Example: detecting PowerShell execution using only \`logs-network_traffic.*\` is impossible — process and script telemetry does not exist in network flow data.
+- **Fundamental telemetry mismatch**: The detection goal requires fields or event types that are categorically absent from the stated index pattern. No query rewrite or approximation can bridge this gap.
+
+When you determine a rule cannot be created:
+1. Do NOT call \`security.create_detection_rule\`.
+2. Explain clearly why the available data cannot support the detection.
+3. Tell the user what data source they would actually need (e.g. "This requires endpoint telemetry from \`logs-endpoint.events.*\` or Windows Event Logs").
+
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
 **You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every create or edit request requires you to actually call the tools (\`security.create_detection_rule\` for creation and query rewrites, \`attachment_update\` for other field edits) to persist the result. Describing the change without applying it is not acceptable.
@@ -145,7 +157,7 @@ For changes to tags, severity, risk_score, schedule, name, description, MITRE ma
 
 1. **Parse** the \`text\` field from the attachment (stringified JSON of the rule).
 2. **Modify** only the fields the user asked to change. Do not add or remove other fields.
-3. **Re-stringify the ENTIRE rule object** — never send partial updates.
+3. **Re-stringify the ENTIRE rule object** — never send partial updates. New lines inside string values (e.g. a rule \`description\`) must always be escaped with double backslashes, i.e. \`\\\\n\`, to ensure valid JSON — never embed a raw line break.
 4. **Call \`attachment_update\`** to persist the change. Always include \`attachmentLabel\` (the rule \`name\`) and \`description\` so the chat label stays visible. The card's link to its saved rule is tracked separately (on the attachment, not in \`text\`) and persists automatically — you do not need to carry it through.
 \`\`\`
 attachment_update({
@@ -182,6 +194,26 @@ Checklist before finishing the answer:
 - [ ] Did I run \`security.run_rule_preview\` after creating or modifying the rule query or schedule?`
     : ''
 }
+
+---
+
+## Handling Tool Rejections
+
+The \`security.create_detection_rule\` tool can return a rejection when it deliberately cannot build a rule. A rejection looks like this:
+
+\`\`\`json
+{ "rejected": true, "rejectionCode": "NO_DATA", "message": "..." }
+\`\`\`
+
+**When you see \`rejected: true\`:**
+- Do NOT retry the tool under any circumstances — not with a different index pattern, not with a simplified query, not with explicit field names. This is a deliberate decision by the detection engine, not a transient failure.
+- Do NOT use \`attachment_update\` as a fallback to hand-write a rule when the tool rejects. \`attachment_update\` is for editing existing rule fields only — it must never be used to construct a new rule or write a query from scratch.
+- Surface the \`message\` field directly to the user. It is already written for the user to read. Stop there. Do NOT mention the \`rejectionCode\` value by name — it is an internal code and not meaningful to the user.
+- Follow up based on \`rejectionCode\`:
+  - \`NO_DATA\` — The data required for this detection does not exist in this environment. Tell the user what data stream they would need (e.g. "This detection requires \`logs-o365.audit-*\` data. Ingest O365 audit logs first, then try again."). Do NOT retry with a different index and do NOT attempt to build the rule manually.
+  - \`INVALID_OUTPUT\` — The agent produced a rule but it failed schema validation. Ask the user to rephrase or add more detail, then retry the tool **once** with the revised description.
+  - \`INCOHERENT\` — The request did not describe a detectable behavior. Ask the user to rephrase and describe the specific activity to detect (e.g. "detect failed logins from a single IP").
+  - \`NOT_SECURITY_RELEVANT\` — The request is not a security detection scenario. Ask the user to describe suspicious behavior, attack patterns, or anomalies instead.
 
 ---
 
@@ -402,11 +434,11 @@ Pre-check: user wants to modify existing rule → edit path → proceed to Step 
 1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment — unless no attachment exists and none can be found via \`attachment_list\`, in which case tell the user to open the rule first.
 2. NEVER just suggest or describe changes — ALWAYS apply them by calling \`attachment_update\` or \`security.create_detection_rule\`. The user expects the rule to be updated, not a description of what to update.
 3. ALWAYS read the attachment before modifying it (edit path only — skip for fresh creation).
-4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
+4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates, and always escape new lines inside string values with double backslashes (i.e. \`\\\\n\`) so the stored JSON stays valid. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
 6. When creating a **fresh, separate** rule: use \`security.create_detection_rule\` with \`user_query\` only — do NOT include \`attachment_id\`. When **rewriting the query** of an existing rule — including follow-up refinements to a rule you created earlier in this conversation (e.g., "update it to only alert when...", "change the threshold to...") — use \`security.create_detection_rule\` WITH \`attachment_id\` — never omit it.
 7. ALWAYS use \`security.create_detection_rule\` with \`attachment_id\` when rewriting the query.
-8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`.
+8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`. NEVER use \`attachment_update\` to construct an entire rule from scratch — if \`security.create_detection_rule\` rejected, that rejection is final; do not circumvent it.
 9. NEVER invent attachment ids. The correct id for any edit-path call (\`security.create_detection_rule\` with \`attachment_id\`, or \`attachment_update\`) is the one that appears in the most recent \`<render_attachment id="...">\` tag — it looks like \`ai-rule-creation\` or \`air:xxxxxxxx-...\`. Using a name you derive from the rule content (e.g. \`"rule-failed-ssh-logins"\`) will create a new orphan attachment and lose the saved-rule link.
 10. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
 11. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.

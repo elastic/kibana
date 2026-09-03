@@ -22,9 +22,15 @@ import type {
   SOSecret,
   KafkaOutput,
   NewRemoteElasticsearchOutput,
+  NewOtlpOutput,
+  BeatsOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
-import { isOtelExporterOutput } from '../../../common/services/output_helpers';
+import {
+  isBeatsOutput,
+  isOtlpOutput,
+  isOtelExporterOutput,
+} from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -34,9 +40,11 @@ import {
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -142,6 +150,29 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   });
 }
 
+/**
+ * Builds a predicate matching outputs that route through the managed `_bulk` endpoint.
+ */
+export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
+  const managedBulkUrls = new Set(
+    (config ? getPreconfiguredOutputFromConfig(config) : [])
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
+      .flatMap((output) => ('hosts' in output ? output.hosts ?? [] : []))
+      .flatMap((host) => {
+        try {
+          return [normalizeHostsForAgents(host)];
+        } catch {
+          // cloud.managed_otlp.url is only schema.string(); never throw on the full-policy path
+          return [];
+        }
+      })
+  );
+
+  return (output: Output) =>
+    output.type === outputType.Elasticsearch &&
+    (output.hosts?.some((host) => managedBulkUrls.has(host)) ?? false);
+};
+
 export async function ensurePreconfiguredOutputs(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -167,7 +198,19 @@ export async function createOrUpdatePreconfiguredOutputs(
     { ignoreNotFound: true }
   );
 
+  // Resolve OTLP eligibility once before the pMap — the version check does a paginated
+  // package-policy list and must not run concurrently for each OTLP output.
+  // Lazy: skip the check entirely when no OTLP outputs are present.
+  const otlpCheck = outputs.some(isOtlpOutput)
+    ? await checkOtlpOutputAllowed(esClient, soClient)
+    : { result: true as const };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    if (isOtlpOutput(output) && !otlpCheck.result) {
+      logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
+      return;
+    }
+
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
     const { id, config, ...outputData } = output;
@@ -177,14 +220,17 @@ export async function createOrUpdatePreconfiguredOutputs(
     const data: NewOutput = {
       ...outputData,
       is_preconfigured: true,
-      config_yaml: configYaml ?? null,
-      // Set value to null to update these fields on update
-      ca_sha256: outputData.ca_sha256 ?? null,
-      ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
-      ssl: outputData.ssl ?? null,
+      // Beats-specific fields: null these out on update so fields are cleared when not set.
+      // isBeatsOutput narrows `output` so beats-only properties are accessible.
+      ...(isBeatsOutput(output) && {
+        config_yaml: configYaml ?? null,
+        ca_sha256: output.ca_sha256 ?? null,
+        ca_trusted_fingerprint: output.ca_trusted_fingerprint ?? null,
+        ssl: output.ssl ?? null,
+      }),
     } as NewOutput;
 
-    if (!data.hosts || data.hosts.length === 0) {
+    if (isBeatsOutput(data) && (!data.hosts || data.hosts.length === 0)) {
       data.hosts = outputService.getDefaultESHosts();
     }
 
@@ -276,13 +322,36 @@ async function hashSecrets(output: PreconfiguredOutput) {
       };
     }
   }
-  // common to all types
-  if (typeof output.secrets?.ssl?.key === 'string') {
-    const key = await hashSecret(output.secrets?.ssl?.key);
+  if (isBeatsOutput(output) && typeof output.secrets?.ssl?.key === 'string') {
+    const key = await hashSecret(output.secrets.ssl.key);
     secrets = {
       ...(secrets ? secrets : {}),
       ssl: { key },
     };
+  }
+
+  if (isOtlpOutput(output)) {
+    const tls = output.secrets?.otlp_exporter?.tls;
+    const tlsHashes: Record<string, unknown> = {};
+
+    if (typeof tls?.key_pem === 'string') {
+      tlsHashes.key_pem = await hashSecret(tls.key_pem);
+    }
+
+    const tpmHashes: Record<string, unknown> = {};
+    if (typeof tls?.tpm?.owner_auth === 'string') {
+      tpmHashes.owner_auth = await hashSecret(tls.tpm.owner_auth);
+    }
+    if (typeof tls?.tpm?.auth === 'string') {
+      tpmHashes.auth = await hashSecret(tls.tpm.auth);
+    }
+    if (Object.keys(tpmHashes).length) {
+      tlsHashes.tpm = tpmHashes;
+    }
+
+    if (Object.keys(tlsHashes).length) {
+      secrets = { ...secrets, otlp_exporter: { tls: tlsHashes } };
+    }
   }
 
   return secrets;
@@ -293,14 +362,11 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list();
-  const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
-  );
+  const existingPreconfiguredOutputs = await outputService.listPreconfigured();
 
   const logger = appContextService.getLogger();
 
-  for (const output of existingPreconfiguredOutput) {
+  for (const output of existingPreconfiguredOutputs.items) {
     const hasBeenDelete = !outputs.find(({ id }) => output.id === id);
     if (!hasBeenDelete) {
       continue;
@@ -383,9 +449,44 @@ async function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
 ): Promise<boolean> {
-  // ssl fields are common to all output types
+  // Type change always requires an update; subsequent branches assume same type.
+  if (isDifferent(existingOutput.type, preconfiguredOutput.type)) {
+    return true;
+  }
+
+  // Fields common to all output types.
+  if (
+    !existingOutput.is_preconfigured ||
+    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
+    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
+    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
+    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
+    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal)
+  ) {
+    return true;
+  }
+
+  if (existingOutput.type === outputType.Otlp) {
+    const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
+    const existingTls = existingOutput.secrets?.otlp_exporter?.tls;
+    const preconfiguredTls = preconfiguredOtlp.secrets?.otlp_exporter?.tls;
+    const [tlsKeyIsDifferent, ownerAuthIsDifferent, tpmAuthIsDifferent] = await Promise.all([
+      isSecretDifferent(preconfiguredTls?.key_pem, existingTls?.key_pem),
+      isSecretDifferent(preconfiguredTls?.tpm?.owner_auth, existingTls?.tpm?.owner_auth),
+      isSecretDifferent(preconfiguredTls?.tpm?.auth, existingTls?.tpm?.auth),
+    ]);
+    return (
+      isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter) ||
+      tlsKeyIsDifferent ||
+      ownerAuthIsDifferent ||
+      tpmAuthIsDifferent
+    );
+  }
+
+  const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;
+
   const sslKeyHashIsDifferent = await isSecretDifferent(
-    preconfiguredOutput.secrets?.ssl?.key,
+    preconfiguredBeats.secrets?.ssl?.key,
     existingOutput.secrets?.ssl?.key
   );
 
@@ -456,27 +557,21 @@ async function isPreconfiguredOutputDifferentFromCurrent(
   };
 
   return (
-    !existingOutput.is_preconfigured ||
-    isDifferent(existingOutput.is_default, preconfiguredOutput.is_default) ||
-    isDifferent(existingOutput.is_default_monitoring, preconfiguredOutput.is_default_monitoring) ||
-    isDifferent(existingOutput.name, preconfiguredOutput.name) ||
-    isDifferent(existingOutput.type, preconfiguredOutput.type) ||
-    (preconfiguredOutput.hosts &&
+    !!(
+      preconfiguredBeats.hosts &&
       !isEqual(
-        existingOutput?.type === 'elasticsearch'
+        existingOutput.type === 'elasticsearch'
           ? existingOutput.hosts?.map(normalizeHostsForAgents)
           : existingOutput.hosts,
         preconfiguredOutput.type === 'elasticsearch'
-          ? preconfiguredOutput.hosts.map(normalizeHostsForAgents)
-          : preconfiguredOutput.hosts
-      )) ||
-    isDifferent(preconfiguredOutput.ssl, existingOutput.ssl) ||
-    isDifferent(existingOutput.ca_sha256, preconfiguredOutput.ca_sha256) ||
-    isDifferent(
-      existingOutput.ca_trusted_fingerprint,
-      preconfiguredOutput.ca_trusted_fingerprint
+          ? preconfiguredBeats.hosts.map(normalizeHostsForAgents)
+          : preconfiguredBeats.hosts
+      )
     ) ||
-    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    isDifferent(preconfiguredBeats.ssl, existingOutput.ssl) ||
+    isDifferent(existingOutput.ca_sha256, preconfiguredBeats.ca_sha256) ||
+    isDifferent(existingOutput.ca_trusted_fingerprint, preconfiguredBeats.ca_trusted_fingerprint) ||
+    isDifferent(existingOutput.config_yaml, preconfiguredBeats.config_yaml) ||
     (isOtelExporterOutput(existingOutput) &&
       isOtelExporterOutput(preconfiguredOutput) &&
       (isDifferent(
@@ -489,11 +584,10 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         ))) ||
     // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
     (existingOutput.type !== 'kafka' &&
-      isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)) ||
-    isDifferent(existingOutput.allow_edit ?? [], preconfiguredOutput.allow_edit ?? []) ||
-    (preconfiguredOutput.preset &&
-      isDifferent(existingOutput.preset, preconfiguredOutput.preset)) ||
-    isDifferent(existingOutput.is_internal, preconfiguredOutput.is_internal) ||
+      isDifferent(existingOutput.proxy_id, preconfiguredBeats.proxy_id)) ||
+    !!(
+      preconfiguredBeats.preset && isDifferent(existingOutput.preset, preconfiguredBeats.preset)
+    ) ||
     sslKeyHashIsDifferent ||
     (await kafkaFieldsAreDifferent()) ||
     (await logstashFieldsAreDifferent()) ||

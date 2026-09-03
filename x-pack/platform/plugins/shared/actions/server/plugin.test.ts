@@ -74,6 +74,11 @@ function getConfig(overrides = {}) {
         },
       },
     },
+    inboundEvents: {
+      enabled: false,
+      maxBodyBytes: new ByteSizeValue(1024 * 1024),
+      maxEmitted: 25,
+    },
     ...overrides,
   };
 }
@@ -132,6 +137,11 @@ describe('Actions Plugin', () => {
             },
           },
         },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -180,6 +190,16 @@ describe('Actions Plugin', () => {
       const clientLeasePool = setupContract.getClientLeasePool();
       expect(clientLeasePool).toBeInstanceOf(LeasePool);
       expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
+    });
+
+    it('allows only one connector event emitter registration', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+      const emitter = { emit: jest.fn() };
+
+      setupContract.registerConnectorEventEmitter(emitter);
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+        /only one emitter is supported/
+      );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -551,6 +571,11 @@ describe('Actions Plugin', () => {
               callback: { lookbackWindow: '1h', limit: 100 },
             },
           },
+        },
+        inboundEvents: {
+          enabled: false,
+          maxBodyBytes: new ByteSizeValue(1024 * 1024),
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);

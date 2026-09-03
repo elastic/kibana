@@ -31,10 +31,17 @@ export const ALERTING_ERROR_CODES = {
   RULE_VERSION_CONFLICT: 'RULE_VERSION_CONFLICT',
   /** The submitted rule body failed schema validation. */
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
+  /** A registered artifact's `data` failed its type-specific schema validation. */
+  INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
+  /**
+   * A rule's merged shape has a recovery/no-data query block that is
+   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   */
+  INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
   /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
@@ -43,6 +50,11 @@ export const ALERTING_ERROR_CODES = {
    * operation into multiple requests.
    */
   BULK_QUERY_MATCH_LIMIT_EXCEEDED: 'BULK_QUERY_MATCH_LIMIT_EXCEEDED',
+  /**
+   * A builder rule's query was changed without explicitly clearing
+   * `metadata.builder_type`. The transition to ES|QL mode must be explicit.
+   */
+  BUILDER_TYPE_NOT_CLEARED: 'BUILDER_TYPE_NOT_CLEARED',
   /** PUT body changed a field flagged as immutable. */
   IMMUTABLE_FIELDS_CHANGED: 'IMMUTABLE_FIELDS_CHANGED',
   /** Filter expression referenced an unknown field. */
@@ -80,6 +92,10 @@ export const ALERTING_ERROR_CODES = {
    */
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
+  // ────────────────────── Rule templates ─────────────────────
+  /** A rule template with the given identifier does not exist. */
+  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
+
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -108,11 +124,16 @@ export const ALERTING_ERROR_CODES = {
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * The `group_hash` resolved to a latest alert event, but its `episode_id`
-   * did not match the one the item targeted (the episode was superseded).
-   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   * No alert event matched the supplied `episode_id`. On the legacy bulk
+   * route it also covers a targeted `episode_id` superseded by a newer
+   * episode of the group.
    */
   ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  /**
+   * The episode exists but is not the latest episode of its series. Lifecycle
+   * actions (`activate` / `deactivate`) only accept the latest episode.
+   */
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
@@ -157,6 +178,13 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  *   `_INVALID`, `_UNRECOVERABLE`.
  */
 export const ALERTING_LOG_CODES = {
+  // ─────────────────────────────── Dispatcher steps ──────────────────────
+  /**
+   * Hydrate episode data step: some episodes had no matching .rule-events row;
+   * data will be absent for those episodes
+   */
+  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -309,6 +337,49 @@ export const ALERTING_LOG_CODES = {
    * remaining policies still dispatch.
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
+  /**
+   * The dispatcher has no persisted event watermark (cold start or wiped task
+   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
+   * Rule events older than that will not be dispatched.
+   */
+  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
+  /**
+   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark is
+   * safe. This is expected under sustained high load — it is not an error.
+   */
+  DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
+  /**
+   * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
+   * The dispatcher will write terminal `unmatched` records for the blocking
+   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   */
+  DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
+  /**
+   * The persisted eventWatermark is not a valid ISO date string. The dispatcher
+   * will fall back to cold-start behaviour (scan from now − OVERLAP_WINDOW_MINUTES).
+   */
+  DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
+  /**
+   * The escape hatch fired but the pipeline stopped before FetchEpisodesStep so
+   * no episodes are known for the window, and watermark lag is still within one
+   * max scan window. The watermark is held; the stuck counter is reset so
+   * transient infra pressure can recover without dropping the window.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
+  /**
+   * The pre-fetch escape hatch fired and watermark lag already exceeds one max
+   * scan window. The window is force-advanced without knowing its episodes;
+   * unread events in that window are skipped so the dispatcher cannot stall
+   * indefinitely.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
+    'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+  /**
+   * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
+   * call failed. The watermark is held so episodes will be retried next tick.
+   */
+  DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -365,6 +436,12 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
+  RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
+  /**
+   * The active-group fetch hit its `alerts.max` bound, so the active set may be truncated.
+   */
+  RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED: 'RULE_EXECUTION_ACTIVE_GROUPS_TRUNCATED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
@@ -372,6 +449,16 @@ export const ALERTING_LOG_CODES = {
    * failed, leaving the rule's task state diverged from its saved object.
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+  /**
+   * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
+   * for one or more rules — e.g. the per-task-type key grant was rejected. The
+   * affected rules' keys were left unrotated (their old key still works) and
+   * are reported per-rule in the bulk response; no saved object was written,
+   * so rule and task state stay consistent (this is not
+   * `RULE_TASK_MANAGER_DRIFT`).
+   */
+  RULE_API_KEY_ROTATION_FAILED: 'RULE_API_KEY_ROTATION_FAILED',
+
   /**
    * Scheduling a new rule's executor task failed and the compensating delete
    * of the already-persisted saved object failed too. The rule is left
@@ -414,6 +501,13 @@ export const ALERTING_LOG_CODES = {
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
 
+  // ──────────────── Rule templates (graceful degradation) ────────────────
+  /**
+   * A stored rule template failed schema validation. Find omits it from the
+   * page; get maps it to not-found. Operator should investigate package drift.
+   */
+  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_episode` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
@@ -436,9 +530,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Skill schema docs could not be generated; skill registration aborted (error). */
-  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
-  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────
@@ -452,6 +544,15 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * The pending API-key invalidation background task run failed. Keys queued
+   * for invalidation remain until the next scheduled run.
+   */
+  TASKS_API_KEY_INVALIDATION_RUN_FAILED: 'TASKS_API_KEY_INVALIDATION_RUN_FAILED',
+
+  // ─────────────────────────────── Routes ──────────────────────────────
+  /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */
+  ROUTES_HANDLER_FAILED: 'ROUTES_HANDLER_FAILED',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

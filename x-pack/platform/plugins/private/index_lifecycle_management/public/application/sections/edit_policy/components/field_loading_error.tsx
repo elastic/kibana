@@ -7,43 +7,33 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 interface Props {
   title: React.ReactNode;
   body: React.ReactNode;
+  buttonLabel: string;
   resendRequest: () => void;
   'data-test-subj'?: string;
-  'aria-label'?: string;
 }
 
 export const FieldLoadingError: FunctionComponent<Props> = (props) => {
-  const { title, body, resendRequest } = props;
+  const { title, body, buttonLabel, resendRequest } = props;
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnWarningCallout
         data-test-subj={props['data-test-subj']}
-        iconType="question"
-        color="warning"
-        title={
-          <>
-            {title}
-
-            <EuiToolTip content={props['aria-label']} disableScreenReaderOutput>
-              <EuiButtonIcon
-                size="s"
-                color="warning"
-                onClick={resendRequest}
-                iconType="refresh"
-                aria-label={props['aria-label']}
-              />
-            </EuiToolTip>
-          </>
-        }
-      >
-        {body}
-      </EuiCallOut>
+        title={title}
+        text={body}
+        actionProps={{
+          primary: {
+            children: buttonLabel,
+            onClick: resendRequest,
+          },
+        }}
+      />
     </>
   );
 };

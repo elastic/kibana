@@ -24,8 +24,10 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { HeightRetainer } from '../height_retainer';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { filterSectionsByTerm } from './helper';
+import { renderMetadataFieldValue } from './render_metadata_value';
 import { Section } from './section';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import type { SectionDescriptor } from './types';
 
 interface Props {
@@ -39,6 +41,12 @@ export function MetadataTable({ sections, isLoading }: Props) {
   const { urlParams } = useLegacyUrlParams();
   const { searchTerm = '' } = urlParams;
   const { docLinks } = useApmPluginContext().core;
+  const { dataView } = useAdHocApmDataView();
+
+  const renderValue = useCallback(
+    (key: string, value: unknown) => renderMetadataFieldValue(dataView, key, value),
+    [dataView]
+  );
 
   const filteredSections = filterSectionsByTerm(sections, searchTerm);
 
@@ -100,7 +108,7 @@ export function MetadataTable({ sections, isLoading }: Props) {
               <h6>{section.label}</h6>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <Section properties={section.properties} />
+            <Section properties={section.properties} renderValue={renderValue} />
             <EuiSpacer size="xl" />
           </div>
         ))}
