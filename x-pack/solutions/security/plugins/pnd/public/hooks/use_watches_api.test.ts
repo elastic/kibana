@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { notifyWatchUpdateError } from './use_watches_api';
+import { notifyWorkerUpdateError } from './use_workers_api';
 
 const httpError = (status: number): Error =>
   Object.assign(new Error(`HTTP ${status}`), {
@@ -15,7 +15,7 @@ const httpError = (status: number): Error =>
     response: { status },
   });
 
-describe('notifyWatchUpdateError', () => {
+describe('notifyWorkerUpdateError', () => {
   const toasts = coreMock.createStart().notifications.toasts;
 
   beforeEach(() => {
@@ -23,18 +23,18 @@ describe('notifyWatchUpdateError', () => {
   });
 
   it('warns on 409 without a stack toast', () => {
-    notifyWatchUpdateError(toasts, httpError(409));
+    notifyWorkerUpdateError(toasts, httpError(409));
 
-    expect(toasts.addWarning).toHaveBeenCalledWith('Watch settings changed; reload and try again');
+    expect(toasts.addWarning).toHaveBeenCalledWith('Worker settings changed; reload and try again');
     expect(toasts.addDanger).not.toHaveBeenCalled();
     expect(toasts.addError).not.toHaveBeenCalled();
   });
 
   it('uses danger on 403 without a stack toast', () => {
-    notifyWatchUpdateError(toasts, httpError(403));
+    notifyWorkerUpdateError(toasts, httpError(403));
 
     expect(toasts.addDanger).toHaveBeenCalledWith(
-      'You do not have permission to update this watch'
+      'You do not have permission to update this worker'
     );
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addError).not.toHaveBeenCalled();
@@ -42,9 +42,9 @@ describe('notifyWatchUpdateError', () => {
 
   it('keeps addError for unexpected failures', () => {
     const error = httpError(500);
-    notifyWatchUpdateError(toasts, error);
+    notifyWorkerUpdateError(toasts, error);
 
-    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the watch' });
+    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the worker' });
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addDanger).not.toHaveBeenCalled();
   });

@@ -3,9 +3,8 @@
   "body": [
     {
       "id": "security_solution_home",
-      "icon": "logoSecurity",
-      "renderAs": "home",
-      "title": "Security",
+      "icon": "home",
+      "title": "Home",
       "href": "/jom/app/security/get_started",
       "path": "security_solution_home",
       "deepLink": {},
