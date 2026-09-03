@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { ApmDataSource, ApmDataSourceWithSummary } from '@kbn/apm-data-access-plugin/common';
+export type { ApmDataSource, ApmDataSourceWithSummary } from '@kbn/apm-types';
