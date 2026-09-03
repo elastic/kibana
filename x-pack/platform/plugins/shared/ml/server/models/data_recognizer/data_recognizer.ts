@@ -57,6 +57,7 @@ import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { ServerlessInfo } from '../../types';
+import { getIsMlCpsEnabled } from '../../lib/cps_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -108,6 +109,7 @@ export class DataRecognizer {
   private _mlSavedObjectService: MLSavedObjectService;
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
+  private _serverless: ServerlessInfo;
 
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
@@ -150,6 +152,7 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
+    this._serverless = serverless;
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient, serverless);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
@@ -631,7 +634,11 @@ export class DataRecognizer {
         });
       }
 
-      if (projectRouting !== undefined) {
+      if (
+        projectRouting !== undefined &&
+        this._serverless.cpsEnabled &&
+        (await getIsMlCpsEnabled(this._client))
+      ) {
         moduleConfig.datafeeds.forEach((df) => {
           df.config.project_routing = projectRouting;
         });

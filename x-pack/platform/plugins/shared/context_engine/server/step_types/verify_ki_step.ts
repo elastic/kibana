@@ -11,8 +11,14 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
 import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
+import type { ContextEngineAnalyticsService } from '../telemetry';
+import { withKiVerificationTelemetry } from './helpers';
 
-export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logger) => {
+export const createVerifyKiStepDefinition = (
+  coreSetup: CoreSetup,
+  logger: Logger,
+  analyticsService: ContextEngineAnalyticsService
+) => {
   const service = new KiVerificationService(createKiVerifierRegistry());
 
   return createServerStepDefinition({
@@ -30,12 +36,16 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
         });
       }
 
-      const esClient = context.contextManager.getScopedEsClient();
-      const summary = await service.verifyKi(context.input.ki, {
-        isEnabled,
-        esClient,
+      const summary = await withKiVerificationTelemetry({
+        analyticsService,
         logger,
-        abortSignal: context.abortSignal,
+        run: () =>
+          service.verifyKi(context.input.ki, {
+            isEnabled,
+            esClient: context.contextManager.getScopedEsClient(),
+            logger,
+            abortSignal: context.abortSignal,
+          }),
       });
 
       return { output: summary };

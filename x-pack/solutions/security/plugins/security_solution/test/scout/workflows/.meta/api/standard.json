@@ -1,5 +1,5 @@
 {
-  "sha1": "a1b5c21367bc0d41c99fc459c1d460380dbe9c95",
+  "sha1": "7fc7574c64c4200e6d623df3f874843b657f411a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -29,7 +29,23 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/create_rule_step.spec.ts",
         "line": 122,
-        "column": 79
+        "column": 61
+      }
+    },
+    {
+      "id": "52023b41025cee1-d30ad3ccb96beb6",
+      "title": "Security Solution - Workflow Trigger Registration should register all expected Security Solution event-driven trigger definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/api/tests/security_trigger_registration.spec.ts",
+        "line": 44,
+        "column": 25
       }
     }
   ]
