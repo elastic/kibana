@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   EMPTY_TOKENS,
+  formatRawDocument,
   identifyFeatures,
   sumTokens,
   toPreviouslyIdentifiedFeature,
+  type InferenceDocument,
   type SearchSimilarFeaturesArguments,
   type SimilarFeatureHit,
 } from '@kbn/streams-ai';
@@ -56,7 +57,7 @@ interface AvailableDeduplicationScenario {
 }
 
 interface DedupContextInput extends Record<string, unknown> {
-  sampleDocuments: Array<SearchHit<Record<string, string>>>;
+  sampleDocuments: InferenceDocument[];
   knownFeatureIds: string;
   similarFeature?: SimilarFeatureHit;
 }
@@ -73,10 +74,9 @@ interface DedupContextOutput {
   searchCalls: SearchSimilarFeaturesArguments[];
 }
 
-const checkoutDocument: SearchHit<Record<string, string>> = {
+const checkoutDocument: InferenceDocument = {
   _id: 'checkout-doc',
-  _index: 'logs-synthetic',
-  _source: {
+  fields: {
     'service.name': 'checkout-api',
     'event.dataset': 'checkout-api.logs',
     message: 'checkout-api handled GET /checkout',
@@ -308,10 +308,14 @@ evaluate.describe(
                   let tokensUsed = EMPTY_TOKENS;
 
                   for (let i = 0; i < input.iterations; i++) {
-                    const sampleDocuments = await collectSampleDocuments({
+                    const sampledHits = await collectSampleDocuments({
                       esClient,
                       scenario: extractionScenario,
                       log,
+                    });
+                    const sampleDocuments = sampledHits.flatMap((hit) => {
+                      const document = formatRawDocument({ hit });
+                      return document ? [document] : [];
                     });
 
                     const previouslyIdentifiedFeatures = accumulated

@@ -26,7 +26,11 @@ import type {
   BeatsOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
-import { isBeatsOutput, isOtelExporterOutput } from '../../../common/services/output_helpers';
+import {
+  isBeatsOutput,
+  isOtlpOutput,
+  isOtelExporterOutput,
+} from '../../../common/services/output_helpers';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -40,6 +44,7 @@ import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/c
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { checkOtlpOutputAllowed } from '../outputs/helpers';
 import {
   isAgentlessEnabled,
   isManagedBulkEnabled,
@@ -193,7 +198,19 @@ export async function createOrUpdatePreconfiguredOutputs(
     { ignoreNotFound: true }
   );
 
+  // Resolve OTLP eligibility once before the pMap — the version check does a paginated
+  // package-policy list and must not run concurrently for each OTLP output.
+  // Lazy: skip the check entirely when no OTLP outputs are present.
+  const otlpCheck = outputs.some(isOtlpOutput)
+    ? await checkOtlpOutputAllowed(esClient, soClient)
+    : { result: true as const };
+
   const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    if (isOtlpOutput(output) && !otlpCheck.result) {
+      logger.warn(`Skipping preconfigured OTLP output ${output.id}: ${otlpCheck.error}`);
+      return;
+    }
+
     const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
     const { id, config, ...outputData } = output;
@@ -313,6 +330,30 @@ async function hashSecrets(output: PreconfiguredOutput) {
     };
   }
 
+  if (isOtlpOutput(output)) {
+    const tls = output.secrets?.otlp_exporter?.tls;
+    const tlsHashes: Record<string, unknown> = {};
+
+    if (typeof tls?.key_pem === 'string') {
+      tlsHashes.key_pem = await hashSecret(tls.key_pem);
+    }
+
+    const tpmHashes: Record<string, unknown> = {};
+    if (typeof tls?.tpm?.owner_auth === 'string') {
+      tpmHashes.owner_auth = await hashSecret(tls.tpm.owner_auth);
+    }
+    if (typeof tls?.tpm?.auth === 'string') {
+      tpmHashes.auth = await hashSecret(tls.tpm.auth);
+    }
+    if (Object.keys(tpmHashes).length) {
+      tlsHashes.tpm = tpmHashes;
+    }
+
+    if (Object.keys(tlsHashes).length) {
+      secrets = { ...secrets, otlp_exporter: { tls: tlsHashes } };
+    }
+  }
+
   return secrets;
 }
 
@@ -425,9 +466,21 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     return true;
   }
 
-  if (existingOutput.type === 'otlp') {
+  if (existingOutput.type === outputType.Otlp) {
     const preconfiguredOtlp = preconfiguredOutput as Partial<NewOtlpOutput>;
-    return isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter);
+    const existingTls = existingOutput.secrets?.otlp_exporter?.tls;
+    const preconfiguredTls = preconfiguredOtlp.secrets?.otlp_exporter?.tls;
+    const [tlsKeyIsDifferent, ownerAuthIsDifferent, tpmAuthIsDifferent] = await Promise.all([
+      isSecretDifferent(preconfiguredTls?.key_pem, existingTls?.key_pem),
+      isSecretDifferent(preconfiguredTls?.tpm?.owner_auth, existingTls?.tpm?.owner_auth),
+      isSecretDifferent(preconfiguredTls?.tpm?.auth, existingTls?.tpm?.auth),
+    ]);
+    return (
+      isDifferent(existingOutput.otlp_exporter, preconfiguredOtlp.otlp_exporter) ||
+      tlsKeyIsDifferent ||
+      ownerAuthIsDifferent ||
+      tpmAuthIsDifferent
+    );
   }
 
   const preconfiguredBeats = preconfiguredOutput as Partial<BeatsOutput>;
