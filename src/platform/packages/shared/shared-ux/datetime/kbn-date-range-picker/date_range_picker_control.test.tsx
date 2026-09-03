@@ -435,6 +435,99 @@ describe('DateRangePickerControl', () => {
     });
   });
 
+  describe('rounded suffix', () => {
+    it('shows "(rounded)" next to the label when a relative bound is rounded', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="-1y/y" />);
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Last 1 year (rounded)');
+      expect(screen.getByTestId('dateRangePickerRoundedSuffix')).toBeInTheDocument();
+    });
+
+    it('shows "(rounded)" on presets whose relative bound is rounded', async () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          presets={[
+            { start: 'now-7d/d', end: 'now', label: 'Last 7 days' },
+            { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
+            { start: 'now/d', end: 'now/d', label: 'Today' },
+          ]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const rounded = screen.getByTestId('dateRangePickerPresetItem-Last_7_days');
+      const plain = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
+      const named = screen.getByTestId('dateRangePickerPresetItem-Today');
+      expect(within(rounded).getByTestId('dateRangePickerPresetRoundedSuffix')).toBeInTheDocument();
+      expect(
+        within(plain).queryByTestId('dateRangePickerPresetRoundedSuffix')
+      ).not.toBeInTheDocument();
+      expect(
+        within(named).queryByTestId('dateRangePickerPresetRoundedSuffix')
+      ).not.toBeInTheDocument();
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('shows "(rounded)" when the round relative time setting adds rounding', () => {
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          defaultValue="-1y"
+          settings={{ roundRelativeTime: true }}
+        />
+      );
+
+      expect(screen.getByTestId('dateRangePickerRoundedSuffix')).toBeInTheDocument();
+    });
+
+    it('does not show "(rounded)" without rounding or for named ranges', () => {
+      const { unmount } = renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="-1y" />
+      );
+      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+      unmount();
+
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="today" />);
+      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+    });
+
+    it('keeps "(rounded)" out of the input and the saved preset label', async () => {
+      const onPresetSave = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="-1y/y" onPresetSave={onPresetSave} />
+      );
+
+      const input = openEditing() as HTMLInputElement;
+      expect(input.value).toBe('-1y/y');
+      expect(screen.queryByTestId('dateRangePickerRoundedSuffix')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('dateRangePickerSavePresetButton'));
+      expect(onPresetSave).toHaveBeenCalledWith({
+        start: 'now-1y/y',
+        end: 'now',
+        label: 'Last 1 year',
+      });
+
+      await waitForPopoverClose();
+    });
+
+    it('includes "(rounded)" in the aria-label when collapsed', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed defaultValue="-1y/y" />);
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveAttribute(
+        'aria-label',
+        'Last 1 year (rounded)'
+      );
+    });
+  });
+
   describe('collapsed prop', () => {
     describe('collapsed=false (default)', () => {
       it('shows the text label', () => {

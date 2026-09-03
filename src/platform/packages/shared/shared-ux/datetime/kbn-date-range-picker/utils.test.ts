@@ -11,9 +11,11 @@ import moment from 'moment';
 
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from './constants';
 import type { TimeRange } from './types';
+import { textToTimeRange } from './parse';
 import {
   toLocalPreciseString,
   isValidTimeRange,
+  hasRoundedOffset,
   getOptionDisplayLabel,
   getOptionShorthand,
   getOptionInputText,
@@ -145,6 +147,21 @@ describe('getOptionDisplayLabel', () => {
     expect(getOptionDisplayLabel({ start: '2025-01-01', end: '2025-01-31' })).toBe(
       'Jan 1, 2025, 00:00:00 → Jan 31, 2025, 00:00:00'
     );
+  });
+});
+
+describe('hasRoundedOffset', () => {
+  it('is true when a relative offset bound has a rounding suffix', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y/y'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('now to +1d/d'))).toBe(true);
+    expect(hasRoundedOffset(textToTimeRange('-7d', { roundRelativeTime: true }))).toBe(true);
+  });
+
+  it('is false without rounding, for named ranges, and for absolute bounds', () => {
+    expect(hasRoundedOffset(textToTimeRange('-1y'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('today'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('now/w to now'))).toBe(false);
+    expect(hasRoundedOffset(textToTimeRange('2024-01-01 to 2024-02-01'))).toBe(false);
   });
 });
 

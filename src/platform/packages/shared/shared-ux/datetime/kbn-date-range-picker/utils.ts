@@ -14,6 +14,7 @@ import moment from 'moment';
 import type {
   TimePrecision,
   TimeRange,
+  TimeRangeBounds,
   TimeRangeBoundsOption,
   TimeRangeTransformOptions,
   InitialFocus,
@@ -188,6 +189,16 @@ export function isRelativeToNow(range: TimeRange): boolean {
     (startType === 'RELATIVE' && endType === 'NOW') ||
     (startType === 'NOW' && endType === 'RELATIVE')
   );
+}
+
+/**
+ * Returns `true` when a relative offset bound carries a rounding suffix
+ * (e.g. `now-1y/y`), whether typed by the user or added by the
+ * `roundRelativeTime` setting. Rounding-only bounds such as the `now/d` of
+ * "Today" are not offsets and don't count.
+ */
+export function hasRoundedOffset(range: TimeRangeBounds): boolean {
+  return [range.start, range.end].some((bound) => Boolean(dateMathToRelativeParts(bound)?.round));
 }
 
 /**
