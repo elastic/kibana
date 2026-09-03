@@ -43,6 +43,8 @@ export {
   DEFAULT_DURATION_OUTPUT_FORMAT,
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
+  getDurationUnitFromOutputFormat,
+  getDurationUnitInSeconds,
 } from './constants/duration_formats';
 export { FIELD_FORMAT_IDS } from './types';
 
