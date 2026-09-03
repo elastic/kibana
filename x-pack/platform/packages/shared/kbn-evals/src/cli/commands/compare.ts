@@ -13,10 +13,12 @@ import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
+import { getSpaceIdsFromEnv } from '../../utils/space_ids';
+import { readSpaceIdsFlag } from '../run_helpers';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
-const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
+const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -24,8 +26,8 @@ export const compareCmd: Command<void> = {
   Compare two evaluation experiments using paired t-tests.
 
   Usage modes:
-    1. Direct comparison of two experiment IDs:
-       node scripts/evals compare <experiment-id-1> <experiment-id-2>
+    1. Direct comparison of two experiment IDs (target first, baseline second):
+       node scripts/evals compare <target-experiment-id> <baseline-experiment-id>
 
     2. Auto-resolve baseline from a branch (for CI):
        node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>
@@ -37,13 +39,23 @@ export const compareCmd: Command<void> = {
     --kibana-url       Kibana URL for generating compare page links in markdown
     --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
+    --space-ids        Spaces the experiments were run in (same value as "evals run")
 
   Environment:
-    EVALUATIONS_KBN_URL      Target Kibana URL (defaults to localhost)
-    EVALUATIONS_KBN_API_KEY  API key for authenticating to the target Kibana
+    EVAL_KBN_URL      Target Kibana URL (defaults to localhost)
+    EVAL_KBN_API_KEY  API key for authenticating to the target Kibana
+    EVAL_SPACE_IDS    Spaces the experiments were run in (same as --space-ids)
   `,
   flags: {
-    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output', 'refresh-url'],
+    string: [
+      'baseline-branch',
+      'suite',
+      'format',
+      'kibana-url',
+      'output',
+      'refresh-url',
+      'space-ids',
+    ],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
       --suite            Suite ID filter for baseline lookup and score filtering
@@ -51,6 +63,7 @@ export const compareCmd: Command<void> = {
       --kibana-url       Kibana URL for generating compare page links in markdown
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
+      --space-ids        Spaces the experiments were run in
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -61,24 +74,27 @@ export const compareCmd: Command<void> = {
     const kibanaUrl = flagsReader.string('kibana-url');
     const outputPath = flagsReader.string('output');
     const refreshUrl = flagsReader.string('refresh-url');
+    // Scores are only readable from the spaces they were ingested into, so a
+    // comparison has to be made from where the runs put them.
+    const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
     }
 
-    const evaluationsKbnUrl = process.env.EVALUATIONS_KBN_URL;
+    const evaluationsKbnUrl = process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
     }
 
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
     const kbnClient = getEvaluationsKbnClient({
       kbnClient: defaultKbnClient,
       log,
       evaluationsKbnUrl,
-      evaluationsKbnApiKey: process.env.EVALUATIONS_KBN_API_KEY,
+      evaluationsKbnApiKey: process.env.EVAL_KBN_API_KEY,
     });
-    const evalsClient = new EvalsClient(kbnClient, log);
+    const evalsClient = new EvalsClient(kbnClient, log, { spaceIds });
 
     try {
       await evalsClient.assertPluginEnabled();
@@ -86,14 +102,20 @@ export const compareCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
-          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
     }
 
-    let firstExperimentId: string;
-    let secondExperimentId: string;
+    try {
+      await evalsClient.assertSpacesExist();
+    } catch (error) {
+      throw createFlagError(error instanceof Error ? error.message : String(error));
+    }
+
+    let targetExperimentId: string;
+    let baselineExperimentId: string;
     let baselineMetadata: BaselineExperiment | undefined;
 
     if (baselineBranch) {
@@ -101,8 +123,8 @@ export const compareCmd: Command<void> = {
         throw createFlagError('--suite is required when using --baseline-branch.');
       }
 
-      firstExperimentId = positionals[0];
-      if (!firstExperimentId) {
+      targetExperimentId = positionals[0];
+      if (!targetExperimentId) {
         throw createFlagError(
           'One experiment ID is required with --baseline-branch. Example: node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>'
         );
@@ -111,23 +133,23 @@ export const compareCmd: Command<void> = {
       // In CI the positional may be a base build ID (e.g. "bk-BUILD_ID"). Resolve it to the
       // full composite (e.g. "bk-BUILD_ID::suite::model") so the server's exact-term query
       // on metadata.execution_id finds the scores.
-      if (!firstExperimentId.includes('::')) {
+      if (!targetExperimentId.includes('::')) {
         const resolved = await evalsClient.findLatestExperimentForBuild({
           suiteId,
-          baseExecutionId: firstExperimentId,
+          baseExecutionId: targetExperimentId,
         });
         if (resolved) {
-          log.info(`Resolved PR experiment: ${firstExperimentId} → ${resolved.executionId}`);
-          firstExperimentId = resolved.executionId;
+          log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
+          targetExperimentId = resolved.executionId;
         } else {
-          log.warning(`Could not resolve base ID "${firstExperimentId}"; using raw ID.`);
+          log.warning(`Could not resolve base ID "${targetExperimentId}"; using raw ID.`);
         }
       }
 
       // Extract model ID from the composite for model-matched baseline lookup,
       // so we don't compare haiku scores against a sonnet baseline (or vice versa).
-      const taskModelId = firstExperimentId.includes('::')
-        ? firstExperimentId.split('::').pop()
+      const taskModelId = targetExperimentId.includes('::')
+        ? targetExperimentId.split('::').pop()
         : undefined;
 
       log.info(
@@ -140,7 +162,7 @@ export const compareCmd: Command<void> = {
         suiteId,
         branch: baselineBranch,
         taskModelId,
-        excludeExecutionId: firstExperimentId,
+        excludeExecutionId: targetExperimentId,
       });
 
       if (!baselineMetadata) {
@@ -150,13 +172,13 @@ export const compareCmd: Command<void> = {
         return;
       }
 
-      secondExperimentId = baselineMetadata.executionId;
-      log.info(`Found baseline experiment: ${secondExperimentId}`);
+      baselineExperimentId = baselineMetadata.executionId;
+      log.info(`Found baseline experiment: ${baselineExperimentId}`);
     } else {
-      [firstExperimentId, secondExperimentId] = positionals;
-      if (!firstExperimentId || !secondExperimentId) {
+      [targetExperimentId, baselineExperimentId] = positionals;
+      if (!targetExperimentId || !baselineExperimentId) {
         throw createFlagError(
-          'Two experiment IDs are required. Example: node scripts/evals compare <experiment-id-1> <experiment-id-2>. Configure target Kibana with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY.'
+          'Two experiment IDs are required (target first, baseline second). Example: node scripts/evals compare <target-experiment-id> <baseline-experiment-id>. Configure target Kibana with EVAL_KBN_URL and EVAL_KBN_API_KEY.'
         );
       }
 
@@ -183,15 +205,15 @@ export const compareCmd: Command<void> = {
           return id;
         };
 
-        [firstExperimentId, secondExperimentId] = await Promise.all([
-          resolveIfNeeded(firstExperimentId),
-          resolveIfNeeded(secondExperimentId),
+        [targetExperimentId, baselineExperimentId] = await Promise.all([
+          resolveIfNeeded(targetExperimentId),
+          resolveIfNeeded(baselineExperimentId),
         ]);
 
         if (format === 'markdown') {
-          const baselineBaseId = secondExperimentId.includes('::')
-            ? secondExperimentId.split('::')[0]
-            : secondExperimentId;
+          const baselineBaseId = baselineExperimentId.includes('::')
+            ? baselineExperimentId.split('::')[0]
+            : baselineExperimentId;
           baselineMetadata = await evalsClient.findLatestExperimentForBuild({
             suiteId,
             baseExecutionId: baselineBaseId,
@@ -200,30 +222,33 @@ export const compareCmd: Command<void> = {
       }
     }
 
-    const executionIdFilter = suiteId ? { suiteId, executionId: firstExperimentId } : undefined;
-    const baselineFilter = suiteId ? { suiteId, executionId: secondExperimentId } : undefined;
+    const targetFilter = suiteId ? { suiteId, executionId: targetExperimentId } : undefined;
+    const baselineFilter = suiteId ? { suiteId, executionId: baselineExperimentId } : undefined;
 
-    const [firstExperimentScores, secondExperimentScores] = await Promise.all([
-      evalsClient.getExperimentScores(firstExperimentId, executionIdFilter),
-      evalsClient.getExperimentScores(secondExperimentId, baselineFilter),
+    const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
+      evalsClient.getExperimentScores(targetExperimentId, targetFilter),
+      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
     ]);
 
-    if (firstExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${firstExperimentId}`);
+    if (targetExperimentScores.length === 0) {
+      throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
-    if (secondExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${secondExperimentId}`);
+    if (baselineExperimentScores.length === 0) {
+      throw new Error(`No scores found for experiment ID: ${baselineExperimentId}`);
     }
 
-    const firstExperimentDatasets = new Map(
-      firstExperimentScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const targetExperimentDatasets = new Map(
+      targetExperimentScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
     );
-    const secondExperimentDatasets = new Map(
-      secondExperimentScores.map((score) => [score.example.dataset.id, score.example.dataset.name])
+    const baselineExperimentDatasets = new Map(
+      baselineExperimentScores.map((score) => [
+        score.example.dataset.id,
+        score.example.dataset.name,
+      ])
     );
-    const overlappingDatasetIds = [...firstExperimentDatasets.keys()].filter((id) =>
-      secondExperimentDatasets.has(id)
+    const overlappingDatasetIds = [...targetExperimentDatasets.keys()].filter((id) =>
+      baselineExperimentDatasets.has(id)
     );
 
     if (overlappingDatasetIds.length === 0) {
@@ -233,16 +258,16 @@ export const compareCmd: Command<void> = {
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
 
     const overlappingDatasetSet = new Set(overlappingDatasetIds);
-    const filteredFirstScores = firstExperimentScores.filter((score) =>
+    const filteredTargetScores = targetExperimentScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
-    const filteredSecondScores = secondExperimentScores.filter((score) =>
+    const filteredBaselineScores = baselineExperimentScores.filter((score) =>
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
     const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredFirstScores,
-      filteredSecondScores
+      filteredTargetScores,
+      filteredBaselineScores
     );
 
     if (pairs.length === 0) {
@@ -268,17 +293,17 @@ export const compareCmd: Command<void> = {
           urlObj.username = '';
           urlObj.password = '';
           const baseUrl = urlObj.toString().replace(/\/+$/, '');
-          comparePageUrl = `${baseUrl}/app/management/ai/evals/compare?type=execution&baseline=${encodeURIComponent(
-            secondExperimentId
-          )}&target=${encodeURIComponent(firstExperimentId)}`;
+          comparePageUrl = `${baseUrl}/app/evals/compare?type=execution&baseline=${encodeURIComponent(
+            baselineExperimentId
+          )}&target=${encodeURIComponent(targetExperimentId)}`;
         } catch {
           log.warning(`Invalid Kibana URL for compare page link: ${effectiveKibanaUrl}`);
         }
       }
 
       const markdown = formatMarkdownCompareReport({
-        experimentIdA: firstExperimentId,
-        experimentIdB: secondExperimentId,
+        targetExperimentId,
+        baselineExperimentId,
         results,
         comparePageUrl,
         baselineTimestamp: baselineMetadata?.timestamp,
@@ -297,8 +322,8 @@ export const compareCmd: Command<void> = {
       }
     } else {
       const report = formatPairedTTestReport({
-        experimentIdA: firstExperimentId,
-        experimentIdB: secondExperimentId,
+        targetExperimentId,
+        baselineExperimentId,
         results,
       });
 

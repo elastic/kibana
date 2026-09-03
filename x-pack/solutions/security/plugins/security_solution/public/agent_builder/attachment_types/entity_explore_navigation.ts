@@ -17,7 +17,6 @@ import {
   type FlyoutDescriptor,
   type FlyoutV2UrlParamValue,
 } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { notifyFlyoutV2Navigation } from '../../flyout_v2/shared/url_state/flyout_v2_navigation';
 import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
@@ -30,6 +29,10 @@ import {
   ServicePanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
+import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
+import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
+import { ServiceDetailsPanelKey } from '../../flyout/entity_details/service_details_left';
+import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
 
@@ -123,6 +126,7 @@ const getEntityToolDescriptor = (
         entityType,
         entityName,
         entityId,
+        ...(path.subTab ? { subTab: path.subTab } : {}),
       };
     case 'anomalies':
       return entityType === 'host' || entityType === 'user'
@@ -320,6 +324,70 @@ export const buildEntityRightPanel = (
   }
 };
 
+/**
+ * Builds the expandable-flyout `left` (details) panel for a host/user/service
+ * entity. Parameterized by `scopeId`, left-tab `path`, and `isRiskScoreExist`
+ *
+ * Returns `null` for generic entities and when `entityStoreId` is missing.
+ */
+export const buildEntityLeftPanel = ({
+  identifier,
+  scopeId,
+  path,
+  isRiskScoreExist,
+}: {
+  identifier: EntityAttachmentIdentifier;
+  scopeId: string;
+  path: Partial<EntityDetailsPath>;
+  isRiskScoreExist: boolean;
+}): EntityAnalyticsFlyoutNavigationState['left'] | null => {
+  const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
+    return null;
+  }
+
+  switch (identifierType) {
+    case 'host':
+      return {
+        id: HostDetailsPanelKey,
+        params: {
+          hostName: displayName,
+          entityId: entityStoreId,
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
+      };
+    case 'user':
+      return {
+        id: UserDetailsPanelKey,
+        params: {
+          userName: displayName,
+          identityFields: { 'user.name': displayName },
+          entityId: entityStoreId,
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
+      };
+    case 'service':
+      return {
+        id: ServiceDetailsPanelKey,
+        params: {
+          identityFields: { 'service.name': displayName },
+          entityStoreEntityId: entityStoreId,
+          scopeId,
+          isRiskScoreExist,
+          path,
+        },
+      };
+    default:
+      return null;
+  }
+};
+
 const openSecurityAgentBuilderChatPreservingConversation = (
   agentBuilder: AgentBuilderPluginStart
 ): void => {
@@ -483,10 +551,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     path,
     replace: true,
   });
-
-  if (isNewFlyoutEnabled && descriptors) {
-    notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
-  }
 
   if (!alreadyOnEaHomePage) {
     scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });

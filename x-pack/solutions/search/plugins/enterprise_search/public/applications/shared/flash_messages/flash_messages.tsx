@@ -10,29 +10,40 @@ import React, { Fragment } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
-import { FLASH_MESSAGE_TYPES } from './constants';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
+
 import { FlashMessagesLogic } from './flash_messages_logic';
+
+const flashMessageCalloutComponents = {
+  success: KbnSuccessCallout,
+  info: KbnInfoCallout,
+  warning: KbnWarningCallout,
+  error: KbnDangerCallout,
+} as const;
 
 export const FlashMessages: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
     <div aria-live="polite" data-test-subj="FlashMessages">
-      {messages.map(({ type, message, description, iconType }, index) => (
-        <Fragment key={index}>
-          <EuiCallOut
-            data-test-subj="flashMessageCallout"
-            color={FLASH_MESSAGE_TYPES[type].color}
-            iconType={iconType ?? FLASH_MESSAGE_TYPES[type].iconType}
-            title={message}
-          >
-            {description}
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      ))}
+      {messages.map(({ type, message, description }, index) => {
+        const CalloutComponent = flashMessageCalloutComponents[type];
+        return (
+          <Fragment key={index}>
+            <CalloutComponent data-test-subj="flashMessageCallout" title={message}>
+              {description}
+            </CalloutComponent>
+            <EuiSpacer />
+          </Fragment>
+        );
+      })}
       {children}
     </div>
   );

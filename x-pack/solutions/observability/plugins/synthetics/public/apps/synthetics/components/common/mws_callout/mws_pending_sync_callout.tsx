@@ -10,8 +10,15 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SyncNowLink } from './sync_now_link';
+import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
-export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }) => {
+export const MwsPendingSyncCallout = ({
+  syncInterval,
+  hasOutdatedAgent = false,
+}: {
+  syncInterval: number;
+  hasOutdatedAgent?: boolean;
+}) => {
   return (
     <>
       <EuiCallOut
@@ -34,6 +41,7 @@ export const MwsPendingSyncCallout = ({ syncInterval }: { syncInterval: number }
             values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
           />
         </EuiText>
+        {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>

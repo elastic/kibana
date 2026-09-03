@@ -302,20 +302,26 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // disable rule, and implicitly task
       await ruleUtils.disable(createdRule.id);
 
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // Wait for the current task run to finish before checking the disabled state. The task can be
+      // disabled while still running, which would otherwise race with the assertions below.
+      await waitForIdleDisabledTask(createdRule.scheduled_task_id);
 
       // manually enable task
       await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
 
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // Re-enabling the Task Manager document must not re-enable the task for a disabled rule.
+      // Wait for any attempted run to finish before asserting that it was disabled again.
+      await waitForIdleDisabledTask(createdRule.scheduled_task_id);
     });
 
-    async function waitForDisabledTask(taskId: string) {
+    async function waitForIdleDisabledTask(taskId: string) {
       await retry.try(async () => {
         const taskDoc = await getScheduledTask(taskId);
         expect(taskDoc.task.enabled).to.be(false);
+        expect(taskDoc.task.status).to.eql('idle');
+        expect(taskDoc.task.ownerId).to.be(null);
+        expect(taskDoc.task.startedAt).to.be(null);
+        expect(taskDoc.task.retryAt).to.be(null);
       });
     }
   });

@@ -9,14 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@e
 import { css } from '@emotion/react';
 import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
-import { useSignificantEventsAvailability } from '../../hooks/significant_events/use_significant_events_availability';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { AboutPanel } from './about_panel';
 import { DataQualityCard } from './data_quality_card';
 import { IngestRateChart } from './ingest_rate_chart';
 import { ImportExportPanel } from './import_export_panel';
-import { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
 
 interface OverviewSection {
   id: string;
@@ -27,16 +25,8 @@ interface OverviewSection {
 export function StreamOverview() {
   const { definition, refresh } = useStreamDetail();
   const {
-    features: { contentPacks, significantEvents },
-    isLoading: isPrivilegesLoading,
+    features: { contentPacks },
   } = useStreamsPrivileges();
-  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  // Client-side gate (flag + license + tier); availability also confirms required plugins.
-  const showKnowledgeIndicatorsPanel =
-    !!significantEvents?.available &&
-    !isPrivilegesLoading &&
-    !isAvailabilityLoading &&
-    availability?.available === true;
 
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
   const isDraft = isDraftGetResponse(definition);
@@ -61,11 +51,6 @@ export function StreamOverview() {
 
   const sidebarSections: OverviewSection[] = [
     { id: 'about', node: <AboutPanel />, show: true },
-    {
-      id: 'knowledge-indicators',
-      node: <KnowledgeIndicatorsPanel definition={definition} />,
-      show: showKnowledgeIndicatorsPanel,
-    },
     {
       id: 'import-export',
       node: <ImportExportPanel definition={definition} refreshDefinition={refresh} />,

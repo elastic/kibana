@@ -75,7 +75,7 @@ describe('VegaVisualizations', () => {
       getServiceSettings: mockGetServiceSettings,
     };
 
-    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies, 'view');
+    VegaVisualization = createVegaVisualization(vegaVisualizationDependencies, false);
   });
 
   describe('VegaVisualization - basics', () => {

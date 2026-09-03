@@ -15,7 +15,7 @@ actions:
         ## When to use this API
 
         - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
-        - Use the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+        - Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
 
         ## Get started
 
@@ -140,7 +140,7 @@ actions:
 
         `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
-        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations).
+        For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization).
 
         - **Inline**: use when the panel is specific to this dashboard or must work across Kibana spaces. The panel configuration goes directly inside `config`:
 
@@ -172,7 +172,7 @@ actions:
           }
           ```
 
-        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](visualizations#tag/Visualizations/operation/post-visualizations) to create and retrieve IDs for visualization items.
+        - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create and retrieve IDs for visualization items.
 
           ```json
           {
@@ -221,9 +221,52 @@ actions:
           }
           ```
 
-        - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](#operation/post-dashboards) endpoint.
+        - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](#operation/create-dashboard) endpoint.
 
       externalDocs:
         description: Dashboards documentation
         url: https://www.elastic.co/docs/explore-analyze/dashboards
       x-displayName: Dashboards
+
+  # ──────────────────────────────────────────────
+  # Operation IDs
+  # ──────────────────────────────────────────────
+  # Pin every operationId to a stable, human-readable name.
+  #
+  # Without these actions the router generates the ID from the method and the
+  # path, which produces names like `put-dashboards-id`. Those names ship to
+  # SDK and CLI code generators, where they become command and method names.
+  #
+  # These pins must survive the retirement of the bump-slim overlay. See
+  # https://github.com/elastic/kibana/issues/266195. The bump-slim overlay sets
+  # the same IDs today. Keep the two files in agreement until it is retired.
+  - target: "$.paths['/api/dashboards'].get"
+    description: "Pin operationId for GET /api/dashboards"
+    update:
+      operationId: search-dashboards
+  - target: "$.paths['/api/dashboards'].post"
+    description: "Pin operationId for POST /api/dashboards"
+    update:
+      operationId: create-dashboard
+  - target: "$.paths['/api/dashboards/{id}'].get"
+    description: "Pin operationId for GET /api/dashboards/{id}"
+    update:
+      operationId: get-dashboard
+  - target: "$.paths['/api/dashboards/{id}'].put"
+    description: "Pin operationId for PUT /api/dashboards/{id}"
+    update:
+      operationId: upsert-dashboard
+  - target: "$.paths['/api/dashboards/{id}'].delete"
+    description: "Pin operationId for DELETE /api/dashboards/{id}"
+    update:
+      operationId: delete-dashboard
+
+  # Hide Discover JSON document view fields (feature-flagged).
+  # Same pattern as connectors.overlays.yaml: JSONPath + remove: true.
+  # These properties are inlined on tabs and overrides, not a single $ref.
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session']..properties.documents_display_mode"
+    description: Remove documents_display_mode — behind a feature flag
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session']..properties.json_mode_settings"
+    description: Remove json_mode_settings — behind a feature flag
+    remove: true

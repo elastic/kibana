@@ -164,9 +164,6 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
                 },
               },
               filters: [],
-              query: {
-                esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-              },
               visualization: {
                 legend: {
                   isVisible: true,
@@ -256,6 +253,7 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
 export const discoverSessionApiData: DiscoverSessionApiData = {
   title: 'all_props',
   description: 'A Discover Session with as many props as I can get.',
+  tags: [],
   tabs: [
     {
       id: 'fe157f5f-1ad8-47c9-9cb0-f9fff059aa48',
@@ -299,7 +297,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -333,7 +330,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -407,9 +403,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
               },
             },
             filters: [],
-            query: {
-              esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-            },
             visualization: {
               legend: {
                 isVisible: true,

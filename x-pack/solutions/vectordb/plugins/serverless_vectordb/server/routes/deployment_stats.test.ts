@@ -13,15 +13,24 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
-import { fetchDashboardsCount, fetchIndexStats } from '../lib/deployment_stats';
+import { fetchDashboardsCount } from '../lib/dashboards';
+import {
+  fetchApiKeysStats,
+  fetchIndexStats,
+  hasIndexMonitorPrivilege,
+} from '../lib/deployment_stats';
 import { registerDeploymentStatsRoute } from './deployment_stats';
 
+jest.mock('../lib/dashboards');
 jest.mock('../lib/deployment_stats');
 
 const mockFetchIndexStats = fetchIndexStats as jest.MockedFunction<typeof fetchIndexStats>;
 const mockFetchDashboardsCount = fetchDashboardsCount as jest.MockedFunction<
   typeof fetchDashboardsCount
+>;
+const mockFetchApiKeysStats = fetchApiKeysStats as jest.MockedFunction<typeof fetchApiKeysStats>;
+const mockHasIndexMonitorPrivilege = hasIndexMonitorPrivilege as jest.MockedFunction<
+  typeof hasIndexMonitorPrivilege
 >;
 
 describe('registerDeploymentStatsRoute', () => {
@@ -36,6 +45,8 @@ describe('registerDeploymentStatsRoute', () => {
     logger = loggingSystemMock.createLogger();
     esClient = elasticsearchServiceMock.createScopedClusterClient();
     soClient = savedObjectsClientMock.create();
+    mockHasIndexMonitorPrivilege.mockResolvedValue(true);
+    mockFetchApiKeysStats.mockResolvedValue({ total: null, expiring: null });
 
     registerDeploymentStatsRoute(router, logger);
   });
@@ -52,19 +63,15 @@ describe('registerDeploymentStatsRoute', () => {
         }),
     } as unknown as RequestHandlerContext);
 
-  it('registers a GET route at the deployment stats path with ES-delegated authz', () => {
-    const [config] = router.get.mock.calls[0];
-    expect(config.path).toBe(DEPLOYMENT_STATS_PATH);
-    expect(config.security?.authz).toBeDefined();
-  });
-
-  it('returns index stats and dashboard count combined in a single body', async () => {
+  it('returns index stats, dashboard count and api key stats combined in a single body', async () => {
     mockFetchIndexStats.mockResolvedValue({
       indicesCount: 3,
       storeSizeBytes: 1024,
-      vectorDocsCount: 5,
+      vectorCount: 5,
+      documentsCount: 4,
     });
     mockFetchDashboardsCount.mockResolvedValue(2);
+    mockFetchApiKeysStats.mockResolvedValue({ total: 6, expiring: 1 });
 
     const request = httpServerMock.createKibanaRequest();
     const response = httpServerMock.createResponseFactory();
@@ -75,34 +82,21 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         indicesCount: 3,
         storeSizeBytes: 1024,
-        vectorDocsCount: 5,
+        vectorCount: 5,
+        documentsCount: 4,
         dashboardsCount: 2,
+        apiKeysCount: 6,
+        expiringApiKeysCount: 1,
       },
     });
-  });
-
-  it('passes the scoped ES and saved objects clients to the respective lib helpers', async () => {
-    mockFetchIndexStats.mockResolvedValue({
-      indicesCount: 0,
-      storeSizeBytes: 0,
-      vectorDocsCount: 0,
-    });
-    mockFetchDashboardsCount.mockResolvedValue(0);
-
-    const request = httpServerMock.createKibanaRequest();
-    const response = httpServerMock.createResponseFactory();
-
-    await getHandler()(createContext(), request, response);
-
-    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger);
-    expect(mockFetchDashboardsCount).toHaveBeenCalledWith(soClient, logger);
   });
 
   it('surfaces null values (unavailable) without failing the response', async () => {
     mockFetchIndexStats.mockResolvedValue({
       indicesCount: null,
       storeSizeBytes: null,
-      vectorDocsCount: null,
+      vectorCount: null,
+      documentsCount: null,
     });
     mockFetchDashboardsCount.mockResolvedValue(null);
 
@@ -115,11 +109,45 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         indicesCount: null,
         storeSizeBytes: null,
-        vectorDocsCount: null,
+        vectorCount: null,
+        documentsCount: null,
         dashboardsCount: null,
+        apiKeysCount: null,
+        expiringApiKeysCount: null,
       },
     });
     expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('withholds only the vector count from a caller without the `monitor` privilege', async () => {
+    mockHasIndexMonitorPrivilege.mockResolvedValue(false);
+    mockFetchIndexStats.mockResolvedValue({
+      indicesCount: 3,
+      storeSizeBytes: 1024,
+      vectorCount: null,
+      documentsCount: 4,
+    });
+    mockFetchDashboardsCount.mockResolvedValue(2);
+
+    const request = httpServerMock.createKibanaRequest();
+    const response = httpServerMock.createResponseFactory();
+
+    await getHandler()(createContext(), request, response);
+
+    expect(mockFetchIndexStats).toHaveBeenCalledWith(esClient, logger, {
+      canMonitorAllIndices: false,
+    });
+    expect(response.forbidden).not.toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        indicesCount: 3,
+        storeSizeBytes: 1024,
+        documentsCount: 4,
+        dashboardsCount: 2,
+        apiKeysCount: null,
+        expiringApiKeysCount: null,
+      },
+    });
   });
 
   it('returns a custom error when resolving the core context throws', async () => {

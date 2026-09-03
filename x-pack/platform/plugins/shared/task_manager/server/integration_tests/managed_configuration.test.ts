@@ -73,6 +73,9 @@ describe('managed configuration', () => {
       active_nodes_lookback: '30s',
       interval: 10000,
     },
+    execution_control: {
+      poll_interval: 5000,
+    },
     kibanas_per_partition: 2,
     capacity: 10,
     max_attempts: 9,
@@ -149,6 +152,11 @@ describe('managed configuration', () => {
       esStart.client.asInternalUser as unknown as Client
     );
     coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
+    // No task execution control document exists, so the execution control
+    // service resolves to "not paused" immediately and startup can proceed.
+    savedObjectsClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task-execution-control')
+    );
     taskManagerStart = await taskManager.start(coreStart, {
       licensing: licensingMock.createStart(),
     });

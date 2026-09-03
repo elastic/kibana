@@ -9,12 +9,11 @@ knowledge indicators, rules (queries), detections, events, memory and settings. 
 consumes the `significant_events` plugin (server APIs via the typed
 `significantEventsRepositoryClient`).
 
-The app is gated behind the Significant Events rollout feature flag
-(`streams.significantEventsAvailable`), the Enterprise license and the pricing tier;
-when unavailable it is hidden from navigation/global search and direct visits are
-redirected to the Streams app.
+Availability is decided server-side by `GET /internal/significant_events/availability`
+(rollout feature flag, project type, pricing tier, Enterprise license and required
+plugins). It gates app/deep-link visibility in global search and the page itself; when
+unavailable the app is hidden from navigation/global search and direct visits show
+`SignificantEventsNotEnabledPrompt`.
 
-The plugin's start contract exposes the availability gate (`availability$`,
-`fetchAvailability`) and the app locator, so other plugins — notably `streams_app` —
-can gate and link to sig-events entry points without depending on this plugin's
-internals.
+Deep links go through the share plugin locator registered under
+`SIGNIFICANT_EVENTS_APP_LOCATOR_ID`.

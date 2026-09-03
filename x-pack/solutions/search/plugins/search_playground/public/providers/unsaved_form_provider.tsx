@@ -7,7 +7,7 @@
 import type { UseFormGetValues } from 'react-hook-form';
 import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { DEFAULT_CONTEXT_DOCUMENTS } from '../../common';
 import { DEFAULT_LLM_PROMPT } from '../../common/prompt';

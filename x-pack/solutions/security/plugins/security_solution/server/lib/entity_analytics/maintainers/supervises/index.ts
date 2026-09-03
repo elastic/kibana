@@ -51,6 +51,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildSupervisesConfigs(lastProcessedTimestamp),
+      maintainerName: 'supervises',
       signal,
       telemetryCollector: collector,
     });
@@ -64,10 +65,9 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
         proposed: result.totalRecords,
         applied: result.totalWritten,
         droppedNotInStore: result.totalNotFound,
+        targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
-        // TODO: investigate whether to extend the telemetry funnel schema with a new field for
-        // droppedTargets (result.totalDroppedTargets) or map it to an existing field before wiring.
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -79,7 +79,7 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[supervises] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[supervises] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
 
     // Do not advance the watermark if the run was aborted — the next run should

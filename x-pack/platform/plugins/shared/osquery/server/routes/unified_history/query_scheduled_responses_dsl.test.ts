@@ -93,6 +93,59 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(subAggs.max_timestamp).toEqual({ max: { field: '@timestamp' } });
     });
+
+    test('includes label sub-aggregations so rows without a local pack can be named', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
+      const subAggs = scheduledExec.aggs as Record<string, unknown>;
+
+      expect(subAggs.pack_id).toEqual({ terms: { field: 'pack_id', size: 1 } });
+      expect(subAggs.pack_name).toEqual({ terms: { field: 'pack_name', size: 1 } });
+      expect(subAggs.query_name).toEqual({ terms: { field: 'query_name', size: 1 } });
+    });
+  });
+
+  describe('agent cardinality sub-aggregations', () => {
+    const getSubAggs = () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
+      const aggs = result.body.aggs as Record<string, unknown>;
+      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
+
+      return scheduledExec.aggs as Record<string, unknown>;
+    };
+
+    test('counts agents per bucket by agent_id cardinality', () => {
+      expect(getSubAggs().agent_count).toEqual({ cardinality: { field: 'agent_id' } });
+    });
+
+    test('nests agent cardinality under the success filter', () => {
+      // processScheduledHistory reads `success_count.agents.value`; a flat
+      // cardinality would silently leave it on the doc_count fallback.
+      expect(getSubAggs().success_count).toEqual({
+        filter: { bool: { must_not: { exists: { field: 'error' } } } },
+        aggs: { agents: { cardinality: { field: 'agent_id' } } },
+      });
+    });
+
+    test('nests agent cardinality under the error filter', () => {
+      expect(getSubAggs().error_count).toEqual({
+        filter: { exists: { field: 'error' } },
+        aggs: { agents: { cardinality: { field: 'agent_id' } } },
+      });
+    });
+
+    test('leaves cardinality precision at the ES default on every agent agg', () => {
+      // Measured: `precision_threshold: 40000` on this agg trips the request
+      // circuit breaker at 10k+ buckets. All three must also share one precision.
+      const subAggs = getSubAggs();
+      const successAggs = (subAggs.success_count as { aggs: Record<string, unknown> }).aggs;
+      const errorAggs = (subAggs.error_count as { aggs: Record<string, unknown> }).aggs;
+
+      expect(JSON.stringify([subAggs.agent_count, successAggs, errorAggs])).not.toContain(
+        'precision_threshold'
+      );
+    });
   });
 
   describe('base filters', () => {
@@ -123,6 +176,31 @@ describe('buildScheduledResponsesQuery', () => {
 
     test('uses simple term filter for non-default space', () => {
       const result = buildScheduledResponsesQuery({ spaceId: 'security' });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'security' } });
+    });
+
+    test('requires an exact default space_id when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId, cpsEnabled: true });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'default' } });
+      expect(filters).not.toContainEqual(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([
+              { bool: { must_not: { exists: { field: 'space_id' } } } },
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('leaves the non-default space filter unchanged when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: 'security', cpsEnabled: true });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 

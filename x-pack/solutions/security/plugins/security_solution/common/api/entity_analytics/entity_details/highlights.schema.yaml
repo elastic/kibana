@@ -79,6 +79,8 @@ paths:
                           type: number
                       anomalies:
                         type: array
+                        nullable: true
+                        description: ML anomaly findings. Null when there are none.
                         items:
                           type: object
                           additionalProperties: true

@@ -143,7 +143,7 @@ describe('identifyFeatures', () => {
 
     const result = await identifyFeatures({
       streamName: 'logs.test',
-      sampleDocuments: [],
+      sampleDocuments: [{ _id: 'doc-1', fields: { message: 'test message' } }],
       inferenceClient,
       systemPrompt: 'system prompt',
       logger,
@@ -167,7 +167,7 @@ describe('identifyFeatures', () => {
           function: 'finalize_features',
         },
         input: {
-          sample_documents: '[]',
+          sample_documents: JSON.stringify([{ _id: 'doc-1', fields: { message: 'test message' } }]),
           previously_identified_features: JSON.stringify([
             {
               id: 'existing',
@@ -178,6 +178,38 @@ describe('identifyFeatures', () => {
           known_feature_ids: 'technology: existing, okta',
           excluded_features: '',
         },
+      })
+    );
+    // `evidence` bounds, `filter.oneOf`, and required optional fields are deliberately absent:
+    // `fromJSONSchema` discards sibling keys next to `oneOf`, and any rejected payload retries
+    // the whole generation before the batch is dropped. Both are enforced in code instead.
+    expect(capturedOptions?.prompt.versions[0]?.tools?.finalize_features?.schema).toEqual(
+      expect.objectContaining({
+        required: ['features', 'ignored_features'],
+        properties: expect.objectContaining({
+          features: expect.objectContaining({
+            items: expect.objectContaining({
+              required: [
+                'id',
+                'type',
+                'subtype',
+                'description',
+                'title',
+                'properties',
+                'confidence',
+                'evidence',
+                'tags',
+              ],
+              properties: expect.objectContaining({
+                type: expect.objectContaining({
+                  enum: ['entity', 'infrastructure', 'technology', 'dependency', 'schema'],
+                }),
+                evidence: expect.not.objectContaining({ maxItems: expect.anything() }),
+                filter: expect.not.objectContaining({ oneOf: expect.anything() }),
+              }),
+            }),
+          }),
+        }),
       })
     );
     expect(searchSimilarFeatures).toHaveBeenCalledWith({
@@ -215,6 +247,55 @@ describe('identifyFeatures', () => {
       },
     ]);
     expect(result.tokensUsed).toEqual({ prompt: 10, completion: 5, total: 15, cached: 0 });
+  });
+
+  it('caps evidence in code and keeps single-evidence features', async () => {
+    executeAsReasoningAgentMock.mockResolvedValue(
+      createReasoningResponse({
+        features: [
+          {
+            id: 'verbose-evidence',
+            type: 'technology',
+            subtype: 'library',
+            title: 'Verbose',
+            description: 'Feature with more evidence than the prompt asks for',
+            properties: { library: 'verbose' },
+            confidence: 70,
+            evidence: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'],
+            tags: ['technology'],
+          },
+          {
+            id: 'single-evidence',
+            type: 'technology',
+            subtype: 'library',
+            title: 'Single',
+            description: 'Feature supported by one grounded observation',
+            properties: { library: 'single' },
+            confidence: 60,
+            evidence: ['only-one'],
+            tags: ['technology'],
+          },
+        ],
+        ignored_features: [],
+      })
+    );
+
+    const result = await identifyFeatures({
+      streamName: 'logs.test',
+      sampleDocuments: [],
+      inferenceClient,
+      systemPrompt: 'system prompt',
+      logger,
+      signal,
+    });
+
+    expect(result.features).toEqual([
+      expect.objectContaining({
+        id: 'verbose-evidence',
+        evidence: ['e1', 'e2', 'e3', 'e4', 'e5'],
+      }),
+      expect.objectContaining({ id: 'single-evidence', evidence: ['only-one'] }),
+    ]);
   });
 
   it('returns a tool error instead of failing when semantic search rejects', async () => {

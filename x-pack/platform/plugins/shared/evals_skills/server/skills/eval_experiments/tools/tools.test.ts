@@ -33,6 +33,15 @@ interface WorkflowsApiMock {
   cancelWorkflowExecution: jest.Mock;
 }
 
+/** A dataset service that reports every dataset as visible by default. */
+const datasetServiceWith = ({
+  visible = true,
+  getClient = jest.fn(),
+}: { visible?: boolean; getClient?: jest.Mock } = {}) => {
+  getClient.mockReturnValue({ datasetExists: jest.fn().mockResolvedValue(visible) });
+  return { evals: { datasetService: { getClient } } };
+};
+
 const createDeps = (
   overrides: Partial<EvalExperimentsToolDeps> = {}
 ): {
@@ -52,7 +61,7 @@ const createDeps = (
     workflowsApi: workflowsApi as unknown as EvalExperimentsToolDeps['workflowsApi'],
     serverBasePath: '',
     logger,
-    getStartDependencies: jest.fn().mockResolvedValue({}),
+    getStartDependencies: jest.fn().mockResolvedValue(datasetServiceWith()),
     ...overrides,
   };
   return { deps, workflowsApi, logger };
@@ -60,6 +69,7 @@ const createDeps = (
 
 const securityWith = (hasAllRequested: boolean) =>
   ({
+    ...datasetServiceWith(),
     security: {
       authz: {
         actions: { api: { get: (privilege: string) => `api:${privilege}` } },
@@ -222,6 +232,24 @@ describe('saveEvalExperimentTool', () => {
     expect(workflowsApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
+  it('refuses to save an experiment against a dataset the space cannot see', async () => {
+    const { deps, workflowsApi } = createDeps({
+      getStartDependencies: jest
+        .fn()
+        .mockResolvedValue(
+          datasetServiceWith({ visible: false })
+        ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(
+      await saveEvalExperimentTool(deps).handler(validConfig, createContext('sales'))
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/not found in this space/);
+    expect(workflowsApi.createWorkflow).not.toHaveBeenCalled();
+  });
+
   it('saves when security is enabled and the caller has manage_evals', async () => {
     const { deps, workflowsApi } = createDeps(grantingDeps());
     workflowsApi.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'Evaluate agent agent-1' });
@@ -252,7 +280,7 @@ describe('runEvalExperimentTool', () => {
     });
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data.workflow_execution_ids).toEqual(['we-1']);
-    expect(result.data.results_url).toContain('/app/management/ai/evals/experiments/');
+    expect(result.data.results_url).toContain('/app/evals/experiments/');
   });
 
   it('fans out one execution per model for cross-model runs', async () => {
@@ -271,7 +299,7 @@ describe('runEvalExperimentTool', () => {
     expect(workflowsApi.executeWorkflow).toHaveBeenCalledTimes(2);
     expect(result.data.mode).toBe('cross-model');
     expect(result.data.workflow_execution_ids).toEqual(['we-1', 'we-2']);
-    expect(result.data.results_url).toContain('/app/management/ai/evals/runs');
+    expect(result.data.results_url).toContain('/app/evals/runs');
   });
 
   it('associates the run with a saved workflow id when provided', async () => {
@@ -350,6 +378,26 @@ describe('runEvalExperimentTool', () => {
     expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
   });
 
+  it('refuses to launch against a dataset the space cannot see', async () => {
+    const getClient = jest.fn();
+    const { deps, workflowsApi } = createDeps({
+      getStartDependencies: jest
+        .fn()
+        .mockResolvedValue(
+          datasetServiceWith({ visible: false, getClient })
+        ) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(
+      await runEvalExperimentTool(deps).handler(validConfig, createContext('sales'))
+    );
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data.message).toMatch(/not found in this space/);
+    expect(getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+    expect(workflowsApi.executeWorkflow).not.toHaveBeenCalled();
+  });
+
   it('launches when security is enabled and the caller has manage_evals', async () => {
     const { deps, workflowsApi } = createDeps(grantingDeps());
     workflowsApi.executeWorkflow.mockResolvedValue({ workflowExecutionId: 'we-1' });
@@ -364,10 +412,66 @@ describe('runEvalExperimentTool', () => {
 });
 
 describe('discovery tools', () => {
+  const emptyFacets = { tags: [], maturity: [] };
+
   it('lists datasets via the evals dataset service', async () => {
     const list = jest.fn().mockResolvedValue({
       datasets: [{ id: 'd1', name: 'D1', description: 'x', examples_count: 2 }],
       total: 1,
+      facets: emptyFacets,
+    });
+    const getClient = jest.fn().mockReturnValue({ list });
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        evals: { datasetService: { getClient } },
+        agentBuilder: {},
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+
+    expect(list).toHaveBeenCalledWith({
+      search: undefined,
+      tags: undefined,
+      maturity: undefined,
+      page: 1,
+      perPage: 50,
+    });
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data.total).toBe(1);
+    expect(result.data.datasets[0].id).toBe('d1');
+    expect(getClient).toHaveBeenCalledWith({ spaceId: 'default' });
+  });
+
+  it('lists only the datasets of the space the tool runs in', async () => {
+    const list = jest.fn().mockResolvedValue({ datasets: [], total: 0, facets: emptyFacets });
+    const getClient = jest.fn().mockReturnValue({ list });
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        evals: { datasetService: { getClient } },
+        agentBuilder: {},
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    await listEvalDatasetsTool(deps).handler({}, createContext('sales'));
+
+    expect(getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+  });
+
+  it('narrows datasets by tag and maturity and reports the available tags', async () => {
+    const list = jest.fn().mockResolvedValue({
+      datasets: [
+        {
+          id: 'd1',
+          name: 'D1',
+          description: 'x',
+          tags: ['golden', 'esql'],
+          maturity: 'golden',
+          examples_count: 2,
+        },
+      ],
+      total: 1,
+      facets: { tags: [{ value: 'golden', count: 3 }], maturity: [{ value: 'golden', count: 3 }] },
     });
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
@@ -376,12 +480,21 @@ describe('discovery tools', () => {
       }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
     });
 
-    const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
+    const result = firstResult(
+      await listEvalDatasetsTool(deps).handler(
+        { tags: ['golden'], maturity: ['golden'] },
+        createContext()
+      )
+    );
 
-    expect(list).toHaveBeenCalledWith({ search: undefined, page: 1, perPage: 50 });
-    expect(result.type).toBe(ToolResultType.other);
-    expect(result.data.total).toBe(1);
-    expect(result.data.datasets[0].id).toBe('d1');
+    expect(list).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['golden'], maturity: ['golden'] })
+    );
+    expect(result.data.datasets[0]).toMatchObject({
+      tags: ['golden', 'esql'],
+      maturity: 'golden',
+    });
+    expect(result.data.available_tags).toEqual(['golden']);
   });
 
   it('returns an error result when the dataset service is unavailable', async () => {

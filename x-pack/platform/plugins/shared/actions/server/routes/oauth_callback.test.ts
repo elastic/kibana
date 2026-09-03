@@ -50,6 +50,10 @@ const mockConnectorTokenClientInstance = {
   createWithRefreshToken: jest.fn(),
 };
 
+const mockActionsClient = {
+  evictClientPool: jest.fn(),
+};
+
 const mockEncryptedSavedObjectsClient = {
   getClient: jest.fn().mockReturnValue({
     getDecryptedAsInternalUser: jest.fn(),
@@ -100,7 +104,7 @@ const createMockContext = (
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn(),
+    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -119,6 +123,7 @@ describe('oauthCallbackRoute', () => {
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
       getDecryptedAsInternalUser: jest.fn(),
     });
+    mockActionsClient.evictClientPool.mockReset();
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockUserConnectorTokenClient.mockImplementation(
@@ -293,6 +298,7 @@ describe('oauthCallbackRoute', () => {
   });
 
   it('exchanges code for tokens and redirects on success', async () => {
+    const credentialMutationOrder: string[] = [];
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
@@ -327,8 +333,17 @@ describe('oauthCallbackRoute', () => {
       expiresIn: 3600,
     });
 
-    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
-    mockConnectorTokenClientInstance.createWithRefreshToken.mockResolvedValue(undefined);
+    mockActionsClient.evictClientPool.mockImplementation(async () => {
+      credentialMutationOrder.push('evictClientPoolStarted');
+      await Promise.resolve();
+      credentialMutationOrder.push('evictClientPoolFinished');
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockImplementation(async () => {
+      credentialMutationOrder.push('deleteConnectorTokens');
+    });
+    mockConnectorTokenClientInstance.createWithRefreshToken.mockImplementation(async () => {
+      credentialMutationOrder.push('createWithRefreshToken');
+    });
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -386,6 +401,13 @@ describe('oauthCallbackRoute', () => {
           'https://kibana.example.com/app/connectors?oauth_authorization=success&connector_id=connector-1&status_code=200',
       },
     });
+    expect(mockActionsClient.evictClientPool).toHaveBeenCalledWith('connector-1');
+    expect(credentialMutationOrder).toEqual([
+      'evictClientPoolStarted',
+      'evictClientPoolFinished',
+      'deleteConnectorTokens',
+      'createWithRefreshToken',
+    ]);
   });
 
   it('uses EARS token exchange when authType is set in config (not secrets)', async () => {

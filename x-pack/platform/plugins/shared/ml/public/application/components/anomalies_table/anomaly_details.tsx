@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiIcon,
   EuiIconTip,
   EuiLink,
@@ -28,6 +27,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { type MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { getAnomalyDescription } from '../../../../common/util/anomaly_description';
 import { MAX_CHARS } from './anomalies_table_constants';
@@ -342,19 +342,16 @@ const CategoryExamples: FC<{
     >
       {error && (
         <EuiFlexItem>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             size="s"
-            color="danger"
-            iconType="warning"
             title={i18n.translate(
               'xpack.ml.anomaliesTable.anomalyDetails.categoryDefinitionErrorTitle',
               { defaultMessage: 'An error occurred loading category definition:' }
             )}
             data-test-subj="mlAnomaliesTableCategoryDefinitionError"
-          >
-            <EuiText size="xs">{error}</EuiText>
-          </EuiCallOut>
+            text={error}
+          />
           <EuiSpacer size="s" />
         </EuiFlexItem>
       )}

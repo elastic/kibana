@@ -21,4 +21,4 @@ export const plugin: PluginInitializer<
   SignificantEventsAppPublicStart,
   SignificantEventsAppSetupDependencies,
   SignificantEventsAppStartDependencies
-> = (ctx) => new SignificantEventsAppPlugin(ctx);
+> = () => new SignificantEventsAppPlugin();

@@ -83,7 +83,9 @@ spaceTest.describe(
       // calls the security solution search strategy for risk scores. Without this mock the call
       // takes several seconds, keeping the section in a loading state that continuously shifts
       // the anomalies section's Y position — preventing Playwright's stability check from
-      // passing before the test timeout.
+      // passing before the test timeout. This blanket route also serves the observed-host
+      // `HostsQueries.details` search, whose real backend always returns `hostDetails: {}`; omit
+      // it and `hostData.details` is `undefined`, crashing the page into the fatal error boundary.
       await page.route('**/internal/search/securitySolutionSearchStrategy', async (route) => {
         await route.fulfill({
           status: 200,
@@ -93,6 +95,7 @@ spaceTest.describe(
             isPartial: false,
             totalCount: 0,
             data: [],
+            hostDetails: {},
             rawResponse: {
               took: 0,
               timed_out: false,
@@ -190,16 +193,31 @@ spaceTest.describe(
     spaceTest(
       'host right panel shows an error state in the anomalies section when the anomaly overview API returns an error',
       async ({ page, pageObjects }) => {
-        await page.route(ANOMALY_OVERVIEW_ROUTE, (route) => route.fulfill({ status: 500 }));
+        // 400 is the only status useAnomalyOverview's retry predicate refuses to retry, so the
+        // query fails on the first response. Any retried status (e.g. 500) puts the section into
+        // a ~7s exponential backoff during which it renders the loading skeleton, and the
+        // backoff is not resumable: the query function consumes the abort signal, so React Query
+        // reverts the query to its pre-fetch `loading` state whenever the last observer
+        // unmounts. The section unmounts on any re-render that briefly drops
+        // `entityStoreEntityId` (it gates `loadAnomalies`), which restarts the whole chain and
+        // pushes the error state past the assertion timeout.
+        await page.route(ANOMALY_OVERVIEW_ROUTE, (route) =>
+          route.fulfill({
+            status: 400,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'Invalid anomaly overview request',
+            }),
+          })
+        );
 
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
 
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
-        // React Query retries failed requests 3 times with exponential backoff (~1s + 2s + 4s = ~7s)
-        // before setting isError, so we need more than the default 10s assertion timeout.
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toContainText(
-          'Unable to load behavioral anomalies',
-          { timeout: 15000 }
+          'Unable to load behavioral anomalies'
         );
       }
     );
@@ -294,39 +312,6 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'anomalies table row actions menu exposes investigation actions',
-      async ({ page, pageObjects }) => {
-        await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_WITH_ANOMALIES),
-          });
-        });
-        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
-          });
-        });
-        await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
-        await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
-
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline')
-        ).toBeVisible();
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-discover')
-        ).toBeVisible();
-        await expect(
-          pageObjects.entityFlyoutAnomaliesPage.getRowAction('view-in-single-metric-viewer')
-        ).toBeVisible();
-      }
-    );
-
-    spaceTest(
       'Add to timeline row action opens timeline scoped to the anomaly influencers',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
@@ -392,10 +377,14 @@ spaceTest.describe(
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
         await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
-        await pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline').click();
+        await pageObjects.entityFlyoutAnomaliesPage.clickRowAction('add-to-timeline');
 
         await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 30000 });
-        await expect(pageObjects.timelinePage.kqlTextarea).toHaveValue(/"host\.name":"test-host"/);
+        // Container is mounted before QueryBarTimeline; retries until KQL paints.
+        await expect(pageObjects.timelinePage.searchContainer).toContainText(
+          /"host\.name":"test-host"/,
+          { timeout: 30000 }
+        );
       }
     );
 

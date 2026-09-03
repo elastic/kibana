@@ -145,7 +145,7 @@ export function FieldValueSelection({
       style={width ? { width } : {}}
       size="m"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       data-test-subj={dataTestSubj ?? 'fieldValueSelectionBtn'}
@@ -167,7 +167,7 @@ export function FieldValueSelection({
       })}
       isSelected={isPopoverOpen || forceOpen}
       hasActiveFilters={numOfFilters > 0}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       numActiveFilters={numOfFilters}
       numFilters={options.length}
       onClick={onButtonClick}
@@ -212,6 +212,13 @@ export function FieldValueSelection({
     <Wrapper>
       <EuiPopover
         id="popover"
+        aria-label={i18n.translate(
+          'xpack.observabilityShared.fieldValueSelection.popoverAriaLabel',
+          {
+            defaultMessage: 'Filter options for {label}',
+            values: { label },
+          }
+        )}
         panelPaddingSize="none"
         button={button || (asFilterButton ? filterButton : anchorButton)}
         isOpen={isPopoverOpen || forceOpen}
@@ -220,6 +227,7 @@ export function FieldValueSelection({
         display="block"
       >
         <EuiSelectable
+          data-test-subj="o11yFieldValueSelectionSelectable"
           searchable
           singleSelection={singleSelection}
           searchProps={{

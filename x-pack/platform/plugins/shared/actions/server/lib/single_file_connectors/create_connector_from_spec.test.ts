@@ -10,6 +10,7 @@ import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
+import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
 import { WorkflowsConnectorFeatureId } from '../../../common';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -21,6 +22,8 @@ describe('createConnectorTypeFromSpec', () => {
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn() }),
+    getClientLeasePool: jest.fn().mockReturnValue({ lease: jest.fn() }),
   } as unknown as ActionsPluginSetupContract;
 
   const createMockSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
@@ -38,10 +41,12 @@ describe('createConnectorTypeFromSpec', () => {
       },
       actions: overrides.actions || {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
       },
+      test: overrides.test ?? { handler: jest.fn(), enabled: false },
       ...overrides,
     } as ConnectorSpec);
 
@@ -57,6 +62,7 @@ describe('createConnectorTypeFromSpec', () => {
     const spec = createMockSpec({
       actions: {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
@@ -71,6 +77,18 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.validate.params).toBeDefined();
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
     expect(connectorType.isExperimental).toBeUndefined();
+  });
+
+  it('builds the connector network from the actions configuration utilities', () => {
+    const createConnectorNetworkSettingsSpy = jest.spyOn(
+      createConnectorNetworkSettingsModule,
+      'createConnectorNetworkSettings'
+    );
+
+    createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+    expect(createConnectorNetworkSettingsSpy).toHaveBeenCalledWith(mockActionsConfigUtils);
+    createConnectorNetworkSettingsSpy.mockRestore();
   });
 
   it('sets isExperimental from metadata.isTechnicalPreview', () => {
@@ -113,6 +131,7 @@ describe('createConnectorTypeFromSpec', () => {
       },
       actions: {
         testAction: {
+          scope: 'read',
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },
@@ -184,14 +203,17 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           action1: {
+            scope: 'read',
             input: z4.object({ field1: z4.string() }),
             handler: jest.fn(),
           },
           action2: {
+            scope: 'read',
             input: z4.object({ field2: z4.number() }),
             handler: jest.fn(),
           },
           action3: {
+            scope: 'read',
             input: z4.object({ field3: z4.boolean() }),
             handler: jest.fn(),
           },
@@ -222,6 +244,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -238,6 +261,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -254,6 +278,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -273,6 +298,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           testAction: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -293,6 +319,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           complexAction: {
+            scope: 'read',
             input: z4.object({
               nested: z4.object({
                 field1: z4.string(),
@@ -383,7 +410,7 @@ describe('createConnectorTypeFromSpec', () => {
       const testHandler = jest.fn();
       const specWithOnlyDisabledTest = createMockSpec({
         actions: {},
-        test: { handler: testHandler },
+        test: { handler: testHandler, enabled: false },
       });
 
       expect(() =>
@@ -391,7 +418,7 @@ describe('createConnectorTypeFromSpec', () => {
       ).toThrow('No actions defined');
 
       const specWithActions = createMockSpec({
-        test: { handler: testHandler },
+        test: { handler: testHandler, enabled: false },
       });
       const connectorType = createConnectorTypeFromSpec(specWithActions, mockActionsPlugin);
 
@@ -452,6 +479,7 @@ describe('createConnectorTypeFromSpec', () => {
       const spec = createMockSpec({
         actions: {
           [TEST_CONNECTOR_SUB_ACTION]: {
+            scope: 'read',
             input: z4.object({ test: z4.string() }),
             handler: jest.fn(),
           },
@@ -467,6 +495,7 @@ describe('createConnectorTypeFromSpec', () => {
     it('does not mutate spec.actions when augmenting with test handler', () => {
       const actions = {
         testAction: {
+          scope: 'read' as const,
           input: z4.object({ test: z4.string() }),
           handler: jest.fn(),
         },

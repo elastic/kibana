@@ -41,7 +41,7 @@ if [[ -z "$TEST_RUN_ID" ]]; then
   exit 0
 fi
 
-KIBANA_URL="${EVALUATIONS_KBN_URL:-}"
+KIBANA_URL="${EVAL_KBN_URL:-}"
 
 EVAL_SUITE_IDS="${EVAL_SUITE_IDS:-}"
 if [[ -z "$EVAL_SUITE_IDS" ]]; then

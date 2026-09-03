@@ -1,5 +1,8 @@
 {
-  "sha1": "33c386b521bc5fa31b7251a9be1ffee53563ae28",
+  "sha1": "fe900321d33104e2389d5c82d90f1c3d36456e03",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "5060bc123105c69-842632def2d4e28",
@@ -13,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field_ml.spec.ts",
-        "line": 229,
-        "column": 14
+        "line": 225,
+        "column": 26
       }
     },
     {
@@ -29,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/exceptions/ui/parallel_tests/bulk_close_runtime_field.spec.ts",
-        "line": 108,
-        "column": 14
+        "line": 106,
+        "column": 15
       }
     }
   ]

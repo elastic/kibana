@@ -9,9 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
-import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
-import type { SupportedDataType } from '../types';
 
 export { getTrailingIdentifier } from './regex';
 
@@ -21,29 +19,6 @@ export const techPreviewLabel = i18n.translate(
     defaultMessage: `Technical Preview`,
   }
 );
-
-/**
- * In several cases we don't want to count the last arg if it is
- * of type unknown.
- *
- * this solves for the case where the user has typed a
- * prefix (e.g. "keywordField != tex/")
- *
- * "tex" is not a recognizable identifier so it is of
- * type "unknown" which leads us to continue suggesting
- * fields/functions.
- *
- * Monaco will then filter our suggestions list
- * based on the "tex" prefix which gives the correct UX
- */
-export function removeFinalUnknownIdentiferArg(
-  args: ESQLAstItem[],
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
-) {
-  return getExpressionType(args[args.length - 1]) === 'unknown'
-    ? args.slice(0, args.length - 1)
-    : args;
-}
 
 /**
  * Checks the suggestion text for overlap with the current query.

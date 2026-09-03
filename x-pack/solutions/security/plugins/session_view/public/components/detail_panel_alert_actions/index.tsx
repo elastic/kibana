@@ -87,6 +87,12 @@ export const DetailPanelAlertActions = ({
   return (
     <EuiPopover
       id={uuid}
+      aria-label={i18n.translate(
+        'xpack.sessionView.detailPanelAlertListItem.alertActionsAriaLabel',
+        {
+          defaultMessage: 'Alert actions',
+        }
+      )}
       button={
         <EuiToolTip
           content={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {

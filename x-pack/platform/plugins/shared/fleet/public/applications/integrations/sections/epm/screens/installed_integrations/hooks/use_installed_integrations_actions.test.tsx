@@ -59,8 +59,8 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUninstallIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendRemovePackageForRq).toBeCalledTimes(1);
-      expect(sendRemovePackageForRq).toBeCalledWith({ pkgName: 'test', pkgVersion: '1.0.0' });
+      expect(sendRemovePackageForRq).toHaveBeenCalledTimes(1);
+      expect(sendRemovePackageForRq).toHaveBeenCalledWith({ pkgName: 'test', pkgVersion: '1.0.0' });
     });
 
     it('should work with multiple integrations', async () => {
@@ -92,8 +92,8 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUninstallIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUninstallPackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkUninstallPackagesForRq).toBeCalledWith({
+      expect(sendBulkUninstallPackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkUninstallPackagesForRq).toHaveBeenCalledWith({
         packages: [
           { name: 'test', version: '1.0.0' },
           { name: 'test2', version: '1.1.0' },
@@ -150,9 +150,9 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkUpgradePackagesForRq).toBeCalledWith({
-        packages: [{ name: 'test' }],
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
+        packages: [{ name: 'test', version: '1.2.0' }],
         upgrade_package_policies: false,
       });
     });
@@ -180,9 +180,9 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkUpgradePackagesForRq).toBeCalledWith({
-        packages: [{ name: 'test' }],
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
+        packages: [{ name: 'test', version: '1.2.0' }],
         upgrade_package_policies: true,
       });
     });
@@ -215,9 +215,12 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkUpgradePackagesForRq).toBeCalledWith({
-        packages: [{ name: 'test' }, { name: 'test2' }],
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
+        packages: [
+          { name: 'test', version: '1.2.0' },
+          { name: 'test2', version: '1.2.0' },
+        ],
         upgrade_package_policies: false,
       });
     });
@@ -271,8 +274,8 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkRollbackIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkRollbackPackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkRollbackPackagesForRq).toBeCalledWith({ packages: [{ name: 'test' }] });
+      expect(sendBulkRollbackPackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkRollbackPackagesForRq).toHaveBeenCalledWith({ packages: [{ name: 'test' }] });
     });
 
     it('should work with multiple integrations', async () => {
@@ -304,8 +307,8 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkRollbackIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkRollbackPackagesForRq).toBeCalledTimes(1);
-      expect(sendBulkRollbackPackagesForRq).toBeCalledWith({
+      expect(sendBulkRollbackPackagesForRq).toHaveBeenCalledTimes(1);
+      expect(sendBulkRollbackPackagesForRq).toHaveBeenCalledWith({
         packages: [{ name: 'test' }, { name: 'test2' }],
       });
     });

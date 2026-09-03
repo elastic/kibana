@@ -9,6 +9,14 @@ export const TIME_BUCKET_FIELD = 'timestamp';
 export const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
 export const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="nullify";';
 
+/**
+ * CPS (cross-project search): scope the query to the given project routing. Without it the
+ * query runs with the server default (`_alias:_origin`), which misses linked-project data.
+ * An explicit `SET project_routing` in the query text takes precedence over picker values.
+ */
+export const esqlSetProjectRouting = (projectRouting: string) =>
+  `SET project_routing="${projectRouting}";`;
+
 // When no limit is specified in the container, docker allows the app as much memory / swap memory
 // as it wants. This number represents the max possible value for the limit field. Stored as a
 // string to avoid JS floating-point precision loss. The equivalent Painless constant lives at:

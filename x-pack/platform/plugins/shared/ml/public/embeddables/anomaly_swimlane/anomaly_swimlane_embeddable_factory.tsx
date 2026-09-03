@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
@@ -26,12 +27,11 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
@@ -108,6 +108,14 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const rendered$ = new BehaviorSubject<boolean>(false);
+      subscriptions.add(
+        dataLoading$.subscribe((isLoading) => {
+          if (isLoading) {
+            rendered$.next(false);
+          }
+        })
+      );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const query$ = ((parentApi as Partial<PublishesUnifiedSearch>)?.query$ ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
@@ -194,6 +202,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           subscriptions
         ),
         dataLoading$,
+        rendered$,
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
@@ -254,31 +263,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             );
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-          const [hasRendered, setHasRendered] = useState<boolean>(false);
-          const wrapperRef = useRef<HTMLDivElement>(null);
-          useEffect(() => {
-            if (isLoading) setHasRendered(false);
-          }, [isLoading]);
-
-          useEffect(
-            function dispatchRenderMessages() {
-              const el = wrapperRef.current;
-              if (!el) return;
-              if (error) {
-                dispatchRenderComplete(el);
-                return;
-              }
-              if (isLoading) {
-                dispatchRenderStart(el);
-                return;
-              }
-              if (hasRendered) {
-                dispatchRenderComplete(el);
-              }
-            },
-            [isLoading, hasRendered, error]
-          );
-
           const onCellsSelection = useCallback(
             (update?: AppStateSelectedCells) => {
               setSelectedCells(update);
@@ -304,12 +288,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                     padding: 8px;
                   `}
                   data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-                  data-render-complete={error ? true : hasRendered}
-                  ref={wrapperRef}
                 >
                   {error ? (
-                    <EuiCallOut
+                    <KbnDangerCallout
                       announceOnMount
                       title={
                         <FormattedMessage
@@ -317,12 +298,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                           defaultMessage="Unable to load the data for the swim lane"
                         />
                       }
-                      color="danger"
-                      iconType="warning"
                       css={{ width: '100%' }}
-                    >
-                      <p>{error.message}</p>
-                    </EuiCallOut>
+                      text={error.message}
+                    />
                   ) : (
                     <SwimlaneContainer
                       id={uuid}
@@ -365,7 +343,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                       chartsService={pluginsStartServices.charts}
                       onRenderComplete={() => {
                         if (!isLoading) {
-                          setHasRendered(true);
+                          rendered$.next(true);
                         }
                       }}
                     />

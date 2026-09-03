@@ -46,7 +46,7 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
     case 'failed':
       return {
         spinner: false,
-        icon: 'errorFilled',
+        icon: 'errorFill',
         color: 'danger',
         title: i18n.translate('xpack.investigationOutput.failedStatusTitle', {
           defaultMessage: 'Investigation failed',
@@ -64,31 +64,11 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
     case 'complete':
       return {
         spinner: false,
-        icon: 'checkInCircleFilled',
+        icon: 'checkCircleFill',
         color: 'success',
         title: i18n.translate('xpack.investigationOutput.successStatusTitle', {
           defaultMessage: 'Investigation complete',
         }),
       };
   }
-};
-
-/** Builds the markdown shown for the final result: the agent's own `conclusion` markdown
- * (already containing its own `## Conclusion` / `## Next Steps` sections), followed by a
- * `## Gaps Found` section when the agent reported any. */
-export const buildFinalResultsMarkdown = (state: InvestigationState): string | undefined => {
-  const sections: string[] = [];
-
-  if (state.conclusion) {
-    sections.push(state.conclusion);
-  }
-
-  if (state.gaps_found && state.gaps_found.length > 0) {
-    const gapsTitle = i18n.translate('xpack.investigationOutput.gapsFoundTitle', {
-      defaultMessage: 'Gaps found',
-    });
-    sections.push([`## ${gapsTitle}`, ...state.gaps_found.map((gap) => `- ${gap}`)].join('\n'));
-  }
-
-  return sections.length > 0 ? sections.join('\n\n') : undefined;
 };

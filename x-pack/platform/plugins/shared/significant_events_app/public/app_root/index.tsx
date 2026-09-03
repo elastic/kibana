@@ -9,27 +9,24 @@ import React, { useMemo } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsAppContextProvider } from './app_context_provider';
 import { significantEventsAppRouter } from '../routes/config';
+import { significantEventsQueryClient } from '../query_client';
 import type { SignificantEventsAppStartDependencies } from '../types';
 import type { SignificantEventsAppServices } from '../services/types';
 import { DateRangeRedirect } from './date_range_redirect';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
-
-const queryClient = new QueryClient();
 
 export function AppRoot({
   coreStart,
   pluginsStart,
   services,
   appMountParameters,
-  isServerless,
 }: {
   coreStart: CoreStart;
   pluginsStart: SignificantEventsAppStartDependencies;
   services: SignificantEventsAppServices;
-  isServerless: boolean;
   appMountParameters: AppMountParameters;
 }) {
   const { history } = appMountParameters;
@@ -41,14 +38,13 @@ export function AppRoot({
         start: pluginsStart,
       },
       services,
-      isServerless,
     }),
-    [coreStart, pluginsStart, services, isServerless]
+    [coreStart, pluginsStart, services]
   );
 
   return (
     <SignificantEventsAppContextProvider context={context}>
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={significantEventsQueryClient}>
         {/* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={significantEventsAppRouter}>
           <UpdateExecutionContextOnRouteChange>

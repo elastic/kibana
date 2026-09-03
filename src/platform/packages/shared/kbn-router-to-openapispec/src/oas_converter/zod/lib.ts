@@ -701,6 +701,58 @@ function mergeInlineOasExtensions(node: unknown): unknown {
   return result;
 }
 
+/** A `{ type: 'null' }` branch, as emitted by z.toJSONSchema() for `.nullable()`. */
+const isNullBranch = (branch: unknown): boolean =>
+  typeof branch === 'object' &&
+  branch !== null &&
+  !Array.isArray(branch) &&
+  (branch as Record<string, unknown>).type === 'null' &&
+  Object.keys(branch as Record<string, unknown>).length === 1;
+
+// OAS 3.0 ignores keywords sibling to $ref; COMPONENT_ID_MARKER branches become $ref later.
+const keepWrapped = (branch: Record<string, unknown>): boolean =>
+  '$ref' in branch || COMPONENT_ID_MARKER in branch;
+
+// Must run before the recursive descent, which rewrites { type: 'null' } to { nullable: true }.
+function collapseNullBranches(node: Record<string, unknown>): {
+  node: Record<string, unknown>;
+  nullable: boolean;
+} {
+  let result = node;
+  let nullable = false;
+
+  for (const combiner of ['anyOf', 'oneOf'] as const) {
+    const branches = result[combiner];
+    if (!Array.isArray(branches)) continue;
+
+    const nullIdx = branches.findIndex(isNullBranch);
+    if (nullIdx === -1) continue;
+
+    const remaining = branches.filter((_: unknown, i: number) => i !== nullIdx);
+    nullable = true;
+
+    const [sole] = remaining;
+    const soleIsMergeable =
+      remaining.length === 1 &&
+      typeof sole === 'object' &&
+      sole !== null &&
+      !Array.isArray(sole) &&
+      !keepWrapped(sole as Record<string, unknown>);
+
+    if (soleIsMergeable) {
+      const { [combiner]: _combiner, ...rest } = result;
+      result = { ...rest, ...(sole as Record<string, unknown>) };
+    } else if (remaining.length === 1) {
+      const { [combiner]: _combiner, ...rest } = result;
+      result = { ...rest, allOf: remaining };
+    } else {
+      result = { ...result, [combiner]: remaining };
+    }
+  }
+
+  return { node: result, nullable };
+}
+
 /**
  * Recursively transform a JSON Schema object (OAS 3.1 / JSON Schema draft 2020-12)
  * into an OpenAPI 3.0-compatible Schema Object.
@@ -716,11 +768,13 @@ function mergeInlineOasExtensions(node: unknown): unknown {
 function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, unknown> {
   if (typeof node !== 'object' || node === null) return node;
 
-  let result: Record<string, unknown> = {};
+  const { node: collapsed, nullable } = collapseNullBranches(node);
 
-  const hasPropertyNames = 'propertyNames' in node;
+  const result: Record<string, unknown> = {};
 
-  for (const [key, value] of Object.entries(node)) {
+  const hasPropertyNames = 'propertyNames' in collapsed;
+
+  for (const [key, value] of Object.entries(collapsed)) {
     // Strip `propertyNames` (not supported in OAS 3.0)
     if (key === 'propertyNames') continue;
     // Strip companion `required` emitted by z.toJSONSchema() for z.record(z.enum([...]), ...)
@@ -746,43 +800,13 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
     }
   }
 
-  // Handle `anyOf`/`oneOf` containing `{ type: 'null' }` branches:
-  // Pull out the null branch and set `nullable: true` on the remaining schema.
-  for (const combiner of ['anyOf', 'oneOf'] as const) {
-    const branches = result[combiner];
-    if (!Array.isArray(branches)) continue;
-
-    const nullIdx = branches.findIndex(
-      (b: unknown) =>
-        typeof b === 'object' &&
-        b !== null &&
-        (b as Record<string, unknown>).type === 'null' &&
-        Object.keys(b as Record<string, unknown>).length === 1
-    );
-
-    if (nullIdx === -1) continue;
-
-    // Remove the null branch
-    const remaining = branches.filter((_: unknown, i: number) => i !== nullIdx);
-
-    if (remaining.length === 1) {
-      // Single remaining branch: merge it into the current level with nullable
-      const [sole] = remaining;
-      if (typeof sole === 'object' && sole !== null) {
-        // Remove the combiner key, spread the sole schema, add nullable
-        delete result[combiner];
-        result = { ...result, ...(sole as Record<string, unknown>), nullable: true };
-      }
-    } else {
-      // Multiple remaining branches: keep the combiner, add nullable
-      result[combiner] = remaining;
-      result.nullable = true;
-    }
-  }
-
   // Handle top-level `type: 'null'` (standalone null schema)
   if (result.type === 'null') {
     delete result.type;
+    result.nullable = true;
+  }
+
+  if (nullable) {
     result.nullable = true;
   }
 

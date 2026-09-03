@@ -306,6 +306,7 @@ apiTest.describe(
         });
         expect(conversation.access_control).toStrictEqual({
           access_mode: ConversationAccessControlMode.Public,
+          entries: [],
         });
         expect(conversation.rounds).toHaveLength(1);
 

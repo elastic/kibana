@@ -19,7 +19,10 @@ import type {
 import { FIELD_REQUIRED, TOGGLE_ON, TOGGLE_OFF } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type ToggleProps = z.infer<typeof ToggleFieldSchema> & ConditionRenderProps;
+type ToggleProps = z.infer<typeof ToggleFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const isChecked = (value: unknown): boolean => value === true || value === 'true';
 
@@ -36,6 +39,7 @@ export const Toggle = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: ToggleProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -61,7 +65,8 @@ export const Toggle = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

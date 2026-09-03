@@ -6,22 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { tagsResponseSchema } from './common';
 
 export const actionPolicyTagsQuerySchema = z
   .object({
     search: z
       .string()
-      .min(1)
       .max(256)
       .optional()
-      .describe('Optional search string used to filter suggested action policy tags.'),
+      .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
   })
-  .describe('Query parameters for action policy tag suggestions.');
+  .strict()
+  .describe('Query parameters for the action policy tags API.');
 
 export type ActionPolicyTagsQuery = z.infer<typeof actionPolicyTagsQuerySchema>;
 
-export const actionPolicyTagsResponseSchema = z
-  .array(z.string())
-  .describe('The list of suggested action policy tags.');
+export const actionPolicyTagsResponseSchema = tagsResponseSchema.describe(
+  'All unique tags across action policies.'
+);
 
 export type ActionPolicyTagsResponse = z.infer<typeof actionPolicyTagsResponseSchema>;

@@ -80,6 +80,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -193,8 +194,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isManagedWorkflow = workflow?.managed === true;
-  const isReadOnlyYaml = isExecutionYaml || isManagedWorkflow;
+  const isReadOnlyYaml = useWorkflowEditorReadOnly();
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -651,13 +651,10 @@ export const WorkflowYAMLEditor = ({
       }
       if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
         const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
-        insertTriggerSnippet(
-          model,
-          yamlDocumentCurrent,
-          action.id,
-          editor,
-          triggerDefinition?.snippets?.condition
-        );
+        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor, {
+          defaultCondition: triggerDefinition?.snippets?.condition,
+          requiresConnectorId: triggerDefinition?.requiresConnectorId,
+        });
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
@@ -673,21 +670,21 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
           defaultMessage: 'Collapse all',
         }),
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
       },
       {
         id: 'unfoldAll',
         label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
           defaultMessage: 'Expand all',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
       },
       {
         id: 'find',
         label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
           defaultMessage: 'Find and Replace',
         }),
-        iconType: 'search',
+        iconType: 'magnify',
       },
     ];
     if (isVisualEditorEnabled && onToggleEditorMode) {

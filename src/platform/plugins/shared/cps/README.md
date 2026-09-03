@@ -43,3 +43,23 @@ Retrieves project tags from Elasticsearch using the `/_project/tags` endpoint.
 - Delegates authorization to the scoped Elasticsearch client
 - Proxies requests to the Elasticsearch `/_project/tags` API
 - Returns project tag mappings as key-value pairs
+- Returns `403` when the user lacks the `read_project_routing` cluster privilege
+
+#### GET /internal/cps/project_routing/{projectRoutingName}
+
+Retrieves the value of a named project routing expression (NPRE) from Elasticsearch (`/_project_routing/{name}`). Used to resolve the default project routing for a space.
+
+**Route Details:**
+
+- **Path:** `/internal/cps/project_routing/{projectRoutingName}`
+- **Authorization:** The lookup is performed as the Kibana internal user, so it succeeds regardless of the requesting user's cluster privileges. NPRE values are not considered sensitive.
+- **Response:** The expression string, or `404` if no expression exists with that name (clients fall back to searching all projects).
+
+## Privileges
+
+Elasticsearch gates the CPS metadata APIs behind cluster privileges:
+
+- `read_project_routing` — read access to `/_project/tags` and `/_project_routing`. **Custom roles must be granted this privilege for users to see the project picker and other CPS UI features.** Built-in roles include it; without it, `POST /internal/cps/projects_tags` returns `403` and CPS UI features hide themselves.
+- `manage_project_routing` — additionally allows creating/updating NPREs (e.g. customizing a space's default project routing).
+
+Users without `read_project_routing` can still run searches: the space default project routing is resolved via the Kibana internal user and applied to their queries, and Elasticsearch scopes cross-project results to the projects the user is authorized to access.

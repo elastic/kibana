@@ -16,8 +16,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.scout/reports/scout-playwright-test-failures-*/**/*'
     '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     'target/junit/**/*'
-    'target/kibana-coverage/jest/**/*'
-    'target/kibana-coverage/functional/**/*'
     'target/kibana-*'
     'target/kibana-security-solution/**/*.png'
     'target/kibana-security-solution/**/management/**/*.mp4'

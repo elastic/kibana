@@ -29,6 +29,7 @@ export enum AttacksEventTypes {
   TypeFilterChanged = 'Attacks Type Filter Changed',
   TourCalloutAction = 'Attacks Tour Callout Action',
   TourStepAction = 'Attacks Tour Step Action',
+  WorkflowsPromotionCalloutAction = 'Attacks Workflows Promotion Callout Action',
 }
 
 interface AttacksTableSortChangedParams {
@@ -120,6 +121,10 @@ interface AttacksTourStepActionParams {
   step: number;
 }
 
+interface AttacksWorkflowsPromotionCalloutActionParams {
+  action: 'view' | 'enable' | 'dismiss' | 'learn_more';
+}
+
 export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TableSortChanged]: AttacksTableSortChangedParams;
   [AttacksEventTypes.ViewOptionChanged]: AttacksViewOptionChangedParams;
@@ -142,6 +147,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TypeFilterChanged]: AttacksTypeFilterChangedParams;
   [AttacksEventTypes.TourCalloutAction]: AttacksTourCalloutActionParams;
   [AttacksEventTypes.TourStepAction]: AttacksTourStepActionParams;
+  [AttacksEventTypes.WorkflowsPromotionCalloutAction]: AttacksWorkflowsPromotionCalloutActionParams;
 }
 
 export interface AttacksTelemetryEvent {

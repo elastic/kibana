@@ -68,7 +68,7 @@ export const upsertDiscoverSession = async (
   return {
     body: {
       id: updated.id,
-      data: transformDiscoverSessionOut(updated.attributes, updated.references),
+      data: transformDiscoverSessionOut(updated.attributes, updated.references).sessionState,
       meta: getMeta(updated),
     },
     operation: updateResponse.created_at ? 'create' : 'update',

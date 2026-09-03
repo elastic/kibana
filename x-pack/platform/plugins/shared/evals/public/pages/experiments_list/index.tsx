@@ -32,6 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
@@ -68,7 +69,7 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
       button={
         <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="ellipsis"
             color="text"
             aria-label={i18n.ROW_DETAILS_ARIA}
             onClick={(event: React.MouseEvent) => {
@@ -194,7 +195,7 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
-        width: '200px',
+        width: '28%',
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
@@ -225,7 +226,7 @@ export const ExperimentsListPage: React.FC = () => {
       {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
-        width: '150px',
+        width: '11%',
         render: (count: number | undefined) => {
           const c = count ?? 1;
           return (
@@ -239,19 +240,23 @@ export const ExperimentsListPage: React.FC = () => {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
+        width: '15%',
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
+        width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
-        field: 'evaluator_model',
+        field: 'evaluator_models',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
-          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
+        width: '19%',
+        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
+          <EvaluatorModelsBadge models={models} />
+        ),
       },
       {
         field: 'total_repetitions',
@@ -364,7 +369,12 @@ export const ExperimentsListPage: React.FC = () => {
               content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
               position="top"
             >
-              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+              <EuiButton
+                iconType="compare"
+                onClick={handleCompare}
+                isDisabled={!canCompare}
+                size="m"
+              >
                 {i18n.COMPARE_SELECTED_BUTTON}
               </EuiButton>
             </EuiToolTip>
@@ -373,7 +383,7 @@ export const ExperimentsListPage: React.FC = () => {
         {savedWorkflowsHref && (
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="popout"
+              iconType="external"
               size="m"
               href={savedWorkflowsHref}
               data-test-subj="evalsViewExperimentWorkflowsButton"
@@ -385,7 +395,7 @@ export const ExperimentsListPage: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="m"
             onClick={() => setIsNewExperimentOpen(true)}
             data-test-subj="evalsNewExperimentButton"

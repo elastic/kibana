@@ -37,6 +37,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    http,
     savedObjects,
     modelProvider,
     toolsService,
@@ -55,10 +56,13 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     analyticsService,
     trackingService,
     experimentalFeatures,
+    projectRouting,
+    conversationTemplates,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
+  const conversationClient = await manager.deps.conversationService.getScopedClient({ request });
 
   const { filesystemService, bashService } = await createFilesystemServices({
     manager,
@@ -73,7 +77,15 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
-    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
+    selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
     toolRegistry,
@@ -103,17 +115,22 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       runner: manager.getRunner(),
     }),
     renderers: renderersService,
+    conversationTemplates,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    conversationClient,
     analyticsService,
     trackingService,
     filesystemService,
     bashService,
+    aiIndexResolver: manager.deps.agentsService.getAiIndexResolver(),
   };
 };
 

@@ -59,6 +59,13 @@ const sameIdSet = (a: MonitorServiceLocation[], b: MonitorServiceLocation[]) => 
   return a.every((loc) => bIds.has(loc.id));
 };
 
+// Public bulk-update carries forward private locations unless `private_locations`
+// is explicit (even `[]`); split so overwrite/remove drop private as intended.
+const toLocationsPatch = (nextLocations: MonitorServiceLocation[]) => ({
+  [ConfigKey.LOCATIONS]: nextLocations.filter((loc) => loc.isServiceManaged),
+  private_locations: nextLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
+});
+
 export const BulkLocationsFlyout = ({
   monitors,
   onClose,
@@ -150,7 +157,7 @@ export const BulkLocationsFlyout = ({
       const { result } = await fetchBulkUpdateMonitors({
         updates: updates.map(({ id, nextLocations }) => ({
           id,
-          attributes: { [ConfigKey.LOCATIONS]: nextLocations },
+          attributes: toLocationsPatch(nextLocations),
         })),
         spaceId,
       });

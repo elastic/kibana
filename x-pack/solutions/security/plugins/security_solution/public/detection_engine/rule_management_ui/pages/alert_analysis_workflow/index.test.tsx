@@ -10,9 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { licenseService } from '../../../../common/hooks/use_license';
 import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE } from './api';
 import { AlertAnalysisWorkflowPage } from '.';
 
@@ -25,36 +27,85 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('@kbn/inference-connectors');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const useLoadConnectorsMock = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
+
+const builtInInferenceEndpoint = {
+  id: '.anthropic-claude-sonnet-chat_completion',
+  name: 'Built-in Claude Sonnet',
+  actionTypeId: '.inference',
+  config: {
+    inferenceId: '.anthropic-claude-sonnet-chat_completion',
+    taskType: 'chat_completion',
+    service: 'elastic',
+  },
+  secrets: {},
+  isPreconfigured: true,
+  isSystemAction: false,
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isMissingSecrets: false,
+  isEis: true,
+} as AIConnector;
+
+const externalInferenceEndpoint = {
+  id: 'external-openai-chat',
+  name: 'External OpenAI endpoint',
+  actionTypeId: '.inference',
+  config: {
+    inferenceId: 'external-openai-chat',
+    taskType: 'chat_completion',
+    service: 'openai',
+  },
+  secrets: {},
+  isPreconfigured: false,
+  isSystemAction: false,
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isMissingSecrets: false,
+} as AIConnector;
 
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
   const listAgentsMock = jest.fn();
 
-  const settingsGetResponse = (
-    settings: Record<string, unknown> = {
-      autoCloseEnabled: true,
-      autoCloseConfidenceScoreMinThreshold: 0.85,
-      autoCloseConfidenceScoreMaxThreshold: 1,
-      tagPrefix: 'alert-analysis',
-    }
-  ) => ({
+  const defaultSettings = {
+    autoCloseEnabled: true,
+    autoCloseConfidenceScoreMinThreshold: 0.85,
+    autoCloseConfidenceScoreMaxThreshold: 1,
+    tagPrefix: 'alert-analysis',
+  };
+
+  const settingsGetResponse = (settings: Record<string, unknown> = defaultSettings) => ({
     settings,
     workflowId: 'system-security-alert-analysis-default',
   });
 
-  const renderComponent = () => {
+  const renderComponent = ({
+    canEditRules = true,
+    canReadRules = true,
+    canSaveAdvancedSettings = true,
+    isEnterprise = true,
+    settingsRequest,
+  }: {
+    canEditRules?: boolean;
+    canReadRules?: boolean;
+    canSaveAdvancedSettings?: boolean;
+    isEnterprise?: boolean;
+    settingsRequest?: jest.Mock;
+  } = {}) => {
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(isEnterprise);
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
-      advancedSettings: { show: true, save: true },
+      advancedSettings: { show: true, save: canSaveAdvancedSettings },
       securitySolution: { show: true, crud: true },
-      workflowsManagement: { updateWorkflow: true },
     };
-    // The page reads rules-edit via useUserPrivileges (not raw capabilities).
+    // The page reads rules privileges via useUserPrivileges (not raw capabilities).
     useUserPrivilegesMock.mockReturnValue({
-      rulesPrivileges: { rules: { read: true, edit: true } },
+      rulesPrivileges: { rules: { read: canReadRules, edit: canEditRules } },
     });
     coreStart.application.getUrlForApp.mockImplementation(
       (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -63,6 +114,9 @@ describe('AlertAnalysisWorkflowPage', () => {
       const [path, options] = args as [string, { method?: string; body?: string } | undefined];
 
       if (path === ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE) {
+        if (options?.method !== 'PUT' && settingsRequest) {
+          return settingsRequest();
+        }
         return options?.method === 'PUT'
           ? settingsGetResponse(JSON.parse(options.body as string))
           : settingsGetResponse();
@@ -96,11 +150,89 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+    useLoadConnectorsMock.mockReturnValue({
+      data: [builtInInferenceEndpoint, externalInferenceEndpoint],
+      isLoading: false,
+    } as ReturnType<typeof useLoadConnectors>);
     listAgentsMock.mockResolvedValue([
       { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
       { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
     ]);
+  });
+
+  it.each([
+    { reason: 'the license is below Enterprise', isEnterprise: false },
+    { reason: 'rules read is unauthorized', canReadRules: false },
+    { reason: 'rules edit is unauthorized', canEditRules: false },
+    { reason: 'advanced settings save is unauthorized', canSaveAdvancedSettings: false },
+  ])('renders not found without loading data when $reason', async (overrides) => {
+    renderComponent(overrides);
+
+    expect(await screen.findByTestId('notFoundPage')).toBeInTheDocument();
+    expect(coreStart.http.fetch).not.toHaveBeenCalled();
+    expect(useLoadConnectorsMock).not.toHaveBeenCalled();
+    expect(listAgentsMock).not.toHaveBeenCalled();
+  });
+
+  it('shows an error prompt and retries a failed settings request', async () => {
+    const settingsRequest = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Unable to load settings'))
+      .mockResolvedValueOnce(settingsGetResponse());
+
+    renderComponent({ settingsRequest });
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSettingsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertAnalysisWorkflowSettingsLoading')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSettingsRetryButton'));
+
+    expect(await screen.findByTestId('alertAnalysisWorkflowSaveButton')).toBeInTheDocument();
+    expect(settingsRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads Agent Builder models and lists built-in and external inference endpoints', async () => {
+    renderComponent();
+
+    const connectorSelector = await screen.findByTestId('connector-selector');
+
+    expect(useLoadConnectorsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        http: coreStart.http,
+        toasts: coreStart.notifications.toasts,
+        featureId: 'agent_builder',
+      })
+    );
+
+    fireEvent.click(connectorSelector);
+
+    expect(
+      screen.getByTestId(`connector-option-${builtInInferenceEndpoint.name}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`connector-option-${externalInferenceEndpoint.name}`)
+    ).toBeInTheDocument();
+  });
+
+  it('serializes an external inference endpoint ID as connectorId', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('connector-selector'));
+    fireEvent.click(screen.getByTestId(`connector-option-${externalInferenceEndpoint.name}`));
+    fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+
+    await waitFor(() => {
+      expect(coreStart.http.fetch).toHaveBeenCalledWith(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
+        method: 'PUT',
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+        body: JSON.stringify({
+          ...defaultSettings,
+          connectorId: externalInferenceEndpoint.id,
+        }),
+      });
+    });
   });
 
   it('lists the user selectable agents excluding platform built-ins', async () => {

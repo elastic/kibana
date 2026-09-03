@@ -10,8 +10,10 @@ import {
   ensureMetadata,
   extractBucketColumnName,
   extractBucketIntervalMs,
+  extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
   getStatsQueryHints,
   hasSameEsql,
   hasStatsCommand,
@@ -421,5 +423,56 @@ describe('hasSameEsql', () => {
 
   it('distinguishes valid but different queries', () => {
     expect(hasSameEsql('FROM logs | WHERE a > 1', 'FROM logs | WHERE b > 2')).toBe(false);
+  });
+});
+
+describe('findOverBroadMatchPredicates', () => {
+  it('flags a multi-word `:` value', () => {
+    expect(findOverBroadMatchPredicates('FROM logs | WHERE message : "request failed"')).toEqual([
+      { field: 'message', value: 'request failed', operator: ':' },
+    ]);
+  });
+
+  it('flags a multi-word MATCH value with no options', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH(message, "request failed")')
+    ).toEqual([{ field: 'message', value: 'request failed', operator: 'MATCH' }]);
+  });
+
+  it('does not flag a single-word `:` value', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE error.type : "OutOfMemoryError"')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH_PHRASE', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE MATCH_PHRASE(message, "request failed")')
+    ).toEqual([]);
+  });
+
+  it('does not flag MATCH with an explicit AND operator', () => {
+    expect(
+      findOverBroadMatchPredicates(
+        'FROM logs | WHERE MATCH(message, "request failed", {"operator": "AND"})'
+      )
+    ).toEqual([]);
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('extractReferencedColumns', () => {
+  it('collects field references across clauses, including a field under a cast', () => {
+    const columns = extractReferencedColumns(
+      'FROM logs | WHERE svc::keyword == "x" AND msg == "y"'
+    );
+    expect(new Set(columns)).toEqual(new Set(['svc', 'msg']));
+  });
+
+  it('returns an empty array for an unparseable query', () => {
+    expect(extractReferencedColumns('THIS IS NOT ESQL {{{')).toEqual([]);
   });
 });

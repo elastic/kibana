@@ -1,0 +1,792 @@
+{
+  "sha1": "ce1d00512d7385139cb10eb5350d830bbb49231a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "1f74745923a4dea-e395ce97cca539e",
+      "title": "Automated email resolution integration tests Basic email matching — two entities with same email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 86,
+        "column": 7
+      }
+    },
+    {
+      "id": "1f74745923a4dea-2925171d96b5532",
+      "title": "Automated email resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 107,
+        "column": 8
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a99ccef61b945a2",
+      "title": "Automated email resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 140,
+        "column": 8
+      }
+    },
+    {
+      "id": "1f74745923a4dea-c07a229a984ea45",
+      "title": "Automated email resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 161,
+        "column": 13
+      }
+    },
+    {
+      "id": "1f74745923a4dea-5571f3104035a1d",
+      "title": "Automated email resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 200,
+        "column": 26
+      }
+    },
+    {
+      "id": "1f74745923a4dea-a84792155c15c5b",
+      "title": "Automated email resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 247,
+        "column": 7
+      }
+    },
+    {
+      "id": "1f74745923a4dea-d8f28015196c6d3",
+      "title": "Automated email resolution integration tests Ambiguous buckets skipped — multiple existing targets for same email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 288,
+        "column": 20
+      }
+    },
+    {
+      "id": "1f74745923a4dea-bfb4b3b43243881",
+      "title": "Automated email resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 330,
+        "column": 18
+      }
+    },
+    {
+      "id": "1f74745923a4dea-b01d67b7c6944c4",
+      "title": "Automated email resolution integration tests Manually unlinked entity not re-resolved after new activity updates timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
+        "line": 409,
+        "column": 24
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-77ddb42cb90a9b5",
+      "title": "Entity Store CRUD API tests Should create an entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 46,
+        "column": 55
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-211888d56b14658",
+      "title": "Entity Store CRUD API tests Should receive a conflict (409) if an entity already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-a279d998dad719d",
+      "title": "Entity Store CRUD API tests Should use generated EUID on create when entity.id is not supplied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 84,
+        "column": 21
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-12e211e64cbdae9",
+      "title": "Entity Store CRUD API tests Should reject create when supplied entity.id does not match generated EUID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 107,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-5a3fd48c7069839",
+      "title": "Entity Store CRUD API tests Should require a force flag for restricted fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 125,
+        "column": 13
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-060293f49b8f6c7",
+      "title": "Entity Store CRUD API tests Should update an entity by ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-5a1c4ccc343acf0",
+      "title": "Entity Store CRUD API tests Should update an entity by ID only (no identity fields)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 205,
+        "column": 20
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-95b1d29ad2d7073",
+      "title": "Entity Store CRUD API tests Should update an entity by identity fields only (no entity.id)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 245,
+        "column": 40
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-ac7e8696390ea6b",
+      "title": "Entity Store CRUD API tests Should perform a bulk update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 286,
+        "column": 15
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-fb6dc2aed16acdb",
+      "title": "Entity Store CRUD API tests Should create an entity from a flat document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 334,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-2bb2a545c116f8d",
+      "title": "Entity Store CRUD API tests Should update an entity from a flat document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 351,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-8eec670a36e5e42",
+      "title": "Entity Store CRUD API tests Should replace values (not merge into arrays) when updating twice with flat documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 389,
+        "column": 94
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-af6fe243706382c",
+      "title": "Entity Store CRUD API tests Should delete an entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 435,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-78cb99fb14e2cf6",
+      "title": "Entity Store CRUD API tests Should list entities without params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 487,
+        "column": 73
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-5a734ea915b2d2c",
+      "title": "Entity Store CRUD API tests Should list entities with a DSL filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 516,
+        "column": 23
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-29df6f3037c6167",
+      "title": "Entity Store CRUD API tests Should list entities with size param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 559,
+        "column": 16
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-9bbcf61d0b65cb6",
+      "title": "Entity Store CRUD API tests Should paginate with searchAfter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 576,
+        "column": 73
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-54b87e6f5c885a1",
+      "title": "Entity Store CRUD API tests Should return specific fields when fields param is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 610,
+        "column": 18
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-3c845fefd5f065b",
+      "title": "Entity Store CRUD API tests Should not include fields in response when fields param is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 627,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-e74b533da688344",
+      "title": "Entity Store CRUD API tests Should return multiple fields when multiple fields are requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 645,
+        "column": 24
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-665b1667211494d",
+      "title": "Entity Store CRUD API tests Should return empty fields entry when requested field does not exist on the entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 680,
+        "column": 23
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-aec6e82a8a95398",
+      "title": "Entity Store CRUD API tests Should return 400 for invalid kql",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 709,
+        "column": 25
+      }
+    },
+    {
+      "id": "ee8a3313f445d8e-027c137184141b1",
+      "title": "Entity Store CRUD API tests Should return 400 for invalid searchAfter JSON",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/crud_api.spec.ts",
+        "line": 720,
+        "column": 33
+      }
+    },
+    {
+      "id": "19c1c7c5e6ccaf3-fb5d89006e5f2aa",
+      "title": "Entity Store History Snapshot history snapshot: copies latest to history index and resets behaviors on latest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/history_snapshot.spec.ts",
+        "line": 59,
+        "column": 38
+      }
+    },
+    {
+      "id": "7fe7312af904b17-272fcc149650c56",
+      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate to the seed target, then preserves link when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 105,
+        "column": 46
+      }
+    },
+    {
+      "id": "7fe7312af904b17-5b9bf4cbeeb86ac",
+      "title": "Related user alias resolution integration tests does not link when related user value has no candidate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 201,
+        "column": 19
+      }
+    },
+    {
+      "id": "7fe7312af904b17-d34261d1940580b",
+      "title": "Related user alias resolution integration tests cascades candidate aliases to the seed target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
+        "line": 234,
+        "column": 10
+      }
+    },
+    {
+      "id": "5b394a157338cea-ac5435a64b2e2ab",
+      "title": "Entity Store Resolution API tests Link: should link entities to a target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
+      "id": "5b394a157338cea-d540075aa7f17dc",
+      "title": "Entity Store Resolution API tests Link: should skip already-linked entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 86,
+        "column": 23
+      }
+    },
+    {
+      "id": "5b394a157338cea-d601e83594ce6b8",
+      "title": "Entity Store Resolution API tests Group: should return resolution group from target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 117,
+        "column": 73
+      }
+    },
+    {
+      "id": "5b394a157338cea-af2b38dc38eb7be",
+      "title": "Entity Store Resolution API tests Group: should return same group from alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 153,
+        "column": 22
+      }
+    },
+    {
+      "id": "5b394a157338cea-32988f03f9377cd",
+      "title": "Entity Store Resolution API tests Group: should return standalone entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 180,
+        "column": 22
+      }
+    },
+    {
+      "id": "5b394a157338cea-17655c41267b0c3",
+      "title": "Entity Store Resolution API tests Unlink: should unlink alias entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 194,
+        "column": 86
+      }
+    },
+    {
+      "id": "5b394a157338cea-86d3f3e1e605e28",
+      "title": "Entity Store Resolution API tests Unlink: should skip non-alias entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 243,
+        "column": 21
+      }
+    },
+    {
+      "id": "5b394a157338cea-f49556f23277ecb",
+      "title": "Entity Store Resolution API tests Link: should return 400 for self-link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 260,
+        "column": 26
+      }
+    },
+    {
+      "id": "5b394a157338cea-3c3759b1065556f",
+      "title": "Entity Store Resolution API tests Link: should return 400 for non-existent entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 270,
+        "column": 86
+      }
+    },
+    {
+      "id": "5b394a157338cea-aa054f480907c53",
+      "title": "Entity Store Resolution API tests Link: should return 400 for chain resolution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 279,
+        "column": 24
+      }
+    },
+    {
+      "id": "5b394a157338cea-0d7581a3d7d0f60",
+      "title": "Entity Store Resolution API tests Link: should return 400 when linking entity that has aliases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 311,
+        "column": 24
+      }
+    },
+    {
+      "id": "5b394a157338cea-a0ccc9eedf16023",
+      "title": "Entity Store Resolution API tests Unlink: should return 400 for non-existent entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 333,
+        "column": 7
+      }
+    },
+    {
+      "id": "5b394a157338cea-34c8169d17da7a9",
+      "title": "Entity Store Resolution API tests Group: should return 404 for non-existent entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/resolution_api.spec.ts",
+        "line": 349,
+        "column": 3
+      }
+    }
+  ]
+}

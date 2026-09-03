@@ -86,6 +86,7 @@ const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
     name: schema.string(),
     host: schema.uri({ scheme: ['http', 'https'] }),
     is_default: schema.boolean(),
+    is_preconfigured: schema.maybe(schema.boolean()),
     proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
     ssl: schema.maybe(
       schema.object({
@@ -212,8 +213,12 @@ export const SettingsSchemaV8 = SettingsSchemaV7.extends({
   download_source_auth_secret_storage_requirements_met: schema.maybe(schema.boolean()),
 });
 
+export const SettingsSchemaV9 = SettingsSchemaV8.extends({
+  otlp_output_requirements_met: schema.maybe(schema.boolean()),
+});
+
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV8,
+  item: SettingsSchemaV9,
 });
 
 export const PutSpaceSettingsRequestSchema = {

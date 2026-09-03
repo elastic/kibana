@@ -7,17 +7,18 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import { createMockStorageServiceContract } from '../../services/storage_service/storage_service.mock';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../../resources/datastreams/alert_actions';
-import {
-  createDispatcherPipelineState,
-  createAlertEpisode,
   createActionGroup,
   createActionPolicy,
+  createAlertEpisode,
+  createDispatcherPipelineState,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 const createRules = (...ids: string[]) => new Map(ids.map((id) => [id, createRule({ id })]));
 
@@ -45,7 +46,7 @@ describe('StoreActionsStep', () => {
       dispatch: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
     expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
@@ -61,7 +62,7 @@ describe('StoreActionsStep', () => {
       dispatch: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
     expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
@@ -73,7 +74,7 @@ describe('StoreActionsStep', () => {
 
     const state = createDispatcherPipelineState({});
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
     expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
@@ -96,9 +97,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
     expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -141,9 +142,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
     expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -186,9 +187,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     expect(callArgs.docs).toHaveLength(2);
@@ -243,9 +244,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     const notifiedDoc = callArgs.docs.find(
@@ -294,9 +295,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     const notifiedDoc = callArgs.docs.find(
       (d: Record<string, unknown>) => d.action_type === 'notified'
@@ -355,9 +356,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-suppressed', 'rule-throttled', 'rule-dispatch'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
@@ -432,9 +433,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-unmatched'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
     expect(mockService.bulkIndexDocs).toHaveBeenCalledWith({
       index: ALERT_ACTIONS_DATA_STREAM,
@@ -478,9 +479,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1', 'rule-2'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
@@ -534,9 +535,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-dispatch', 'rule-throttled', 'rule-unmatched'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
@@ -593,9 +594,9 @@ describe('StoreActionsStep', () => {
       rules: createRules('rule-1'),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
     expect(mockService.bulkIndexDocs).toHaveBeenCalledTimes(1);
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
@@ -624,7 +625,7 @@ describe('StoreActionsStep', () => {
         suppressed: [{ ...episode, reason: 'suppressed' }],
       });
 
-      await step.execute(state);
+      await step.execute(state, logger);
 
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs[0].space_id).toBe('custom');
@@ -645,7 +646,7 @@ describe('StoreActionsStep', () => {
         suppressed: [{ ...episode, reason: 'suppressed' }],
       });
 
-      await step.execute(state);
+      await step.execute(state, logger);
 
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs[0].space_id).toBe('default');
@@ -665,7 +666,7 @@ describe('StoreActionsStep', () => {
         suppressed: [{ ...episode, reason: 'suppressed' }],
       });
 
-      await step.execute(state);
+      await step.execute(state, logger);
 
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs[0].space_id).toBe('default');
@@ -696,7 +697,7 @@ describe('StoreActionsStep', () => {
         ],
       });
 
-      await step.execute(state);
+      await step.execute(state, logger);
 
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs[0].space_id).toBe('space-a');
@@ -727,9 +728,9 @@ describe('StoreActionsStep', () => {
         dispatch: [group],
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
-      expect(result).toEqual({ type: 'continue' });
+      expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
 
       const fireDoc = callArgs.docs.find((d: Record<string, unknown>) => d.action_type === 'fire');
@@ -767,9 +768,9 @@ describe('StoreActionsStep', () => {
         dispatch: [group],
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
-      expect(result).toEqual({ type: 'continue' });
+      expect(result).toEqual(expect.objectContaining({ type: 'continue' }));
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
 
       const notifiedDoc = callArgs.docs.find(
@@ -784,6 +785,133 @@ describe('StoreActionsStep', () => {
           space_id: 'space-a',
           actor: 'system',
         })
+      );
+    });
+  });
+
+  describe('recordedEpisodes count', () => {
+    it('counts suppressed episodes', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        suppressed: [
+          { ...createAlertEpisode({ episode_id: 'ep-1' }), reason: 'acked' },
+          { ...createAlertEpisode({ episode_id: 'ep-2' }), reason: 'acked' },
+        ],
+        throttled: [],
+        dispatch: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual(
+        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 2 } })
+      );
+    });
+
+    it('counts throttled episodes across groups', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        suppressed: [],
+        throttled: [
+          createActionGroup({
+            id: 'g1',
+            episodes: [
+              createAlertEpisode({ episode_id: 'e1' }),
+              createAlertEpisode({ episode_id: 'e2' }),
+            ],
+          }),
+          createActionGroup({ id: 'g2', episodes: [createAlertEpisode({ episode_id: 'e3' })] }),
+        ],
+        dispatch: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual(
+        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 3 } })
+      );
+    });
+
+    it('counts dispatch episodes across groups', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        suppressed: [],
+        throttled: [],
+        dispatch: [
+          createActionGroup({
+            id: 'g1',
+            episodes: [
+              createAlertEpisode({ episode_id: 'e1' }),
+              createAlertEpisode({ episode_id: 'e2' }),
+            ],
+          }),
+        ],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual(
+        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 2 } })
+      );
+    });
+
+    it('counts unmatched episodes', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const state = createDispatcherPipelineState({
+        dispatchable: [
+          createAlertEpisode({ episode_id: 'e1' }),
+          createAlertEpisode({ episode_id: 'e2' }),
+          createAlertEpisode({ episode_id: 'e3' }),
+        ],
+        suppressed: [],
+        throttled: [],
+        dispatch: [],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual(
+        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 3 } })
+      );
+    });
+
+    it('sums all buckets', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      // 1 suppressed + 1 throttled (in a group) + 1 dispatch (in a group) + 1 unmatched = 4
+      const unmatchedEpisode = createAlertEpisode({
+        episode_id: 'ep-unmatched',
+        group_hash: 'h-unmatched',
+      });
+      const dispatchedEpisode = createAlertEpisode({
+        episode_id: 'ep-dispatch',
+        group_hash: 'h-dispatch',
+      });
+      const throttledEpisode = createAlertEpisode({
+        episode_id: 'ep-throttled',
+        group_hash: 'h-throttled',
+      });
+
+      const state = createDispatcherPipelineState({
+        dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
+        suppressed: [{ ...createAlertEpisode({ episode_id: 'ep-sup' }), reason: 'acked' }],
+        throttled: [createActionGroup({ id: 'g-throttle', episodes: [throttledEpisode] })],
+        dispatch: [createActionGroup({ id: 'g-dispatch', episodes: [dispatchedEpisode] })],
+      });
+
+      const result = await step.execute(state, logger);
+
+      expect(result).toEqual(
+        expect.objectContaining({ type: 'continue', data: { recordedEpisodes: 4 } })
       );
     });
   });

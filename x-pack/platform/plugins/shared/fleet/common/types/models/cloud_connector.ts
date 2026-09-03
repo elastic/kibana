@@ -10,9 +10,11 @@ import type {
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
 } from './package_policy';
-export type CloudProvider = 'aws' | 'azure' | 'gcp';
+export const AWS_CLOUD_PROVIDER = 'aws' as const;
 
-const CLOUD_PROVIDERS: readonly CloudProvider[] = ['aws', 'azure', 'gcp'];
+export type CloudProvider = typeof AWS_CLOUD_PROVIDER | 'azure' | 'gcp';
+
+const CLOUD_PROVIDERS: readonly CloudProvider[] = [AWS_CLOUD_PROVIDER, 'azure', 'gcp'];
 
 /**
  * Type guard to check if a value is a valid CloudProvider.
@@ -59,7 +61,7 @@ export interface CloudConnectorNewSecretVar {
 
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  external_id: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
+  external_id?: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 
 export interface AzureCloudConnectorVars {

@@ -45,6 +45,9 @@ export enum SYNTHETICS_API_URLS {
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
+  PRIVATE_LOCATION_AGENT_STATS = `/internal/synthetics/private_locations/agent_stats`,
+  PRIVATE_LOCATION_OUTDATED_MW_AGENTS = `/internal/synthetics/private_locations/outdated_mw_agents`,
+  MONITOR_AGENT_ASSIGNMENT = `/internal/synthetics/monitors/{monitorId}/agent_assignment`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
   GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,
   GET_CONNECTOR_TYPES = `/internal/synthetics/get_connector_types`,
@@ -64,6 +67,7 @@ export enum SYNTHETICS_API_URLS {
   ERROR_STATS = '/internal/synthetics/error_stats',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
+  FIELD_SUGGESTIONS = `/internal/synthetics/field_suggestions`,
   MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
 
   // Project monitor public endpoint

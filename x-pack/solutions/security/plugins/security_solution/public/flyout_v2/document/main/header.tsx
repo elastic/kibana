@@ -31,6 +31,7 @@ import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 
 const SHARE_ALERT_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
@@ -79,6 +80,7 @@ export const Header: FC<HeaderProps> = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
 
     const alertDetailsLink = useGetFlyoutLink({
       eventId: hit.raw._id ?? '',
@@ -104,7 +106,7 @@ export const Header: FC<HeaderProps> = memo(
         </EuiText>
         <EuiSpacer size="xs" />
 
-        <Title hit={hit} hideLink={!canReadRules} />
+        <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />
@@ -132,10 +134,18 @@ export const Header: FC<HeaderProps> = memo(
               <EuiFlexItem css={flyoutHeaderBlockStyles}>
                 <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
                   <EuiFlexItem>
-                    <Assignees hit={hit} onAlertUpdated={onAlertUpdated} />
+                    <Assignees
+                      hit={hit}
+                      onAlertUpdated={onAlertUpdated}
+                      showAssignees={!isRulePreview}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <Notes documentId={hit.raw._id ?? ''} onShowNotes={onShowNotes} />
+                    <Notes
+                      documentId={hit.raw._id ?? ''}
+                      onShowNotes={onShowNotes}
+                      disabled={isRulePreview}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

@@ -11,7 +11,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
+import { AutoOpsPromotionCallout, AutoOpsEnabledCallout } from '@kbn/autoops-promotion-callout';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -46,6 +46,7 @@ export interface PageTemplateProps {
   getPageData?: () => Promise<void>;
   product?: string;
   showAutoOpsPromotion?: boolean;
+  showAutoOpsEnabledBanner?: boolean;
 }
 
 export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
@@ -55,6 +56,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   getPageData,
   product,
   showAutoOpsPromotion,
+  showAutoOpsEnabledBanner,
   children,
 }) => {
   useTitle('', title);
@@ -138,6 +140,12 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
     !hideAnnouncements;
 
+  const shouldShowAutoOpsEnabledBanner =
+    showAutoOpsEnabledBanner &&
+    !Legacy.shims.isAirGapped &&
+    cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -161,6 +169,14 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
             cloudConnectUrl={cloudConnectUrl}
             onConnectClick={handleConnectClick}
             hasCloudConnectPermission={hasCloudConnectPermission}
+            compressed={false}
+          />
+        )}
+        {shouldShowAutoOpsEnabledBanner && (
+          <AutoOpsEnabledCallout
+            autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+            docsUrl={cloudConnectStatus.autoOpsDocsUrl}
+            compressed={false}
           />
         )}
         <EuiSpacer size="m" />
