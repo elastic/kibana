@@ -46,7 +46,70 @@ export interface AiIndexAuditEventParams {
 
 export enum ImprovementAuditAction {
   RECORD = 'context_engine_improvement_record',
+  APPROVE = 'context_engine_improvement_approve',
+  REJECT = 'context_engine_improvement_reject',
+  RUN = 'context_engine_feedback_analysis_run',
 }
+
+export interface ImprovementDecisionAuditEventParams {
+  action:
+    | ImprovementAuditAction.APPROVE
+    | ImprovementAuditAction.REJECT
+    | ImprovementAuditAction.RUN;
+  aiIndexId: string;
+  /** Absent for a run, which decides nothing. */
+  improvementId?: string;
+  error?: Error;
+}
+
+const DECISION_VERB: Record<
+  ImprovementDecisionAuditEventParams['action'],
+  { attempt: string; done: string }
+> = {
+  [ImprovementAuditAction.APPROVE]: { attempt: 'approve', done: 'approved' },
+  [ImprovementAuditAction.REJECT]: { attempt: 'reject', done: 'rejected' },
+  [ImprovementAuditAction.RUN]: {
+    attempt: 'run feedback analysis for',
+    done: 'run feedback analysis for',
+  },
+};
+
+/**
+ * Audits a reviewer approving or rejecting a proposal, or starting a run by hand.
+ *
+ * Approving is the point at which the loop is allowed to change something, so the decision and its
+ * outcome are both privileged mutations worth a record of their own — `RECORD` above covers only
+ * what a run proposed, which changes nothing on its own.
+ */
+export const improvementDecisionAuditEvent = ({
+  action,
+  aiIndexId,
+  improvementId,
+  error,
+}: ImprovementDecisionAuditEventParams): AuditEvent => {
+  const subject = improvementId
+    ? `improvement [id=${improvementId}] on AI index [id=${aiIndexId}]`
+    : `AI index [id=${aiIndexId}]`;
+
+  return {
+    message: error
+      ? `Failed attempt to ${DECISION_VERB[action].attempt} ${subject}`
+      : `User has ${DECISION_VERB[action].done} ${subject}`,
+    event: {
+      action,
+      category: ['database'],
+      type: [action === ImprovementAuditAction.RUN ? 'access' : 'change'],
+      outcome: error ? 'failure' : 'success',
+    },
+    kibana: {
+      saved_object: { type: 'ai_index', id: aiIndexId },
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
 
 export interface ImprovementAuditEventParams {
   aiIndexId: string;

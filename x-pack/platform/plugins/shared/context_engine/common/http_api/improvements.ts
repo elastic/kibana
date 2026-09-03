@@ -29,6 +29,23 @@ export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
  */
 export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
 
+export const IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = [
+  'suggested',
+  'applied',
+  'rejected',
+  'failed',
+];
+
+/**
+ * The statuses a reviewer has not settled. `failed` is open: the apply errored, so nothing was
+ * written and approving again after fixing the cause is the expected next step.
+ */
+export const OPEN_IMPROVEMENT_STATUSES: readonly ImprovementStatus[] = ['suggested', 'failed'];
+
+/** Whether the improvement is still awaiting a decision, and so can be approved or rejected. */
+export const isOpenImprovement = (status: ImprovementStatus): boolean =>
+  OPEN_IMPROVEMENT_STATUSES.includes(status);
+
 /** The `add_*` actions create their target, so they carry no {@link ImprovementTarget}. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');
 
@@ -141,6 +158,22 @@ export type ImprovementTransition = Extract<ImprovementStatus, 'applied' | 'reje
 export interface ListImprovementsResponse {
   items: Improvement[];
   total: number;
+}
+
+/** Response to approving or rejecting: the new head, so the caller need not re-list to redraw a row. */
+export interface MutateImprovementResponse {
+  improvement: Improvement;
+}
+
+/** Response to starting a run by hand. */
+export interface RunFeedbackAnalysisResponse {
+  /** The workflow execution that was started, for following the run. */
+  execution_id: string;
+}
+
+/** Body of a reject request. */
+export interface RejectImprovementRequest {
+  reason?: string;
 }
 
 /**

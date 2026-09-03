@@ -37,9 +37,26 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/** Read and decision routes for the improvements a feedback analysis run proposed. */
+export const aiIndexImprovementsPath = `${internalApiPath}/ai_index/{aiIndexId}/improvements`;
+export const improvementApprovePath = `${aiIndexImprovementsPath}/{improvementId}/approve`;
+export const improvementRejectPath = `${aiIndexImprovementsPath}/{improvementId}/reject`;
+/** Triggers one analysis off-schedule. */
+export const aiIndexFeedbackAnalysisRunPath = `${aiIndexFeedbackAnalysisPath}/_run`;
+
+/** Version of the internal Improvements API, shared between route registration and the browser client. */
+export const IMPROVEMENTS_INTERNAL_API_VERSION = '1';
+
+export const MAX_IMPROVEMENT_ID_LENGTH = 512;
+
 /** Default and maximum page size when listing improvements (one entry per improvement lineage). */
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Upper bound on `from + size`, so deep pagination cannot exceed ES `index.max_result_window`.
+ */
+export const MAX_IMPROVEMENTS_RESULT_WINDOW = 10000;
 
 /**
  * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see

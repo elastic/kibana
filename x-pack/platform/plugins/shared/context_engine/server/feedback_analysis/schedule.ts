@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
@@ -37,6 +37,15 @@ export interface FeedbackAnalysisScheduleService {
    * per run through the context endpoint, so only the interval needs this.
    */
   reconcile(params: ReconcileScheduleParams): Promise<void>;
+
+  /**
+   * Runs one analysis immediately, off-schedule, and returns the execution id.
+   *
+   * Only possible while analysis is enabled: disabling uninstalls the per-index workflow, so with
+   * it off there is no instance to execute. The caller checks the configuration and explains that,
+   * rather than offering an action that would fail here.
+   */
+  run(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<string>;
 
   /** Tears the schedule down when the AI index it analyzes is deleted. */
   remove(params: { aiIndexId: string; spaceId: string }): Promise<void>;
@@ -93,6 +102,23 @@ export const createFeedbackAnalysisScheduleService = ({
           feedbackAnalysis
         )}m`
       );
+    },
+
+    async run({ aiIndexId, spaceId, request }) {
+      const client = await getManagedWorkflowsClient();
+      const executionId = await client.execute(
+        request,
+        CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+        {
+          spaceId,
+          workflowIdSuffix: aiIndexId,
+          triggeredBy: 'manual',
+        }
+      );
+      log.info(
+        `Started an off-schedule feedback analysis run for AI index '${aiIndexId}' in space '${spaceId}'`
+      );
+      return executionId;
     },
 
     async remove({ aiIndexId, spaceId }) {
