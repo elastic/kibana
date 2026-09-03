@@ -10,19 +10,16 @@ import type {
   CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiSearchBarOnChangeArgs,
-  EuiSwitchEvent,
   Query,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -30,13 +27,13 @@ import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import type { FC } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -76,6 +73,41 @@ const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
   return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
+const rolesListTitle = i18n.translate('xpack.security.management.roles.roleTitle', {
+  defaultMessage: 'Roles',
+});
+
+const customRolesListTitle = i18n.translate('xpack.security.management.roles.customRoleTitle', {
+  defaultMessage: 'Custom Roles',
+});
+
+const rolesListDescription = i18n.translate('xpack.security.management.roles.subtitle', {
+  defaultMessage: 'Apply roles to groups of users and manage permissions across the stack.',
+});
+
+const customRolesListDescription = i18n.translate(
+  'xpack.security.management.roles.customRolesSubtitle',
+  {
+    defaultMessage:
+      'In addition to the predefined roles on the system, you can create your own roles and provide your users with the exact set of privileges that they need.',
+  }
+);
+
+const createRoleButtonLabel = i18n.translate(
+  'xpack.security.management.roles.createRoleButtonLabel',
+  { defaultMessage: 'Create role' }
+);
+
+const showReservedRolesLabel = i18n.translate(
+  'xpack.security.management.roles.showReservedRolesLabel',
+  { defaultMessage: 'Show reserved roles' }
+);
+
+const assignRolesLinkLabel = i18n.translate(
+  'xpack.security.management.roles.assignRolesLinkLabel',
+  { defaultMessage: 'Assign roles' }
+);
+
 const MAX_PAGINATED_ITEMS = 10000;
 
 const DEFAULT_TABLE_STATE = {
@@ -105,7 +137,8 @@ export const RolesGridPage: FC<Props> = ({
   const [selection, setSelection] = useState<Role[]>([]);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<boolean>(false);
   const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasCompletedLoad, setHasCompletedLoad] = useState<boolean>(false);
 
   const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
@@ -135,6 +168,7 @@ export const RolesGridPage: FC<Props> = ({
       }
     } finally {
       setIsLoading(false);
+      setHasCompletedLoad(true);
     }
   };
 
@@ -142,11 +176,11 @@ export const RolesGridPage: FC<Props> = ({
     loadRoles(DEFAULT_TABLE_STATE);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
+  const onIncludeReservedRolesChange = (checked: boolean) => {
     const newTableStateArgs = {
       ...tableState,
       filters: {
-        showReservedRoles: e.target.checked,
+        showReservedRoles: checked,
       },
     };
     setTableState(newTableStateArgs);
@@ -226,24 +260,6 @@ export const RolesGridPage: FC<Props> = ({
         />
       </EuiButton>
     );
-  };
-
-  const renderToolsRight = () => {
-    if (buildFlavor !== 'serverless') {
-      return (
-        <EuiSwitch
-          data-test-subj="showReservedRolesSwitch"
-          label={
-            <FormattedMessage
-              id="xpack.security.management.roles.showReservedRolesLabel"
-              defaultMessage="Show reserved roles"
-            />
-          }
-          checked={tableState.filters.showReservedRoles ?? true}
-          onChange={onIncludeReservedRolesChange}
-        />
-      );
-    }
   };
 
   const onTableChange = ({ page, sort }: CriteriaWithPagination<Role>) => {
@@ -407,73 +423,51 @@ export const RolesGridPage: FC<Props> = ({
   };
   const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
 
+  const createRolePath = getRoleManagementHref('edit');
+  const listTitle = buildFlavor === 'serverless' ? customRolesListTitle : rolesListTitle;
+  const listDescription =
+    buildFlavor === 'serverless' ? customRolesListDescription : rolesListDescription;
+
+  const menu: AppHeaderMenu = {};
+  if (buildFlavor !== 'serverless') {
+    menu.switch = {
+      id: 'showReservedRoles',
+      label: showReservedRolesLabel,
+      checked: tableState.filters.showReservedRoles ?? true,
+      onChange: onIncludeReservedRolesChange,
+      'data-test-subj': 'showReservedRolesSwitch',
+    };
+  }
+  if (!readOnly && hasCompletedLoad) {
+    menu.primaryActionItem = {
+      id: 'createRole',
+      label: createRoleButtonLabel,
+      iconType: 'plusCircle',
+      testId: 'createRoleButton',
+      href: history.createHref({ pathname: createRolePath }),
+      run: () => history.push(createRolePath),
+    };
+  }
+  if (!readOnly && buildFlavor === 'serverless' && cloudOrgUrl) {
+    menu.items = [
+      {
+        id: 'assignRoles',
+        label: assignRolesLinkLabel,
+        iconType: 'external',
+        href: cloudOrgUrl,
+        target: '_blank',
+      },
+    ];
+  }
+
   return permissionDenied ? (
     <PermissionDenied />
   ) : (
     <>
-      <KibanaPageTemplate.Header
-        bottomBorder
-        data-test-subj="rolesGridPageHeader"
-        pageTitle={
-          buildFlavor === 'serverless' ? (
-            <FormattedMessage
-              id="xpack.security.management.roles.customRoleTitle"
-              defaultMessage="Custom Roles"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.security.management.roles.roleTitle"
-              defaultMessage="Roles"
-            />
-          )
-        }
-        description={
-          buildFlavor === 'serverless' ? (
-            <FormattedMessage
-              id="xpack.security.management.roles.customRolesSubtitle"
-              defaultMessage="In addition to the predefined roles on the system, you can create your own roles and provide your users with the exact set of privileges that they need."
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.security.management.roles.subtitle"
-              defaultMessage="Apply roles to groups of users and manage permissions across the stack."
-            />
-          )
-        }
-        rightSideItems={
-          readOnly
-            ? undefined
-            : [
-                <EuiButton
-                  data-test-subj="createRoleButton"
-                  {...reactRouterNavigate(history, getRoleManagementHref('edit'))}
-                  fill
-                  iconType="plusCircle"
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.roles.createRoleButtonLabel"
-                    defaultMessage="Create role"
-                  />
-                </EuiButton>,
-                buildFlavor === 'serverless' && (
-                  <EuiButtonEmpty
-                    href={cloudOrgUrl}
-                    target="_blank"
-                    iconSide="right"
-                    iconType="external"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.roles.assignRolesLinkLabel"
-                      defaultMessage="Assign roles"
-                    />
-                  </EuiButtonEmpty>
-                ),
-              ]
-        }
-      />
+      <AppHeader title={listTitle} description={listDescription} menu={menu} spacing="bleed" />
 
       <EuiSpacer size="l" />
-      <KibanaPageTemplate.Section paddingSize="none">
+      <div>
         {showDeleteConfirmation ? (
           <ConfirmDelete
             onCancel={onCancelDelete}
@@ -494,7 +488,6 @@ export const RolesGridPage: FC<Props> = ({
           }}
           onChange={onSearchChange}
           toolsLeft={renderToolsLeft()}
-          toolsRight={renderToolsRight()}
         />
         <EuiSpacer size="s" />
         {exceededResultCount && (
@@ -549,7 +542,7 @@ export const RolesGridPage: FC<Props> = ({
           }}
           rowProps={{ 'data-test-subj': 'roleRow' }}
         />
-      </KibanaPageTemplate.Section>
+      </div>
     </>
   );
 };

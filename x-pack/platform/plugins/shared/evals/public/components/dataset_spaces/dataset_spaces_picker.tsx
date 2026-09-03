@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
-import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import * as i18n from './translations';
 
