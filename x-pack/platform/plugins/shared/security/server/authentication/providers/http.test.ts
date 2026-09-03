@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import type { ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
@@ -421,6 +422,71 @@ describe('HTTPAuthenticationProvider', () => {
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Detected UIAM OAuth token on a non-MCP endpoint')
+      );
+    });
+
+    it('does not warn for a trusted loopback caller with a verified internal-caller attestation.', async () => {
+      const header = 'Bearer essu_some_token';
+      const attestation = 'some-internal-caller-attestation';
+      jest
+        .mocked(mockOptionsWithUiam.uiam!.getInternalCallerAttestationHeaders)
+        .mockReturnValue({ [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: attestation });
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: header,
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: attestation,
+        },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(
+        mockAuthenticatedUser()
+      );
+      mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {
+        supportedSchemes: new Set(['bearer']),
+      });
+
+      await provider.authenticate(request);
+
+      expect(mockOptionsWithUiam.logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('Detected UIAM OAuth token on a non-MCP endpoint')
+      );
+      expect(mockOptionsWithUiam.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+        expect.objectContaining({ scheme: 'Bearer', credentials: 'essu_some_token' })
+      );
+    });
+
+    // Presence alone must not silence the warning, or any external caller could suppress it.
+    it('still warns when the presented internal-caller attestation does not verify.', async () => {
+      const header = 'Bearer essu_some_token';
+      jest
+        .mocked(mockOptionsWithUiam.uiam!.getInternalCallerAttestationHeaders)
+        .mockReturnValue({ [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'the-real-attestation' });
+
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: header,
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'a-forged-attestation',
+        },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(
+        mockAuthenticatedUser()
+      );
       mockOptionsWithUiam.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       const provider = new HTTPAuthenticationProvider(mockOptionsWithUiam, {

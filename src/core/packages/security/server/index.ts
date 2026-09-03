@@ -16,6 +16,12 @@ export type {
 export type { CoreAuditService } from './src/audit';
 export type { CoreServiceAccountsService } from './src/service_accounts';
 export type {
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
+  CreateServiceAccountParams,
+} from '@kbn/core-security-common';
+export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
