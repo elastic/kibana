@@ -70,9 +70,10 @@ const waitForEsqlPanelInitialized = async (page: ScoutPage): Promise<void> => {
   await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
   await expect(page.testSubj.locator('ESQLEditor-run-query-button')).toBeEnabled();
   await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
-  // Initial ES|QL suggestion/column fetch (`FROM … | limit 0`) can exceed the
-  // default expect timeout under load; stats only appear once it settles.
-  await expect(page.getByText(/documents processed/i)).toBeVisible({ timeout: 30_000 });
+  // Stats appear once the initial suggestion/column fetch (`FROM … | limit 0`) settles.
+  await expect(
+    page.testSubj.locator('ESQLEditor-queryStats-totalDocumentsProcessed')
+  ).toBeVisible();
 };
 
 const setEsqlQueryAndRun = async (page: ScoutPage, query: string): Promise<void> => {
