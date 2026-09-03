@@ -316,11 +316,10 @@ describe('test transform install with legacy schema', () => {
     // The transform ref must still be present — not wiped by the reinstall.
     const lastUpdateCall =
       savedObjectsClient.update.mock.calls[savedObjectsClient.update.mock.calls.length - 1];
-    const finalInstalledEs = (lastUpdateCall[2] as { installed_es: Array<{ id: string; type: string }> })
-      .installed_es;
-    expect(finalInstalledEs).toEqual([
-      { id: transformId, type: ElasticsearchAssetType.transform },
-    ]);
+    const finalInstalledEs = (
+      lastUpdateCall[2] as { installed_es: Array<{ id: string; type: string }> }
+    ).installed_es;
+    expect(finalInstalledEs).toEqual([{ id: transformId, type: ElasticsearchAssetType.transform }]);
   });
 
   test('can install new version and when no older version', async () => {
