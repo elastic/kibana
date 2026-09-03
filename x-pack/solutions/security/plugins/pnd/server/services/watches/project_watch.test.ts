@@ -517,6 +517,7 @@ describe('project watch', () => {
       with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
+      'on-failure'?: Record<string, unknown>;
     }
 
     const flattenSteps = (steps: NestedStep[]): NestedStep[] =>
@@ -708,6 +709,38 @@ describe('project watch', () => {
       it('measures FP rate independently from the unreviewed work queue', () => {
         expect(harvestQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
         expect(harvestQuery).toContain('fp_rate_count * 100 >= total_count');
+      });
+
+      // A proposal can outlive its sweep (cancelled sweep, manual run). Its rule must
+      // not consume a sweep slot again while the gate is pending, so the harvest
+      // excludes rules with an in-flight proposal, and fails open when the lookup or
+      // the group-key parse cannot be trusted.
+      it('skips rules whose proposal is still in flight', () => {
+        const lookup = tuningSteps.find(({ name }) => name === 'list_active_proposals')!;
+        const path = String(lookup.with?.path);
+        const nonTerminal = [
+          'pending',
+          'waiting',
+          'waiting_for_input',
+          'waiting_for_child',
+          'running',
+          'queued',
+        ];
+
+        expect(path).toContain(`/api/workflows/workflow/${PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID}/executions?`);
+        for (const status of nonTerminal) {
+          expect(path).toContain(`statuses=${status}`);
+        }
+        expect(lookup['on-failure']).toEqual({ continue: true });
+
+        const resolve = tuningSteps.find(({ name }) => name === 'resolve_active_rules')!;
+        expect(String(resolve.if)).toContain('parsed_count == steps.collect_active_rules.output.expected');
+
+        const filter = JSON.stringify(harvest.with?.filter);
+        expect(filter).toContain('must_not');
+        expect(filter).toContain(
+          '"kibana.alert.rule.rule_id":"${{ steps.resolve_active_rules.output.rule_ids | default: consts.no_rows }}"'
+        );
       });
 
       it('does not split one rule history when its name changes', () => {
