@@ -17,6 +17,7 @@ import type {
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -101,6 +102,7 @@ import type { ConnectorExecuteParams } from '../application/connector/methods/ex
 import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 import { getAxiosInstance } from '../application/connector/methods/get_axios_instance';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
+import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -131,6 +133,7 @@ export interface ConstructorOptions {
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
+  securityService?: SecurityServiceStart;
 }
 
 export interface ActionsClientContext {
@@ -159,6 +162,7 @@ export interface ActionsClientContext {
   connectorLifecycleListeners?: ConnectorLifecycleListener[];
   getCurrentUserProfileId?: (request: KibanaRequest) => Promise<string | undefined>;
   evictClientPool?: (connectorId: string) => Promise<void>;
+  securityService?: SecurityServiceStart;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -190,6 +194,7 @@ export class ActionsClient {
     connectorLifecycleListeners,
     getCurrentUserProfileId,
     evictClientPool,
+    securityService,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -215,6 +220,7 @@ export class ActionsClient {
       connectorLifecycleListeners,
       getCurrentUserProfileId: getCurrentUserProfileId ?? noop,
       evictClientPool,
+      securityService,
     };
   }
 
@@ -608,6 +614,8 @@ export class ActionsClient {
     // Must run before the saved-object delete below — needs the connector's secrets to revoke its
     // OAuth grant.
     await this.deleteConnectorAuthTokens(id, authMode);
+
+    await invalidateInboundConnectorEventIdentity(this.context, id, actionTypeId);
 
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
