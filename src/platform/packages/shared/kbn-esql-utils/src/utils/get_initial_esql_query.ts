@@ -25,10 +25,21 @@ const getFinalWhereClause = (
 };
 
 /**
+ * Matches every index on every remote cluster. TSDB field metadata surfacing from such a broad
+ * resolution is not a reliable signal that the user wants a time series query.
+ */
+const ALL_REMOTES_WILDCARD = '*:*';
+
+const hasUnboundedRemotePattern = (indexPattern: string): boolean =>
+  indexPattern.split(',').some((entry) => entry.trim() === ALL_REMOTES_WILDCARD);
+
+/**
  * Builds an ES|QL query for the provided dataView.
  * If there is @timestamp field in the index, we don't add the WHERE clause.
  * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName.
  * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command.
+ * `*:*` is an exception: it matches every index on every remote cluster, so TSDB field metadata
+ * there is not a reliable signal of time series intent and we fall back to the FROM command.
  * When a timeFieldName exists, a SORT DESC clause on the dataView timeFieldName is appended.
  */
 export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
@@ -50,8 +61,10 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?:
     filterBySearchText,
     filtersExpression || undefined
   );
-  const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+  const indexPattern = dataView.getIndexPattern();
+  const sourceCommand =
+    dataView.isTSDBMode() && !hasUnboundedRemotePattern(indexPattern) ? 'TS' : 'FROM';
   const sortClause = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${sortClause}${whereClause}`;
+  return `${sourceCommand} ${indexPattern}${sortClause}${whereClause}`;
 }
