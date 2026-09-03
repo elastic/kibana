@@ -26,6 +26,7 @@ import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
 import type { QueryTab } from './types';
+import { Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './rule_builder/threshold/form_types';
 
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
@@ -135,6 +136,7 @@ interface SandboxFlyoutMockProps {
   helpText?: React.ReactNode;
   headerActions?: React.ReactNode;
   tabs?: QueryTab[];
+  activeTab?: QueryTab;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -527,10 +529,23 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+      expect(sandboxFlyoutProps?.activeTab).toBe('base');
     });
 
     it('includes the recovery tab only when custom recovery is selected', () => {
-      renderFlyout({ mode: 'create', builderType: 'threshold' });
+      renderFlyout({
+        mode: 'create',
+        builderType: 'threshold',
+        initialBuilderState: {
+          ...DEFAULT_THRESHOLD_FORM_VALUES,
+          recovery: {
+            conditions: [
+              { id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] },
+            ],
+            conditionOperator: 'AND',
+          },
+        },
+      });
 
       act(() => {
         getLatestFormProps().onRecoveryTypeChange('custom');
@@ -538,6 +553,17 @@ describe('ComposeDiscoverFlyout', () => {
       fireEvent.click(screen.getByTestId('ruleBuilderOpenPreview'));
 
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert', 'recovery']);
+      expect(sandboxFlyoutProps?.activeTab).toBe('base');
+    });
+
+    it('disables Preview when custom recovery has no valid recovery block', () => {
+      renderFlyout({ mode: 'create', builderType: 'threshold' });
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      expect(screen.getByTestId('ruleBuilderOpenPreview')).toBeDisabled();
     });
 
     it('disables Preview while the sandbox is open', () => {

@@ -63,11 +63,11 @@ import {
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { splitQuery } from '../../use_heuristic_split';
+import { OPTIONAL_LABEL } from '../../../../form/translations';
 import {
   AGGREGATION_OPTIONS,
   COMPARATOR_OPTIONS,
   CONDITION_OPERATOR_OPTIONS,
-  OPTIONAL_LABEL,
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';

@@ -57,7 +57,9 @@ import {
   RULE_BUILDER_REGISTRY,
   BuilderStateProvider,
   parseDiscoverQueryForBuilder,
+  buildRecoveryBlock,
   type BuilderState,
+  type ThresholdFormValues,
 } from './rule_builder';
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
@@ -373,6 +375,7 @@ export function ComposeDiscoverFlyout({
     initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
+    isBuilderMode,
   });
 
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -414,6 +417,13 @@ export function ComposeDiscoverFlyout({
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });
+
+  const hasValidRecoveryBlock = useMemo(() => {
+    if (builderType !== 'threshold' || !builderState) {
+      return true;
+    }
+    return Boolean(buildRecoveryBlock(builderState as ThresholdFormValues));
+  }, [builderType, builderState]);
 
   const validationErrors = inlineResult.unresolved;
   const hasValidationErrors = validationErrors.length > 0;
@@ -677,6 +687,8 @@ export function ComposeDiscoverFlyout({
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
+  const isBuilderModeRef = useRef(isBuilderMode);
+  isBuilderModeRef.current = isBuilderMode;
 
   /*
    * After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
@@ -687,7 +699,11 @@ export function ComposeDiscoverFlyout({
   useEffect(() => {
     if (reopenChildRef.current) {
       reopenChildRef.current = false;
-      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+      dispatch({
+        type: 'OPEN_CHILD',
+        isAlert: isAlertRef.current,
+        isBuilderMode: isBuilderModeRef.current,
+      });
     }
   }, [flyoutKey, dispatch]);
 
@@ -1098,31 +1114,28 @@ export function ComposeDiscoverFlyout({
    * Follow schema decisions in #268984 — if recoveryType is superseded by a
    * field on RuleQuery itself, gate this on query shape instead.
    */
-  const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
+  const fullPreviewSandboxTabs = useMemo<QueryTab[] | undefined>(() => {
     /*
      * Builder preview and YAML sandbox show the full query (base, alert, and
      * recovery when custom recovery is selected) regardless of the current step.
      * A standalone query can't be represented as base/alert tabs, so it uses
      * the single unified editor.
      */
-    if (isBuilderMode || uiState.yamlMode) {
-      if (sandboxQuery.format === 'standalone') return undefined;
-      return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
-    }
-    return getSandboxTabs(isAlert, {
-      step: uiState.step,
-      recoveryType: uiState.recoveryType,
-      manualSplitEnabled: uiState.manualSplitEnabled,
-    });
-  }, [
-    isBuilderMode,
-    uiState.yamlMode,
-    uiState.recoveryType,
-    uiState.step,
-    uiState.manualSplitEnabled,
-    sandboxQuery.format,
-    isAlert,
-  ]);
+    if (sandboxQuery.format === 'standalone') return undefined;
+    return uiState.recoveryType === 'custom' ? ['base', 'alert', 'recovery'] : ['base', 'alert'];
+  }, [sandboxQuery.format, uiState.recoveryType]);
+
+  const stepSandboxTabs = useMemo(
+    () =>
+      getSandboxTabs(isAlert, {
+        step: uiState.step,
+        recoveryType: uiState.recoveryType,
+        manualSplitEnabled: uiState.manualSplitEnabled,
+      }),
+    [isAlert, uiState.step, uiState.recoveryType, uiState.manualSplitEnabled]
+  );
+
+  const sandboxTabs = isBuilderMode || uiState.yamlMode ? fullPreviewSandboxTabs : stepSandboxTabs;
 
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
 
@@ -1302,8 +1315,13 @@ export function ComposeDiscoverFlyout({
                           size="s"
                           color="text"
                           iconType="chevronLimitLeft"
-                          isDisabled={uiState.childOpen}
-                          onClick={() => dispatch({ type: 'OPEN_CHILD', isAlert })}
+                          isDisabled={
+                            uiState.childOpen ||
+                            (uiState.recoveryType === 'custom' && !hasValidRecoveryBlock)
+                          }
+                          onClick={() =>
+                            dispatch({ type: 'OPEN_CHILD', isAlert, isBuilderMode: true })
+                          }
                           data-test-subj="ruleBuilderOpenPreview"
                         >
                           {PREVIEW_BUTTON_LABEL}

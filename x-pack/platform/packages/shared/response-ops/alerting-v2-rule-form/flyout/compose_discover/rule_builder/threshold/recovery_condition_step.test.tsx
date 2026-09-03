@@ -14,8 +14,6 @@ import { BuilderStateProvider } from '../builder_state_context';
 import type { ThresholdFormValues } from './form_types';
 import { Comparator, DEFAULT_THRESHOLD_FORM_VALUES } from './form_types';
 import type { FormValues } from '../../../../form/types';
-import type { ComposeDiscoverState } from '../../types';
-import { createInitialState } from '../../use_compose_discover_state';
 
 const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): ThresholdFormValues => ({
   ...DEFAULT_THRESHOLD_FORM_VALUES,
@@ -34,11 +32,6 @@ const BASE_COMPOSE_VALUES: FormValues = {
   runbookArtifacts: [],
   dashboardArtifacts: [],
 };
-
-const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
-  ...createInitialState({ mode: 'create' }),
-  ...overrides,
-});
 
 const Wrapper: React.FC<{
   builderState: ThresholdFormValues;
@@ -62,8 +55,6 @@ const Wrapper: React.FC<{
 };
 
 describe('BuilderRecoveryForm', () => {
-  const dispatch = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -77,7 +68,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -97,7 +88,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -121,7 +112,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -140,7 +131,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={jest.fn()}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -158,7 +149,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -183,7 +174,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 
@@ -203,7 +194,7 @@ describe('BuilderRecoveryForm', () => {
 
     render(
       <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
-        <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
+        <BuilderRecoveryForm />
       </Wrapper>
     );
 

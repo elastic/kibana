@@ -113,6 +113,12 @@ describe('createInitialState', () => {
     expect(state.yamlMode).toBe(false);
     expect(state.childOpen).toBe(false);
   });
+
+  it('starts on the base tab in builder mode', () => {
+    const state = createInitialState({ mode: 'create', isBuilderMode: true });
+
+    expect(state.activeTab).toBe('base');
+  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
@@ -176,6 +182,7 @@ describe('reducer', () => {
 
       expect(next.recoveryType).toBe('custom');
       expect(next.childOpen).toBe(false);
+      expect(next.activeTab).toBe('recovery');
     });
 
     it('does not open child when switching to default', () => {
@@ -246,6 +253,24 @@ describe('reducer', () => {
 
       expect(next.step).toBe(1);
       expect(next.childOpen).toBe(true);
+    });
+  });
+
+  describe('OPEN_CHILD', () => {
+    it('opens on the unified-editor fallback tab outside builder mode', () => {
+      const state = createState({ childOpen: false, step: 0, activeTab: 'alert' });
+      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true });
+
+      expect(next.childOpen).toBe(true);
+      expect(next.activeTab).toBe('alert');
+    });
+
+    it('opens on the base tab in builder mode', () => {
+      const state = createState({ childOpen: false, activeTab: 'alert' });
+      const next = reducer(state, { type: 'OPEN_CHILD', isAlert: true, isBuilderMode: true });
+
+      expect(next.childOpen).toBe(true);
+      expect(next.activeTab).toBe('base');
     });
   });
 
