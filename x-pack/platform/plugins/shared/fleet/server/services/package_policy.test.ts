@@ -4851,6 +4851,50 @@ describe('Package policy service', () => {
       });
     });
 
+    it('should not persist spaceIds in SO attributes', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+      const storedPolicy = createPackagePolicyMock();
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: storedPolicy.id,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: '1',
+            attributes: storedPolicy,
+          },
+        ],
+      });
+      let capturedAttributes: Record<string, unknown> = {};
+      soClient.update.mockImplementation(async (_type, _id, attrs) => {
+        capturedAttributes = attrs as Record<string, unknown>;
+        return {
+          id: storedPolicy.id,
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: '2',
+          attributes: attrs,
+        } as any;
+      });
+      soClient.get.mockResolvedValue({
+        id: storedPolicy.id,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: '2',
+        attributes: storedPolicy,
+      } as any);
+
+      await packagePolicyService.update(
+        soClient,
+        esClient,
+        storedPolicy.id,
+        { ...storedPolicy, spaceIds: ['space-a'] } as any
+      );
+
+      expect(capturedAttributes).not.toHaveProperty('spaceIds');
+    });
+
     describe('secret storage', () => {
       const buildUpdateSOMocks = (
         soClient: ReturnType<typeof createSavedObjectClientMock>,
