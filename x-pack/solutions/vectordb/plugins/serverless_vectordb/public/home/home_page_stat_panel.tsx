@@ -158,6 +158,7 @@ export const HomePageStatPanel = ({
             <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
               <EuiStat
                 data-test-subj={`${testSubj}-${key}`}
+                css={{ whiteSpace: 'nowrap' }}
                 title={
                   isLoading ? (
                     <EuiSkeletonText
