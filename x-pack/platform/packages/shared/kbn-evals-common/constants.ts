@@ -27,6 +27,7 @@ export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
+export const EVALS_ONLINE_SCORES_URL = `${EVALS_INTERNAL_URL}/online_scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
 export const EVALS_RESOLVE_INSTRUMENTATION_URL =
   `${EVALS_INTERNAL_URL}/traces/_resolve_instrumentation` as const;
@@ -48,6 +49,7 @@ const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
 export const EvaluationIndices = {
   SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
+  ONLINE_SCORES: `${EVALUATION_INDEX_PREFIX}-online-scores`,
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
