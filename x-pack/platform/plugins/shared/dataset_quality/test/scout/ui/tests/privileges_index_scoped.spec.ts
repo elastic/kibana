@@ -32,7 +32,7 @@ const APACHE_ACCESS_DATA_STREAM = buildDataStreamName({ dataset: APACHE_ACCESS_D
 
 const READ_AND_METADATA = ['read', 'view_index_metadata'];
 
-/** Only `metrics-*` is readable, and no `metrics-*` data exists anywhere. */
+/** Only `metrics-*` is readable, so the seeded `logs-*` data is invisible to this user. */
 const metricsOnlyRole = fullAccessRoleWithIndices([
   { names: ['metrics-*'], privileges: READ_AND_METADATA },
 ]);
@@ -103,11 +103,10 @@ test.describe(
         await expect(pageObjects.datasetQuality.getTypesFilter()).toBeHidden();
       });
 
-      await test.step('reports no data rather than no privileges', async () => {
-        // The logs data seeded above is invisible to this user and no `metrics-*`
-        // data stream exists, so the table is legitimately empty.
-        await expect(pageObjects.datasetQuality.noDataEmptyState).toBeVisible();
-      });
+      // We intentionally do not assert the no-data empty state here: it would require that
+      // no `metrics-*` data stream exists anywhere on the (shared) cluster, which we cannot
+      // guarantee. See scout-best-practices "Never assert that data is absent"; the empty
+      // `metrics-*` branch is covered by unit tests instead.
     });
 
     test('renders the types filter for a user authorized for several types', async ({
