@@ -1,8 +1,7 @@
 ---
 name: flaky-test-doctor
 description: >
-  Security Solution specific. Analyzes flaky, failing, or skipped Security Solution Cypress tests to
-  determine root cause and recommend fixes. Use when: (1) a user shares a flaky or skipped Cypress test,
+  Security Solution specific. Use when: (1) a user shares a flaky or skipped Security Solution Cypress test,
   (2) asked to fix a test that intermittently fails, (3) asked to unskip a test, (4) triaging a test
   stability GitHub issue, (5) asked "why is this test flaky/failing", (6) asked to analyze test failures
   in ESS/Serverless/MKI environments, (7) asked whether to fix, delete, or migrate a broken Cypress test.
@@ -44,7 +43,7 @@ Path relative to this skill's directory.
 
 ## Analysis framework
 
-**Complete Steps 0-2 before proposing any fix.** A fix for an invalid or redundant test wastes time.
+**Complete Steps 0-2 before proposing any action.** A destination for an invalid or redundant test wastes time.
 
 ### Step 0: Validity check
 
@@ -111,10 +110,7 @@ Decide the destination layer from what the test asserts. Cypress is not a destin
 | User workflow, RBAC, alert table, Timeline UI | Scout UI |
 | Navigation / page-loads-without-error | Delete |
 
-Typical Security examples (full map: `security-cypress-to-scout-migration` Gate 2):
-- Detection rules CRUD, rule execution, exception/cases CRUD, entity-store setup → API
-- Alert table, Timeline editing, Cases UI workflows, RBAC on buttons → Scout UI
-- Navigation / page loading → delete
+Full domain map: `security-cypress-to-scout-migration` Gate 2.
 
 If the test is already Cypress and the destination is Scout UI: recommend migration, not a Cypress patch — unless it is tagged `@serverlessQA`.
 

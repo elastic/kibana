@@ -9,7 +9,7 @@
 - [Step 4: Diagnosing "Element Disabled" failures](#step-4-diagnosing-element-disabled-failures)
 - [Step 5: Pre-proposal checklist](#step-5-pre-proposal-checklist)
 
-Detailed guidance for Steps 0, 2, and 4 of the analysis framework.
+Detailed guidance for Steps 0, 2, 3, 4, and 5 of the analysis framework.
 
 ## Step 0: Common reasons tests become invalid
 
@@ -71,9 +71,11 @@ Apply the **first matching row**. `@serverlessQA` wins over delete.
 | Cypress tags | Scout `tag:` | Recommendation |
 |--------------|--------------|----------------|
 | has `@serverlessQA` | any | Keep Cypress until Scout is in the Kibana QA gate |
-| `@serverless` (no `@serverlessQA`) | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
-| `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
+| `@ess` + `@serverless` (no `@serverlessQA`) | `tags.stateful.classic` **and** `tags.serverless.security.*` | Delete Cypress — Scout covers both sides |
+| `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.serverless.security.*` | Keep Cypress for ESS, or recommend a Scout **migration** that adds `tags.stateful.classic`. Do not edit an existing Scout spec's tags. |
 | `@ess` + `@serverless` (no `@serverlessQA`) | only `tags.stateful.classic` | Keep Cypress for serverless, or recommend a Scout **migration** that adds serverless coverage. Do not edit an existing Scout spec's tags to turn on MKI. |
+| `@serverless` only (no `@ess`, no `@serverlessQA`) | includes `tags.serverless.security.*` | Delete Cypress — Scout covers serverless/MKI |
+| `@ess` only | includes `tags.stateful.classic` | Delete Cypress — Scout covers ESS |
 
 **Format:**
 - Delete Cypress: `[path]` — Reason: Scout spec `[path]` uses `tags.…` covering the same env
