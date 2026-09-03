@@ -209,6 +209,28 @@ describe('ArtifactSimpleTable', () => {
     expect(onChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 10 });
   });
 
+  it('invokes onChange with sort when a sortable column header is clicked', () => {
+    render();
+
+    fireEvent.click(renderResult.getByText('Name'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      pageIndex: 0,
+      pageSize: 10,
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+  });
+
+  it('marks the active sort column', () => {
+    render({ sortField: 'updated_at', sortOrder: 'desc' });
+
+    expect(renderResult.getByText('Last updated').closest('th')).toHaveAttribute(
+      'aria-sort',
+      'descending'
+    );
+  });
+
   describe('policy assignment column', () => {
     it('renders Global when the artifact has the global tag', () => {
       render({

@@ -6,7 +6,12 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  Pagination,
+} from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
@@ -39,7 +44,12 @@ export type ArtifactSimpleTableActionType = 'edit' | 'delete';
 export interface ArtifactSimpleTableProps {
   items: MaybeImmutable<ExceptionListItemSchema[]>;
   pagination: Pagination;
-  onChange: (changes: { pageIndex: number; pageSize: number }) => void;
+  onChange: (changes: {
+    pageIndex: number;
+    pageSize: number;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => void;
   onAction: (action: {
     type: ArtifactSimpleTableActionType;
     item: ExceptionListItemSchema;
@@ -49,6 +59,8 @@ export interface ArtifactSimpleTableProps {
   error?: string;
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
   'data-test-subj'?: string;
 }
 
@@ -82,6 +94,8 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     error,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
+    sortField,
+    sortOrder,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -89,12 +103,21 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
     const { policies, isLoading: loadingPoliciesList } = useArtifactAssignedPolicies(tableItems);
 
     const handleTableChange = useCallback(
-      ({ page }: CriteriaWithPagination<ExceptionListItemSchema>) => {
+      ({ page, sort }: CriteriaWithPagination<ExceptionListItemSchema>) => {
         if (!page) {
           return;
         }
 
-        onChange({ pageIndex: page.index, pageSize: page.size });
+        onChange({
+          pageIndex: page.index,
+          pageSize: page.size,
+          ...(sort
+            ? {
+                sortField: sort.field as string,
+                sortOrder: sort.direction,
+              }
+            : {}),
+        });
       },
       [onChange]
     );
@@ -105,6 +128,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'name',
           name: labels.tableColumnNameLabel,
           truncateText: true,
+          sortable: true,
           render: (name: string) => (
             <EuiToolTip content={name} anchorClassName="eui-textTruncate">
               <EuiText
@@ -147,6 +171,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         {
           field: 'updated_by',
           name: labels.tableColumnUpdatedByLabel,
+          sortable: true,
           render: (updatedBy: string) => (
             <EuiFlexGroup
               responsive={false}
@@ -182,6 +207,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
           field: 'updated_at',
           name: labels.tableColumnLastUpdatedLabel,
           truncateText: true,
+          sortable: true,
           render: (updatedAt: string) => (
             <span data-test-subj={getTestId('columnUpdatedAt')} className="eui-textTruncate">
               <FormattedDate
@@ -250,6 +276,19 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
       policies,
     ]);
 
+    const sorting = useMemo(() => {
+      if (!sortField || !sortOrder) {
+        return { sort: undefined };
+      }
+
+      return {
+        sort: {
+          field: sortField as keyof ExceptionListItemSchema,
+          direction: sortOrder as Direction,
+        },
+      };
+    }, [sortField, sortOrder]);
+
     return (
       <EuiBasicTable<ExceptionListItemSchema>
         items={tableItems}
@@ -258,6 +297,7 @@ export const ArtifactSimpleTable = memo<ArtifactSimpleTableProps>(
         loading={loading}
         error={error}
         pagination={pagination}
+        sorting={sorting}
         onChange={handleTableChange}
         noItemsMessage={
           <div data-test-subj={getTestId('noResults')}>{labels.tableNoItemsMessage}</div>

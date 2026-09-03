@@ -30,7 +30,6 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
-import type { PaginatedContentProps } from '../paginated_content';
 import { PaginatedContent } from '../paginated_content';
 import { ArtifactSimpleTable } from './components/artifact_simple_table';
 
@@ -68,11 +67,6 @@ import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
 import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
-
-type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
-  ExceptionListItemSchema,
-  ArtifactEntryCardType
->;
 
 interface ArtifactListPageBaseProps {
   apiClient: ExceptionsListApiClient;
@@ -158,7 +152,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const setUrlParams = useSetUrlParams();
     const {
-      urlParams: { filter, includedPolicies },
+      urlParams: { filter, includedPolicies, sortField, sortOrder },
     } = useUrlParams<ArtifactListPageUrlParams>();
     const { exportExceptionList } = useApi(http);
 
@@ -245,20 +239,35 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
 
-    const handlePaginationChange: ArtifactListPagePaginatedContentComponent['onChange'] =
-      useCallback(
-        ({ pageIndex, pageSize }) => {
-          setUrlParams({
-            page: pageIndex + 1,
-            pageSize,
-          });
+    const handlePaginationChange = useCallback(
+      ({
+        pageIndex,
+        pageSize,
+        sortField: nextSortField,
+        sortOrder: nextSortOrder,
+      }: {
+        pageIndex: number;
+        pageSize: number;
+        sortField?: string;
+        sortOrder?: 'asc' | 'desc';
+      }) => {
+        const resolvedSortField = nextSortField ?? sortField;
+        const resolvedSortOrder = nextSortOrder ?? sortOrder;
+        const didSortChange = resolvedSortField !== sortField || resolvedSortOrder !== sortOrder;
 
-          // Scroll to the top to ensure that when new set of data is received and list updated,
-          // the user is back at the top of the list
-          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        },
-        [setUrlParams]
-      );
+        setUrlParams({
+          page: didSortChange ? 1 : pageIndex + 1,
+          pageSize,
+          sortField: resolvedSortField,
+          sortOrder: resolvedSortOrder,
+        });
+
+        // Scroll to the top to ensure that when new set of data is received and list updated,
+        // the user is back at the top of the list
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      },
+      [setUrlParams, sortField, sortOrder]
+    );
 
     const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filterValue: string, selectedPolicies: string, doHardRefresh) => {
@@ -537,6 +546,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                 error={(error?.body as ServerApiError)?.message || error?.message}
                 allowCardEditAction={allowCardEditAction}
                 allowCardDeleteAction={allowCardDeleteAction}
+                sortField={sortField}
+                sortOrder={sortOrder}
                 data-test-subj={getTestId('simpleTable')}
               />
             ) : (

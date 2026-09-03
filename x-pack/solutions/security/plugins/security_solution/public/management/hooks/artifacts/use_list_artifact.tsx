@@ -30,6 +30,8 @@ export function useListArtifact(
     perPage: number;
     policies: string[];
     excludedPolicies: string[];
+    sortField: string;
+    sortOrder: 'asc' | 'desc';
   }> = DEFAULT_OPTIONS,
   searchableFields: MaybeImmutable<string[]> = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
   customQueryOptions?: Partial<UseQueryOptions<FoundExceptionListItemSchema, IHttpFetchError>>,
@@ -41,6 +43,8 @@ export function useListArtifact(
     perPage = MANAGEMENT_DEFAULT_PAGE_SIZE,
     policies = [],
     excludedPolicies = [],
+    sortField = MANAGEMENT_DEFAULT_SORT_FIELD,
+    sortOrder = MANAGEMENT_DEFAULT_SORT_ORDER,
   } = options;
   const filterKuery = useMemo<string | undefined>(() => {
     return parsePoliciesAndFilterToKql({
@@ -51,14 +55,23 @@ export function useListArtifact(
   }, [filter, searchableFields, policies, excludedPolicies]);
 
   return useQuery<FoundExceptionListItemSchema, IHttpFetchError>(
-    [...customQueryIds, 'list', exceptionListApiClient, filterKuery, page, perPage],
+    [
+      ...customQueryIds,
+      'list',
+      exceptionListApiClient,
+      filterKuery,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    ],
     async () => {
       const result = await exceptionListApiClient.find({
         filter: filterKuery,
         perPage,
         page,
-        sortField: MANAGEMENT_DEFAULT_SORT_FIELD,
-        sortOrder: MANAGEMENT_DEFAULT_SORT_ORDER,
+        sortField,
+        sortOrder,
       });
 
       return result;
