@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { getRegistries } from './registry';
-import type { ApiRegistry, ApiTarget, LoadedApi } from './types';
+import type { ApiRegistry, LoadedApi } from './types';
 
 export const isUnknownApiError = (err: unknown): err is Error =>
   err instanceof Error && err.name === 'UnknownApiError';

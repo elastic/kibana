@@ -7,4 +7,4 @@
 
 export { buildAgentLookup } from './build_agent_lookup';
 export type { AgentLookup } from './build_agent_lookup';
-export { SkillsProjectionService } from './skills_projection_service';
+export { projectSkillsFromDefinition } from './project_skills';

@@ -134,7 +134,22 @@ export const useAgentId = () => {
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
-  return { title: conversation?.title ?? '', isLoading };
+  return {
+    title: conversation?.title ?? '',
+    isLoading,
+  };
+};
+
+export const useConversationReadOnly = () => {
+  const conversationId = useConversationId();
+  const { conversation, isFetching } = useConversation();
+
+  return {
+    isReadOnly: conversation?.read_only ?? false,
+    // Not `isLoading`: v4 reports it for disabled queries too, and this query stays disabled
+    // for the whole stream that creates a conversation.
+    isLoading: Boolean(conversationId) && !conversation && isFetching,
+  };
 };
 
 export const useConversationRounds = () => {
@@ -147,7 +162,6 @@ export const useConversationRounds = () => {
     if (Boolean(error) && pendingMessage) {
       const pendingRound = createNewRound({
         userMessage: pendingMessage,
-        roundId: '',
         steps: errorSteps,
       });
       return [...rounds, pendingRound];
