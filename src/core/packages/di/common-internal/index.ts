@@ -18,6 +18,5 @@ export {
   type ServiceIdentifierFactory,
 } from './src/modules/lifecycle';
 export { Global } from './src/modules/plugin';
-export { toKibanaContainerModuleLoadOptions } from './src/module';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
 export { cacheInScope } from './src/utils';
