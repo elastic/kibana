@@ -121,9 +121,17 @@ overrides:
   '@elastic/pretty-printer': 'catalog:'
   '@emnapi/core': '1.11.1'
   '@emnapi/runtime': '1.11.1'
+  # redux-saga@1.3.0's `^` ranges float up under pnpm; pin the transitives to
+  # yarn's resolved versions. @redux-saga/types@1.4.1 tightened Saga so `run()`
+  # requires a Generator, breaking callers typed against Iterator.
+  '@redux-saga/core': '1.3.0'
+  '@redux-saga/types': '1.2.1'
   '@types/babel__traverse': '7.20.6'
   '@types/eslint>@types/estree': '1.0.9'
   '@types/glob-stream': '6.1.0'
+  # @types/glob-stream depends on @types/glob@*, which floats to the empty v9
+  # deprecation stub; pin to v7 so SrcOptions keeps cwd/dot/nodir (matches yarn).
+  '@types/glob-stream>@types/glob': '7.2.0'
   '@types/hast>@types/unist': '2.0.3'
   '@types/mdast>@types/unist': '2.0.3'
   '@types/mdast@^3': '3.0.3'

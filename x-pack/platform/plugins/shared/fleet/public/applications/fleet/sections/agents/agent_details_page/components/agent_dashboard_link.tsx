@@ -132,7 +132,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
-          disabled={agentPolicy?.is_managed}
+          isDisabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
             id="xpack.fleet.agentDetails.enableMetricsLabel"
