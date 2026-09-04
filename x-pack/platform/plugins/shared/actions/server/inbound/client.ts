@@ -21,6 +21,7 @@ interface InboundEventsClientInternalDeps {
   inboundEventsEnabled: boolean;
   isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
+  maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   inMemoryConnectors: InMemoryConnector[];
@@ -43,6 +44,7 @@ export function buildInboundEventsClient(
         inboundEventsEnabled: deps.inboundEventsEnabled,
         isActionTypeEnabled: deps.isActionTypeEnabled,
         maxEmitted: deps.maxEmitted,
+        maxBodyBytes: deps.maxBodyBytes,
         emitConnectorEvents: deps.emitConnectorEvents,
         logger: deps.logger,
         getUnsecuredSavedObjectsClient: deps.getUnsecuredSavedObjectsClient,
