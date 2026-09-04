@@ -89,6 +89,7 @@ const getLastCopyText = (): string =>
 describe('ApiStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     mockUseOnboardingCredentials.mockReturnValue({
       elasticsearchUrl: null,
       apiKey: null,
@@ -247,6 +248,18 @@ describe('ApiStep', () => {
       fireEvent.click(screen.getByTestId('vectordbWizardSnippetTab-hybrid'));
 
       expect(getSnippetText()).toContain('hybrid javascript code');
+      expect(screen.getByTestId('vectordbWizardLanguagePicker')).toHaveTextContent('JavaScript');
+    });
+
+    it('restores the selected language on a later visit', () => {
+      const { unmount } = renderComponent();
+
+      selectJavascript();
+      unmount();
+
+      renderComponent({ tabs: [semanticTab], step: 'ingest' });
+
+      expect(getSnippetText()).toContain('semantic javascript code');
       expect(screen.getByTestId('vectordbWizardLanguagePicker')).toHaveTextContent('JavaScript');
     });
   });
