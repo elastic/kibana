@@ -1696,7 +1696,7 @@
     "@emotion/jest": "11.11.0",
     "@eslint-community/eslint-plugin-eslint-comments": "4.4.1",
     "@fast-check/jest": "2.1.1",
-    "@hey-api/openapi-ts": "0.90.3",
+    "@hey-api/openapi-ts": "0.99.0",
     "@huggingface/hub": "2.2.0",
     "@jest/console": "29.7.0",
     "@jest/reporters": "29.7.0",
@@ -2275,7 +2275,7 @@
     "typescript-7": "npm:typescript@7.0.2",
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.2",
-    "vscode-languageserver-textdocument": "1.0.12",
+    "vscode-languageserver-textdocument": "1.0.13",
     "watchpack": "2.5.2",
     "web-streams-polyfill": "4.3.0",
     "webpack": "5.96.1",
@@ -2287,7 +2287,7 @@
     "whatwg-fetch": "3.6.20",
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
-    "yaml-language-server": "1.23.0",
+    "yaml-language-server": "1.24.0",
     "yarn-deduplicate": "6.0.2"
   },
   "packageManager": "yarn@1.22.22"
