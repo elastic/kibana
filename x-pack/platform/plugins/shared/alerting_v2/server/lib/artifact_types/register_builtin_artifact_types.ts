@@ -56,5 +56,6 @@ export function registerBuiltinArtifactTypes(registry: ArtifactTypeRegistry): vo
         dashboardId: dashboardIdSchema,
       })
       .strict(),
+    references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
   });
 }
