@@ -9,13 +9,17 @@ tags:
   - security
   - detection-rule-tuning
 settings:
-  # The sweep now runs as long as its slowest gate (up to 72h). Dropping overlaps
-  # serializes sweeps on purpose: alerts are only tagged once a gate resolves, so
-  # a second sweep started mid-join would rediagnose the same rules.
+  # A sweep lives as long as its slowest gate (up to 72h) and the key is one global
+  # bucket, so a single max would let one space's pending gate drop every other
+  # space's scheduled sweep for three days. Five lanes keep that from starving the
+  # fleet while still bounding how many joins wait at once.
+  # Overlap is safe now that the harvest skips rules with an in-flight proposal;
+  # for sweeps that start close enough together to miss that, the proposal's own
+  # per-rule drop concurrency stops the duplicate before it can rediagnose.
   concurrency:
     key: detection-rule-tuning
     strategy: drop
-    max: 1
+    max: 5
 triggers:
   # Detection Watch owns the per-space 2h schedule. This global worker stays
   # manual-only so there is one scheduler authority and no cross-space task collision.

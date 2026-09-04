@@ -1027,6 +1027,17 @@ describe('project watch', () => {
         expect(concurrency.max).toBe(1);
       });
 
+      // A sweep waits out its slowest gate (72h) and every space shares one
+      // concurrency key, so a single lane would let one pending gate drop the whole
+      // fleet's scheduled sweeps.
+      it('leaves room for other spaces to sweep while gates are pending', () => {
+        const { concurrency } = (tuning as unknown as { settings: Record<string, unknown> })
+          .settings as { concurrency: { strategy: string; max: number } };
+
+        expect(concurrency.strategy).toBe('drop');
+        expect(concurrency.max).toBe(5);
+      });
+
       // The fan-in reads the settled aggregate, so the summary cannot run before
       // every gate has resolved or failed.
       it('summarizes decisions from the settled fan-out results', () => {
