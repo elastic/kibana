@@ -132,7 +132,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
   }, [createFieldFormRef]);
 
   useEffect(() => {
-    if (isSemanticText) {
+    if (isSemanticText || isSemantic) {
+      const fieldTypeName = isSemanticText ? 'semantic_text' : 'semantic';
       const allSemanticFields = {
         byId: {
           ...fields.byId,
@@ -142,37 +143,16 @@ export const CreateField = React.memo(function CreateFieldComponent({
         aliases: {},
         maxNestedDepth: 0,
       };
-      const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
-        ? ''
-        : 'semantic_text';
+      const defaultName = getFieldByPathName(allSemanticFields, fieldTypeName) ? '' : fieldTypeName;
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
       }
-      if (!form.getFormData().reference_field) {
+      if (isSemanticText && !form.getFormData().reference_field) {
         form.setFieldValue('reference_field', '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSemanticText]);
-
-  useEffect(() => {
-    if (isSemantic) {
-      const allSemanticFields = {
-        byId: {
-          ...fields.byId,
-          ...mappingViewFields.byId,
-        },
-        rootLevelFields: [],
-        aliases: {},
-        maxNestedDepth: 0,
-      };
-      const defaultName = getFieldByPathName(allSemanticFields, 'semantic') ? '' : 'semantic';
-      if (!form.getFormData().name) {
-        form.setFieldValue('name', defaultName);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSemantic]);
+  }, [type?.[0]?.value]);
 
   const submitForm = async (
     e?: React.FormEvent,
