@@ -20,6 +20,7 @@ import {
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/constants';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
@@ -31,13 +32,14 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import * as insights from '../../../telemetry/insights';
 import { setAttacksStatusRoute } from './set_attacks_status_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const DETECTION_ALERTS_INDEX = '.alerts-security.alerts-default';
 
 const getSearchResponse = (
-  hits: Array<{ _id: string; alertIds?: string[] }>
+  hits: Array<{ _id: string; alertIds?: string[]; workflowStatus?: string; _index?: string }>
 ): estypes.SearchResponse<unknown> => ({
   took: 1,
   timed_out: false,
@@ -45,10 +47,13 @@ const getSearchResponse = (
   hits: {
     total: { value: hits.length, relation: 'eq' },
     max_score: 0,
-    hits: hits.map(({ _id, alertIds }) => ({
+    hits: hits.map(({ _id, alertIds, workflowStatus, _index = SCHEDULED_INDEX }) => ({
       _id,
-      _index: SCHEDULED_INDEX,
-      _source: alertIds === undefined ? {} : { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds },
+      _index,
+      _source: {
+        ...(alertIds !== undefined ? { [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds } : {}),
+        ...(workflowStatus !== undefined ? { [ALERT_WORKFLOW_STATUS]: workflowStatus } : {}),
+      },
     })),
   },
 });
@@ -150,7 +155,12 @@ describe('set attacks workflow status', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+          // signal.status is requested so status-less attacks — which the update script
+          // never mutates — can be told apart from attacks with an unrecognized status.
+          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS, 'signal.status'],
+          // One result slot per attack index family, so an _id present in both the
+          // scheduled and adhoc indices cannot displace another requested attack.
+          size: 2 * 2,
         })
       );
     });
@@ -403,6 +413,191 @@ describe('set attacks workflow status', () => {
           update_related_alerts: true,
         })
       );
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: {
+      emitAttackStatusChanged: jest.Mock;
+      emitAlertStatusChanged: jest.Mock;
+    };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = {
+        emitAttackStatusChanged: jest.fn(),
+        emitAlertStatusChanged: jest.fn(),
+      };
+      setAttacksStatusRoute(
+        server.router,
+        ruleDataClient,
+        telemetrySenderMock,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    describe('non-cascade', () => {
+      beforeEach(() => {
+        // prefetchPreviousStatusesByIds uses esClient.search; provide previous statuses
+        // that differ from the target 'acknowledged' so the emit fires.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', workflowStatus: 'open' },
+            { _id: 'attack2', workflowStatus: 'open' },
+          ])
+        );
+      });
+
+      test('emits attackStatusChanged after updating attack status', async () => {
+        await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1', 'attack2'],
+            status: 'acknowledged',
+            truncated: false,
+          })
+        );
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+    });
+
+    test('does not emit for a status-less attack in the non-cascade path', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+        getSearchResponse([{ _id: 'attack1' }])
+      );
+      await server.inject(
+        getRequest({ ids: ['attack1'], status: 'acknowledged' }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
+    });
+
+    describe('cascade', () => {
+      beforeEach(() => {
+        // First search: searchAlerts — returns attack doc with related alert IDs and previous status
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        // Second search: prefetchPreviousStatusesByIds for related alerts
+        // Use DETECTION_ALERTS_INDEX so hits are correctly classified as detection alerts.
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'alertA', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+          ])
+        );
+      });
+
+      test('emits attackStatusChanged and alertStatusChanged', async () => {
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1'],
+            status: 'acknowledged',
+            truncated: false,
+          })
+        );
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['alertA', 'alertB'],
+            status: 'acknowledged',
+          })
+        );
+      });
+
+      test('does not emit a status-less attack, and still emits an unrecognized-status one', async () => {
+        // `updateAlertsWorkflowStatus` only assigns when the status field is non-null, so a
+        // status-less attack never transitions. An unrecognized non-null value ("triaged")
+        // IS overwritten, so it must still be emitted.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'status-less-attack', alertIds: [] },
+            { _id: 'unrecognized-attack', alertIds: [], workflowStatus: 'triaged' },
+          ])
+        );
+
+        await server.inject(
+          getRequest({
+            ids: ['status-less-attack', 'unrecognized-attack'],
+            status: 'acknowledged',
+            update_related_alerts: true,
+          }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ attackIds: ['unrecognized-attack'], previousStatuses: [] })
+        );
+      });
+
+      test('does not emit alertStatusChanged for a status-less related alert', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            // alertA has no status field at all — the update script leaves it untouched.
+            { _id: 'alertA', _index: DETECTION_ALERTS_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+          ])
+        );
+
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['alertB'] })
+        );
+      });
+
+      test('does not emit alertStatusChanged for related IDs whose only hit is in an AD index', async () => {
+        // Simulate: 'alertA' is a stale reference that collides with an AD doc _id.
+        // 'alertB' is a real detection alert. Only 'alertB' should appear in the event.
+        context.core.elasticsearch.client.asCurrentUser.search.mockReset();
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'attack1', alertIds: ['alertA', 'alertB'], workflowStatus: 'open' },
+          ])
+        );
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponseOnce(
+          getSearchResponse([
+            { _id: 'alertA', workflowStatus: 'open', _index: SCHEDULED_INDEX },
+            { _id: 'alertB', workflowStatus: 'open', _index: DETECTION_ALERTS_INDEX },
+          ])
+        );
+
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ alertIds: ['alertB'] })
+        );
+        const call = (mockEventBus.emitAlertStatusChanged as jest.Mock).mock.calls[0][1];
+        expect(call.alertIds).not.toContain('alertA');
+      });
     });
   });
 });

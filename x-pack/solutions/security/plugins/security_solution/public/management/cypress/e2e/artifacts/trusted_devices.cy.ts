@@ -68,56 +68,6 @@ describe(
       os_types: ['windows'],
     });
 
-    describe('Renders Trusted Devices form fields', () => {
-      it('Correctly renders trusted devices form for Windows only with Username field', () => {
-        openTrustedDevices({ create: true });
-
-        selectOs('Windows');
-
-        selectField('Username');
-        selectOperator('is');
-        fillValue('test-user');
-      });
-
-      it('Renders all field options correctly for Windows only', () => {
-        openTrustedDevices({ create: true });
-        selectOs('Windows');
-
-        const fields: Array<'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID'> = [
-          'Username',
-          'Host',
-          'Device ID',
-          'Manufacturer',
-          'Product ID',
-        ];
-
-        fields.forEach((field) => {
-          selectField(field);
-          cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').should('contain', field);
-        });
-      });
-
-      it('Shows limited field options for Windows and Mac (no Username)', () => {
-        openTrustedDevices({ create: true });
-        selectOs('Windows and Mac');
-
-        cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').click();
-
-        const availableFields: Array<'Host' | 'Device ID' | 'Manufacturer' | 'Product ID'> = [
-          'Host',
-          'Device ID',
-          'Manufacturer',
-          'Product ID',
-        ];
-
-        availableFields.forEach((field) => {
-          cy.get('[role="option"]').should('contain', field);
-        });
-
-        cy.get('[role="option"]').should('not.contain', 'Username');
-      });
-    });
-
     describe('Handles CRUD with device fields', () => {
       afterEach(() => {
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);

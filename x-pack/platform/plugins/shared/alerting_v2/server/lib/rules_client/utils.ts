@@ -264,8 +264,10 @@ export function transformCreateRuleBodyToRuleSoAttributes(
 }
 
 /**
- * Resolves `metadata.builder_type` for an update. Auto-clears when the query
- * changes without an explicit `builder_type` in the same request.
+ * Resolves `metadata.builder_type` for an update.
+ *
+ * Builder rules require an explicit `metadata.builder_type: null` in the request
+ * to clear the field when the query changes.
  */
 function resolveBuilderType(
   updateData: UpdateRuleData,
@@ -280,13 +282,16 @@ function resolveBuilderType(
   const queryChanged =
     updateData.query !== undefined &&
     !isEqual(toStoredQuery(updateData.query), existingAttrs.query);
-  const strategyChanged =
-    (updateData.recovery_strategy !== undefined &&
-      updateData.recovery_strategy !== existingAttrs.recovery_strategy) ||
-    (updateData.no_data_strategy !== undefined &&
-      updateData.no_data_strategy !== existingAttrs.no_data_strategy);
 
-  if (queryChanged || strategyChanged) {
+  if (queryChanged && existingAttrs.metadata.builder_type) {
+    throw Boom.badRequest(
+      'Cannot update the query on a builder rule without explicitly clearing ' +
+        'metadata.builder_type. Send metadata.builder_type: null to confirm the transition to ES|QL mode.',
+      { code: ALERTING_ERROR_CODES.BUILDER_TYPE_NOT_CLEARED }
+    );
+  }
+
+  if (queryChanged) {
     return undefined;
   }
 
@@ -316,6 +321,9 @@ export function buildUpdateRuleAttributes(
       ...existingAttrs.metadata,
       ...updateData.metadata,
       builder_type: resolveBuilderType(updateData, existingAttrs),
+      // `null` clears all tags. The SO schema is `maybe(...)` without
+      // `nullable()`, so the cleared value must be stored as `undefined`.
+      tags: nullToUndefined(updateData.metadata?.tags, existingAttrs.metadata.tags),
       version,
     },
     time_field: updateData.time_field ?? existingAttrs.time_field,

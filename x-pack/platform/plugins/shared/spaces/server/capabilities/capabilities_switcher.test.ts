@@ -7,6 +7,7 @@
 
 import type { Capabilities, CoreSetup } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
@@ -179,7 +180,7 @@ const setup = (space: Space) => {
 describe('capabilitiesSwitcher', () => {
   it('does not toggle capabilities when the space has no disabled features', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: [],
     };
@@ -195,7 +196,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('does not toggle capabilities when the request is not authenticated', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     };
@@ -213,7 +214,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('does not toggle capabilities when the default capabilities are requested', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     };
@@ -231,7 +232,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('logs a debug message, and does not toggle capabilities if an error is encountered', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     };
@@ -253,7 +254,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('ignores unknown disabledFeatures', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['i-do-not-exist'],
     };
@@ -269,7 +270,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('disables the corresponding navLink, catalogue, management sections, and all capability flags for disabled features', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_2'],
     };
@@ -293,7 +294,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('does not disable catalogue, management, or app entries when they are shared with an enabled feature', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_3'],
     };
@@ -320,7 +321,7 @@ describe('capabilitiesSwitcher', () => {
 
   it('can disable everything', async () => {
     const space: Space = {
-      id: 'space',
+      id: asSpaceId('space'),
       name: '',
       disabledFeatures: ['feature_1', 'feature_2', 'feature_3', 'feature_4'],
     };
@@ -355,7 +356,7 @@ describe('capabilitiesSwitcher', () => {
   describe('when the space has a solution set', () => {
     it('does toggles capabilities of the solutions different from the space one even when the space has no disabled features', async () => {
       const space: Space = {
-        id: 'space',
+        id: asSpaceId('space'),
         name: '',
         disabledFeatures: [],
       };

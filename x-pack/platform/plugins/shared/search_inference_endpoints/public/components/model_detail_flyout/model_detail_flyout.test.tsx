@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -179,6 +179,39 @@ describe('ModelDetailFlyout', () => {
 
       expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
       expect(screen.getByTestId('flyoutRegionBadge-us')).toBeInTheDocument();
+    });
+
+    it('shows region_display_name in the region badge tooltip', async () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: {
+          regions: [
+            {
+              csp: 'aws',
+              region: 'eu-west-1',
+              geo: 'eu',
+              region_display_name: 'EU West (Ireland)',
+            },
+          ],
+        },
+      } as unknown as EisInferenceEndpoint;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-eu'));
+      await waitFor(() => {
+        expect(screen.getByTestId('flyoutRegionBadgeTooltip-eu')).toHaveTextContent(
+          'EU West (Ireland)'
+        );
+      });
+    });
+
+    it('shows the region id in the tooltip when region_display_name is missing', async () => {
+      renderFlyout(MODEL_ID, [endpointWithRegions]);
+
+      fireEvent.mouseOver(screen.getByTestId('flyoutRegionBadge-us'));
+      await waitFor(() => {
+        expect(screen.getByTestId('flyoutRegionBadgeTooltip-us')).toHaveTextContent('us-east-1');
+      });
     });
 
     it('does not render region badges when endpoint has no region metadata', () => {

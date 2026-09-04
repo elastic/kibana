@@ -117,7 +117,7 @@ describe('parseCombinedOrThrow', () => {
         ...defaultArgs,
         combinedResponse: invalidCombinedResponse,
       })
-    ).toThrowError('Unexpected token \'i\', "invalid json" is not valid JSON');
+    ).toThrow('Unexpected token \'i\', "invalid json" is not valid JSON');
   });
 
   it('throws the expected error when JSON validation fails', () => {
@@ -128,6 +128,6 @@ describe('parseCombinedOrThrow', () => {
         ...defaultArgs,
         combinedResponse: invalidJson,
       })
-    ).toThrowError('Invalid input: expected array, received string');
+    ).toThrow('Invalid input: expected array, received string');
   });
 });

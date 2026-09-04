@@ -20,6 +20,23 @@ describe('validateConnectorIds', () => {
   };
 
   const mockConnectorTypes: Record<string, ConnectorTypeInfo> = {
+    '.inboundWebhook': {
+      actionTypeId: '.inboundWebhook',
+      displayName: 'Inbound Webhook',
+      instances: [
+        {
+          id: 'testyng',
+          name: 'testyng',
+          isPreconfigured: false,
+          isDeprecated: false,
+        },
+      ],
+      enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
+      minimumLicenseRequired: 'gold',
+      subActions: [],
+    },
     '.slack': {
       actionTypeId: '.slack',
       displayName: 'Slack',
@@ -65,29 +82,6 @@ describe('validateConnectorIds', () => {
     ...overrides,
   });
 
-  describe('when dynamicConnectorTypes is null', () => {
-    it('should return error indicating dynamic connector types not found', () => {
-      const connectorIdItems: ConnectorIdItem[] = [createConnectorIdItem()];
-
-      const results = validateConnectorIds(connectorIdItems, null, '');
-
-      expect(results).toHaveLength(1);
-      expect(results[0]).toMatchObject({
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        beforeMessage: null,
-        hoverMessage: null,
-      });
-    });
-  });
-
   describe('when connector is found by UUID', () => {
     it('should return valid result with beforeMessage containing connector name', () => {
       const connectorIdItems: ConnectorIdItem[] = [
@@ -113,6 +107,26 @@ describe('validateConnectorIds', () => {
       });
       expect(results[0].hoverMessage).toBeDefined();
       expect(typeof results[0].hoverMessage).toBe('string');
+      expect(results[0]).not.toHaveProperty('ruleId');
+    });
+
+    it('should accept an inbound webhook instance id on a trigger connector-id', () => {
+      const connectorIdItems: ConnectorIdItem[] = [
+        createConnectorIdItem({
+          key: 'testyng',
+          connectorType: '.inboundWebhook',
+        }),
+      ];
+
+      const results = validateConnectorIds(connectorIdItems, mockConnectorTypes, '');
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        severity: 'info',
+        message: null,
+        owner: 'connector-id-validation',
+        beforeMessage: '✓ testyng',
+      });
     });
   });
 
@@ -133,6 +147,7 @@ describe('validateConnectorIds', () => {
         severity: 'error',
         message: expect.stringContaining('UUID "My Slack Connector" not found'),
         owner: 'connector-id-validation',
+        ruleId: 'connectorNotFound',
         beforeMessage: null,
       });
     });
@@ -154,6 +169,7 @@ describe('validateConnectorIds', () => {
         id: 'test-id-1-2-3-4',
         severity: 'error',
         owner: 'connector-id-validation',
+        ruleId: 'connectorNotFound',
         startLineNumber: 5,
         startColumn: 10,
         endLineNumber: 5,

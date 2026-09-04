@@ -7,6 +7,7 @@
 
 import React, { PureComponent } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
 
@@ -20,6 +21,20 @@ import {
   RemoteClustersProvider,
 } from '../../components';
 import { SectionLoading } from '../../../shared_imports';
+
+const addFollowerIndexTitle = i18n.translate(
+  'xpack.crossClusterReplication.followerIndex.addTitle',
+  {
+    defaultMessage: 'Add follower index',
+  }
+);
+
+const ccrHomeTitle = i18n.translate(
+  'xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle',
+  {
+    defaultMessage: 'Cross-Cluster Replication',
+  }
+);
 
 export interface FollowerIndexAddProps extends RouteComponentProps {
   saveFollowerIndex: (name: string, followerIndex: FollowerIndexSaveBody) => void | Promise<void>;
@@ -43,50 +58,49 @@ export class FollowerIndexAdd extends PureComponent<FollowerIndexAddProps> {
       clearApiError,
       apiStatus,
       apiError,
+      history,
       match: { url: currentUrl },
     } = this.props;
 
     return (
       <RemoteClustersProvider>
-        {({ isLoading, error, remoteClusters }) => {
-          if (isLoading) {
-            return (
+        {({ isLoading, error, remoteClusters }) => (
+          <>
+            <FollowerIndexPageTitle
+              title={addFollowerIndexTitle}
+              back={{
+                href: history.createHref({ pathname: '/follower_indices' }),
+                label: ccrHomeTitle,
+              }}
+            />
+
+            {isLoading ? (
               <SectionLoading>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
                   defaultMessage="Loading remote clusters…"
                 />
               </SectionLoading>
-            );
-          }
-
-          return (
-            <EuiPageSection restrictWidth style={{ width: '100%' }}>
-              <FollowerIndexPageTitle
-                title={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndex.addTitle"
-                    defaultMessage="Add follower index"
-                  />
-                }
-              />
-              <FollowerIndexForm
-                apiStatus={apiStatus}
-                apiError={apiError}
-                currentUrl={currentUrl}
-                remoteClusters={error ? [] : remoteClusters}
-                saveFollowerIndex={saveFollowerIndex}
-                clearApiError={clearApiError}
-                saveButtonLabel={
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexCreateForm.saveButtonLabel"
-                    defaultMessage="Create"
-                  />
-                }
-              />
-            </EuiPageSection>
-          );
-        }}
+            ) : (
+              <EuiPageSection restrictWidth style={{ width: '100%' }}>
+                <FollowerIndexForm
+                  apiStatus={apiStatus}
+                  apiError={apiError}
+                  currentUrl={currentUrl}
+                  remoteClusters={error ? [] : remoteClusters}
+                  saveFollowerIndex={saveFollowerIndex}
+                  clearApiError={clearApiError}
+                  saveButtonLabel={
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexCreateForm.saveButtonLabel"
+                      defaultMessage="Create"
+                    />
+                  }
+                />
+              </EuiPageSection>
+            )}
+          </>
+        )}
       </RemoteClustersProvider>
     );
   }

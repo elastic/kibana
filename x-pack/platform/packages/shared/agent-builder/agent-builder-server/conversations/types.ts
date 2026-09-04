@@ -9,7 +9,7 @@ import type {
   ConversationAccessControlInput,
   ConversationListOptions,
   ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
+  ConversationListResult,
 } from '@kbn/agent-builder-common';
 
 /**
@@ -37,7 +37,7 @@ export interface ConversationPublicClient {
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
+  list(options?: ConversationListOptions): Promise<ConversationListResult>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */

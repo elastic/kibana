@@ -8,7 +8,6 @@
 import {
   LENS_DATASOURCE_ID,
   LENS_METRIC_GROUP_ID,
-  appendTimeBucketToEsqlQuery,
   buildTrendlineBucketExpression,
   buildTrendlineQueryWithMetricFieldMap,
 } from '@kbn/lens-common';
@@ -423,10 +422,11 @@ export function getTextBasedDatasource({
         const groupByFields = groupByColumns.map((c) => c.fieldName);
 
         // Sync the trendline layer's query from the source layer.
-        // The trendline query is derived from the main query with an appended
-        // BUCKET() clause. When the main query changes we must regenerate it.
+        // The trendline query is derived from the main query with an appropriate
+        // BUCKET() or TBUCKET() clause. When the main query changes we must regenerate it.
         let updatedQuery = toLayer.query;
         let metricFieldMap = new Map<string, string>();
+        let trendlineTimeField: string | undefined;
         if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
           try {
             const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
@@ -436,6 +436,7 @@ export function getTextBasedDatasource({
               groupByFields
             );
             metricFieldMap = trendlineQueryResult.metricFieldMap;
+            trendlineTimeField = trendlineQueryResult.timeField;
             if (
               !updatedQuery ||
               !isOfAggregateQueryType(updatedQuery) ||
@@ -463,14 +464,29 @@ export function getTextBasedDatasource({
 
         const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
 
-        // Update columns: add if missing, update if field changed
-        let updatedColumns = toLayer.columns;
+        // Update columns: add if missing, update if field changed. The trendline
+        // time column is the only generated column not represented by a link.
+        const linkedTargetColumnIds = new Set(trendlineLayerLinks.map((item) => item.to.columnId));
+        const shouldUpdateTimeField = toLayer.columns.some(
+          (column) =>
+            trendlineTimeField &&
+            column.meta?.type === 'date' &&
+            !linkedTargetColumnIds.has(column.columnId) &&
+            column.fieldName !== trendlineTimeField
+        );
+        let updatedColumns = shouldUpdateTimeField
+          ? toLayer.columns.map((column) =>
+              column.meta?.type === 'date' && !linkedTargetColumnIds.has(column.columnId)
+                ? { ...column, fieldName: trendlineTimeField ?? column.fieldName }
+                : column
+            )
+          : toLayer.columns;
         if (shouldSkipColumn) {
-          updatedColumns = toLayer.columns.filter((c) => c.columnId !== link.to.columnId);
+          updatedColumns = updatedColumns.filter((c) => c.columnId !== link.to.columnId);
         } else if (!existingCol) {
-          updatedColumns = [...toLayer.columns, newCol];
+          updatedColumns = [...updatedColumns, newCol];
         } else if (existingCol.fieldName !== newCol.fieldName) {
-          updatedColumns = toLayer.columns.map((c) =>
+          updatedColumns = updatedColumns.map((c) =>
             c.columnId === link.to.columnId ? newCol : c
           );
         }
@@ -535,30 +551,33 @@ export function getTextBasedDatasource({
     },
     // Called by the visualization to pre-populate a dimension when a new layer is
     // created. For metric trendline layers, this auto-initializes the time field
-    // column and appends a BUCKET() time-bucketing clause to the ES|QL query so
-    // the trendline has time-series data without manual user configuration.
+    // column and applies the appropriate ES|QL time bucket so the trendline has
+    // time-series data without manual user configuration.
     initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
       const layer = state.layers[layerId];
       if (!layer) return state;
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
-        // The fieldName must match the ES|QL result column name, which is the
-        // full BUCKET expression, not the raw field name.
-        const timeColumn: TextBasedLayerColumn = {
-          columnId,
-          fieldName: buildTrendlineBucketExpression(tf),
-          meta: { type: 'date' },
-        };
+        let trendlineTimeField = buildTrendlineBucketExpression(tf);
 
-        // Auto-modify query to add time bucketing for trendline
+        // Auto-modify query to add time bucketing for trendline and resolve the
+        // actual result column, including a user-defined TBUCKET alias.
         let trendlineQuery = layer.query;
         if (trendlineQuery && 'esql' in trendlineQuery) {
           try {
-            trendlineQuery = { esql: appendTimeBucketToEsqlQuery(trendlineQuery.esql, tf) };
+            const result = buildTrendlineQueryWithMetricFieldMap(trendlineQuery.esql, tf);
+            trendlineQuery = { esql: result.query };
+            trendlineTimeField = result.timeField;
           } catch {
             // If the query can't be parsed, keep the existing query unchanged
           }
         }
+
+        const timeColumn: TextBasedLayerColumn = {
+          columnId,
+          fieldName: trendlineTimeField,
+          meta: { type: 'date' },
+        };
 
         return {
           ...state,
@@ -734,6 +753,7 @@ export function getTextBasedDatasource({
               inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              ...(column.customLabel ? { customLabel: true } : {}),
               scale,
             };
           }

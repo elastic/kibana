@@ -36,7 +36,8 @@
       "unifiedSearch",
       "esUiShared",
       "workflowsExtensions",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "files"
     ],
     "requiredBundles": [
       "kibanaReact",

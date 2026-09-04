@@ -29,6 +29,7 @@ import {
   type EuiTableSelectionType,
 } from '@elastic/eui';
 
+import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
 import { toLocaleString } from '../../../../util/string_utils';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { ResultLinks, useActionsMenuContent } from '../job_actions';
@@ -99,7 +100,7 @@ export const JobsList: FC<JobsListProps> = ({
   } = useMlKibana();
   const mlApi = useMlApi();
   const cpsManager = cps?.cpsManager;
-
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const jobActions = useActionsMenuContent({
     toastNotifications: notifications.toasts,
     share,
@@ -219,7 +220,7 @@ export const JobsList: FC<JobsListProps> = ({
         render: (id: string, job: MlSummaryJobWithSpaces) => <JobDetails id={id} job={job} />,
       },
 
-      ...(cpsManager
+      ...(isMlCpsEnabled && cpsManager
         ? [
             {
               field: 'projectRouting',
@@ -230,8 +231,8 @@ export const JobsList: FC<JobsListProps> = ({
               sortable: false,
               truncateText: false,
               width: '100px',
-              render: (projectRouting: string | null) => (
-                <ProjectScope projectRouting={projectRouting} />
+              render: (projectRouting: string | null, job: MlSummaryJobWithSpaces) => (
+                <ProjectScope projectRouting={projectRouting} job={job} />
               ),
             },
           ]
@@ -345,6 +346,7 @@ export const JobsList: FC<JobsListProps> = ({
   }, [
     application?.capabilities?.savedObjectsManagement?.shareIntoSpace,
     cpsManager,
+    isMlCpsEnabled,
     itemIdToExpandedRowMap,
     jobActions,
     onToggleRow,

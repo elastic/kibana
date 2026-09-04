@@ -37,21 +37,16 @@ const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
 
 describe('ContextEngineSubPageHeader', () => {
   let services: ReturnType<typeof coreMock.createStart>;
-  let isChromeNextEnabledSpy: jest.SpyInstance;
 
   beforeEach(() => {
     services = coreMock.createStart();
-    isChromeNextEnabledSpy = jest
-      .spyOn(services.chrome.next, 'isEnabled', 'get')
-      .mockReturnValue(false);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('always shows the in-page back button when Chrome Next is enabled in the project layout', () => {
-    isChromeNextEnabledSpy.mockReturnValue(true);
+  it('always shows the in-page back button in the project layout', () => {
     services.chrome.getChromeStyle.mockReturnValue('project');
 
     renderHeader(services);
@@ -60,8 +55,7 @@ describe('ContextEngineSubPageHeader', () => {
     expect(screen.getByText('Create AI index')).toBeInTheDocument();
   });
 
-  it('suppresses the chrome fallback back button when Chrome Next is enabled in the project layout', () => {
-    isChromeNextEnabledSpy.mockReturnValue(true);
+  it('suppresses the chrome fallback back button in the project layout', () => {
     services.chrome.getChromeStyle.mockReturnValue('project');
     services.chrome.next.appHeader.set.mockReturnValue(jest.fn());
 
@@ -72,8 +66,7 @@ describe('ContextEngineSubPageHeader', () => {
     );
   });
 
-  it('shows the in-page back button in classic layout when Chrome Next is enabled', () => {
-    isChromeNextEnabledSpy.mockReturnValue(true);
+  it('shows the in-page back button in classic layout', () => {
     services.chrome.getChromeStyle.mockReturnValue('classic');
 
     renderHeader(services);
@@ -82,19 +75,10 @@ describe('ContextEngineSubPageHeader', () => {
   });
 
   it('does not suppress the chrome back button outside the project layout', () => {
-    isChromeNextEnabledSpy.mockReturnValue(true);
     services.chrome.getChromeStyle.mockReturnValue('classic');
 
     renderHeader(services);
 
     expect(services.chrome.next.appHeader.set).not.toHaveBeenCalled();
-  });
-
-  it('shows the in-page back button in the project layout when Chrome Next is disabled', () => {
-    services.chrome.getChromeStyle.mockReturnValue('project');
-
-    renderHeader(services);
-
-    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 });

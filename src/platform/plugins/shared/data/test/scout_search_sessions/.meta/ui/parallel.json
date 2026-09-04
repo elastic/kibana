@@ -1,5 +1,5 @@
 {
-  "sha1": "eca40d9e3beab916950c1d36db4e3c8972900a1d",
+  "sha1": "381aeff229a6996d00156e438b3faec8067e24a7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts",
-        "line": 89,
-        "column": 51
+        "line": 47,
+        "column": 7
       }
     },
     {

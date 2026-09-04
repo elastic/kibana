@@ -9,10 +9,12 @@ you type: **Run Preview** renders the current spec on the panel, **Apply and clo
 dashboard, and any other close — Cancel, Esc, or click-away — reverts, removing a new panel or
 restoring an existing panel's prior spec.
 
-Creation is gated by the `vega.standaloneEmbeddable` browser feature flag (off by default). The
-embeddable definition itself is always registered so existing panels keep rendering after a flag
-rollback; only the creation actions attach and detach as the flag changes.
+Creation and panel JSON export are gated by the `vega.standaloneEmbeddable` feature flag (off by
+default). The embeddable definition itself is always registered so existing panels keep rendering
+after a flag rollback; only the creation actions attach and detach as the flag changes.
 
-The panel registers no server embeddable definition, so Dashboard's public REST API treats it as an
-unmapped panel: writes reject it and reads drop it with a `dropped_panel` warning. The Dashboard
-app's own internal save/load routes store and return it as-is.
+When the flag is enabled, `visTypeVega` also registers a server embeddable schema for
+`type: vega`, so Dashboard's public REST API and generated OpenAPI include `vega` and validate its
+config. When disabled, the public API treats `vega` as an unmapped panel type: writes reject it
+and reads drop stored panels with a `dropped_panel` warning. The Dashboard app's own internal
+save/load routes store and return it as-is.

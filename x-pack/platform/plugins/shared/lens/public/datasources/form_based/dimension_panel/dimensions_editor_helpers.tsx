@@ -28,9 +28,9 @@ import type {
   PercentileRanksIndexPatternColumn,
   TermsIndexPatternColumn,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import { operationDefinitionMap } from '../operations';
-import { isColumnOfType } from '../operations/definitions/helpers';
 import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';

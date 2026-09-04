@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286574
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix notes page not restoring filter UI state on return
-description: Fixes an issue where previously applied filters on the Notes management page were not shown in the filter controls after navigating away and returning, even though the filters were still active.

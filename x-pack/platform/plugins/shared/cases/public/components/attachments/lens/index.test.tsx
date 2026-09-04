@@ -183,7 +183,7 @@ describe('getVisualizationAttachmentType', () => {
         ...attachmentViewProps,
         data: {
           state: {
-            attributes: { state: { query: { esql: '' } } },
+            attributes: { state: { datasourceStates: { textBased: { layers: {} } } } },
             timeRange: {},
           },
         },

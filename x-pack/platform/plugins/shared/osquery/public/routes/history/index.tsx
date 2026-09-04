@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HistoryPage } from './list';
@@ -20,6 +20,9 @@ const HistoryComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   useBreadcrumbs('history');
   const match = useRouteMatch();
+  const { search, hash } = useLocation();
+  // Legacy `/history/new` bookmarks must keep their query string and hash on the way to `/new`.
+  const newQueryLocation = useMemo(() => ({ pathname: '/new', search, hash }), [search, hash]);
 
   if (!permissions.readLiveQueries) {
     return <MissingPrivileges />;
@@ -28,7 +31,7 @@ const HistoryComponent = () => {
   return (
     <Routes>
       <Route path={`${match.url}/new`}>
-        <Redirect to="/new" />
+        <Redirect to={newQueryLocation} />
       </Route>
       <Route path={`${match.url}/scheduled/:scheduleId/:executionCount`}>
         <ScheduledExecutionDetailsPage />

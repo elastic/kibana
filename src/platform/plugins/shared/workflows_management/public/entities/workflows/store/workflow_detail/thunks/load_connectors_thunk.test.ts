@@ -82,6 +82,28 @@ describe('loadConnectorsThunk', () => {
     );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
+    expect(store.getState().detail.connectorsLoadState).toEqual({ status: 'ready' });
+  });
+
+  it('tracks a connector refresh as loading until it completes', async () => {
+    store.dispatch(setConnectors(mockConnectorsResponse1));
+    let resolveRequest: ((value: ConnectorsResponse) => void) | undefined;
+    mockWorkflowApi.getConnectors.mockReturnValue(
+      new Promise<ConnectorsResponse>((resolve) => {
+        resolveRequest = resolve;
+      })
+    );
+
+    const resultPromise = store.dispatch(loadConnectorsThunk());
+
+    expect(store.getState().detail.connectorsLoadState).toEqual({ status: 'loading' });
+    if (!resolveRequest) {
+      throw new Error('Connector request resolver was not initialized');
+    }
+    resolveRequest(mockConnectorsResponse1);
+    await resultPromise;
+
+    expect(store.getState().detail.connectorsLoadState).toEqual({ status: 'ready' });
   });
 
   it('should load connectors and update schema when connectors have changed', async () => {
@@ -138,6 +160,10 @@ describe('loadConnectorsThunk', () => {
     );
     expect(result.type).toBe('detail/loadConnectorsThunk/rejected');
     expect(result.payload).toBe('Failed to fetch connectors');
+    expect(store.getState().detail.connectorsLoadState).toEqual({
+      status: 'failed',
+      error: 'Failed to fetch connectors',
+    });
   });
 
   it('should handle HTTP error without body message', async () => {

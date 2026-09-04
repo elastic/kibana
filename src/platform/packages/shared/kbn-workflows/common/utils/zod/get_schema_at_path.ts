@@ -47,7 +47,9 @@ export function getSchemaAtPath(
       current = unwrapSchema(current);
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
-        if (!(segment in shape)) {
+        // `in` walks the prototype chain, so `__proto__` / `constructor` / `toString`
+        // would resolve to an Object.prototype member instead of a zod schema.
+        if (!Object.hasOwn(shape, segment)) {
           return partial
             ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
             : { schema: null, scopedToPath: null };

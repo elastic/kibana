@@ -1,5 +1,5 @@
 {
-  "sha1": "6797b03c0df59ea94ebed74f58c5c70cf3f745e0",
+  "sha1": "7db8260678c039969deb7d226a2cca4bce1c938e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,114 @@
         "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-585df4fbb906807",
+      "title": "Logs profile - Doc viewer should open each section from its own leading control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 72,
+        "column": 25
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-0b4e2838c6f5217",
+      "title": "Logs profile - Doc viewer should keep both sections open when both controls of the same row are used",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 100,
+        "column": 22
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-cfb1d7fab898bf7",
+      "title": "Logs profile - Doc viewer should open only the new section when the controls are on different rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 120,
+        "column": 5
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-496b7803a592ad4",
+      "title": "Logs profile - Doc viewer should return to the Log overview tab from another tab when a control is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 138,
+        "column": 9
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-68eefa20ac72341",
+      "title": "Logs profile - Doc viewer should open a section from a leading control inside a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 168,
+        "column": 5
+      }
+    },
+    {
+      "id": "b964c7b3772cdca-684763565ca4062",
+      "title": "Logs profile - Doc viewer should return to the Log overview tab from another tab inside a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/logs_experience/ui/parallel_tests/doc_viewer.spec.ts",
+        "line": 179,
+        "column": 64
       }
     },
     {

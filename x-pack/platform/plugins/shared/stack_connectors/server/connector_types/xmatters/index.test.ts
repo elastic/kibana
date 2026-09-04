@@ -481,7 +481,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.warn).toBeCalledWith(
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
       'Error thrown triggering xMatters workflow: maxContentLength size of 1000000 exceeded'
     );
   });

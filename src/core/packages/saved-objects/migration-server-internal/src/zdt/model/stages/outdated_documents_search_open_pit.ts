@@ -31,5 +31,6 @@ export const outdatedDocumentsSearchOpenPit: ModelStage<
     transformErrors: [],
     progress: createInitialProgress(),
     hasTransformedDocs: false,
+    batchSize: context.batchSize,
   };
 };

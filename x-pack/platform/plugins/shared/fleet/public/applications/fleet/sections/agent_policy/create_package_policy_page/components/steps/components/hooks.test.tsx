@@ -221,6 +221,67 @@ describe('useVarGroupSelections', () => {
 
       expect(result.current.selections).toEqual({});
     });
+
+    it('should infer selections from populated vars on the edit page when none are saved', () => {
+      // Policy predating var_groups: oauth vars are populated, so the derived
+      // selection must be oauth, not the first visible option (api_key)
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'oauth' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should not infer from vars on the create page', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: false,
+        })
+      );
+
+      // Create flow keeps the first-visible-option default
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+    });
+
+    it('should fall back to defaults on the edit page when no vars are populated', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+    });
   });
 
   describe('initialization effect', () => {

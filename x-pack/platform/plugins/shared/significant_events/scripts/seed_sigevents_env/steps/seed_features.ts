@@ -20,29 +20,20 @@ export async function seedFeatures(
   config: ConnectionConfig,
   log: ToolingLog
 ): Promise<void> {
-  const lastSeen = new Date().toISOString();
   const baseFeatures = buildFeaturePayloads(ctx, manifest);
 
   if (baseFeatures.length === 0) {
     throw new Error('seedFeatures: no feature operations to index (unexpected empty set)');
   }
 
-  // Add index-only display fields (status, last_seen) on top of the shared base payload.
-  const operations = baseFeatures.map((base) => ({
-    index: {
-      feature: {
-        ...base,
-        status: 'active',
-        last_seen: lastSeen,
-      },
-    },
-  }));
+  const operations = baseFeatures.map((feature) => ({ index: { feature } }));
 
   const res = await kibanaRequest(
     config,
     'POST',
     `/internal/streams/${encodeURIComponent(ctx.streamName)}/features/_bulk`,
-    { operations }
+    { operations },
+    ctx.space
   );
   if (res.status >= 300) {
     throw new Error(`Failed to bulk-index features (HTTP ${res.status})`);

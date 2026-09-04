@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { type RelationshipsClient } from '@kbn/entity-store/server';
 import type { LeadEntity } from '../types';
-import { createRelationshipModule, __testables } from './relationship_module';
+import { createRelationshipModule } from './relationship_module';
 
 const logger = loggingSystemMock.createLogger();
-const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-const spaceId = 'default';
 
 interface EntityRecordOverrides {
   type?: string;
@@ -65,38 +62,40 @@ const relationshipsClient: jest.Mocked<
   getEarliestObservationByTarget: jest.fn(),
 };
 
-const createModule = () =>
+const createModule = (entitiesMap: ReadonlyMap<string, LeadEntity>) =>
   createRelationshipModule({
-    esClient,
     logger,
-    spaceId,
     relationshipsClient: relationshipsClient as unknown as RelationshipsClient,
+    entitiesMap,
   });
 
-const collect = (entities: LeadEntity[]) => createModule().collect(entities);
+/**
+ * Builds an `entitiesMap` from `allEntities` (defaulting to `entities`) and
+ * collects observations for `entities` — mirroring how `run_pipeline` injects
+ * the map produced by `buildEntityLookupMap`, which may include entities
+ * resolved from outside the candidate batch.
+ */
+const collect = (entities: LeadEntity[], allEntities: LeadEntity[] = entities) => {
+  const entitiesMap = new Map(allEntities.map((entity) => [entity.id, entity]));
+  return createModule(entitiesMap).collect(entities);
+};
 
 const msDaysAgo = (days: number) => Date.now() - days * 24 * 60 * 60 * 1000;
 
 const firstSeenMap = (entries: Record<string, number>) => new Map(Object.entries(entries));
 
-const mgetFound = (source: Record<string, unknown>) => ({
-  found: true as const,
-  _source: source,
-});
-
 describe('createRelationshipModule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    esClient.mget.mockResolvedValue({ docs: [] } as never);
     relationshipsClient.getEarliestObservationByTarget.mockResolvedValue(new Map());
   });
 
   it('is always enabled', () => {
-    expect(createModule().isEnabled()).toBe(true);
+    expect(createModule(new Map()).isEnabled()).toBe(true);
   });
 
   it('exposes the entity_relationships module id, priority, and weight', () => {
-    const { config } = createModule();
+    const { config } = createModule(new Map());
     expect(config.id).toBe('entity_relationships');
     expect(config.priority).toBe(6);
     expect(config.weight).toBe(0.6);
@@ -109,7 +108,6 @@ describe('createRelationshipModule', () => {
       expect(
         await collect([buildEntity({ relationships: { communicates_with: { ids: [] } } })])
       ).toHaveLength(0);
-      expect(esClient.mget).not.toHaveBeenCalled();
     });
 
     it('ignores malformed relationships', async () => {
@@ -120,40 +118,16 @@ describe('createRelationshipModule', () => {
       ];
 
       for (const entity of malformed) {
-        expect(__testables.getEntityRelationships(entity)).toBeUndefined();
         expect(await collect([entity])).toHaveLength(0);
       }
-      expect(esClient.mget).not.toHaveBeenCalled();
     });
 
-    it('keeps only administers, communicates_with, and accesses_infrequently', () => {
+    it('does not emit for relationship kinds outside the picked set', async () => {
       const entity = buildEntity({
-        relationships: {
-          administers: { ids: ['host:a'] },
-          communicates_with: { ids: ['host:b'] },
-          accesses_infrequently: { ids: ['host:c'] },
-          depends_on: { ids: ['host:d'] },
-          owns: { ids: ['host:e'] },
-          owns_inferred: { ids: ['host:f'] },
-          accesses_frequently: { ids: ['host:g'] },
-          supervises: { ids: ['host:h'] },
-        },
-      });
-
-      expect(__testables.getEntityRelationships(entity)).toEqual({
-        administers: { ids: ['host:a'] },
-        communicates_with: { ids: ['host:b'] },
-        accesses_infrequently: { ids: ['host:c'] },
-      });
-    });
-
-    it('does not fetch related entities from relationship kinds outside the picked set', async () => {
-      const entity = buildEntity({
-        relationships: { depends_on: { ids: ['host:dc-01'] } },
+        relationships: { owns: { ids: ['host:dc-01'] } },
       });
 
       expect(await collect([entity])).toHaveLength(0);
-      expect(esClient.mget).not.toHaveBeenCalled();
     });
   });
 
@@ -349,11 +323,11 @@ describe('createRelationshipModule', () => {
     });
 
     it('does not emit when the target cannot be resolved to an entity', async () => {
-      esClient.mget.mockResolvedValue({ docs: [{ found: false }] } as never);
       const entity = buildEntity({
         relationships: { accesses_infrequently: { ids: ['host:unknown'] } },
       });
 
+      // host:unknown is absent from the entity lookup map (unresolved by buildEntityLookupMap).
       const observations = await collect([entity]);
 
       expect(observations.find((o) => o.type === 'sensitive_infrequent_access')).toBeUndefined();
@@ -467,24 +441,19 @@ describe('createRelationshipModule', () => {
     });
 
     it('resolves a high-value target fetched from outside the candidate batch', async () => {
-      esClient.mget.mockResolvedValue({
-        docs: [
-          mgetFound({
-            entity: { id: 'host:dc-01', name: 'dc-01', type: 'host' },
-            asset: { criticality: 'extreme_impact' },
-          }),
-        ],
-      } as never);
-
+      const target = buildEntity({ type: 'host', name: 'dc-01', criticality: 'extreme_impact' });
       const entity = buildEntity({
-        relationships: { accesses_infrequently: { ids: ['host:dc-01'] } },
+        relationships: { accesses_infrequently: { ids: [target.id] } },
       });
 
-      const observations = await collect([entity]);
+      // `target` is only present in the injected entity lookup map, not in the
+      // candidate batch passed to collect() — mirroring an entity resolved by
+      // buildEntityLookupMap from outside the pipeline's candidate list.
+      const observations = await collect([entity], [entity, target]);
       const observation = observations.find((o) => o.type === 'sensitive_infrequent_access');
 
       expect(observation?.score).toBe(80);
-      expect(observation?.metadata.critical_accessed_entities).toEqual(['host:dc-01']);
+      expect(observation?.metadata.critical_accessed_entities).toEqual([target.id]);
     });
   });
 

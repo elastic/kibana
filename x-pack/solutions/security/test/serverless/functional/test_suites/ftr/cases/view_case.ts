@@ -34,7 +34,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('Case View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/287822
+  describe.skip('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -301,7 +302,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY
+    // FLAKY: https://github.com/elastic/kibana/issues/288565
     describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');

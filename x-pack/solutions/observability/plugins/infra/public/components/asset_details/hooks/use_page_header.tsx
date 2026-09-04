@@ -62,7 +62,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   };
 
   // The compatibility Back only renders when Chrome Next is active in the project layout.
-  if (chrome.next.isEnabled && chrome.getChromeStyle() === 'project') {
+  if (chrome.getChromeStyle() === 'project') {
     return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
   }
 

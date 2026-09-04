@@ -10,3 +10,5 @@ export * from './seed_features';
 export * from './seed_logs';
 export * from './seed_queries';
 export * from './clean';
+export * from './run_discovery';
+export * from './verify_change_point';

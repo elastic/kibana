@@ -17,6 +17,7 @@ project:
   owner: '@elastic/logstash'
   sourceRoot: x-pack/platform/plugins/private/logstash
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/home-plugin'
   - '@kbn/management-plugin'

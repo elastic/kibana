@@ -32,6 +32,7 @@ export function validateDeprecatedStepTypes(
       results.push({
         id: `deprecated-step-type-${step.stepId}-${startPos.line}-${startPos.col}`,
         owner: 'deprecated-step-validation',
+        ruleId: 'deprecatedStepType',
         severity: 'warning',
         message,
         hoverMessage: null,

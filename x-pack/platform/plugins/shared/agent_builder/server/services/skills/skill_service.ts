@@ -15,11 +15,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
+import { isAllowedSkillRegistration } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
+import { AvailabilityCache } from '../common/availability_cache';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
 import { createBuiltinSkillProvider } from './builtin';
@@ -71,6 +72,7 @@ export const createSkillService = (): SkillService => {
 class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
+  private readonly availabilityCache = new AvailabilityCache();
 
   /**
    * Promise chain used to serialize dynamic registration so that the async
@@ -81,7 +83,7 @@ class SkillServiceImpl implements SkillService {
   setup(): SkillServiceSetup {
     return {
       registerSkill: (skill) => {
-        if (!isAllowedBuiltinSkill(skill.id)) {
+        if (!isAllowedSkillRegistration(skill)) {
           throw new Error(
             `Built-in skill with id "${skill.id}" is not in the list of allowed built-in skills.
              Please add it to the list of allowed built-in skills in the "@kbn/agent-builder-server/allow_lists.ts" file.`
@@ -120,7 +122,10 @@ class SkillServiceImpl implements SkillService {
         await this.mutationQueue;
         await validated;
         const space = getCurrentSpaceId({ request, spaces });
-        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const builtinProvider = createBuiltinSkillProvider(
+          [...this.skills.values()],
+          this.availabilityCache
+        );
         const persistedProvider = createPersistedSkillProvider({
           space,
           esClient: elasticsearch.client.asInternalUser,
@@ -165,6 +170,11 @@ class SkillServiceImpl implements SkillService {
           toolRegistry,
           experimentalFeaturesEnabled,
           uiSettingValues,
+          availabilityContext: {
+            request,
+            spaceId: space,
+            uiSettings: uiSettingsClient,
+          },
         });
       },
       registerSkill: (skill) => {

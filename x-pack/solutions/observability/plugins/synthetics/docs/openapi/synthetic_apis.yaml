@@ -1428,6 +1428,15 @@ components:
               type: boolean
               default: false
               description: Ignore HTTPS errors.
+            certificate_error_spki_allowlist:
+              type: array
+              default: []
+              description: >-
+                PEM certificates whose public keys (SPKI) are allowlisted so Chromium
+                bypasses certificate errors for matching presented certificates.
+                This does not add a CA to Chromium's trust store.
+              items:
+                type: string
             inline_script:
               type: string
               description: The inline script.

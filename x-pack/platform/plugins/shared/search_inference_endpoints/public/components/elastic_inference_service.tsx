@@ -28,11 +28,7 @@ export const ElasticInferenceService = () => {
       data-test-subj="eisModelsPage"
     >
       <ElasticInferenceServiceModelsHeader onManageRegions={() => setIsManageRegionsOpen(true)} />
-      <EuiPageTemplate.Section
-        className="eui-yScroll"
-        data-test-subj="eisModelsPageMain"
-        paddingSize="none"
-      >
+      <EuiPageTemplate.Section data-test-subj="eisModelsPageMain" paddingSize="none">
         <ElasticInferenceServiceModelsPage />
       </EuiPageTemplate.Section>
       {isManageRegionsOpen && <ManageRegionsModal onClose={() => setIsManageRegionsOpen(false)} />}

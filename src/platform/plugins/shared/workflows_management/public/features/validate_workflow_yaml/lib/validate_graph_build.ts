@@ -59,6 +59,7 @@ export function validateGraphBuild(
     {
       id: `graph-build-${stepId ?? 'workflow'}-${startLineNumber}-${startColumn}`,
       owner: 'graph-build-validation',
+      ruleId: 'graphBuildError',
       severity: 'error',
       message,
       hoverMessage: null,

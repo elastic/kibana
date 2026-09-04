@@ -42,8 +42,12 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    expect(result.data?.suppressions?.[0].should_suppress).toBe(true);
+    expect(result.data?.suppressions?.size).toBe(1);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })
+      )
+    ).toBe('unknown suppression reason');
   });
 
   it('returns empty suppressions when no episodes exist', async () => {
@@ -55,7 +59,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.size).toBe(0);
   });
 
   it('returns empty suppressions when episodes is undefined', async () => {
@@ -67,7 +71,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.size).toBe(0);
   });
 
   it('parses external suppressions (source != internal, null rule_id) correctly', async () => {
@@ -102,12 +106,17 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    const suppression = result.data?.suppressions?.[0];
-    expect(suppression?.source).toBe('pagerduty');
-    expect(suppression?.rule_id).toBeNull();
-    expect(suppression?.should_suppress).toBe(true);
-    expect(suppression?.last_ack_action).toBe('ack');
+    expect(result.data?.suppressions?.size).toBe(1);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+        })
+      )
+    ).toBe('ack');
   });
 
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
@@ -159,7 +168,24 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(2);
-    expect(result.data?.suppressions?.map((s) => s.episode_id)).toEqual(['e0', 'e199']);
+    expect(result.data?.suppressions?.size).toBe(2);
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          rule_id: `${longSegment}-r0`,
+          group_hash: `${longSegment}-g0`,
+          episode_id: 'e0',
+        })
+      )
+    ).toBeDefined();
+    expect(
+      result.data?.suppressions?.suppressionReasonFor(
+        createAlertEpisode({
+          rule_id: `${longSegment}-r199`,
+          group_hash: `${longSegment}-g199`,
+          episode_id: 'e199',
+        })
+      )
+    ).toBeUndefined();
   });
 });

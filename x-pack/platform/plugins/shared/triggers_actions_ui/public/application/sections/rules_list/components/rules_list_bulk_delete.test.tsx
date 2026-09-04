@@ -220,7 +220,7 @@ describe('Rules list Bulk Delete', () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
     });
-    expect(bulkDeleteRules).not.toBeCalled();
+    expect(bulkDeleteRules).not.toHaveBeenCalled();
   });
 
   it('should have warning toast message after Bulk Delete', async () => {

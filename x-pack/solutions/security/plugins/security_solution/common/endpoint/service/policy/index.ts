@@ -6,4 +6,3 @@
  */
 
 export * from './get_policy_data_for_update';
-export * from './protected_policy_settings';

@@ -60,20 +60,20 @@ describe('LabelOptions component', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find({ paramName: ROTATE }).prop('setValue')(ROTATE, '5');
 
-    expect(setAxisLabel).toBeCalledWith('rotate', 5);
+    expect(setAxisLabel).toHaveBeenCalledWith('rotate', 5);
   });
 
   it('should set filter value', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find({ paramName: FILTER }).prop('setValue')(FILTER, false);
 
-    expect(setAxisLabel).toBeCalledWith(FILTER, false);
+    expect(setAxisLabel).toHaveBeenCalledWith(FILTER, false);
   });
 
   it('should set value for valueAxes', () => {
     const comp = shallow(<LabelOptions {...defaultProps} />);
     comp.find(TruncateLabelsOption).prop('setValue')('truncate', 10);
 
-    expect(setAxisLabel).toBeCalledWith('truncate', 10);
+    expect(setAxisLabel).toHaveBeenCalledWith('truncate', 10);
   });
 });

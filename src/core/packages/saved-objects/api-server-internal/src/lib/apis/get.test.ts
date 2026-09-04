@@ -170,7 +170,7 @@ describe('#get', () => {
         id: string,
         options?: SavedObjectsBaseOptions
       ) => {
-        await expect(repository.get(type, id, options)).rejects.toThrowError(
+        await expect(repository.get(type, id, options)).rejects.toThrow(
           createGenericNotFoundErrorPayload(type, id)
         );
       };
@@ -178,7 +178,7 @@ describe('#get', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.get(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {

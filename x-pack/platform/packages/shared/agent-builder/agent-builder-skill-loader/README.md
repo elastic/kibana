@@ -19,9 +19,9 @@ my-skill/
   .github/CODEOWNERS.md               # ignored: dot-prefixed
 ```
 
-Filenames (without the extension) and directory segments must contain only lowercase letters, numbers, hyphens, and underscores, and must start and end with a letter or number.
+Filenames (without the extension) and directory segments must contain only letters, numbers, hyphens, and underscores, and must start and end with a letter or number.
 
-Non-markdown and dot-prefixed files and directories are ignored. Markdown files with unsupported filenames (e.g. `README.md`, a `Setup Guide.md`, `config.yaml.md`, `overview.MD`) throw an error.
+Non-markdown and dot-prefixed files and directories are ignored. Markdown files with unsupported filenames (e.g. a `Setup Guide.md`, `config.yaml.md`, `overview.MD`) throw an error.
 ## Frontmatter
 
 `SKILL.md` must begin with a YAML frontmatter block. Unknown keys are ignored, so a skill authored for another harness may carry extra fields.

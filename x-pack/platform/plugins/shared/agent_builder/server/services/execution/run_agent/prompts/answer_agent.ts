@@ -27,6 +27,7 @@ export const getStructuredAnswerPrompt = async (
     cycleLimit,
     resultTransformer,
     toolManager,
+    imageResolver,
   } = params;
 
   // Generate messages from the conversation's rounds, with optional compaction summary
@@ -87,6 +88,7 @@ ${attachmentToolsInstructions()}
       cycleLimit,
       resultTransformer,
       toolManager,
+      imageResolver,
     })),
     ...formatAnswerActionHistory({ actions: answerActions }),
   ];

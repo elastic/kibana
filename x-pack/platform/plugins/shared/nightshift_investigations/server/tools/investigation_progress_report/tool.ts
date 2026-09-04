@@ -32,7 +32,7 @@ const toolDescription = dedent`
     'xpack.nightshiftInvestigations.agentBuilder.tools.investigationProgressReport.description.rules',
     {
       defaultMessage:
-        'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "summary" short (one or two sentences) describing what is happening right now. This tool does not end the investigation — keep working after calling it.',
+        'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "summary" short (one or two sentences) describing what is happening right now. Set "impact" progressively from step 2.5 onward — include it in every snapshot once seeded. This tool does not end the investigation — keep working after calling it.',
     }
   )}
 `;
