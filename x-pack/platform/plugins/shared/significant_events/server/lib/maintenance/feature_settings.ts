@@ -17,7 +17,7 @@ import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/wo
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
 import type { GetScopedClients } from '../../routes/types';
-import { SCHEDULED_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
+import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -42,7 +42,7 @@ export const isContinuousOnboardingWorkflowId = (workflowId: string): boolean =>
   workflowId === LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID;
 
 export const isScheduledDiscoveryWorkflowId = (workflowId: string): boolean =>
-  SCHEDULED_MAINTENANCE_WORKFLOW_IDS.some(
+  SCHEDULED_DISCOVERY_WORKFLOW_IDS.some(
     (baseId) => workflowId === baseId || workflowId.startsWith(`${baseId}-`)
   );
 
