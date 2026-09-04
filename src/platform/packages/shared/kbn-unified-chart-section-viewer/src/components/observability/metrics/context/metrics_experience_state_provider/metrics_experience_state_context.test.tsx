@@ -9,6 +9,7 @@
 
 import React, { useContext } from 'react';
 import { renderHook, act } from '@testing-library/react';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
@@ -54,10 +55,31 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </MetricsExperienceStateProvider>
 );
 
+const StatefulGridSettingsWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [gridSettings, setGridSettings] = React.useState<MetricsGridSettings>(
+    METRICS_GRID_SETTINGS_DEFAULTS
+  );
+  const onGridSettingsChange = React.useCallback((update: Partial<MetricsGridSettings>) => {
+    setGridSettings((prev) => ({ ...prev, ...update }));
+  }, []);
+
+  return (
+    <MetricsExperienceStateProvider
+      profileId="test-profile"
+      gridSettings={gridSettings}
+      onGridSettingsChange={onGridSettingsChange}
+    >
+      {children}
+    </MetricsExperienceStateProvider>
+  );
+};
+
 describe('MetricsExperienceStateProvider', () => {
   describe('onSearchTermChange', () => {
     it('resets currentPage to 0 when search term changes', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Navigate to page 2
       act(() => {
@@ -74,7 +96,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('does not reset currentPage when search term is unchanged', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Set a search term
       act(() => {
@@ -97,7 +121,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('resets currentPage when search term changes from one value to another', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       // Set initial search and navigate
       act(() => {
@@ -117,7 +143,9 @@ describe('MetricsExperienceStateProvider', () => {
     });
 
     it('resets currentPage when search term is cleared', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       act(() => {
         result.current.onSearchTermChange('cpu');
@@ -138,12 +166,33 @@ describe('MetricsExperienceStateProvider', () => {
 
   describe('onDimensionsChange', () => {
     it('updates selectedDimensions', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       act(() => {
         result.current.onDimensionsChange([{ name: 'host.name' }]);
       });
       expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('forwards only dimension names to onGridSettingsChange, dropping `type`', () => {
+      const onGridSettingsChange = jest.fn();
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onGridSettingsChange={onGridSettingsChange}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      act(() => {
+        result.current.onDimensionsChange([{ name: 'host.name', type: 'keyword' }]);
+      });
+
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ dimensions: ['host.name'] });
     });
 
     it('does not reset currentPage (internal sync should not disrupt pagination)', () => {
@@ -157,9 +206,8 @@ describe('MetricsExperienceStateProvider', () => {
       act(() => {
         result.current.onDimensionsChange([{ name: 'host.name' }]);
       });
-      // currentPage must be preserved — this is the duplicate-tab scenario:
-      // useDiscoverFieldForBreakdown fires an internal sync after restore,
-      // which must not reset the page the user was on.
+      // currentPage must be preserved -- resetting it on a dimensions change is owned
+      // exclusively by useResetPageOnDimensionsChange in the grid component, not here.
       expect(result.current.currentPage).toBe(4);
     });
   });
@@ -190,6 +238,8 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
+        dimensions: [],
+        searchTerm: '',
       });
     });
 
@@ -201,6 +251,8 @@ describe('MetricsExperienceStateProvider', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'min',
             histogramPercentile: 'p50',
+            dimensions: ['host.name'],
+            searchTerm: 'host',
           }}
         >
           {children}
@@ -212,7 +264,10 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
+        dimensions: ['host.name'],
+        searchTerm: 'host',
       });
+      expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
     });
 
     it('forwards updates to the onGridSettingsChange prop', () => {
