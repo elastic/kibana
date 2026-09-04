@@ -65,6 +65,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
 import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
@@ -530,7 +531,7 @@ export class WorkflowsService {
   public async getExecutionStepExecutions(
     params: GetExecutionStepExecutionsParams,
     spaceId: string
-  ): Promise<StepExecutionListResult> {
+  ): Promise<GetExecutionStepExecutionsResult> {
     await this.ensureInitialized();
     return this.executionQueryService.getExecutionStepExecutions(params, spaceId);
   }

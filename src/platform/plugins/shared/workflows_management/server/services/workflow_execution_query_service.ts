@@ -36,7 +36,10 @@ import {
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
-import { getExecutionStepExecutions } from '../api/lib/get_execution_step_executions';
+import {
+  getExecutionStepExecutions,
+  type GetExecutionStepExecutionsResult,
+} from '../api/lib/get_execution_step_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
   searchStepExecutions,
@@ -157,7 +160,7 @@ export class WorkflowExecutionQueryService {
   async getExecutionStepExecutions(
     params: GetExecutionStepExecutionsParams,
     spaceId: string
-  ): Promise<StepExecutionListResult> {
+  ): Promise<GetExecutionStepExecutionsResult> {
     return getExecutionStepExecutions({
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,

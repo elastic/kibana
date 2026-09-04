@@ -71,26 +71,22 @@ export function registerGetExecutionStepsRoute({ router, api, spaces }: RouteDep
           const { executionId } = request.params;
           const { page, size } = request.query;
           const spaceId = spaces.getSpaceId(request);
-          const workflowExecution = await api.getWorkflowExecution(executionId, spaceId, {
-            omitStepExecutions: true,
-          });
-          if (!workflowExecution) {
-            return response.notFound();
-          }
-          assertCanReadManagedWorkflowExecution(request, workflowExecution);
-
-          return response.ok({
-            body: await api.getExecutionStepExecutions(
+          const { workflowExecution, stepExecutionListResult } =
+            await api.getExecutionStepExecutions(
               {
                 executionId,
                 page,
                 size,
               },
               spaceId
-            ),
+            );
+          assertCanReadManagedWorkflowExecution(request, workflowExecution);
+
+          return response.ok({
+            body: stepExecutionListResult,
           });
         } catch (error) {
-          return handleRouteError(response, error);
+          return handleRouteError(response, error, { checkNotFound: true });
         }
       })
     );

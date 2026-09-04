@@ -66,6 +66,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
@@ -903,7 +904,7 @@ export class WorkflowsManagementApi {
   public async getExecutionStepExecutions(
     params: GetExecutionStepExecutionsParams,
     spaceId: string
-  ): Promise<StepExecutionListResult> {
+  ): Promise<GetExecutionStepExecutionsResult> {
     return this.workflowsService.getExecutionStepExecutions(params, spaceId);
   }
 

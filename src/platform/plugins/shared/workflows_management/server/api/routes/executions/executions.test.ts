@@ -832,7 +832,10 @@ describe('Execution Routes', () => {
 
     it('should call api.getExecutionStepExecutions with pagination', async () => {
       const list = { results: [{ id: 'se-1' }], total: 1, page: 1, size: 50 };
-      mockApi.getExecutionStepExecutions.mockResolvedValue(list);
+      mockApi.getExecutionStepExecutions.mockResolvedValue({
+        workflowExecution: { id: 'ex-1', managed: false },
+        stepExecutionListResult: list,
+      });
       const h = handler('GET', path)!;
       const request = {
         params: { executionId: 'ex-1' },
@@ -841,9 +844,7 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.getWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', {
-        omitStepExecutions: true,
-      });
+      expect(mockApi.getWorkflowExecution).not.toHaveBeenCalled();
       expect(mockApi.getExecutionStepExecutions).toHaveBeenCalledWith(
         {
           executionId: 'ex-1',
@@ -856,7 +857,9 @@ describe('Execution Routes', () => {
     });
 
     it('should return not found when the execution does not exist', async () => {
-      mockApi.getWorkflowExecution.mockResolvedValue(undefined);
+      mockApi.getExecutionStepExecutions.mockRejectedValue(
+        new WorkflowExecutionNotFoundError('missing')
+      );
       const h = handler('GET', path)!;
       const request = {
         params: { executionId: 'missing' },
@@ -866,7 +869,7 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockResponse.notFound).toHaveBeenCalled();
-      expect(mockApi.getExecutionStepExecutions).not.toHaveBeenCalled();
+      expect(mockApi.getWorkflowExecution).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
     });
   });
