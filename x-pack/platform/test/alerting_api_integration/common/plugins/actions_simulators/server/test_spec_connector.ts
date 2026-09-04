@@ -41,6 +41,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
   actions: {
     testHandlerParams: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         message: z.string(),
       }),
@@ -56,6 +57,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateAuthentication: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => {
         const response = await ctx.client(ctx.config?.apiUrl as string, {
@@ -68,6 +70,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateHeaders: {
       isTool: true,
+      scope: 'read',
       input: z.object({}),
       handler: async (ctx, input) => {
         const response = await ctx.client(ctx.config?.apiUrl as string, {
@@ -80,6 +83,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     validateParams: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         foobar: z.string(),
       }),
@@ -89,6 +93,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
     },
     throwError: {
       isTool: true,
+      scope: 'read',
       input: z.object({
         foobar: z.string(),
       }),

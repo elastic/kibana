@@ -19,6 +19,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
+import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
@@ -34,6 +35,7 @@ interface ConversationServiceDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
+  eventBus?: ConversationEventBus;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -42,13 +44,22 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
+  private readonly eventBus?: ConversationEventBus;
 
-  constructor({ logger, security, elasticsearch, spaces, agents }: ConversationServiceDeps) {
+  constructor({
+    logger,
+    security,
+    elasticsearch,
+    spaces,
+    agents,
+    eventBus,
+  }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;
     this.spaces = spaces;
     this.agents = agents;
+    this.eventBus = eventBus;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -56,6 +67,7 @@ export class ConversationServiceImpl implements ConversationService {
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
+    const eventBus = this.eventBus;
 
     return createClient({
       user,
@@ -63,6 +75,9 @@ export class ConversationServiceImpl implements ConversationService {
       logger: this.logger,
       space,
       agentRegistry,
+      onMetadataPatched: eventBus
+        ? (payload) => eventBus.emitMetadataPatched(request, payload)
+        : undefined,
     });
   }
 

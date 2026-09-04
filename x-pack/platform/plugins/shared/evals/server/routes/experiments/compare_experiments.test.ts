@@ -197,8 +197,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.status).toBe(200);
     expect(response.payload.results).toEqual([]);
     expect(response.payload.pairing.totalPairs).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns comparison results with pairing stats for overlapping datasets', async () => {
@@ -232,13 +232,13 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
     expect(response.payload.results[0].direction).toBe('maximize');
-    expect(response.payload.results[0].meanA).toBeCloseTo(0.4);
-    expect(response.payload.results[0].meanB).toBeCloseTo(0.8);
+    expect(response.payload.results[0].meanTarget).toBeCloseTo(0.4);
+    expect(response.payload.results[0].meanBaseline).toBeCloseTo(0.8);
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
-    expect(response.payload.pairing.truncatedA).toBe(false);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(false);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns direction: minimize for lower-is-better evaluator metadata', async () => {
@@ -354,8 +354,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload.pairing.truncatedA).toBe(true);
-    expect(response.payload.pairing.truncatedB).toBe(false);
+    expect(response.payload.pairing.truncatedBaseline).toBe(true);
+    expect(response.payload.pairing.truncatedTarget).toBe(false);
   });
 
   it('returns 500 when ES throws', async () => {

@@ -24,6 +24,7 @@ export {
   PND_INVESTIGATIONS_URL,
   PND_INVESTIGATION_URL_TEMPLATE,
   PND_PLUGIN_NAME,
+  ALERTZERO_THIN_AGENT_ID,
   PND_SKILLS_URL,
   PND_SKILL_URL_TEMPLATE,
   PND_WATCHES_URL,
@@ -37,6 +38,13 @@ export {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_IDS,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  SYSTEM_SECURITY_WORKER_CATALOG,
+  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_IDS,
   TEMPLATE_ID_INCIDENT,
   TEMPLATE_ID_INVESTIGATION,
   TEMPLATE_ID_PROPOSAL,
@@ -73,8 +81,8 @@ export {
   ScheduleHandoff,
   ScheduleMode,
   ScopeAccess,
-  UpdateWatchRequestBody,
-  UpdateWatchResponse,
+  UpdateWorkerRequestBody,
+  UpdateWorkerResponse,
   Watch,
   WatchApprovalGate,
   WatchAutonomyLevel,
@@ -96,7 +104,9 @@ export {
   WatchTriggersSettings,
   WatchWorker,
   WatchWorkerAttachment,
+  Worker,
   WorkerRunState,
+  WorkerSettings,
   WorkflowTriggerType,
   type TimelineEvent,
 } from './impl/schemas';
@@ -127,5 +137,8 @@ export {
   getMockProposalById,
   getMockProposalsByInvestigationId,
 } from './impl/samples';
-export type { SystemSecurityWatchCatalogEntry } from './constants';
+export type {
+  SystemSecurityWatchCatalogEntry,
+  SystemSecurityWorkerCatalogEntry,
+} from './constants';
 export type { WatchSkillSeed, WatchWorkerSeed } from './impl/samples';

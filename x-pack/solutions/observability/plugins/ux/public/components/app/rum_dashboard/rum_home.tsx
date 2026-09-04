@@ -7,17 +7,20 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
-import { EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { UxEnvironmentFilter } from './environment_filter';
+import { useAppMenu } from '../../../hooks/use_app_menu';
+import { useUxPluginContext } from '../../../context/use_ux_plugin_context';
+
 import { RumOverview } from '.';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
@@ -25,10 +28,9 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observabilityShared, observabilityAIAssistant } = useKibanaServices();
-
+  const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
+    useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
-
   const { hasData, loading: isLoading, dataViewTitle } = useHasRumData();
 
   const noDataConfig: NoDataConfig | undefined = !hasData
@@ -63,6 +65,10 @@ export function RumHome() {
     screenDescription = `${screenDescription} The index that was used to query the system is undefined, so it is not configured yet.`;
   }
 
+  const { isDev } = useUxPluginContext();
+  const enableInspector = isDev || uiSettings.get<boolean>(enableInspectEsQueries);
+  const { appMenu } = useAppMenu(enableInspector);
+
   useEffect(() => {
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription,
@@ -87,35 +93,27 @@ export function RumHome() {
   return (
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
-      pageHeader={{ children: <PageHeader /> }}
       isPageDataLoaded={isLoading === false}
-      isEmptyState={isLoading}
+      pageSectionProps={{
+        paddingSize: 'none',
+      }}
     >
-      {isLoading && <EmptyStateLoading />}
-      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-        <RumOverview />
-      </div>
+      <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="standard" />
+
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        <DashboardToolbar />
+        {isLoading && <EmptyStateLoading />}
+        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+          <RumOverview />
+        </div>
+      </EuiPageSection>
     </PageTemplateComponent>
   );
 }
 
-function PageHeader() {
-  const sizes = useBreakpoints();
-
-  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
-
+function DashboardToolbar() {
   return (
-    <div style={{ width: '100%' }}>
-      <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{DASHBOARD_LABEL}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
-          <RumDatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <>
       <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
         <EuiFlexItem>
@@ -127,7 +125,11 @@ function PageHeader() {
         <EuiFlexItem>
           <UxEnvironmentFilter />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RumDatePicker />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
+      <EuiSpacer size="m" />
+    </>
   );
 }

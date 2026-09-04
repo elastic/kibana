@@ -19,9 +19,23 @@ export interface IntegrationMiniTileData {
   /** Fleet integration group whose chooser this tile opens instead of navigating,
    * falling back to its normal navigation when Fleet has no card for the group. */
   collectionGroup?: string;
+  /** Limits the tile to a pricing state: 'metrics' renders only when metrics
+   * onboarding is available, 'logs-essentials' only when it is not.
+   * Omitted tiles render on every tier. */
+  visibleOn?: 'metrics' | 'logs-essentials';
 }
 
 export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
+  {
+    id: 'opentelemetry',
+    title: i18n.translate(
+      'xpack.observability_onboarding.integrationsGrid.moreIntegrationsSection.miniIntegrationTile.opentelemetry.title',
+      { defaultMessage: 'OpenTelemetry' }
+    ),
+    logo: 'opentelemetry',
+    // Stands in for the Applications category, which is hidden on Logs Essentials.
+    visibleOn: 'logs-essentials',
+  },
   {
     id: 'prometheus',
     title: i18n.translate(
@@ -31,6 +45,7 @@ export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
     logo: 'prometheus',
     eprPackage: 'prometheus',
     collectionGroup: 'prometheus',
+    visibleOn: 'metrics',
   },
   {
     id: 'supabase',
@@ -40,6 +55,7 @@ export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
     ),
     logo: 'supabase',
     eprPackage: 'supabase',
+    visibleOn: 'metrics',
   },
   {
     id: 'auto_import',

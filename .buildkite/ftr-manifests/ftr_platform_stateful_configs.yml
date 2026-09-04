@@ -80,10 +80,8 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
-  - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
-  - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
@@ -217,7 +215,6 @@ enabled:
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
-  - x-pack/platform/test/functional/apps/lens/group4/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts

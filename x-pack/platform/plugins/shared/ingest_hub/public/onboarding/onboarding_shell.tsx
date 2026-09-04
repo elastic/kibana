@@ -31,7 +31,7 @@ import {
   AuthenticateAndDeployStep,
   ServicesStep,
   ServiceSettingsStep,
-  DeployAndDetectStep,
+  DetectAndReviewStep,
 } from './step_components';
 
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
@@ -45,7 +45,7 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> =
   'authenticate-and-deploy': AuthenticateAndDeployStep,
   services: ServicesStep,
   'service-settings': ServiceSettingsStep,
-  'deploy-and-detect': DeployAndDetectStep,
+  'detect-and-review': DetectAndReviewStep,
 };
 
 interface IntegrationMeta {

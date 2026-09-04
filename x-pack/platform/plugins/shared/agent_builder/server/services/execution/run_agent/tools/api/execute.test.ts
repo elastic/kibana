@@ -7,6 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { AgentExecutionMode, ToolResultType } from '@kbn/agent-builder-common';
+import type { AutoApprovedApi } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
@@ -819,6 +820,247 @@ describe('createExecuteApiTool', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       const data = result.results[0].data as ErrorResultData;
       expect(data.message).toContain('non-interactive');
+    });
+
+    it('records that the user confirmed the call', async () => {
+      esLoadApi.mockResolvedValue(deleteIndexApi());
+
+      const context = agentBuilderMocks.tools.createHandlerContext();
+      context.prompts.checkConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+      jest
+        .mocked(context.esClient.asCurrentUser.transport.request)
+        .mockResolvedValue({ acknowledged: true });
+
+      const tool = createExecuteApiTool({ selfClient });
+      const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as ApiExecuteResultData;
+      expect(data.approval).toBe('user_confirmed');
+    });
+
+    it('leaves the approval unset for a non-destructive call', async () => {
+      esLoadApi.mockResolvedValue(
+        createLoadedApi(
+          {
+            name: 'health',
+            namespace: 'cluster',
+            description: 'Cluster health',
+            method: 'GET',
+            path: '/_cluster/health',
+            destructive: false,
+          },
+          { method: 'GET', path: '/_cluster/health' }
+        )
+      );
+
+      const context = agentBuilderMocks.tools.createHandlerContext();
+      jest.mocked(context.esClient.asCurrentUser.transport.request).mockResolvedValue({});
+
+      const tool = createExecuteApiTool({ selfClient });
+      const result = (await tool.handler(
+        { target: 'elasticsearch', api: 'cluster.health', params: {} },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as ApiExecuteResultData;
+      expect(data.approval).toBeUndefined();
+    });
+
+    describe('pre-approved by the execution', () => {
+      const withInteractivity = ({
+        executionMode,
+        enabled,
+        autoApprovedApis = [],
+      }: {
+        executionMode: AgentExecutionMode;
+        enabled: boolean;
+        autoApprovedApis?: AutoApprovedApi[];
+      }) => ({
+        ...agentBuilderMocks.tools.createHandlerContext(),
+        executionMode,
+        interactivity: { enabled, auto_approved_apis: autoApprovedApis },
+      });
+
+      const covered: AutoApprovedApi[] = [{ target: 'elasticsearch', api: 'indices.delete' }];
+
+      it.each<{ description: string; executionMode: AgentExecutionMode; enabled: boolean }>([
+        {
+          description: 'a standalone execution',
+          executionMode: AgentExecutionMode.standalone,
+          enabled: false,
+        },
+        {
+          description: 'an interactive conversation',
+          executionMode: AgentExecutionMode.conversation,
+          enabled: true,
+        },
+        {
+          description: 'a non-interactive conversation, as an ai.agent workflow step runs',
+          executionMode: AgentExecutionMode.conversation,
+          enabled: false,
+        },
+      ])(
+        'runs a covered destructive API in $description, without prompting',
+        async ({ executionMode, enabled }) => {
+          esLoadApi.mockResolvedValue(deleteIndexApi());
+
+          const context = withInteractivity({
+            executionMode,
+            enabled,
+            autoApprovedApis: covered,
+          });
+          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          transportRequest.mockResolvedValue({ acknowledged: true });
+
+          const tool = createExecuteApiTool({ selfClient });
+          const result = (await tool.handler(
+            deleteIndexParams,
+            context
+          )) as ToolHandlerStandardReturn;
+
+          expect(transportRequest).toHaveBeenCalledWith({ method: 'DELETE', path: '/my-index' });
+          expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+          expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+          const data = result.results[0].data as ApiExecuteResultData;
+          expect(data.approval).toBe('pre_approved');
+        }
+      );
+
+      it.each<{ description: string; executionMode: AgentExecutionMode }>([
+        { description: 'a standalone execution', executionMode: AgentExecutionMode.standalone },
+        {
+          description: 'a non-interactive conversation, as an ai.agent workflow step runs',
+          executionMode: AgentExecutionMode.conversation,
+        },
+      ])(
+        'refuses an uncovered destructive API in $description, pointing at the pre-approval',
+        async ({ executionMode }) => {
+          esLoadApi.mockResolvedValue(deleteIndexApi());
+
+          const context = withInteractivity({
+            executionMode,
+            enabled: false,
+            autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+          });
+          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+
+          const tool = createExecuteApiTool({ selfClient });
+          const result = (await tool.handler(
+            deleteIndexParams,
+            context
+          )) as ToolHandlerStandardReturn;
+
+          expect(transportRequest).not.toHaveBeenCalled();
+          expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+          expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+          expect(result.results[0].type).toBe(ToolResultType.error);
+          const data = result.results[0].data as ErrorResultData;
+          expect(data.message).toContain('pre-approve');
+          expect(data.message).toContain('indices.delete');
+        }
+      );
+
+      it.each<{ description: string; autoApprovedApis: AutoApprovedApi[] }>([
+        {
+          description: 'a namespace wildcard',
+          autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.*' }],
+        },
+        {
+          description: 'the full wildcard',
+          autoApprovedApis: [{ target: 'elasticsearch', api: '*' }],
+        },
+      ])(
+        'runs a destructive API covered by $description, without prompting',
+        async ({ autoApprovedApis }) => {
+          esLoadApi.mockResolvedValue(deleteIndexApi());
+
+          const context = withInteractivity({
+            executionMode: AgentExecutionMode.conversation,
+            enabled: false,
+            autoApprovedApis,
+          });
+          const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+          transportRequest.mockResolvedValue({ acknowledged: true });
+
+          const tool = createExecuteApiTool({ selfClient });
+          const result = (await tool.handler(
+            deleteIndexParams,
+            context
+          )) as ToolHandlerStandardReturn;
+
+          expect(transportRequest).toHaveBeenCalledWith({ method: 'DELETE', path: '/my-index' });
+          expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+          const data = result.results[0].data as ApiExecuteResultData;
+          expect(data.approval).toBe('pre_approved');
+        }
+      );
+
+      it('does not let a wildcard for one target cover the other', async () => {
+        esLoadApi.mockResolvedValue(deleteIndexApi());
+
+        const context = withInteractivity({
+          executionMode: AgentExecutionMode.conversation,
+          enabled: false,
+          autoApprovedApis: [{ target: 'kibana', api: '*' }],
+        });
+        const transportRequest = jest.mocked(context.esClient.asCurrentUser.transport.request);
+
+        const tool = createExecuteApiTool({ selfClient });
+        const result = (await tool.handler(
+          deleteIndexParams,
+          context
+        )) as ToolHandlerStandardReturn;
+
+        expect(transportRequest).not.toHaveBeenCalled();
+        expect(result.results[0].type).toBe(ToolResultType.error);
+      });
+
+      it('still asks for confirmation in an interactive conversation the grant does not cover', async () => {
+        esLoadApi.mockResolvedValue(deleteIndexApi());
+
+        const context = withInteractivity({
+          executionMode: AgentExecutionMode.conversation,
+          enabled: true,
+          autoApprovedApis: [{ target: 'kibana', api: 'indices.delete' }],
+        });
+        context.prompts.checkConfirmationStatus.mockReturnValue({
+          status: ConfirmationStatus.unprompted,
+        });
+        context.prompts.askForConfirmation.mockImplementation((confirm) => ({
+          prompt: { type: AgentPromptType.confirmation, ...confirm },
+        }));
+
+        const tool = createExecuteApiTool({ selfClient });
+        const result = await tool.handler(deleteIndexParams, context);
+
+        expect(isToolHandlerInterruptReturn(result)).toBe(true);
+        expect(context.prompts.askForConfirmation).toHaveBeenCalled();
+      });
+
+      it('records the pre-approval on the error when the call itself fails', async () => {
+        esLoadApi.mockResolvedValue(deleteIndexApi());
+
+        const context = withInteractivity({
+          executionMode: AgentExecutionMode.standalone,
+          enabled: false,
+          autoApprovedApis: covered,
+        });
+        jest
+          .mocked(context.esClient.asCurrentUser.transport.request)
+          .mockRejectedValue(new Error('index_not_found_exception'));
+
+        const tool = createExecuteApiTool({ selfClient });
+        const result = (await tool.handler(
+          deleteIndexParams,
+          context
+        )) as ToolHandlerStandardReturn;
+
+        expect(result.results[0].type).toBe(ToolResultType.error);
+        const data = result.results[0].data as ErrorResultData;
+        expect(data.metadata).toEqual(expect.objectContaining({ approval: 'pre_approved' }));
+      });
     });
   });
 });

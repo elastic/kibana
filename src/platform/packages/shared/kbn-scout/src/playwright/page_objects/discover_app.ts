@@ -529,6 +529,17 @@ export class DiscoverApp {
     await this.page.mouse.move(0, 0);
   }
 
+  /** Opens the search-threshold rule flyout from Alerts (v1 button or v2 legacy option). */
+  async openSearchThresholdRuleFlyout() {
+    await this.clickAppMenuItem('discoverAlertsButton');
+    const ruleOption = this.page.testSubj
+      .locator('discoverLegacySearchThresholdRule')
+      .or(this.page.testSubj.locator('discoverCreateAlertButton'));
+    await expect(ruleOption).toBeVisible();
+    await ruleOption.click();
+    await expect(this.page.testSubj.locator('addRuleFlyoutTitle')).toBeVisible();
+  }
+
   async clickNewSearch({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
     await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.dismissHoverOverlays();
@@ -638,6 +649,8 @@ export class DiscoverApp {
       await this.page.testSubj.fill('esqlControlLabel', label);
     }
     if (values) {
+      await this.page.testSubj.locator('esqlControlTypeDropdown').click();
+      await this.page.testSubj.locator('staticValues').click();
       const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
       for (const value of values) {
         await valuesComboBox.setCustomSelectedOptions([value]);
@@ -834,13 +847,16 @@ export class DiscoverApp {
     await this.page.mouse.up();
   }
 
-  async getCurrentQueryName(): Promise<string> {
+  getCurrentQueryNameLocator(): Locator {
     // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
     // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
-    const title = this.page.testSubj
+    return this.page.testSubj
       .locator('appHeaderTitle')
       .or(this.page.testSubj.locator('breadcrumb last'));
-    return await title.innerText();
+  }
+
+  async getCurrentQueryName(): Promise<string> {
+    return await this.getCurrentQueryNameLocator().innerText();
   }
 
   async loadSavedSearch(searchName: string) {
@@ -857,13 +873,17 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  getHitCountLocator(): Locator {
+    return this.page.testSubj.locator('discoverQueryHits');
+  }
+
   async getHitCountInt(): Promise<number> {
-    const hitCount = await this.page.testSubj.innerText('discoverQueryHits');
+    const hitCount = await this.getHitCountLocator().innerText();
     return parseInt(hitCount.replace(/,/g, ''), 10);
   }
 
   async getHitCount(): Promise<string> {
-    return this.page.testSubj.innerText('discoverQueryHits');
+    return this.getHitCountLocator().innerText();
   }
 
   getRefreshDataButton(): Locator {
@@ -896,9 +916,13 @@ export class DiscoverApp {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
 
+  getHistogramChart(): Locator {
+    return this.page.testSubj.locator('unifiedHistogramChart');
+  }
+
   async getChartTimespan(): Promise<string> {
     // Wait until the attribute no longer contains "Loading"
-    const element = this.page.testSubj.locator('unifiedHistogramChart');
+    const element = this.getHistogramChart();
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
@@ -914,6 +938,40 @@ export class DiscoverApp {
     const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
     // Click at the center of the canvas
     await canvas.click();
+  }
+
+  /**
+   * Brushes a short range on the histogram canvas. Offsets match the FTR
+   * `brushHistogram` gesture so the selected window stays comparable.
+   */
+  async brushHistogram() {
+    const canvas = this.page.locator('[data-test-subj="unifiedHistogramChart"] canvas');
+    await canvas.waitFor({ state: 'visible' });
+    const box = await canvas.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram canvas bounding box');
+    }
+    const centerX = box.x + box.width / 2;
+    const centerY = box.y + box.height / 2;
+    await this.page.mouse.move(centerX - 300, centerY + 20);
+    await this.page.mouse.down();
+    await this.page.mouse.move(centerX - 100, centerY + 30, { steps: 10 });
+    await this.page.mouse.up();
+  }
+
+  async getHistogramLegendLabels(): Promise<string[]> {
+    const labels = this.getHistogramChart().locator('.echLegendItem__label');
+    return (await labels.allInnerTexts()).map((text) => text.trim()).filter(Boolean);
+  }
+
+  async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.page.testSubj.click(`legend-${field}`);
+    await this.page.testSubj.click(`legend-${field}-${filterType}`);
+  }
+
+  getChartIntervalWarningIcon(): Locator {
+    return this.page.testSubj.locator('unifiedHistogramIntervalWarning');
   }
 
   // Waits for a Discover tab to finish loading.
@@ -979,8 +1037,9 @@ export class DiscoverApp {
 
   /**
    * Click the histogram breakdown selector and pick `field` (or `"No breakdown"`).
+   * `value` is the selectable item value when it differs from the visible label.
    */
-  async chooseBreakdownField(field: string) {
+  async chooseBreakdownField(field: string, value = field) {
     await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
       state: 'visible',
@@ -988,7 +1047,7 @@ export class DiscoverApp {
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
     await this.page
       .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${field}"]`
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${value}"]`
       )
       .click();
     await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
@@ -1015,18 +1074,7 @@ export class DiscoverApp {
    * Clears the histogram breakdown field by selecting the "No breakdown" option.
    */
   async clearBreakdownField() {
-    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'visible',
-    });
-    await this.page
-      .locator(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
-      )
-      .click();
-    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
-      state: 'hidden',
-    });
+    await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -1120,13 +1168,19 @@ export class DiscoverApp {
   }
 
   async showChart() {
-    await this.page.testSubj.click('dscShowHistogramButton');
-    await this.waitUntilTabIsLoaded();
+    const showButton = this.page.testSubj.locator('dscShowHistogramButton');
+    if (await showButton.isVisible()) {
+      await showButton.click();
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   async hideChart() {
-    await this.page.testSubj.click('dscHideHistogramButton');
-    await this.waitUntilTabIsLoaded();
+    const hideButton = this.page.testSubj.locator('dscHideHistogramButton');
+    if (await hideButton.isVisible()) {
+      await hideButton.click();
+      await this.waitUntilTabIsLoaded();
+    }
   }
 
   async showTable() {
