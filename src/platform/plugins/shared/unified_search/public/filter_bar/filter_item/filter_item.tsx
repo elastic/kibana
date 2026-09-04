@@ -383,7 +383,7 @@ export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
   css({
     width: 1200,
     maxWidth: '100%',
-    maxHeight: `calc(80vh - max(${layoutVar('application.content.top')}, 80px))`,
+    maxHeight: `calc(80vh - max(${layoutVar('application.content.top', '0px')}, 80px))`,
     overflow: 'auto',
   });
 
