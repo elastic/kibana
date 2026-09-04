@@ -13,6 +13,7 @@ import {
   CASES_URL,
   CASE_TELEMETRY_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  INTERNAL_FIELD_DEFINITIONS_URL,
   OBSERVABLE_TYPE_IPV4,
 } from '@kbn/cases-plugin/common/constants';
 import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
