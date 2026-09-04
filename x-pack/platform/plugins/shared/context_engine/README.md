@@ -13,6 +13,7 @@ stream. AI index records are stored in a hidden Kibana system index
 | `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
 | `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
 | `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `POST`   | `/api/context_engine/ai_index/_query`                             | Run ES\|QL against AI indices        |
 | `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
 | `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
@@ -42,6 +43,37 @@ Notes:
   are left untouched and must be removed with the Delete index API if desired.
 - `feedback_analysis` configures this index's feedback loop. See
   [Feedback analysis configuration](#feedback-analysis-configuration) below.
+
+## Querying AI indices
+
+`POST /api/context_engine/ai_index/_query` runs caller-supplied ES|QL as the
+current user. Body: `{ query, params?, limit? }`. Two things are server-owned
+and cannot be overridden:
+
+- **Space filter.** Documents are visible when they carry no
+  `permissions.kibana.privileges` element (public), or when one is scoped to
+  the request's space or to `*`. The space comes from the request URL
+  (`/s/{spaceId}/api/...`, default space otherwise), so a caller cannot read
+  another space's documents on any path. `contextEngine:enabled` is a per-space
+  setting, so the route 404s in any space where it is off.
+- **Row limit.** `limit` defaults to 100 and cannot exceed 1000. A trailing
+  `LIMIT` in the query is capped to it; otherwise one is appended.
+
+The query is otherwise a pass-through: it decides which indices it reads
+(`FROM ai-index-idx-a,ai-index-ds-b` and `FROM ai-index-*` both work) and
+Elasticsearch index privileges bound what it can reach. Elasticsearch 4xx
+errors (bad ES|QL, missing index privilege) are returned with their status.
+
+### Privileges
+
+`contextEngine:read` grants the route; it grants **no** Elasticsearch index
+privileges. Callers also need `read` on every backing index they query
+(`ai-index-*`), or Elasticsearch returns 403.
+
+The space filter is the only document-level check. Knowledge indicators that
+describe Kibana objects (dashboards, rules, connectors) are returned to anyone
+with `read` on the backing index, whether or not they could open those objects
+in Kibana. This is deliberate: an AI index is queried like any other index.
 
 ## Feedback analysis configuration
 

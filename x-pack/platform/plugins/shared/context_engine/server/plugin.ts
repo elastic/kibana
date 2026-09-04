@@ -23,10 +23,12 @@ import type {
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
+  GetAiIndexReadServiceParams,
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { AiIndexReadService } from './ai_indices/read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
@@ -52,6 +54,7 @@ export class ContextEnginePlugin
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;
   private createImprovementsService?: (esClient: ElasticsearchClient) => ImprovementsService;
+  private createAiIndexReadService?: (params: GetAiIndexReadServiceParams) => AiIndexReadService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
@@ -129,6 +132,12 @@ export class ContextEnginePlugin
         }
         return this.createImprovementsService(esClient);
       },
+      getAiIndexReadService: (params) => {
+        if (!this.createAiIndexReadService) {
+          throw new Error('AI index read service not available — plugin has not started');
+        }
+        return this.createAiIndexReadService(params);
+      },
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
@@ -204,6 +213,14 @@ export class ContextEnginePlugin
       new ImprovementsService({ esClient, logger: improvementsLogger });
     const createImprovementsService = this.createImprovementsService;
 
+    this.createAiIndexReadService = ({ esClient, request }) =>
+      new AiIndexReadService({
+        esClient,
+        spaceId: resolveSpaceId(startDeps.spaces, request),
+        auditLogger: coreStart.security.audit.asScoped(request),
+      });
+    const createAiIndexReadService = this.createAiIndexReadService;
+
     // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
     // first user write to create from it, so the store needs no grant on the internal user.
     installImprovementsIndexTemplate({
@@ -258,6 +275,7 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      getAiIndexReadService: (params) => createAiIndexReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient) => createImprovementsService(esClient),
     };
