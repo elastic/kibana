@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const getSLOSuggestionsResponseSchema = t.type({
-  tags: t.array(
-    t.type({
-      label: t.string,
-      value: t.string,
-      count: t.number,
+const getSLOSuggestionsResponseSchema = z.object({
+  tags: z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+      count: z.number(),
     })
   ),
 });
 
-type GetSLOSuggestionsResponse = t.OutputOf<typeof getSLOSuggestionsResponseSchema>;
+type GetSLOSuggestionsResponse = z.output<typeof getSLOSuggestionsResponseSchema>;
 
 export { getSLOSuggestionsResponseSchema };
 export type { GetSLOSuggestionsResponse };

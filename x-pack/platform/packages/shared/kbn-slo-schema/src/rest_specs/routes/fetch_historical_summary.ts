@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import {
-  budgetingMethodSchema,
-  objectiveSchema,
-  sloIdSchema,
-  timeWindowSchema,
-} from '../../schema';
+import { z } from '@kbn/zod';
+
+import { budgetingMethodSchema, objectiveSchema, sloIdSchema } from '../../schema/zod/slo';
+import { timeWindowSchema } from '../../schema/zod/time_window';
 import {
   allOrAnyString,
   allOrAnyStringOrArray,
@@ -18,48 +15,44 @@ import {
   dateType,
   errorBudgetSchema,
   statusSchema,
-} from '../../schema/common';
+} from '../../schema/zod/common';
 
-const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({
-    list: t.array(
-      t.intersection([
-        t.type({
-          sloId: sloIdSchema,
-          instanceId: t.string,
-          timeWindow: timeWindowSchema,
-          budgetingMethod: budgetingMethodSchema,
-          objective: objectiveSchema,
-          groupBy: allOrAnyStringOrArray,
-          revision: t.number,
-        }),
-        t.partial({
-          remoteName: t.string,
-          range: dateRangeSchema,
-        }),
-      ])
+const fetchHistoricalSummaryParamsSchema = z.object({
+  body: z.object({
+    list: z.array(
+      z.object({
+        sloId: sloIdSchema,
+        instanceId: z.string(),
+        timeWindow: timeWindowSchema,
+        budgetingMethod: budgetingMethodSchema,
+        objective: objectiveSchema,
+        groupBy: allOrAnyStringOrArray,
+        revision: z.number(),
+        remoteName: z.string().optional(),
+        range: dateRangeSchema.optional(),
+      })
     ),
   }),
 });
 
-const historicalSummarySchema = t.type({
+const historicalSummarySchema = z.object({
   date: dateType,
   status: statusSchema,
-  sliValue: t.number,
+  sliValue: z.number(),
   errorBudget: errorBudgetSchema,
 });
 
-const fetchHistoricalSummaryResponseSchema = t.array(
-  t.type({
+const fetchHistoricalSummaryResponseSchema = z.array(
+  z.object({
     sloId: sloIdSchema,
     instanceId: allOrAnyString,
-    data: t.array(historicalSummarySchema),
+    data: z.array(historicalSummarySchema),
   })
 );
 
-type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
-type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
-type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
+type FetchHistoricalSummaryParams = z.output<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
+type FetchHistoricalSummaryResponse = z.input<typeof fetchHistoricalSummaryResponseSchema>;
+type HistoricalSummaryResponse = z.input<typeof historicalSummarySchema>;
 
 export {
   fetchHistoricalSummaryParamsSchema,

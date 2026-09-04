@@ -4,28 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const getSLOStatsOverviewParamsSchema = t.partial({
-  query: t.partial({
-    kqlQuery: t.string,
-    filters: t.string,
-  }),
+import { MAX_QUERY_LENGTH } from '../../schema/zod/limits';
+
+const getSLOStatsOverviewParamsSchema = z.object({
+  query: z
+    .object({
+      kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
+      filters: z.string().max(MAX_QUERY_LENGTH).optional(),
+    })
+    .optional(),
 });
 
-const getSLOStatsOverviewResponseSchema = t.type({
-  violated: t.number,
-  degrading: t.number,
-  stale: t.number,
-  healthy: t.number,
-  noData: t.number,
-  burnRateRules: t.number,
-  burnRateActiveAlerts: t.number,
-  burnRateRecoveredAlerts: t.number,
+const getSLOStatsOverviewResponseSchema = z.object({
+  violated: z.number(),
+  degrading: z.number(),
+  stale: z.number(),
+  healthy: z.number(),
+  noData: z.number(),
+  burnRateRules: z.number(),
+  burnRateActiveAlerts: z.number(),
+  burnRateRecoveredAlerts: z.number(),
 });
 
-type GetSLOStatsOverviewParams = t.TypeOf<typeof getSLOStatsOverviewParamsSchema.props.query>;
-type GetSLOStatsOverviewResponse = t.OutputOf<typeof getSLOStatsOverviewResponseSchema>;
+type GetSLOStatsOverviewParams = NonNullable<
+  z.output<typeof getSLOStatsOverviewParamsSchema.shape.query>
+>;
+type GetSLOStatsOverviewResponse = z.output<typeof getSLOStatsOverviewResponseSchema>;
 
 export { getSLOStatsOverviewParamsSchema, getSLOStatsOverviewResponseSchema };
 export type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse };

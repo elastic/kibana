@@ -4,41 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-const apmBodyParamsSchema = t.intersection([
-  t.type({
-    /**
-     * SLO type.
-     */
-    type: t.literal('apm'),
-  }),
-  t.partial({
-    /**
-     * Number of buckets to return.
-     * If not provided, the query will use elasticsearch default value of 10.
-     */
-    size: t.number,
-    /**
-     * List of service names to filter by.
-     */
-    serviceNames: t.array(t.string),
-    /**
-     * Environment to filter by.
-     */
-    environment: t.string,
-    /**
-     * KQL query to filter SLOs.
-     */
-    kqlQuery: t.string,
-    /**
-     * List of statuses to filter by (e.g. ['VIOLATED', 'DEGRADING']).
-     */
-    statusFilters: t.array(t.string),
-  }),
-]);
+import { MAX_ARRAY_LENGTH, MAX_KEYWORD_LENGTH, MAX_QUERY_LENGTH } from '../../schema/zod/limits';
 
-const getSLOGroupedStatsParamsSchema = t.type({
+const apmBodyParamsSchema = z.object({
+  type: z.literal('apm'),
+  size: z.number().optional(),
+  serviceNames: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
+  environment: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+  kqlQuery: z.string().max(MAX_QUERY_LENGTH).optional(),
+  statusFilters: z.array(z.string().max(MAX_KEYWORD_LENGTH)).max(MAX_ARRAY_LENGTH).optional(),
+});
+
+const getSLOGroupedStatsParamsSchema = z.object({
   body: apmBodyParamsSchema,
 });
 
@@ -51,7 +30,7 @@ interface GetSLOGroupedStatsResponse {
   results: Array<GroupedStatsResult>;
 }
 
-type GetSLOGroupedStatsParams = t.TypeOf<typeof getSLOGroupedStatsParamsSchema>['body'];
+type GetSLOGroupedStatsParams = z.output<typeof getSLOGroupedStatsParamsSchema>['body'];
 
 export { getSLOGroupedStatsParamsSchema };
 
