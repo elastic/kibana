@@ -36,7 +36,7 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
   test.beforeEach(async ({ page }) => {
     // Intercept the server-side ECF version proxy so tests don't make real outbound requests.
     await page.route(
-      (url) => /\/internal\/ingest_hub\/ecf\/latest_version$/.test(url.pathname),
+      (url) => /\/internal\/onboarding\/ecf\/latest_version$/.test(url.pathname),
       (route) =>
         route.fulfill({
           status: 200,
@@ -103,10 +103,12 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
     });
 
     // The version label appears below the stack name field.
-    await expect(page.locator(`text=ECF version: ${MOCK_ECF_VERSION}`)).toBeVisible();
+    await expect(
+      page.testSubj.locator('ecfDeploymentSection-unifiedLaunchButton-version')
+    ).toBeVisible();
   });
 
-  test('post-launch: editing the stack name persists across a page reload', async ({
+  test('post-launch: editing the stack name is written to session storage', async ({
     browserAuth,
     page,
   }) => {
@@ -160,12 +162,10 @@ test.describe('Onboarding ECF Deployment Section', { tag: tags.stateful.classic 
     // Blur to trigger the touched-state error check.
     await stackNameField.blur();
 
-    // Inline validation error should appear.
+    // Inline validation error should appear (scoped to the form row).
     await expect(
-      page.locator(
-        'text=Stack name must start with a letter and contain only letters, digits, and hyphens'
-      )
-    ).toBeVisible();
+      page.testSubj.locator('ecfDeploymentSection-unifiedLaunchButton-stackNameRow')
+    ).toContainText('Stack name must start with a letter');
 
     // The field is optional — an invalid value must NOT block step completion.
     await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();

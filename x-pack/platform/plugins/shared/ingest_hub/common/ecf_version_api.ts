@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-/**
- * Internal API path for the ECF latest-version resolver.
- *
- * Note: the existing (dead) `iam_permissions_api.ts` uses the legacy `/internal/onboarding/`
- * prefix. All new ingest_hub internal routes use `/internal/ingest_hub/...` instead.
- */
-export const ECF_LATEST_VERSION_API_PATH = '/internal/ingest_hub/ecf/latest_version';
+/** Internal API path for the ECF latest-version resolver. */
+export const ECF_LATEST_VERSION_API_PATH = '/internal/onboarding/ecf/latest_version';
 
-/** Response shape for `GET /internal/ingest_hub/ecf/latest_version`. */
+/** Response shape for `GET /internal/onboarding/ecf/latest_version`. */
 export interface GetEcfLatestVersionResponse {
   /** Resolved ECF template semantic version (e.g. `"1.10.0"`). */
   version: string;

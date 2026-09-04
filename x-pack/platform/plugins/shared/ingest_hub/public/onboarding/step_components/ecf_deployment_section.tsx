@@ -43,6 +43,7 @@ import type { EcfServiceConfig } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 import { useEcfTemplateVersion } from '../use_ecf_template_version';
+import { ECF_STACK_NAME_MAX_LENGTH } from '../../../common/ecf_template_version';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -51,9 +52,10 @@ export const ECF_LAUNCH_STEP_SESSION_KEY = 'ecfLaunchStep' as const;
 
 /**
  * AWS CloudFormation stack name validation pattern.
- * Must start with a letter and contain only letters, digits, and hyphens; max 128 chars.
+ * Must start with a letter and contain only letters, digits, and hyphens.
+ * Max length is `ECF_STACK_NAME_MAX_LENGTH` chars total (first letter + up to max−1 more).
  */
-const STACK_NAME_REGEX = /^[a-zA-Z][-a-zA-Z0-9]{0,127}$/;
+const STACK_NAME_REGEX = new RegExp(`^[a-zA-Z][-a-zA-Z0-9]{0,${ECF_STACK_NAME_MAX_LENGTH - 1}}$`);
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -178,6 +180,8 @@ export const useEcfDeployment = ({
 
   // URLs are always rebuilt with the current stack name from session so the "Reopen" link
   // tracks any post-launch edits the user makes to match their actual AWS stack name.
+  // Use the stored version when available (set at launch time) so Reopen always targets the
+  // same template the user originally deployed. Falls back to the live version pre-launch.
   const unifiedLaunchUrl = useMemo(
     () =>
       hasEcfUnified
@@ -185,8 +189,9 @@ export const useEcfDeployment = ({
             ecfConfigs: ecfUnifiedConfigs,
             region: globalRegion,
             otlpEndpoint,
-            version: templateVersion,
-            stackName: stackNames.unified ?? ECF_UNIFIED_STACK_NAME,
+            version: stackVersions.unified ?? templateVersion,
+            // || (not ??) so an empty string (user cleared the field) falls back to default.
+            stackName: stackNames.unified || ECF_UNIFIED_STACK_NAME,
           })
         : undefined,
 
@@ -196,6 +201,7 @@ export const useEcfDeployment = ({
       globalRegion,
       otlpEndpoint,
       templateVersion,
+      stackVersions.unified,
       stackNames.unified,
     ]
   );
@@ -207,12 +213,20 @@ export const useEcfDeployment = ({
             ecfConfigs: ecfOtelConfigs,
             region: globalRegion,
             otlpEndpoint,
-            version: templateVersion,
-            stackName: stackNames.otel ?? ECF_OTEL_STACK_NAME,
+            version: stackVersions.otel ?? templateVersion,
+            stackName: stackNames.otel || ECF_OTEL_STACK_NAME,
           })
         : undefined,
 
-    [hasEcfOtel, ecfOtelConfigs, globalRegion, otlpEndpoint, templateVersion, stackNames.otel]
+    [
+      hasEcfOtel,
+      ecfOtelConfigs,
+      globalRegion,
+      otlpEndpoint,
+      templateVersion,
+      stackVersions.otel,
+      stackNames.otel,
+    ]
   );
 
   const crowdstrikeLaunchUrl = useMemo(
@@ -221,12 +235,19 @@ export const useEcfDeployment = ({
         ? buildEcfCrowdstrikeCloudFormationUrl({
             region: globalRegion,
             otlpEndpoint,
-            version: templateVersion,
-            stackName: stackNames.crowdstrike ?? ECF_CROWDSTRIKE_STACK_NAME,
+            version: stackVersions.crowdstrike ?? templateVersion,
+            stackName: stackNames.crowdstrike || ECF_CROWDSTRIKE_STACK_NAME,
           })
         : undefined,
 
-    [hasEcfCrowdstrike, globalRegion, otlpEndpoint, templateVersion, stackNames.crowdstrike]
+    [
+      hasEcfCrowdstrike,
+      globalRegion,
+      otlpEndpoint,
+      templateVersion,
+      stackVersions.crowdstrike,
+      stackNames.crowdstrike,
+    ]
   );
 
   return {
@@ -272,6 +293,140 @@ interface EcfFamilyPanelProps {
   onStackNameChange: (name: string) => void;
 }
 
+interface EcfFamilyPanelPostLaunchProps {
+  launchUrl: string | undefined;
+  stackName: string;
+  stackVersion: string | undefined;
+  defaultStackName: string;
+  onStackNameChange: (name: string) => void;
+  testSubjPrefix: string;
+}
+
+/** Post-launch content for one ECF template family: confirmation, stack name field, version, reopen. */
+const EcfFamilyPanelPostLaunch = ({
+  launchUrl,
+  stackName,
+  stackVersion,
+  defaultStackName,
+  onStackNameChange,
+  testSubjPrefix,
+}: EcfFamilyPanelPostLaunchProps) => {
+  const [showReopen, setShowReopen] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  const stackNameError = useMemo(() => {
+    if (!touched || stackName === '' || STACK_NAME_REGEX.test(stackName)) return null;
+    return i18n.translate('xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameError', {
+      defaultMessage:
+        'Stack name must start with a letter and contain only letters, digits, and hyphens (max 128 characters).',
+    });
+  }, [stackName, touched]);
+
+  // Only feed a valid name into the URL builder — invalid names show an inline error but do
+  // not prevent navigation (the field is optional throughout).
+  const isStackNameValid = stackName === '' || STACK_NAME_REGEX.test(stackName);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowReopen(true), REOPEN_LINK_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchedConfirmation"
+            defaultMessage="The Elastic Cloud Forwarder has been created in your AWS account. Data detection is running in the background — check Detect &amp; Review for arrival status."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      {/* Stack name field */}
+      <EuiFormRow
+        label={
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameLabel"
+                defaultMessage="Stack name"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameTooltip',
+                  {
+                    defaultMessage:
+                      'The CloudFormation stack name pre-filled when you launched. If you renamed the stack in the AWS Console, update this field so the Reopen link targets the right stack.',
+                  }
+                )}
+                position="right"
+                type="question"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        isInvalid={Boolean(stackNameError)}
+        error={stackNameError}
+        data-test-subj={`${testSubjPrefix}-stackNameRow`}
+      >
+        <EuiFieldText
+          value={stackName}
+          placeholder={`e.g.: ${defaultStackName}-xxxx`}
+          isInvalid={Boolean(stackNameError)}
+          append={
+            isStackNameValid && stackName !== '' ? (
+              <EuiIcon type="check" color="success" aria-label="valid" />
+            ) : undefined
+          }
+          onChange={(e) => {
+            setTouched(true);
+            onStackNameChange(e.target.value);
+          }}
+          onBlur={() => setTouched(true)}
+          data-test-subj={`${testSubjPrefix}-stackNameField`}
+        />
+      </EuiFormRow>
+
+      {/* Version display */}
+      {stackVersion && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued" data-test-subj={`${testSubjPrefix}-version`}>
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.versionLabel"
+              defaultMessage="ECF version: {version}"
+              values={{ version: <strong>{stackVersion}</strong> }}
+            />
+          </EuiText>
+        </>
+      )}
+
+      {/* Reopen link (shown after 5s) */}
+      {showReopen && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            href={isStackNameValid ? launchUrl : undefined}
+            target="_blank"
+            iconType="external"
+            iconSide="right"
+            size="s"
+            data-test-subj={`${testSubjPrefix}-reopen`}
+          >
+            <FormattedMessage
+              id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.reopenButton"
+              defaultMessage="Reopen AWS Console"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
+    </>
+  );
+};
+
 /** Renders the content for one ECF template family (description, launch/deploying UI). */
 const EcfFamilyPanel = ({
   description,
@@ -284,30 +439,6 @@ const EcfFamilyPanel = ({
   defaultStackName,
   onStackNameChange,
 }: EcfFamilyPanelProps) => {
-  const [showReopen, setShowReopen] = useState(false);
-  const [touched, setTouched] = useState(false);
-
-  const stackNameError = useMemo(() => {
-    if (!touched || stackName === '' || STACK_NAME_REGEX.test(stackName)) return null;
-    return i18n.translate('xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameError', {
-      defaultMessage:
-        'Stack name must start with a letter and contain only letters, digits, and hyphens (max 128 characters).',
-    });
-  }, [stackName, touched]);
-
-  // Show the invalid stack name in the URL builder only when it passes validation — invalid
-  // names are displayed with an inline error but do not prevent the user from navigating.
-  const isStackNameValid = stackName === '' || STACK_NAME_REGEX.test(stackName);
-
-  useEffect(() => {
-    if (!isLaunched) {
-      setShowReopen(false);
-      return;
-    }
-    const timer = window.setTimeout(() => setShowReopen(true), REOPEN_LINK_DELAY_MS);
-    return () => window.clearTimeout(timer);
-  }, [isLaunched]);
-
   return (
     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
       <EuiText size="s" color="subdued">
@@ -337,97 +468,14 @@ const EcfFamilyPanel = ({
         </EuiFlexGroup>
       ) : (
         /* ── Post-launch ────────────────────────────────────────────────────── */
-        <>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.launchedConfirmation"
-                defaultMessage="The Elastic Cloud Forwarder has been created in your AWS account. Data detection is running in the background — check Detect &amp; Review for arrival status."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-
-          {/* Stack name field */}
-          <EuiFormRow
-            label={
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameLabel"
-                    defaultMessage="Stack name"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={i18n.translate(
-                      'xpack.ingestHub.authenticateAndDeployStep.ecfSection.stackNameTooltip',
-                      {
-                        defaultMessage:
-                          'The CloudFormation stack name pre-filled when you launched. If you renamed the stack in the AWS Console, update this field so the Reopen link targets the right stack.',
-                      }
-                    )}
-                    position="right"
-                    type="question"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            isInvalid={Boolean(stackNameError)}
-            error={stackNameError}
-          >
-            <EuiFieldText
-              value={stackName}
-              placeholder={`e.g.: ${defaultStackName}-xxxx`}
-              isInvalid={Boolean(stackNameError)}
-              append={
-                isStackNameValid && stackName !== '' ? (
-                  <EuiIcon type="check" color="success" aria-label="valid" />
-                ) : undefined
-              }
-              onChange={(e) => {
-                setTouched(true);
-                onStackNameChange(e.target.value);
-              }}
-              onBlur={() => setTouched(true)}
-              data-test-subj={`${launchButtonTestSubj}-stackNameField`}
-            />
-          </EuiFormRow>
-
-          {/* Version display */}
-          {stackVersion && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.versionLabel"
-                  defaultMessage="ECF version: {version}"
-                  values={{ version: <strong>{stackVersion}</strong> }}
-                />
-              </EuiText>
-            </>
-          )}
-
-          {/* Reopen link (shown after 5s) */}
-          {showReopen && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiButtonEmpty
-                href={isStackNameValid ? launchUrl : undefined}
-                target="_blank"
-                iconType="external"
-                iconSide="right"
-                size="s"
-                data-test-subj={`${launchButtonTestSubj}-reopen`}
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.reopenButton"
-                  defaultMessage="Reopen AWS Console"
-                />
-              </EuiButtonEmpty>
-            </>
-          )}
-        </>
+        <EcfFamilyPanelPostLaunch
+          launchUrl={launchUrl}
+          stackName={stackName}
+          stackVersion={stackVersion}
+          defaultStackName={defaultStackName}
+          onStackNameChange={onStackNameChange}
+          testSubjPrefix={launchButtonTestSubj}
+        />
       )}
     </EuiPanel>
   );
@@ -562,7 +610,7 @@ export const EcfDeploymentSection = ({
               isLaunched={launchedFamilies.includes('unified')}
               onLaunch={() => onLaunch('unified')}
               launchButtonTestSubj="ecfDeploymentSection-unifiedLaunchButton"
-              stackName={stackNames.unified ?? ECF_UNIFIED_STACK_NAME}
+              stackName={stackNames.unified || ECF_UNIFIED_STACK_NAME}
               stackVersion={stackVersions.unified}
               defaultStackName={ECF_UNIFIED_STACK_NAME}
               onStackNameChange={(name) => onStackNameChange('unified', name)}
@@ -584,7 +632,7 @@ export const EcfDeploymentSection = ({
                 isLaunched={launchedFamilies.includes('otel')}
                 onLaunch={() => onLaunch('otel')}
                 launchButtonTestSubj="ecfDeploymentSection-otelLaunchButton"
-                stackName={stackNames.otel ?? ECF_OTEL_STACK_NAME}
+                stackName={stackNames.otel || ECF_OTEL_STACK_NAME}
                 stackVersion={stackVersions.otel}
                 defaultStackName={ECF_OTEL_STACK_NAME}
                 onStackNameChange={(name) => onStackNameChange('otel', name)}
@@ -606,7 +654,7 @@ export const EcfDeploymentSection = ({
                 isLaunched={launchedFamilies.includes('crowdstrike')}
                 onLaunch={() => onLaunch('crowdstrike')}
                 launchButtonTestSubj="ecfDeploymentSection-crowdstrikeLaunchButton"
-                stackName={stackNames.crowdstrike ?? ECF_CROWDSTRIKE_STACK_NAME}
+                stackName={stackNames.crowdstrike || ECF_CROWDSTRIKE_STACK_NAME}
                 stackVersion={stackVersions.crowdstrike}
                 defaultStackName={ECF_CROWDSTRIKE_STACK_NAME}
                 onStackNameChange={(name) => onStackNameChange('crowdstrike', name)}
