@@ -14,6 +14,11 @@ import {
   pickManagedWorkflowFields,
   pickWorkflowDocumentVersion,
 } from '@kbn/workflows';
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './execution_identity';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
@@ -71,6 +76,7 @@ export const buildWorkflowExecutionDocument = (
   );
   const dispatchEventId =
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
+  const missingIdentity = authenticatedUser === UNKNOWN_EXECUTION_IDENTITY;
   const workflowExecution: WorkflowExecutionForInputRendering = {
     id: generateUuid(),
     spaceId,
@@ -80,10 +86,19 @@ export const buildWorkflowExecutionDocument = (
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
     context,
-    status: ExecutionStatus.PENDING,
+    status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser,
     triggeredBy,
+    ...(missingIdentity
+      ? {
+          error: {
+            type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+            message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+          },
+          finishedAt: now.toISOString(),
+        }
+      : {}),
     ...(metadata ? { metadata } : {}),
     ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
     ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),

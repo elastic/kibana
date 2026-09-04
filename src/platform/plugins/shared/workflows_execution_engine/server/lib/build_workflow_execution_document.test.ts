@@ -10,6 +10,11 @@
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { buildWorkflowExecutionDocument } from './build_workflow_execution_document';
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './execution_identity';
 
 const baseWorkflow: WorkflowExecutionEngineModel = {
   id: 'workflow-1',
@@ -73,6 +78,23 @@ describe('buildWorkflowExecutionDocument', () => {
       createdAt: '2024-06-01T12:00:00.000Z',
     });
     expect(workflowExecution.id).toBeDefined();
+  });
+
+  it('fails the execution immediately when no identity is attached', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      authenticatedUser: UNKNOWN_EXECUTION_IDENTITY,
+    });
+
+    expect(workflowExecution).toMatchObject({
+      status: ExecutionStatus.FAILED,
+      executedBy: UNKNOWN_EXECUTION_IDENTITY,
+      finishedAt: '2024-06-01T12:00:00.000Z',
+      error: {
+        type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+        message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+      },
+    });
   });
 
   it('copies managed workflow billable metadata', () => {

@@ -8,6 +8,7 @@
  */
 
 import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
+import { UNKNOWN_EXECUTION_IDENTITY } from './execution_identity';
 
 /**
  * Gets the authenticated user information from the request.
@@ -50,5 +51,5 @@ export async function getAuthenticatedUser(
   }
 
   // For the time being, this is WTF - should never happen since we don't have "system" execution
-  return 'unknown';
+  return UNKNOWN_EXECUTION_IDENTITY;
 }

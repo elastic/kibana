@@ -44,4 +44,10 @@ describe('getAuthenticatedUser', () => {
       )
     ).resolves.toBe('elastic');
   });
+
+  it('returns unknown when no user or API key identity can be resolved', async () => {
+    await expect(
+      getAuthenticatedUser(createRequest(), createSecurity(null), createClusterClient())
+    ).resolves.toBe('unknown');
+  });
 });
