@@ -6,14 +6,9 @@
  */
 
 import React from 'react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSwitch,
-  EuiText,
-  useGeneratedHtmlId,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,59 +18,44 @@ interface RestrictTrafficToggleProps {
   onChange: (isRestricted: boolean) => void;
 }
 
+const switchStyles = ({ euiTheme }: UseEuiTheme) => css`
+  margin-bottom: ${euiTheme.size.xs};
+`;
+
 export const RestrictTrafficToggle: React.FC<RestrictTrafficToggleProps> = ({
   isRestricted,
   isDisabled,
   onChange,
 }) => {
-  const { euiTheme } = useEuiTheme();
+
   const toggleId = useGeneratedHtmlId({ prefix: 'restrictTrafficToggle' });
 
-  const helpText = isRestricted ? (
+  const helpText = (
     <EuiText size="xs" color="subdued" data-test-subj="manageRegionsToggleHelpText">
       <FormattedMessage
         id="xpack.searchInferenceEndpoints.manageRegions.restrictTrafficHelpOn"
-        defaultMessage="Limits inference traffic to the selected locations. It's recommended to review model usage prior to saving the policy. <b>Not all models are available in all locations and may affect usage.</b>"
+        defaultMessage="Limits inference traffic to the selected locations."
         values={{ b: (chunks) => <strong>{chunks}</strong> }}
       />
-    </EuiText>
-  ) : (
-    <EuiText size="xs" color="subdued" data-test-subj="manageRegionsToggleHelpText">
-      {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.restrictTrafficHelpOff', {
-        defaultMessage:
-          'Routes traffic through any available location for best performance. New locations will automatically be allowed as they become available.',
-      })}
     </EuiText>
   );
 
   const switchElement = (
-    <EuiFormRow helpText={helpText} fullWidth>
+    <EuiFormRow helpText={isRestricted ? helpText : undefined} fullWidth>
       <EuiSwitch
         id={toggleId}
         checked={isRestricted}
-        css={{ marginBottom: euiTheme.size.m }}
         onChange={(e) => onChange(e.target.checked)}
         disabled={isDisabled}
         label={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.restrictTrafficLabel', {
-          defaultMessage: 'Restrict inference traffic',
+          defaultMessage: 'Use custom region policy',
         })}
         data-test-subj="manageRegionsCustomPolicyToggle"
+        css={isRestricted ? switchStyles : { marginBottom: 0 }}
       />
     </EuiFormRow>
   );
 
-  if (!isRestricted) {
-    return (
-      <EuiPanel
-        hasBorder
-        hasShadow={false}
-        paddingSize="m"
-        data-test-subj="manageRegionsRestrictPanel"
-      >
-        {switchElement}
-      </EuiPanel>
-    );
-  }
+  return switchElement
 
-  return switchElement;
 };

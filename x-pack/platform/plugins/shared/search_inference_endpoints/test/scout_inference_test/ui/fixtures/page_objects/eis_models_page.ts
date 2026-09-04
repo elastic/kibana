@@ -210,10 +210,6 @@ export class EisModelsPage {
     return this.page.testSubj.locator(`deleteEndpointButton-${inferenceId}`);
   }
 
-  public geoZoneRow(geo: string): Locator {
-    return this.page.testSubj.locator(`geoZoneRow-${geo}`);
-  }
-
   public geoZoneCheckbox(geo: string): Locator {
     return this.page.testSubj.locator(`geoZoneCheckbox-${geo}`);
   }

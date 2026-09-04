@@ -31,12 +31,12 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj="manageRegionsSelectionCount">
-            <strong>
+            <p>
               {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectionCount', {
                 defaultMessage: '{selected} of {total} selected',
                 values: { selected: totalSelected, total: totalRegions },
               })}
-            </strong>
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -47,11 +47,11 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
           >
             {allSelected
               ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.deselectAll', {
-                  defaultMessage: 'Deselect all',
-                })
+                defaultMessage: 'Deselect all',
+              })
               : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectAll', {
-                  defaultMessage: 'Select all',
-                })}
+                defaultMessage: 'Select all',
+              })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -66,11 +66,11 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
         >
           {isAllExpanded
             ? i18n.translate('xpack.searchInferenceEndpoints.manageRegions.collapseAll', {
-                defaultMessage: 'Collapse all',
-              })
+              defaultMessage: 'Collapse all',
+            })
             : i18n.translate('xpack.searchInferenceEndpoints.manageRegions.expandAll', {
-                defaultMessage: 'Expand all',
-              })}
+              defaultMessage: 'Expand all',
+            })}
         </EuiButtonEmpty>
       </EuiFlexItem>
     )}
