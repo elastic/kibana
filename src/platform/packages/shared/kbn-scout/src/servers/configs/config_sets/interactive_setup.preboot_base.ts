@@ -202,9 +202,7 @@ export const createNoSecurityServers = (): ScoutServerConfig =>
     esFiles: [],
     withoutKibanaSecurity: true,
     esServerArgs: [
-      ...defaultConfig.esTestCluster.serverArgs.filter(
-        (arg) => !arg.startsWith('xpack.security.')
-      ),
+      ...defaultConfig.esTestCluster.serverArgs.filter((arg) => !arg.startsWith('xpack.security.')),
       'xpack.security.enabled=false',
     ],
   });
