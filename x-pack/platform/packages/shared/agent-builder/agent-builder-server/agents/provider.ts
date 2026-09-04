@@ -350,6 +350,10 @@ export interface AgentParams {
    */
   conversation?: Conversation;
   /**
+   * Pre-minted id for the round the agent is about to run.
+   */
+  roundId?: string;
+  /**
    * The input triggering this round.
    */
   nextInput: ConverseInput;

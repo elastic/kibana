@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
@@ -40,6 +40,18 @@ import {
 } from './managed_workflow_targets';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
+
+/**
+ * Maintenance SO attributes after branding spaceId fields at the SO → domain
+ * boundary. Wire schemas remain `schema.string()`.
+ */
+type LoadedMaintenanceState = Omit<
+  SignificantEventsMaintenanceStateAttributes,
+  'disabledWorkflows' | 'pausedSettings'
+> & {
+  disabledWorkflows: MaintenanceWorkflowTarget[];
+  pausedSettings?: PausedFeatureSettings;
+};
 
 /**
  * Pauses and resumes all Significant Events background activity from a single
@@ -201,19 +213,31 @@ export const createSignificantEventsMaintenanceService = ({
     raw
       ? {
           continuousOnboardingWasEnabled: raw.continuousOnboardingWasEnabled,
-          scheduledDiscoveryEnabledSpaceIds: [...raw.scheduledDiscoveryEnabledSpaceIds],
+          scheduledDiscoveryEnabledSpaceIds:
+            raw.scheduledDiscoveryEnabledSpaceIds.map(brandSpaceId),
         }
       : undefined;
 
+  /** Brand SO-loaded workflow targets once at the SO → domain boundary. */
+  const brandDisabledWorkflows = (
+    workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
+  ): MaintenanceWorkflowTarget[] =>
+    (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
+
   const readState = async (
     soClient: SavedObjectsClientContract
-  ): Promise<SignificantEventsMaintenanceStateAttributes | undefined> => {
+  ): Promise<LoadedMaintenanceState | undefined> => {
     try {
       const so = await soClient.get<SignificantEventsMaintenanceStateAttributes>(
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
         SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID
       );
-      return so.attributes;
+      // Brand spaceId fields once on SO load (wire schema stays schema.string()).
+      return {
+        ...so.attributes,
+        disabledWorkflows: brandDisabledWorkflows(so.attributes.disabledWorkflows),
+        pausedSettings: normalizePausedSettings(so.attributes.pausedSettings),
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
         return undefined;
@@ -236,7 +260,7 @@ export const createSignificantEventsMaintenanceService = ({
   const getAllSpaceIds = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
-  ): Promise<string[]> => {
+  ): Promise<SpaceId[]> => {
     const spacesClient = server.spaces?.spacesService.createSpacesClient(request);
     if (!spacesClient) {
       failures.push({
@@ -248,6 +272,7 @@ export const createSignificantEventsMaintenanceService = ({
     }
     try {
       // SpacesClient.getAll already loads every space SO (up to xpack.spaces.maxSpaces).
+      // Space.id is already branded as SpaceId.
       const spaces = await spacesClient.getAll();
       const ids = spaces.map((space) => space.id);
       return ids.length > 0 ? [...new Set([DEFAULT_SPACE_ID, ...ids])] : [DEFAULT_SPACE_ID];
@@ -440,7 +465,7 @@ export const createSignificantEventsMaintenanceService = ({
     workflowsDisabledThisSweep: number;
     rulesDisabledThisSweep: number;
     failures: SignificantEventsMaintenanceFailure[];
-    spaceIds: string[];
+    spaceIds: SpaceId[];
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
@@ -510,7 +535,7 @@ export const createSignificantEventsMaintenanceService = ({
   }: {
     soClient: SavedObjectsClientContract;
     request: KibanaRequest;
-    existing: SignificantEventsMaintenanceStateAttributes | undefined;
+    existing: LoadedMaintenanceState | undefined;
     mode: 'pause' | 'reassert';
     updatedBy?: string;
   }): Promise<{
@@ -570,7 +595,7 @@ export const createSignificantEventsMaintenanceService = ({
       pausedSettings = await featureSettings.pauseFeatureSettings({
         request,
         spaceIds: sweep.spaceIds,
-        previous: normalizePausedSettings(existing?.pausedSettings),
+        previous: existing?.pausedSettings,
         failures: sweep.failures,
       });
     } else {
@@ -679,7 +704,7 @@ export const createSignificantEventsMaintenanceService = ({
 
         const failures: SignificantEventsMaintenanceFailure[] = [];
         const mgmt = server.workflowsManagement?.management;
-        const pausedSettings = normalizePausedSettings(existing?.pausedSettings);
+        const pausedSettings = existing?.pausedSettings;
         // First resume from paused gates settings-backed workflows. A retry of
         // leftover inventory already filtered those once — retry everything left.
         const isFirstResumeFromPaused = currentState === 'paused';

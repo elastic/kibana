@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord, DiscoverTabType } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -218,6 +218,7 @@ export interface TabState extends TabItem {
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).

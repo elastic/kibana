@@ -1,0 +1,40 @@
+{
+  "sha1": "a84e4311e2b7d22b9ce591520139162930d9dfed",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4dd4f954d8f8955-4b7e12f3b348967",
+      "title": "Observability alert investigation action sends an investigation request from an alert row action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "4dd4f954d8f8955-ea2b693e093542e",
+      "title": "Observability alert investigation action sends an investigation request from the alert detail action menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
+        "line": 79,
+        "column": 17
+      }
+    }
+  ]
+}
