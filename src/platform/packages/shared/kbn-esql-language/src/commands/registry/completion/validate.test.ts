@@ -39,6 +39,11 @@ describe('COMPLETION Validation', () => {
          ) WITH { "inference_id": "inferenceId"}`,
           []
         );
+
+        completionExpectErrors(
+          `FROM index | COMPLETION CASE(booleanField, keywordField, NULL) WITH { "inference_id": "inferenceId"}`,
+          []
+        );
       });
 
       it('prompt is a text column', () => {
