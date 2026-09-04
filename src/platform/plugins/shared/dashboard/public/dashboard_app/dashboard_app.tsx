@@ -35,6 +35,7 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { PrettifyDashboardButton } from './prettify/prettify_dashboard_button';
+import { CacheSettingsButton } from './cache_settings/cache_settings_button';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
@@ -197,6 +198,7 @@ export function DashboardApp({
             dashboardInternalApi={dashboardInternalApi}
           />
           <PrettifyDashboardButton dashboardApi={dashboardApi} />
+          <CacheSettingsButton />
         </>
       )}
 

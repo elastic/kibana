@@ -14,8 +14,14 @@ export interface DashboardCacheEntry {
   absoluteTimeRange: TimeRange; // Resolved time at session creation (ISO strings)
 }
 
+// 'always'    = auto-refresh whenever the time window has moved past the cached snapshot
+// 'tolerance' = only refresh when the drift exceeds 5% of the cached range length
+// 'never'     = leave it to the user to manually refresh
+export type RevalidationMode = 'always' | 'tolerance' | 'never';
+
 // Simple in-memory cache - lasts for the browser session, cleared on page refresh
 const cache = new Map<string, DashboardCacheEntry>();
+let revalidationMode: RevalidationMode = 'always';
 
 export const dashboardCacheService = {
   getCacheEntry: (dashboardId: string): DashboardCacheEntry | undefined => cache.get(dashboardId),
@@ -27,5 +33,9 @@ export const dashboardCacheService = {
   },
   clearAll: (): void => {
     cache.clear();
+  },
+  getRevalidationMode: (): RevalidationMode => revalidationMode,
+  setRevalidationMode: (mode: RevalidationMode): void => {
+    revalidationMode = mode;
   },
 };

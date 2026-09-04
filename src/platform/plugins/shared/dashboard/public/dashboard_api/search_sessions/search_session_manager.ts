@@ -50,9 +50,51 @@ export function initializeSearchSessionManager(
         dataService.search.session.continue(embeddablePackage.searchSessionId);
       }
     });
+    if (cachedSessionId) {
+      // eslint-disable-next-line no-console
+      console.log('[Dashboard cache] return visit — cache hit for this dashboard');
+    } else if (!sessionIdToRestore) {
+      // eslint-disable-next-line no-console
+      console.log('[Dashboard cache] first visit — no cache entry for this dashboard');
+    }
+
+    // True when the current time window has moved past the cached snapshot — revalidation needed.
+    let timeRangeExceedsCache = false;
+    // True when the drift also exceeds 5% of the cached range length (used for 'tolerance' mode).
+    let toleranceExceeded = false;
     if (sessionIdToRestore) {
       dataService.search.session.restore(sessionIdToRestore);
     } else if (cachedSessionId) {
+      // Compare the current resolved time against the cached absolute time to predict whether
+      // ES async search will return cached results or needs to re-fetch.
+      const dashboardId = dashboardApi.savedObjectId$.getValue();
+      const cachedEntry = dashboardId
+        ? dashboardCacheService.getCacheEntry(dashboardId)
+        : undefined;
+      const currentTimeRange = dashboardApi.timeRange$.getValue();
+      if (cachedEntry && currentTimeRange) {
+        const resolvedCurrent = getAbsoluteTimeRange(currentTimeRange);
+        const cachedFromMs = Date.parse(cachedEntry.absoluteTimeRange.from as string);
+        const cachedToMs = Date.parse(cachedEntry.absoluteTimeRange.to as string);
+        const currentToMs = Date.parse(resolvedCurrent.to as string);
+        const drift = currentToMs - cachedToMs;
+        const cachedRangeLength = cachedToMs - cachedFromMs;
+        if (drift < 1000) {
+          // eslint-disable-next-line no-console
+          console.log(
+            '[Dashboard cache] time picker time range matches cached time range, expecting cache hit'
+          );
+        } else {
+          timeRangeExceedsCache = true;
+          toleranceExceeded = drift > cachedRangeLength * 0.05;
+          // eslint-disable-next-line no-console
+          console.log(
+            '[Dashboard cache] time picker time range exceeds cached time range, will first request cached data and then refresh'
+          );
+        }
+      }
+      // eslint-disable-next-line no-console
+      console.log('[Dashboard cache] fetching cached data');
       // Use `continue` (not `restore`) to avoid setting isRestore=true which would
       // bypass the client-side response cache.
       dataService.search.session.continue(cachedSessionId);
@@ -96,7 +138,28 @@ export function initializeSearchSessionManager(
     };
 
     // After a cache hit renders, trigger a new session so panels fetch fresh data.
-    if (cachedSessionId && waitForPanelsToLoad$) {
+    // Only revalidate when the time window has moved past the cached snapshot AND
+    // the user has not disabled auto-revalidation in the cache settings menu.
+    const revalidationMode = dashboardCacheService.getRevalidationMode();
+    const shouldRevalidate =
+      cachedSessionId &&
+      ((revalidationMode === 'always' && timeRangeExceedsCache) ||
+        (revalidationMode === 'tolerance' && toleranceExceeded));
+    if (cachedSessionId && timeRangeExceedsCache) {
+      if (revalidationMode === 'never') {
+        // eslint-disable-next-line no-console
+        console.log(
+          '[Dashboard cache] revalidation disabled by user setting — leaving refresh to user'
+        );
+      } else if (revalidationMode === 'tolerance' && toleranceExceeded) {
+        // eslint-disable-next-line no-console
+        console.log('[Dashboard cache] time drift exceeds 5% tolerance — will refresh');
+      } else if (revalidationMode === 'tolerance' && !toleranceExceeded) {
+        // eslint-disable-next-line no-console
+        console.log('[Dashboard cache] time drift within 5% tolerance — skipping refresh');
+      }
+    }
+    if (shouldRevalidate && waitForPanelsToLoad$) {
       revalidationSubscription = waitForPanelsToLoad$.subscribe(() => {
         const scheduleRevalidation: (cb: () => void) => void =
           typeof window.requestIdleCallback === 'function'
@@ -104,6 +167,8 @@ export function initializeSearchSessionManager(
             : (cb) => setTimeout(cb, 50);
 
         scheduleRevalidation(() => {
+          // eslint-disable-next-line no-console
+          console.log('[Dashboard cache] fetching fresh data');
           dashboardApi.forceRefresh();
         });
       });
