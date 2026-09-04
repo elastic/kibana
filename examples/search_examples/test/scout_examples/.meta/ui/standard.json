@@ -1,5 +1,5 @@
 {
-  "sha1": "274b791ee2325720288d1ff21ae15ee1e7af7964",
+  "sha1": "003b9bc9bcd71e7cca16fcb360e8171bfa59690e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -37,8 +37,8 @@
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
-        "line": 22,
-        "column": 21
+        "line": 21,
+        "column": 47
       }
     },
     {
@@ -50,7 +50,7 @@
       ],
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
-        "line": 26,
+        "line": 25,
         "column": 11
       }
     },
@@ -116,7 +116,33 @@
       "location": {
         "file": "examples/search_examples/test/scout_examples/ui/tests/search_session_example.spec.ts",
         "line": 60,
-        "column": 59
+        "column": 41
+      }
+    },
+    {
+      "id": "e150f352b1c4eec-afb78081a21608b",
+      "title": "Search example shard-failure warnings shows shard-failure warnings as toasts and can open inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_warnings.spec.ts",
+        "line": 15,
+        "column": 23
+      }
+    },
+    {
+      "id": "e150f352b1c4eec-4cd0c06d3d6c1ad",
+      "title": "Search example shard-failure warnings shows incomplete warnings on the results tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_warnings.spec.ts",
+        "line": 26,
+        "column": 22
       }
     },
     {
