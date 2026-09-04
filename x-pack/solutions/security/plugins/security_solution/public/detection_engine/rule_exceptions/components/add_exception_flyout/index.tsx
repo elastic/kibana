@@ -43,6 +43,7 @@ import {
 } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { AlertClosingReason } from '../../../../../common/types';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -162,6 +163,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       bulkCloseAlerts,
       closeSingleAlert,
       bulkCloseIndex,
+      closeAlertsReason,
       addExceptionToRadioSelection,
       selectedRulesToAddTo,
       exceptionListsToAddTo,
@@ -348,6 +350,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     [dispatch]
   );
 
+  const setCloseAlertsReason = useCallback(
+    (reason?: AlertClosingReason): void => {
+      dispatch({
+        type: 'setCloseAlertsReason',
+        reason,
+      });
+    },
+    [dispatch]
+  );
+
   const setDisableBulkCloseAlerts = useCallback(
     (disableBulkCloseAlerts: boolean): void => {
       dispatch({
@@ -456,13 +468,14 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       });
 
       if (closeAlerts != null && shouldCloseAlerts) {
-        await closeAlerts(
+        await closeAlerts({
           ruleStaticIds,
-          addedItems,
+          exceptionItems: addedItems,
           alertIdToClose,
           bulkCloseIndex,
-          runtimeFieldsResolution.runtimeFields
-        );
+          runtimeFields: runtimeFieldsResolution.runtimeFields,
+          reason: closeAlertsReason,
+        });
       }
 
       invalidateFetchRuleByIdQuery();
@@ -490,6 +503,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
+    closeAlertsReason,
     runtimeFieldsResolution.runtimeFields,
     setErrorSubmitting,
     invalidateFetchRuleByIdQuery,
@@ -685,10 +699,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               isSignalIndexPatternLoading={isSignalIndexPatternLoading}
               signalIndexPatterns={signalIndexPatterns}
               hasUntypedRuntimeFields={runtimeFieldsResolution.hasUntypedFields}
+              closeAlertsReason={closeAlertsReason}
               onDisableBulkClose={setDisableBulkCloseAlerts}
               onUpdateBulkCloseIndex={setBulkCloseIndex}
               onBulkCloseCheckboxChange={setBulkCloseAlerts}
               onSingleAlertCloseCheckboxChange={setCloseSingleAlert}
+              onCloseAlertsReasonChange={setCloseAlertsReason}
             />
           </>
         )}

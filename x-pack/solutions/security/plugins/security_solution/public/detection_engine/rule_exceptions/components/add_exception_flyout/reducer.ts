@@ -13,6 +13,7 @@ import type {
 } from '@kbn/securitysolution-list-utils';
 import type { Moment } from 'moment';
 
+import type { AlertClosingReason } from '../../../../../common/types';
 import type { Rule } from '../../../rule_management/logic/types';
 
 export interface State {
@@ -28,6 +29,7 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
+  closeAlertsReason: AlertClosingReason | undefined;
   selectedOs: OsTypeArray | undefined;
   exceptionListsToAddTo: ExceptionListSchema[];
   selectedRulesToAddTo: Rule[];
@@ -51,6 +53,7 @@ export const initialState: State = {
   bulkCloseAlerts: false,
   disableBulkClose: false,
   bulkCloseIndex: undefined,
+  closeAlertsReason: undefined,
   selectedOs: undefined,
   exceptionListsToAddTo: [],
   addExceptionToRadioSelection: 'add_to_rule',
@@ -105,6 +108,10 @@ export type Action =
   | {
       type: 'setBulkCloseIndex';
       bulkCloseIndex: string[] | undefined;
+    }
+  | {
+      type: 'setCloseAlertsReason';
+      reason: AlertClosingReason | undefined;
     }
   | {
       type: 'setSelectedOsOptions';
@@ -251,6 +258,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           bulkCloseIndex,
+        };
+      }
+      case 'setCloseAlertsReason': {
+        const { reason } = action;
+
+        return {
+          ...state,
+          closeAlertsReason: reason,
         };
       }
       case 'setSelectedOsOptions': {

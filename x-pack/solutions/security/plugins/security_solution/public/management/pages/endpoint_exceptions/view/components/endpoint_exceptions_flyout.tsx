@@ -52,6 +52,7 @@ import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { prepareEndpointExceptionItemsForBulkClose } from '../utils/prepare_endpoint_exception_items_for_bulk_close';
+import type { AlertClosingReason } from '../../../../../../common/types';
 
 export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
@@ -94,6 +95,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   const [bulkCloseAlerts, setBulkCloseAlerts] = useState(false);
   const [disableBulkClose, setDisableBulkCloseAlerts] = useState(false);
   const [bulkCloseIndex, setBulkCloseIndex] = useState<string[] | undefined>();
+  const [closeAlertsReason, setCloseAlertsReason] = useState<AlertClosingReason | undefined>();
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const {
     isSignalIndexLoading,
@@ -156,7 +158,13 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
 
       if (closeAlerts != null && shouldCloseAlerts && addedExceptions) {
         const exceptionsForBulkClose = prepareEndpointExceptionItemsForBulkClose(addedExceptions);
-        await closeAlerts(ruleStaticIds, exceptionsForBulkClose, alertIdToClose, bulkCloseIndex);
+        await closeAlerts({
+          ruleStaticIds,
+          exceptionItems: exceptionsForBulkClose,
+          alertIdToClose,
+          bulkCloseIndex,
+          reason: closeAlertsReason,
+        });
       }
 
       toasts.addSuccess(
@@ -172,6 +180,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
     bulkCloseAlerts,
     bulkCloseIndex,
     closeAlerts,
+    closeAlertsReason,
     closeSingleAlert,
     createOrUpdateArtifact,
     exception,
@@ -223,6 +232,8 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
             alertData={alertData}
             isAlertDataLoading={isAlertDataLoading ?? false}
             alertStatus={alertStatus}
+            closeAlertsReason={closeAlertsReason}
+            onCloseAlertsReasonChange={setCloseAlertsReason}
           />
         </>
       )}
