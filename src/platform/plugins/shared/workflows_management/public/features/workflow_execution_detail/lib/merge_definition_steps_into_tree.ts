@@ -34,8 +34,9 @@ export const mergeDefinitionStepsIntoTree = (
   const pseudoSteps = tree.filter(isPseudoTreeStep);
   const executedByStepId = new Map<string, StepExecutionTreeItem>();
   for (const item of tree) {
-    if (isPseudoTreeStep(item)) continue;
-    executedByStepId.set(item.stepId, item);
+    if (!isPseudoTreeStep(item)) {
+      executedByStepId.set(item.stepId, item);
+    }
   }
 
   const aligned: StepExecutionTreeItem[] = definition.steps.map((step, index) => {

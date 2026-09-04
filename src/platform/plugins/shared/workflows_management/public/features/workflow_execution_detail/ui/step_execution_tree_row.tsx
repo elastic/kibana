@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -460,19 +461,21 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               data-test-subj="workflowStepTreeChevronSlot"
             >
               {isExpandable ? (
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                  size="xs"
-                  color="text"
-                  aria-label={expandLabel}
-                  aria-expanded={isExpanded}
-                  data-test-subj="workflowStepTreeChevron"
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onToggleExpand?.();
-                  }}
-                />
+                <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    size="xs"
+                    color="text"
+                    aria-label={expandLabel}
+                    aria-expanded={isExpanded}
+                    data-test-subj="workflowStepTreeChevron"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggleExpand?.();
+                    }}
+                  />
+                </EuiToolTip>
               ) : (
                 <span aria-hidden="true" />
               )}

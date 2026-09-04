@@ -37,12 +37,19 @@ export function buildForeachOutput(
   for (const s of allStepExecutions) {
     const frame = s.scopeStack?.find((f) => f.stepId === stepId);
     const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
-    if (!iterScope?.scopeId) continue;
-    const iterNum = parseInt(iterScope.scopeId, 10);
-    if (isNaN(iterNum)) continue;
-    if (!byIteration.has(iterNum)) byIteration.set(iterNum, {});
-    if (s.output !== undefined && s.output !== null) {
-      byIteration.get(iterNum)![s.stepId] = s.output as JsonValue;
+    if (iterScope?.scopeId) {
+      const iterNum = parseInt(iterScope.scopeId, 10);
+      if (!isNaN(iterNum)) {
+        if (!byIteration.has(iterNum)) {
+          byIteration.set(iterNum, {});
+        }
+        if (s.output !== undefined && s.output !== null) {
+          const iteration = byIteration.get(iterNum);
+          if (iteration) {
+            iteration[s.stepId] = s.output as JsonValue;
+          }
+        }
+      }
     }
   }
 

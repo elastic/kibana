@@ -174,6 +174,9 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('workflows.executionFlyout.takeAction.menuAriaLabel', {
+          defaultMessage: 'More actions',
+        })}
         isOpen={isMenuOpen}
         closePopover={() => setIsMenuOpen(false)}
         panelPaddingSize="none"

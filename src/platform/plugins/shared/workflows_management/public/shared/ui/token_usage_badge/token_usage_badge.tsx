@@ -68,6 +68,7 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
 
     return (
       <EuiPopover
+        aria-label={ariaLabel}
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         ownFocus={false}

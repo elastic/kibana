@@ -271,18 +271,21 @@ function collectIterationChildren(
   };
 
   for (const child of children) {
-    if (!isIterationStepType(child.stepType)) continue;
-    const index = parseInt(child.stepId, 10);
-    if (isNaN(index)) continue;
-    byIndex.set(index, child);
-    const childStatus = stepExecutionMap.get(child.stepExecutionId ?? '')?.status ?? child.status;
-    infos.push({
-      index,
-      hasFailed:
-        (childStatus != null && isDangerousStatus(childStatus)) ||
-        subtreeHasDangerousStatus(child, stepExecutionMap),
-      isInFlight: isInFlightStatus(childStatus) || subtreeHasInFlight(child),
-    });
+    if (isIterationStepType(child.stepType)) {
+      const index = parseInt(child.stepId, 10);
+      if (!isNaN(index)) {
+        byIndex.set(index, child);
+        const childStatus =
+          stepExecutionMap.get(child.stepExecutionId ?? '')?.status ?? child.status;
+        infos.push({
+          index,
+          hasFailed:
+            (childStatus != null && isDangerousStatus(childStatus)) ||
+            subtreeHasDangerousStatus(child, stepExecutionMap),
+          isInFlight: isInFlightStatus(childStatus) || subtreeHasInFlight(child),
+        });
+      }
+    }
   }
   return { byIndex, infos };
 }
@@ -548,18 +551,19 @@ function convertTreeToOpenNodes(
           }
         } else {
           const iter = byIndex.get(entry.index);
-          if (!iter) continue;
-          nodes.push(
-            ...convertTreeToOpenNodes(
-              [iter],
-              stepExecutionMap,
-              selectedId,
-              onSelectStepExecution,
-              expandedGapIds,
-              onToggleGap,
-              childOptions
-            )
-          );
+          if (iter) {
+            nodes.push(
+              ...convertTreeToOpenNodes(
+                [iter],
+                stepExecutionMap,
+                selectedId,
+                onSelectStepExecution,
+                expandedGapIds,
+                onToggleGap,
+                childOptions
+              )
+            );
+          }
         }
       }
 
@@ -775,14 +779,19 @@ function convertTreeToOpenNodes(
             ? () => onSelectStepExecution(stepExecution.id)
             : undefined,
         errorPanelDiagnoseState: options?.diagnose?.state,
-        onDiagnoseFailedStep:
-          status &&
-          isDangerousStatus(status) &&
-          stepExecution != null &&
-          options?.diagnose != null &&
-          (options.diagnose.state === 'a' || options.diagnose.state === 'b')
-            ? () => options.diagnose!.onDiagnoseStep(stepExecution)
-            : undefined,
+        onDiagnoseFailedStep: (() => {
+          const diagnose = options?.diagnose;
+          if (
+            status &&
+            isDangerousStatus(status) &&
+            stepExecution != null &&
+            diagnose != null &&
+            (diagnose.state === 'a' || diagnose.state === 'b')
+          ) {
+            return () => diagnose.onDiagnoseStep(stepExecution);
+          }
+          return undefined;
+        })(),
         isDiagnoseLoading: options?.diagnose?.isDiagnoseHandoffInFlight,
         errorPanelRequiredLicenseTier: options?.diagnose?.requiredLicenseTier,
         errorPanelLicenseManagementHref: options?.diagnose?.licenseManagementHref,

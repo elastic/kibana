@@ -13,6 +13,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,6 +37,9 @@ export const WorkflowExecutionListFlyout = ({
 
   return (
     <EuiFlyout
+      aria-label={i18n.translate('workflows.executionListFlyout.ariaLabel', {
+        defaultMessage: 'Workflow execution history',
+      })}
       onClose={onClose}
       // Overlay when hidden so the detail push-flyout owns the layout slot.
       type={isHidden ? 'overlay' : 'push'}
@@ -67,16 +71,23 @@ export const WorkflowExecutionListFlyout = ({
             borderBottom: euiTheme.border.thin,
           }}
         >
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={i18n.translate('workflows.executionListFlyout.close', {
+          <EuiToolTip
+            content={i18n.translate('workflows.executionListFlyout.close', {
               defaultMessage: 'Close',
             })}
-            color="text"
-            size="s"
-            iconSize="m"
-            onClick={onClose}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={i18n.translate('workflows.executionListFlyout.close', {
+                defaultMessage: 'Close',
+              })}
+              color="text"
+              size="s"
+              iconSize="m"
+              onClick={onClose}
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 

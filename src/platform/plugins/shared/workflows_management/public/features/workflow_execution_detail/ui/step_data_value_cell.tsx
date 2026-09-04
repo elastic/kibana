@@ -38,11 +38,12 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
 
   if (!isLong) {
     if (!value) {
-      return <span css={{ fontSize: '12px', color: euiTheme.colors.subduedText }}>—</span>;
+      return <span css={{ fontSize: '12px', color: euiTheme.colors.subduedText }}>{'—'}</span>;
     }
     return (
       <EuiToolTip content={value} display="block" position="top">
         <span
+          tabIndex={0}
           css={{
             display: 'block',
             width: '100%',
@@ -70,31 +71,43 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
         >
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={value}>
-              {(copy) => (
-                <EuiButtonIcon
-                  iconType="copy"
-                  size="xs"
-                  color="text"
-                  aria-label={i18n.translate('workflows.executionFlyout.stepDetail.copyValue', {
-                    defaultMessage: 'Copy value',
-                  })}
-                  onClick={copy}
-                  data-test-subj="workflowExecutionStepDataValueCopy"
-                />
-              )}
+              {(copy) => {
+                const copyLabel = i18n.translate('workflows.executionFlyout.stepDetail.copyValue', {
+                  defaultMessage: 'Copy value',
+                });
+                return (
+                  <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="copy"
+                      size="xs"
+                      color="text"
+                      aria-label={copyLabel}
+                      onClick={copy}
+                      data-test-subj="workflowExecutionStepDataValueCopy"
+                    />
+                  </EuiToolTip>
+                );
+              }}
             </EuiCopy>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="minimize"
-              size="xs"
-              color="text"
-              aria-label={i18n.translate('workflows.executionFlyout.stepDetail.collapseValue', {
+            <EuiToolTip
+              content={i18n.translate('workflows.executionFlyout.stepDetail.collapseValue', {
                 defaultMessage: 'Collapse value',
               })}
-              onClick={() => setExpanded(false)}
-              data-test-subj="workflowExecutionStepDataValueCollapse"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minimize"
+                size="xs"
+                color="text"
+                aria-label={i18n.translate('workflows.executionFlyout.stepDetail.collapseValue', {
+                  defaultMessage: 'Collapse value',
+                })}
+                onClick={() => setExpanded(false)}
+                data-test-subj="workflowExecutionStepDataValueCollapse"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiCodeBlock

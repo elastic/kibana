@@ -94,7 +94,7 @@ export function StepExecutionTreeItemLabel({
                   isDangerous && styles.dangerousStepName,
                 ]}
               >
-                #{attemptNumber}{' '}
+                {`#${attemptNumber} `}
               </span>
             )}
             {stepId}

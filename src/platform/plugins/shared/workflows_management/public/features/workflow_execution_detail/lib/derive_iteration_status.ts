@@ -55,15 +55,15 @@ const collectLeafStatuses = (
   for (const child of item.children) {
     if (isIterationStepType(child.stepType)) {
       collectLeafStatuses(child, stepExecutionMap, into);
-      continue;
-    }
-    const exec = stepExecutionMap.get(child.stepExecutionId ?? '');
-    const status = exec?.status ?? child.status;
-    if (status != null) {
-      into.push(status);
-    }
-    if (child.children.length > 0) {
-      collectLeafStatuses(child, stepExecutionMap, into);
+    } else {
+      const exec = stepExecutionMap.get(child.stepExecutionId ?? '');
+      const status = exec?.status ?? child.status;
+      if (status != null) {
+        into.push(status);
+      }
+      if (child.children.length > 0) {
+        collectLeafStatuses(child, stepExecutionMap, into);
+      }
     }
   }
 };
@@ -117,19 +117,17 @@ export const buildIterationStatusOverrides = (
 ): Map<number, ExecutionStatus> => {
   const derivedByIndex = new Map<number, ExecutionStatus>();
   for (const child of children) {
-    if (!isIterationStepType(child.stepType)) {
-      continue;
+    if (isIterationStepType(child.stepType)) {
+      const index = parseInt(child.stepId, 10);
+      if (!Number.isNaN(index)) {
+        derivedByIndex.set(index, deriveIterationStatus(child, stepExecutionMap));
+      }
     }
-    const index = parseInt(child.stepId, 10);
-    if (Number.isNaN(index)) {
-      continue;
-    }
-    derivedByIndex.set(index, deriveIterationStatus(child, stepExecutionMap));
   }
 
   const sortedIndices = [...derivedByIndex.keys()].sort((a, b) => a - b);
   const constrained = applyTrailingNotRunConstraint(
-    sortedIndices.map((index) => derivedByIndex.get(index)!)
+    sortedIndices.map((index) => derivedByIndex.get(index) ?? ExecutionStatus.SKIPPED)
   );
 
   return new Map(sortedIndices.map((index, i) => [index, constrained[i]]));

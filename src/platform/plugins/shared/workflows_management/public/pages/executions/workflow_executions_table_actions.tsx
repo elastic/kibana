@@ -213,7 +213,7 @@ export const WorkflowExecutionActionsMenu = ({
           aria-label={showActionsLabel}
           color="text"
           data-test-subj="workflowExecutionActionsButton"
-          iconType="boxesVertical"
+          iconType="ellipsis"
           onClick={() => setIsOpen((prev) => !prev)}
         />
       </EuiToolTip>

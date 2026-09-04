@@ -245,6 +245,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
             />
             <EuiToolTip content={field} position="top">
               <span
+                tabIndex={0}
                 css={{
                   fontSize: '12px',
                   fontFamily: euiTheme.font.familyCode,
@@ -292,6 +293,9 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
       extraAction={
         hasTable ? (
           <EuiPopover
+            aria-label={i18n.translate('workflows.executionFlyout.stepDetail.viewMenuAriaLabel', {
+              defaultMessage: 'Data view',
+            })}
             isOpen={isViewPopoverOpen}
             closePopover={() => setIsViewPopoverOpen(false)}
             anchorPosition="downRight"
@@ -416,6 +420,9 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
             `}
           >
             <EuiBasicTable<StepDataTableRow>
+              tableCaption={i18n.translate('workflows.executionFlyout.stepDetail.tableCaption', {
+                defaultMessage: 'Step data fields',
+              })}
               items={paginatedRows}
               columns={tableColumns}
               compressed
@@ -708,6 +715,10 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
     return (
       <EuiFlyout
+        aria-label={i18n.translate('workflows.executionFlyout.ariaLabel', {
+          defaultMessage: 'Execution of {name}',
+          values: { name: workflowName },
+        })}
         onClose={onClose}
         type="push"
         paddingSize="none"
@@ -772,14 +783,16 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     <EuiTextTruncate text={stepName} />
                   </h2>
                 </EuiTitle>
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={i18nTexts.close}
-                  color="text"
-                  size="s"
-                  iconSize="m"
-                  onClick={() => setSelectedStepExecutionId(null)}
-                />
+                <EuiToolTip content={i18nTexts.close} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    aria-label={i18nTexts.close}
+                    color="text"
+                    size="s"
+                    iconSize="m"
+                    onClick={() => setSelectedStepExecutionId(null)}
+                  />
+                </EuiToolTip>
               </div>
 
               <div
@@ -957,23 +970,27 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   justifyContent="flexEnd"
                   responsive={false}
                 >
-                  <EuiButtonIcon
-                    iconType="share"
-                    aria-label={i18nTexts.share}
-                    color="text"
-                    size="s"
-                    iconSize="m"
-                    onClick={handleShare}
-                    isDisabled={!workflowExecution?.workflowId}
-                  />
-                  <EuiButtonIcon
-                    iconType="cross"
-                    aria-label={i18nTexts.close}
-                    color="text"
-                    size="s"
-                    iconSize="m"
-                    onClick={onClose}
-                  />
+                  <EuiToolTip content={i18nTexts.share} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="share"
+                      aria-label={i18nTexts.share}
+                      color="text"
+                      size="s"
+                      iconSize="m"
+                      onClick={handleShare}
+                      isDisabled={!workflowExecution?.workflowId}
+                    />
+                  </EuiToolTip>
+                  <EuiToolTip content={i18nTexts.close} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      aria-label={i18nTexts.close}
+                      color="text"
+                      size="s"
+                      iconSize="m"
+                      onClick={onClose}
+                    />
+                  </EuiToolTip>
                 </EuiFlexGroup>
               </EuiFlexGroup>
 
@@ -1020,7 +1037,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {runModeInfo?.runMode === 'stepTest' && (
                       <EuiFlexItem grow={false}>
                         <EuiToolTip content={stepTestTargetName}>
-                          <EuiBadge color="warning" iconType="flask">
+                          <EuiBadge tabIndex={0} color="warning" iconType="flask">
                             {i18n.translate('workflows.executionFlyout.runMode.stepTest', {
                               defaultMessage: 'Step test: {name}',
                               values: { name: truncateStepName(stepTestTargetName) },
@@ -1199,6 +1216,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                           <EuiFlexItem grow css={{ minWidth: 0 }}>
                             <EuiToolTip content={executedByDisplay} display="block">
                               <EuiText
+                                tabIndex={0}
                                 size="s"
                                 css={{
                                   fontWeight: 600,
@@ -1213,19 +1231,24 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                           {executedByValue ? (
                             <EuiFlexItem grow={false}>
                               <EuiCopy textToCopy={executedByValue}>
-                                {(copy) => (
-                                  <EuiButtonIcon
-                                    iconType="copy"
-                                    size="xs"
-                                    color="text"
-                                    aria-label={i18n.translate(
-                                      'workflows.executionFlyout.executedBy.copy',
-                                      { defaultMessage: 'Copy executed by' }
-                                    )}
-                                    onClick={copy}
-                                    data-test-subj="workflowExecutionFlyoutExecutedByCopy"
-                                  />
-                                )}
+                                {(copy) => {
+                                  const copyLabel = i18n.translate(
+                                    'workflows.executionFlyout.executedBy.copy',
+                                    { defaultMessage: 'Copy executed by' }
+                                  );
+                                  return (
+                                    <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                                      <EuiButtonIcon
+                                        iconType="copy"
+                                        size="xs"
+                                        color="text"
+                                        aria-label={copyLabel}
+                                        onClick={copy}
+                                        data-test-subj="workflowExecutionFlyoutExecutedByCopy"
+                                      />
+                                    </EuiToolTip>
+                                  );
+                                }}
                               </EuiCopy>
                             </EuiFlexItem>
                           ) : null}

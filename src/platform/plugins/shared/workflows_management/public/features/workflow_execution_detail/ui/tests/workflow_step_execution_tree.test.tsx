@@ -153,7 +153,7 @@ jest.mock('../step_execution_tree_row', () => ({
           }}
         />
       ) : null}
-      {isBranchLabel ? <span data-test-subj="workflowStepTreeBranchGlyph">→</span> : null}
+      {isBranchLabel ? <span data-test-subj="workflowStepTreeBranchGlyph">{'→'}</span> : null}
       <span data-test-subj="workflowStepName">
         {attemptNumber !== undefined ? `#${attemptNumber} ` : null}
         {stepId}
@@ -184,7 +184,7 @@ jest.mock('../step_execution_tree_row', () => ({
         <span data-test-subj="workflowStepTreeTokenUsage">{usage.totalTokens}</span>
       ) : null}
       {status === 'skipped' || status === 'pending' ? (
-        <span data-test-subj="workflowStepTreeDuration">Not run</span>
+        <span data-test-subj="workflowStepTreeDuration">{'Not run'}</span>
       ) : null}
     </span>
   ),

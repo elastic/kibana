@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiHorizontalRule, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -63,15 +63,17 @@ export const StepDetailAccordionSection = React.memo<StepDetailAccordionSectionP
             paddingBottom: euiTheme.size.m,
           }}
         >
-          <EuiButtonIcon
-            iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
-            size="xs"
-            color="text"
-            aria-expanded={isOpen}
-            aria-label={ariaLabel}
-            onClick={() => setIsOpen((v) => !v)}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}Toggle` : undefined}
-          />
+          <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+              size="xs"
+              color="text"
+              aria-expanded={isOpen}
+              aria-label={ariaLabel}
+              onClick={() => setIsOpen((v) => !v)}
+              data-test-subj={dataTestSubj ? `${dataTestSubj}Toggle` : undefined}
+            />
+          </EuiToolTip>
           <EuiTitle
             size="s"
             css={{

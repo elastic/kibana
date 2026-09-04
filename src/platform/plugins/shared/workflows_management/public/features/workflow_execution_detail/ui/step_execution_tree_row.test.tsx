@@ -38,7 +38,10 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
 
 jest.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => ({
   TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
-    <span data-test-subj="workflowStepTreeTokenUsage">{usage.totalTokens} tokens</span>
+    <span data-test-subj="workflowStepTreeTokenUsage">
+      {usage.totalTokens}
+      {' tokens'}
+    </span>
   ),
 }));
 
