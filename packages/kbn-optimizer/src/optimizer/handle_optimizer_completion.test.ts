@@ -87,7 +87,7 @@ it('passes through errors on the source stream', async () => {
   const error = new Error('foo');
   const update$ = Rx.throwError(error);
 
-  await expect(
-    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowError(error);
+  await expect(allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))).rejects.toThrow(
+    error
+  );
 });

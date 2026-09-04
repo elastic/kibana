@@ -736,7 +736,7 @@ describe('CoreUsageDataService', () => {
         service.getMarkedAsSafe = mockGetMarkedAsSafe;
         await getConfigsUsageData();
 
-        expect(mockGetMarkedAsSafe).toBeCalledTimes(2);
+        expect(mockGetMarkedAsSafe).toHaveBeenCalledTimes(2);
         expect(mockGetMarkedAsSafe.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [

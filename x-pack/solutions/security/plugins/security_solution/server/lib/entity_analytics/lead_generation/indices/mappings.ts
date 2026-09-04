@@ -41,6 +41,25 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
         metadata: { type: 'object', enabled: false },
       },
     },
+    top_related_entities: {
+      type: 'object',
+      properties: {
+        id: { type: 'keyword' },
+        type: { type: 'keyword' },
+        name: { type: 'keyword' },
+        kinds: { type: 'keyword' },
+        risk_level: { type: 'keyword' },
+        criticality: { type: 'keyword' },
+        interacted_with_at_least: { type: 'integer' },
+      },
+    },
+    related_entity_counts: {
+      type: 'object',
+      properties: {
+        kind: { type: 'keyword' },
+        count: { type: 'integer' },
+      },
+    },
     execution_uuid: { type: 'keyword' },
     source_type: { type: 'keyword' },
     created_at: { type: 'date' },

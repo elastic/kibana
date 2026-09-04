@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-security';
+import { ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 
 export const COMMON_HEADERS = {
   'Content-Type': 'application/json;charset=UTF-8',
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
+  ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 } as const;
 
 /**

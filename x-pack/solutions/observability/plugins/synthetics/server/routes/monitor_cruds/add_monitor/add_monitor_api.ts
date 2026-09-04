@@ -7,6 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +47,24 @@ import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocationsForNamespaces } from '../../../synthetics_service/get_private_locations';
 import { resolveMaintenanceWindowsOrThrow } from '../../../synthetics_service/maintenance_windows/resolve_maintenance_windows';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+
+/**
+ * Fleet bulkCreate reports saved-object 409s as plain `{ statusCode, error }`
+ * objects, not `Error` instances. Package-policy ids are deterministic
+ * (`${monitorId}-${locationId}`), so a conflict means that policy already
+ * exists — typically a concurrent cleanup sync or a Fleet retry after the SO
+ * write landed. Failing the create (and reverting) turns that into a 500.
+ */
+export const isPackagePolicyConflictFailure = (error: unknown): boolean => {
+  if (error instanceof Error) {
+    return SavedObjectsErrorHelpers.isConflictError(error);
+  }
+  if (error && typeof error === 'object') {
+    const soError = error as { statusCode?: number; error?: string };
+    return soError.statusCode === 409 || soError.error === 'Conflict';
+  }
+  return false;
+};
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -125,10 +144,15 @@ export class AddEditMonitorAPI {
       if ((packagePolicyResult?.failed?.length ?? 0) > 0) {
         // Fleet reports saved object level failures (e.g. a policy id conflict) as plain
         // objects, so they have to be formatted explicitly to stay readable.
-        const failed = packagePolicyResult.failed.map(({ error }) =>
-          error instanceof Error ? error.message : JSON.stringify(error)
+        const failed = packagePolicyResult.failed.filter(
+          ({ error }) => !isPackagePolicyConflictFailure(error)
         );
-        throw new Error(failed.join(', '));
+        if (failed.length > 0) {
+          const messages = failed.map(({ error }) =>
+            error instanceof Error ? error.message : JSON.stringify(error)
+          );
+          throw new Error(messages.join(', '));
+        }
       }
 
       monitorSavedObject = soResult.value;

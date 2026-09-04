@@ -65,7 +65,7 @@ describe('ES search strategy', () => {
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
-        expect(esClient.search).toBeCalled();
+        expect(esClient.search).toHaveBeenCalled();
         expect(esClient.search.mock.calls[0][0]).toEqual({
           ...params,
           ignore_unavailable: true,
@@ -80,7 +80,7 @@ describe('ES search strategy', () => {
     await esSearchStrategyProvider(mockConfig$, mockLogger)
       .search({ params }, {}, getMockedDeps())
       .subscribe(() => {
-        expect(esClient.search).toBeCalled();
+        expect(esClient.search).toHaveBeenCalled();
         expect(esClient.search.mock.calls[0][0]).toEqual({
           ...params,
           track_total_hits: true,
@@ -127,7 +127,7 @@ describe('ES search strategy', () => {
       .search({ params }, { abortSignal: abortController.signal }, getMockedDeps())
       .toPromise();
 
-    expect(esClient.search).toBeCalled();
+    expect(esClient.search).toHaveBeenCalled();
     expect(esClient.search.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
@@ -153,7 +153,7 @@ describe('ES search strategy', () => {
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(esClient.search).toBeCalled();
+      expect(esClient.search).toHaveBeenCalled();
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(404);
       expect(e.message).toBe(errResponse.message);
@@ -170,7 +170,7 @@ describe('ES search strategy', () => {
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(esClient.search).toBeCalled();
+      expect(esClient.search).toHaveBeenCalled();
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
@@ -187,7 +187,7 @@ describe('ES search strategy', () => {
         .search({ params }, {}, getMockedDeps(errResponse))
         .toPromise();
     } catch (e) {
-      expect(esClient.search).toBeCalled();
+      expect(esClient.search).toHaveBeenCalled();
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe(errResponse.message);
@@ -203,7 +203,7 @@ describe('ES search strategy', () => {
         .search({ indexType: 'banana', params }, {}, getMockedDeps())
         .toPromise();
     } catch (e) {
-      expect(esClient.search).not.toBeCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
       expect(e).toBeInstanceOf(KbnSearchError);
       expect(e.message).toBe('Unsupported index pattern type banana');
       expect(e.statusCode).toBe(400);

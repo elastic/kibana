@@ -40,7 +40,7 @@ describe('write_lines_to_bulk_list_items', () => {
       const promise = importListItemsToStream(options);
       options.stream.push(null);
       await promise;
-      expect(createListItemsBulk).toBeCalledWith(expect.objectContaining({ value: [] }));
+      expect(createListItemsBulk).toHaveBeenCalledWith(expect.objectContaining({ value: [] }));
     });
 
     test('It imports a set of items to a write buffer by calling "getListItemByValues" with a single value given', async () => {
@@ -55,7 +55,9 @@ describe('write_lines_to_bulk_list_items', () => {
       options.stream.push('127.0.0.1\n');
       options.stream.push(null);
       await promise;
-      expect(createListItemsBulk).toBeCalledWith(expect.objectContaining({ value: ['127.0.0.1'] }));
+      expect(createListItemsBulk).toHaveBeenCalledWith(
+        expect.objectContaining({ value: ['127.0.0.1'] })
+      );
     });
 
     test('It imports a set of items to a write buffer by calling "getListItemByValues" with two values given', async () => {
@@ -71,7 +73,7 @@ describe('write_lines_to_bulk_list_items', () => {
       options.stream.push('127.0.0.2\n');
       options.stream.push(null);
       await promise;
-      expect(createListItemsBulk).toBeCalledWith(
+      expect(createListItemsBulk).toHaveBeenCalledWith(
         expect.objectContaining({ value: ['127.0.0.1', '127.0.0.2'] })
       );
     });
@@ -82,7 +84,7 @@ describe('write_lines_to_bulk_list_items', () => {
       options.stream.push(`--\nContent-Disposition: attachment; filename="%22Filename%22.txt"`);
       options.stream.push(null);
       await promise;
-      expect(createListIfItDoesNotExist).toBeCalledWith(
+      expect(createListIfItDoesNotExist).toHaveBeenCalledWith(
         expect.objectContaining({ id: `"Filename".txt`, name: `"Filename".txt` })
       );
     });

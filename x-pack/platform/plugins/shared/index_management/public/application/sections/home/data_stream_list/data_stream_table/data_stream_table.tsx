@@ -454,12 +454,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="success"
-                iconType="refresh"
-                onClick={reload}
-                data-test-subj="reloadButton"
-              >
+              <EuiButton iconType="refresh" onClick={reload} data-test-subj="reloadButton">
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamList.reloadDataStreamsButtonLabel"
                   defaultMessage="Reload"

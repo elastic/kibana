@@ -166,7 +166,7 @@ test('fails and stops services if server preboot fails', async () => {
   expect(logger.stop).not.toHaveBeenCalled();
   expect(mockServer.stop).not.toHaveBeenCalled();
 
-  await expect(root.preboot()).rejects.toThrowError('server failed');
+  await expect(root.preboot()).rejects.toThrow('server failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(serverError);
@@ -186,7 +186,7 @@ test('fails and stops services if server setup fails', async () => {
   expect(mockServer.stop).not.toHaveBeenCalled();
 
   await root.preboot();
-  await expect(root.setup()).rejects.toThrowError('server failed');
+  await expect(root.setup()).rejects.toThrow('server failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(serverError);
@@ -207,7 +207,7 @@ test('fails and stops services if initial logger upgrade fails', async () => {
   expect(logger.stop).not.toHaveBeenCalled();
   expect(mockServer.preboot).not.toHaveBeenCalled();
 
-  await expect(root.preboot()).rejects.toThrowError('logging config upgrade failed');
+  await expect(root.preboot()).rejects.toThrow('logging config upgrade failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(loggingUpgradeError);

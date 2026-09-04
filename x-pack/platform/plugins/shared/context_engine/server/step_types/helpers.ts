@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { isRequestAbortedError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -14,8 +13,9 @@ import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { KiVerificationSummary } from '../ki_verification';
 import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
-import { errorTypeForTelemetry } from '../telemetry';
+import { errorTypeForTelemetry, isAbortError } from '../telemetry';
 
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
@@ -33,10 +33,6 @@ export interface ResolvedAiIndex {
   dest: AiIndexDest;
   managed: boolean;
 }
-
-/** Whether the error is a cancellation, not a write failure. */
-export const isAbortError = (error: unknown): boolean =>
-  isRequestAbortedError(error) || (error instanceof Error && error.name === 'AbortError');
 
 const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
   create: 'created in',
@@ -89,6 +85,48 @@ export const withKiWriteTelemetry = async <Output extends { id: string }>({
         ? `KI ${action} aborted in AI index '${aiIndexId}'`
         : `KI ${action} failed in AI index '${aiIndexId}': ${errorType}`
     );
+    throw error;
+  }
+};
+
+/**
+ * Runs the verify step body, reporting the outcome (success, failure, or
+ * aborted) to EBT and the logs.
+ */
+export const withKiVerificationTelemetry = async ({
+  analyticsService,
+  logger,
+  run,
+}: {
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+  run: () => Promise<KiVerificationSummary>;
+}): Promise<KiVerificationSummary> => {
+  try {
+    const summary = await run();
+    const failures = summary.results.filter((result) => !result.passed);
+    analyticsService.reportKiVerification({
+      outcome: 'success',
+      passed: summary.passed,
+      verifiersRun: summary.results.length,
+      failedVerifierIds: failures.map(({ verifier }) => verifier),
+    });
+    if (summary.passed) {
+      logger.debug(`KI verification passed (verifiers run: ${summary.results.length})`);
+    } else {
+      logger.debug(
+        `KI verification failed: ${failures.map(({ verifier }) => verifier).join(', ')}`
+      );
+    }
+    return summary;
+  } catch (error) {
+    const aborted = isAbortError(error);
+    const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+    analyticsService.reportKiVerification({
+      outcome: aborted ? 'aborted' : 'failure',
+      errorType,
+    });
+    logger.debug(aborted ? 'KI verification aborted' : `KI verification errored: ${errorType}`);
     throw error;
   }
 };

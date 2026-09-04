@@ -128,7 +128,7 @@ describe('DefendInsightsDataClient', () => {
         defendInsightCreate,
         authenticatedUser: user,
       });
-      await expect(responsePromise).rejects.toThrowError('Elasticsearch error');
+      await expect(responsePromise).rejects.toThrow('Elasticsearch error');
       expect(mockEsClient.create).toHaveBeenCalledTimes(1);
       expect(mockGetDefendInsight).not.toHaveBeenCalled();
     });
@@ -277,7 +277,7 @@ describe('DefendInsightsDataClient', () => {
         dataClient.findAllDefendInsights({
           authenticatedUser: user,
         })
-      ).rejects.toThrowError('Elasticsearch error');
+      ).rejects.toThrow('Elasticsearch error');
       expect(mockEsClient.search).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });

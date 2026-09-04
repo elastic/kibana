@@ -1,5 +1,5 @@
 {
-  "sha1": "ebe11039955b2596031341d560dc0973249556ff",
+  "sha1": "efae7abcc293a84c18854170f529f5d8328ed839",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -85,6 +85,45 @@
       }
     },
     {
+      "id": "9c1881f2135d817-686926d85ee73c5",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 182,
+        "column": 12
+      }
+    },
+    {
+      "id": "9c1881f2135d817-03e8d139e7cd81f",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: unparseable query shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 228,
+        "column": 51
+      }
+    },
+    {
+      "id": "9c1881f2135d817-04b710afa6358fd",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: switch toggle shows confirmation modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 264,
+        "column": 21
+      }
+    },
+    {
       "id": "6dccdf7d98d0236-a7d0ae7c38928c4",
       "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
       "expectedStatus": "passed",
@@ -121,6 +160,19 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
         "line": 58,
         "column": 5
+      }
+    },
+    {
+      "id": "c00a5416f5250d2-a130c3dc63aa3dc",
+      "title": "Rule tags — edit via ES|QL form removing all tags persists (does not restore the old tags)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_tags_edit.spec.ts",
+        "line": 51,
+        "column": 34
       }
     },
     {

@@ -340,7 +340,7 @@ describe('getFlattenedTraceWaterfall', () => {
         parentChildMap: invalidMap,
         orphans: orphans!,
       })
-    ).toThrowError('Duplicate span id detected');
+    ).toThrow('Duplicate span id detected');
   });
 });
 

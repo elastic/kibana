@@ -1,11 +1,11 @@
 {
-  "sha1": "b78733fe55e13884ac1b4c44f75e9fdd15011617",
+  "sha1": "2b3d9c8c65acb650e2488a4a3d662134d8ab1768",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "07a9893f4bfa48c-8a982de270c8a77",
+      "id": "a002a5dadd7e00b-8a982de270c8a77",
       "title": "Onboarding Authenticate and Deploy step deploy fires POST /api/fleet/managed_integrations and shows success state",
       "expectedStatus": "passed",
       "tags": [
@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_step.spec.ts",
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_authenticate_and_deploy_step.spec.ts",
         "line": 108,
         "column": 30
       }
@@ -224,22 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 448,
-        "column": 7
-      }
-    },
-    {
-      "id": "f11cb343b6e8637-26047a727d2a7c0",
-      "title": "Onboarding Service Settings step ⋮ actions menu is visible on every row and contains Duplicate service",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 485,
-        "column": 5
+        "line": 447,
+        "column": 11
       }
     },
     {
@@ -252,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 502,
-        "column": 87
+        "line": 484,
+        "column": 8
       }
     },
     {
@@ -266,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 511,
-        "column": 87
+        "line": 493,
+        "column": 30
       }
     },
     {
@@ -280,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 522,
-        "column": 11
+        "line": 501,
+        "column": 24
       }
     },
     {
@@ -294,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 535,
-        "column": 20
+        "line": 514,
+        "column": 100
       }
     },
     {
@@ -308,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 569,
-        "column": 20
+        "line": 548,
+        "column": 24
       }
     },
     {
@@ -322,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 598,
-        "column": 7
+        "line": 576,
+        "column": 17
       }
     },
     {
@@ -336,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 667,
-        "column": 24
+        "line": 640,
+        "column": 11
       }
     },
     {
@@ -350,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 734,
+        "line": 715,
         "column": 24
       }
     },
@@ -364,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 762,
+        "line": 743,
         "column": 24
       }
     },

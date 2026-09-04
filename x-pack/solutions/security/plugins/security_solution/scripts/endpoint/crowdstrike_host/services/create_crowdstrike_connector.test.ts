@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient } from '@kbn/test';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import { createCrowdStrikeConnectorIfNeeded } from './create_crowdstrike_connector';
 import * as connectorsServices from '../../common/connectors_services';
@@ -33,7 +34,7 @@ describe('createCrowdStrikeConnectorIfNeeded', () => {
     mockLog = createToolingLogger();
 
     mockedSpaces.fetchActiveSpace.mockResolvedValue({
-      id: 'default',
+      id: asSpaceId('default'),
       name: 'Default',
       disabledFeatures: [],
     });

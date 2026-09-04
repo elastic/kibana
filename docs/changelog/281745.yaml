@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/281745
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix missing privilege checks for exception lists on the alerting APIs
-description: Fixes a gap where users could change detection-rule exception lists, investigation fields, and investigation guides through the generic alerting APIs without the corresponding sub-feature privileges.

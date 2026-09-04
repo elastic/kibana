@@ -31,6 +31,17 @@ describe('update_case common step definition', () => {
     expect(InputSchema.safeParse(updateCaseInputWithVersionFixture).success).toBe(true);
   });
 
+  it('accepts update case input with extended_fields in updates', () => {
+    expect(
+      InputSchema.safeParse({
+        case_id: caseIdFixture,
+        updates: {
+          extended_fields: { priority_as_keyword: 'low' },
+        },
+      }).success
+    ).toBe(true);
+  });
+
   it('rejects update case input without updates', () => {
     expect(
       InputSchema.safeParse({

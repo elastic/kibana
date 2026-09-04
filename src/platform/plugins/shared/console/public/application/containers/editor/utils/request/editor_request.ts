@@ -8,6 +8,7 @@
  */
 
 import type { monaco, ParsedRequest } from '@kbn/monaco';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/console/utils';
 import type { EditorRequest } from '../../types';
 import { startsWithMethodRegex } from '../constants';
 import { parseLine } from '../tokens_utils';
@@ -40,10 +41,13 @@ export const getRequestEndLineNumber = ({
   startLineNumber: number;
 }): number => {
   let endLineNumber: number;
+
   if (parsedRequest.endOffset) {
     // if the parser set an end offset for this request, then find the line number for it
     endLineNumber = model.getPositionAt(parsedRequest.endOffset).lineNumber;
   } else {
+    const requestStartLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber;
+
     // if no end offset, try to find the line before the next request starts
     if (nextRequest) {
       const nextRequestStartLine = model.getPositionAt(nextRequest.startOffset).lineNumber;
@@ -51,14 +55,29 @@ export const getRequestEndLineNumber = ({
         nextRequestStartLine > startLineNumber ? nextRequestStartLine - 1 : startLineNumber;
     } else {
       // if there is no next request, find the end of the text or the line that starts with a method
-      let nextLineNumber = model.getPositionAt(parsedRequest.startOffset).lineNumber + 1;
-      let nextLineContent: string;
-      while (nextLineNumber <= model.getLineCount()) {
-        nextLineContent = model.getLineContent(nextLineNumber).trim();
-        if (nextLineContent.match(startsWithMethodRegex)) {
+      const lineCount = model.getLineCount();
+      // The parser reads the request line as method + url and never opens a string on it, so the
+      // string scan starts at the body: a stray quote or comment marker on the request line must
+      // not phase-shift the string state of the lines below.
+      const bodyLines: string[] = [];
+      for (let lineNumber = requestStartLineNumber + 1; lineNumber <= lineCount; lineNumber++) {
+        bodyLines.push(model.getLineContent(lineNumber));
+      }
+      // Scan the body once and query each candidate line by offset; rescanning the whole prefix
+      // for every method-like line is quadratic on large unfinished bodies.
+      const isInsideUnfinishedString = createInsideConsoleStringChecker(bodyLines.join('\n'));
+      let nextLineNumber = requestStartLineNumber + 1;
+      let nextLineStartOffset = 0;
+      while (nextLineNumber <= lineCount) {
+        const nextLineContent = bodyLines[nextLineNumber - requestStartLineNumber - 1];
+        if (
+          nextLineContent.trim().match(startsWithMethodRegex) &&
+          !isInsideUnfinishedString(nextLineStartOffset)
+        ) {
           // found a line that starts with a method, stop iterating
           break;
         }
+        nextLineStartOffset += nextLineContent.length + 1;
         nextLineNumber++;
       }
       // nextLineNumber is now either the line with a method or 1 line after the end of the text

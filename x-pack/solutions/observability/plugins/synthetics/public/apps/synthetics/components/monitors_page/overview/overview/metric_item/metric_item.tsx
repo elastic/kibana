@@ -38,7 +38,7 @@ import { MetricItemIcon } from './metric_item_icon';
 import type { FlyoutParamProps } from '../types';
 import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
-export const METRIC_ITEM_HEIGHT = 180;
+export const METRIC_ITEM_HEIGHT = 200; // room for a wrapped tag row above duration
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -217,6 +217,8 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          /* Charts clips the body on __gap, not __body. */
+          .echMetricText__gap,
           .echMetricText__body {
             overflow: visible;
           }
@@ -257,6 +259,7 @@ export const MetricItem = ({
                     <div
                       role="button"
                       tabIndex={0}
+                      css={{ width: '100%', minWidth: 0 }}
                       onMouseDown={(e) => e.stopPropagation()}
                       onMouseUp={(e) => e.stopPropagation()}
                       onClick={(e) => {

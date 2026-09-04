@@ -131,6 +131,15 @@ export interface PackagePolicyClient {
     }>;
   }>;
 
+  /**
+   * Persists partial package-policy attributes without running the full Fleet update pipeline.
+   * Callers are responsible for validation, revision metadata, callbacks, and agent deployment.
+   */
+  bulkUpdatePartial(
+    soClient: SavedObjectsClientContract,
+    packagePolicyUpdates: PackagePolicyPartialUpdate[]
+  ): Promise<PackagePolicyPartialUpdateResult>;
+
   bulkUpgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -336,11 +345,25 @@ export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'per
 
 export type PackagePolicyClientFetchAllItemsOptions = Pick<
   ListWithKuery,
-  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'fields'
 > &
   WithSpaceIdsOption;
 
 export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
+export interface PackagePolicyPartialUpdate {
+  id: string;
+  version: string;
+  attributes: Partial<PackagePolicySOAttributes>;
+}
+
+export interface PackagePolicyPartialUpdateResult {
+  updatedPolicies: PartialPackagePolicy[];
+  failedPolicies: Array<{
+    update: PackagePolicyPartialUpdate;
+    error: SavedObjectError;
+  }>;
+}
 
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
@@ -349,9 +372,15 @@ export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
   skipUnassignFromAgentPolicies?: boolean;
   /** Skip the agent policy revision bump when the caller will perform it separately. */
   bumpRevision?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;

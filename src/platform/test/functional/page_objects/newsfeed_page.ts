@@ -12,9 +12,7 @@ import { FtrService } from '../ftr_provider_context';
 
 export class NewsfeedPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
-  private readonly flyout = this.ctx.getService('flyout');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
 
@@ -27,29 +25,28 @@ export class NewsfeedPageObject extends FtrService {
   }
 
   async closeNewsfeedPanel() {
-    await this.flyout.ensureClosed('NewsfeedFlyout');
-    this.log.debug('clickNewsfeed icon');
-    await this.retry.waitFor('newsfeed flyout', async () => {
-      if (await this.testSubjects.exists('NewsfeedFlyout')) {
-        await this.testSubjects.click('NewsfeedFlyout > euiFlyoutCloseButton');
+    this.log.debug('closeNewsfeedPanel');
+    await this.retry.waitFor('newsfeed sidebar to close', async () => {
+      if (await this.testSubjects.exists('newsfeedSidebar')) {
+        await this.testSubjects.click('sidebarHeaderCloseButton');
         return false;
       }
       return true;
     });
   }
 
-  async openNewsfeedPanel() {
-    this.log.debug('clickNewsfeed icon');
-    return await this.testSubjects.exists('NewsfeedFlyout');
+  async isNewsfeedPanelOpen() {
+    this.log.debug('isNewsfeedPanelOpen');
+    return await this.testSubjects.exists('newsfeedSidebar');
   }
 
   async getRedButtonSign() {
-    return await this.find.existsByCssSelector('.euiHeaderSectionItemButton__notification--dot');
+    return await this.testSubjects.exists('headerActionButtonNotification', { timeout: 0 });
   }
 
   async getNewsfeedList() {
-    const list = await this.testSubjects.find('NewsfeedFlyout');
-    const cells = await list.findAllByTestSubject('newsHeadAlert');
+    const sidebar = await this.testSubjects.find('newsfeedSidebar');
+    const cells = await sidebar.findAllByTestSubject('newsHeadAlert');
 
     const objects = [];
     for (const cell of cells) {

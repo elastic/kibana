@@ -83,3 +83,13 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
+
+export type {
+  RunQuotaConsumeRequest,
+  RunQuotaConsumeResponse,
+  RunQuotaGroup,
+  RunQuotaSettings,
+  RunQuotaSettingsUpdate,
+  RunQuotaWindow,
+  RunQuotasResponse,
+} from './run_quotas';

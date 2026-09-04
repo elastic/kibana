@@ -40,6 +40,7 @@ export const createForbiddenToolsEvaluator = (): Evaluator<
   return {
     name: FORBIDDEN_TOOLS_EVALUATOR_NAME,
     kind: 'CODE',
+    direction: 'maximize',
     evaluate: async ({ output, input }) => {
       const toolCalls = (output?.steps ?? []).filter(
         (step) => (step as { type?: string }).type === 'tool_call' && step.tool_id

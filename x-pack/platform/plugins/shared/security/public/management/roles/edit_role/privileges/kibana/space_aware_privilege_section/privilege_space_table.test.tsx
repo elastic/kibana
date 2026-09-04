@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import { createKibanaPrivileges } from '@kbn/security-role-management-model/src/__fixtures__';
@@ -149,14 +150,14 @@ const buildProps = (roleKibanaPrivileges: RoleKibanaPrivilege[]): PrivilegeSpace
     onEdit: (spacesIndex: number) => {},
     displaySpaces: [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         name: 'Default',
         description: '',
         disabledFeatures: [],
         _reserved: true,
       },
       {
-        id: 'marketing',
+        id: asSpaceId('marketing'),
         name: 'Marketing',
         description: '',
         disabledFeatures: [],

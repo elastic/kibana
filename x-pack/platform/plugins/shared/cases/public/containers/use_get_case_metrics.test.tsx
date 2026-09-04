@@ -39,7 +39,7 @@ describe('useGetCaseMetrics', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal)
+      expect(spyOnGetCaseMetrics).toHaveBeenCalledWith(basicCase.id, features, abortCtrl.signal)
     );
   });
 

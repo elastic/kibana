@@ -211,7 +211,7 @@ describe('Executor', () => {
         parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
         []
       );
-      expect(injectFn).toBeCalledTimes(5);
+      expect(injectFn).toHaveBeenCalledTimes(5);
     });
 
     describe('.extract', () => {
@@ -219,7 +219,7 @@ describe('Executor', () => {
         executor.extract(
           parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
         );
-        expect(extractFn).toBeCalledTimes(5);
+        expect(extractFn).toHaveBeenCalledTimes(5);
       });
 
       test('extracts references with the proper step key', () => {
@@ -292,7 +292,7 @@ describe('Executor', () => {
           ),
           version: '7.10.0',
         });
-        expect(migrateFn).toBeCalledTimes(5);
+        expect(migrateFn).toHaveBeenCalledTimes(5);
       });
 
       test('migrates expression function to expression function or chain of expression functions', () => {

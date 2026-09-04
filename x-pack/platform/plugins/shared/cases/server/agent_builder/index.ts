@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { CasesClient } from '../client';
 import type { CasesServerStartDependencies } from '../types';
@@ -16,10 +17,11 @@ import { attachmentsTool } from './tools/attachment_tools';
 import { getAttachmentsTool } from './tools/get_attachments_tool';
 import { manageAttachmentsTool } from './tools/manage_attachments_tool';
 import { observablesTool } from './tools/observable_tools';
-import { casesSkill } from './skills/cases_skill';
+import { buildCasesSkill } from './skills/cases_skill';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
+import { createCasesToolAvailability } from './utils/get_cases_tool_availability';
 
 /**
  * Registers all Cases agent builder tools:
@@ -45,22 +47,32 @@ export function registerCasesAgentBuilderTools(
     analyticsV2Enabled,
     attachmentsEnabled,
     templatesEnabled,
-  }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean }
+  }: { analyticsV2Enabled: boolean; attachmentsEnabled: boolean; templatesEnabled: boolean },
+  logger: Logger
 ): void {
-  agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient));
-  agentBuilder.tools.register(manageCasesTool(getCasesClient, templatesEnabled));
-  agentBuilder.tools.register(getAttachmentsTool(getCasesClient));
-  agentBuilder.tools.register(
-    manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
-  );
-  agentBuilder.tools.register(
-    attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled)
-  );
-  agentBuilder.tools.register(observablesTool(getCasesClient));
-  agentBuilder.skills.register(casesSkill);
+  const availability = createCasesToolAvailability(coreSetup, logger);
+  agentBuilder.tools.register({
+    ...searchCasesTool(coreSetup, getCasesClient),
+    availability,
+  });
+  agentBuilder.tools.register({
+    ...manageCasesTool(getCasesClient, templatesEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({ ...getAttachmentsTool(getCasesClient), availability });
+  agentBuilder.tools.register({
+    ...manageAttachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({
+    ...attachmentsTool(getCasesClient, unifiedAttachmentTypeRegistry, attachmentsEnabled),
+    availability,
+  });
+  agentBuilder.tools.register({ ...observablesTool(getCasesClient), availability });
+  agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
-    agentBuilder.skills.register(casesAnalyticsSkill);
+    agentBuilder.skills.register({ ...casesAnalyticsSkill, availability });
   }
   agentBuilder.attachments.registerType(
     createCaseAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]

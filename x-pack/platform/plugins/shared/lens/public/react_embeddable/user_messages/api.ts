@@ -15,6 +15,7 @@ import type {
   VisualizationContextHelper,
   LensInternalApi,
 } from '@kbn/lens-common';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
@@ -173,7 +174,7 @@ export function buildUserMessagesHelpers(
         datasourceMap,
         dataViewObject.indexPatterns
       ),
-      query: activeAttributes.state.query,
+      query: getRepresentativeQuery(activeAttributes) ?? EMPTY_KQL_QUERY,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',

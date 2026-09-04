@@ -76,7 +76,6 @@
     "@kbn/test-suites-src",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/config-schema",
-    "@kbn/ml-string-hash",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
     "@kbn/typed-react-router-config",
@@ -93,6 +92,7 @@
     "@kbn/kbn-client",
     "@kbn/apm-types",
     "@kbn/apm-api-shared",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/app-header"
   ]
 }

@@ -76,7 +76,7 @@ describe('PUT workpad', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(okResponse);
-    expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, updatedWorkpad);
+    expect(mockRouteContext.canvas.workpad.update).toHaveBeenCalledWith(id, updatedWorkpad);
   });
 
   it(`returns not found if existing workpad is not found`, async () => {
@@ -184,7 +184,7 @@ describe('update assets', () => {
     );
     expect(response.status).toBe(200);
 
-    expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, {
+    expect(mockRouteContext.canvas.workpad.update).toHaveBeenCalledWith(id, {
       assets,
     });
   });

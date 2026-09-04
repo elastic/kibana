@@ -10,6 +10,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 import { getServices } from '../services';
@@ -25,6 +26,7 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
   previewHtml: string | null;
   onLoadingChange: (isLoading: boolean) => void;
   onGenerateWithChat?: () => void;
@@ -46,7 +48,7 @@ const iframeCss = css({
 });
 
 const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
-  defaultMessage: 'Custom content panel',
+  defaultMessage: 'Custom panel',
 });
 
 export const CustomContentComponent = ({
@@ -59,6 +61,7 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
+  esqlVariables,
   previewHtml,
   onLoadingChange,
   onGenerateWithChat,
@@ -76,6 +79,7 @@ export const CustomContentComponent = ({
     projectRouting,
     query,
     filters,
+    esqlVariables,
   });
 
   const { agentBuilder } = getServices();

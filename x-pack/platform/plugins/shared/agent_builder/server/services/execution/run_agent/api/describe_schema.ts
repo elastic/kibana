@@ -6,9 +6,9 @@
  */
 
 import { mapValues, omit } from 'lodash';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { loadSchemaClosure } from './schema_closure';
 import { isRecord } from './types';
-import type { ApiTarget } from './types';
 
 // Character limit for inline definitions
 const MAX_INLINED_DEFINITION_CHARS = 1_200;

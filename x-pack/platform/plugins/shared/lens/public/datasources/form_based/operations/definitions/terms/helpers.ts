@@ -26,6 +26,7 @@ import type {
   TermsIndexPatternColumn,
   FramePublicAPI,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { operationDefinitionMap } from '..';
 import { filtersDefaultLabel } from '../filters/filters';
 import { isReferenced } from '../../layer_helpers';
@@ -33,7 +34,6 @@ import { isReferenced } from '../../layer_helpers';
 import type { FieldBasedOperationErrorMessage } from '..';
 
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
-import { isColumnOfType } from '../helpers';
 import {
   TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
   TERMS_WITH_MULTIPLE_TIMESHIFT,

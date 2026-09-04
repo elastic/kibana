@@ -15,6 +15,7 @@ import { ALLOWED_CATEGORIES, getQueriesFromOutput } from '../types';
 export const categoryComplianceEvaluator: KIQueryGenerationEvaluator = {
   name: 'category_compliance',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     if (queries.length === 0) {

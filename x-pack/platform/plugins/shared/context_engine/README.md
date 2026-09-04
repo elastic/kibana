@@ -8,12 +8,13 @@ AI indices attach a logical name to an existing user index pattern or data
 stream. AI index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
-| Method   | Path                                  | Description                     |
-| -------- | ------------------------------------- | ------------------------------- |
-| `PUT`    | `/api/context_engine/ai_index/{id}`   | Create or update an AI index    |
-| `GET`    | `/api/context_engine/ai_index/{id}`   | Get an AI index by id           |
-| `GET`    | `/api/context_engine/ai_index`        | List AI indices (max 100)       |
-| `DELETE` | `/api/context_engine/ai_index/{id}`   | Delete an AI index              |
+| Method   | Path                                                            | Description                          |
+| -------- | --------------------------------------------------------------- | ------------------------------------ |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
+| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
+| `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
 Notes:
 
@@ -39,6 +40,62 @@ Notes:
   Required, may be empty.
 - Deleting an AI index deletes **only** the AI index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
+- `feedback_analysis` configures this index's feedback loop. See
+  [Feedback analysis configuration](#feedback-analysis-configuration) below.
+
+## Feedback analysis configuration
+
+Signal *generation* is global — one background task, one advanced setting.
+Signal *analysis* is per AI index, because the improvement it proposes targets
+that index's KI pipeline. The configuration therefore lives on the AI index
+record:
+
+```json
+{
+  "enabled": true,
+  "agent_id": "my-analysis-agent",
+  "schedule": { "interval": "24h" },
+  "signal_time_range": { "type": "relative", "from": "now-30d" },
+  "signal_filter": "tags: query_error",
+  "allowed_actions": ["add_ki", "edit_ki"]
+}
+```
+
+- `enabled` is *desired* state. A schedule also needs credentials bound to it,
+  so the scheduler stays authoritative for whether analysis is really running.
+- `agent_id` is the Agent Builder agent that analyzes this index's signals. It
+  is also the agent the interactive "Analyze & improve" hand-off opens.
+- `schedule.interval` defaults to `24h` and must be at least 15 minutes. Every
+  run is an LLM analysis over a window of signals, so the interval is a cost
+  control rather than only a scheduling detail.
+- `signal_time_range` defaults to `now-30d` and is a **read filter only**: it
+  narrows which signals a run selects over, and never deletes or retains
+  them. A `relative` window must cover at least one schedule interval, or
+  signals arriving between runs would never be analyzed. Overlapping windows
+  are harmless, because re-proposals are de-duplicated downstream. An
+  `absolute` window is an open-ended "since this date", so it is always
+  accepted.
+- `signal_filter` is KQL narrowing which signals a run analyzes, applied on top
+  of `signal_time_range`. It is validated as KQL when written, so a typo cannot
+  silently disable every scheduled run. It belongs here rather than in the
+  generation pipeline: generation is global and stateful, so dropping a signal
+  at write time would drop it for every consumer, permanently, whereas a read
+  filter is per index and reversible.
+- `allowed_actions` defaults to the full [improvement action
+  taxonomy](common/http_api/improvement_actions.ts) and bounds what the
+  analysis may propose for this index. Deployments routinely want an agent that
+  may suggest KIs but never touch workflows, and an agent asked in a prompt to
+  avoid an action is not prevented from taking it — so the allowed set is
+  config that the apply step enforces, not prompt text. An empty list is
+  observe-only: the run still reports what it found but may not propose a
+  change.
+
+The dedicated `PUT .../feedback_analysis` route replaces only this block,
+leaving the rest of the record untouched. Unlike a full AI index replace it is
+permitted on **managed** AI indices: their definition is owned by the plugin
+that registers them, but which agent analyzes them and how often is operator
+preference. Without that carve-out, the indices that ship by default would be
+the only ones that could never be analyzed.
 
 ## Connector sources
 
@@ -79,4 +136,72 @@ user against the current space's signals index):
 
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
+
+## Improvements
+
+An **improvement** is a proposed change to one AI index's KI pipeline, derived
+from that index's signals. They live in the single global
+`context-engine-improvements` index, exposed to the server as
+`ContextEnginePluginStart.getImprovementsService(esClient)`. There is no HTTP
+surface yet: the analysis runner that produces improvements and the review UI
+that applies them come later.
+
+Unlike signals, the store is **global rather than per-space**: an improvement
+targets an AI index's KI pipeline, and the AI index registry has no space
+dimension. Two consequences are accepted deliberately — the analysis reads
+signals across all spaces, so an improvement's rationale can cite evidence from
+a space the reviewer cannot open; and a single index means one
+`deleteByAiIndex` cleans up completely when an AI index is deleted.
+
+The lifecycle is an **append log** rather than a mutable status field, so the
+record of what the loop did to a user's index survives every transition:
+
+- `improvement_id` is the stable lineage key, derived idempotently from
+  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
+  proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
+  so a re-run over the same latent problem appends a revision instead of
+  creating a near-duplicate row.
+- `revision_id` is the ES `_id`; every write, including APPLY / REJECT, appends
+  a revision carrying `previous_revision_id`.
+- `latest: true` marks the head of each lineage, and `list`/`get` filter on it.
+  A boolean flag rather than `collapse`, because `collapse` makes
+  `track_total_hits` count hits instead of groups and the review UI needs an
+  exact total to paginate.
+- Transitions are serialized by retiring the current head under
+  `if_seq_no`/`if_primary_term` before appending. A reviewer who loses that race
+  appends nothing and gets a conflict, so the log can never hold both an
+  `applied` and a `rejected` head for the same improvement.
+- A batch `write` skips only the lineages that lost that race, rather than
+  abandoning the batch. A bulk applies each operation independently, so the
+  other heads are already retired by then; dropping them would leave those
+  lineages with no `latest` revision at all.
+- OCC only guards a lineage that already has a head. The first revision of a
+  brand-new `improvement_id` has nothing to guard it, so two runs writing the
+  same new improvement concurrently can both append a head. Analysis runs for
+  one AI index are therefore expected to be serialized. Should it happen anyway,
+  it is self-healing rather than permanent: a head lookup returns every head of
+  a lineage and the next `write` or `transition` retires all of them, so the
+  lineage converges back to a single head.
+- `failed` is a status, not an error return: an approval whose apply step errors
+  stays visible and retryable, with the reason on `resolution.error`.
+- A rejection keeps the reviewer's rationale on `resolution.reason`, so the next
+  run knows a fix was considered and turned down rather than re-proposing it.
+
+### Privileges
+
+`context-engine-improvements` is a **user-owned index**, and needs no grant on
+the `kibana_system` role. The work is split so that no single actor needs both
+halves:
+
+- **Kibana** installs the `context-engine-improvements` index template at start,
+  which needs only the cluster-level `manage_index_templates` it already holds.
+- **The caller** creates the index on the first write, and Elasticsearch applies
+  the template's mappings to it. Every subsequent read and write is authorized
+  against that caller too, so `getImprovementsService` takes the client to act
+  through and callers pass a request-scoped one.
+
+This is what keeps the store off the internal user. Applying mappings lazily per
+operation instead — the usual storage-adapter pattern — would need `manage` on
+the index from whoever performed it, including anyone merely reading the review
+UI. Writers need `create_index` plus `write`; readers need `read`.
 

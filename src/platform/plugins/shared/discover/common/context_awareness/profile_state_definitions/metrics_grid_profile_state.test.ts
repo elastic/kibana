@@ -32,30 +32,40 @@ describe('METRICS_STATE_DEF', () => {
     expect(METRICS_STATE_DEF.key).toBe('metricsState');
   });
 
-  it('types sort as Url and grid settings as Persistent', () => {
+  it('types all fields as Url so they can be bookmarked and shared', () => {
     expect(METRICS_STATE_DEF.descriptor).toEqual({
-      counterAggregation: { type: ProfileStateType.Persistent },
-      gaugeAggregation: { type: ProfileStateType.Persistent },
-      histogramPercentile: { type: ProfileStateType.Persistent },
+      counterAggregation: { type: ProfileStateType.Url },
+      gaugeAggregation: { type: ProfileStateType.Url },
+      histogramPercentile: { type: ProfileStateType.Url },
       sortField: { type: ProfileStateType.Url },
       sortDirection: { type: ProfileStateType.Url },
+      dimensions: { type: ProfileStateType.Url },
+      searchTerm: { type: ProfileStateType.Url },
     });
   });
 
-  it('fills in defaults when expanding a partial sort (what the host writes to the URL)', () => {
+  it('fills in sibling Url defaults when expanding a partial state (what the host writes to the URL)', () => {
     const registry = createRegistry();
 
     const expanded = registry.pickStateByType({
-      profileStateMap: { [KEY]: { sortField: 'recency' } },
+      profileStateMap: { [KEY]: { counterAggregation: 'max' } },
       stateTypes: [ProfileStateType.Url],
       defaultsHandling: 'expand',
     });
 
-    // The sibling default is filled in so a shared link is self-contained.
-    expect(expanded[KEY]).toEqual({ sortField: 'recency', sortDirection: 'asc' });
+    // Sibling defaults are filled in so a shared link is self-contained.
+    expect(expanded[KEY]).toEqual({
+      counterAggregation: 'max',
+      gaugeAggregation: 'avg',
+      histogramPercentile: 'p95',
+      sortField: 'alphabetically',
+      sortDirection: 'asc',
+      dimensions: [],
+      searchTerm: '',
+    });
   });
 
-  it('strips an all-default sort so it does not reach the URL', () => {
+  it('strips an all-default state so it does not reach the URL', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({
@@ -75,6 +85,18 @@ describe('METRICS_STATE_DEF', () => {
     expect(stripped[KEY]).toBeUndefined();
   });
 
+  it('preserves a non-default grid setting so it reaches the URL', () => {
+    const registry = createRegistry();
+
+    const stripped = registry.pickStateByType({
+      profileStateMap: { [KEY]: { counterAggregation: 'max' } },
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+    expect(stripped).toEqual({ [KEY]: { counterAggregation: 'max' } });
+  });
+
   it('preserves a non-default sort so it reaches the URL', () => {
     const registry = createRegistry();
 
@@ -87,19 +109,7 @@ describe('METRICS_STATE_DEF', () => {
     expect(stripped).toEqual({ [KEY]: { sortField: 'recency', sortDirection: 'desc' } });
   });
 
-  it('keeps non-default grid settings out of URL state', () => {
-    const registry = createRegistry();
-
-    const urlState = registry.pickStateByType({
-      profileStateMap: { [KEY]: { counterAggregation: 'max', sortField: 'recency' } },
-      stateTypes: [ProfileStateType.Url],
-      defaultsHandling: 'strip',
-    });
-
-    expect(urlState).toEqual({ [KEY]: { sortField: 'recency' } });
-  });
-
-  it('still exposes sort to locally persisted state types (reload persistence)', () => {
+  it('still exposes Url fields to locally persisted state types (reload persistence)', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({

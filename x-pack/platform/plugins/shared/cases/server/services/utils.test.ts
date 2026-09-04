@@ -20,7 +20,7 @@ describe('bulkDecodeSOAttributes', () => {
 
   it('throws an error when SO is not valid', () => {
     // @ts-expect-error
-    expect(() => bulkDecodeSOAttributes([{ id: '1', attributes: {} }], typeToTest)).toThrowError(
+    expect(() => bulkDecodeSOAttributes([{ id: '1', attributes: {} }], typeToTest)).toThrow(
       'Invalid value "undefined" supplied to "foo"'
     );
   });
