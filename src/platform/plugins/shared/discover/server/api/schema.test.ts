@@ -12,7 +12,7 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import {
   discoverSessionApiDataSchema,
   type DiscoverSessionApiClassicTab,

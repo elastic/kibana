@@ -8,8 +8,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
-import { MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH } from '../constants';
+import {
+  UnifiedHistogramSuggestionType,
+  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
+} from '@kbn/discover-session-constants';
 
 export const visContextSchema = z
   .object({

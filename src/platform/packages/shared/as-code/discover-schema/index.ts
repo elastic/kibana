@@ -31,18 +31,3 @@ export type {
   DiscoverSessionApiEsqlTab,
   DiscoverSessionApiTab,
 } from './src/types';
-
-export {
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_SESSION_DESCRIPTION_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
-  MAX_DISCOVER_SESSION_CONTROL_PANELS,
-  MAX_DISCOVER_SESSION_TAGS,
-  MAX_SEARCH_QUERY_LENGTH,
-  MAX_DISCOVER_SESSION_TABS,
-  VIEW_MODE,
-  DataGridDensity,
-  UnifiedHistogramSuggestionType,
-} from '@kbn/discover-session-constants';

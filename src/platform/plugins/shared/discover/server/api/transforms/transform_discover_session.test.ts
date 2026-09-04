@@ -13,7 +13,7 @@ import {
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type {
   DiscoverSessionApiClassicTab,

@@ -52,7 +52,6 @@ export type {
   DiscoverSessionEmbeddableState,
 } from './embeddable';
 export { discoverSessionApiResponseSchema } from './api/schema';
-export { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 export { transformDiscoverSessionIn, transformDiscoverSessionOut } from './api/transforms';
 export type {
   DiscoverSessionApiClassicTab,

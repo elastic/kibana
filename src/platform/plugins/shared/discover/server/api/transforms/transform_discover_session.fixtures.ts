@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataGridDensity, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { DataGridDensity, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiData } from '../schema';

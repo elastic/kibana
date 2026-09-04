@@ -21,7 +21,7 @@ export type {
   DiscoverSessionTabTypeState,
 } from './types';
 
-export { VIEW_MODE } from '@kbn/discover-utils';
+export { VIEW_MODE } from '@kbn/discover-session-constants';
 
 export {
   SavedSearchType,

@@ -16,7 +16,7 @@ import {
   DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
 } from '@kbn/controls-constants';
-import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '../constants';
+import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '@kbn/discover-session-constants';
 
 const discoverSessionControlWidthSchema = z
   .union([

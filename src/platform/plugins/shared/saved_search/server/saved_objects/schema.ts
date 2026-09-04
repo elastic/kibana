@@ -9,8 +9,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity, HistogramPercentileValue } from '@kbn/discover-utils';
-import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { HistogramPercentileValue } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {

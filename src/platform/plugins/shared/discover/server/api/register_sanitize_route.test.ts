@@ -15,7 +15,7 @@ import {
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
 } from '../../common/constants';
 import { registerSanitizeRoute } from './register_sanitize_route';
-import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/as-code-discover-schema';
+import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/discover-session-constants';
 import type { DiscoverSessionSanitizeResponse } from './schema';
 import type { DiscoverSessionSanitizeRequest } from './session_sanitize';
 import {

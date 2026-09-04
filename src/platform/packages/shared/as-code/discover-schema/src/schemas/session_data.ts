@@ -15,17 +15,17 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '../constants';
-import { classicTabSchema, esqlTabSchema } from './tab';
-import { visContextSchema } from './vis_context';
-import { discoverSessionControlPanelsSchema } from './control_panel';
+import { MAX_DISCOVER_SESSION_TABS } from '@kbn/discover-session-constants';
 import {
   MAX_SESSION_TITLE_LENGTH,
   MAX_SESSION_DESCRIPTION_LENGTH,
   MAX_TAB_LABEL_LENGTH,
   MAX_BREAKDOWN_FIELD_LENGTH,
   MAX_DISCOVER_SESSION_TAGS,
-} from '../constants';
+} from '@kbn/discover-session-constants';
+import { classicTabSchema, esqlTabSchema } from './tab';
+import { visContextSchema } from './vis_context';
+import { discoverSessionControlPanelsSchema } from './control_panel';
 
 const discoverSessionTabPresentationSchema = z
   .object({

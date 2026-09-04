@@ -13,7 +13,7 @@ import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
-import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/as-code-discover-schema';
+import { MAX_DISCOVER_SESSION_TAGS } from '@kbn/discover-session-constants';
 import {
   DISCOVER_SESSION_API_VERSION,
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
