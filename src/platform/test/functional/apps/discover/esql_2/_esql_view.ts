@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /** Migration recommendation: MIGRATE, trimmed to ES|QL-specific assertions only (classic chrome covered by view_mode_toggle.spec.ts). */
+      // Migration recommendation: MIGRATE, trimmed to ES|QL-specific assertions (classic chrome covered by view_mode_toggle.spec.ts).
       it('should render esql view correctly', async function () {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
       });
 
-      /** Migration recommendation: MIGRATE, merged with the ?_tstart/?_tend test below as a matched pair. */
+      // Migration recommendation: MIGRATE, merged with the ?_tstart/?_tend test below.
       it('should not render the histogram for indices with no @timestamp field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       });
 
-      /** Migration recommendation: MIGRATE, merged with the logstash* variant below. */
+      // Migration recommendation: MIGRATE, merged with the logstash* variant below.
       it('should perform test query correctly', async function () {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -229,7 +229,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /** Migration recommendation: MIGRATE, merged into 'should perform test query correctly'. */
+      // Migration recommendation: MIGRATE, merged into 'should perform test query correctly'.
       it('should query an index pattern that doesnt translate to a dataview correctly', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /** Migration recommendation: MIGRATE; assert column order, not NULL_LABEL placeholder styling (component-owned). */
+      // Migration recommendation: MIGRATE; assert column order, not NULL_LABEL placeholder styling.
       it('should render correctly if there are empty fields', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -274,7 +274,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be('1');
       });
 
-      /** Migration recommendation: MIGRATE; replace render-count workaround with a Playwright time-range assertion. */
+      // Migration recommendation: MIGRATE; replace render-count workaround with a Playwright time-range assertion.
       it('should allow brushing time series', async () => {
         await timePicker.setDefaultAbsoluteRange();
         await discover.waitUntilTabIsLoaded();
@@ -379,11 +379,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, merged with the test below into one spec with
-       * two steps. Both assert the same thing — `ESQLEditor` is gone — and differ only in whether a
-       * saved search with unsaved changes is open.
-       */
+      // Migration recommendation: MIGRATE, merged with the saved-search variant below.
       it('should switch to a data view immediately', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -406,10 +402,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('ESQLEditor')).to.be(false);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. Distinct from the two above: it asserts the hit
-       * count and the full data view list survive the switch, and it does so after a page refresh.
-       */
       it('should show available data views and search results after switching to classic mode', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -511,7 +503,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('should see my current query in the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -522,7 +514,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
-      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('updating the query should add this to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -541,10 +533,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. The one case that needs the real editor —
-       * clicking a history row has to populate Monaco and re-run the query.
-       */
+      // Migration recommendation: MIGRATE; clicking a history row must populate Monaco and re-run.
       it('should select a query from the history and submit it', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -561,7 +550,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      /** Migration recommendation: UNIT (history_local_storage.test.ts). */
+      // Migration recommendation: UNIT (history_local_storage.test.ts).
       it('should add a failed query to the history', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -749,10 +738,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, folded into the split above as the `var0` case.
-       * It repeats the apply/save/reload/reopen sequence verbatim with a different column.
-       */
+      // Migration recommendation: MIGRATE, folded into the split above as the var0 case.
       it('should sort on custom vars too', async () => {
         const savedSearchName = 'testSortingForCustomVars';
 
@@ -854,7 +840,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
       });
 
-      /** Migration recommendation: MIGRATE, merged with 'should append an end in existing where clause' below. */
+      // Migration recommendation: MIGRATE, merged with 'should append an end in existing where clause' below.
       it('should append a where clause by clicking the table', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -905,10 +891,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      /**
-       * Migration recommendation: DELETE. Strict subset of the test below, which asserts the chart
-       * type is preserved *and* that a customized series color survives the same filter.
-       */
+      // Migration recommendation: DELETE; strict subset of the test below.
       it('should append a where clause by clicking the table without changing the chart type', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -944,7 +927,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(type).to.be('Line');
       });
 
-      /** Migration recommendation: MIGRATE; drop common.sleep(1000) debounce, assert committed color value instead. */
+      // Migration recommendation: MIGRATE; drop common.sleep(1000) — assert committed color value instead.
       it('should append a where clause by clicking the table without changing the chart type nor the visualization state', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -1091,10 +1074,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\` == "png"`);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT. Breakdown persistence through save, new search
-       * and reload is worth keeping as its own assertion.
-       */
       it('should save breakdown field in saved search', async () => {
         // revert the filter
         const testQuery = 'from logstash-*';
@@ -1116,10 +1095,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
       });
 
-      /**
-       * Migration recommendation: MIGRATE TO SCOUT, merged with 'should choose breakdown field'.
-       * Identical assertion, reached from the field stats popover instead of the breakdown selector.
-       */
+      // Migration recommendation: MIGRATE, merged with 'should choose breakdown field'.
       it('should choose breakdown field when selected from field stats', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();

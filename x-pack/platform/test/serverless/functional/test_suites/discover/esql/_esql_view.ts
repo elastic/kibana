@@ -7,8 +7,6 @@
 
 // Original test (remove during Scout migration): src/platform/test/functional/apps/discover/esql_2/_esql_view.ts
 
-/** Migration recommendation: DELETE. Subset of the stateful original; folds in via `tags.deploymentAgnostic`. */
-
 import expect from '@kbn/expect';
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
