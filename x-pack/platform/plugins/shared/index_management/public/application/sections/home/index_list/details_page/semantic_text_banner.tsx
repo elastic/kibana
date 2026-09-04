@@ -8,8 +8,9 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { LICENSE_MANAGEMENT_LOCATOR_ID } from '@kbn/license-management-plugin/public/locator';
 import { useAppContext } from '../../../../app_context';
+
+const LICENSE_MANAGEMENT_LOCATOR_ID = 'LICENSE_MANAGEMENT_LOCATOR';
 
 export const SemanticTextBanner = () => {
   const {
@@ -27,12 +28,12 @@ export const SemanticTextBanner = () => {
   const bannerTitle = i18n.translate(
     'xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.title',
     {
-      defaultMessage: 'Semantic field types are available with a Platinum license.',
+      defaultMessage: 'The semantic_text field type is available with a Platinum license',
     }
   );
 
   const bannerText = i18n.translate('xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.text', {
-    defaultMessage: 'Upgrade to use the semantic_text and semantic types in your indices.',
+    defaultMessage: 'Upgrade to use the semantic_text type in your indices.',
   });
 
   const manageLicenseLabel = i18n.translate(
@@ -45,6 +46,7 @@ export const SemanticTextBanner = () => {
   return isSemanticTextBannerDisplayable ? (
     <KbnInfoCallout
       title={bannerTitle}
+      size="s"
       text={bannerText}
       announceOnMount={false}
       data-test-subj="indexDetailsMappingsSemanticTextBanner"

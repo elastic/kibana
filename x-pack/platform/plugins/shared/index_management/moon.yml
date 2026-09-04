@@ -85,7 +85,6 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
-  - '@kbn/license-management-plugin'
 tags:
   - plugin
   - prod

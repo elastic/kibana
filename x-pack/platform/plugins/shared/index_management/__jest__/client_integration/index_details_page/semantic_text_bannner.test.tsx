@@ -16,6 +16,9 @@ jest.mock('../../../public/application/app_context', () => ({
   useAppContext: () => mockUseAppContext(),
 }));
 
+const BANNER_TITLE = 'The semantic_text field type is available with a Platinum license';
+const BANNER_TEXT = 'Upgrade to use the semantic_text type in your indices.';
+
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
 };
@@ -36,7 +39,7 @@ describe('SemanticTextBanner', () => {
     setItemSpy.mockRestore();
   });
 
-  describe('when user does not have at least a platinum license and can manage license', () => {
+  describe('when user can manage license', () => {
     beforeEach(() => {
       mockUseAppContext.mockReturnValue({
         core: {
@@ -69,18 +72,14 @@ describe('SemanticTextBanner', () => {
       renderWithIntl(<SemanticTextBanner />);
 
       const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
-      expect(banner.textContent).toContain(
-        'Semantic field types are available with a Platinum license.'
-      );
-      expect(banner.textContent).toContain(
-        'Upgrade to use the semantic_text and semantic types in your indices.'
-      );
+      expect(banner.textContent).toContain(BANNER_TITLE);
+      expect(banner.textContent).toContain(BANNER_TEXT);
     });
 
     it('should navigate to the license management page when clicked', () => {
       renderWithIntl(<SemanticTextBanner />);
 
-      const manageButton = screen.getByRole('button', { name: 'Manage license' });
+      const manageButton = screen.getByTestId('SemanticTextBannerManageLicenseButton');
       fireEvent.click(manageButton);
 
       expect(mockNavigate).toHaveBeenCalledWith({ page: 'dashboard' });
@@ -101,7 +100,7 @@ describe('SemanticTextBanner', () => {
     });
   });
 
-  describe('when user does not have at least a platinum license and cannot manage license', () => {
+  describe('when user cannot manage license', () => {
     beforeEach(() => {
       mockUseAppContext.mockReturnValue({
         core: {
@@ -127,19 +126,15 @@ describe('SemanticTextBanner', () => {
       renderWithIntl(<SemanticTextBanner />);
 
       expect(screen.getByTestId('indexDetailsMappingsSemanticTextBanner')).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Manage license' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('SemanticTextBannerManageLicenseButton')).not.toBeInTheDocument();
     });
 
     it('should contain content about the license requirement', () => {
       renderWithIntl(<SemanticTextBanner />);
 
       const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
-      expect(banner.textContent).toContain(
-        'Semantic field types are available with a Platinum license.'
-      );
-      expect(banner.textContent).toContain(
-        'Upgrade to use the semantic_text and semantic types in your indices.'
-      );
+      expect(banner.textContent).toContain(BANNER_TITLE);
+      expect(banner.textContent).toContain(BANNER_TEXT);
     });
   });
 });
