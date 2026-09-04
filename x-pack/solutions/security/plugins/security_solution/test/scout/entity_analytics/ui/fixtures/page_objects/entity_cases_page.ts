@@ -105,10 +105,6 @@ export class EntityCasesPage {
     await this.createNewCaseFromModalButton.click();
   }
 
-  async clickAddToExistingCase() {
-    await this.addToCaseItem.click();
-  }
-
   async fillCaseName(name: string) {
     await this.createCaseNameInput.waitFor();
     await this.createCaseNameInput.fill(name);
