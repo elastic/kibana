@@ -138,13 +138,12 @@ describe('config validation', () => {
     expect(() => {
       validateParams(
         connectorType,
-        { documents: ['should be an object'] },
+        { documents: ['should be an object or object string'] },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: ✖ Invalid input: expected record, received string
-        → at documents[0]"
-    `);
+    }).toThrowError(
+      'error validating action params: ✖ Unexpected token \'s\', "should be "... is not valid JSON'
+    );
   });
 });
 
