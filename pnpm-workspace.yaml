@@ -1,3 +1,155 @@
+nodeLinker: hoisted
+hoistPattern:
+  - '*'
+publicHoistPattern:
+  - '*'
+shamefullyHoist: true
+autoInstallPeers: true
+strictPeerDependencies: false
+dedupePeerDependents: true
+verifyDepsBeforeRun: false
+storeDir: .pnpm-store
+
+# Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
+# dependency's install/postinstall only when it's set true below. strictDepBuilds
+# fails the install if any build-script dependency is missing from this list, so
+# every one is an explicit, reviewed decision — never a blanket allow or block.
+# When a new dependency trips this, add it here with true (needed) or false (skip)
+# and a one-line reason.
+strictDepBuilds: true
+allowBuilds:
+  # Allowed — the script does required work:
+  'chromedriver': true # downloads the chromedriver binary for functional tests
+  'cypress': true # downloads the Cypress binary for functional tests
+  'esbuild': true # downloads the platform esbuild binary (transitive via esbuild-register)
+  'geckodriver': true # downloads the geckodriver binary for functional tests
+  # Denied — script is unnecessary, unwanted, or handled elsewhere:
+  '@mongodb-js/zstd': false # optional native dep of just-bash; lazy-loads with fallback
+  '@parcel/watcher': false # native build; prebuilds are sufficient
+  '@scarf/scarf': false # anonymous install analytics
+  '@swc/core': false # native build; prebuilds are sufficient
+  'backport': false # writes config into the home dir
+  'core-js': false # donation banner
+  'core-js-pure': false # donation banner
+  'es5-ext': false # prints an informational message
+  'lmdb': false # native bindings; prebuilds are sufficient
+  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
+  'msgpackr-extract': false # native bindings; prebuilds are sufficient
+  'msw': false # copies a worker script if configured; unused
+  'nice-napi': false # optional piscina nice-value helper
+  'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
+  'playwright-chromium': false # browsers installed explicitly in bootstrap
+  'protobufjs': false # prints a version-scheme warning
+  'puppeteer': false # browser download skipped via .puppeteerrc
+  'sharp': false # native build; prebuilds are sufficient
+
+# @elastic/esql suite versions, referenced via `catalog:` below (replaces the
+# deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
+# package.json; the renovate `esql-js` group bumps them together.
+catalog:
+  '@elastic/esql-grammar': '4.21.1'
+  '@elastic/esql-promql-grammar': '4.21.1'
+  '@elastic/esql-types': '4.21.1'
+  '@elastic/pretty-printer': '4.21.1'
+overrides:
+  # Generated from package.json#resolutions by `kbn bootstrap` — edit
+  # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
+  # START GENERATED OVERRIDES
+  '@aws-sdk/client-bedrock-agent-runtime': '3.1089.0'
+  '@aws-sdk/client-bedrock-runtime': '3.1089.0'
+  '@aws-sdk/client-kendra': '3.1089.0'
+  '@aws-sdk/credential-provider-node': '3.972.70'
+  '@babel/core': '7.29.7'
+  '@babel/generator': '7.29.8'
+  '@babel/helper-annotate-as-pure': '7.29.7'
+  '@babel/helper-module-imports': '7.29.7'
+  '@babel/helper-plugin-utils': '7.29.7'
+  '@babel/parser': '7.29.8'
+  '@babel/plugin-syntax-jsx': '7.29.7'
+  '@babel/plugin-transform-react-jsx': '7.29.7'
+  '@babel/runtime': '7.29.7'
+  '@babel/traverse': '7.29.8'
+  '@babel/types': '7.29.8'
+  '@elastic/charts>@reduxjs/toolkit': 'npm:@reduxjs/toolkit@1.9.7'
+  '@elastic/charts>immer': 'npm:immer@9.0.21'
+  '@elastic/charts>react-redux': 'npm:react-redux@7.2.8'
+  '@elastic/charts>redux': 'npm:redux@4.2.1'
+  '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
+  '@hapi/mimos>mime-db': '1.53.0'
+  '@hello-pangea/dnd': '18.0.1'
+  '@langchain/core': '1.2.3'
+  '@langchain/google-common': '2.2.0'
+  '@mswjs/interceptors': '0.41.6'
+  '@storybook/react-docgen-typescript-plugin': '1.0.6--canary.9.cd77847.0'
+  '@types/node': '24.10.13'
+  '@types/prop-types': '15.7.5'
+  '@types/react': '18.2.79'
+  '@types/react-dom': '18.2.25'
+  '@typescript-eslint/utils': '8.60.0'
+  'adm-zip': '0.6.0'
+  'apache-arrow': '20.x - 21.x'
+  'baseline-browser-mapping': '2.9.14'
+  'cheerio': '1.0.0-rc.12'
+  'chokidar': '3.5.3'
+  'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
+  'esbuild': '0.27.2'
+  'fast-xml-parser': '5.5.7'
+  'flatted': '3.4.2'
+  'globby>fast-glob': '3.3.3'
+  'hoist-non-react-statics': '3.3.2'
+  'isomorphic-fetch>node-fetch': '2.7.0'
+  'lodash': '4.18.1'
+  'pixelmatch': '5.3.0'
+  'qs': '6.16.0'
+  'remark-parse>trim': '1.0.1'
+  'serialize-javascript': '7.0.5'
+  'sharp': '0.35.2'
+  'socket.io-parser': '4.2.7'
+  'typescript': '6.0.3'
+  'util': '0.12.5'
+  'yauzl': '3.4.0'
+  'zod': '4.4.3'
+  # END GENERATED OVERRIDES
+  # pnpm-only pins: catalog: refs, drift pins, and scoped selectors with no
+  # package.json#resolutions counterpart.
+  '@babel/plugin-transform-typescript': '7.24.7'
+  '@bufbuild/protobuf': '2.5.2'
+  '@elastic/elasticsearch@9>@elastic/transport': '9.4.0'
+  '@elastic/esql-grammar': 'catalog:'
+  '@elastic/esql-promql-grammar': 'catalog:'
+  '@elastic/esql-types': 'catalog:'
+  '@elastic/pretty-printer': 'catalog:'
+  '@emnapi/core': '1.11.1'
+  '@emnapi/runtime': '1.11.1'
+  '@types/babel__traverse': '7.20.6'
+  '@types/eslint>@types/estree': '1.0.9'
+  '@types/glob-stream': '6.1.0'
+  '@types/hast>@types/unist': '2.0.3'
+  '@types/mdast>@types/unist': '2.0.3'
+  '@types/mdast@^3': '3.0.3'
+  '@types/mdast@^4': '4.0.4'
+  '@types/seedrandom': '2.4.28'
+  '@types/unist@^2': '2.0.3'
+  '@types/unist@^3': '3.0.3'
+  'colorette': '2.0.20'
+  'concaveman': '1.2.0'
+  'd3-format@3': '3.1.0'
+  'dom-accessibility-api@^0.5.9': '0.5.13'
+  'focus-lock': '0.11.6'
+  'gaxios>node-fetch': '2.7.0'
+  'glob-stream': '8.0.0'
+  'module-replacements': '2.3.2'
+  'node-jose>uuid': '11.1.1'
+  'nwsapi': '2.2.2'
+  'react-focus-lock': '2.9.5'
+  'react-focus-on': '3.9.1'
+  'vega-util': '2.1.0'
+  'vscode-languageserver-types': '3.17.5'
+minimumReleaseAgeExclude:
+  # First-party packages are trusted publishes; don't delay consuming fresh @elastic releases.
+  - '@elastic/*'
+
+
 # pnpm reads all workspace config from this file — pnpm 11 no longer reads
 # package.json "pnpm". The packages: block below is generated by `kbn_pm
 # bootstrap` from kibana.jsonc discovery; don't edit it by hand. Everything
@@ -1467,154 +1619,3 @@ packages:
   - 'x-pack/solutions/workplaceai/plugins/workplace_ai_app'
   - 'x-pack/solutions/workplaceai/test'
 # END GENERATED PACKAGES
-
-nodeLinker: hoisted
-hoistPattern:
-  - '*'
-publicHoistPattern:
-  - '*'
-shamefullyHoist: true
-autoInstallPeers: true
-strictPeerDependencies: false
-dedupePeerDependents: true
-verifyDepsBeforeRun: false
-storeDir: .pnpm-store
-
-# Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
-# dependency's install/postinstall only when it's set true below. strictDepBuilds
-# fails the install if any build-script dependency is missing from this list, so
-# every one is an explicit, reviewed decision — never a blanket allow or block.
-# When a new dependency trips this, add it here with true (needed) or false (skip)
-# and a one-line reason.
-strictDepBuilds: true
-allowBuilds:
-  # Allowed — the script does required work:
-  'chromedriver': true # downloads the chromedriver binary for functional tests
-  'cypress': true # downloads the Cypress binary for functional tests
-  'esbuild': true # downloads the platform esbuild binary (transitive via esbuild-register)
-  'geckodriver': true # downloads the geckodriver binary for functional tests
-  # Denied — script is unnecessary, unwanted, or handled elsewhere:
-  '@mongodb-js/zstd': false # optional native dep of just-bash; lazy-loads with fallback
-  '@parcel/watcher': false # native build; prebuilds are sufficient
-  '@scarf/scarf': false # anonymous install analytics
-  '@swc/core': false # native build; prebuilds are sufficient
-  'backport': false # writes config into the home dir
-  'core-js': false # donation banner
-  'core-js-pure': false # donation banner
-  'es5-ext': false # prints an informational message
-  'lmdb': false # native bindings; prebuilds are sufficient
-  'ms-chromium-edge-driver': false # downloads Edge driver only if EDGEDRIVER_DOWNLOAD_ON_INSTALL
-  'msgpackr-extract': false # native bindings; prebuilds are sufficient
-  'msw': false # copies a worker script if configured; unused
-  'nice-napi': false # optional piscina nice-value helper
-  'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
-  'playwright-chromium': false # browsers installed explicitly in bootstrap
-  'protobufjs': false # prints a version-scheme warning
-  'puppeteer': false # browser download skipped via .puppeteerrc
-  'sharp': false # native build; prebuilds are sufficient
-
-# @elastic/esql suite versions, referenced via `catalog:` below (replaces the
-# deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
-# package.json; the renovate `esql-js` group bumps them together.
-catalog:
-  '@elastic/esql-grammar': '4.21.1'
-  '@elastic/esql-promql-grammar': '4.21.1'
-  '@elastic/esql-types': '4.21.1'
-  '@elastic/pretty-printer': '4.21.1'
-overrides:
-  # Generated from package.json#resolutions by `kbn bootstrap` — edit
-  # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
-  # START GENERATED OVERRIDES
-  '@aws-sdk/client-bedrock-agent-runtime': '3.1089.0'
-  '@aws-sdk/client-bedrock-runtime': '3.1089.0'
-  '@aws-sdk/client-kendra': '3.1089.0'
-  '@aws-sdk/credential-provider-node': '3.972.70'
-  '@babel/core': '7.29.7'
-  '@babel/generator': '7.29.8'
-  '@babel/helper-annotate-as-pure': '7.29.7'
-  '@babel/helper-module-imports': '7.29.7'
-  '@babel/helper-plugin-utils': '7.29.7'
-  '@babel/parser': '7.29.8'
-  '@babel/plugin-syntax-jsx': '7.29.7'
-  '@babel/plugin-transform-react-jsx': '7.29.7'
-  '@babel/runtime': '7.29.7'
-  '@babel/traverse': '7.29.8'
-  '@babel/types': '7.29.8'
-  '@elastic/charts>@reduxjs/toolkit': 'npm:@reduxjs/toolkit@1.9.7'
-  '@elastic/charts>immer': 'npm:immer@9.0.21'
-  '@elastic/charts>react-redux': 'npm:react-redux@7.2.8'
-  '@elastic/charts>redux': 'npm:redux@4.2.1'
-  '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
-  '@hapi/mimos>mime-db': '1.53.0'
-  '@hello-pangea/dnd': '18.0.1'
-  '@langchain/core': '1.2.3'
-  '@langchain/google-common': '2.2.0'
-  '@mswjs/interceptors': '0.41.6'
-  '@storybook/react-docgen-typescript-plugin': '1.0.6--canary.9.cd77847.0'
-  '@types/node': '24.10.13'
-  '@types/prop-types': '15.7.5'
-  '@types/react': '18.2.79'
-  '@types/react-dom': '18.2.25'
-  '@typescript-eslint/utils': '8.60.0'
-  'adm-zip': '0.6.0'
-  'apache-arrow': '20.x - 21.x'
-  'baseline-browser-mapping': '2.9.14'
-  'cheerio': '1.0.0-rc.12'
-  'chokidar': '3.5.3'
-  'd3-scale>d3-color': 'npm:@elastic/kibana-d3-color@2.0.1'
-  'esbuild': '0.27.2'
-  'fast-xml-parser': '5.5.7'
-  'flatted': '3.4.2'
-  'globby>fast-glob': '3.3.3'
-  'hoist-non-react-statics': '3.3.2'
-  'isomorphic-fetch>node-fetch': '2.7.0'
-  'lodash': '4.18.1'
-  'pixelmatch': '5.3.0'
-  'qs': '6.16.0'
-  'remark-parse>trim': '1.0.1'
-  'serialize-javascript': '7.0.5'
-  'sharp': '0.35.2'
-  'socket.io-parser': '4.2.7'
-  'typescript': '6.0.3'
-  'util': '0.12.5'
-  'yauzl': '3.4.0'
-  'zod': '4.4.3'
-  # END GENERATED OVERRIDES
-  # pnpm-only pins: catalog: refs, drift pins, and scoped selectors with no
-  # package.json#resolutions counterpart.
-  '@babel/plugin-transform-typescript': '7.24.7'
-  '@bufbuild/protobuf': '2.5.2'
-  '@elastic/elasticsearch@9>@elastic/transport': '9.4.0'
-  '@elastic/esql-grammar': 'catalog:'
-  '@elastic/esql-promql-grammar': 'catalog:'
-  '@elastic/esql-types': 'catalog:'
-  '@elastic/pretty-printer': 'catalog:'
-  '@emnapi/core': '1.11.1'
-  '@emnapi/runtime': '1.11.1'
-  '@types/babel__traverse': '7.20.6'
-  '@types/eslint>@types/estree': '1.0.9'
-  '@types/glob-stream': '6.1.0'
-  '@types/hast>@types/unist': '2.0.3'
-  '@types/mdast>@types/unist': '2.0.3'
-  '@types/mdast@^3': '3.0.3'
-  '@types/mdast@^4': '4.0.4'
-  '@types/seedrandom': '2.4.28'
-  '@types/unist@^2': '2.0.3'
-  '@types/unist@^3': '3.0.3'
-  'colorette': '2.0.20'
-  'concaveman': '1.2.0'
-  'd3-format@3': '3.1.0'
-  'dom-accessibility-api@^0.5.9': '0.5.13'
-  'focus-lock': '0.11.6'
-  'gaxios>node-fetch': '2.7.0'
-  'glob-stream': '8.0.0'
-  'module-replacements': '2.3.2'
-  'node-jose>uuid': '11.1.1'
-  'nwsapi': '2.2.2'
-  'react-focus-lock': '2.9.5'
-  'react-focus-on': '3.9.1'
-  'vega-util': '2.1.0'
-  'vscode-languageserver-types': '3.17.5'
-minimumReleaseAgeExclude:
-  # First-party packages are trusted publishes; don't delay consuming fresh @elastic releases.
-  - '@elastic/*'

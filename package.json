@@ -2103,7 +2103,7 @@
     "@types/sinon": "22.0.0",
     "@types/source-map-support": "0.5.10",
     "@types/stats-lite": "2.2.2",
-    "@types/styled-components": "5.1.0",
+    "@types/styled-components": "5.1.36",
     "@types/supertest": "7.2.0",
     "@types/type-detect": "4.0.3",
     "@types/vinyl": "2.0.12",
