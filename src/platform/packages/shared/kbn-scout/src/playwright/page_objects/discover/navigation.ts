@@ -310,6 +310,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     await this.waitUntilTabIsLoaded();
   }
 
+  /** Opens a linked panel's inline Dashboard edit session in the full Discover editor. */
+  async openInlineEditorInDiscover() {
+    await this.page.testSubj.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitUntilTabIsLoaded();
+  }
+
   getCurrentQueryNameLocator(): Locator {
     // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
     // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.

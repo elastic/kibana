@@ -65,6 +65,18 @@ export abstract class SaveMixin extends NavigationMixin {
     await this.confirmSaveModal();
   }
 
+  /** Saves an embedded edit as a new library session and opens it in normal Discover mode. */
+  async saveEditorSessionAsNew(name: string) {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    const popover = this.page.testSubj.locator('discoverSaveButtonPopover');
+    await popover.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('interactiveSaveMenuItem');
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.confirmSaveModal();
+    await this.waitUntilTabIsLoaded();
+  }
+
   async saveUnsavedChanges() {
     await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
