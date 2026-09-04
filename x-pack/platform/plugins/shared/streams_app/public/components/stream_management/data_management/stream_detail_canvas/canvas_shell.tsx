@@ -30,6 +30,7 @@ import { CanvasMinimap } from './canvas_minimap';
 import { CanvasZoomControls } from './canvas_zoom_controls';
 import { canvasEdgeTypes, canvasNodeTypes } from './registry';
 import { getTranslateExtent } from './translate_extent';
+import { CanvasVisualExtent } from './canvas_visual_extent';
 
 // Lines are purely visual connectors that animate on hover — they can't be
 // selected or clicked. Module-level so the object/function identity stays stable
@@ -214,6 +215,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
           <CanvasZoomControls />
           <CanvasMinimap />
+          <CanvasVisualExtent coords={translateExtent} />
         </ReactFlow>
         {children}
       </EuiPanel>
