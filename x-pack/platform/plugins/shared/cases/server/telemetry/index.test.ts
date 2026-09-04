@@ -11,7 +11,11 @@ import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createCasesTelemetry } from '.';
 import { collectTelemetryData } from './collect_telemetry_data';
-import { CASE_TEMPLATE_SAVED_OBJECT, CASES_TELEMETRY_TASK_NAME } from '../../common/constants';
+import {
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASES_TELEMETRY_TASK_NAME,
+} from '../../common/constants';
 import type { ConfigType } from '../config';
 
 jest.mock('./collect_telemetry_data');
@@ -74,6 +78,20 @@ describe('createCasesTelemetry', () => {
           expect.objectContaining({ templatesEnabled: expected })
         );
         expect(allowedSavedObjectTypes.includes(CASE_TEMPLATE_SAVED_OBJECT)).toBe(expected);
+      }
+    );
+
+    /**
+     * The gate is a product choice, not a technical one: the field-definition type is in the
+     * telemetry repository whether or not the flag is on, so with it off the read would return
+     * the definitions a deployment kept after disabling the feature.
+     */
+    it.each([true, false])(
+      'reads field definitions regardless of the flag being %s',
+      async (enabled) => {
+        const { allowedSavedObjectTypes } = await runTelemetryTask({ enabled });
+
+        expect(allowedSavedObjectTypes).toContain(CASE_FIELD_DEFINITION_SAVED_OBJECT);
       }
     );
   });

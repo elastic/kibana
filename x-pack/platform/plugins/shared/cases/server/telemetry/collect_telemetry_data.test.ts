@@ -17,6 +17,10 @@ import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getEmptyTemplatesTelemetry, getTemplatesTelemetryData } from './queries/templates';
+import {
+  getEmptyFieldLibraryTelemetry,
+  getFieldLibraryTelemetryData,
+} from './queries/field_definitions';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -40,6 +44,19 @@ jest.mock('./queries/templates', () => {
   };
 });
 
+// The read is mocked outright, but the zeroed-shape builder keeps its real implementation so the
+// flag-off assertions check the shape the payload contract actually declares. It is still wrapped
+// in a `jest.fn` so one test can make it throw.
+jest.mock('./queries/field_definitions', () => {
+  const actual = jest.requireActual('./queries/field_definitions');
+
+  return {
+    ...actual,
+    getFieldLibraryTelemetryData: jest.fn(),
+    getEmptyFieldLibraryTelemetry: jest.fn(actual.getEmptyFieldLibraryTelemetry),
+  };
+});
+
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
 const getCasesSystemActionMock = getCasesSystemActionData as jest.Mock;
@@ -52,6 +69,10 @@ const getTemplatesMock = getTemplatesTelemetryData as jest.Mock;
 const getEmptyTemplatesMock = getEmptyTemplatesTelemetry as jest.Mock;
 const realGetEmptyTemplates = jest.requireActual('./queries/templates')
   .getEmptyTemplatesTelemetry as typeof getEmptyTemplatesTelemetry;
+const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
+const getEmptyFieldLibraryMock = getEmptyFieldLibraryTelemetry as jest.Mock;
+const realGetEmptyFieldLibrary = jest.requireActual('./queries/field_definitions')
+  .getEmptyFieldLibraryTelemetry as typeof getEmptyFieldLibraryTelemetry;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -80,10 +101,45 @@ const zeroedTemplatesScope = {
 
 const templatesScope = { ...zeroedTemplatesScope, total: 7 };
 
+const zeroedFieldLibraryScope = { total: 0, totalGlobal: 0, totalReusable: 0 };
+const populatedFieldLibraryScope = { total: 9, totalGlobal: 5, totalReusable: 4 };
+
 // The payload every pre-existing area is expected to contribute. Asserted whole rather than
 // per key, so an area that goes missing or gains a stray key fails the comparison.
 const preExistingPayload = () =>
   Object.fromEntries(Object.keys(preExistingAreas).map((area) => [area, area]));
+
+const expectedTemplatesOn = {
+  featureEnabled: true,
+  all: templatesScope,
+  sec: templatesScope,
+  obs: templatesScope,
+  main: templatesScope,
+};
+
+const expectedTemplatesOff = {
+  featureEnabled: false,
+  all: zeroedTemplatesScope,
+  sec: zeroedTemplatesScope,
+  obs: zeroedTemplatesScope,
+  main: zeroedTemplatesScope,
+};
+
+const expectedFieldLibraryOn = {
+  featureEnabled: true,
+  all: populatedFieldLibraryScope,
+  sec: populatedFieldLibraryScope,
+  obs: populatedFieldLibraryScope,
+  main: populatedFieldLibraryScope,
+};
+
+const expectedFieldLibraryOff = {
+  featureEnabled: false,
+  all: zeroedFieldLibraryScope,
+  sec: zeroedFieldLibraryScope,
+  obs: zeroedFieldLibraryScope,
+  main: zeroedFieldLibraryScope,
+};
 
 describe('collectTelemetryData', () => {
   const logger = loggingSystemMock.createLogger();
@@ -97,6 +153,7 @@ describe('collectTelemetryData', () => {
 
     // `resetAllMocks` drops the wrapped real implementation, so restore it.
     getEmptyTemplatesMock.mockImplementation(realGetEmptyTemplates);
+    getEmptyFieldLibraryMock.mockImplementation(realGetEmptyFieldLibrary);
 
     // Each pre-existing area resolves to its own key name, so an assertion that one area
     // survived cannot pass on another area's value.
@@ -107,6 +164,12 @@ describe('collectTelemetryData', () => {
       obs: templatesScope,
       main: templatesScope,
     });
+    getFieldLibraryMock.mockResolvedValue({
+      all: populatedFieldLibraryScope,
+      sec: populatedFieldLibraryScope,
+      obs: populatedFieldLibraryScope,
+      main: populatedFieldLibraryScope,
+    });
   });
 
   describe('when the templates feature flag is on', () => {
@@ -114,24 +177,21 @@ describe('collectTelemetryData', () => {
       const result = await collect(true);
 
       expect(getTemplatesMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
+      expect(getFieldLibraryMock).toHaveBeenCalledWith({ savedObjectsClient, logger });
       expect(result).toStrictEqual({
         ...preExistingPayload(),
-        templates: {
-          featureEnabled: true,
-          all: templatesScope,
-          sec: templatesScope,
-          obs: templatesScope,
-          main: templatesScope,
-        },
+        templates: expectedTemplatesOn,
+        fieldLibrary: expectedFieldLibraryOn,
       });
     });
   });
 
   describe('when the templates feature flag is off', () => {
-    it('does not query templates at all', async () => {
+    it('does not query templates or field definitions at all', async () => {
       await collect(false);
 
       expect(getTemplatesMock).not.toHaveBeenCalled();
+      expect(getFieldLibraryMock).not.toHaveBeenCalled();
     });
 
     it('reports the flag as off with zeroed scopes, alongside every pre-existing area', async () => {
@@ -139,13 +199,8 @@ describe('collectTelemetryData', () => {
 
       expect(result).toStrictEqual({
         ...preExistingPayload(),
-        templates: {
-          featureEnabled: false,
-          all: zeroedTemplatesScope,
-          sec: zeroedTemplatesScope,
-          obs: zeroedTemplatesScope,
-          main: zeroedTemplatesScope,
-        },
+        templates: expectedTemplatesOff,
+        fieldLibrary: expectedFieldLibraryOff,
       });
     });
   });
@@ -161,18 +216,33 @@ describe('collectTelemetryData', () => {
       // Absent, not zero-filled: a zero would be indistinguishable from a deployment that
       // has the feature on and no templates.
       expect(result).not.toHaveProperty('templates');
-    });
-
-    it('leaves every other area intact', async () => {
-      const result = await collect(true);
-
-      expect(result).toStrictEqual(preExistingPayload());
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        fieldLibrary: expectedFieldLibraryOn,
+      });
     });
 
     it('logs the failure', async () => {
       await collect(true);
 
       expect(logger.debug).toHaveBeenCalledWith('Failed collecting Cases templates telemetry data');
+    });
+  });
+
+  describe('when the field library read fails', () => {
+    beforeEach(() => {
+      getFieldLibraryMock.mockRejectedValue(new Error('failed'));
+    });
+
+    it('omits only the field library key, leaving every other area intact', async () => {
+      const result = await collect(true);
+
+      // Absent, not zeroed: zeroed would be indistinguishable from a deployment that has no
+      // field definitions.
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        templates: expectedTemplatesOn,
+      });
     });
   });
 
@@ -188,14 +258,17 @@ describe('collectTelemetryData', () => {
     it('omits templates and keeps every other area', async () => {
       const result = await collect(false);
 
-      expect(result).toStrictEqual(preExistingPayload());
+      expect(result).toStrictEqual({
+        ...preExistingPayload(),
+        fieldLibrary: expectedFieldLibraryOff,
+      });
     });
   });
 
   describe('when a pre-existing area fails', () => {
     // The pre-existing contract: any failure here discards the whole payload so that an
     // error is distinguishable from a cluster that simply does not use cases. This step
-    // must not change that, templates included.
+    // must not change that, templates and field library included.
     it.each(Object.keys(preExistingAreas))('empties the whole payload for %s', async (area) => {
       preExistingAreas[area as keyof typeof preExistingAreas].mockRejectedValue(
         new Error(`${area} boom`)
@@ -204,13 +277,37 @@ describe('collectTelemetryData', () => {
       expect(await collect(true)).toStrictEqual({});
     });
 
-    it('discards a successfully collected templates area too', async () => {
+    it('discards successfully collected templates and field library areas too', async () => {
       getCasesMock.mockRejectedValue(new Error('cases boom'));
 
       const result = await collect(true);
 
       expect(getTemplatesMock).toHaveBeenCalled();
+      expect(getFieldLibraryMock).toHaveBeenCalled();
       expect(result).toStrictEqual({});
+    });
+
+    /**
+     * Guards the shape rather than the current behaviour: while the read sits inside
+     * `Promise.all` its rejection is always handled. Hoisting it to a variable and catching at
+     * the `await` instead leaves it unhandled whenever a sibling area rejects first, and no
+     * other test here notices.
+     */
+    it('leaves no unhandled rejection when the field library loses the race', async () => {
+      const unhandled = jest.fn();
+      process.on('unhandledRejection', unhandled);
+
+      getFieldLibraryMock.mockImplementation(
+        () =>
+          new Promise((_, reject) => setImmediate(() => reject(new Error('field library failed'))))
+      );
+      preExistingAreas.cases.mockRejectedValue(new Error('cases failed'));
+
+      expect(await collect(true)).toStrictEqual({});
+      await new Promise(setImmediate);
+
+      process.off('unhandledRejection', unhandled);
+      expect(unhandled).not.toHaveBeenCalled();
     });
   });
 });

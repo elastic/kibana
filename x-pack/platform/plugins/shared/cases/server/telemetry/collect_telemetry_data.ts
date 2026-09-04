@@ -14,7 +14,16 @@ import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getEmptyTemplatesTelemetry, getTemplatesTelemetryData } from './queries/templates';
-import type { CasesTelemetry, CollectCasesTelemetryParams, TemplatesTelemetry } from './types';
+import {
+  getEmptyFieldLibraryTelemetry,
+  getFieldLibraryTelemetryData,
+} from './queries/field_definitions';
+import type {
+  CasesTelemetry,
+  CollectCasesTelemetryParams,
+  FieldLibraryTelemetry,
+  TemplatesTelemetry,
+} from './types';
 
 /**
  * The templates area, reporting the flag state alongside the counts.
@@ -42,6 +51,29 @@ const collectTemplatesTelemetry = async ({
   };
 };
 
+/**
+ * Skipped when the flag is off by choice, not by constraint. Unlike templates, the
+ * field-definition type stays in the telemetry repository either way — see the `templates` flag
+ * in `server/config.ts` — so this would otherwise report the definitions a deployment kept after
+ * disabling the feature. Reporting the flag keeps that decision visible.
+ *
+ * Throws on a read failure; the caller owns the error boundary.
+ */
+const collectFieldLibraryTelemetry = async ({
+  savedObjectsClient,
+  logger,
+  templatesEnabled,
+}: CollectCasesTelemetryParams): Promise<FieldLibraryTelemetry> => {
+  if (!templatesEnabled) {
+    return { featureEnabled: false, ...getEmptyFieldLibraryTelemetry() };
+  }
+
+  return {
+    featureEnabled: true,
+    ...(await getFieldLibraryTelemetryData({ savedObjectsClient, logger })),
+  };
+};
+
 export const collectTelemetryData = async ({
   savedObjectsClient,
   logger,
@@ -58,6 +90,7 @@ export const collectTelemetryData = async ({
       configuration,
       casesSystemAction,
       templates,
+      fieldLibrary,
     ] = await Promise.all([
       getCasesTelemetryData({ savedObjectsClient, logger }),
       getUserActionsTelemetryData({ savedObjectsClient, logger }),
@@ -72,6 +105,14 @@ export const collectTelemetryData = async ({
         logger.debug(err);
         return undefined;
       }),
+      collectFieldLibraryTelemetry({ savedObjectsClient, logger, templatesEnabled }).catch(
+        (err) => {
+          logger.debug('Failed collecting Cases field library telemetry data');
+          logger.debug(err);
+
+          return undefined;
+        }
+      ),
     ]);
 
     return {
@@ -84,6 +125,7 @@ export const collectTelemetryData = async ({
       configuration,
       casesSystemAction,
       ...(templates !== undefined ? { templates } : {}),
+      ...(fieldLibrary !== undefined ? { fieldLibrary } : {}),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
@@ -92,7 +134,12 @@ export const collectTelemetryData = async ({
      * Return an empty object instead of an empty state to distinguish between
      * clusters that they do not use cases thus all counts will be zero
      * and clusters where an error occurred.
+     *
+     * The isolation above is one-directional: a templates or field library failure costs
+     * only its own numbers, but a failure in any area collected here still discards the
+     * whole payload.
      */
+
     return {};
   }
 };

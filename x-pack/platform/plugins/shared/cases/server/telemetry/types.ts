@@ -374,6 +374,7 @@ export interface CasesTelemetry {
     totalRules: number;
   };
   templates: TemplatesTelemetry;
+  fieldLibrary: FieldLibraryTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -387,3 +388,4 @@ export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
+export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
