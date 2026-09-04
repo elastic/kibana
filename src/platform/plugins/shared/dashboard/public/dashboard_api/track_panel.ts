@@ -40,7 +40,7 @@ const getRelatedPanelsFromSiblings = (
     .filter((result) => result !== null);
 
   // combineLatest([]) completes without emitting, so use of([]) when nobody publishes relatedPanels$.
-  if (relatedPanelPublishers.length === 0) {
+  if (!relatedPanelPublishers.length) {
     return of([]);
   }
 
