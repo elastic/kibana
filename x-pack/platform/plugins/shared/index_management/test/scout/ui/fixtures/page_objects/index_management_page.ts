@@ -80,7 +80,9 @@ export class IndexManagement extends AbstractPageObject {
   async navigateToIndexManagementTab(
     tab: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
   ) {
-    await this.goto();
+    // Deep-link straight to the tab's route so we don't load the default Indices
+    // list and then click the tab: that click raced app bootstrap and timed out.
+    await this.page.gotoApp(`management/data/index_management/${tab}`);
     const tabMap = {
       indices: 'indicesTab',
       data_streams: 'data_streamsTab',
@@ -88,7 +90,7 @@ export class IndexManagement extends AbstractPageObject {
       component_templates: 'component_templatesTab',
       enrich_policies: 'enrich_policiesTab',
     };
-    await this.page.testSubj.locator(tabMap[tab]).click();
+    await expect(this.page.testSubj.locator(tabMap[tab])).toBeVisible();
   }
 
   async clickNextButton() {
