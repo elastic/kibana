@@ -148,6 +148,9 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       expect(accepted.length).toBeGreaterThan(0);
       expect(accepted.length).toBeLessThan(2);
 
+      const loser = firstResume.status === 200 ? secondResume : firstResume;
+      expect([409, 500]).toContain(loser.status);
+
       const completed = await workflowsApi.waitForStatus({
         workflowExecutionId,
         status: ExecutionStatus.COMPLETED,

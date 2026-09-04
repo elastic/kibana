@@ -303,15 +303,6 @@ export class WorkflowsApiService {
   }
 
   /** POST /api/workflows/executions/{id}/resume — resume a paused HITL execution. */
-  async resume(
-    workflowExecutionId: string,
-    input: Record<string, unknown>
-  ): Promise<{ success: boolean; executionId: string; message: string }> {
-    const response = await this.rawResume(workflowExecutionId, input);
-    return response.data;
-  }
-
-  /** POST /api/workflows/executions/{id}/resume — resume, with response status. */
   async rawResume(
     workflowExecutionId: string,
     input: Record<string, unknown>,
