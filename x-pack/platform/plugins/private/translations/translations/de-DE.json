@@ -40583,7 +40583,6 @@
     "xpack.security.management.users.showReservedUsersLabel": "Reservierte Benutzer anzeigen",
     "xpack.security.management.users.statusColumnName": "Status",
     "xpack.security.management.users.tableCaption": "Nutzer",
-    "xpack.security.management.users.userForm.backToUsersButton": "Zurück zu Nutzern",
     "xpack.security.management.users.userForm.cancelButton": "Abbrechen",
     "xpack.security.management.users.userForm.changingUserNameAfterCreationDescription": "Der Benutzername kann nach der Kontoerstellung nicht mehr geändert werden.",
     "xpack.security.management.users.userForm.confirmPasswordInvalidError": "Die Passwörter stimmen nicht überein.",

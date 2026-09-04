@@ -10,16 +10,31 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
 
+/** Descriptor for a single tab passed to the root `tabs` prop. */
+export interface FlyoutTabProps {
+  /** Stable identifier linking this tab to its `Body.TabPanel`. */
+  id: string;
+  /** Tab label rendered inside `EuiTab`. */
+  label: ReactNode;
+  disabled?: boolean;
+  prepend?: ReactNode;
+  append?: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
+export interface FlyoutBodyTabPanelProps {
+  /** The `id` of the root `tabs` entry this panel belongs to. Non-matching ids are silently ignored in tabbed mode. */
+  tabId: string;
+  children?: ReactNode;
+  'data-test-subj'?: string;
+}
+
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header as an H3. */
+  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
-  /**
-   * Reserved for future header parts (Header.Badge, Header.InfoBlock, etc.).
-   * Free-form content placed here is not rendered; put it in the Body instead.
-   */
-  children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
   titleIcon?: EuiIconProps['type'];
   /** Tooltip shown from the title icon. */
@@ -36,7 +51,7 @@ export interface FlyoutHeaderProps {
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
-  /** Arbitrary content rendered in source order. */
+  /** `Body.TabPanel` parts, and/or arbitrary content rendered as-is in source order. */
   children?: ReactNode;
 }
 
@@ -93,4 +108,12 @@ export type FlyoutTemplateProps = Pick<
   'data-test-subj'?: string;
   /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
   children?: ReactNode;
+  /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
+  tabs?: FlyoutTabProps[];
+  /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
+  defaultSelectedTabId?: string;
+  /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
+  selectedTabId?: string;
+  /** Called when the user clicks a tab. */
+  onTabChange?: (id: string) => void;
 };

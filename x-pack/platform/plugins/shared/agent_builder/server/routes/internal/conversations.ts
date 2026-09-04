@@ -139,7 +139,10 @@ export function registerInternalConversationRoutes({
         const { metadata } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
-        const updatedConversation = await client.patchMetadata(conversationId, metadata);
+        const { conversation: updatedConversation } = await client.patchMetadata(
+          conversationId,
+          metadata
+        );
 
         return response.ok<PatchConversationMetadataResponse>({
           body: {

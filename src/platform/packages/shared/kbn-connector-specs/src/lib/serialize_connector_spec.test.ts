@@ -26,6 +26,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -50,6 +51,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -76,6 +78,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -105,6 +108,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -134,6 +138,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -164,6 +169,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -193,6 +199,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -230,6 +237,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -268,6 +276,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -306,6 +315,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
@@ -435,6 +445,7 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },

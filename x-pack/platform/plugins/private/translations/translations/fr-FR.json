@@ -40474,7 +40474,6 @@
     "xpack.security.management.users.showReservedUsersLabel": "Afficher les utilisateurs réservés",
     "xpack.security.management.users.statusColumnName": "Statut",
     "xpack.security.management.users.tableCaption": "Utilisateurs",
-    "xpack.security.management.users.userForm.backToUsersButton": "Retour aux utilisateurs",
     "xpack.security.management.users.userForm.cancelButton": "Annuler",
     "xpack.security.management.users.userForm.changingUserNameAfterCreationDescription": "Le nom de l'utilisateur ne peut pas être modifié après la création du compte.",
     "xpack.security.management.users.userForm.confirmPasswordInvalidError": "Les mots de passe ne correspondent pas.",

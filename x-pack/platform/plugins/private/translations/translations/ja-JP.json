@@ -40695,7 +40695,6 @@
     "xpack.security.management.users.showReservedUsersLabel": "リザーブされたユーザーを表示",
     "xpack.security.management.users.statusColumnName": "ステータス",
     "xpack.security.management.users.tableCaption": "ユーザー",
-    "xpack.security.management.users.userForm.backToUsersButton": "ユーザーに戻る",
     "xpack.security.management.users.userForm.cancelButton": "キャンセル",
     "xpack.security.management.users.userForm.changingUserNameAfterCreationDescription": "アカウントの作成後は、ユーザー名を変更できません。",
     "xpack.security.management.users.userForm.confirmPasswordInvalidError": "パスワードが一致していません。",

@@ -40708,7 +40708,6 @@
     "xpack.security.management.users.showReservedUsersLabel": "显示保留用户",
     "xpack.security.management.users.statusColumnName": "状态",
     "xpack.security.management.users.tableCaption": "用户",
-    "xpack.security.management.users.userForm.backToUsersButton": "返回到用户",
     "xpack.security.management.users.userForm.cancelButton": "取消",
     "xpack.security.management.users.userForm.changingUserNameAfterCreationDescription": "创建帐户后无法更改用户名。",
     "xpack.security.management.users.userForm.confirmPasswordInvalidError": "密码不匹配。",

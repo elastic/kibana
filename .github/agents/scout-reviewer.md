@@ -19,7 +19,7 @@ Do not run this check on backport PRs (they usually have `backport` label and/or
 
 ## Review instructions
 
-Follow `.claude/skills/scout-best-practices-reviewer/SKILL.md` for the **Critical checks** (highest-priority — do them first), the general checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
+Follow `.agents/skills/scout-best-practices-reviewer/SKILL.md` for the **Critical checks** (highest-priority — do them first), the general checklist, reuse rules, and migration parity. Ignore any output formatting in that file — use the format below. Use the GitHub tools and local file inspection to explore as needed.
 
 If any changed files match `x-pack/solutions/security/**/test/scout*/**` or `**/kbn-scout-security/**`, also apply `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer/SKILL.md` for Security Solution-specific checks. Apply it after the general skill — do not run the general skill a second time.
 
@@ -34,6 +34,16 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 5. Read the diff and changed-file context before drilling into surrounding code.
 6. Inspect nearby implementation and tests to confirm whether the concern is real and whether existing fixtures, page objects, or API services already cover the helper being introduced.
 7. If prior review comments are available in the provided context, avoid repeating feedback that already applies to unchanged lines (see **Re-run behavior** below).
+
+### Evidence gate — required before posting
+
+Apply this gate to every finding, especially Critical checks:
+
+1. Read the exact best-practices section linked by the matching skill rule. Copying the rule name or URL from the skill does not count as consulting the source.
+2. Positively verify every premise needed for the finding against repository content. Absence from the PR diff is not evidence that code or configuration is absent elsewhere.
+3. Discover repository paths through documentation, parent-directory listings, package exports, or existing references; do not infer filesystem layout from an import package name. Before claiming that a file, config, helper, or abstraction is missing, inspect its expected parent directory at the PR head SHA. Before suggesting an API or option, verify it in a type definition, implementation, or existing usage.
+4. Treat `404`, `429`, empty results, truncated results, and other failed or incomplete tool responses as unresolved verification — never as evidence of absence. Honor retry guidance or use a materially different read path. If a required premise remains unresolved, omit that finding; if no verified findings remain, call `noop`.
+5. Re-read the final comment payload before submitting it. Ensure code samples preserve their quotes and are valid examples copied or adapted from a verified repository API. When using the shell to construct a multiline body, write the Markdown with a quoted heredoc and encode the file as JSON; do not embed it in a shell single-quoted argument.
 
 ## Output
 
@@ -53,14 +63,14 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 
 <Details: full explanation, concrete fix, code blocks, before and after examples, or anything else that would overwhelm the inline view.>
 
-<sup>Share feedback in the #appex-qa Slack channel.</sup>
+<sup>Share feedback in the #kibana-qa Slack channel.</sup>
 
 </details>
 ```
 
 - **Rule link (optional).** If a best-practices section genuinely matches, state the rule as a **Markdown link** whose text is the section heading and whose URL is the section-scoped URL (see routing below). If no section matches, or if a match would feel forced or contrived (e.g. making the heading fit a finding it doesn't really describe), **omit the rule link line entirely** and start the comment with the overview prose. Do not invent a match, do not reuse a vaguely-related section, and do not fall back to a doc-root link. A finding without a rule link is fine when the overview alone is self-explanatory.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
-- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules. Always end the details block with the `#appex-qa` feedback line shown above.
+- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules. Always end the details block with the `#kibana-qa` feedback line shown above.
 
 If the finding genuinely fits in one line (e.g. a nit about a typo'd constant name), you can skip the `<details>` block. Use judgment — the goal is a scannable PR, not rigid formatting.
 
@@ -72,7 +82,7 @@ Scout best practices live in three files. Don't guess from keywords — read the
 - API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/api-best-practices`
 - General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices`
 
-When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
+For Critical checks, also read every additional document linked from the matching skill row. When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
 
 ### Always include the section anchor (when you link)
 

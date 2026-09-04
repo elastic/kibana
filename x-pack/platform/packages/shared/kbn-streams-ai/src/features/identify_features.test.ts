@@ -143,7 +143,7 @@ describe('identifyFeatures', () => {
 
     const result = await identifyFeatures({
       streamName: 'logs.test',
-      sampleDocuments: [],
+      sampleDocuments: [{ _id: 'doc-1', fields: { message: 'test message' } }],
       inferenceClient,
       systemPrompt: 'system prompt',
       logger,
@@ -167,7 +167,7 @@ describe('identifyFeatures', () => {
           function: 'finalize_features',
         },
         input: {
-          sample_documents: '[]',
+          sample_documents: JSON.stringify([{ _id: 'doc-1', fields: { message: 'test message' } }]),
           previously_identified_features: JSON.stringify([
             {
               id: 'existing',

@@ -43,8 +43,6 @@ const mockManagement = {
   getWorkflowExecution: jest.fn(),
   getWorkflow: jest.fn(),
   runWorkflow: jest.fn(),
-  getWorkflowExecutions: jest.fn(),
-  searchStepExecutions: jest.fn(),
 };
 
 const mockWorkflowsManagement = {
@@ -85,6 +83,7 @@ const makeAttrs = (overrides: Partial<InvestigationAttributes> = {}): Investigat
   concurrency_key: undefined,
   executed_by: 'test-user',
   created_at: '2024-01-01T00:00:00Z',
+  started_at: '2024-01-01T00:00:00Z',
   completed_at: '2024-01-01T01:00:00Z',
   summary: 'All clear.',
   conclusion: 'No issues found.',
@@ -121,891 +120,223 @@ const createMockRepository = (): jest.Mocked<InvestigationRepository> => ({
 beforeEach(() => {
   jest.clearAllMocks();
   installInvestigationAgentMock.mockResolvedValue(undefined);
-  mockManagement.searchStepExecutions.mockResolvedValue({ results: [], total: 0 });
   repository = createMockRepository();
 });
 
 describe('NightshiftInvestigationsClient.get()', () => {
-  const makeExecution = (overrides: Record<string, unknown> = {}) => ({
-    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-    status: ExecutionStatus.RUNNING,
-    startedAt: '2024-01-01T00:00:00Z',
-    finishedAt: undefined as string | undefined,
-    context: undefined as Record<string, unknown> | undefined,
-    stepExecutions: undefined as
-      | Array<{ stepId?: string; stepType?: string; startedAt?: string; output: unknown }>
-      | undefined,
-    error: undefined as { message: string } | undefined,
-    ...overrides,
+  it('throws InvestigationNotFoundError when the record does not exist', async () => {
+    await expect(makeClient().get('inv-123')).rejects.toThrow(InvestigationNotFoundError);
   });
 
-  describe('not-found guards', () => {
-    it('throws InvestigationNotFoundError when execution is null', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(null);
-      await expect(makeClient().get('inv-123')).rejects.toThrow(InvestigationNotFoundError);
-      await expect(makeClient().get('inv-123')).rejects.toThrow('"inv-123" not found');
-    });
+  it('returns full structured output from the store', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({
+        conversation_id: 'conv-1',
+        impact: { entities: [{ name: 'checkout-service' }] },
+      })
+    );
+    const result = await makeClient().get('inv-1');
 
-    it('throws InvestigationNotFoundError when workflowId does not match', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ workflowId: 'some-other-workflow' })
-      );
-      await expect(makeClient().get('inv-123')).rejects.toThrow(InvestigationNotFoundError);
-    });
-  });
-
-  describe('status mapping', () => {
-    const cases: Array<[ExecutionStatus, string]> = [
-      [ExecutionStatus.PENDING, 'pending'],
-      [ExecutionStatus.QUEUED, 'pending'],
-      [ExecutionStatus.RUNNING, 'running'],
-      [ExecutionStatus.WAITING, 'running'],
-      [ExecutionStatus.WAITING_FOR_INPUT, 'running'],
-      [ExecutionStatus.WAITING_FOR_CHILD, 'running'],
-      [ExecutionStatus.COMPLETED, 'completed'],
-      [ExecutionStatus.FAILED, 'failed'],
-      [ExecutionStatus.TIMED_OUT, 'failed'],
-      [ExecutionStatus.CANCELLED, 'cancelled'],
-      [ExecutionStatus.SKIPPED, 'cancelled'],
-    ];
-
-    it.each(cases)('%s → %s', async (executionStatus, expectedStatus) => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ status: executionStatus })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.status).toBe(expectedStatus);
-    });
-
-    it('unknown status defaults to running and logs a warning', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ status: 'totally-unknown' as ExecutionStatus })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.status).toBe('running');
-      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('totally-unknown'));
+    expect(result).toEqual({
+      investigation_id: 'inv-1',
+      subject: { type: 'alert', id: 'alert-42' },
+      trigger_type: 'automatic',
+      status: 'completed',
+      created_at: '2024-01-01T00:00:00Z',
+      started_at: '2024-01-01T00:00:00Z',
+      completed_at: '2024-01-01T01:00:00Z',
+      concurrency_key: undefined,
+      executed_by: 'test-user',
+      error: undefined,
+      summary: 'All clear.',
+      conclusion: 'No issues found.',
+      severity: undefined,
+      hypotheses: [{ candidate: 'h1', confidence: 0.9, status: 'confirmed' }],
+      recommendations: [{ title: 'Keep monitoring' }],
+      blind_spots: [{ title: 'Blind spot', description: 'desc' }],
+      trigger_feedback: [],
+      conversation_id: 'conv-1',
+      impact: { entities: [{ name: 'checkout-service' }] },
     });
   });
 
-  describe('subject recovery', () => {
-    it('recovers significant_event subject from context.inputs', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: { context: { source: 'significant_event', significant_event_id: 'se-42' } },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'significant_event', id: 'se-42' });
-    });
+  it('returns subject.summary from the stored subject_summary attribute', async () => {
+    const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+    repository.get.mockResolvedValue(
+      makeRecord({
+        subject_type: 'significant_event',
+        subject_id: 'event-42',
+        subject_summary: long,
+      })
+    );
 
-    it('recovers significant_event subject from direct workflow input', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'significant_event', id: 'event-42' });
-    });
+    const result = await makeClient().get('inv-1');
 
-    it('recovers alert subject from context.inputs', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: { inputs: { context: { source: 'alert', alert_id: 'alert-99' } } },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
-    });
-
-    it('prefers the stable event_id over significant_event_id when both are present', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: {
-                source: 'significant_event',
-                event_id: 'checkout-latency-breach',
-                significant_event_id: 'event-uuid-1',
-              },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({
-        type: 'significant_event',
-        id: 'checkout-latency-breach',
-      });
-    });
-
-    it('returns no subject when the recovered significant_event id is empty', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toBeUndefined();
-    });
-
-    it('returns no subject when context is missing', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toBeUndefined();
-    });
-
-    it('returns no subject when the source is unrecognized', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ context: { inputs: { context: { source: 'chat' } } } })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toBeUndefined();
-    });
-
-    it('recovers trigger_type from context.inputs', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: { context: { source: 'alert', alert_id: 'a-1', trigger_type: 'automatic' } },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.trigger_type).toBe('automatic');
-    });
-
-    it('returns no trigger_type when context is missing', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
-      const result = await makeClient().get('inv-1');
-      expect(result.trigger_type).toBeUndefined();
+    expect(result.subject).toEqual({
+      type: 'significant_event',
+      id: 'event-42',
+      summary: long,
     });
   });
 
-  describe('subject reference', () => {
-    it('returns the summary verbatim, however long', async () => {
-      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: {
-                source: 'significant_event',
-                event_id: 'event-42',
-                summary: long,
-              },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({
-        type: 'significant_event',
-        id: 'event-42',
-        summary: long,
-      });
-    });
-
-    it('adds the summary to an alert subject', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({
-        type: 'alert',
-        id: 'alert-99',
-        summary: 'CPU saturation',
-      });
-    });
-
-    it('omits the summary when the caller supplied none', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          context: {
-            inputs: {
-              message: 'Investigation requested for alert alert-99',
-              context: { source: 'alert', alert_id: 'alert-99' },
-            },
-          },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
-    });
+  it('omits subject.summary when subject_summary is absent', async () => {
+    repository.get.mockResolvedValue(makeRecord());
+    const result = await makeClient().get('inv-1');
+    expect(result.subject).toEqual({ type: 'alert', id: 'alert-42' });
   });
 
-  describe('terminal state handling', () => {
-    it('sets completed_at when status is completed', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ status: ExecutionStatus.COMPLETED, finishedAt: '2024-01-02T00:00:00Z' })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.completed_at).toBe('2024-01-02T00:00:00Z');
-    });
+  it('returns the stored running status without consulting the workflow engine', async () => {
+    repository.get.mockResolvedValue(makeRecord({ status: 'running', completed_at: undefined }));
 
-    it('does not set completed_at when status is running', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ status: ExecutionStatus.RUNNING, finishedAt: '2024-01-02T00:00:00Z' })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.completed_at).toBeUndefined();
-    });
+    const result = await makeClient().get('inv-1');
+
+    expect(result.status).toBe('running');
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
-  describe('conclusion', () => {
-    // The workflow engine wraps ai.agent structured output in a `structured_output` envelope.
-    // Real shape: stepExecution.output = { structured_output: { conclusion: '...', summary: '...' } }
-    // Confirmed by investigation_workflow.yaml: steps.investigate.output.structured_output.*
+  it('returns the stored started_at', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({ started_at: '2024-01-01T00:05:00Z', created_at: '2024-01-01T00:00:00Z' })
+    );
 
-    it('returns conclusion from the last step whose structured_output has a conclusion field', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            { output: { structured_output: { conclusion: 'All clear.', summary: 'Summary.' } } },
-            { output: { other: 'data' } }, // non-agent step — no structured_output
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBe('All clear.');
-    });
+    const result = await makeClient().get('inv-1');
 
-    it('prefers the last step with structured_output when multiple steps have it', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            { output: { structured_output: { conclusion: 'First conclusion.' } } },
-            { output: { structured_output: { conclusion: 'Last conclusion.' } } },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBe('Last conclusion.');
-    });
-
-    it('falls back to summary when structured_output has summary but no conclusion', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { structured_output: { summary: 'Summary text.' } } }],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBe('Summary text.');
-    });
-
-    it('does not match steps whose output has conclusion at the top level (old/wrong shape)', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { conclusion: 'Flat — should not match.' } }],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBeUndefined();
-    });
-
-    it('returns undefined when no step has structured_output', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { other: 'data' } }],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBeUndefined();
-    });
-
-    it('does not return conclusion when status is not completed', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.RUNNING,
-          stepExecutions: [{ output: { structured_output: { conclusion: 'Should be ignored.' } } }],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.conclusion).toBeUndefined();
-    });
+    expect(result.started_at).toBe('2024-01-01T00:05:00Z');
   });
 
-  describe('result', () => {
-    // The full agent output, validated against the same schema the workflow declares to the model.
-    // The hypotheses, the ES|QL behind each verdict and the recommendations are the expensive part
-    // of a run, so a caller that only gets `conclusion` cannot show why the answer is believable.
-    const fullState = {
-      summary: 'Three candidates investigated.',
-      conclusion: 'Pool exhaustion after the pool_max change.',
-      hypotheses: [
-        {
-          candidate: 'pool_max reduced from 80 to 50',
-          confidence: 0.97,
-          status: 'confirmed',
-          reason: 'v2.3.1 saturates at 49 of 50 connections.',
-          evidence: [
-            {
-              description: 'Pool metrics by version.',
-              esql_query: 'FROM logs-infra-services | STATS AVG(connections.active) BY version',
-              time_range: { from: '2026-08-27T01:00:00Z', to: '2026-08-27T03:40:00Z' },
-            },
-          ],
-        },
-        {
-          candidate: 'Downstream dependency degradation',
-          confidence: 0.05,
-          status: 'dismissed',
-          reason: 'Neighbouring services sit at their baseline.',
-        },
-      ],
-      blind_spots: [{ title: 'No APM traces', description: 'Could not identify the error class.' }],
-      recommendations: [{ title: 'Roll back to v2.1.0', description: 'Restores pool_max to 80.' }],
-    };
+  it('returns created_at with started_at unset for a pending record', async () => {
+    repository.get.mockResolvedValue(
+      makeRecord({
+        status: 'pending',
+        started_at: undefined,
+        completed_at: undefined,
+        created_at: '2024-01-01T00:00:00Z',
+      })
+    );
 
-    it('returns the whole investigation state, not just the conclusion', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { structured_output: fullState } }],
-        })
-      );
+    const result = await makeClient().get('inv-1');
 
-      const result = await makeClient().get('inv-1');
-
-      expect(result.result).toEqual(fullState);
-      // A dismissed hypothesis is as much of the record as a confirmed one.
-      expect(result.result?.hypotheses.map((h) => h.status)).toEqual(['confirmed', 'dismissed']);
-      // Evidence keeps the query and its window, so a reader can re-run it.
-      expect(result.result?.hypotheses[0].evidence?.[0].esql_query).toContain('FROM logs-infra');
-      expect(result.result?.hypotheses[0].evidence?.[0].time_range?.from).toBe(
-        '2026-08-27T01:00:00Z'
-      );
-    });
-
-    it('keeps the conclusion string alongside the structured result', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { structured_output: fullState } }],
-        })
-      );
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.conclusion).toBe('Pool exhaustion after the pool_max change.');
-    });
-
-    it('drops output that does not match the schema but still returns the narrative', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            {
-              // `hypotheses` is required by the schema and a confidence above 1 is out of range:
-              // half-parsed output would be worse than none, because a consumer cannot tell.
-              output: {
-                structured_output: {
-                  summary: 'A summary.',
-                  conclusion: 'Still readable.',
-                  hypotheses: [{ candidate: 'c', confidence: 42, status: 'confirmed' }],
-                },
-              },
-            },
-          ],
-        })
-      );
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.result).toBeUndefined();
-      expect(result.conclusion).toBe('Still readable.');
-    });
-
-    it('does not return a result while the investigation is still running', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.RUNNING,
-          stepExecutions: [{ output: { structured_output: fullState } }],
-        })
-      );
-
-      const result = await makeClient().get('inv-1');
-
-      expect(result.result).toBeUndefined();
-    });
+    expect(result.status).toBe('pending');
+    expect(result.created_at).toBe('2024-01-01T00:00:00Z');
+    expect(result.started_at).toBeUndefined();
   });
 
-  describe('severity', () => {
-    it('returns the severity reported in structured_output', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            { output: { structured_output: { summary: 'Summary.', severity: '60-high' } } },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBe('60-high');
-    });
-
-    it('returns undefined when structured_output carries no severity', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { structured_output: { conclusion: 'All clear.' } } }],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBeUndefined();
-    });
-
-    it('drops and logs a severity outside the canonical tiers', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            { output: { structured_output: { summary: 'Summary.', severity: 'critical' } } },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBeUndefined();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('unrecognized severity "critical"')
-      );
-    });
-
-    it('reads the newest attempt when a retry produced a second investigate step', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            {
-              stepId: 'investigate',
-              stepType: 'ai.agent',
-              startedAt: '2024-01-01T02:00:00Z',
-              output: { structured_output: { conclusion: 'Second.', severity: '40-medium' } },
-            },
-            {
-              stepId: 'investigate',
-              stepType: 'ai.agent',
-              startedAt: '2024-01-01T01:00:00Z',
-              output: { structured_output: { conclusion: 'First.', severity: '80-critical' } },
-            },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBe('40-medium');
-      expect(result.conclusion).toBe('Second.');
-    });
-
-    it('ignores the step-level timeout wrapper sharing the investigate step id', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            {
-              stepId: 'investigate',
-              stepType: 'step_level_timeout',
-              startedAt: '2024-01-01T03:00:00Z',
-              output: { structured_output: { severity: '80-critical' } },
-            },
-            {
-              stepId: 'investigate',
-              stepType: 'ai.agent',
-              startedAt: '2024-01-01T01:00:00Z',
-              output: { structured_output: { conclusion: 'Agent.', severity: '20-low' } },
-            },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBe('20-low');
-    });
-
-    it('does not return severity when status is not completed', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.RUNNING,
-          stepExecutions: [
-            { output: { structured_output: { summary: 'Summary.', severity: '20-low' } } },
-          ],
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.severity).toBeUndefined();
-    });
+  it('returns the stored severity', async () => {
+    repository.get.mockResolvedValue(makeRecord({ severity: '60-high' }));
+    const result = await makeClient().get('inv-1');
+    expect(result.severity).toBe('60-high');
   });
 
-  describe('error masking', () => {
-    it('returns generic error string (not raw message) when failed', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({
-          status: ExecutionStatus.FAILED,
-          error: { message: 'Internal credential error: secret-token-xyz' },
-        })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.error).toBe('Investigation failed');
-      expect(result.error).not.toContain('secret-token-xyz');
-    });
-
-    it('does not set error when status is not failed', async () => {
-      mockManagement.getWorkflowExecution.mockResolvedValue(
-        makeExecution({ status: ExecutionStatus.COMPLETED })
-      );
-      const result = await makeClient().get('inv-1');
-      expect(result.error).toBeUndefined();
-    });
+  it('leaves severity unset when the record has none', async () => {
+    repository.get.mockResolvedValue(makeRecord());
+    const result = await makeClient().get('inv-1');
+    expect(result.severity).toBeUndefined();
   });
 });
 
 describe('NightshiftInvestigationsClient.list()', () => {
-  const makeListResult = (overrides: Record<string, unknown> = {}) => ({
-    results: [],
-    page: 1,
-    size: 20,
-    total: 0,
-    ...overrides,
-  });
-
-  it('uses default page=1 and size=20 when called with no arguments', async () => {
-    mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
+  it('uses default page=1 and perPage=20', async () => {
     await makeClient().list();
-    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, size: 20 }),
-      SPACE_ID
+    expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ page: 1, perPage: 20 }));
+  });
+
+  it('passes statuses filter', async () => {
+    await makeClient().list({ statuses: ['running', 'completed'] });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({ statuses: ['running', 'completed'] })
     );
   });
 
-  it('passes page and size through when provided', async () => {
-    mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult({ page: 3, size: 50 }));
-    await makeClient().list({ page: 3, size: 50 });
-    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 3, size: 50 }),
-      SPACE_ID
+  it('passes sort_field=completed_at through as sortField', async () => {
+    await makeClient().list({ sort_field: 'completed_at' });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({ sortField: 'completed_at' })
     );
   });
 
-  describe('status filter fan-out', () => {
-    const cases: Array<[InvestigationStatus, ExecutionStatus[]]> = [
-      ['pending', [ExecutionStatus.PENDING, ExecutionStatus.QUEUED]],
-      [
-        'running',
-        [
-          ExecutionStatus.RUNNING,
-          ExecutionStatus.WAITING,
-          ExecutionStatus.WAITING_FOR_INPUT,
-          ExecutionStatus.WAITING_FOR_CHILD,
-        ],
-      ],
-      ['completed', [ExecutionStatus.COMPLETED]],
-      ['failed', [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT]],
-      ['cancelled', [ExecutionStatus.CANCELLED, ExecutionStatus.SKIPPED]],
-    ];
-
-    it.each(cases)('%s expands to the correct ExecutionStatus values', async (status, expected) => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
-      await makeClient().list({ statuses: [status] });
-      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ statuses: expected }),
-        SPACE_ID
-      );
+  it('maps started_* filters onto started_at, leaving created_at unfiltered', async () => {
+    await makeClient().list({
+      started_after: '2024-01-01T00:00:00Z',
+      started_before: '2024-01-31T00:00:00Z',
     });
-
-    it('omits the statuses filter when no statuses are requested', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
-      await makeClient().list({});
-      const call = mockManagement.getWorkflowExecutions.mock.calls[0][0];
-      expect(call).not.toHaveProperty('statuses');
-    });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startedAfter: '2024-01-01T00:00:00Z',
+        startedBefore: '2024-01-31T00:00:00Z',
+        createdAfter: undefined,
+        createdBefore: undefined,
+      })
+    );
   });
 
-  describe('sort field mapping', () => {
-    it('maps created_at to createdAt', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
-      await makeClient().list({ sort_field: 'created_at' });
-      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'createdAt' }),
-        SPACE_ID
-      );
+  it('maps created_* filters onto created_at so pending runs are matchable', async () => {
+    await makeClient().list({
+      created_after: '2024-01-01T00:00:00Z',
+      created_before: '2024-01-31T00:00:00Z',
     });
-
-    it('maps finished_at to finishedAt', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
-      await makeClient().list({ sort_field: 'finished_at' });
-      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'finishedAt' }),
-        SPACE_ID
-      );
-    });
-
-    it('defaults to createdAt when sort_field is omitted', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(makeListResult());
-      await makeClient().list({});
-      expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'createdAt' }),
-        SPACE_ID
-      );
-    });
+    expect(repository.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        createdAfter: '2024-01-01T00:00:00Z',
+        createdBefore: '2024-01-31T00:00:00Z',
+        startedAfter: undefined,
+        startedBefore: undefined,
+      })
+    );
   });
 
-  describe('terminal state gating for completed_at', () => {
-    const makeExecResult = (status: ExecutionStatus, finishedAt?: string) => ({
-      id: 'exec-1',
-      status,
-      startedAt: '2024-01-01T00:00:00Z',
-      finishedAt,
-      concurrencyGroupKey: undefined,
-      executedBy: undefined,
-    });
-
-    it.each([
-      [ExecutionStatus.COMPLETED, 'completed'],
-      [ExecutionStatus.FAILED, 'failed'],
-      [ExecutionStatus.TIMED_OUT, 'failed'],
-      [ExecutionStatus.CANCELLED, 'cancelled'],
-      [ExecutionStatus.SKIPPED, 'cancelled'],
-    ])('sets completed_at for terminal status %s', async (execStatus) => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({ results: [makeExecResult(execStatus, '2024-01-02T00:00:00Z')] })
-      );
-      const result = await makeClient().list({});
-      expect(result.results[0].completed_at).toBe('2024-01-02T00:00:00Z');
-    });
-
-    it.each([
-      [ExecutionStatus.PENDING, 'pending'],
-      [ExecutionStatus.QUEUED, 'pending'],
-      [ExecutionStatus.RUNNING, 'running'],
-      [ExecutionStatus.WAITING, 'running'],
-      [ExecutionStatus.WAITING_FOR_INPUT, 'running'],
-      [ExecutionStatus.WAITING_FOR_CHILD, 'running'],
-    ])('omits completed_at for non-terminal status %s', async (execStatus) => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({ results: [makeExecResult(execStatus, '2024-01-02T00:00:00Z')] })
-      );
-      const result = await makeClient().list({});
-      expect(result.results[0].completed_at).toBeUndefined();
-    });
+  it('omits sortField when sort_field is not given so the store default applies', async () => {
+    await makeClient().list({});
+    expect(repository.find).toHaveBeenCalledWith(expect.objectContaining({ sortField: undefined }));
   });
 
-  describe('severity', () => {
-    const makeSeverityExecResult = (id: string, status: ExecutionStatus) => ({
-      id,
-      status,
-      startedAt: '2024-01-01T00:00:00Z',
-      finishedAt: '2024-01-02T00:00:00Z',
-      concurrencyGroupKey: undefined,
-      executedBy: undefined,
-    });
+  it('returns a slim list item without structured output', async () => {
+    repository.find.mockResolvedValue(
+      findResult([makeRecord({ concurrency_key: 'key-1' }, { id: 'inv-42' })])
+    );
 
-    const makeStep = (
-      workflowRunId: string,
-      startedAt: string,
-      structuredOutput: Record<string, unknown>
-    ) => ({
-      workflowRunId,
-      startedAt,
-      stepType: 'ai.agent',
-      output: { structured_output: structuredOutput },
-    });
-
-    it('maps each investigate step output onto its own investigation', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [
-            makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED),
-            makeSeverityExecResult('exec-2', ExecutionStatus.COMPLETED),
-          ],
-          total: 2,
-        })
-      );
-      mockManagement.searchStepExecutions.mockResolvedValue({
-        results: [
-          makeStep('exec-2', '2024-01-01T01:00:00Z', { severity: '20-low' }),
-          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '80-critical' }),
-        ],
-        total: 2,
-      });
-
-      const result = await makeClient().list({});
-
-      expect(mockManagement.searchStepExecutions).toHaveBeenCalledWith(
-        {
-          workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-          stepId: 'investigate',
-          stepType: 'ai.agent',
-          workflowExecutionIds: ['exec-1', 'exec-2'],
-          sourceIncludes: ['workflowRunId', 'startedAt', 'output.structured_output.severity'],
-          size: 4,
-        },
-        SPACE_ID
-      );
-      expect(result.results.map(({ severity }) => severity)).toEqual(['80-critical', '20-low']);
-    });
-
-    it('keeps the newest attempt when a run produced several', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
-          total: 1,
-        })
-      );
-      mockManagement.searchStepExecutions.mockResolvedValue({
-        results: [
-          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '80-critical' }),
-          makeStep('exec-1', '2024-01-01T02:00:00Z', { severity: '40-medium' }),
-        ],
-        total: 2,
-      });
-
-      const result = await makeClient().list({});
-      expect(result.results[0].severity).toBe('40-medium');
-    });
-
-    // The search filters on stepType, so a wrapper never reaches this code in practice. Asserted
-    // anyway so the resolver stays correct on its own if that filter is ever relaxed.
-    it('ignores a step-level timeout wrapper if one reaches the resolver', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
-          total: 1,
-        })
-      );
-      mockManagement.searchStepExecutions.mockResolvedValue({
-        results: [
-          {
-            workflowRunId: 'exec-1',
-            startedAt: '2024-01-01T03:00:00Z',
-            stepType: 'step_level_timeout',
-            output: { structured_output: { severity: '80-critical' } },
-          },
-          makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '20-low' }),
-        ],
-        total: 2,
-      });
-
-      const result = await makeClient().list({});
-      expect(result.results[0].severity).toBe('20-low');
-    });
-
-    it('leaves severity unset when the step output carries none', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
-          total: 1,
-        })
-      );
-      mockManagement.searchStepExecutions.mockResolvedValue({
-        results: [makeStep('exec-1', '2024-01-01T01:00:00Z', {})],
-        total: 1,
-      });
-
-      const result = await makeClient().list({});
-      expect(result.results[0].severity).toBeUndefined();
-    });
-
-    it('does not search step executions when no investigation on the page completed', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [
-            makeSeverityExecResult('exec-1', ExecutionStatus.RUNNING),
-            makeSeverityExecResult('exec-2', ExecutionStatus.FAILED),
-          ],
-          total: 2,
-        })
-      );
-
-      const result = await makeClient().list({});
-
-      expect(mockManagement.searchStepExecutions).not.toHaveBeenCalled();
-      expect(result.results.every(({ severity }) => severity === undefined)).toBe(true);
-    });
-
-    it('returns the list without severities when the severity lookup fails', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
-          total: 1,
-        })
-      );
-      mockManagement.searchStepExecutions.mockRejectedValue(new Error('step index unavailable'));
-
-      const result = await makeClient().list({});
-
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].severity).toBeUndefined();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Could not resolve investigation severities')
-      );
-    });
-
-    it('warns when the step search returned fewer documents than matched', async () => {
-      mockManagement.getWorkflowExecutions.mockResolvedValue(
-        makeListResult({
-          results: [makeSeverityExecResult('exec-1', ExecutionStatus.COMPLETED)],
-          total: 1,
-        })
-      );
-      mockManagement.searchStepExecutions.mockResolvedValue({
-        results: [makeStep('exec-1', '2024-01-01T01:00:00Z', { severity: '60-high' })],
-        total: 9,
-      });
-
-      await makeClient().list({});
-
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('read 1 of 9 matching step executions')
-      );
-    });
-  });
-
-  it('maps getWorkflowExecutions result to ListInvestigationsResponse shape', async () => {
-    const finishedAt = '2024-01-02T00:00:00Z';
-    mockManagement.getWorkflowExecutions.mockResolvedValue({
-      results: [
-        {
-          id: 'exec-42',
-          status: ExecutionStatus.COMPLETED,
-          startedAt: '2024-01-01T00:00:00Z',
-          finishedAt,
-          concurrencyGroupKey: 'key-1',
-          executedBy: 'user-1',
-        },
-      ],
-      page: 1,
-      size: 20,
-      total: 1,
-    });
     const result = await makeClient().list({});
-    expect(result).toMatchObject({
-      results: [
-        {
-          investigation_id: 'exec-42',
-          status: 'completed',
-          started_at: '2024-01-01T00:00:00Z',
-          completed_at: finishedAt,
-          concurrency_key: 'key-1',
-          executed_by: 'user-1',
-        },
-      ],
-      page: 1,
-      size: 20,
-      total: 1,
+    expect(result.results[0]).toEqual({
+      investigation_id: 'inv-42',
+      status: 'completed',
+      created_at: '2024-01-01T00:00:00Z',
+      started_at: '2024-01-01T00:00:00Z',
+      completed_at: '2024-01-01T01:00:00Z',
+      severity: undefined,
+      concurrency_key: 'key-1',
+      executed_by: 'test-user',
+      subject: { type: 'alert', id: 'alert-42' },
     });
+    expect(result.results[0]).not.toHaveProperty('trigger_type');
+    expect(result.results[0]).not.toHaveProperty('error');
+    expect(result.results[0]).not.toHaveProperty('summary');
+    expect(result.results[0]).not.toHaveProperty('conclusion');
+    expect(result.results[0]).not.toHaveProperty('hypotheses');
+    expect(result.results[0]).not.toHaveProperty('impact');
+    expect(result.results[0]).not.toHaveProperty('conversation_id');
+  });
+
+  it('returns stored running items without consulting the workflow engine', async () => {
+    repository.find.mockResolvedValue(
+      findResult([
+        makeRecord({ status: 'running', completed_at: undefined }, { id: 'inv-running' }),
+      ])
+    );
+
+    const result = await makeClient().list({});
+
+    expect(result.results[0].status).toBe('running');
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('returns severity on list items when stored', async () => {
+    repository.find.mockResolvedValue(
+      findResult([makeRecord({ severity: '80-critical' }, { id: 'inv-42' })])
+    );
+
+    const result = await makeClient().list({});
+    expect(result.results[0].severity).toBe('80-critical');
   });
 });
 
@@ -1686,5 +1017,147 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     repository.create.mockRejectedValue(new InvestigationAlreadyExistsError(EXECUTION_ID));
 
     await expect(makeClient().ensureOrCreate(EXECUTION_ID)).resolves.toBeUndefined();
+  });
+
+  describe('subject recovery from execution inputs', () => {
+    // recoverSubjectFromInput / recoverTriggerTypeFromInput are called here (and only here) on the
+    // create path. These cases were previously on get() which used the same functions; after the
+    // read path moved to the SO store the functions stayed live but lost their only coverage.
+
+    it('recovers significant_event subject via event_id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('event-42');
+    });
+
+    it('recovers significant_event subject via significant_event_id when event_id is absent', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: 'se-99' } },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('se-99');
+    });
+
+    it('prefers event_id over significant_event_id when both are present', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: 'checkout-latency-breach',
+                significant_event_id: 'event-uuid-1',
+              },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_id).toBe('checkout-latency-breach');
+    });
+
+    it('falls through an empty event_id to significant_event_id', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: {
+                source: 'significant_event',
+                event_id: '',
+                significant_event_id: 'se-fallback',
+              },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_id).toBe('se-fallback');
+    });
+
+    it('throws InvestigationSubjectMissingError when all significant_event id fields are empty', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: '' } },
+          },
+        })
+      );
+      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+        InvestigationSubjectMissingError
+      );
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('throws InvestigationSubjectMissingError when the source is unrecognized', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'chat', some_id: 'x' } } },
+        })
+      );
+      await expect(makeClient().ensureOrCreate(EXECUTION_ID)).rejects.toThrow(
+        InvestigationSubjectMissingError
+      );
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('stores subject_summary from ctx.summary for a significant_event subject', async () => {
+      const long = `${'x'.repeat(400)} and a trailing clause that must not be cut mid-sentence.`;
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: { source: 'significant_event', event_id: 'event-42', summary: long },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('significant_event');
+      expect(attrs.subject_id).toBe('event-42');
+      expect(attrs.subject_summary).toBe(long);
+    });
+
+    it('stores subject_summary for an alert subject', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: {
+            inputs: {
+              context: { source: 'alert', alert_id: 'alert-99', summary: 'CPU saturation' },
+            },
+          },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.subject_type).toBe('alert');
+      expect(attrs.subject_id).toBe('alert-99');
+      expect(attrs.subject_summary).toBe('CPU saturation');
+    });
+
+    it('falls back to manual trigger_type when context carries none', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeEnsureExecution({
+          context: { inputs: { context: { source: 'alert', alert_id: 'a-1' } } },
+        })
+      );
+      await makeClient().ensureOrCreate(EXECUTION_ID);
+      const { attributes: attrs } = repository.create.mock.calls[0][0];
+      expect(attrs.trigger_type).toBe('manual');
+    });
   });
 });

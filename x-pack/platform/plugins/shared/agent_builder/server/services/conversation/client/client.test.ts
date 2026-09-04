@@ -1977,6 +1977,137 @@ describe('ConversationClient', () => {
         message: expect.stringContaining('conversation-1'),
       });
     });
+
+    describe('onMetadataPatched callback', () => {
+      const template = makeTemplate('tmpl-cb', {
+        status: {
+          input_type: 'SELECT',
+          description: 'Status',
+          options: ['open', 'closed'],
+        },
+        severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+      });
+
+      beforeEach(() => {
+        getTemplateMock.mockReturnValue(template);
+        mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      });
+
+      it('calls onMetadataPatched with changed fields after a successful write', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocumentWithTemplate({
+                templateId: template.id,
+                metadata: { status: 'open' },
+              }),
+            ],
+          },
+        });
+
+        await clientWithCb.patchMetadata('conversation-1', { severity: 'high' });
+
+        expect(onMetadataPatched).toHaveBeenCalledWith({
+          conversationId: 'conversation-1',
+          templateId: template.id,
+          parentId: undefined,
+          changedFields: ['severity'],
+        });
+      });
+
+      it('includes parentId when the conversation has a parent_conversation', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        const docWithParent = {
+          ...createConversationDocumentWithTemplate({
+            templateId: template.id,
+          }),
+        };
+        (docWithParent._source as unknown as Record<string, unknown>).parent_conversation = {
+          id: 'parent-conv-1',
+          relation: 'subagent',
+        };
+
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+
+        await clientWithCb.patchMetadata('conversation-1', { status: 'closed' });
+
+        expect(onMetadataPatched).toHaveBeenCalledWith(
+          expect.objectContaining({ parentId: 'parent-conv-1' })
+        );
+      });
+
+      it('does not call onMetadataPatched when all values are identical (no-op suppression)', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocumentWithTemplate({
+                templateId: template.id,
+                // status is already 'open' — writing the same value is a no-op
+                metadata: { status: 'open' },
+              }),
+            ],
+          },
+        });
+
+        await clientWithCb.patchMetadata('conversation-1', { status: 'open' });
+
+        expect(onMetadataPatched).not.toHaveBeenCalled();
+      });
+
+      it('does not call onMetadataPatched when the write fails', async () => {
+        const onMetadataPatched = jest.fn();
+        const clientWithCb = createClient({
+          space: testSpace,
+          logger: loggerMock.create(),
+          esClient: {} as never,
+          agentRegistry: agentRegistry as unknown as AgentRegistry,
+          user: { id: 'user-1', username: 'test-user', isAdmin: false },
+          onMetadataPatched,
+        });
+
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [createConversationDocumentWithTemplate({ templateId: template.id })],
+          },
+        });
+        mockEsClient.index.mockRejectedValue(new Error('disk full'));
+
+        await expect(
+          clientWithCb.patchMetadata('conversation-1', { severity: 'high' })
+        ).rejects.toThrow('disk full');
+
+        expect(onMetadataPatched).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('create with template', () => {

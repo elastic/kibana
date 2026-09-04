@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -25,6 +26,7 @@ export interface AgentBuilderDashboardsPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   data: DataPublicPluginStart;
   dashboard: DashboardStart;
+  files: FilesStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;

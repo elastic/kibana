@@ -11,6 +11,8 @@ import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTitle,
   useEuiMemoizedStyles,
@@ -20,7 +22,12 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { flyoutAssembly } from '../assembly';
-import { resolveZoneTestSubj, useFlyoutHeaderCollapse, useFlyoutTemplateConfig } from '../context';
+import {
+  resolveZoneTestSubj,
+  useFlyoutHeaderCollapse,
+  useFlyoutTabs,
+  useFlyoutTemplateConfig,
+} from '../context';
 import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
 
@@ -30,10 +37,8 @@ export const HEADER_PART_NAME = 'header';
 const headerPart = flyoutAssembly.definePart({ name: HEADER_PART_NAME });
 
 /** Declarative `FlyoutTemplate.Header`; the root renders the collected attributes. */
-const BaseHeader = headerPart.createComponent<FlyoutHeaderProps>();
-BaseHeader.displayName = 'FlyoutTemplate.Header';
-
-export const Header = BaseHeader;
+export const Header = headerPart.createComponent<FlyoutHeaderProps>();
+Header.displayName = 'FlyoutTemplate.Header';
 
 /** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
 const resolveHorizontalPadding = (
@@ -133,6 +138,7 @@ export const HeaderZone = ({
   const { euiTheme } = useEuiTheme();
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
+  const { tabs, selectedTabId, selectTab } = useFlyoutTabs();
   const {
     isCollapsed: isScrollCollapsed,
     collapsibleRef,
@@ -144,6 +150,7 @@ export const HeaderZone = ({
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
 
   const hasDescription = Boolean(description);
+  const showTabs = tabs.length > 0;
 
   return (
     <KibanaErrorBoundaryProvider>
@@ -200,10 +207,31 @@ export const HeaderZone = ({
               </div>
             </div>
 
-            {/* Always visible: spacing before the divider, which tightens when collapsed. */}
+            {/* Spacing before tabs/divider adapts to collapsed state. */}
             <div ref={!isCollapsed ? expandedSpacerRef : undefined}>
-              <EuiSpacer size={isCollapsed ? 'xs' : 'm'} />
+              <EuiSpacer size={isCollapsed ? 'xs' : showTabs ? 's' : 'm'} />
             </div>
+
+            {/* Always visible: tab bar. */}
+            {showTabs && (
+              <EuiTabs bottomBorder={false} size="m">
+                {tabs.map((tab) => (
+                  <EuiTab
+                    key={tab.id}
+                    id={tab.tabDomId}
+                    aria-controls={tab.panelDomId}
+                    isSelected={tab.id === selectedTabId}
+                    onClick={() => selectTab(tab.id)}
+                    disabled={tab.disabled}
+                    prepend={tab.prepend}
+                    append={tab.append}
+                    data-test-subj={tab['data-test-subj']}
+                  >
+                    {tab.label}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+            )}
 
             <FullBleedDivider horizontalPadding={horizontalPadding} />
           </div>

@@ -22,6 +22,7 @@ responses:
                 has_seen_add_data_notice: true
                 secret_storage_requirements_met: true
                 output_secret_storage_requirements_met: true
+                otlp_output_requirements_met: true
                 delete_unenrolled_agents:
                   enabled: false
                   is_preconfigured: false

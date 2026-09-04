@@ -83,6 +83,18 @@ import {
   updateConversation,
   type Document,
 } from './converters';
+import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
+
+// Note: comparison is order-sensitive for arrays — reordering elements counts as a change.
+// This is intentional: metadata arrays (e.g. ordered checklists) preserve insertion order.
+function computeChangedFields(
+  updates: Record<string, SerializedMetadataValue>,
+  stored: Record<string, SerializedMetadataValue>
+): string[] {
+  return Object.keys(updates).filter(
+    (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
+  );
+}
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -114,7 +126,10 @@ export interface ConversationClient {
     update: UpdateConversationAccessControlRequestBody
   ): Promise<ConversationAccessControl>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
-  patchMetadata(conversationId: string, updates: Record<string, unknown>): Promise<Conversation>;
+  patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<{ conversation: Conversation; changedFields: string[] }>;
 }
 
 /**
@@ -132,12 +147,14 @@ export const createClient = ({
   esClient,
   user,
   agentRegistry,
+  onMetadataPatched,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
+  onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -146,6 +163,7 @@ export const createClient = ({
     space,
     agentRegistry,
     logger,
+    onMetadataPatched,
   });
 };
 
@@ -155,6 +173,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
+  private readonly onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
 
   constructor({
     storage,
@@ -162,18 +181,21 @@ class ConversationClientImpl implements ConversationClient {
     space,
     agentRegistry,
     logger,
+    onMetadataPatched,
   }: {
     storage: ConversationStorage;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
+    onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
     this.storage = storage;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
+    this.onMetadataPatched = onMetadataPatched;
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationListResult> {
@@ -638,7 +660,9 @@ class ConversationClientImpl implements ConversationClient {
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>
-  ): Promise<Conversation> {
+  ): Promise<{ conversation: Conversation; changedFields: string[] }> {
+    let changedFields: string[] = [];
+
     const result = await this.writeConversation({
       conversationId,
       access: 'owner',
@@ -667,11 +691,24 @@ class ConversationClientImpl implements ConversationClient {
         );
 
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+
+        // Track which fields actually changed to suppress no-op trigger events.
+        changedFields = computeChangedFields(serialized, storedMetadata);
+
         return { metadata: { ...storedMetadata, ...serialized } };
       },
     });
 
-    return result;
+    if (changedFields.length > 0 && this.onMetadataPatched) {
+      this.onMetadataPatched({
+        conversationId: result.id,
+        templateId: result.template_id,
+        parentId: result.parent_conversation?.id,
+        changedFields,
+      });
+    }
+
+    return { conversation: result, changedFields };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {

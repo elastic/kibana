@@ -135,6 +135,8 @@ describe('SavedObjectInvestigationRepository', () => {
         concurrencyKey: 'key-1',
         createdAfter: '2024-01-01T00:00:00Z',
         createdBefore: '2024-01-31T00:00:00Z',
+        startedAfter: '2024-01-15T00:00:00Z',
+        startedBefore: '2024-01-20T00:00:00Z',
         completedAfter: '2024-02-01T00:00:00Z',
         completedBefore: '2024-02-28T00:00:00Z',
         sortField: 'completed_at',
@@ -150,6 +152,8 @@ describe('SavedObjectInvestigationRepository', () => {
           ` AND ${TYPE}.attributes.concurrency_key: "key-1"` +
           ` AND ${TYPE}.attributes.created_at >= "2024-01-01T00:00:00Z"` +
           ` AND ${TYPE}.attributes.created_at <= "2024-01-31T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.started_at >= "2024-01-15T00:00:00Z"` +
+          ` AND ${TYPE}.attributes.started_at <= "2024-01-20T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at >= "2024-02-01T00:00:00Z"` +
           ` AND ${TYPE}.attributes.completed_at <= "2024-02-28T00:00:00Z"`,
         sortField: 'completed_at',
@@ -180,6 +184,22 @@ describe('SavedObjectInvestigationRepository', () => {
         expect.objectContaining({
           filter: `${TYPE}.attributes.concurrency_key: "key-\\"quoted\\""`,
         })
+      );
+    });
+
+    it('forwards attribute fields so the result is a projection', async () => {
+      const { repository, savedObjectsClient } = createRepository();
+      savedObjectsClient.find.mockResolvedValue({
+        saved_objects: [savedObject],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+
+      await repository.find({ fields: ['status', 'created_at'] });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ fields: ['status', 'created_at'] })
       );
     });
 

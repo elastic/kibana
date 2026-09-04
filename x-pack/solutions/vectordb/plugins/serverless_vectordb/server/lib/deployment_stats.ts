@@ -38,7 +38,7 @@ interface IndexStats {
   documentsCount: number | null;
 }
 
-export const INDEX_STATS_UNAVAILABLE: IndexStats = {
+const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
   vectorCount: null,
@@ -48,18 +48,20 @@ export const INDEX_STATS_UNAVAILABLE: IndexStats = {
 const USER_INDICES_PATTERN = ['*', '-.*'];
 
 /**
- * Whether the caller may see cluster-wide totals. Every source behind `fetchIndexStats` runs with
- * elevated privileges, so Elasticsearch will not reject an unprivileged caller on its own and the
- * route has to ask on their behalf. Errors deny access rather than granting it.
+ * Whether the caller may see the cluster-wide vector count. `countVectors` reads `indices.stats`
+ * as the internal user, so Elasticsearch will not scope it to the caller and the route has to ask
+ * on their behalf. `monitor` is the privilege that governs index stats, and requiring it over `*`
+ * keeps a partially privileged caller from being shown totals that span indices they cannot see.
+ * Errors deny access rather than granting it.
  */
-export const hasIndexManagePrivilege = async (
+export const hasIndexMonitorPrivilege = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<boolean> => {
   try {
     const { has_all_requested: hasAllRequested } =
       await client.asCurrentUser.security.hasPrivileges({
-        index: [{ names: ['*'], privileges: ['manage'] }],
+        index: [{ names: ['*'], privileges: ['monitor'] }],
       });
 
     return hasAllRequested;
@@ -120,12 +122,15 @@ const countDocuments = async (
 
 /**
  * Fetches index-level stats: user index count, aggregate store size, indexed dense/sparse vector
- * count, and top-level document count. Failures are logged and surfaced as `null` so callers can
- * distinguish "unavailable" from a genuine `0`.
+ * count, and top-level document count. The index, size, and document counts are scoped to the
+ * caller by Elasticsearch itself. The vector count is not scoped, so it is only read when the
+ * caller has the `monitor` all indices privilege. Failures are logged and surfaced as `null`
+ * so callers can distinguish "unavailable" from a genuine `0`.
  */
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
-  logger: Logger
+  logger: Logger,
+  { canMonitorAllIndices }: { canMonitorAllIndices: boolean }
 ): Promise<IndexStats> => {
   try {
     const meteringStats = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>(
@@ -142,17 +147,19 @@ export const fetchIndexStats = async (
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
 
-    let vectorCount: number | null = 0;
+    let vectorCount: number | null = canMonitorAllIndices ? 0 : null;
     let documentsCount: number | null = 0;
 
     if (indicesCount > 0) {
       [vectorCount, documentsCount] = await Promise.all([
-        countVectors(client).catch((error) => {
-          logger.warn(
-            `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
-          );
-          return null;
-        }),
+        canMonitorAllIndices
+          ? countVectors(client).catch((error) => {
+              logger.warn(
+                `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
+              );
+              return null;
+            })
+          : Promise.resolve(null),
         countDocuments(client, logger).catch((error) => {
           logger.warn(
             `Failed to compute document count for vectordb deployment stats. Returning partial stats: ${error.message}`

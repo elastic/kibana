@@ -29,6 +29,7 @@ import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import {
   useClassicBreadcrumbs,
+  useContextSwitcher,
   useHasAppMenuConfig,
   useHasInlineAppHeader,
   useUserMenu,
@@ -49,6 +50,7 @@ export const ClassicHeader = React.memo(() => {
   const hasAppMenuConfig = useHasAppMenuConfig();
   const hasInlineAppHeader = useHasInlineAppHeader();
   const userMenu = useUserMenu();
+  const contextSwitcher = useContextSwitcher();
   const isSmall = useIsWithinMaxBreakpoint('s');
   const search = dark(<SearchButton layout={isSmall ? 'compact' : 'expanded'} />);
   const rightGroup = (
@@ -111,6 +113,9 @@ export const ClassicHeader = React.memo(() => {
                   }
                 />
               </EuiHeaderSectionItem>
+              {contextSwitcher ? (
+                <EuiHeaderSectionItem>{contextSwitcher}</EuiHeaderSectionItem>
+              ) : null}
               <HeaderNavControls position="left" />
             </EuiHeaderSection>
 
