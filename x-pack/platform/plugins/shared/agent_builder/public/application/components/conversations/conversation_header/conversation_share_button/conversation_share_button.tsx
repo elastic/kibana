@@ -35,6 +35,7 @@ import {
   hasInviteMembersSummary,
   useUpdateConversationAccessControl,
 } from '../../../../hooks/use_conversation_access_control';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
@@ -102,6 +103,8 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
     enabled: isPopoverOpen,
   });
   const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
+
+  const { agent } = useAgentBuilderAgentById(conversation.agent_id);
 
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const suggestedUsersSearch = searchValue ? debouncedSearch : '';
@@ -276,6 +279,7 @@ const ConversationSharePopover: React.FC<ConversationSharePopoverProps> = ({ con
                 onAdd: onAddUser,
                 onSearch: setSearchValue,
               }}
+              agentName={agent?.name}
             />
           ) : (
             <ConversationParticipantsList

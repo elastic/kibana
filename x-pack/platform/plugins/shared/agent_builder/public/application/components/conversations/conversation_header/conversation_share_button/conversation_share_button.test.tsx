@@ -55,6 +55,10 @@ jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+}));
+
 const mockUseConversation = jest.mocked(useConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 const mockUseIsUnpersistedConversation = jest.mocked(useIsUnpersistedConversation);
