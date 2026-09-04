@@ -16,6 +16,7 @@ import {
   VECTORDB_APP_ID,
   WORKFLOWS_STATS_PATH,
 } from '../../common/constants';
+import type { NewIndexDetails } from '../../common/types';
 
 interface WorkflowsStats {
   workflows?: { enabled?: number; disabled?: number };
@@ -27,16 +28,16 @@ interface StarredDashboardsCountResponse {
 
 interface DeploymentStatsResponse {
   indicesCount: number | null;
-  vectorCount?: number | null;
+  vectorCount: number | null;
   storeSizeBytes: number | null;
   dashboardsCount: number | null;
   documentsCount: number | null;
   apiKeysCount: number | null;
   expiringApiKeysCount: number | null;
+  newIndex: NewIndexDetails | null;
 }
 
 export interface DeploymentStats extends DeploymentStatsResponse {
-  vectorCount: number | null;
   workflowsCount: number | null;
   workflowsRunningCount: number | null;
   starredDashboardsCount: number | null;
@@ -53,6 +54,7 @@ const initialStats: DeploymentStats = {
   apiKeysCount: null,
   expiringApiKeysCount: null,
   starredDashboardsCount: null,
+  newIndex: null,
 };
 
 /**
@@ -117,6 +119,7 @@ export const useDeploymentStats = () => {
         workflowsRunningCount: workflowsResponse?.workflows?.enabled ?? null,
         dashboardsCount: esStats?.dashboardsCount ?? null,
         starredDashboardsCount,
+        newIndex: esStats?.newIndex ?? null,
       };
     },
     refetchOnMount: 'always',

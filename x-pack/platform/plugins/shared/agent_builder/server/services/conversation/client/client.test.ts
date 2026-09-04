@@ -1062,18 +1062,14 @@ describe.skip('ConversationClient', () => {
 
   describe('setPinned', () => {
     it('adds only the calling user to pinned_by', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-              pinnedBy: [],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          userId: 'other-user-id',
+          username: 'other-user',
+          accessMode: ConversationAccessControlMode.Public,
+          pinnedBy: [],
+        })
+      );
 
       const result = await client.setPinned('conversation-1', true);
 
@@ -1084,19 +1080,14 @@ describe.skip('ConversationClient', () => {
     });
 
     it('does not clobber pinned_by entries written by another user', async () => {
-      mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument({ pinnedBy: [] })] } })
-        // another user pinned it concurrently
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({
-                seqNo: 2,
-                pinnedBy: [{ userId: 'other-user-id' }],
-              }),
-            ],
-          },
-        });
+      mockGetDocumentResponseOnce(createConversationDocument({ pinnedBy: [] }));
+      // another user pinned it concurrently
+      mockGetDocumentResponse(
+        createConversationDocument({
+          seqNo: 2,
+          pinnedBy: [{ userId: 'other-user-id' }],
+        })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -1109,15 +1100,11 @@ describe.skip('ConversationClient', () => {
     });
 
     it('removes only the calling user when unpinning', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+        })
+      );
 
       await client.setPinned('conversation-1', false);
 
@@ -1126,21 +1113,17 @@ describe.skip('ConversationClient', () => {
     });
 
     it('is a no-op when the calling user has no stable id', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              pinnedBy: [],
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
+      mockGetDocumentResponse(
+        createConversationDocument({
+          pinnedBy: [],
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
 
       client = createClient({
         space: testSpace,
         logger: loggerMock.create(),
-        esClient: {} as never,
+        esClient: mockRawEsClient as unknown as ElasticsearchClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { username: 'no-profile-user', isAdmin: false },
       });
@@ -2729,21 +2712,12 @@ describe.skip('ConversationClient', () => {
       const step0 = stepTimelineEvent('round-1', 0);
       const step1 = stepTimelineEvent('round-1', 1);
 
-      mockEsClient.search
-        // First OCC read: only the start events are stored.
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [createConversationDocument({ schemaVersion: 1, events: start })],
-          },
-        })
-        // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
-        .mockResolvedValue({
-          hits: {
-            hits: [
-              createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] }),
-            ],
-          },
-        });
+      // First OCC read: only the start events are stored.
+      mockGetDocumentResponseOnce(createConversationDocument({ schemaVersion: 1, events: start }));
+      // Retry read: a concurrent flush won the race and landed step::0 in the meantime.
+      mockGetDocumentResponse(
+        createConversationDocument({ schemaVersion: 1, seqNo: 2, events: [...start, step0] })
+      );
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
@@ -2799,24 +2773,20 @@ describe.skip('ConversationClient', () => {
         data: { message: 'round two input' },
       } as TimelineEvent;
 
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              schemaVersion: 1,
-              events: [
-                storedRound1UserMessage,
-                storedRound1ExecutionStarted,
-                storedRound1Step0,
-                storedRound1Step1,
-                staleRound1Step2,
-                additiveEvent,
-                round2UserMessage,
-              ],
-            }),
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: 1,
+          events: [
+            storedRound1UserMessage,
+            storedRound1ExecutionStarted,
+            storedRound1Step0,
+            storedRound1Step1,
+            staleRound1Step2,
+            additiveEvent,
+            round2UserMessage,
           ],
-        },
-      });
+        })
+      );
       mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
 
       const canonicalUserMessage = {

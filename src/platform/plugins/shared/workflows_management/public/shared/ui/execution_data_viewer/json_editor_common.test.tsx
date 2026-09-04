@@ -34,10 +34,11 @@ jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   }),
 }));
 
-// Mock theme constant
+// Mock theme constant + registration hook
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  useWorkflowsMonacoTheme: jest.fn(),
 }));
 
 describe('JsonCodeEditorCommon', () => {

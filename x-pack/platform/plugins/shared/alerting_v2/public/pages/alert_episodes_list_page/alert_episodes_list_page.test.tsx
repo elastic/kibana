@@ -16,7 +16,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
@@ -69,8 +69,6 @@ jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
 // which requires heavy Kibana data-view infra. Mock the hook so useFetchAlertingEpisodesQuery
 // gets a ready dataView without going through the full data-view construction path.
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
-
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
@@ -227,22 +225,6 @@ jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
 mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
-
-const mockedUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
-
-const defaultKpisImpl: typeof useEpisodesKpisQuery = () => ({
-  data: {
-    alertsCount: 3,
-    firingRules: 0,
-    assignedToMe: 0,
-    unassigned: 0,
-    acknowledged: 0,
-    snoozed: 0,
-  },
-  isLoading: false,
-  isError: false,
-});
-mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
 
 const getCapturedBulkActions = (): CustomBulkActions => {
   const calls = mockUnifiedDataTable.mock.calls;
@@ -469,19 +451,43 @@ describe('episode count + reset filters toolbar', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
 
-  it('renders the episode count', async () => {
+  it('renders the loaded episode count when under the page size cap', async () => {
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
     expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
   });
 
-  it('fires useEpisodesKpisQuery only with filterState', () => {
+  it('uses the loaded row count even when it differs from a larger filter total', async () => {
+    // Previously the toolbar used KPI alertsCount; it must follow the table rows instead.
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     renderPage();
-    const calls = mockedUseEpisodesKpisQuery.mock.calls.map(([args]) => args);
-    expect(calls.every((c) => c.filterState !== undefined)).toBe(true);
+    const node = await screen.findByTestId('alertEpisodesItemCount');
+    expect(node).toHaveTextContent('Showing 3 episodes');
+    expect(node).not.toHaveTextContent('Showing first');
+  });
+
+  it('renders the capped label and tooltip when the page size limit is reached', async () => {
+    const cappedEpisodes = Array.from({ length: ALERT_EPISODES_LIST_PAGE_SIZE }, (_, index) => ({
+      'episode.id': `ep${index}`,
+      'rule.id': `rule${index}`,
+      group_hash: `gh${index}`,
+      '@timestamp': '2026-01-01T00:00:00Z',
+    }));
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
+
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(ALERT_EPISODES_LIST_PAGE_SIZE);
+    });
+
+    const node = await screen.findByTestId('alertEpisodesItemCount');
+    expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+episodes$/);
+    expect(node).toHaveAttribute('tabindex', '0');
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {
@@ -532,7 +538,6 @@ describe('privilege gating', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
   });
 
@@ -584,7 +589,6 @@ describe('rule summary flyout', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
     renderPage();
     await waitFor(() => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
