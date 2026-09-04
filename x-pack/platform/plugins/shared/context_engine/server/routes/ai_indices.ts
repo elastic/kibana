@@ -19,6 +19,7 @@ import {
   DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
+  MAX_AI_INDEX_DESCRIBE_FIELDS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
   MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
@@ -36,6 +37,7 @@ import {
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
   aiIndexByIdPath,
+  aiIndexDescribePath,
   aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
   aiIndexKiListPath,
@@ -49,6 +51,7 @@ import {
 import type {
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
+  DescribeAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
@@ -71,6 +74,7 @@ import {
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexDescribeResponseTooLargeError,
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
@@ -333,6 +337,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
     error instanceof InvalidAiIndexDestError ||
     error instanceof InvalidConnectorSourceError ||
     error instanceof AiIndexQueryResponseTooLargeError ||
+    error instanceof AiIndexDescribeResponseTooLargeError ||
     error instanceof InvalidAiIndexQueryError
   ) {
     return response.badRequest({ body: { message: error.message } });
@@ -350,8 +355,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   throw error;
 };
 
-/** Pass-through query: Elasticsearch 4xx (bad ES|QL, missing index privilege) is the caller's error. */
-const handleQueryError = (error: unknown, response: KibanaResponseFactory) => {
+/** Current-user reads: ES 4xx (bad ES|QL, missing privilege) is caller's error. */
+const handleReadError = (error: unknown, response: KibanaResponseFactory) => {
   if (isResponseError(error)) {
     const { statusCode, message } = error;
     if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
@@ -569,7 +574,47 @@ export const registerAiIndexRoutes = ({
           }).query(request.body);
           return response.ok({ body });
         } catch (error) {
-          return handleQueryError(error, response);
+          return handleReadError(error, response);
+        }
+      })
+    );
+
+  // Describe an AI index
+  router.versioned
+    .get({
+      path: aiIndexDescribePath,
+      security: READ_SECURITY,
+      access: 'public',
+      summary: 'Describe an AI index',
+      description: `Returns what a query against the AI index can use: its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic. Field metadata is read as the current user, so Elasticsearch index privileges bound what it can reach.`,
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const { aiIndexId } = request.params;
+        try {
+          const described = await getAiIndexReadService({ esClient, request }).describe(aiIndexId);
+          if (described.status === 'not_found') {
+            return response.notFound({
+              body: { message: new AiIndexNotFoundError(described.id).message },
+            });
+          }
+          const body: DescribeAiIndexResponse = described.result;
+          return response.ok({ body });
+        } catch (error) {
+          return handleReadError(error, response);
         }
       })
     );

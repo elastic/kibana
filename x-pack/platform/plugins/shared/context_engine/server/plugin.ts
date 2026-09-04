@@ -201,6 +201,7 @@ export class ContextEnginePlugin
       esClient: this.esClient,
       logger: aiIndexLogger,
     });
+    const aiIndexService = this.aiIndexService;
 
     this.signalsService = new SignalsService({
       esClient: this.esClient,
@@ -218,6 +219,7 @@ export class ContextEnginePlugin
         esClient,
         spaceId: resolveSpaceId(startDeps.spaces, request),
         auditLogger: coreStart.security.audit.asScoped(request),
+        aiIndexService,
       });
     const createAiIndexReadService = this.createAiIndexReadService;
 
@@ -234,7 +236,6 @@ export class ContextEnginePlugin
       );
     });
 
-    const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
 
     const soClient = coreStart.savedObjects.createInternalRepository();
