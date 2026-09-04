@@ -9,3 +9,5 @@ const wrapped = coreStart.rendering.addContext(<MyApplication />);
 ```
 
 Use this for any render that is not already under the application mount provided by `application.register`.
+
+Root vs render vs theme, and why not to nest providers: [`kibana_context/README.md`](../../../../platform/packages/shared/react/kibana_context/README.md).
