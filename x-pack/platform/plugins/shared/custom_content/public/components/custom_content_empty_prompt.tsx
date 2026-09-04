@@ -42,7 +42,7 @@ export const CustomContentEmptyPrompt = ({
                     'Examples: "Create a health status card for each of my hosts", "Create a banner with an animated image", "Show how data flows across my services".',
                 })
               : i18n.translate('xpack.customContent.noContent.bodyNoAi', {
-                  defaultMessage: 'Use HTML, CSS, Liquid and ES|QL to create your custom panel',
+                  defaultMessage: 'Use HTML, CSS, Liquid, and ES|QL to create your custom panel',
                 })}
           </p>
         </EuiText>
