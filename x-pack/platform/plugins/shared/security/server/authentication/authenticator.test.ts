@@ -2036,6 +2036,105 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['no session', null],
+      ['a session owned by a different provider name', { name: 'saml2', type: 'saml' }],
+      ['a session owned by a different provider type', { name: 'saml1', type: 'saml' }],
+    ] as const)(
+      'does not create or replace a session on minimal-auth requests with %s',
+      async (_, provider) => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: { saml1: { order: 1, realm: 'saml' }, saml2: { order: 2, realm: 'saml' } },
+          },
+        });
+        authenticator = new Authenticator(mockOptions);
+        const request = httpServerMock.createKibanaRequest({
+          path: '/internal/search/es',
+          kibanaRouteOptions: {
+            xsrfRequired: true,
+            access: 'internal',
+            security: {
+              authc: { enabled: 'minimal', reason: 'test' },
+              authz: { enabled: false, reason: 'test' },
+            },
+          },
+        });
+        mockOptions.session.get.mockResolvedValue(
+          provider
+            ? { error: null, value: { ...mockSessVal, provider } }
+            : { error: new SessionMissingError(), value: null }
+        );
+        const result = AuthenticationResult.succeeded(mockAuthenticatedUser(), { state: {} });
+        if (provider?.name === 'saml2') {
+          mockSamlAuthenticationProvider.authenticate
+            .mockResolvedValueOnce(AuthenticationResult.notHandled())
+            .mockResolvedValue(result);
+        } else {
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(result);
+        }
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(result);
+
+        expect(mockOptions.session.create).not.toHaveBeenCalled();
+        expect(mockOptions.session.update).not.toHaveBeenCalled();
+        expect(mockOptions.session.extend).not.toHaveBeenCalled();
+        expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+        expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      ['/internal/search/es', {}, false],
+      ['/authentication/fast/me', { 'kbn-xsrf': 'true' }, false],
+      ['/authentication/fast/me', {}, true],
+    ] as const)(
+      'does not create an anonymous session for minimal-auth %s with headers %j',
+      async (path, headers, succeeds) => {
+        mockOptions = getMockOptions({
+          providers: {
+            anonymous: {
+              anonymous1: { order: 0, credentials: { username: 'user', password: 'pass' } },
+            },
+          },
+          http: { enabled: false },
+        });
+        authenticator = new Authenticator(mockOptions);
+        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+        mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(
+          mockAuthenticatedUser()
+        );
+        mockOptions.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+        const request = httpServerMock.createKibanaRequest({
+          path,
+          headers,
+          kibanaRouteOptions: {
+            xsrfRequired: true,
+            access: 'internal',
+            security: {
+              authc: { enabled: 'minimal', reason: 'test' },
+              authz: { enabled: false, reason: 'test' },
+            },
+          },
+        });
+
+        const result = await authenticator.authenticate(request);
+
+        expect(result.succeeded()).toBe(succeeds);
+        expect(result.shouldUpdateState()).toBe(succeeds);
+        expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(
+          succeeds ? 1 : 0
+        );
+        expect(mockOptions.session.create).not.toHaveBeenCalled();
+        expect(mockOptions.session.update).not.toHaveBeenCalled();
+        expect(mockOptions.session.extend).not.toHaveBeenCalled();
+        expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      }
+    );
+
     it('creates session whenever authentication provider returns state for system API requests', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
@@ -2236,10 +2335,11 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
-        ...mockSessVal,
-        state: newState,
-      });
+      expect(mockOptions.session.update).toHaveBeenCalledWith(
+        request,
+        { ...mockSessVal, state: newState },
+        { extend: true }
+      );
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
@@ -2264,10 +2364,11 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
-        ...mockSessVal,
-        state: newState,
-      });
+      expect(mockOptions.session.update).toHaveBeenCalledWith(
+        request,
+        { ...mockSessVal, state: newState },
+        { extend: true }
+      );
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
@@ -2301,11 +2402,11 @@ describe('Authenticator', () => {
       );
 
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
-        ...mockSessVal,
-        userProfileId: 'new-profile-uid',
-        state: newState,
-      });
+      expect(mockOptions.session.update).toHaveBeenCalledWith(
+        request,
+        { ...mockSessVal, userProfileId: 'new-profile-uid', state: newState },
+        { extend: true }
+      );
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
@@ -3011,6 +3112,36 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
+    it('does not extend session for a minimally authenticated request if no update is needed.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRouteOptions: {
+          xsrfRequired: true,
+          access: 'internal',
+          security: {
+            authc: { enabled: 'minimal', reason: 'test' },
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+      });
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user)
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
     it('replaces existing session with the one returned by authentication provider', async () => {
       const user = mockAuthenticatedUser();
       const newState = { authorization: 'Basic yyy' };
@@ -3028,10 +3159,47 @@ describe('Authenticator', () => {
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
-        ...mockSessVal,
-        state: newState,
+      expect(mockOptions.session.update).toHaveBeenCalledWith(
+        request,
+        { ...mockSessVal, state: newState },
+        { extend: true }
+      );
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('replaces existing session for a minimally authenticated request if provider returns new state', async () => {
+      const user = mockAuthenticatedUser();
+      const newState = { authorization: 'Basic yyy' };
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRouteOptions: {
+          xsrfRequired: true,
+          access: 'internal',
+          security: {
+            authc: { enabled: 'minimal', reason: 'test' },
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
       });
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.update).toHaveBeenCalledWith(
+        request,
+        { ...mockSessVal, state: newState },
+        { extend: false }
+      );
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(auditLogger.log).not.toHaveBeenCalled();
