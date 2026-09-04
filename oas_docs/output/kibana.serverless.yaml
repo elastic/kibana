@@ -78530,6 +78530,14 @@ paths:
             maximum: 100
             minimum: 1
             type: number
+        - description: JSON-encoded search_after sort values from a prior response for cursor pagination.
+          in: query
+          name: searchAfter
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+            x-state: Generally available; added in 9.5.0
         - description: Datemath lower bound for filtering executions by startedAt (inclusive when parsed).
           in: query
           name: startedAfter
