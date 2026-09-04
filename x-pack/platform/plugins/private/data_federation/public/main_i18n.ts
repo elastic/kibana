@@ -269,6 +269,11 @@ export const mainTranslations = {
   },
 
   connectionCheck: {
+    progressText: (name: string) =>
+      i18n.translate('xpack.dataFederation.connectionCheck.progressText', {
+        defaultMessage: 'Checking whether Elasticsearch can reach {name}.',
+        values: { name },
+      }),
     successText: (name: string) =>
       i18n.translate('xpack.dataFederation.connectionCheck.successText', {
         defaultMessage: 'Elasticsearch can reach {name} with the settings you saved.',
@@ -277,7 +282,7 @@ export const mainTranslations = {
     errorText: (name: string) =>
       i18n.translate('xpack.dataFederation.connectionCheck.errorText', {
         defaultMessage:
-          'Elasticsearch could not connect to {name}. Edit the data source to check its settings.',
+          'Elasticsearch could not reach {name}. It is saved either way, so you can carry on and fix its settings whenever you are ready.',
         values: { name },
       }),
   },

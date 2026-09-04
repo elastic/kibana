@@ -34,6 +34,7 @@ import {
   formatFlyoutSaveErrorForCallout,
 } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
+import { useDataSourceConnectionCheck } from '../use_data_source_connection_check';
 import {
   ADDITIONAL_SETTINGS_STEP,
   DATA_SOURCE_STEP,
@@ -231,6 +232,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     [dataSources]
   );
 
+  // The wizard has no status column to check in, so the check announces itself in a toast.
+  const { startConnectionCheck } = useDataSourceConnectionCheck({ showProgressToast: true });
+
   const openCreateDataSourceFlyout = useCallback(() => {
     setIsCreateDataSourceFlyoutOpen(true);
   }, []);
@@ -261,11 +265,12 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       const error = await createDataSource(dataSource);
       if (!error) {
         setIsCreateDataSourceFlyoutOpen(false);
+        void startConnectionCheck(dataSource.name.trim());
       }
 
       return error;
     },
-    [createDataSource]
+    [createDataSource, startConnectionCheck]
   );
 
   const handleSelectDataSource = useCallback(

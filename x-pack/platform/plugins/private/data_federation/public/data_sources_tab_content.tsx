@@ -6,17 +6,13 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
-import { createDataSourceFlyoutStrings } from './create_data_source_flyout/create_data_source_flyout_i18n';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
-import {
-  runMockDataSourceConnectionCheck,
-  type DataSourceConnectionStatus,
-} from './data_source_connection_status';
+import { useDataSourceConnectionCheck } from './use_data_source_connection_check';
 import { ConfirmDeleteDataSourceModal } from './confirm_delete_data_source_modal';
 import { ConfirmDeleteDataSourcesModal } from './confirm_delete_data_sources_modal';
 import { DataSourcesTable } from './data_sources_table';
@@ -62,25 +58,9 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     services: { dataSourcesClient, toasts },
   } = useKibana<DataFederationKibanaServices>();
   const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>([]);
-  const [connectionStatuses, setConnectionStatuses] = useState<
-    ReadonlyMap<string, DataSourceConnectionStatus>
-  >(new Map());
-  const [checkingDataSourceNames, setCheckingDataSourceNames] = useState<ReadonlySet<string>>(
-    new Set()
-  );
-  /**
-   * Identifies the check a result belongs to, so a re-save that restarts a check discards
-   * the result of the check it replaced, and so nothing lands after unmount.
-   */
-  const latestConnectionCheckIdRef = useRef(new Map<string, number>());
-  const isMountedRef = useRef(true);
-
-  useEffect(
-    () => () => {
-      isMountedRef.current = false;
-    },
-    []
-  );
+  // The table shows the check in its status column, so it needs no progress toast.
+  const { connectionStatuses, checkingDataSourceNames, startConnectionCheck } =
+    useDataSourceConnectionCheck();
 
   const existingDataSourceNames = useMemo(() => dataSources.map((ds) => ds.name), [dataSources]);
 
@@ -199,43 +179,6 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     pendingDeleteDataSources,
     toasts,
   ]);
-
-  const startConnectionCheck = useCallback(
-    async (name: string) => {
-      const checkId = (latestConnectionCheckIdRef.current.get(name) ?? 0) + 1;
-      latestConnectionCheckIdRef.current.set(name, checkId);
-
-      setCheckingDataSourceNames((current) => new Set(current).add(name));
-
-      const status = await runMockDataSourceConnectionCheck();
-
-      // A newer check for this data source, or an unmount, makes this result stale.
-      if (!isMountedRef.current || latestConnectionCheckIdRef.current.get(name) !== checkId) {
-        return;
-      }
-
-      setConnectionStatuses((current) => new Map(current).set(name, status));
-      setCheckingDataSourceNames((current) => {
-        const next = new Set(current);
-        next.delete(name);
-        return next;
-      });
-
-      if (status === 'connected') {
-        toasts.addSuccess({
-          title: createDataSourceFlyoutStrings.testConnectionSuccessTitle(),
-          text: mainTranslations.connectionCheck.successText(name),
-        });
-        return;
-      }
-
-      toasts.addDanger({
-        title: createDataSourceFlyoutStrings.testConnectionErrorTitle(),
-        text: mainTranslations.connectionCheck.errorText(name),
-      });
-    },
-    [toasts]
-  );
 
   const onSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
