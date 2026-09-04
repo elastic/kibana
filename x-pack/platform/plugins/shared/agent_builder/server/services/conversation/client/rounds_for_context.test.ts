@@ -100,4 +100,49 @@ describe('roundsForContext', () => {
 
     expect(roundsForContext(conversation)).toEqual([storedRound]);
   });
+
+  it('produces no round for an orphan user_message (receipt-time input with no paired execution)', () => {
+    const orphanUserMessage: TimelineEvent = {
+      id: 'r-orphan::user_message',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-01-01T00:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'alice' },
+      data: { message: 'raw input that never ran' },
+    } as unknown as TimelineEvent;
+
+    const conversation = conversationWith({
+      events: [orphanUserMessage],
+      rounds: [],
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
+
+    expect(roundsForContext(conversation)).toEqual([]);
+  });
+
+  it('still produces no round when a paired execution_started is missing (input + terminal without a start)', () => {
+    const orphanUserMessage: TimelineEvent = {
+      id: 'r-partial::user_message',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-01-01T00:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1', username: 'alice' },
+      data: { message: 'partial' },
+    } as unknown as TimelineEvent;
+    const executionStarted: TimelineEvent = {
+      id: 'r-partial::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: '2026-01-01T00:00:00.001Z',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: 'r-partial::execution',
+      trigger_event_id: 'r-partial::user_message',
+      data: { trigger_type: TimelineTriggerType.userMessage },
+    } as unknown as TimelineEvent;
+
+    const conversation = conversationWith({
+      events: [orphanUserMessage, executionStarted],
+      rounds: [],
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
+
+    expect(roundsForContext(conversation)).toEqual([]);
+  });
 });

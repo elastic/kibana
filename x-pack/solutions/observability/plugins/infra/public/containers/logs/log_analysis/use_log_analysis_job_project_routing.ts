@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { getProjectRoutingFromJobSummary } from '@kbn/ml-cps-common';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useIsInfraMlCpsEnabled } from '../../../hooks/use_infra_ml_cps';
 import type { JobSummary } from './api/ml_get_jobs_summary_api';
 
 /**
@@ -19,8 +19,7 @@ import type { JobSummary } from './api/ml_get_jobs_summary_api';
 export const useLogAnalysisJobProjectRouting = (
   jobSummary?: JobSummary
 ): ProjectRouting | undefined => {
-  const { services } = useKibanaContextForPlugin();
-  const isCpsEnabled = Boolean(services.cps?.isTierEligible && services.cps?.cpsManager);
+  const isCpsEnabled = useIsInfraMlCpsEnabled();
 
   const { projectRouting, isUiamEnabled } = jobSummary ?? {};
 

@@ -55,6 +55,7 @@ export const TagsField = () => {
             fullWidth
           >
             <EuiComboBox
+              data-test-subj="ruleTagsInput"
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}

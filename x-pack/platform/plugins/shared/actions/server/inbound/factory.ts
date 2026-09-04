@@ -24,6 +24,7 @@ export interface InboundEventsClientArgs {
   inboundEventsEnabled: boolean;
   isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
+  maxBodyBytes: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
   inMemoryConnectors: InMemoryConnector[];

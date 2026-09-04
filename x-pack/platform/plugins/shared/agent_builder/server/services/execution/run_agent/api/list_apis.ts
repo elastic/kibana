@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { getRegistries } from './registry';
-import type { ApiRegistry, ApiRegistryMeta, ApiTarget } from './types';
+import type { ApiRegistry, ApiRegistryMeta } from './types';
 
 export interface ApiSummary {
   api: string;

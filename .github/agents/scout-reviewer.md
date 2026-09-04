@@ -31,7 +31,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 2. From `pr-files.json` (or `pr-diff.txt`), determine whether any in-scope files (see **Scope** above) changed. If none changed, stop and call `noop` with `No Scout files changed`.
 3. From `pr-metadata.json`, check the PR title prefix and labels. If this is a backport (label `backport` or title prefix like `[9.x]`), stop and call `noop` with `Backport PR — skipping`.
 4. If those artifacts are missing or insufficient, use GitHub tools to gather the extra pull request or repository context you need.
-5. Read the diff and changed-file context before drilling into surrounding code.
+5. Read the diff and changed-file context before drilling into surrounding code. `pr-diff.txt` holds the full patch for every changed file, so a deleted file appears as one large `-` hunk containing its entire former contents — read the whole hunk rather than the first screenful, and don't substitute a keyword grep for reading a removed suite you intend to cite. When a file's patch is the `# GitHub did not provide a patch for this file` placeholder, fetch that file at the base SHA instead.
 6. Inspect nearby implementation and tests to confirm whether the concern is real and whether existing fixtures, page objects, or API services already cover the helper being introduced.
 7. If prior review comments are available in the provided context, avoid repeating feedback that already applies to unchanged lines (see **Re-run behavior** below).
 
@@ -40,7 +40,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 Apply this gate to every finding, especially Critical checks:
 
 1. Read the exact best-practices section linked by the matching skill rule. Copying the rule name or URL from the skill does not count as consulting the source.
-2. Positively verify every premise needed for the finding against repository content. Absence from the PR diff is not evidence that code or configuration is absent elsewhere.
+2. Positively verify every premise needed for the finding against repository content. Absence from the PR diff is not evidence that code or configuration is absent elsewhere. Equally, the presence of a path in the diff — a deleted file, a directory name, a removed config — is not evidence of what that code did or where it ran; read its contents.
 3. Discover repository paths through documentation, parent-directory listings, package exports, or existing references; do not infer filesystem layout from an import package name. Before claiming that a file, config, helper, or abstraction is missing, inspect its expected parent directory at the PR head SHA. Before suggesting an API or option, verify it in a type definition, implementation, or existing usage.
 4. Treat `404`, `429`, empty results, truncated results, and other failed or incomplete tool responses as unresolved verification — never as evidence of absence. Honor retry guidance or use a materially different read path. If a required premise remains unresolved, omit that finding; if no verified findings remain, call `noop`.
 5. Re-read the final comment payload before submitting it. Ensure code samples preserve their quotes and are valid examples copied or adapted from a verified repository API. When using the shell to construct a multiline body, write the Markdown with a quoted heredoc and encode the file as JSON; do not embed it in a shell single-quoted argument.

@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { MaintenanceWindowStatus } from '../../common';
 import {
   MAINTENANCE_WINDOW_FEATURE_ID,
@@ -36,7 +28,6 @@ import { LicensePrompt } from './license_prompt';
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
     application: { capabilities },
-    chrome,
     docLinks,
   } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
@@ -48,7 +39,8 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const [selectedStatus, setSelectedStatus] = useState<MaintenanceWindowStatus[]>([]);
   const [search, setSearch] = useState<string>('');
 
-  const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
+  const { navigateToCreateMaintenanceWindow, getCreateMaintenanceWindowUrl } =
+    useCreateMaintenanceWindowNavigation();
 
   const { isLoading, isInitialLoading, data, refetch } = useFindMaintenanceWindows({
     enabled: hasLicense,
@@ -79,26 +71,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
     writeWindowMaintenance;
 
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
-
-  // if the user is read only then display the glasses badge in the global navigation header
-  const setBadge = useCallback(() => {
-    if (readOnly) {
-      chrome.setBadge({
-        text: i18n.READ_ONLY_BADGE_TEXT,
-        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'readOnly',
-      });
-    }
-  }, [chrome, readOnly]);
-
-  useEffect(() => {
-    setBadge();
-
-    // remove the icon after the component unmounts
-    return () => {
-      chrome.setBadge();
-    };
-  }, [setBadge, chrome]);
+  const showCreateInHeader = !showEmptyPrompt && hasLicense && writeWindowMaintenance;
 
   const onPageChange = useCallback(
     ({ page: { index, size } }: { page: { index: number; size: number } }) => {
@@ -116,56 +89,67 @@ export const MaintenanceWindowsPage = React.memo(() => {
     setSearch(value);
   }, []);
 
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (!showCreateInHeader) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createMaintenanceWindow',
+        label: i18n.CREATE_NEW_BUTTON,
+        iconType: 'plusCircle',
+        testId: 'mw-create-button',
+        href: getCreateMaintenanceWindowUrl(),
+        run: handleClickCreate,
+      },
+    };
+  }, [getCreateMaintenanceWindowUrl, handleClickCreate, showCreateInHeader]);
+
+  const badges = useMemo(
+    () =>
+      readOnly
+        ? [
+            {
+              label: i18n.READ_ONLY_BADGE_TEXT,
+              tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
+              color: 'hollow' as const,
+              'data-test-subj': 'mw-read-only-badge',
+            },
+          ]
+        : undefined,
+    [readOnly]
+  );
+
   return (
     <>
-      <EuiPageHeader bottomBorder alignItems="top">
-        <EuiPageHeaderSection>
-          <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1>{i18n.MAINTENANCE_WINDOWS}</h1>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiText size="m">
-            <p>{i18n.MAINTENANCE_WINDOWS_DESCRIPTION}</p>
-          </EuiText>
-        </EuiPageHeaderSection>
-        {!showEmptyPrompt && hasLicense && writeWindowMaintenance ? (
-          <EuiPageHeaderSection>
-            <EuiButton
-              data-test-subj="mw-create-button"
-              onClick={handleClickCreate}
-              iconType="plusCircle"
-              fill
-            >
-              {i18n.CREATE_NEW_BUTTON}
-            </EuiButton>
-          </EuiPageHeaderSection>
-        ) : null}
-      </EuiPageHeader>
+      <AppHeader
+        title={i18n.MAINTENANCE_WINDOWS}
+        description={i18n.MAINTENANCE_WINDOWS_DESCRIPTION}
+        badges={badges}
+        menu={menu}
+        docLink={docLinks.links.alerting.maintenanceWindows}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
       {!hasLicense ? (
         <LicensePrompt />
       ) : showEmptyPrompt ? (
         <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : (
-        <>
-          <EuiSpacer size="xl" />
-          <MaintenanceWindowsList
-            readOnly={readOnly}
-            refreshData={refreshData}
-            isLoading={isLoading || isInitialLoading}
-            items={maintenanceWindows}
-            page={page}
-            perPage={perPage}
-            total={total}
-            onPageChange={onPageChange}
-            selectedStatus={selectedStatus}
-            onStatusChange={onSelectedStatusChange}
-            onSearchChange={onSearchChange}
-          />
-        </>
+        <MaintenanceWindowsList
+          readOnly={readOnly}
+          refreshData={refreshData}
+          isLoading={isLoading || isInitialLoading}
+          items={maintenanceWindows}
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={onPageChange}
+          selectedStatus={selectedStatus}
+          onStatusChange={onSelectedStatusChange}
+          onSearchChange={onSearchChange}
+        />
       )}
     </>
   );
