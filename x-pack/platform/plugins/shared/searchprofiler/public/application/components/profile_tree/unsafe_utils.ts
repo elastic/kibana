@@ -52,7 +52,7 @@ function getToolTip(key: string) {
     case 'into_bit_set':
       return i18n.translate('xpack.searchProfiler.intoBitSetTimeDescription', {
         defaultMessage:
-          'The time taken to bulk-collect matching document IDs into a bit set, bypassing per-document nextDoc() calls.',
+          'The time taken to collect matching document IDs into a bit set for a range of documents.',
       });
     default:
       return '';

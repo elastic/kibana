@@ -68,7 +68,7 @@ export const normalized = [
     time: 0,
     relative: 0.0,
     color: '#f5f5f5',
-    tip: 'The time taken to bulk-collect matching document IDs into a bit set, bypassing per-document nextDoc() calls.',
+    tip: 'The time taken to collect matching document IDs into a bit set for a range of documents.',
   },
   { key: 'into_bit_set_count', time: 0, relative: 0, color: '#f5f5f5', tip: '' },
   {
