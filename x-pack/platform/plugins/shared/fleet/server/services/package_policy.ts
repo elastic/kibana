@@ -1056,12 +1056,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        // eslint-disable-next-line prefer-const
-        let {
-          id,
-          spaceIds: _spaceIds,
-          ...pkgPolicyWithoutId
-        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        const { id, spaceIds: _spaceIds, ...pkgPolicyWithoutIdInit } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1731,13 +1727,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     // spaceIds is a runtime field; strip it so it cannot leak into SO attributes
-    // eslint-disable-next-line prefer-const
-    let {
-      version,
-      id: _id,
-      spaceIds: _spaceIds,
-      ...restOfPackagePolicy
-    } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+    const { version, id: _id, spaceIds: _spaceIds, ...restOfPackagePolicyInit } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+    let restOfPackagePolicy = restOfPackagePolicyInit;
 
     // Internal callers can omit top-level fields (e.g. `vars`) when they only intend to touch
     // a subset of the policy. Without this backfill, `getPolicySecretPaths` and
@@ -2218,14 +2209,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         const { version } = packagePolicyUpdate;
         // id, version, and spaceIds are not part of the saved object attributes
-
-        // eslint-disable-next-line prefer-const
-        let {
-          version: _version,
-          id: _id,
-          spaceIds: _spaceIds,
-          ...restOfPackagePolicy
-        } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+        const { version: _version, id: _id, spaceIds: _spaceIds, ...restOfPackagePolicyInit } = packagePolicy as typeof packagePolicy & { spaceIds?: string[] };
+        let restOfPackagePolicy = restOfPackagePolicyInit;
 
         if (restOfPackagePolicy.vars === undefined) {
           restOfPackagePolicy.vars = oldPackagePolicy.vars;
