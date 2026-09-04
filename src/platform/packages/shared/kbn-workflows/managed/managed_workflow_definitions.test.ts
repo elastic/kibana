@@ -13,7 +13,7 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -22,7 +22,7 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
+import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/hunt_continuous_threat_hunt.yaml';
 import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
 import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
 import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
@@ -58,7 +58,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
+  [PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -147,9 +147,9 @@ it.each([
   [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
   [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID, FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
   [
-    PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-    DARK_CONTINUOUS_THREAT_HUNT_YAML,
-    '2:de85a75a',
+    PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+    HUNT_CONTINUOUS_THREAT_HUNT_YAML,
+    '4:4a111849',
   ],
   [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID, DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
   [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID, DETECTION_RULE_CREATION_YAML, '1:a6804a44'],

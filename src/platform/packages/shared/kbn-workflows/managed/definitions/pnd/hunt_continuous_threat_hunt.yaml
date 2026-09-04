@@ -1,0 +1,142 @@
+version: "1"
+name: Continuous Threat Hunt
+description: >
+  Hunt Watch's only tagged Worker. Continuous, technology-aware hunting on a
+  recurring UTC sweep with reviewable findings. Owns schedule, settings, and
+  report fan-out; composes untagged children (hunt, correlation,
+  package_report). The six Hunt-only dials below are fixed YAML consts, not
+  settings-API fields, until WorkerSettings grows room for them.
+enabled: false
+tags:
+  - watch
+  - watch-dark
+triggers:
+  - type: scheduled
+    with:
+      every: "4h"
+  - type: manual
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+  # Hunt-only dials. Not settings-API fields (WorkerSettings has no room for
+  # them yet) — edit this file directly to change defaults.
+  schedule_every: "4h"
+  inference_endpoint_id: ""
+  tier2_when: on_hits
+  candidate_limit: 10
+  fan_out_max: 10
+  hunt_cooldown_minutes: 240
+steps:
+  # --- Stage 0: readiness gate + candidate selection ------------------
+  - name: check_ti_readiness
+    type: kibana.request
+    with:
+      request:
+        method: GET
+        # TODO(follow-up): route does not exist yet. TI supply lives under
+        # security_solution's THREAT_INTEL_API_BASE (/internal/threat_intel),
+        # not under /internal/pnd. Land the readiness route there before this
+        # Worker can run.
+        path: /internal/threat_intel/readiness
+
+  - name: select_candidate_reports
+    type: elasticsearch.search
+    if: "${{ steps.check_ti_readiness.output.ready == true }}"
+    with:
+      index: ".kibana-threat-reports"
+      size: 10
+      query:
+        bool:
+          filter:
+            # Usable-report bar (mvp-slice.md): has content, has IOCs or
+            # techniques, has severity. Replaces the removed `reportable`
+            # field, which does not exist on the shipped mapping.
+            - bool:
+                should:
+                  - exists:
+                      field: extracted.iocs
+                  - exists:
+                      field: extracted.ttps.techniques
+                minimum_should_match: 1
+            - exists:
+                field: severity.level
+            # Cooldown: feedback.last_hunted_at is nested, not top-level.
+            - bool:
+                should:
+                  - range:
+                      feedback.last_hunted_at:
+                        lte: "now-240m"
+                  - bool:
+                      must_not:
+                        exists:
+                          field: feedback.last_hunted_at
+                minimum_should_match: 1
+      sort:
+        - corroborated_rank_score:
+            order: desc
+            missing: _last
+        - rank_score:
+            order: desc
+            missing: 0
+
+  # --- Stage 1-4: one straight-line branch per selected report --------
+  # Branch body must be straight-line, atomic steps only (no nested
+  # if/foreach/parallel), so hunt and correlation run serially below
+  # instead of concurrently.
+  - name: report_fan_out
+    type: parallel
+    foreach: "{{ steps.select_candidate_reports.output.hits.hits | json }}"
+    concurrency:
+      max: 10
+    steps:
+      - name: find_or_create_investigation
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            # TODO(follow-up): route does not exist yet. pnd's
+            # investigations routes today are GET-only (get_investigation,
+            # list_investigations, list_proposals); there is no POST
+            # find-or-create handler.
+            path: /internal/pnd/investigations
+            body:
+              # The report's own id is the document _id, not a report_id field.
+              report_id: "{{ foreach.item._id }}"
+
+      - name: hunt
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-execute
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+            inference_endpoint_id: "{{ consts.inference_endpoint_id }}"
+            tier2_when: "{{ consts.tier2_when }}"
+
+      - name: correlation
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-correlation
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: package_report
+        type: workflow.execute
+        with:
+          workflow-id: system-security-hunt-package-report
+          inputs:
+            report_id: "{{ foreach.item._id }}"
+            investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
+
+      - name: start_proposal_gates
+        type: kibana.request
+        with:
+          request:
+            method: POST
+            # TODO(follow-up): route does not exist yet, see the
+            # find_or_create_investigation note above.
+            path: /internal/pnd/investigations/{{ steps.find_or_create_investigation.output.investigation_id }}/start_gates
+            body:
+              proposals: "{{ steps.package_report.output.proposals_to_gate | json }}"

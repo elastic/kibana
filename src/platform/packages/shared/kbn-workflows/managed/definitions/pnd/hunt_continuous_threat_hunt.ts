@@ -8,19 +8,19 @@
  */
 
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_WORKER_MANAGEMENT } from './constants';
-import DARK_CONTINUOUS_THREAT_HUNT_YAML from './dark_continuous_threat_hunt.yaml';
+import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
 import { type CommonWorkerTemplateValues, renderCommonWorkerYaml } from './worker_template_values';
 import type { ManagedWorkflowDefinition } from '../../types';
 
-export const PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
-  'system-security-dark-continuous-threat-hunt';
+export const PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID =
+  'system-security-hunt-continuous-threat-hunt';
 
-export const PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
+export const PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW = {
   billable: false,
-  id: PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  id: PND_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
   management: PND_WORKER_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 2,
+  version: 4,
   yamlTemplate: (values: CommonWorkerTemplateValues): string =>
-    renderCommonWorkerYaml(DARK_CONTINUOUS_THREAT_HUNT_YAML, values),
+    renderCommonWorkerYaml(HUNT_CONTINUOUS_THREAT_HUNT_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;

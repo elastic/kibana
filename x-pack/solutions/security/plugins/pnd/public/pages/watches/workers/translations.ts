@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -69,7 +69,7 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
       defaultMessage: 'Continues Attack Discovery findings into reviewable investigation evidence.',
     }
   ),
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.pnd.watches.workers.darkContinuousThreatHunt.description',
     {
       defaultMessage: 'Hunts continuously for threats and coverage gaps nobody has reported yet.',
@@ -101,7 +101,7 @@ export const WORKER_NAMES: Record<string, string> = {
     'xpack.pnd.watches.workers.floorAttackDiscovery.name',
     { defaultMessage: 'Attack Discovery' }
   ),
-  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+  [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.pnd.watches.workers.darkContinuousThreatHunt.name',
     { defaultMessage: 'Continuous Threat Hunt' }
   ),
