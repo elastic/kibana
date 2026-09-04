@@ -109,6 +109,26 @@ describe('CustomRecurringSchedule', () => {
     expect(await screen.findByTestId('bymonth-field')).toBeInTheDocument();
   });
 
+  it('offers a last day of the month option if custom frequency = monthly', async () => {
+    render(
+      <TestWrapper>
+        <CustomRecurringSchedule startDate={startDate} />
+      </TestWrapper>
+    );
+
+    fireEvent.change(
+      within(screen.getByTestId('custom-frequency-field')).getByTestId(
+        'customRecurringScheduleFrequencySelect'
+      ),
+      {
+        target: { value: Frequency.MONTHLY },
+      }
+    );
+
+    const bymonthField = await screen.findByTestId('bymonth-field');
+    expect(within(bymonthField).getByTestId('lastday')).toHaveTextContent('On the last day');
+  });
+
   it('should initialize the form when no initialValue provided', () => {
     render(
       <TestWrapper>

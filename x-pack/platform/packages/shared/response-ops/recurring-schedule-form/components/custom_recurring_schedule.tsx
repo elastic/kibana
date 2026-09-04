@@ -24,6 +24,7 @@ import { getWeekdayInfo } from '../utils/get_weekday_info';
 import type { RecurringSchedule } from '../types';
 import {
   RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_DAY,
+  RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_LAST_DAY,
   RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT,
   RECURRING_SCHEDULE_FORM_INTERVAL_EVERY,
   RECURRING_SCHEDULE_FORM_BYWEEKDAY_REQUIRED,
@@ -86,6 +87,10 @@ export const CustomRecurringSchedule = memo(
           id: 'weekday',
           label:
             RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT(dayOfWeek)[isLastOfMonth ? 0 : nthWeekdayOfMonth],
+        },
+        {
+          id: 'lastday',
+          label: RECURRING_SCHEDULE_FORM_CUSTOM_REPEAT_MONTHLY_ON_LAST_DAY,
         },
       ];
     }, [startDate]);
