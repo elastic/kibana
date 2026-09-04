@@ -19,7 +19,7 @@ import {
 import type { QueryAiIndicesRequest } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexQueryResponseTooLargeError, InvalidAiIndexQueryError } from './errors';
-import { queryAiIndices } from './query';
+import { executeScopedEsql, queryAiIndices } from './query';
 
 describe('queryAiIndices', () => {
   const esqlQuery = jest.fn();
@@ -186,5 +186,23 @@ describe('queryAiIndices', () => {
     await expect(
       queryAiIndices({ esClient, spaceId: 'default', query: 'FROM ai-index-idx-a' })
     ).rejects.toThrow('boom');
+  });
+
+  describe('executeScopedEsql', () => {
+    it('lets internal callers refuse partial results and skips input validation', async () => {
+      await executeScopedEsql({
+        esClient,
+        spaceId: 'default',
+        query: 'FROM ai-index-idx-a',
+        limit: MAX_AI_INDEX_QUERY_LIMIT + 1,
+        allowPartialResults: false,
+      });
+
+      expect(lastRequest()).toMatchObject({
+        query: `FROM ai-index-idx-a | LIMIT ${MAX_AI_INDEX_QUERY_LIMIT + 1}`,
+        filter: buildAiIndexSpaceFilter('default'),
+        allow_partial_results: false,
+      });
+    });
   });
 });

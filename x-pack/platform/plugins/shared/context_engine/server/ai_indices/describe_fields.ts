@@ -18,7 +18,7 @@ import {
 import type { AiIndexField } from '../../common/http_api/ai_indices';
 import { AiIndexDescribeResponseTooLargeError } from './errors';
 
-const CONFLICT_FIELD_TYPE = 'conflict';
+export const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
 
 interface MappingProperties {

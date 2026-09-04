@@ -7,37 +7,56 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, DescribeAiIndexResponse } from '../../common/http_api/ai_indices';
+import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
+import { describeAiIndexQueryTemplates } from './describe_templates';
+import { buildSuggestedQueries } from './suggested_queries';
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexHttpItem;
+  spaceId: string;
 }
 
-/** Registry entry plus what backing indices expose, read as caller. */
+/** Registry entry plus what backing indices expose, read as caller and filtered to `spaceId`. */
 export const describeAiIndex = async ({
   esClient,
   aiIndex,
+  spaceId,
 }: DescribeAiIndexParams): Promise<DescribeAiIndexResponse> => {
   const { id, description, dest, managed } = aiIndex;
+  const target = dest.value;
   const {
     fields,
     semantic_fields: semanticFields,
-    truncated,
-  } = await describeAiIndexFields({ esClient, target: dest.value });
+    truncated: fieldsTruncated,
+  } = await describeAiIndexFields({ esClient, target });
+
+  const [
+    { ki_type_counts: kiTypeCounts, tag_counts: tagCounts },
+    { query_templates: queryTemplates, truncated: templatesTruncated },
+  ] = await Promise.all([
+    describeAiIndexAggregations({ esClient, target, spaceId, fields }),
+    describeAiIndexQueryTemplates({ esClient, target, spaceId, fields }),
+  ]);
 
   return {
     id,
-    esql_target: dest.value,
+    esql_target: target,
     ...(description !== undefined && { description }),
     dest,
     managed,
     fields,
     semantic_fields: semanticFields,
-    ki_type_counts: [],
-    tag_counts: [],
-    query_templates: [],
-    suggested_queries: {},
-    truncated: { fields: truncated, query_templates: false },
+    ki_type_counts: kiTypeCounts,
+    tag_counts: tagCounts,
+    query_templates: queryTemplates,
+    suggested_queries: buildSuggestedQueries({
+      target,
+      fields,
+      semanticFields,
+      topType: kiTypeCounts[0]?.type,
+    }),
+    truncated: { fields: fieldsTruncated, query_templates: templatesTruncated },
   };
 };
