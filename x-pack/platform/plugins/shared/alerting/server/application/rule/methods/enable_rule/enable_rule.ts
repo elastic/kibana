@@ -158,12 +158,11 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
         })
       : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       attributes.tags,
       existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
-      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
       context.isServerless,
-      context.featureFlags
+      context.shouldGrantUiam
     );
 
     const updateAttributes = updateMeta(context, {

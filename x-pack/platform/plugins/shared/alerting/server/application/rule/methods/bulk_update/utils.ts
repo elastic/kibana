@@ -187,12 +187,11 @@ export const prepareUpdate = async <Params extends RuleParams>({
       apiKeys.set(id, newKeys);
     }
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyAttributes.uiamApiKey,
-      apiKeyAttributes.apiKeyCreatedByUser,
       context.isServerless,
-      context.featureFlags
+      context.shouldGrantUiam
     );
 
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);

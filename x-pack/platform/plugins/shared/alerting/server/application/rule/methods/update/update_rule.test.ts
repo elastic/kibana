@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 import type { IntervalSchedule } from '../../../../types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -4893,16 +4892,13 @@ describe('update()', () => {
 
   describe('missing UIAM API key tagging', () => {
     test('should add missing UIAM API key tag when updating rule with API key rotation and missing UIAM key in serverless', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
-        featureFlags,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -4973,14 +4969,11 @@ describe('update()', () => {
     });
 
     test('should not add missing UIAM API key tag when UIAM key is present during update', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
-        featureFlags,
+        shouldGrantUiam: true,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -5003,6 +4996,14 @@ describe('update()', () => {
         },
         references: [],
         version: '123',
+      });
+
+      // The rule is enabled, so the API key is rotated: the tag decision is made on the
+      // freshly created key set, which does contain a UIAM key here.
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '456', name: '456', api_key: 'abc' },
+        uiamResult: { id: '789', name: '789', api_key: 'def' },
       });
 
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -5045,12 +5046,8 @@ describe('update()', () => {
 
     test('should not add missing UIAM API key tag in non-serverless environment during update', async () => {
       // Non-serverless environment (default rulesClientParams.isServerless = false)
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
       const nonServerlessRulesClient = new RulesClient({
         ...rulesClientParams,
-        featureFlags,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
