@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
@@ -335,6 +336,53 @@ export default function (providerContext: FtrProviderContext) {
             ),
           /409 "Conflict" An integration policy with the name test-nginx-.* already exists. Please rename it or choose a different name./
         );
+      });
+    });
+
+    describe('POST /api/fleet/agent_policies/{id}/copy (bulkCreate)', () => {
+      let sourcePkgPolicyId: string;
+      let copiedAgentPolicyId: string;
+
+      before(async () => {
+        const pp = await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [multiSpacePolicy.item.id],
+          name: `test-nginx-copy-source-${Date.now()}`,
+          description: 'source for copy test',
+          package: { name: 'nginx', version: '1.20.0' },
+          inputs: {},
+        });
+        sourcePkgPolicyId = pp.item.id;
+      });
+
+      after(async () => {
+        if (copiedAgentPolicyId) {
+          await apiClient.deleteAgentPolicy(copiedAgentPolicyId);
+        }
+        if (sourcePkgPolicyId) {
+          await apiClient.deletePackagePolicy(sourcePkgPolicyId);
+        }
+      });
+
+      it('should not persist spaceIds in SO attributes of bulk-created package policies', async () => {
+        const res = await supertestWithoutAuth
+          .post(`/api/fleet/agent_policies/${multiSpacePolicy.item.id}/copy`)
+          .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `Copied policy ${Date.now()}`, description: '' })
+          .expect(200);
+
+        copiedAgentPolicyId = res.body.item.id;
+        const copiedPackagePolicies: Array<{ id: string }> = res.body.item.package_policies ?? [];
+        expect(copiedPackagePolicies.length).to.be.greaterThan(0);
+
+        for (const { id } of copiedPackagePolicies) {
+          const soRes = await supertestWithoutAuth
+            .get(`/api/saved_objects/${PACKAGE_POLICY_SAVED_OBJECT_TYPE}/${id}`)
+            .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
+            .expect(200);
+
+          expect(soRes.body.attributes).not.to.have.property('spaceIds');
+        }
       });
     });
   });

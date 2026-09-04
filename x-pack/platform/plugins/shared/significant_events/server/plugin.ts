@@ -21,6 +21,7 @@ import type { Subscription } from 'rxjs';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -63,6 +64,10 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import {
+  createCleanupWorkflowService,
+  type CleanupWorkflowService,
+} from './lib/workflows/cleanup_workflow';
 import { createSyncWorkflowService, type SyncWorkflowService } from './lib/workflows/sync_workflow';
 import {
   createSignificantEventsScheduledWorkflowsService,
@@ -123,6 +128,8 @@ export class SignificantEventsPlugin
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -289,6 +296,7 @@ export class SignificantEventsPlugin
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
     let syncWorkflowService: SyncWorkflowService | undefined;
+    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -316,19 +324,27 @@ export class SignificantEventsPlugin
     registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      const getManagedWorkflowsClient = async () => {
+        const [, pluginsStart] = await core.getStartServices();
+        if (!pluginsStart.workflowsExtensions) {
+          throw new Error('Workflows extensions are not available');
+        }
+        return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+        );
+      };
+
+      cleanupWorkflowService = createCleanupWorkflowService({
+        logger: this.logger,
+        managementApi: plugins.workflowsManagement.management,
+        getManagedWorkflowsClient,
+      });
+
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient: async () => {
-            const [, pluginsStart] = await core.getStartServices();
-            if (!pluginsStart.workflowsExtensions) {
-              throw new Error('Workflows extensions are not available');
-            }
-            return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
-              SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-            );
-          },
+          getManagedWorkflowsClient,
         }
       );
     }
@@ -350,6 +366,7 @@ export class SignificantEventsPlugin
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
         syncWorkflowService,
+        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,

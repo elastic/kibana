@@ -24,6 +24,12 @@ import { TaskManagerRunner } from './task_running';
 import type { ConcreteTaskInstance } from './task';
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  ADJUST_THROUGHPUT_INTERVAL,
+  BACKPRESSURE_HOLD_INTERVALS,
+} from './lib/create_managed_configuration';
+import { BulkUpdateError } from './lib/errors';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
@@ -31,6 +37,7 @@ import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
+import type { TaskManagerBackpressure } from './task_events';
 import { TaskEventType } from './task_events';
 import { EsApiKeyStrategy } from './api_key_strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
@@ -792,6 +799,126 @@ describe('TaskPollingLifecycle', () => {
       expect(TaskManagerRunner).toHaveBeenCalledWith(
         expect.objectContaining({ enrichFakeRequest })
       );
+    });
+  });
+
+  describe('backpressure events', () => {
+    const collectBackpressureEvents = (lifecycle: TaskPollingLifecycle) => {
+      const events: TaskManagerBackpressure[] = [];
+      lifecycle.events.subscribe((event) => {
+        if (event.type === TaskEventType.TASK_MANAGER_BACKPRESSURE) {
+          events.push(event as TaskManagerBackpressure);
+        }
+      });
+      return events;
+    };
+
+    test('emits an active backpressure event with the ES-pressure reason when Elasticsearch errors', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const active = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot) => snapshot?.active);
+      expect(active.length).toBeGreaterThan(0);
+      expect(active[active.length - 1]).toMatchObject({
+        active: true,
+        reason: 'too_many_requests',
+      });
+    });
+
+    test('stays inactive under the low-utilization poll-interval change (capacity-driven, not ES)', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      // No ES errors: advancing time exercises the managed-config loop without
+      // reducing capacity, so backpressure must never report active.
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const anyActive = events.some((event) => isOk(event.event) && event.event.value.active);
+      expect(anyActive).toBe(false);
+    });
+
+    test('stays continuously active across the idle windows of a sustained cluster block', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      const clusterBlockError = () =>
+        new BulkUpdateError({ statusCode: 403, type: 'cluster_block_exception' });
+
+      // A real block re-errors only ~once per 61s poll, so model one block error
+      // followed by error-free windows within the hold.
+      errors$.next(clusterBlockError());
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      for (let i = 0; i < BACKPRESSURE_HOLD_INTERVALS - 1; i++) {
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+
+      // Once active it must not flip back mid-block (one inactive snapshot is
+      // expected at startup, before the block error arrives).
+      const snapshots = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot): snapshot is NonNullable<typeof snapshot> => snapshot !== undefined);
+      const activeStates = snapshots.map((snapshot) => snapshot.active);
+      const firstActive = activeStates.indexOf(true);
+      expect(firstActive).toBeGreaterThanOrEqual(0);
+      expect(activeStates.slice(firstActive).every(Boolean)).toBe(true);
+      expect(snapshots[snapshots.length - 1]).toMatchObject({
+        active: true,
+        reason: 'cluster_block',
+      });
+    });
+
+    test('clears once the hold elapses with no further ES errors', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(new BulkUpdateError({ statusCode: 403, type: 'cluster_block_exception' }));
+      // Advance well past the hold with no further errors so backpressure clears.
+      for (let i = 0; i < BACKPRESSURE_HOLD_INTERVALS + 2; i++) {
+        clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      }
+
+      const last = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot): snapshot is NonNullable<typeof snapshot> => snapshot !== undefined)
+        .pop();
+      expect(last).toMatchObject({ active: false, reason: null });
     });
   });
 });

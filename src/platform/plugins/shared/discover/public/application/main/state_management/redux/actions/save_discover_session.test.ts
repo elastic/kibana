@@ -443,6 +443,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });
@@ -489,6 +490,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });
@@ -532,6 +534,7 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
           }),
         ],
       });
