@@ -30,9 +30,14 @@ const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOIN
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
   // Every test here drives several tabs through full data fetches, and creating a
   // data view adds an index-sources lookup on top, so these do far more work than
-  // the default budget allows on a loaded CI worker. Same allowance as
-  // `sharing.spec.ts`.
-  spaceTest.setTimeout(90_000);
+  // the default budget allows on a loaded CI worker.
+  //
+  // The allowance also has to cover a data view creation that retries: that helper
+  // gates retries on a 30s window but cannot abort an attempt already in flight, so
+  // a retry starting just under the window still runs to completion. At 90s the test
+  // budget expired first and reported a bare `Test timeout of 90000ms exceeded` with
+  // no sign of the assertion that actually failed (#274869).
+  spaceTest.setTimeout(150_000);
 
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();

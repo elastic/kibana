@@ -166,19 +166,24 @@ export class DiscoverApp {
 
     await flyout.waitFor({ state: 'visible' });
 
-    // The editor renders a skeleton in place of the form until it has loaded the
-    // index sources and the existing data view names, and `isLoadingSources$` can
-    // flip back to loading, so a visible flyout does not mean the fields exist
-    // yet. Listing sources takes a while on a loaded CI worker, so wait for the
-    // title field explicitly rather than leaving it to the much shorter default
-    // action timeout on the `fill` calls below.
-    const editorReadyTimeout = 30_000;
-
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
+
+    // The editor renders a skeleton in place of the form until it has loaded the
+    // index sources and the existing data view names, so a visible flyout does not
+    // mean the fields exist yet. Listing sources takes a while on a loaded CI
+    // worker, hence the allowance over the much shorter default action timeout on
+    // the `fill` calls below.
+    //
+    // This is deliberately outside the retry below: the skeleton is one-way. The
+    // editor service only ever sets `isLoadingSourcesInternal` to false, and the
+    // `true` the flyout renders from is just `useObservable`'s initial value before
+    // the first emission, so the form cannot revert to a skeleton once shown. Paying
+    // this wait per attempt instead put a 30s floor under every retry.
+    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
     // Submitting can silently no-op: the title's async validation races a separately
     // debounced index lookup and can latch invalid even once matches exist, and the form
@@ -190,8 +195,13 @@ export class DiscoverApp {
     // ever becomes true, unlike the flyout closing, which is a transition: waiting for it
     // with a deadline made a slow close indistinguishable from a rejected submit, and
     // retrying then drove the editor that had already closed.
+    //
+    // `toPass` never aborts an attempt that is already running; its timeout only gates
+    // whether another one *starts*. The caller's test budget therefore has to cover this
+    // window plus one whole attempt, or a retry that starts just under the deadline is
+    // killed by the test timeout and reports a bare `Test timeout of Nms exceeded`
+    // instead of the assertion that actually failed (#274869).
     await expect(async () => {
-      await titleInput.waitFor({ state: 'visible', timeout: editorReadyTimeout });
       await titleInput.fill(''); // a real value change, so a latched validation runs again
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
@@ -204,6 +214,11 @@ export class DiscoverApp {
       // "loading has not started". Submitting too early still passes validation, but creates
       // the data view with no time field, so no time filter is applied and hit counts include
       // documents outside the selected range.
+      //
+      // This has to stay inside the retry: the editor reloads timestamp fields off
+      // `matchedIndices$`, and clearing the title empties the matched indices, which empties
+      // the options and makes the field reset its selection. The re-fill above therefore
+      // destroys any selection an earlier attempt made.
       await expect
         .poll(
           async () => {
@@ -213,7 +228,7 @@ export class DiscoverApp {
             }
             return (await timestampCombo.getSelectedOptions()).length > 0;
           },
-          { timeout: 30_000, intervals: [200] }
+          { timeout: 20_000, intervals: [200] }
         )
         .toBe(true);
 
@@ -222,9 +237,11 @@ export class DiscoverApp {
       );
 
       // Saving writes a saved object and refreshes the data view list, so allow well over
-      // the couple of seconds this takes when the worker is idle.
+      // the couple of seconds this takes when the worker is idle. Keep this generous: a
+      // deadline short enough to expire on a slow-but-successful save sends the retry back
+      // to a flyout that has already closed, where `fill` can only keep failing.
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
-    }).toPass({ timeout: 60_000, intervals: [0] });
+    }).toPass({ timeout: 30_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
