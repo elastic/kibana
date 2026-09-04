@@ -7,10 +7,11 @@
 
 import { badge, codeBlock, descriptionList, text, view } from '@kbn/adaptive-ui/builders';
 import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import { getBreachEsqlQuery, type Query } from '@kbn/alerting-v2-schemas';
 
 /**
- * Mirror of `RuleAttachmentData` from `@kbn/response-ops-alerting-v2-schemas`
- * (`rule_attachment_schema.ts`); only the presentational subset is mirrored.
+ * Presentational subset of `RuleAttachmentData` from `@kbn/alerting-v2-schemas`.
+ * `schedule.every` and structured `query` match the live attachment payload.
  */
 export interface AlertingRuleData {
   metadata: {
@@ -21,8 +22,8 @@ export interface AlertingRuleData {
   };
   kind?: string;
   time_field?: string;
-  schedule?: { interval?: string };
-  query?: string;
+  schedule?: { every?: string; lookback?: string };
+  query?: Query;
   enabled?: boolean;
 }
 
@@ -53,8 +54,8 @@ export const toAlertingRuleViewSpec = ({
   ];
 
   const details: Array<{ title: string; description: string }> = [];
-  if (schedule?.interval) {
-    details.push({ title: 'Schedule', description: `Every ${schedule.interval}` });
+  if (schedule?.every) {
+    details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
   }
   if (timeField) {
     details.push({ title: 'Time field', description: timeField });
@@ -67,7 +68,7 @@ export const toAlertingRuleViewSpec = ({
   }
 
   if (query) {
-    body.push(codeBlock({ language: 'esql', code: query, title: 'Query' }));
+    body.push(codeBlock({ language: 'esql', code: getBreachEsqlQuery(query), title: 'Query' }));
   }
   if (metadata.description) {
     body.push(text({ body: metadata.description }));
@@ -87,9 +88,14 @@ export const sampleAlertingRule: AlertingRuleData = {
     tags: ['checkout', 'availability'],
     builder_type: 'threshold',
   },
-  kind: 'metric threshold',
+  kind: 'alert',
   time_field: '@timestamp',
-  schedule: { interval: '1m' },
+  schedule: { every: '1m' },
   enabled: true,
-  query: 'FROM metrics-checkout-* | STATS error_rate = AVG(http.5xx_ratio) BY service.name',
+  query: {
+    format: 'standalone',
+    breach: {
+      query: 'FROM metrics-checkout-* | STATS error_rate = AVG(http.5xx_ratio) BY service.name',
+    },
+  },
 };

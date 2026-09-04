@@ -26,7 +26,7 @@ export interface CaseData {
   total_observables?: number;
   tags?: string[];
   owner?: string;
-  assignees?: string[];
+  assignees?: Array<{ uid: string }> | null;
   category?: string | null;
   connector_name?: string;
   created_at?: string;
@@ -68,7 +68,7 @@ export const toCaseViewSpec = (data: CaseData): ViewSpec => {
 
   const metadata: Array<{ title: string; description: string }> = [];
   if (data.assignees && data.assignees.length > 0) {
-    metadata.push({ title: 'Assignees', description: data.assignees.join(', ') });
+    metadata.push({ title: 'Assignees', description: String(data.assignees.length) });
   }
   if (data.category) {
     metadata.push({ title: 'Category', description: data.category });
@@ -108,7 +108,7 @@ export const sampleCase: CaseData = {
   total_observables: 5,
   tags: ['windows', 'execution'],
   owner: 'securitySolution',
-  assignees: ['drew', 'sam'],
+  assignees: [{ uid: 'drew' }, { uid: 'sam' }],
   category: 'Endpoint',
   connector_name: 'Elastic Cloud',
   updated_at: '2026-08-19T15:04:00.000Z',

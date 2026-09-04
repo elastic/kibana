@@ -22,5 +22,26 @@ describe('platform.alerting.rule attachment adapter', () => {
     expect(rendered).toContain('High error rate on checkout');
     expect(rendered).toContain('Enabled');
     expect(rendered).toContain('Every 1m');
+    expect(rendered).toContain(
+      'FROM metrics-checkout-* | STATS error_rate = AVG(http.5xx_ratio) BY service.name'
+    );
+  });
+
+  it('renders the composed breach query the executor runs', () => {
+    const spec = toAlertingRuleViewSpec({
+      ...sampleAlertingRule,
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE cpu > 0.9' },
+      },
+    });
+    const queryNode = spec.body.find((node) => node.type === 'codeBlock');
+    expect(queryNode).toEqual(
+      expect.objectContaining({
+        type: 'codeBlock',
+        code: 'FROM metrics-* | WHERE cpu > 0.9',
+      })
+    );
   });
 });
