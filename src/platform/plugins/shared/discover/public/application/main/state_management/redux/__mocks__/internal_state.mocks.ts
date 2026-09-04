@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverTabType } from '@kbn/discover-session-constants';
 import type { DiscoverServices } from '../../../../../build_services';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
@@ -46,6 +47,8 @@ export const getPersistedTabMock = ({
   initialInternalStateOverrides = {},
   overridenTimeRestore,
   services,
+  tabType,
+  profileState,
 }: {
   tabId?: string;
   dataView: DataView;
@@ -55,6 +58,8 @@ export const getPersistedTabMock = ({
   initialInternalStateOverrides?: Partial<TabState['initialInternalState']>;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
+  tabType?: DiscoverTabType;
+  profileState?: TabState['profileState'];
 }) => {
   const appState = {
     ...getInitialAppState({
@@ -82,9 +87,11 @@ export const getPersistedTabMock = ({
         ...DEFAULT_TAB_STATE.attributes,
         ...attributesOverrides,
       },
+      ...(profileState ? { profileState } : {}),
     }),
     overridenTimeRestore,
     services,
     currentDataView: dataView,
+    tabType,
   });
 };

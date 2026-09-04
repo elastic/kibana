@@ -13,13 +13,12 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
-  RecoveryType,
   StepDefinition,
   StepRenderProps,
 } from '../types';
 import { isAlertConditionStepId } from '../types';
 import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
-import type { FormValues } from '../../../form/types';
+import type { FormValues, RecoveryStrategy } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { ScheduleField } from '../../../form/fields/schedule_field';
@@ -36,7 +35,7 @@ interface Props {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   ruleId?: string;

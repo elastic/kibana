@@ -8,11 +8,21 @@
  */
 
 import { TEST_PROFILE_STATE_DEF } from '../../public/context_awareness/__mocks__/profile_state';
+import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import {
+  createProfileSavedStateTransform,
   type ProfileStateDefinition,
   ProfileStateRegistry,
   ProfileStateType,
 } from './profile_state';
+import { METRICS_STATE_DEF } from './profile_state_definitions/metrics_grid_profile_state';
+import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_state_transforms/metrics_grid_saved_state_transform';
+
+const createSavedMetricsSettings = (dimensions: string[]) => ({
+  ...METRICS_GRID_SETTINGS_DEFAULTS,
+  dimensions,
+});
 
 describe('ProfileStateRegistry', () => {
   it('registers and matches definitions', () => {
@@ -56,6 +66,156 @@ describe('ProfileStateRegistry', () => {
     expect(() => registry.registerDefinition(TEST_PROFILE_STATE_DEF)).toThrow(
       'State with key testProfileState is already registered.'
     );
+  });
+
+  describe('saved state transforms', () => {
+    it('rejects a transform whose state definition is not registered', () => {
+      const registry = new ProfileStateRegistry();
+
+      expect(() => registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM)).toThrow(
+        'State with key metricsState must be registered before this transform.'
+      );
+    });
+
+    it('rejects a transform whose state definition does not match the registered definition', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition({
+        ...METRICS_STATE_DEF,
+        defaultState: {
+          ...METRICS_STATE_DEF.defaultState,
+          dimensions: ['host.name'],
+        },
+      });
+
+      expect(() => registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM)).toThrow(
+        'State with key metricsState must be registered before this transform.'
+      );
+    });
+
+    it('converts profile state to and from saved state', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition(METRICS_STATE_DEF);
+      registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
+
+      const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
+        metricsState: { dimensions: ['host.name'] },
+      });
+
+      expect(savedState).toEqual({
+        type: DiscoverTabType.Metrics,
+        ...createSavedMetricsSettings(['host.name']),
+      });
+      expect(registry.fromSavedState(savedState)).toEqual({
+        metricsState: createSavedMetricsSettings(['host.name']),
+      });
+    });
+
+    it('returns undefined saved state when the tab type is undefined', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition(METRICS_STATE_DEF);
+      registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
+
+      expect(registry.toSavedState(undefined, {})).toBeUndefined();
+    });
+
+    it('returns undefined when no transform is registered', () => {
+      const registry = new ProfileStateRegistry();
+
+      expect(registry.toSavedState(DiscoverTabType.Metrics, {})).toBeUndefined();
+    });
+
+    it('expands defaults when profile state has not been explicitly set', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition(METRICS_STATE_DEF);
+      registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
+
+      expect(registry.toSavedState(DiscoverTabType.Metrics, {})).toEqual({
+        type: DiscoverTabType.Metrics,
+        ...createSavedMetricsSettings([]),
+      });
+    });
+
+    it('returns empty profile state when saved state is undefined or has no transform', () => {
+      const registry = new ProfileStateRegistry();
+
+      expect(registry.fromSavedState(undefined)).toEqual({});
+      expect(
+        registry.fromSavedState({
+          type: DiscoverTabType.Metrics,
+          ...createSavedMetricsSettings(['host.name']),
+        })
+      ).toEqual({});
+    });
+
+    it('rejects a second transform for the same tab type', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition(METRICS_STATE_DEF);
+      registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
+
+      const duplicateTransform = createProfileSavedStateTransform({
+        tabType: DiscoverTabType.Metrics,
+        stateDefinitions: [METRICS_STATE_DEF],
+        toSavedState: ([{ dimensions }]) => createSavedMetricsSettings(dimensions),
+        fromSavedState: ({ dimensions }) => [{ dimensions }],
+      });
+
+      expect(() => registry.registerTransform(duplicateTransform)).toThrow(
+        'Transform for tab type metrics is already registered.'
+      );
+    });
+
+    it('rejects duplicate state definitions in a transform', () => {
+      const registry = new ProfileStateRegistry();
+      registry.registerDefinition(METRICS_STATE_DEF);
+
+      const transform = createProfileSavedStateTransform({
+        tabType: DiscoverTabType.Metrics,
+        stateDefinitions: [METRICS_STATE_DEF, METRICS_STATE_DEF],
+        toSavedState: ([{ dimensions }]) => createSavedMetricsSettings(dimensions),
+        fromSavedState: ({ dimensions }) => [{ dimensions }, {}],
+      });
+
+      expect(() => registry.registerTransform(transform)).toThrow(
+        'State with key metricsState is already included in the transform for tab type metrics.'
+      );
+    });
+
+    it('maps multiple state definitions to and from ordered tuples', () => {
+      const registry = new ProfileStateRegistry();
+      const secondaryDefinition: ProfileStateDefinition<{ suffix: string }> = {
+        key: 'secondaryState',
+        descriptor: { suffix: { type: ProfileStateType.Persistent } },
+        defaultState: { suffix: 'default-suffix' },
+      };
+      const transform = createProfileSavedStateTransform({
+        tabType: DiscoverTabType.Metrics,
+        stateDefinitions: [METRICS_STATE_DEF, secondaryDefinition],
+        toSavedState: ([metricsState, secondaryState]) => ({
+          ...createSavedMetricsSettings([...metricsState.dimensions, secondaryState.suffix]),
+        }),
+        fromSavedState: ({ dimensions }) => [
+          { dimensions: dimensions.slice(0, -1) },
+          { suffix: dimensions.at(-1) },
+        ],
+      });
+
+      registry.registerDefinition(METRICS_STATE_DEF);
+      registry.registerDefinition(secondaryDefinition);
+      registry.registerTransform(transform);
+
+      const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
+        metricsState: { dimensions: ['host.name'] },
+      });
+
+      expect(savedState).toEqual({
+        type: DiscoverTabType.Metrics,
+        ...createSavedMetricsSettings(['host.name', 'default-suffix']),
+      });
+      expect(registry.fromSavedState(savedState)).toEqual({
+        metricsState: { dimensions: ['host.name'] },
+        secondaryState: { suffix: 'default-suffix' },
+      });
+    });
   });
 
   it('picks registered fields by state type', () => {
