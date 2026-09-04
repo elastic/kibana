@@ -55,7 +55,7 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
     'create graph button navigates to the workspace editor',
     async ({ pageObjects, page }) => {
       await pageObjects.graphListing.goto();
-      await pageObjects.graphListing.createGraphButton.click();
+      await pageObjects.graphListing.clickCreateGraph();
       await expect(page.locator('[data-test-subj~="graphCurrentGraphBreadcrumb"]')).toBeVisible();
     }
   );

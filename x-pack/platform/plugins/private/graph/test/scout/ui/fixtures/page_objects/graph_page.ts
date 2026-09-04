@@ -8,12 +8,15 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
 import { ContentListWrapper } from '@kbn/scout';
 
+const LISTING_TIMEOUT = 20_000;
+
 export class GraphPage {
   /** Shared wrapper for the Content List listing UI (toolbar, table, selection bar). */
   readonly contentList: ContentListWrapper;
 
   // Public locators consumed directly by specs.
   readonly createGraphPromptButton: Locator;
+  readonly createGraphButton: Locator;
   readonly saveButton: Locator;
   readonly currentGraphBreadcrumb: Locator;
   readonly vennLargeTerm1: Locator;
@@ -26,6 +29,10 @@ export class GraphPage {
   private readonly newButton: Locator;
   private readonly settingsButton: Locator;
   private readonly appMenuOverflowButton: Locator;
+  private readonly appHeaderBack: Locator;
+  private readonly listingPage: Locator;
+  private readonly toolbarSkeleton: Locator;
+  private readonly emptyState: Locator;
   private readonly homeBreadcrumb: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
@@ -49,11 +56,16 @@ export class GraphPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.contentList = new ContentListWrapper(page);
     this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
+    this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
     this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
     this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    this.appHeaderBack = this.page.testSubj.locator('appHeaderBack');
+    this.listingPage = this.page.testSubj.locator('kibana-content-list-page');
+    this.toolbarSkeleton = this.page.testSubj.locator('contentListToolbar-skeleton');
+    this.emptyState = this.page.testSubj.locator('content-list-emptyState');
     // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
     // mirror); match `first` to pick the chrome one.
     this.homeBreadcrumb = this.page.locator(
@@ -101,8 +113,14 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.page.testSubj.locator('appHeader').waitFor({ state: 'visible' });
-    await this.contentList.toolbar.or(this.createGraphPromptButton).waitFor({ state: 'visible' });
+    await this.listingPage.waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+    await this.contentList.toolbar
+      .or(this.toolbarSkeleton)
+      .or(this.emptyState)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+    await this.contentList.toolbar
+      .or(this.emptyState)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 
   private async clickAppMenuItem(item: Locator) {
@@ -114,7 +132,15 @@ export class GraphPage {
   }
 
   async clickCreateGraph() {
-    await this.createGraphPromptButton.click();
+    if (await this.createGraphPromptButton.isVisible()) {
+      await this.createGraphPromptButton.click();
+      return;
+    }
+    if (!(await this.createGraphButton.isVisible())) {
+      await this.appMenuOverflowButton.click();
+      await this.createGraphButton.waitFor({ state: 'visible' });
+    }
+    await this.createGraphButton.click();
   }
 
   /**
@@ -180,7 +206,19 @@ export class GraphPage {
   }
 
   async goToListingViaBreadcrumb() {
-    await this.homeBreadcrumb.click();
+    if (await this.appHeaderBack.isVisible()) {
+      await this.appHeaderBack.click();
+    } else {
+      await this.homeBreadcrumb.click();
+    }
+    const modalConfirm = this.confirmModalConfirmButton;
+    const modalVisible = await modalConfirm
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (modalVisible) {
+      await modalConfirm.click();
+    }
   }
 
   async openWorkspace(title: string) {

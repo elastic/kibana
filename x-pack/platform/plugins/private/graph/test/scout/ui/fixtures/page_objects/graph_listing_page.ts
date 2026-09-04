@@ -8,6 +8,8 @@
 import type { ScoutPage, Locator } from '@kbn/scout';
 import { ContentListWrapper } from '@kbn/scout';
 
+const LISTING_TIMEOUT = 20_000;
+
 /**
  * Page object for the Graph listing page (`/app/graph#/home`).
  *
@@ -20,18 +22,49 @@ export class GraphListingPage {
   readonly createGraphButton: Locator;
   readonly emptyPromptCreateButton: Locator;
   readonly appHeader: Locator;
+  readonly listingPage: Locator;
+  private readonly toolbarSkeleton: Locator;
+  private readonly emptyState: Locator;
+  private readonly appMenuOverflowButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
     this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
     this.emptyPromptCreateButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
     this.appHeader = this.page.testSubj.locator('appHeader');
+    this.listingPage = this.page.testSubj.locator('kibana-content-list-page');
+    this.toolbarSkeleton = this.page.testSubj.locator('contentListToolbar-skeleton');
+    this.emptyState = this.page.testSubj.locator('content-list-emptyState');
+    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
   }
 
-  /** Navigate to the Graph listing page and wait for the header to be visible. */
+  /** Listing page template is mounted; list is loaded or empty (not just the chrome header). */
+  async waitForReady() {
+    await this.listingPage.waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+    await this.contentList.toolbar
+      .or(this.toolbarSkeleton)
+      .or(this.emptyState)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+    await this.contentList.toolbar
+      .or(this.emptyState)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+  }
+
+  /** Navigate to the Graph listing page and wait for the list to settle. */
   async goto() {
     await this.page.gotoApp('graph');
-    await this.appHeader.waitFor({ state: 'visible' });
-    await this.contentList.toolbar.or(this.emptyPromptCreateButton).waitFor({ state: 'visible' });
+    await this.waitForReady();
+  }
+
+  async clickCreateGraph() {
+    if (await this.emptyPromptCreateButton.isVisible()) {
+      await this.emptyPromptCreateButton.click();
+      return;
+    }
+    if (!(await this.createGraphButton.isVisible())) {
+      await this.appMenuOverflowButton.click();
+      await this.createGraphButton.waitFor({ state: 'visible' });
+    }
+    await this.createGraphButton.click();
   }
 }

@@ -225,8 +225,15 @@ export class GraphPageObject extends FtrService {
 
   async goToListingPage() {
     await this.retry.try(async () => {
-      await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
-      await this.testSubjects.existOrFail('appHeader', { timeout: 3000 });
+      if (await this.testSubjects.exists('appHeaderBack')) {
+        await this.testSubjects.click('appHeaderBack');
+      } else {
+        await this.testSubjects.click('breadcrumb graphHomeBreadcrumb first');
+      }
+      if (await this.testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
+        await this.common.clickConfirmOnModal();
+      }
+      await this.testSubjects.existOrFail('kibana-content-list-page', { timeout: 5000 });
     });
   }
 
