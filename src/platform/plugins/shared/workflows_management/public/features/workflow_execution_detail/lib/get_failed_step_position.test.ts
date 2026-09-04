@@ -8,11 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import type {
-  WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
-  WorkflowYaml,
-} from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { getFailedStepPosition } from './get_failed_step_position';
 
 const step = (
@@ -29,13 +25,13 @@ const step = (
     stepExecutionIndex: 0,
     topologicalIndex: 0,
     ...partial,
-  }) as WorkflowStepExecutionDto;
+  } as WorkflowStepExecutionDto);
 
 const definition = (names: string[]): WorkflowYaml =>
   ({
     name: 'wf',
     steps: names.map((name) => ({ name, type: 'console' })),
-  }) as WorkflowYaml;
+  } as WorkflowYaml);
 
 describe('getFailedStepPosition', () => {
   it('returns null for non-failed executions', () => {
@@ -56,10 +52,7 @@ describe('getFailedStepPosition', () => {
     });
     const execution = {
       status: ExecutionStatus.FAILED,
-      stepExecutions: [
-        step({ id: '1', stepId: 'start', globalExecutionIndex: 0 }),
-        failed,
-      ],
+      stepExecutions: [step({ id: '1', stepId: 'start', globalExecutionIndex: 0 }), failed],
     } as WorkflowExecutionDto;
     expect(
       getFailedStepPosition(
@@ -120,9 +113,7 @@ describe('getFailedStepPosition', () => {
       scopeStack: [
         {
           stepId: 'http_call',
-          nestedScopes: [
-            { nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '1-attempt' },
-          ],
+          nestedScopes: [{ nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '1-attempt' }],
         },
       ],
     });
@@ -135,9 +126,7 @@ describe('getFailedStepPosition', () => {
       scopeStack: [
         {
           stepId: 'http_call',
-          nestedScopes: [
-            { nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '4-attempt' },
-          ],
+          nestedScopes: [{ nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '4-attempt' }],
         },
       ],
     });

@@ -30,8 +30,8 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
-import type { IterationPinKind } from '../lib/iteration_pins';
 import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
+import type { IterationPinKind } from '../lib/iteration_pins';
 
 /** Chevron / gap-glyph gutter width — reserved per sibling group when needed. */
 export const TREE_ROW_CHEVRON_SLOT_PX = 16;
@@ -240,18 +240,14 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     // Trailing hourglass only — never a leading slot. Skip it when the type
     // icon is already hourglass-shaped (duplicate glyph).
     const showStatus =
-      !isBranchLabel &&
-      shouldShowStatusIcon(status) &&
-      !(isWaitingStatus && typeIconIsHourglass);
+      !isBranchLabel && shouldShowStatusIcon(status) && !(isWaitingStatus && typeIconIsHourglass);
 
     const hoverBg = euiTheme.colors.backgroundBaseInteractiveHover;
     const selectBg = euiTheme.colors.backgroundBaseInteractiveSelect;
     const radius = euiTheme.border.radius.medium;
     // Light theme: stronger danger border for contrast against the danger fill.
     const dangerSelectionBorder =
-      colorMode === 'LIGHT'
-        ? euiTheme.colors.borderStrongDanger
-        : euiTheme.colors.borderBaseDanger;
+      colorMode === 'LIGHT' ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBaseDanger;
 
     const expandLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.expandAriaLabel', {
       defaultMessage: '{expanded, select, true{Collapse} other{Expand}} {stepName}',
@@ -267,9 +263,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
 
     const showErrorPanel = showDangerFill && Boolean(error) && Boolean(onViewFailedStepInput);
 
-    const statusNode = showStatus ? (
-      <StatusIcon status={status} />
-    ) : null;
+    const statusNode = showStatus ? <StatusIcon status={status} /> : null;
     const dangerIconColor = tintDanger ? euiTheme.colors.danger : undefined;
 
     const durationNode = (() => {
@@ -397,9 +391,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             : isInteractive
             ? `cursor: pointer;`
             : ''}
-          ${showDangerSelectionBorder
-            ? `outline: 1px solid ${dangerSelectionBorder};`
-            : ''}
+          ${showDangerSelectionBorder ? `outline: 1px solid ${dangerSelectionBorder};` : ''}
           ${arrivalPulse
             ? `
             @keyframes workflowDangerArrivalPulse {
@@ -409,9 +401,9 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               }
               50% {
                 box-shadow: 0 0 0 ${euiTheme.size.xs} ${transparentize(
-                  euiTheme.colors.danger,
-                  0.35
-                )};
+                euiTheme.colors.danger,
+                0.35
+              )};
               }
             }
             @media (prefers-reduced-motion: no-preference) {

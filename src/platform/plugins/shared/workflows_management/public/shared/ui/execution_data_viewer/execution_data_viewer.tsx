@@ -8,7 +8,14 @@
  */
 
 import type { EuiSelectOption } from '@elastic/eui';
-import { EuiAccordion, EuiFieldSearch, EuiPanel, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFieldSearch,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';

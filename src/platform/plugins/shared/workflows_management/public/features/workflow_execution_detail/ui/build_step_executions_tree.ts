@@ -11,7 +11,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isDangerousStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isDangerousStatus,
+  isExecuteSyncStepType,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 export interface StepListTreeItem {

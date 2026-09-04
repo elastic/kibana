@@ -10,11 +10,11 @@
 import { EuiHorizontalRule, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { StepAiMetadata } from '../lib/normalize_step_ai';
-import { stepAiToTokenUsage } from '../lib/normalize_step_ai';
+import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { useKibana } from '../../../hooks/use_kibana';
 import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
-import { StepDetailAccordionSection } from './step_detail_accordion_section';
+import type { StepAiMetadata } from '../lib/normalize_step_ai';
+import { stepAiToTokenUsage } from '../lib/normalize_step_ai';
 
 interface AiStepSectionProps {
   ai: StepAiMetadata;

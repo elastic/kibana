@@ -108,10 +108,9 @@ export const buildDiagnosisAttachments = (
   const items: AttachmentInput[] = [
     textAttachment({
       id: `wf-diagnose-error-${contextPackage.executionId}`,
-      description: i18n.translate(
-        'workflows.executionFlyout.failedStep.diagnoseAttachmentError',
-        { defaultMessage: 'Step error' }
-      ),
+      description: i18n.translate('workflows.executionFlyout.failedStep.diagnoseAttachmentError', {
+        defaultMessage: 'Step error',
+      }),
       value: contextPackage.error,
     }),
     textAttachment({
@@ -148,10 +147,9 @@ export const buildDiagnosisAttachments = (
   items.push(
     textAttachment({
       id: `wf-diagnose-ids-${contextPackage.executionId}`,
-      description: i18n.translate(
-        'workflows.executionFlyout.failedStep.diagnoseAttachmentIds',
-        { defaultMessage: 'Workflow / execution / step IDs' }
-      ),
+      description: i18n.translate('workflows.executionFlyout.failedStep.diagnoseAttachmentIds', {
+        defaultMessage: 'Workflow / execution / step IDs',
+      }),
       value: {
         workflowId: contextPackage.workflowId,
         executionId: contextPackage.executionId,
@@ -192,10 +190,7 @@ export const buildDiagnosisPrompt = (stepName: string, includeAttemptHistory: bo
   });
 };
 
-export const buildDiagnosisConversationTitle = (
-  workflowName: string,
-  stepName: string
-): string =>
+export const buildDiagnosisConversationTitle = (workflowName: string, stepName: string): string =>
   i18n.translate('workflows.executionFlyout.failedStep.diagnoseConversationTitle', {
     defaultMessage: 'Diagnose: {workflowName} — {stepName}',
     values: { workflowName, stepName },

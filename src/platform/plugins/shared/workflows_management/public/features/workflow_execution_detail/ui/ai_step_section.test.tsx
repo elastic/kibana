@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AiStepSection } from './ai_step_section';
 

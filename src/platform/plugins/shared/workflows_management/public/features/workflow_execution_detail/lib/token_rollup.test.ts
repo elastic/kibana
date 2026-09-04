@@ -86,10 +86,7 @@ describe('rollupTokenUsage', () => {
 
   it('treats zero-total AI leaves as empty so control-flow parents get no badge value', () => {
     const result = rollupTokenUsage({
-      children: [
-        { ai: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } },
-        {},
-      ],
+      children: [{ ai: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } }, {}],
     });
     expect(result).toEqual({
       inputTokens: 0,
@@ -105,11 +102,8 @@ describe('rollupTokenUsage', () => {
 describe('rollupStepAiList', () => {
   it('filters undefined entries', () => {
     expect(
-      rollupStepAiList([
-        undefined,
-        { totalTokens: 10, inputTokens: 6, outputTokens: 4 },
-        undefined,
-      ]).totalTokens
+      rollupStepAiList([undefined, { totalTokens: 10, inputTokens: 6, outputTokens: 4 }, undefined])
+        .totalTokens
     ).toBe(10);
   });
 });

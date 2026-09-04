@@ -146,8 +146,6 @@ describe('stepAiToTokenUsage', () => {
   });
 
   it('returns undefined for zero-total usage so badges stay hidden', () => {
-    expect(
-      stepAiToTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 })
-    ).toBeUndefined();
+    expect(stepAiToTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 })).toBeUndefined();
   });
 });

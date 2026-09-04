@@ -91,9 +91,7 @@ export const deriveIterationStatus = (
  * Not-run iterations may only appear as a trailing contiguous block after
  * the last executed iteration. Earlier holes are coerced away from not-run.
  */
-export const applyTrailingNotRunConstraint = (
-  statuses: ExecutionStatus[]
-): ExecutionStatus[] => {
+export const applyTrailingNotRunConstraint = (statuses: ExecutionStatus[]): ExecutionStatus[] => {
   let lastExecutedIndex = -1;
   for (let i = 0; i < statuses.length; i++) {
     if (!isNotRunStatus(statuses[i])) {

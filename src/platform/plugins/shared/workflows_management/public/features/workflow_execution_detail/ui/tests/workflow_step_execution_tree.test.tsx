@@ -176,10 +176,7 @@ jest.mock('../step_execution_tree_row', () => ({
         </span>
       ))}
       {error && (!isRetryAttempt || (stateTags ?? []).includes('final')) ? (
-        <span
-          data-test-subj="workflowFailedStepErrorPanel"
-          aria-label={errorPanelAriaLabel}
-        >
+        <span data-test-subj="workflowFailedStepErrorPanel" aria-label={errorPanelAriaLabel}>
           {errorPanelMessageOverride ?? 'error'}
         </span>
       ) : null}
@@ -1418,7 +1415,6 @@ describe('WorkflowStepExecutionTree', () => {
     });
   });
 
-
   describe('foreach iteration pins and gaps', () => {
     const makeIteration = (index: number, stepExecId: string) => ({
       stepExecutionId: null as string | null,
@@ -1444,7 +1440,11 @@ describe('WorkflowStepExecutionTree', () => {
           stepId: 'loop',
           stepType: 'foreach',
           executionIndex: 0,
-          children: [makeIteration(0, 'step-0'), makeIteration(1, 'step-1'), makeIteration(2, 'step-2')],
+          children: [
+            makeIteration(0, 'step-0'),
+            makeIteration(1, 'step-1'),
+            makeIteration(2, 'step-2'),
+          ],
         },
       ]);
 
@@ -1586,10 +1586,7 @@ describe('WorkflowStepExecutionTree', () => {
                     id: `step-${i}`,
                     stepId: 'log',
                     stepType: 'console',
-                    status:
-                      i < 5
-                        ? ExecutionStatus.COMPLETED
-                        : ExecutionStatus.RUNNING,
+                    status: i < 5 ? ExecutionStatus.COMPLETED : ExecutionStatus.RUNNING,
                     executionTimeMs: 10,
                   })
                 ),

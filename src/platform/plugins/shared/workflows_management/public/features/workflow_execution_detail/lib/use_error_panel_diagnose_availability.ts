@@ -10,7 +10,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useKibana } from '../../../hooks/use_kibana';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
   AGENT_BUILDER_REQUIRED_LICENSE_TIER,
@@ -27,6 +26,7 @@ import {
   diagnoseHandoffErrorToastTitle,
   openFailureDiagnosisChat,
 } from './open_failure_diagnosis_chat';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface OpenDiagnoseOptions {
   contextPackage: DiagnosisContextPackage;

@@ -53,9 +53,9 @@ export const findStepRetryConfig = (
   walkSteps(definition.steps, (step) => {
     if (found != null) return;
     if (step.name !== stepName) return;
-    const retry = (step as { 'on-failure'?: { retry?: { delay?: string; 'max-attempts'?: number } } })[
-      'on-failure'
-    ]?.retry;
+    const retry = (
+      step as { 'on-failure'?: { retry?: { delay?: string; 'max-attempts'?: number } } }
+    )['on-failure']?.retry;
     if (!retry) return;
     found = {
       delay: retry.delay,

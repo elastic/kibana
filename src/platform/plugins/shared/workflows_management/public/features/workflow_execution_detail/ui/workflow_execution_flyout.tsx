@@ -59,26 +59,26 @@ import {
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
+import { useKibana } from '../../../hooks/use_kibana';
+import { formatDuration } from '../../../shared/lib/format_duration';
+import { getStatusLabel } from '../../../shared/translations/status_translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
+import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
+import { formatExecutionTimestamp } from '../../../shared/ui/use_formatted_date';
 import {
   buildIterationPseudoStep,
   isIterationPseudoStepId,
 } from '../lib/build_iteration_pseudo_step';
+import { findStepConnectorId } from '../lib/find_step_connector_id';
 import { getFailedStepPosition } from '../lib/get_failed_step_position';
 import { getRunMode } from '../lib/get_run_mode';
 import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
 import { normalizeStepAi } from '../lib/normalize_step_ai';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
-import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
-import { useKibana } from '../../../hooks/use_kibana';
-import { formatDuration } from '../../../shared/lib/format_duration';
-import { getStatusLabel } from '../../../shared/translations/status_translations';
-import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
-import { formatExecutionTimestamp } from '../../../shared/ui/use_formatted_date';
-import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
-import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import { TokenUsageBreakdown } from '../../../shared/ui/token_usage_badge/token_usage_breakdown';
-import { findStepConnectorId } from '../lib/find_step_connector_id';
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;

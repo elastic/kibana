@@ -9,9 +9,9 @@
 
 import {
   iterationGapCount,
-  planIterationCollapse,
   type IterationInfo,
   type IterationPlanItem,
+  planIterationCollapse,
 } from './iteration_pins';
 
 describe('planIterationCollapse', () => {
@@ -89,7 +89,9 @@ describe('planIterationCollapse', () => {
       ],
       { isExecutionComplete: true, threshold: 5 }
     );
-    const pins = plan.filter((p): p is Extract<IterationPlanItem, { type: 'pin' }> => p.type === 'pin');
+    const pins = plan.filter(
+      (p): p is Extract<IterationPlanItem, { type: 'pin' }> => p.type === 'pin'
+    );
     expect(pins.find((p) => p.index === 0)?.autoExpand).toBe(true);
     expect(pins.find((p) => p.index === 2)?.autoExpand).toBe(false);
   });

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TokenUsageBreakdown } from './token_usage_breakdown';
 
@@ -57,15 +57,11 @@ describe('TokenUsageBreakdown', () => {
     expect(screen.getByTestId('workflowTokenUsageBreakdown-totalRow')).toHaveTextContent(
       /42 tokens/
     );
-    expect(
-      screen.queryByTestId('workflowTokenUsageBreakdown-inputRow')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowTokenUsageBreakdown-inputRow')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('workflowTokenUsageBreakdown-compositionBar')
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('workflowTokenUsageBreakdown-inputSwatch')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowTokenUsageBreakdown-inputSwatch')).not.toBeInTheDocument();
   });
 
   it('renders parent context as model calls and never a model name', () => {

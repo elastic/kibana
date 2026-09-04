@@ -8,15 +8,15 @@
  */
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
-  DIAGNOSIS_ATTACHMENT_MAX_CHARS,
   buildDiagnosisAttachments,
   buildDiagnosisConversationTitle,
   buildDiagnosisHandoffOpenChatPayload,
   buildDiagnosisPrompt,
+  DIAGNOSIS_ATTACHMENT_MAX_CHARS,
   serializeDiagnosisAttachmentContent,
 } from './build_diagnosis_handoff';
-import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 
 const basePackage = (
   overrides: Partial<DiagnosisContextPackage> = {}

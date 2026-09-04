@@ -14,10 +14,10 @@ import type {
   WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { worstStatus } from './derive_iteration_status';
 import { isNotRunStatus } from './get_failed_step_position';
 import { normalizeStepAi } from './normalize_step_ai';
 import { rollupTokenUsage, tokenRollupToUsage } from './token_rollup';
-import { worstStatus } from './derive_iteration_status';
 
 const ITERATION_ID_RE = /^(foreach|while)-iteration:(.+):(\d+)$/;
 
@@ -112,8 +112,7 @@ export const buildIterationPseudoStep = (
     .map((step) => step.status)
     .filter((status): status is ExecutionStatus => status != null);
   const executed = childStatuses.filter((status) => !isNotRunStatus(status));
-  const status =
-    executed.length === 0 ? ExecutionStatus.SKIPPED : worstStatus(executed);
+  const status = executed.length === 0 ? ExecutionStatus.SKIPPED : worstStatus(executed);
 
   const executionTimeMs = children.reduce((sum, step) => {
     if (step.executionTimeMs != null && Number.isFinite(step.executionTimeMs)) {

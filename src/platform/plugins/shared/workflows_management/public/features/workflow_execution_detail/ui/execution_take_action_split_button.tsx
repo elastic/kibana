@@ -8,20 +8,20 @@
  */
 
 import {
+  copyToClipboard,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
   EuiSplitButton,
-  copyToClipboard,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { isDangerousStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { useRunWorkflow, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
+import { buildReplayInputsFromExecutionContext } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 
 interface ExecutionTakeActionSplitButtonProps {
   execution: WorkflowExecutionDto;
@@ -78,9 +78,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
     const handleCopyLink = useCallback(() => {
       setIsMenuOpen(false);
       const absolute =
-        typeof window !== 'undefined'
-          ? `${window.location.origin}${executionHref}`
-          : executionHref;
+        typeof window !== 'undefined' ? `${window.location.origin}${executionHref}` : executionHref;
       copyToClipboard(absolute);
       notifications.toasts.addSuccess(
         i18n.translate('workflows.executionFlyout.takeAction.linkCopied', {

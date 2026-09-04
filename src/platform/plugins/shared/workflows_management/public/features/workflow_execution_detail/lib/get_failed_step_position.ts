@@ -8,11 +8,7 @@
  */
 
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
-import type {
-  WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
-  WorkflowYaml,
-} from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 
 export interface FailedStepPosition {
   /** Failed step to open / scroll to (may be nested). */

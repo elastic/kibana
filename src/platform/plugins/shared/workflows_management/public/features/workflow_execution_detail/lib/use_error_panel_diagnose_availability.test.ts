@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { useErrorPanelDiagnoseAvailability } from './use_error_panel_diagnose_availability';
+import { act, renderHook } from '@testing-library/react';
+import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
   clearPendingDiagnoseHandoff,
   loadPendingDiagnoseHandoff,
 } from './diagnose_pending_handoff';
-import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
+import { useErrorPanelDiagnoseAvailability } from './use_error_panel_diagnose_availability';
 
 const mockOpenFailureDiagnosisChat = jest.fn();
 const mockAddError = jest.fn();

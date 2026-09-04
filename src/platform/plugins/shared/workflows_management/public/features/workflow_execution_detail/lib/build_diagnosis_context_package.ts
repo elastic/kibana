@@ -8,11 +8,7 @@
  */
 
 import { getStepByNameFromNestedSteps } from '@kbn/workflows';
-import type {
-  SerializedError,
-  WorkflowStepExecutionDto,
-  WorkflowYaml,
-} from '@kbn/workflows';
+import type { SerializedError, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 
 export interface DiagnosisAttemptHistoryEntry {
   attemptNumber: number;

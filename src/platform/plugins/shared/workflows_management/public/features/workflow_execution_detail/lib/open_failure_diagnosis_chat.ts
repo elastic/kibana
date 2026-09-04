@@ -14,8 +14,8 @@ import {
 } from '@kbn/agent-builder-common/chat/events';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { buildDiagnosisHandoffOpenChatPayload } from './build_diagnosis_handoff';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
+import { buildDiagnosisHandoffOpenChatPayload } from './build_diagnosis_handoff';
 
 const RENAME_PATH = (conversationId: string) =>
   `/internal/agent_builder/conversations/${conversationId}/_rename`;

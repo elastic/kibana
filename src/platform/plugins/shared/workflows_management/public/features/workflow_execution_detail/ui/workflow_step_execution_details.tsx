@@ -299,17 +299,20 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                     </EuiFlexItem>
                   )}
-                  {showIterations && stepExecution && allStepExecutions && onSelectStepExecution && (
-                    <EuiFlexItem grow={false}>
-                      <ForeachIterationsSection
-                        foreachStep={stepExecution}
-                        allStepExecutions={allStepExecutions}
-                        selectedId={stepExecution.id}
-                        onSelectStep={onSelectStepExecution}
-                        executionStatus={workflowExecutionStatus}
-                      />
-                    </EuiFlexItem>
-                  )}
+                  {showIterations &&
+                    stepExecution &&
+                    allStepExecutions &&
+                    onSelectStepExecution && (
+                      <EuiFlexItem grow={false}>
+                        <ForeachIterationsSection
+                          foreachStep={stepExecution}
+                          allStepExecutions={allStepExecutions}
+                          selectedId={stepExecution.id}
+                          onSelectStep={onSelectStepExecution}
+                          executionStatus={workflowExecutionStatus}
+                        />
+                      </EuiFlexItem>
+                    )}
                   {showOutput && (
                     <EuiFlexItem grow={false}>
                       <StepExecutionDataView

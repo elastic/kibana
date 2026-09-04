@@ -11,7 +11,7 @@ import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 import {
   getMaskableIconUrl,
   getStepIconType,

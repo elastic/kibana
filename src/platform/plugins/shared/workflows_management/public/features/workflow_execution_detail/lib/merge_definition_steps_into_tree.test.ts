@@ -9,8 +9,8 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
-import type { StepExecutionTreeItem } from '../ui/build_step_executions_tree';
 import { mergeDefinitionStepsIntoTree } from './merge_definition_steps_into_tree';
+import type { StepExecutionTreeItem } from '../ui/build_step_executions_tree';
 
 const def = (steps: Array<{ name: string; type: string }>): WorkflowYaml =>
   ({ name: 'wf', steps } as WorkflowYaml);

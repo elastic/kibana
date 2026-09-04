@@ -141,7 +141,11 @@ export const normalizeStepAi = (params: {
 };
 
 export const stepAiToTokenUsage = (ai: StepAiMetadata): WorkflowTokenUsage | undefined => {
-  if (ai.totalTokens === undefined && ai.inputTokens === undefined && ai.outputTokens === undefined) {
+  if (
+    ai.totalTokens === undefined &&
+    ai.inputTokens === undefined &&
+    ai.outputTokens === undefined
+  ) {
     return undefined;
   }
   const inputTokens = ai.inputTokens ?? 0;

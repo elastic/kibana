@@ -25,7 +25,7 @@ const step = (
     stepExecutionIndex: 0,
     topologicalIndex: 0,
     ...partial,
-  }) as WorkflowStepExecutionDto;
+  } as WorkflowStepExecutionDto);
 
 describe('buildDiagnosisContextPackage', () => {
   const definition = {
@@ -78,9 +78,7 @@ describe('buildDiagnosisContextPackage', () => {
       scopeStack: [
         {
           stepId: 'http_call',
-          nestedScopes: [
-            { nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '1-attempt' },
-          ],
+          nestedScopes: [{ nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '1-attempt' }],
         },
       ],
     });
@@ -96,9 +94,7 @@ describe('buildDiagnosisContextPackage', () => {
       scopeStack: [
         {
           stepId: 'http_call',
-          nestedScopes: [
-            { nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '2-attempt' },
-          ],
+          nestedScopes: [{ nodeId: 'enterRetry', nodeType: 'enter-retry', scopeId: '2-attempt' }],
         },
       ],
     });

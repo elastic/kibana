@@ -38,9 +38,7 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
 
   if (!isLong) {
     if (!value) {
-      return (
-        <span css={{ fontSize: '12px', color: euiTheme.colors.subduedText }}>—</span>
-      );
+      return <span css={{ fontSize: '12px', color: euiTheme.colors.subduedText }}>—</span>;
     }
     return (
       <EuiToolTip content={value} display="block" position="top">
@@ -77,10 +75,9 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
                   iconType="copy"
                   size="xs"
                   color="text"
-                  aria-label={i18n.translate(
-                    'workflows.executionFlyout.stepDetail.copyValue',
-                    { defaultMessage: 'Copy value' }
-                  )}
+                  aria-label={i18n.translate('workflows.executionFlyout.stepDetail.copyValue', {
+                    defaultMessage: 'Copy value',
+                  })}
                   onClick={copy}
                   data-test-subj="workflowExecutionStepDataValueCopy"
                 />
@@ -92,10 +89,9 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
               iconType="minimize"
               size="xs"
               color="text"
-              aria-label={i18n.translate(
-                'workflows.executionFlyout.stepDetail.collapseValue',
-                { defaultMessage: 'Collapse value' }
-              )}
+              aria-label={i18n.translate('workflows.executionFlyout.stepDetail.collapseValue', {
+                defaultMessage: 'Collapse value',
+              })}
               onClick={() => setExpanded(false)}
               data-test-subj="workflowExecutionStepDataValueCollapse"
             />
@@ -154,7 +150,13 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
       >
         {value}
       </span>
-      <EuiIcon type="maximize" size="s" color="subdued" css={{ flexShrink: 0 }} />
+      <EuiIcon
+        type="maximize"
+        size="s"
+        color="subdued"
+        css={{ flexShrink: 0 }}
+        aria-hidden={true}
+      />
     </button>
   );
 });

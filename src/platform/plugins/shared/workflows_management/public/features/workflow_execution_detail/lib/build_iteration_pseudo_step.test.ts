@@ -25,7 +25,7 @@ const createExecution = (
     workflowId: 'wf-1',
     status: ExecutionStatus.COMPLETED,
     ...overrides,
-  }) as WorkflowExecutionDto;
+  } as WorkflowExecutionDto);
 
 describe('buildIterationPseudoStep', () => {
   it('builds Input from resolved foreach.item and omits output', () => {

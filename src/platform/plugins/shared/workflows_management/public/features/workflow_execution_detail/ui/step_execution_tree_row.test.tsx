@@ -12,10 +12,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
-  StepExecutionTreeRow,
-  TREE_ROW_CHEVRON_SLOT_PX,
   getTreeIndentGuideOffset,
+  StepExecutionTreeRow,
   type StepExecutionTreeRowProps,
+  TREE_ROW_CHEVRON_SLOT_PX,
 } from './step_execution_tree_row';
 
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({

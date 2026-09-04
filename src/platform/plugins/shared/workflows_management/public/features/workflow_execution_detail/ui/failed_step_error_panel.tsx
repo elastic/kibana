@@ -49,10 +49,9 @@ interface FailedStepErrorPanelProps {
   onOpenLicenseManagement?: () => void;
 }
 
-const diagnosePrimaryLabel = i18n.translate(
-  'workflows.executionFlyout.failedStep.diagnoseWithAi',
-  { defaultMessage: 'Diagnose with AI' }
-);
+const diagnosePrimaryLabel = i18n.translate('workflows.executionFlyout.failedStep.diagnoseWithAi', {
+  defaultMessage: 'Diagnose with AI',
+});
 
 /**
  * Inline error details under a failed row. Message-first; no visible heading.
@@ -192,7 +191,6 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
                     defaultMessage="Diagnose with AI — {licenseLink}"
                     values={{
                       licenseLink: (
-                        // eslint-disable-next-line @elastic/eui/href-or-on-click
                         <EuiLink
                           href={licenseManagementHref}
                           onClick={(ev: React.MouseEvent<HTMLAnchorElement>) => {

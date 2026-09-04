@@ -25,7 +25,6 @@ import {
 } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
-import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { IterationGapRow } from './iteration_gap_row';
 import { RetryWaitAnnotation } from './retry_wait_annotation';
 import {
@@ -42,15 +41,14 @@ import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
+import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
 import { buildIterationVirtualId } from '../lib/build_iteration_pseudo_step';
+import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
 import {
   buildIterationStatusOverrides,
   deriveIterationStatus,
 } from '../lib/derive_iteration_status';
 import { findStepRetryConfig } from '../lib/find_step_retry_delay';
-import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
-import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
-import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
 import {
   iterationGapCount,
   iterationGapId,
@@ -58,9 +56,11 @@ import {
   type IterationPinKind,
   planIterationCollapse,
 } from '../lib/iteration_pins';
+import { mergeDefinitionStepsIntoTree } from '../lib/merge_definition_steps_into_tree';
 import { normalizeStepAi, stepAiToTokenUsage } from '../lib/normalize_step_ai';
 import { parseWorkflowDurationMs } from '../lib/parse_workflow_duration';
 import { rollupTokenUsage, type TokenRollupNode, tokenRollupToUsage } from '../lib/token_rollup';
+import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const COLLAPSED_BY_DEFAULT_STEP_TYPES = [
@@ -494,8 +494,7 @@ function convertTreeToOpenNodes(
 
       const plan = planIterationCollapse(infos, {
         isExecutionComplete: options?.isExecutionComplete ?? true,
-        threshold:
-          options?.collapseIterations === false ? Number.POSITIVE_INFINITY : undefined,
+        threshold: options?.collapseIterations === false ? Number.POSITIVE_INFINITY : undefined,
       });
 
       const pinByIndex = new Map<number, { kinds: IterationPinKind[]; autoExpand: boolean }>();
@@ -832,8 +831,7 @@ const OpenTreeNodes = ({
     ? nodes.some((n) => n.gap != null)
     : nodes.some(
         (n) =>
-          n.gap != null ||
-          (n.row != null && (Boolean(n.row.isExpandable) || n.children.length > 0))
+          n.gap != null || (n.row != null && (Boolean(n.row.isExpandable) || n.children.length > 0))
       );
 
   return (
@@ -872,8 +870,7 @@ const OpenTreeNodes = ({
         }
 
         const hasTreeChildren = !leafList && node.children.length > 0;
-        const isExpandable =
-          !leafList && (Boolean(node.row.isExpandable) || hasTreeChildren);
+        const isExpandable = !leafList && (Boolean(node.row.isExpandable) || hasTreeChildren);
         const handleToggle = leafList
           ? undefined
           : node.row.onToggleExpand ??
@@ -881,8 +878,8 @@ const OpenTreeNodes = ({
         const isExpanded = leafList
           ? false
           : node.row.onToggleExpand
-            ? Boolean(node.row.isExpanded)
-            : hasTreeChildren && expandedIds.has(node.id);
+          ? Boolean(node.row.isExpanded)
+          : hasTreeChildren && expandedIds.has(node.id);
 
         return (
           <div

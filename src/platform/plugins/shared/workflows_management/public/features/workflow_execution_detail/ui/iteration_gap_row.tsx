@@ -12,14 +12,14 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowTokenUsage } from '@kbn/workflows';
-import { formatDuration } from '../../../shared/lib/format_duration';
-import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 import {
   TREE_ROW_CHEVRON_SLOT_PX,
   TREE_ROW_GAP_SIZE,
   TREE_ROW_PADDING_X_SIZE,
   TREE_ROW_PADDING_Y_PX,
 } from './step_execution_tree_row';
+import { formatDuration } from '../../../shared/lib/format_duration';
+import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
 export interface IterationGapRowProps {
   from: number;

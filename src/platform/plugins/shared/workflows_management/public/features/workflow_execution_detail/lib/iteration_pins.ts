@@ -137,11 +137,8 @@ export const planIterationCollapse = (
   return items;
 };
 
-export const iterationGapId = (
-  foreachParentId: string,
-  from: number,
-  to: number
-): string => `foreach-gap:${foreachParentId}:${from}-${to}`;
+export const iterationGapId = (foreachParentId: string, from: number, to: number): string =>
+  `foreach-gap:${foreachParentId}:${from}-${to}`;
 
 /** Inclusive count of indices in a gap range. */
 export const iterationGapCount = (from: number, to: number): number => to - from + 1;

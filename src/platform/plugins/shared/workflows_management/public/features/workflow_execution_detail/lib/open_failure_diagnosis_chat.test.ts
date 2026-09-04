@@ -8,11 +8,11 @@
  */
 
 import { Subject } from 'rxjs';
-import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { openFailureDiagnosisChat } from './open_failure_diagnosis_chat';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
+import { openFailureDiagnosisChat } from './open_failure_diagnosis_chat';
 
 const contextPackage: DiagnosisContextPackage = {
   error: { type: 'Error', message: 'ECONNREFUSED' },
