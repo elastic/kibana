@@ -38,6 +38,7 @@ export function CanvasEmptyState() {
         css={css`
           width: 100%;
           max-width: 400px;
+          transform: translateY(-10%);
         `}
       >
         <EuiEmptyPrompt

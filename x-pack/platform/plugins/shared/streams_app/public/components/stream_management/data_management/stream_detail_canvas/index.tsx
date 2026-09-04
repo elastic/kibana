@@ -69,6 +69,8 @@ import { CreateSourceModal } from '../../../streams_layout/sources/create_source
 import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_details_flyout';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+// Temporarily hidden until users can create sources (endpoints), pipelines, destinations...
+const SHOW_TOOLBAR = false;
 const SOURCE_TYPE_ICONS: Record<SourceType, IconType> = {
   async_bulk: 'logoElasticsearch',
   bulk: 'logoElasticsearch',
@@ -414,28 +416,31 @@ function StreamsCanvasInner() {
         flex-direction: column;
       `}
     >
-      <EuiFlexGroup
-        responsive={false}
-        justifyContent="flexEnd"
-        css={css`
-          flex: 0 0 auto;
-          padding: ${euiTheme.size.m};
-          border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-          background: ${euiTheme.colors.backgroundBasePlain};
-        `}
-      >
-        <EuiButton
-          fill
-          onClick={saveUnit}
-          isDisabled={!hasUnsavedChanges || isSaving}
-          isLoading={isSaving}
-          data-test-subj="streamsCanvasSaveChanges"
+      {SHOW_TOOLBAR && (
+        <EuiFlexGroup
+          responsive={false}
+          justifyContent="flexEnd"
+          css={css`
+            flex: 0 0 auto;
+            padding: ${euiTheme.size.m};
+            border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+            background: ${euiTheme.colors.backgroundBasePlain};
+          `}
         >
-          {i18n.translate('xpack.streams.canvas.saveChangesButtonLabel', {
-            defaultMessage: 'Save changes',
-          })}
-        </EuiButton>
-      </EuiFlexGroup>
+          <EuiButton
+            size="s"
+            fill
+            onClick={saveUnit}
+            isDisabled={!hasUnsavedChanges || isSaving}
+            isLoading={isSaving}
+            data-test-subj="streamsCanvasSaveChanges"
+          >
+            {i18n.translate('xpack.streams.canvas.saveChangesButtonLabel', {
+              defaultMessage: 'Save changes',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+      )}
       <CanvasShell<ClassicCanvasNode>
         nodes={nodes}
         edges={edges}
