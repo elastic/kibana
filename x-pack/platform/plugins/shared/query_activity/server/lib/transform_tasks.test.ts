@@ -15,6 +15,7 @@ import {
   isQueryTaskCandidate,
   parseDslDescription,
   parseEsqlDescription,
+  transformTaskSummaries,
   transformTasks,
 } from './transform_tasks';
 
@@ -266,6 +267,57 @@ describe('isQueryTaskCandidate', () => {
         DEFAULT_THRESHOLD_NANOS
       )
     ).toBe(false);
+  });
+
+  it('excludes detached non-cancellable async QL tasks', () => {
+    expect(
+      isQueryTaskCandidate(
+        {
+          ...baseTask,
+          action: 'indices:data/read/esql[a]',
+          cancellable: false,
+        },
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toBe(false);
+  });
+});
+
+describe('transformTaskSummaries', () => {
+  it('transforms lightweight task metadata without a description', () => {
+    const results = transformTaskSummaries(
+      [
+        {
+          ...baseTask,
+          description: undefined,
+          headers: {
+            'X-Opaque-Id': 'req1;kibana:application:discover:new',
+          },
+        },
+      ],
+      DEFAULT_THRESHOLD_NANOS
+    );
+
+    expect(results).toEqual([
+      {
+        taskId: 'node1:100',
+        queryType: 'DSL',
+        source: 'Discover',
+        startTime: 1000000,
+        runningTimeMs: QUERY_ACTIVITY_MIN_RUNNING_TIME_DEFAULT_MS,
+        cancellable: true,
+        cancelled: false,
+      },
+    ]);
+  });
+
+  it('omits tasks without a start time', () => {
+    expect(
+      transformTaskSummaries(
+        [{ ...baseTask, start_time_in_millis: undefined } as unknown as TasksTaskInfo],
+        DEFAULT_THRESHOLD_NANOS
+      )
+    ).toEqual([]);
   });
 });
 

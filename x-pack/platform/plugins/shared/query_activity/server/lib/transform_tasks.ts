@@ -6,7 +6,7 @@
  */
 
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
-import type { RunningQuery, QueryType } from '../../common/types';
+import type { RunningQuery, RunningQuerySummary, QueryType } from '../../common/types';
 
 const SEARCH_ACTION_PREFIX = 'indices:data/read/search';
 const ESQL_ACTION_PREFIX = 'indices:data/read/esql';
@@ -144,6 +144,12 @@ export function isQueryTaskCandidate(task: TasksTaskInfo, thresholdNanos: number
     return false;
   }
 
+  // Once an async QL request has detached from its HTTP request, Elasticsearch keeps a
+  // non-cancellable [a] task without useful query details. Do not show it in the table.
+  if (action.endsWith('[a]') && !task.cancellable) {
+    return false;
+  }
+
   return true;
 }
 
@@ -166,6 +172,49 @@ export function isIncludedTask(task: TasksTaskInfo, thresholdNanos: number): boo
   return true;
 }
 
+const transformTaskSummary = (task: TasksTaskInfo): RunningQuerySummary | undefined => {
+  if (task.start_time_in_millis == null) {
+    return undefined;
+  }
+
+  const action = task.action ?? '';
+  const headers = task.headers as Record<string, string> | undefined;
+  const xOpaqueId = headers?.['X-Opaque-Id'];
+
+  return {
+    taskId: `${task.node}:${task.id}`,
+    queryType: getQueryType(action),
+    source: capitalise(extractSource(xOpaqueId)),
+    startTime: task.start_time_in_millis,
+    runningTimeMs: Math.round((task.running_time_in_nanos ?? 0) / 1_000_000),
+    cancellable: task.cancellable ?? false,
+    cancelled: task.cancelled ?? false,
+  };
+};
+
+/**
+ * Transforms lightweight Elasticsearch task metadata into query activity table rows.
+ */
+export function transformTaskSummaries(
+  tasks: TasksTaskInfo[],
+  thresholdNanos: number
+): RunningQuerySummary[] {
+  const results: RunningQuerySummary[] = [];
+
+  for (const task of tasks) {
+    if (!isQueryTaskCandidate(task, thresholdNanos)) {
+      continue;
+    }
+
+    const summary = transformTaskSummary(task);
+    if (summary) {
+      results.push(summary);
+    }
+  }
+
+  return results;
+}
+
 /**
  * Transforms a flat list of ES TasksTaskInfo into RunningQuery objects,
  * applying filtering and field extraction.
@@ -178,16 +227,15 @@ export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): 
       continue;
     }
 
-    if (task.start_time_in_millis == null) {
+    const summary = transformTaskSummary(task);
+    if (!summary) {
       continue;
     }
 
-    const action = task.action ?? '';
-    const queryType = getQueryType(action);
+    const { queryType } = summary;
     const description = task.description ?? '';
     const headers = task.headers as Record<string, string> | undefined;
     const xOpaqueId = headers?.['X-Opaque-Id'];
-    const source = capitalise(extractSource(xOpaqueId));
     const traceId = headers?.['trace.id'];
 
     let indices = 0;
@@ -206,17 +254,11 @@ export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): 
     }
 
     results.push({
-      taskId: `${task.node}:${task.id}`,
-      queryType,
-      source,
-      startTime: task.start_time_in_millis,
-      runningTimeMs: Math.round((task.running_time_in_nanos ?? 0) / 1_000_000),
+      ...summary,
       indices,
       query,
       traceId,
       xOpaqueId,
-      cancellable: task.cancellable ?? false,
-      cancelled: task.cancelled ?? false,
     });
   }
 

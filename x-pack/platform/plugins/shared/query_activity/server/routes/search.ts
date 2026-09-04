@@ -6,37 +6,24 @@
  */
 
 import type { TasksTaskInfo } from '@elastic/elasticsearch/lib/api/types';
-import pLimit from 'p-limit';
 import {
   API_BASE_PATH,
   QUERY_ACTIVITY_READ_PRIVILEGE,
   QUERY_ACTIVITY_MIN_RUNNING_TIME_SETTING,
 } from '../../common/constants';
 import type { RouteOptions } from '.';
-import { isQueryTaskCandidate, QUERY_TASK_ACTIONS, transformTasks } from '../lib/transform_tasks';
-
-const TASK_DETAILS_CONCURRENCY = 10;
+import { QUERY_TASK_ACTIONS, transformTaskSummaries } from '../lib/transform_tasks';
 
 const LIST_FILTER_PATH = [
   'tasks.node',
   'tasks.id',
   'tasks.action',
   'tasks.parent_task_id',
+  'tasks.start_time_in_millis',
   'tasks.running_time_in_nanos',
-];
-
-const GET_FILTER_PATH = [
-  'completed',
-  'task.node',
-  'task.id',
-  'task.action',
-  'task.description',
-  'task.start_time_in_millis',
-  'task.running_time_in_nanos',
-  'task.cancellable',
-  'task.cancelled',
-  'task.headers',
-  'task.parent_task_id',
+  'tasks.cancellable',
+  'tasks.cancelled',
+  'tasks.headers',
 ];
 
 const getErrorStatusCode = (error: unknown): number | undefined => {
@@ -92,35 +79,10 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
           filter_path: LIST_FILTER_PATH,
         });
 
-        const taskCandidates = ((result.tasks ?? []) as TasksTaskInfo[]).filter((task) =>
-          isQueryTaskCandidate(task, thresholdNanos)
+        const queries = transformTaskSummaries(
+          (result.tasks ?? []) as TasksTaskInfo[],
+          thresholdNanos
         );
-        const limit = pLimit(TASK_DETAILS_CONCURRENCY);
-        const taskDetails = await Promise.all(
-          taskCandidates.map((task) =>
-            limit(async () => {
-              try {
-                const taskId = `${task.node}:${task.id}`;
-                const getResult = await esClient.tasks.get({
-                  task_id: taskId,
-                  wait_for_completion: false,
-                  filter_path: GET_FILTER_PATH,
-                });
-                return getResult.completed ? undefined : getResult.task;
-              } catch (error) {
-                // Tasks can finish between the list and get requests.
-                if (getErrorStatusCode(error) === 404) {
-                  return undefined;
-                }
-                throw error;
-              }
-            })
-          )
-        );
-        const detailedTasks = taskDetails.filter(
-          (task): task is TasksTaskInfo => task !== undefined
-        );
-        const queries = transformTasks(detailedTasks, thresholdNanos);
 
         return response.ok({ body: { queries } });
       } catch (error) {
