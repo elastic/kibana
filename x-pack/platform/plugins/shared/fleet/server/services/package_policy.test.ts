@@ -1957,7 +1957,7 @@ describe('Package policy service', () => {
         (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
       }
 
-      const createdAttributes = (soClient.create.mock.calls[0][1] as any);
+      const createdAttributes = soClient.create.mock.calls[0][1] as any;
       expect(createdAttributes).not.toHaveProperty('spaceIds');
     });
   });
@@ -4928,12 +4928,10 @@ describe('Package policy service', () => {
         attributes: storedPolicy,
       } as any);
 
-      await packagePolicyService.update(
-        soClient,
-        esClient,
-        storedPolicy.id,
-        { ...storedPolicy, spaceIds: ['space-a'] } as any
-      );
+      await packagePolicyService.update(soClient, esClient, storedPolicy.id, {
+        ...storedPolicy,
+        spaceIds: ['space-a'],
+      } as any);
 
       expect(capturedAttributes).not.toHaveProperty('spaceIds');
     });
