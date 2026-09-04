@@ -29,11 +29,7 @@ export class GraphPage {
   private readonly newButton: Locator;
   private readonly settingsButton: Locator;
   private readonly appMenuOverflowButton: Locator;
-  private readonly appHeaderBack: Locator;
-  private readonly listingPage: Locator;
-  private readonly toolbarSkeleton: Locator;
   private readonly emptyState: Locator;
-  private readonly homeBreadcrumb: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
   private readonly fieldSearchInput: Locator;
@@ -62,15 +58,7 @@ export class GraphPage {
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
     this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
     this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    this.appHeaderBack = this.page.testSubj.locator('appHeaderBack');
-    this.listingPage = this.page.testSubj.locator('kibana-content-list-page');
-    this.toolbarSkeleton = this.page.testSubj.locator('contentListToolbar-skeleton');
     this.emptyState = this.page.testSubj.locator('content-list-emptyState');
-    // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
-    // mirror); match `first` to pick the chrome one.
-    this.homeBreadcrumb = this.page.locator(
-      '[data-test-subj~="graphHomeBreadcrumb"][data-test-subj~="first"]'
-    );
     this.currentGraphBreadcrumb = this.page.locator(
       '[data-test-subj~="graphCurrentGraphBreadcrumb"]'
     );
@@ -113,13 +101,9 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.listingPage.waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
-    await this.contentList.toolbar
-      .or(this.toolbarSkeleton)
+    await this.contentList.searchBox
       .or(this.emptyState)
-      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
-    await this.contentList.toolbar
-      .or(this.emptyState)
+      .or(this.createGraphPromptButton)
       .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 
@@ -206,19 +190,10 @@ export class GraphPage {
   }
 
   async goToListingViaBreadcrumb() {
-    if (await this.appHeaderBack.isVisible()) {
-      await this.appHeaderBack.click();
-    } else {
-      await this.homeBreadcrumb.click();
-    }
-    const modalConfirm = this.confirmModalConfirmButton;
-    const modalVisible = await modalConfirm
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (modalVisible) {
-      await modalConfirm.click();
-    }
+    this.page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+    await this.goto();
   }
 
   async openWorkspace(title: string) {

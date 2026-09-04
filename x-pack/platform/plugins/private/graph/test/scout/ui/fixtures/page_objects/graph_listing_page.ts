@@ -22,8 +22,6 @@ export class GraphListingPage {
   readonly createGraphButton: Locator;
   readonly emptyPromptCreateButton: Locator;
   readonly appHeader: Locator;
-  readonly listingPage: Locator;
-  private readonly toolbarSkeleton: Locator;
   private readonly emptyState: Locator;
   private readonly appMenuOverflowButton: Locator;
 
@@ -32,21 +30,18 @@ export class GraphListingPage {
     this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
     this.emptyPromptCreateButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
     this.appHeader = this.page.testSubj.locator('appHeader');
-    this.listingPage = this.page.testSubj.locator('kibana-content-list-page');
-    this.toolbarSkeleton = this.page.testSubj.locator('contentListToolbar-skeleton');
     this.emptyState = this.page.testSubj.locator('content-list-emptyState');
     this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
   }
 
-  /** Listing page template is mounted; list is loaded or empty (not just the chrome header). */
+  /**
+   * Wait for the search input or empty state. `contentListToolbar` sits on the
+   * EuiSearchBar root and is often not Playwright-visible even when the bar is.
+   */
   async waitForReady() {
-    await this.listingPage.waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
-    await this.contentList.toolbar
-      .or(this.toolbarSkeleton)
+    await this.contentList.searchBox
       .or(this.emptyState)
-      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
-    await this.contentList.toolbar
-      .or(this.emptyState)
+      .or(this.emptyPromptCreateButton)
       .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
   }
 

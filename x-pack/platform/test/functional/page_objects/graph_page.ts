@@ -233,7 +233,7 @@ export class GraphPageObject extends FtrService {
       if (await this.testSubjects.exists('confirmModalConfirmButton', { timeout: 2000 })) {
         await this.common.clickConfirmOnModal();
       }
-      await this.testSubjects.existOrFail('kibana-content-list-page', { timeout: 5000 });
+      await this.testSubjects.existOrFail('contentListToolbar-searchBox', { timeout: 5000 });
     });
   }
 
