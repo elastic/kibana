@@ -37,6 +37,76 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
       expect(() => zodSchema!.parse({ timeout: 30 })).toThrow();
     });
 
+    it('preserves unknown fields when additionalProperties is true', () => {
+      const zodSchema = fromJSONSchema({
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+        },
+        additionalProperties: true,
+      });
+
+      expect(zodSchema).toBeDefined();
+      expect(zodSchema!.parse({ name: 'test', dynamicField: 42 })).toEqual({
+        name: 'test',
+        dynamicField: 42,
+      });
+    });
+
+    it('rejects unknown fields when additionalProperties is false', () => {
+      const zodSchema = fromJSONSchema({
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+        },
+        additionalProperties: false,
+      });
+
+      expect(zodSchema).toBeDefined();
+      expect(() => zodSchema!.parse({ name: 'test', dynamicField: 42 })).toThrow();
+    });
+
+    it('preserves and validates fields defined by schema-valued additionalProperties', () => {
+      const zodSchema = fromJSONSchema({
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+        },
+        additionalProperties: { type: 'string' },
+      });
+
+      expect(zodSchema).toBeDefined();
+      expect(zodSchema!.parse({ name: 'test', dynamicField: 'value' })).toEqual({
+        name: 'test',
+        dynamicField: 'value',
+      });
+      expect(() => zodSchema!.parse({ name: 'test', dynamicField: 42 })).toThrow();
+    });
+
+    it('preserves Backstage-style dynamic query fields', () => {
+      const zodSchema = fromJSONSchema({
+        type: 'object',
+        properties: {
+          query: {
+            type: 'object',
+            additionalProperties: {
+              anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+            },
+          },
+        },
+        required: ['query'],
+      });
+      const input = {
+        query: {
+          kind: 'Component',
+          'metadata.annotations.elastic.com/sre-agent': 'agent-id',
+        },
+      };
+
+      expect(zodSchema).toBeDefined();
+      expect(zodSchema!.parse(input)).toEqual(input);
+    });
+
     it('converts schema with optional fields', () => {
       const jsonSchema = {
         type: 'object',
