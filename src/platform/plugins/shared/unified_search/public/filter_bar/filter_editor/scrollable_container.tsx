@@ -8,11 +8,16 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Subject } from 'rxjs';
 
-function getVisibleHeightInViewport(element: HTMLDivElement) {
+function getClippedHeight(element: HTMLDivElement) {
   const rect = element.getBoundingClientRect();
+
+  // do not set maxHeight when content is not clipped
+  if (rect.top > 0 && rect.bottom < window.innerHeight) {
+    return 0;
+  }
 
   // Find the top and bottom bounds of the element relative to the viewport window
   const visibleTop = Math.max(0, rect.top);
@@ -32,43 +37,41 @@ export function ScrollableContainer({
   resetVisibleHeight$: Subject<void>;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleHeight, setVisibleHeight] = useState(0);
-
-  const clearVisibleHeight = useCallback(() => {
-    setVisibleHeight(0);
-  }, []);
+  const [clippedHeight, setClippedHeight] = useState(0);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
 
-    const resizeObserver = new ResizeObserver(() => {
+    function updateClippedHeight() {
       if (!containerRef.current) return;
-      setVisibleHeight(getVisibleHeightInViewport(containerRef.current));
-    });
+      setClippedHeight(getClippedHeight(containerRef.current));
+    }
+
+    const resizeObserver = new ResizeObserver(updateClippedHeight);
     resizeObserver.observe(containerRef.current);
 
     // Clear visible height on window resize to allow children to grow to new window size
-    window.addEventListener('resize', clearVisibleHeight);
+    window.addEventListener('resize', updateClippedHeight);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener('resize', clearVisibleHeight);
+      window.removeEventListener('resize', updateClippedHeight);
     };
-  }, [clearVisibleHeight]);
+  }, []);
 
   useEffect(() => {
-    // Clear visible height on content size change to allow children to grow to new content size
-    const subscription = resetVisibleHeight$.subscribe(clearVisibleHeight);
+    // Clear visible height on reset to allow children to grow to new content size
+    const subscription = resetVisibleHeight$.subscribe(() => setClippedHeight(0));
     return () => {
       subscription.unsubscribe();
     };
-  }, [resetVisibleHeight$, clearVisibleHeight]);
+  }, [resetVisibleHeight$]);
 
   return (
     <div
       ref={containerRef}
       style={{
-        ...(visibleHeight > 0 && { maxHeight: `${visibleHeight}px` }),
+        ...(clippedHeight > 0 && { maxHeight: `${clippedHeight}px` }),
         overflow: 'auto',
       }}
     >
