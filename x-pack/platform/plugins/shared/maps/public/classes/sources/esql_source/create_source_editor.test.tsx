@@ -67,7 +67,7 @@ describe('CreateSourceEditor', () => {
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
-      expect(onSourceConfigChange).toBeCalledWith({
+      expect(onSourceConfigChange).toHaveBeenCalledWith({
         dateField: '@timestamp',
         esql: 'from logs | keep location | limit 10000',
         geoField: 'location',
@@ -87,7 +87,7 @@ describe('CreateSourceEditor', () => {
       />
     );
     await waitFor(() =>
-      expect(onSourceConfigChange).toBeCalledWith({
+      expect(onSourceConfigChange).toHaveBeenCalledWith({
         dateField: undefined,
         esql: 'from world_countries | keep geometry | limit 10000',
         geoField: 'geometry',

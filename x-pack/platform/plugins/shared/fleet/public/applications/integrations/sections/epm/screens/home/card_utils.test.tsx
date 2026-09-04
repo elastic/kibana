@@ -12,6 +12,7 @@ import type { PackageListItem } from '../../../../types';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import type { DynamicPagePathValues } from '../../../../constants';
+
 import { getIntegrationLabels, mapToCard } from './card_utils';
 
 function renderIntegrationLabels(item: Partial<PackageListItem>) {
@@ -298,6 +299,86 @@ describe('Card utils', () => {
       } as any);
 
       expect(cardItem.signalTypes).toEqual(['logs', 'metrics', 'traces']);
+    });
+
+    describe('when enableIntegrationTileClickToAdd is enabled', () => {
+      beforeEach(() => {
+        ExperimentalFeaturesService.init({
+          enableIntegrationTileClickToAdd: true,
+        } as any);
+      });
+
+      it('should route integration packages to the add-integration page', () => {
+        const cardItem = mapToCard({
+          item: { id: 'okta', name: 'okta', version: '1.0.0', type: 'integration' },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('add_integration_to_policy');
+      });
+
+      it('should route input packages to the add-integration page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'nginx_otel_input',
+            name: 'nginx_otel_input',
+            version: '1.0.0',
+            type: 'input',
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('add_integration_to_policy');
+      });
+
+      it('should still route content packages to the overview page', () => {
+        const cardItem = mapToCard({
+          item: { id: 'sample_content', name: 'sample_content', version: '1.0.0', type: 'content' },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+    });
+
+    describe('when enableIntegrationTileClickToAdd is disabled (default)', () => {
+      it('should route integration packages to the overview page', () => {
+        const cardItem = mapToCard({
+          item: { id: 'okta', name: 'okta', version: '1.0.0', type: 'integration' },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
+      it('should route input packages to the overview page', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'nginx_otel_input',
+            name: 'nginx_otel_input',
+            version: '1.0.0',
+            type: 'input',
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
+      it('should route content packages to the overview page', () => {
+        const cardItem = mapToCard({
+          item: { id: 'sample_content', name: 'sample_content', version: '1.0.0', type: 'content' },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
     });
 
     it('does not put return params on package card hrefs', () => {

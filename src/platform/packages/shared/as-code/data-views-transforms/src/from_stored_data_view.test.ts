@@ -64,6 +64,35 @@ describe('fromStoredDataView', () => {
     expect(api).not.toHaveProperty('name');
   });
 
+  it('maps sourceFilters to field_filters and round-trips', () => {
+    const stored = {
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+    };
+    const api = fromStoredDataView(stored);
+    expect(api).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      field_filters: ['field_a', 'field_b'],
+    });
+    expect(toStoredDataView(api)).toEqual(stored);
+  });
+
+  it('omits field_filters when sourceFilters is empty', () => {
+    const api = fromStoredDataView({
+      title: 'logs-*',
+      sourceFilters: [],
+    });
+    expect(api).not.toHaveProperty('field_filters');
+  });
+
+  it('omits field_filters when sourceFilters is absent', () => {
+    const api = fromStoredDataView({ title: 'logs-*' });
+    expect(api).not.toHaveProperty('field_filters');
+  });
+
   it('maps inline spec with indexed field formats and attrs to field_settings', () => {
     expect(
       fromStoredDataView({

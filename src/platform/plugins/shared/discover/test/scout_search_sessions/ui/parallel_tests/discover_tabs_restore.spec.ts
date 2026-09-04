@@ -135,9 +135,9 @@ spaceTest.describe(
           await pageObjects.unifiedTabs.navigateToTabByName(ESQL_BACKGROUND_SEARCH_NAME);
 
           // The restored tab must come straight back as rendered. A re-run would drop
-          // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          // `data-table-loaded` back to false while the 5s ES|QL DELAY replays.
           await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
-            'data-render-complete',
+            'data-table-loaded',
             'true'
           );
         });
@@ -172,11 +172,11 @@ spaceTest.describe(
 
         await spaceTest.step('the second tab is still rendered', async () => {
           // Restoring elsewhere must not invalidate an unrelated tab: a re-run would drop
-          // `data-render-complete` back to false while the 5s ES|QL DELAY replays.
+          // `data-table-loaded` back to false while the 5s ES|QL DELAY replays.
           await pageObjects.unifiedTabs.selectTab(1);
 
           await expect(page.testSubj.locator('discoverDocTable')).toHaveAttribute(
-            'data-render-complete',
+            'data-table-loaded',
             'true'
           );
         });

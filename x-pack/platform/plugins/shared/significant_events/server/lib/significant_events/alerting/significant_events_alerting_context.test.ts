@@ -51,6 +51,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
   it('returns the v2 alerts reader and rules adapter', async () => {
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () => v2Client,
+      isServerless: false,
     })();
 
     expect(context.alertsReader).toBe(ALERTS_READER_V2);
@@ -62,6 +63,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     const getAlertingV2RulesClient = jest.fn().mockResolvedValue(v2Client);
     const resolveContext = createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient,
+      isServerless: false,
     });
 
     const [first, second] = await Promise.all([resolveContext(), resolveContext()]);
@@ -69,5 +71,28 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     expect(getAlertingV2RulesClient).toHaveBeenCalledTimes(1);
     expect(first).toBe(second);
     expect(first.alertsReader).toBe(ALERTS_READER_V2);
+  });
+
+  it.each([true, false])('forwards isServerless=%s to the rules adapter', async (isServerless) => {
+    const createRule = jest.fn().mockResolvedValue({});
+    const context = await createSignificantEventsAlertingContextResolver({
+      getAlertingV2RulesClient: async () =>
+        ({
+          createRule,
+        } as unknown as RulesClientApi),
+      isServerless,
+    })();
+
+    await context.rulesClient.createRule('rule-1', {
+      name: 'Errors',
+      streamName: 'my-stream',
+      timestampField: '@timestamp',
+      esqlQuery: 'FROM logs-* | WHERE level == "error"',
+      schedule: { interval: '5m' },
+    });
+
+    expect(
+      createRule.mock.calls[0][0].data.query.breach.query.includes('SET project_routing')
+    ).toBe(isServerless);
   });
 });

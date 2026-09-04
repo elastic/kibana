@@ -10,17 +10,20 @@ import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
+  aiIndexFeedbackAnalysisPath,
   aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
+import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -29,6 +32,7 @@ import {
   KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ImprovementsServiceApi } from '../improvements/service';
 
 interface RegisteredRoute {
   config: {
@@ -88,8 +92,9 @@ const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let aiIndexService: jest.Mocked<
-    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete'>
+    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
+  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -97,6 +102,8 @@ describe('ai indices routes', () => {
   let auditLogger: { log: jest.Mock };
   let esSearch: jest.Mock;
   let esGet: jest.Mock;
+  let improvementsClients: unknown[];
+  const logger = loggerMock.create();
 
   const createContext = () =>
     ({
@@ -123,6 +130,7 @@ describe('ai indices routes', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     routes = {};
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
@@ -139,7 +147,10 @@ describe('ai indices routes', () => {
       get: jest.fn(),
       list: jest.fn(),
       delete: jest.fn(),
+      setFeedbackAnalysis: jest.fn(),
     };
+    improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
+    improvementsClients = [];
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -165,7 +176,12 @@ describe('ai indices routes', () => {
 
     registerAiIndexRoutes({
       router,
+      logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getImprovementsService: (esClient) => {
+        improvementsClients.push(esClient);
+        return improvementsService as unknown as ImprovementsServiceApi;
+      },
       getActions: async () => actions,
     });
   });
@@ -188,13 +204,18 @@ describe('ai indices routes', () => {
     });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
+    await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+      params: { aiIndexId: 'a' },
+      body: { enabled: true },
+    });
 
-    expect(response.notFound).toHaveBeenCalledTimes(7);
+    expect(response.notFound).toHaveBeenCalledTimes(8);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
     expect(aiIndexService.list).not.toHaveBeenCalled();
     expect(aiIndexService.delete).not.toHaveBeenCalled();
+    expect(aiIndexService.setFeedbackAnalysis).not.toHaveBeenCalled();
   });
 
   it('registers routes with the expected access and privileges', () => {
@@ -224,6 +245,10 @@ describe('ai indices routes', () => {
     });
     expect(getRoute('DELETE', aiIndexByIdPath).config).toMatchObject({
       access: 'public',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
+    expect(getRoute('PUT', aiIndexFeedbackAnalysisPath).config).toMatchObject({
+      access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
   });
@@ -699,6 +724,51 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
     });
 
+    it('clears the improvements for the AI index, so they cannot resurface under a reused id', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+    });
+
+    it('audits the deletion even when the improvements cleanup fails afterwards', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      improvementsService.deleteByAiIndex.mockRejectedValue(new Error('security_exception'));
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      // The index is gone either way, so the audit record is owed and the caller is not sent to
+      // retry a delete that would now 404.
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
+    });
+
+    it("deletes the improvements as the request's user, since the store is a user index", async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsClients).toEqual([expect.objectContaining({ search: esSearch })]);
+    });
+
+    it('leaves the improvements alone when the AI index cannot be deleted', async () => {
+      aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'missing' } });
+
+      expect(improvementsService.deleteByAiIndex).not.toHaveBeenCalled();
+    });
+
     it('returns 404 when the AI index does not exist', async () => {
       aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
@@ -707,6 +777,164 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
       });
+    });
+  });
+
+  describe('PUT /internal/context_engine/ai_index/{aiIndexId}/feedback_analysis', () => {
+    const feedbackAnalysis = {
+      enabled: true,
+      agent_id: 'my-analysis-agent',
+      schedule: { interval: '24h' },
+      signal_time_range: { type: 'relative' as const, from: 'now-30d' },
+    };
+
+    it('stores the configuration and returns what was stored', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(aiIndexService.setFeedbackAnalysis).toHaveBeenCalledWith(
+        'customer_support',
+        feedbackAnalysis
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { feedback_analysis: feedbackAnalysis },
+      });
+    });
+
+    it('returns 404 when the AI index does not exist', async () => {
+      aiIndexService.setFeedbackAnalysis.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'missing' },
+        body: feedbackAnalysis,
+      });
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('returns 409 when a concurrent write wins', async () => {
+      aiIndexService.setFeedbackAnalysis.mockRejectedValue(
+        new AiIndexConflictError('customer_support')
+      );
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(response.conflict).toHaveBeenCalled();
+    });
+  });
+
+  describe('feedback analysis body validation', () => {
+    const validateBody = (body: unknown) => {
+      const { validate } = getRoute('PUT', aiIndexFeedbackAnalysisPath);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+
+    it('defaults the schedule, the signal time range, and the allowed actions', () => {
+      expect(validateBody({ enabled: true })).toEqual({
+        enabled: true,
+        schedule: { interval: '24h' },
+        signal_time_range: { type: 'relative', from: 'now-30d' },
+        allowed_actions: [...IMPROVEMENT_ACTIONS],
+      });
+    });
+
+    it('requires enabled', () => {
+      expect(() => validateBody({})).toThrow(/enabled/);
+    });
+
+    it('rejects an interval below the floor', () => {
+      expect(() => validateBody({ enabled: true, schedule: { interval: '5m' } })).toThrow(
+        /at least 15 minutes/
+      );
+    });
+
+    it('rejects a malformed interval', () => {
+      expect(() => validateBody({ enabled: true, schedule: { interval: 'hourly' } })).toThrow(
+        /positive number followed by/
+      );
+    });
+
+    it('accepts an interval at the floor', () => {
+      expect(
+        validateBody({
+          enabled: true,
+          schedule: { interval: '15m' },
+          signal_time_range: { type: 'relative', from: 'now-1d' },
+        })
+      ).toMatchObject({ schedule: { interval: '15m' } });
+    });
+
+    it('rejects a relative window shorter than the schedule interval', () => {
+      expect(() =>
+        validateBody({
+          enabled: true,
+          schedule: { interval: '24h' },
+          signal_time_range: { type: 'relative', from: 'now-1h' },
+        })
+      ).toThrow(/must cover at least one schedule interval/);
+    });
+
+    it('accepts an absolute window regardless of the interval, being open-ended', () => {
+      expect(
+        validateBody({
+          enabled: true,
+          schedule: { interval: '24h' },
+          signal_time_range: { type: 'absolute', from: '2026-01-31T00:00:00.000Z' },
+        })
+      ).toMatchObject({ signal_time_range: { type: 'absolute' } });
+    });
+
+    it('rejects a malformed absolute window', () => {
+      expect(() =>
+        validateBody({
+          enabled: true,
+          signal_time_range: { type: 'absolute', from: 'last tuesday' },
+        })
+      ).toThrow();
+    });
+
+    it('rejects a malformed relative window', () => {
+      expect(() =>
+        validateBody({ enabled: true, signal_time_range: { type: 'relative', from: '30d' } })
+      ).toThrow();
+    });
+
+    it('accepts a KQL signal filter', () => {
+      expect(
+        validateBody({ enabled: true, signal_filter: 'tags: query_error and data.tool: "search"' })
+      ).toMatchObject({ signal_filter: 'tags: query_error and data.tool: "search"' });
+    });
+
+    it('rejects a signal filter that is not valid KQL', () => {
+      expect(() => validateBody({ enabled: true, signal_filter: 'tags: (query_error' })).toThrow(
+        /valid KQL query/
+      );
+    });
+
+    it('accepts a subset of the improvement actions', () => {
+      expect(validateBody({ enabled: true, allowed_actions: ['add_ki', 'edit_ki'] })).toMatchObject(
+        { allowed_actions: ['add_ki', 'edit_ki'] }
+      );
+    });
+
+    it('accepts an empty allowed action list as observe-only', () => {
+      expect(validateBody({ enabled: true, allowed_actions: [] })).toMatchObject({
+        allowed_actions: [],
+      });
+    });
+
+    it('rejects an action outside the taxonomy', () => {
+      expect(() => validateBody({ enabled: true, allowed_actions: ['delete_index'] })).toThrow();
     });
   });
 

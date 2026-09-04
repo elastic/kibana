@@ -46,7 +46,7 @@ describe('convertToLens', () => {
   test('should return null if getColumnsFromVis returns null', async () => {
     mockGetColumnsFromVis.mockReturnValue(null);
     const result = await convertToLens(sampleAreaVis as any, { getAbsoluteTime: () => {} } as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -56,7 +56,7 @@ describe('convertToLens', () => {
       group: [{}, {}],
     });
     const result = await convertToLens(sampleAreaVis as any, { getAbsoluteTime: () => {} } as any);
-    expect(mockGetVisSchemas).toBeCalledTimes(1);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -71,7 +71,7 @@ describe('convertToLens', () => {
       group: [{}],
     });
     const result = await convertToLens(sampleAreaVis as any, { getAbsoluteTime: () => {} } as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -90,7 +90,7 @@ describe('convertToLens', () => {
       metric: [{ aggId: '1' }, { aggId: '2' }],
     });
     const result = await convertToLens(sampleAreaVis as any, { getAbsoluteTime: () => {} } as any);
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -129,7 +129,7 @@ describe('convertToLens', () => {
       } as any,
       { getAbsoluteTime: () => {} } as any
     );
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
     expect(result).toBeNull();
   });
 
@@ -184,9 +184,9 @@ describe('convertToLens', () => {
       } as any,
       { getAbsoluteTime: () => {} } as any
     );
-    expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
-    expect(mockCreateStaticValueColumn).toBeCalledTimes(1);
+    expect(mockGetColumnsFromVis).toHaveBeenCalledTimes(1);
+    expect(mockGetConfiguration).toHaveBeenCalledTimes(1);
+    expect(mockCreateStaticValueColumn).toHaveBeenCalledTimes(1);
     expect(result?.type).toEqual('lnsXY');
     expect(result?.layers.length).toEqual(3);
     expect(result?.layers[0].columns).toEqual([

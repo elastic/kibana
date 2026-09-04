@@ -28,3 +28,34 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
     ...rules.map((rule) => `- ${rule}`),
   ].join('\n');
 };
+
+/**
+ * Compiles vis-author `config.rules` plus `review.critical` and
+ * `review.suggestions` for every chart type that has any of them. Prettify
+ * uses this so it can detect painted issues and describe the wanted edition;
+ * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ */
+export const getChartTypeReviewPromptContent = (): string => {
+  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
+    const configRules: string[] = prompt.config?.rules ?? [];
+    const critical: string[] = prompt.review?.critical ?? [];
+    const suggestions: string[] = prompt.review?.suggestions ?? [];
+
+    if (!configRules.length && !critical.length && !suggestions.length) {
+      return [];
+    }
+
+    return [
+      `### ${chartType}`,
+      ...configRules.map((rule) => `- ${rule}`),
+      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
+      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
+    ];
+  });
+
+  if (!sections.length) {
+    return '';
+  }
+
+  return ['CHART REVIEW RULES:', ...sections].join('\n');
+};

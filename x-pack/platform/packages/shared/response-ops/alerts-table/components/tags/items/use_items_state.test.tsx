@@ -466,7 +466,7 @@ describe('useItemsState', () => {
       result.current.onChange(newOptions);
     });
 
-    expect(onChangeItems).toBeCalledWith({
+    expect(onChangeItems).toHaveBeenCalledWith({
       selectedItems: ['two'],
       unSelectedItems: [],
     });
@@ -485,7 +485,7 @@ describe('useItemsState', () => {
      * Item four initial state has dirty=false
      * It should not be part of the unSelectedItems
      */
-    expect(onChangeItems).toBeCalledWith({
+    expect(onChangeItems).toHaveBeenCalledWith({
       selectedItems: ['two'],
       unSelectedItems: [],
     });

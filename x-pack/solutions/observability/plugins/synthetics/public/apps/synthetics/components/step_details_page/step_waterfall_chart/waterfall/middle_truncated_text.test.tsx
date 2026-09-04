@@ -78,7 +78,7 @@ describe('Component', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(handleClick).toBeCalled();
+      expect(handleClick).toHaveBeenCalled();
     });
   });
 });

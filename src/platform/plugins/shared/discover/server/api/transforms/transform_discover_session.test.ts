@@ -12,9 +12,14 @@ import {
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiData,
+  DiscoverSessionApiEsqlTab,
+} from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -44,7 +49,6 @@ describe('discover session API transforms', () => {
         hide_aggregated_preview: true,
         breakdown_field: 'host.name',
         chart_interval: 'h',
-        time_restore: true,
         time_range: { from: 'now-15m', to: 'now' },
         refresh_interval: { pause: true, value: 0 },
         vis_context: {
@@ -65,7 +69,6 @@ describe('discover session API transforms', () => {
         sort: [],
         hide_chart: false,
         hide_table: false,
-        time_restore: false,
         control_panels: [
           {
             id: 'control-1',
@@ -105,6 +108,100 @@ describe('discover session API transforms', () => {
     it('maps saved object attributes to API data', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it('omits the inline data view ID from self filters and preserves foreign filter IDs', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const searchSource = parseSearchSourceJSON(
+        classicTab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const inlineDataViewId = 'inline-data-view-id';
+      searchSource.index = { id: inlineDataViewId, title: 'logs-*' };
+      searchSource.filter = [
+        {
+          meta: { index: inlineDataViewId },
+          query: { match_phrase: { 'service.name': 'api' } },
+        },
+        {
+          meta: { index: 'foreign-data-view-id' },
+          query: { match_phrase: { 'host.name': 'web-01' } },
+        },
+      ];
+
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              kibanaSavedObjectMeta: { searchSourceJSON: JSON.stringify(searchSource) },
+            },
+          },
+        ],
+      });
+      const [selfFilter, foreignFilter] = (sessionState.tabs[0] as DiscoverSessionApiClassicTab)
+        .filters;
+
+      expect(selfFilter).not.toHaveProperty('data_view_id');
+      expect(foreignFilter).toHaveProperty('data_view_id', 'foreign-data-view-id');
+
+      const { attributes, references } = transformDiscoverSessionIn(sessionState);
+      const roundTrippedSearchSource = injectReferences(
+        parseSearchSourceJSON(attributes.tabs[0].attributes.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+
+      expect(roundTrippedSearchSource.filter?.[0]).not.toHaveProperty('meta.index');
+      expect(roundTrippedSearchSource.filter?.[1]).toHaveProperty(
+        'meta.index',
+        'foreign-data-view-id'
+      );
+    });
+
+    it('omits time_range but preserves refresh_interval when time restore is disabled', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: false,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
+    });
+
+    it('preserves refresh_interval when the stored time range is absent', () => {
+      const [classicTab] = discoverSessionAttributes.tabs;
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...classicTab,
+            attributes: {
+              ...classicTab.attributes,
+              timeRestore: true,
+              timeRange: undefined,
+            },
+          },
+        ],
+      });
+
+      expect(sessionState.tabs[0]).not.toHaveProperty('time_range');
+      expect(sessionState.tabs[0].refresh_interval).toEqual({
+        value: 60000,
+        pause: true,
+      });
     });
 
     it('extracts tag IDs from saved object references', () => {
@@ -291,6 +388,35 @@ describe('discover session API transforms', () => {
         ],
       });
       expect(references).toEqual([]);
+    });
+
+    it('enables time restore when time_range is present', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [classicTab],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
+    });
+
+    it('persists refresh_interval independently when time_range is absent', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [
+          {
+            ...esqlTab,
+            refresh_interval: { pause: false, value: 5000 },
+          },
+        ],
+      });
+
+      expect(attributes.tabs[0].attributes.timeRestore).toBe(false);
+      expect(attributes.tabs[0].attributes.refreshInterval).toEqual({
+        pause: false,
+        value: 5000,
+      });
     });
 
     it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {

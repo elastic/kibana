@@ -42,3 +42,7 @@ export const ATTRIBUTE_GEN_AI_INPUT_MESSAGES = 'attributes.gen_ai.input.messages
 export const ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES = 'attributes.gen_ai.output.messages';
 export const ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS = 'attributes.gen_ai.system_instructions';
 export const ATTRIBUTE_GEN_AI_CONVERSATION_ID = 'attributes.gen_ai.conversation.id';
+export const ATTRIBUTE_GEN_AI_TOOL_DEFINITIONS = 'attributes.gen_ai.tool.definitions';
+export const ATTRIBUTE_GEN_AI_TOOL_NAME = 'attributes.gen_ai.tool.name';
+export const ATTRIBUTE_GEN_AI_TOOL_CALL_ARGUMENTS = 'attributes.gen_ai.tool.call.arguments';
+export const ATTRIBUTE_GEN_AI_TOOL_CALL_RESULT = 'attributes.gen_ai.tool.call.result';

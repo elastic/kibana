@@ -36,11 +36,11 @@ describe('TopNavMenu', () => {
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(1);
+    expect(data.run).toHaveBeenCalledTimes(1);
     expect(data.run).toHaveBeenCalledWith(event.currentTarget);
 
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(2);
+    expect(data.run).toHaveBeenCalledTimes(2);
   });
 
   it('Should render item with all attributes', () => {

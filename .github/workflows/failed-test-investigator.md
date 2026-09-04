@@ -217,10 +217,11 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### Automatic fix request
 
-Only request an automatic fix for a failure that has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
+Request an automatic fix immediately for a fixable **`application`** failure. For every other classification, only request a fix after the failure has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
 
-- **Recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** also add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
-- **First-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
+- **`application`, and you added `failure:ai-fixable`:** add `ai:fix-flaky` immediately, regardless of `failCount`.
+- **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
+- **Any other classification with a first-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
 
 **Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate.
 
@@ -268,10 +269,11 @@ For pre-fix CI lag, make the reason verifiable by naming the commit — e.g. "th
 
 When in doubt, leave the issue open.
 
-## Attribution
+## Relevant history
 
-- Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
-- Never speculate or use attribution as a fallback for weak evidence.
+- Mention a PR or commit (or a small set, last 3 months) only when it materially explains how the flake became possible or observable.
+- State each change's precise causal role — e.g. introduced the faulty behavior, exposed a pre-existing issue, or supplied a prerequisite change. Never infer causation merely because a PR added the test or last touched the file.
+- Never name or `@`-mention an author, and omit the history entirely when the causal link is ambiguous.
 
 ## Comment format
 
@@ -395,7 +397,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
-- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
+- Per **Relevant history**, when strongly supported, name the PR or small set of PRs needed to explain how the flake became possible or observable, with inline links and merge dates. State each PR's precise causal role; do not force a single "introducing PR" when the history is multi-causal, and omit PR history when the evidence is ambiguous.
 
 #### Additional context (optional)
 

@@ -7,16 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MetricUnit } from '../../../types';
 import { getLensMetricFormat, durationUnitNames } from './get_lens_metric_format';
 
 describe('getLensMetricFormat', () => {
-  describe('returns undefined for invalid and empty units', () => {
-    it('returns undefined for count unit', () => {
-      expect(getLensMetricFormat('count')).toBeUndefined();
-    });
+  describe('handles count and unit-less metrics', () => {
+    it.each([undefined, 'count', '{operations}'] as const)(
+      'formats %s as a compact-compatible whole number',
+      (unit) => {
+        expect(getLensMetricFormat(unit)).toEqual({
+          format: 'number',
+          decimals: 0,
+        });
+      }
+    );
 
-    it('returns undefined for special units of count', () => {
-      expect(getLensMetricFormat('{operations}')).toBeUndefined();
+    it('returns undefined for an unknown unit', () => {
+      expect(getLensMetricFormat('Hz' as MetricUnit)).toBeUndefined();
     });
   });
 

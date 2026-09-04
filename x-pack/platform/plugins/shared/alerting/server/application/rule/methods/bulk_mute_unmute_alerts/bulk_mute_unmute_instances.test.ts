@@ -143,7 +143,7 @@ describe('bulkMuteUnmuteInstances', () => {
           params: { rules: [{ id: ruleId, alertInstanceIds }] },
           mute,
         })
-      ).rejects.toThrowError(expectedError);
+      ).rejects.toThrow(expectedError);
 
       expect(muteAlertInstancesMock).not.toHaveBeenCalled();
     });
@@ -176,7 +176,7 @@ describe('bulkMuteUnmuteInstances', () => {
           params: { rules: [{ id: ruleId, alertInstanceIds }] },
           mute,
         })
-      ).rejects.toThrowError(expectedError);
+      ).rejects.toThrow(expectedError);
     });
   });
 
@@ -255,7 +255,7 @@ describe('bulkMuteUnmuteInstances', () => {
           params: { rules: [{ id: ruleId, alertInstanceIds }] },
           mute,
         })
-      ).rejects.toThrowError(expectedError);
+      ).rejects.toThrow(expectedError);
 
       expect(unmuteAlertInstancesMock).not.toHaveBeenCalled();
     });
@@ -288,7 +288,7 @@ describe('bulkMuteUnmuteInstances', () => {
           params: { rules: [{ id: ruleId, alertInstanceIds }] },
           mute,
         })
-      ).rejects.toThrowError(expectedError);
+      ).rejects.toThrow(expectedError);
     });
   });
 
@@ -306,7 +306,7 @@ describe('bulkMuteUnmuteInstances', () => {
         params: { rules: [{ id: ruleId, alertInstanceIds }] },
         mute: true,
       })
-    ).rejects.toThrowError(`Rules not found: ["${ruleId}"]`);
+    ).rejects.toThrow(`Rules not found: ["${ruleId}"]`);
   });
 
   test('should do nothing if an empty rules array is provided', async () => {

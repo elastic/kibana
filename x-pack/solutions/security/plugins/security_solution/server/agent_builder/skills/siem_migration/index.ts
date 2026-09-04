@@ -7,3 +7,6 @@
 
 export { automaticMigrationRulesSummarizeSkill } from './automatic_migration_rules_summarize_skill';
 export { automaticMigrationRulesStartMigrationSkill } from './automatic_migration_rules_start_migration_skill';
+export { automaticMigrationRulesStopMigrationSkill } from './automatic_migration_rules_stop_migration_skill';
+export { automaticMigrationRulesUpdateMigrationSkill } from './automatic_migration_rules_update_migration_skill';
+export { automaticMigrationRulesDeleteMigrationSkill } from './automatic_migration_rules_delete_migration_skill';

@@ -46,7 +46,7 @@ describe('event_log plugin', () => {
     plugin.setup(coreSetup, { serverless: serverlessPluginMock.createSetupContract() });
     plugin.start(coreStart, { spaces });
     await plugin.stop();
-    expect(mockLogger.debug).toBeCalledWith('shutdown: waiting to finish');
-    expect(mockLogger.debug).toBeCalledWith('shutdown: finished');
+    expect(mockLogger.debug).toHaveBeenCalledWith('shutdown: waiting to finish');
+    expect(mockLogger.debug).toHaveBeenCalledWith('shutdown: finished');
   });
 });

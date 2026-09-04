@@ -97,11 +97,11 @@ export const HomePage = () => {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <HomePageStatPanel {...dataCard} />
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="l">
               {secondaryCards.map((card) => (
                 <EuiFlexItem key={card.testSubj}>
                   <HomePageStatPanel {...card} />

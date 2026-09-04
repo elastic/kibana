@@ -94,7 +94,7 @@ describe('calculateLabel(metric, metrics)', () => {
     ] as unknown as Metric[];
     const fields: SanitizedFieldType[] = [{ name: '2', label: '2', type: KBN_FIELD_TYPES.DATE }];
 
-    expect(() => calculateLabel(metric, metrics, fields)).toThrowError('Field "3" not found');
+    expect(() => calculateLabel(metric, metrics, fields)).toThrow('Field "3" not found');
   });
 
   test('should not throw an error if field not found (isThrowErrorOnFieldNotFound is false)', () => {

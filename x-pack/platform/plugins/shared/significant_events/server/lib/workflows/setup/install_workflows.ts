@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -40,13 +41,13 @@ const WORKFLOWS_TO_INSTALL: Array<{
     workflowId: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
+  {
+    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  },
 ];
 
-export const installWorkflows = async ({
-  client,
-}: {
-  client: PluginScopedManagedWorkflowsApi;
-}): Promise<void> => {
+export const installWorkflows = async ({ client }: { client: PluginScopedManagedWorkflowsApi }) => {
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
   const installs: Array<{ id: string; run: Promise<void> }> = [

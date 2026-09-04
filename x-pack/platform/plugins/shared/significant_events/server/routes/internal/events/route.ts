@@ -12,7 +12,7 @@ import {
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
+  triggerFeedbackSchema,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -23,8 +23,15 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import {
+  attachInvestigationToEvent,
+  type SignificantEventTriggerFeedback,
+} from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import {
+  cleanupStaleEvents,
+  type CleanupStaleEventsResult,
+} from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -219,20 +226,14 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
-/**
- * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
- * path and body shape in sync with its `attach_pending_to_significant_event` /
- * `attach_to_significant_event` `kibana.request` steps. The optional `severity`/`summary`/`status`
- * let the terminal attach also apply the investigation's reassessed fields in the same
- * append-only version, so a completed investigation and its field updates are a single write.
- */
+/** Used by the managed investigation-completed subscriber workflow. */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
     description:
-      'Record an investigation run against a significant event (pending, success, or failed), optionally applying reassessed severity/summary/status in the same version.',
+      'Record a completed investigation against a significant event and apply any trigger feedback in the same append-only version.',
   },
   security: {
     authz: {
@@ -243,24 +244,25 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema.extend({
-      severity: severitySchema.optional(),
-      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
-      status: significantEventStatusSchema.optional(),
-    }),
+    body: significantEventInvestigationSchema
+      .extend({
+        trigger_feedback: z.array(triggerFeedbackSchema).max(3).optional(),
+      })
+      .required({ completed_at: true }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { severity, summary, status, ...investigation } = params.body;
+    const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
-      eventUuid: params.path.id,
+      eventId: params.path.id,
       investigation,
-      reassessedFields: { severity, summary, status },
+      triggerFeedback: triggerFeedback as SignificantEventTriggerFeedback | undefined,
+      logger,
     });
   },
 });
@@ -352,6 +354,45 @@ const eventsUpdateRoute = createServerRoute({
   },
 });
 
+const cleanupStaleEventsRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/events/_cleanup',
+  options: {
+    access: 'internal',
+    summary: 'Close stale significant events',
+    description: 'Closes open significant events when none of their backing rules still exist.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z
+      .object({
+        candidateRuleIds: z.array(z.string().max(MAX_ID_LENGTH)).max(1000).optional(),
+      })
+      .nullish(),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<CleanupStaleEventsResult> => {
+    const scopedClients = await getScopedClients({ request });
+    const { getEventClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+    return cleanupStaleEvents({
+      eventClient: getEventClient(),
+      rulesClient,
+      candidateRuleIds: params?.body?.candidateRuleIds,
+    });
+  },
+});
+
 const investigationStatusesRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/investigations/_status',
   options: {
@@ -399,5 +440,6 @@ export const internalEventsRoutes = {
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
+  ...cleanupStaleEventsRoute,
   ...investigationStatusesRoute,
 };

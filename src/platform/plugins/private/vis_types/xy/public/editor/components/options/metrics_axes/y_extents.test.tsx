@@ -43,7 +43,7 @@ describe('YExtents component', () => {
   it('should call setMultipleValidity with true when min and max are not defined', () => {
     mount(<YExtents {...defaultProps} />);
 
-    expect(setMultipleValidity).toBeCalledWith(Y_EXTENTS, true);
+    expect(setMultipleValidity).toHaveBeenCalledWith(Y_EXTENTS, true);
   });
 
   it('should call setMultipleValidity with true when min less than max', () => {
@@ -51,7 +51,7 @@ describe('YExtents component', () => {
     defaultProps.scale.max = 2;
     mount(<YExtents {...defaultProps} />);
 
-    expect(setMultipleValidity).toBeCalledWith(Y_EXTENTS, true);
+    expect(setMultipleValidity).toHaveBeenCalledWith(Y_EXTENTS, true);
   });
 
   it('should call setMultipleValidity with false when min greater than max', () => {
@@ -59,7 +59,7 @@ describe('YExtents component', () => {
     defaultProps.scale.max = 0;
     mount(<YExtents {...defaultProps} />);
 
-    expect(setMultipleValidity).toBeCalledWith(Y_EXTENTS, false);
+    expect(setMultipleValidity).toHaveBeenCalledWith(Y_EXTENTS, false);
   });
 
   it('should call setMultipleValidity with false when min equals max', () => {
@@ -67,7 +67,7 @@ describe('YExtents component', () => {
     defaultProps.scale.max = 1;
     mount(<YExtents {...defaultProps} />);
 
-    expect(setMultipleValidity).toBeCalledWith(Y_EXTENTS, false);
+    expect(setMultipleValidity).toHaveBeenCalledWith(Y_EXTENTS, false);
   });
 
   it('should call setMultipleValidity with false when min equals 0 and scale is log', () => {
@@ -76,7 +76,7 @@ describe('YExtents component', () => {
     defaultProps.scale.type = ScaleType.Log;
     mount(<YExtents {...defaultProps} />);
 
-    expect(setMultipleValidity).toBeCalledWith(Y_EXTENTS, false);
+    expect(setMultipleValidity).toHaveBeenCalledWith(Y_EXTENTS, false);
   });
 
   it('should call setScale with input number', () => {
@@ -85,7 +85,7 @@ describe('YExtents component', () => {
     const inputProps = comp.find(NumberInputOption).first().props();
     inputProps.setValue(Y_EXTENTS, inputNumber);
 
-    expect(setScale).toBeCalledWith(Y_EXTENTS, inputNumber);
+    expect(setScale).toHaveBeenCalledWith(Y_EXTENTS, inputNumber);
   });
 
   it('should call setScale with null when input is empty', () => {
@@ -93,6 +93,6 @@ describe('YExtents component', () => {
     const inputProps = comp.find(NumberInputOption).first().props();
     inputProps.setValue(Y_EXTENTS, '');
 
-    expect(setScale).toBeCalledWith(Y_EXTENTS, null);
+    expect(setScale).toHaveBeenCalledWith(Y_EXTENTS, null);
   });
 });

@@ -756,7 +756,7 @@ describe('utils', () => {
       it('raises an error if the input is invalid', () => {
         const badInput = 'id__SEP__index__SEP__0';
 
-        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrow(
           'Decoded query is invalid. Decoded value: {"id":"id","index":"index","threatMappingIndex":0}'
         );
       });
@@ -771,7 +771,7 @@ describe('utils', () => {
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
-        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrow(
           'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
@@ -784,7 +784,7 @@ describe('utils', () => {
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
-        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrow(
           'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
@@ -794,20 +794,20 @@ describe('utils', () => {
   describe('buildExecutionIntervalValidator', () => {
     it('succeeds if the validator is called within the specified interval', () => {
       const validator = buildExecutionIntervalValidator('1m');
-      expect(() => validator()).not.toThrowError();
+      expect(() => validator()).not.toThrow();
     });
 
     it('throws an error if the validator is called after the specified interval', async () => {
       const validator = buildExecutionIntervalValidator('1s');
 
       await new Promise((r) => setTimeout(r, 2000));
-      expect(() => validator()).toThrowError(
+      expect(() => validator()).toThrow(
         'Current rule execution has exceeded its allotted interval (1s) and has been stopped.'
       );
     });
 
     it('throws an error if the interval cannot be parsed', () => {
-      expect(() => buildExecutionIntervalValidator('badString')).toThrowError(
+      expect(() => buildExecutionIntervalValidator('badString')).toThrow(
         'Unable to parse rule interval (badString); stopping rule execution since allotted duration is undefined'
       );
     });

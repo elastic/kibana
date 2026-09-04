@@ -295,6 +295,23 @@ describe('When a Console command is entered by the user', () => {
         executionTranslations.mustBeGreaterThanZero('foo')
       );
     });
+
+    it('should reject a value for an argument with `mustHaveValue=false`', async () => {
+      const cmd2 = commands.find(({ name }) => name === 'cmd2');
+
+      if (!cmd2) {
+        throw new Error('cmd2 definition not found');
+      }
+
+      cmd2.args!.ext.mustHaveValue = false;
+
+      const { getByTestId } = render();
+      await enterCommand('cmd2 --file test --ext value');
+
+      expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+        executionTranslations.argDoesNotAcceptAnyValue('ext')
+      );
+    });
   });
 
   describe('argState handling', () => {
