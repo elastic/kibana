@@ -35,7 +35,8 @@ import type {
   ESQLAstForkCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
-import { type ESQLControlVariable, ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
+import type { VariableNamePrefix } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
 
@@ -327,23 +328,14 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
   return columns.map((column) => column.name);
 };
 
-export const getESQLQueryVariables = (esql: string): string[] => {
-  const { root } = Parser.parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
-};
-
 /**
- * Returns the names of the Identifier (`??`) variables declared in a query, without the prefix.
- * Unlike {@link getESQLQueryVariables} this excludes Value (`?`) variables, so a caller can tell a
- * field/function control apart from a literal control.
+ * Returns ES|QL parameter names without `?`/`??` prefixes, optionally filtered by Identifier (`??`) or Value (`?`) `paramKind`.
  */
-export const getESQLIdentifierVariables = (esql: string): string[] => {
+export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
-  const identifierPrefix = VariableNamePrefix.IDENTIFIER;
   return Walker.params(root)
-    .filter((v) => v.text.startsWith(identifierPrefix))
-    .map((v) => v.text.slice(identifierPrefix.length));
+    .filter((v) => !prefix || v.paramKind === prefix)
+    .map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
 };
 
 /**

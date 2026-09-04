@@ -24,7 +24,7 @@ import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import {
   getIndexPatternFromESQLQuery,
   parseTimeFieldFromESQLQuery,
-  getESQLIdentifierVariables,
+  getESQLQueryVariables,
 } from '@kbn/esql-utils';
 import { VariableNamePrefix } from '@kbn/esql-types';
 import { Sha256 } from '@kbn/crypto-browser';
@@ -452,7 +452,7 @@ function reconstructESQLControlVariables(
   columns: TextBasedLayerColumn[],
   esql: string
 ): TextBasedLayerColumn[] {
-  const identifierVariables = new Set(getESQLIdentifierVariables(esql));
+  const identifierVariables = new Set(getESQLQueryVariables(esql, VariableNamePrefix.IDENTIFIER));
   if (identifierVariables.size === 0) {
     return columns;
   }
