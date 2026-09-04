@@ -69,6 +69,11 @@ node scripts/bench.js \
 BENCH_EXIT=$?
 set -e
 
+# Disk sizing data for the agent config: overall fill plus this step's own footprint.
+echo "--- Disk usage"
+df -h /
+du -sh "$WORK_DIR"/* 2>/dev/null || true
+
 # onCompare writes the report before it throws on a regression, so a missing
 # report means the benchmark died earlier — infra trouble, not memory growth.
 # This step can never fail the build, so an annotation is the only visibility.
