@@ -29,7 +29,7 @@ export const BIGQUERY_READ_ONLY_PREFIXES = /^(SELECT|WITH|EXPLAIN)\b/i;
 
 // Write / DDL that can hide after a read-only prefix (WITH CTE, SELECT INTO, EXPLAIN UPDATE).
 const WRITE_PATTERN =
-  /\b(INSERT\s+INTO|REPLACE\s+INTO|UPDATE\s+|DELETE\s+FROM|MERGE\s+INTO|CREATE\s+|DROP\s+|ALTER\s+|TRUNCATE\s+|GRANT\s+|REVOKE\s+|CALL\s+|LOAD\s+DATA|INTO\s+(OUTFILE|DUMPFILE))/i;
+  (b/redacted)(INSERT\s+INTO|REPLACE\s+INTO|UPDATE\s+|DELETE\s+|MERGE\s+INTO|CREATE\s+|DROP\s+|ALTER\s+|TRUNCATE\s+|GRANT\s+|REVOKE\s+|CALL\s+|LOAD\s+DATA|INTO\s+(OUTFILE|DUMPFILE))/i;
 
 // MySQL executable comments (/*!...*/): MySQL server parses their contents as code,
 // but stripLeadingCommentsAndWhitespace would strip them as inert text first, letting
