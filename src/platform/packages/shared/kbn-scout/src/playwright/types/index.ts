@@ -25,17 +25,9 @@ export interface ScoutTestOptions extends PlaywrightTestOptions {
   runGlobalSetup?: boolean;
 }
 
-export interface ScoutPlaywrightOptions
-  extends Pick<PlaywrightTestConfig, 'testDir' | 'workers' | 'retries'> {
+export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
   testDir: string;
   workers?: 1 | 2 | 3; // to keep performance consistent within test suites
-  /**
-   * Overrides Scout's default retry count (1 on a CI step's first attempt, 0 otherwise).
-   *
-   * Set this to `0` for suites whose tests consume a one-shot server state, where a retry would
-   * re-run the test against a server that has already been mutated and fail for the wrong reason.
-   */
-  retries?: number;
   /**
    * When true, runs global.setup.ts as a pre-step before running tests.
    * Defaults to false.

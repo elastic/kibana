@@ -15,7 +15,7 @@ import { createPlaywrightConfig } from '@kbn/scout';
  * against an already-booted Kibana and fail on the `204`, so retries are disabled here — Scout
  * otherwise defaults to 1 retry on CI.
  */
-export default createPlaywrightConfig({
-  testDir: './tests',
+export default {
+  ...createPlaywrightConfig({ testDir: './tests' }),
   retries: 0,
-});
+};

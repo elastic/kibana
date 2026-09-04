@@ -125,7 +125,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
     /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
-    retries: options.retries ?? resolveRetries(),
+    retries: resolveRetries(),
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
