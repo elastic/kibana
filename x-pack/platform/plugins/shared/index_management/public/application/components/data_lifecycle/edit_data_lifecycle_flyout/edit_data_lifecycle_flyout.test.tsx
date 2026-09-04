@@ -98,6 +98,19 @@ describe('EditDataLifecycleFlyout', () => {
     expect(getByText('Delete phase')).toBeInTheDocument();
   });
 
+  it('renders a successful data notice only on the successful data tab', () => {
+    const { getByTestId, queryByTestId } = renderFlyout({
+      successfulData: {
+        ...BASE_SUCCESSFUL_DATA,
+        notice: <div data-test-subj="successfulDataNotice" />,
+      },
+    });
+
+    expect(getByTestId('successfulDataNotice')).toBeInTheDocument();
+    fireEvent.click(getByTestId('flyoutTab-failed_data'));
+    expect(queryByTestId('successfulDataNotice')).not.toBeInTheDocument();
+  });
+
   it('calls onClose when Cancel is clicked', () => {
     const { getByRole, onClose } = renderFlyout();
 

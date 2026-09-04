@@ -6,18 +6,26 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { TemplateDeserialized } from '../../../../../common';
+import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../common/constants';
 import { StepReview } from './step_review';
 import { useAppContext } from '../../../app_context';
+import { simulateIndexTemplate } from '../../../services';
 
 jest.mock('../../../app_context', () => ({
   useAppContext: jest.fn(),
 }));
 
+jest.mock('../../../services', () => ({
+  simulateIndexTemplate: jest.fn(),
+}));
+
 const mockUseAppContext = useAppContext as jest.MockedFunction<typeof useAppContext>;
+const mockSimulateIndexTemplate = jest.mocked(simulateIndexTemplate);
+type SimulationResponse = Awaited<ReturnType<typeof simulateIndexTemplate>>;
 
 const mockSimulateTemplatePropsSpy = jest.fn();
 jest.mock('../../index_templates', () => ({
@@ -35,6 +43,7 @@ describe('StepReview', () => {
     mockUseAppContext.mockReturnValue({
       config: { isServerless: false },
     } as ReturnType<typeof useAppContext>);
+    mockSimulateIndexTemplate.mockResolvedValue({ data: null, error: null });
   });
 
   const makeTemplate = (overrides: Partial<TemplateDeserialized> = {}): TemplateDeserialized => ({
@@ -145,6 +154,462 @@ describe('StepReview', () => {
       );
 
       expect(screen.getByTestId('lifecycleValue')).toHaveTextContent('∞ · 2 data phases');
+    });
+  });
+
+  describe('WHEN the index mode is lookup', () => {
+    const renderReview = (template: TemplateDeserialized) =>
+      render(
+        <I18nProvider>
+          <StepReview template={template} navigateToStep={jest.fn()} />
+        </I18nProvider>
+      );
+
+    it('SHOULD warn when the template has a data lifecycle', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: LOOKUP_INDEX_MODE,
+          _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+          template: { lifecycle: { enabled: true, data_retention: '30d' } },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+      expect(screen.getByTestId('lifecycleValue')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when the template has infinite data retention', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: LOOKUP_INDEX_MODE,
+          _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+          template: { lifecycle: { enabled: true } },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when lookup mode and the lifecycle policy are nested settings', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when lookup mode and the lifecycle policy are flat settings', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              'index.mode': LOOKUP_INDEX_MODE,
+              'index.lifecycle.name': 'my-policy',
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD use nested mode when flat mode conflicts', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+              'index.mode': STANDARD_INDEX_MODE,
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD use flat mode when unprefixed mode conflicts', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              'index.mode': LOOKUP_INDEX_MODE,
+              mode: STANDARD_INDEX_MODE,
+              'index.lifecycle.name': 'my-policy',
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when component templates resolve to lookup mode with a lifecycle policy', async () => {
+      mockSimulateIndexTemplate.mockResolvedValue({
+        data: {
+          template: {
+            aliases: {},
+            mappings: {},
+            settings: {
+              index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+            },
+          },
+        },
+        error: null,
+      });
+
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+          template: {
+            settings: { index: { number_of_shards: 1 } },
+            lifecycle: { enabled: true, data_retention: '30d' },
+          },
+        })
+      );
+
+      await waitFor(() =>
+        expect(mockSimulateIndexTemplate).toHaveBeenCalledWith({
+          template: expect.objectContaining({
+            composed_of: ['lookup-component'],
+            template: expect.objectContaining({
+              settings: { index: { number_of_shards: 1 } },
+              lifecycle: { enabled: true, data_retention: '30d' },
+            }),
+          }),
+        })
+      );
+      expect(await screen.findByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when component templates resolve to lookup mode with data stream lifecycle', async () => {
+      mockSimulateIndexTemplate.mockResolvedValue({
+        data: {
+          template: {
+            aliases: {},
+            lifecycle: { enabled: true },
+            mappings: {},
+            settings: { index: { mode: LOOKUP_INDEX_MODE } },
+          },
+        },
+        error: null,
+      });
+
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+        })
+      );
+
+      expect(await screen.findByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD not warn when inherited data stream lifecycle is disabled', async () => {
+      let resolveSimulation: (response: SimulationResponse) => void = () => {};
+      const simulation = new Promise<SimulationResponse>((resolve) => {
+        resolveSimulation = resolve;
+      });
+      mockSimulateIndexTemplate.mockReturnValueOnce(simulation);
+
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+        })
+      );
+
+      await act(async () => {
+        resolveSimulation({
+          data: {
+            template: {
+              lifecycle: { enabled: false },
+              settings: { index: { mode: LOOKUP_INDEX_MODE } },
+            },
+          },
+          error: null,
+        });
+        await simulation;
+      });
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
+    });
+
+    it('SHOULD clear a stale component-template warning while simulating updated settings', async () => {
+      mockSimulateIndexTemplate
+        .mockResolvedValueOnce({
+          data: {
+            template: {
+              aliases: {},
+              mappings: {},
+              settings: {
+                index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+              },
+            },
+          },
+          error: null,
+        })
+        .mockReturnValueOnce(new Promise<never>(() => {}));
+
+      const { rerender } = renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+        })
+      );
+      expect(await screen.findByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+
+      rerender(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              composedOf: ['standard-component'],
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument()
+      );
+    });
+
+    it('SHOULD clear a component-template warning when all components are removed', async () => {
+      mockSimulateIndexTemplate.mockResolvedValueOnce({
+        data: {
+          template: {
+            settings: {
+              index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+            },
+          },
+        },
+        error: null,
+      });
+
+      const { rerender } = renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+        })
+      );
+      expect(await screen.findByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+
+      rerender(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              composedOf: [],
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument()
+      );
+    });
+
+    it('SHOULD ignore an obsolete component-template simulation result', async () => {
+      let resolveObsoleteSimulation: (response: SimulationResponse) => void = () => {};
+      const obsoleteSimulation = new Promise<SimulationResponse>((resolve) => {
+        resolveObsoleteSimulation = resolve;
+      });
+      mockSimulateIndexTemplate
+        .mockReturnValueOnce(obsoleteSimulation)
+        .mockResolvedValueOnce({ data: { template: { settings: {} } }, error: null });
+
+      const { rerender } = renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          composedOf: ['lookup-component'],
+        })
+      );
+
+      rerender(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              composedOf: ['standard-component'],
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+      await waitFor(() => expect(mockSimulateIndexTemplate).toHaveBeenCalledTimes(2));
+
+      await act(async () => {
+        resolveObsoleteSimulation({
+          data: {
+            template: {
+              settings: {
+                index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+              },
+            },
+          },
+          error: null,
+        });
+        await obsoleteSimulation;
+      });
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
+    });
+
+    it('SHOULD warn when the settings set a nested index.lifecycle.name', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: LOOKUP_INDEX_MODE,
+          template: { settings: { index: { lifecycle: { name: 'my-policy' } } } },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when the settings set a flat index.lifecycle.name', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: LOOKUP_INDEX_MODE,
+          template: { settings: { 'index.lifecycle.name': 'my-policy' } },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when index.lifecycle.name omits the optional index prefix', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: LOOKUP_INDEX_MODE,
+          template: { settings: { lifecycle: { name: 'my-policy' } } },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when lookup mode and lifecycle omit the optional index prefix', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              mode: LOOKUP_INDEX_MODE,
+              lifecycle: { name: 'my-policy' },
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD warn when unprefixed lookup settings use a dotted lifecycle name', () => {
+      renderReview(
+        makeTemplate({
+          indexMode: undefined,
+          template: {
+            settings: {
+              mode: LOOKUP_INDEX_MODE,
+              'lifecycle.name': 'my-policy',
+            },
+          },
+        })
+      );
+
+      expect(screen.getByTestId('lookupLifecycleWarning')).toBeInTheDocument();
+    });
+
+    it('SHOULD NOT warn when the template has no lifecycle settings', () => {
+      renderReview(makeTemplate({ indexMode: LOOKUP_INDEX_MODE }));
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('WHEN the index mode is standard', () => {
+    it('SHOULD NOT warn about the data lifecycle', () => {
+      render(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              _kbnMeta: { type: 'default', hasDatastream: true, isLegacy: false },
+              template: { lifecycle: { enabled: true, data_retention: '30d' } },
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
+      expect(screen.getByTestId('lifecycleValue')).toBeInTheDocument();
+    });
+
+    it('SHOULD prefer the Logistics mode over a conflicting settings mode', () => {
+      render(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              template: {
+                settings: {
+                  index: { mode: LOOKUP_INDEX_MODE, lifecycle: { name: 'my-policy' } },
+                },
+              },
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      [
+        'flat',
+        {
+          'index.mode': LOOKUP_INDEX_MODE,
+          'index.lifecycle.name': 'my-policy',
+        },
+      ],
+      [
+        'unprefixed',
+        {
+          mode: LOOKUP_INDEX_MODE,
+          lifecycle: { name: 'my-policy' },
+        },
+      ],
+    ])('SHOULD prefer the Logistics mode over conflicting %s settings', (_, settings) => {
+      render(
+        <I18nProvider>
+          <StepReview
+            template={makeTemplate({
+              indexMode: STANDARD_INDEX_MODE,
+              template: { settings },
+            })}
+            navigateToStep={jest.fn()}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('lookupLifecycleWarning')).not.toBeInTheDocument();
     });
   });
 

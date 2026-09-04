@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -23,7 +23,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamOptions } from '../../../../../common/types/data_streams';
 import { indexModeLabels } from '../../../lib/index_mode_labels';
-import { allowAutoCreateRadioIds } from '../../../../../common/constants';
+import { allowAutoCreateRadioIds, LOOKUP_INDEX_MODE } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
@@ -32,7 +32,10 @@ import { getTemplateParameter } from '../../../../../common';
 import { SimulateTemplate } from '../../index_templates';
 import type { WizardSection } from '../template_form';
 import { formatDlmLifecycleSummary, resolveLifecycleForSummary } from '../../../lib/data_streams';
+import { hasIlmPolicySetting } from '../../../lib/has_ilm_policy_setting';
+import { LookupLifecycleWarningCallout } from '../../shared';
 import { useAppContext } from '../../../app_context';
+import { simulateIndexTemplate } from '../../../services';
 const { stripEmptyFields } = serializers;
 
 const NoneDescriptionText = () => (
@@ -62,6 +65,11 @@ interface Props {
   template: TemplateDeserialized;
   navigateToStep: (stepId: WizardSection) => void;
   dataStreamOptions?: DataStreamOptions;
+}
+
+interface SimulatedTemplate {
+  settings?: NonNullable<TemplateDeserialized['template']>['settings'];
+  lifecycle?: { enabled?: boolean };
 }
 
 const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
@@ -105,18 +113,47 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       _kbnMeta: { isLegacy, hasDatastream },
     } = template!;
 
-    const serializedTemplate = isLegacy
-      ? serializeLegacyTemplate(
-          stripEmptyFields(template!, {
-            types: ['string'],
-          }) as TemplateDeserialized
-        )
-      : serializeTemplate(
-          stripEmptyFields(template!, {
-            types: ['string'],
-          }) as TemplateDeserialized,
-          dataStreamOptions
-        );
+    const serializedTemplate = useMemo(
+      () =>
+        isLegacy
+          ? serializeLegacyTemplate(
+              stripEmptyFields(template!, {
+                types: ['string'],
+              }) as TemplateDeserialized
+            )
+          : serializeTemplate(
+              stripEmptyFields(template!, {
+                types: ['string'],
+              }) as TemplateDeserialized,
+              dataStreamOptions
+            ),
+      [dataStreamOptions, isLegacy, template]
+    );
+
+    const [simulatedTemplate, setSimulatedTemplate] = useState<SimulatedTemplate>();
+    const hasComponentTemplates = Boolean(composedOf?.length);
+
+    useEffect(() => {
+      let isCurrent = true;
+
+      if (isLegacy || !hasComponentTemplates) {
+        setSimulatedTemplate(undefined);
+        return () => {
+          isCurrent = false;
+        };
+      }
+
+      setSimulatedTemplate(undefined);
+      simulateIndexTemplate({ template: serializedTemplate }).then(({ data }) => {
+        if (isCurrent) {
+          setSimulatedTemplate(data?.template as SimulatedTemplate | undefined);
+        }
+      });
+
+      return () => {
+        isCurrent = false;
+      };
+    }, [hasComponentTemplates, isLegacy, serializedTemplate]);
 
     const serializedMappings = getTemplateParameter(serializedTemplate, 'mappings');
     const serializedSettings = getTemplateParameter(serializedTemplate, 'settings');
@@ -131,9 +168,38 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
 
     const hasWildCardIndexPattern = Boolean(indexPatterns!.find((pattern) => pattern === '*'));
 
+    const effectiveSettings = simulatedTemplate?.settings ?? indexTemplate?.settings;
+    const effectiveLifecycle = simulatedTemplate?.lifecycle ?? indexTemplate?.lifecycle;
+    const effectiveIndexMode =
+      simulatedTemplate?.settings?.index?.mode ??
+      indexMode ??
+      effectiveSettings?.index?.mode ??
+      effectiveSettings?.['index.mode'] ??
+      effectiveSettings?.mode;
+
+    // ES accepts lifecycle settings on lookup index templates but does not apply them to lookup-mode indices, so we warn without blocking.
+    const showLookupLifecycleWarning =
+      effectiveIndexMode === LOOKUP_INDEX_MODE &&
+      (Boolean(effectiveLifecycle?.enabled) || hasIlmPolicySetting(effectiveSettings));
+
     const SummaryTab = () => (
       <div data-test-subj="summaryTab">
         <EuiSpacer size="m" />
+
+        {showLookupLifecycleWarning && (
+          <>
+            <LookupLifecycleWarningCallout
+              description={
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.lookupLifecycleWarningDescription"
+                  defaultMessage="Elasticsearch does not apply index lifecycle management (ILM) policies or data stream lifecycle settings to indices with the lookup index mode. The lifecycle settings in this template are not applied to these indices."
+                />
+              }
+            />
+
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         <EuiFlexGroup>
           <EuiFlexItem>
