@@ -1189,8 +1189,7 @@ describe('SyntheticsPrivateLocation', () => {
       vars: {
         __ui: {
           type: 'yaml',
-          value:
-            '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":true}',
+          value: null,
         },
         config_id: {
           type: 'text',
@@ -1238,7 +1237,7 @@ describe('SyntheticsPrivateLocation', () => {
         },
         screenshots: {
           type: 'text',
-          value: 'on',
+          value: null,
         },
         'service.name': {
           type: 'text',
