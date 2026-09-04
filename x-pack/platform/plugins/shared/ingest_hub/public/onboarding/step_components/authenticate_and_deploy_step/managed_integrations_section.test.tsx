@@ -67,9 +67,7 @@ function setupMocks({
       <div data-test-subj="identity-federation">
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
-        <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>
-          mark-named
-        </button>
+        <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
       </div>
     )
   );

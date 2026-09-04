@@ -42,7 +42,11 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
     const fields =
       deploymentMethod === 'agent_based'
         ? getAgentBasedSummaryFields()
-        : getManagedIntegrationSummaryFields({ globalRegion, cfnStackName: undefined, connectorName });
+        : getManagedIntegrationSummaryFields({
+            globalRegion,
+            cfnStackName: undefined,
+            connectorName,
+          });
 
     // Filter out fields with null value — a null value means the data source isn't available yet.
     return fields.filter((f) => f.value != null);
