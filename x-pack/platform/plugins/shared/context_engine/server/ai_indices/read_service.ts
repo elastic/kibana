@@ -11,7 +11,7 @@ import type {
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import { AiIndexAuditAction, aiIndexAuditEvent } from '../routes/audit_events';
+import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { queryAiIndices } from './query';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
