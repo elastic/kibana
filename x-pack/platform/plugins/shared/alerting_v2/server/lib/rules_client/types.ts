@@ -17,6 +17,7 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
 /** Re-exported from the shared schemas package. */
@@ -41,6 +42,7 @@ export interface RotationCandidate {
   taskId: string;
   attrs: RuleSavedObjectAttributes;
   version?: string;
+  references: SavedObjectReference[];
 }
 
 export interface CreateRuleParams {

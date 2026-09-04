@@ -152,14 +152,18 @@ describe('useDiscoverFieldForBreakdown', () => {
     });
 
     it('keeps existing selection order and appends new breakdown dimension', async () => {
-      renderHook(() =>
-        useDiscoverFieldForBreakdown(
-          'service.name',
-          [hostDimension, serviceDimension],
-          [hostDimension],
-          mockOnDimensionsChange
-        )
+      const { rerender } = renderHook(
+        ({ breakdownField }) =>
+          useDiscoverFieldForBreakdown(
+            breakdownField,
+            [hostDimension, serviceDimension],
+            [hostDimension],
+            mockOnDimensionsChange
+          ),
+        { initialProps: { breakdownField: undefined as string | undefined } }
       );
+
+      rerender({ breakdownField: 'service.name' });
 
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension, serviceDimension]);
@@ -177,11 +181,13 @@ describe('useDiscoverFieldForBreakdown', () => {
           ),
         {
           initialProps: {
-            breakdownField: 'host.name' as string | undefined,
+            breakdownField: undefined as string | undefined,
             selectedDimensions: [serviceDimension] as Dimension[],
           },
         }
       );
+
+      rerender({ breakdownField: 'host.name', selectedDimensions: [serviceDimension] });
 
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([serviceDimension, hostDimension]);
@@ -210,14 +216,18 @@ describe('useDiscoverFieldForBreakdown', () => {
       // Guard to ensure this test adapts with any future constant changes.
       expect(selectedDimensionsAtMax).toHaveLength(MAX_DIMENSIONS_SELECTIONS);
 
-      renderHook(() =>
-        useDiscoverFieldForBreakdown(
-          'dim6',
-          [...selectedDimensionsAtMax, dim5, dim6],
-          selectedDimensionsAtMax,
-          mockOnDimensionsChange
-        )
+      const { rerender } = renderHook(
+        ({ breakdownField }) =>
+          useDiscoverFieldForBreakdown(
+            breakdownField,
+            [...selectedDimensionsAtMax, dim5, dim6],
+            selectedDimensionsAtMax,
+            mockOnDimensionsChange
+          ),
+        { initialProps: { breakdownField: undefined as string | undefined } }
       );
+
+      rerender({ breakdownField: 'dim6' });
 
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([
