@@ -16,7 +16,7 @@ import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 const meta: Meta<typeof WorkflowStepExecutionDetails> = {
   component: WorkflowStepExecutionDetails,
-  title: 'Workflows Management/Step Execution Details',
+  title: 'Workflows Management/Previous Execution Detail/Step Execution Details',
   decorators: [kibanaReactDecorator, (story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 

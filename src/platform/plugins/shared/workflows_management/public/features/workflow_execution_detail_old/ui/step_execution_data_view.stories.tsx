@@ -21,7 +21,7 @@ const heightDecorator = (Story: React.ComponentType) => (
 );
 
 const meta: Meta = {
-  title: 'Workflows Management/Step Execution Data View',
+  title: 'Workflows Management/Previous Execution Detail/Step Execution Data View',
   component: StepExecutionDataView,
   decorators: [kibanaReactDecorator, heightDecorator],
 };

@@ -17,7 +17,7 @@ import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
-  title: 'Workflows Management/Step Execution Tree',
+  title: 'Workflows Management/Previous Execution Detail/Step Execution Tree',
   decorators: [
     kibanaReactDecorator,
     (story) => (
