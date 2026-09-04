@@ -13,6 +13,12 @@
  */
 export const ECF_FALLBACK_TEMPLATE_VERSION = '1.10.0';
 
+/**
+ * Maximum length of an AWS CloudFormation stack name (AWS hard limit).
+ * Shared between the UI validation regex and the Fleet saved-object schema.
+ */
+export const ECF_STACK_NAME_MAX_LENGTH = 128;
+
 /** ECF S3 bucket base URL. */
 const ECF_S3_BASE = 'https://edot-cloud-forwarder.s3.amazonaws.com';
 

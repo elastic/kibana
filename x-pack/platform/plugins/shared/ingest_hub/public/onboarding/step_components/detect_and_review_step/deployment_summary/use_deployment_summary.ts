@@ -57,9 +57,10 @@ export function useDeploymentSummary(deploymentMethod: DeploymentMethod): Summar
     const cfnStackName =
       launchedFamilies
         .map((family) => {
-          if (family === 'unified') return stackNames.unified ?? ECF_UNIFIED_STACK_NAME;
-          if (family === 'otel') return stackNames.otel ?? ECF_OTEL_STACK_NAME;
-          if (family === 'crowdstrike') return stackNames.crowdstrike ?? ECF_CROWDSTRIKE_STACK_NAME;
+          // || (not ??) so an empty string (user cleared the field) falls back to the default.
+          if (family === 'unified') return stackNames.unified || ECF_UNIFIED_STACK_NAME;
+          if (family === 'otel') return stackNames.otel || ECF_OTEL_STACK_NAME;
+          if (family === 'crowdstrike') return stackNames.crowdstrike || ECF_CROWDSTRIKE_STACK_NAME;
           return null;
         })
         .filter(Boolean)
