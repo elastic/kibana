@@ -47,6 +47,9 @@ export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   'ci:ftr-auto-retry': {
     FTR_AUTO_RETRY_COUNT: '1',
   },
+  'ci:ignore-skipped-on-main': {
+    IGNORE_SKIPPED_ON_MAIN: 'true', // Ignore test failures for tests skipped on the PR target branch after the merge base
+  },
   [FIPS_GH_LABELS[FIPS_VERSION.TWO]]: {
     TEST_ENABLE_FIPS_VERSION: FIPS_VERSION.TWO,
   },

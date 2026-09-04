@@ -4,6 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/test/ftr_smart_retry.sh
+source .buildkite/scripts/steps/test/skipped_on_main.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
@@ -99,6 +100,9 @@ while read -r config; do
   """
   fi
 
+  # marks JUnit reports written by this config so they can be evaluated in isolation
+  junitMarker=$(mktemp)
+
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
@@ -109,6 +113,19 @@ while read -r config; do
     "$EXTRA_ARGS"
   lastCode=$?
   set -e;
+
+  # Only sound when the whole config ran (no --bail): every failure must be inspected.
+  if [[ $lastCode -ne 0 && -z "$BAIL_ARG" ]] && skipped_on_main_applicable; then
+    junitArgs=()
+    while IFS= read -r junitFile; do
+      junitArgs+=(--junit-file "$junitFile")
+    done < <(find "target/junit/$JOB" -name '*.xml' -newer "$junitMarker" 2>/dev/null)
+
+    if [[ ${#junitArgs[@]} -gt 0 ]] && forgive_skipped_on_main "$config" "${junitArgs[@]}"; then
+      lastCode=0
+    fi
+  fi
+  rm -f "$junitMarker"
 
   # Scout reporter
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then

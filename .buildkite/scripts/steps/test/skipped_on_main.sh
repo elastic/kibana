@@ -1,0 +1,67 @@
+# Sourced by ftr_configs.sh and the Scout runners — do not execute directly.
+#
+# Forgives test failures for tests that are skipped on the PR target branch but were not
+# skipped at the PR merge base: had the PR been rebased, those tests would not have run.
+# Opt-in via the `ci:ignore-skipped-on-main` label (IGNORE_SKIPPED_ON_MAIN=true).
+
+SKIPPED_ON_MAIN_TARGET_SHA=""
+
+skipped_on_main_applicable() {
+  [[ "${IGNORE_SKIPPED_ON_MAIN:-}" =~ ^(1|true)$ ]] \
+    && [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]] \
+    && [[ -n "${GITHUB_PR_TARGET_BRANCH:-}" ]] \
+    && [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]
+}
+
+# Resolves the target branch tip once per step. Returns non-zero when it cannot be fetched,
+# in which case failures are left untouched.
+resolve_skipped_on_main_target() {
+  if [[ -n "$SKIPPED_ON_MAIN_TARGET_SHA" ]]; then
+    return 0
+  fi
+  if git fetch --quiet origin "$GITHUB_PR_TARGET_BRANCH" 2>/dev/null; then
+    SKIPPED_ON_MAIN_TARGET_SHA="$(git rev-parse FETCH_HEAD)"
+    return 0
+  fi
+  echo "[skipped-on-main] could not fetch origin/$GITHUB_PR_TARGET_BRANCH; leaving failures as-is"
+  return 1
+}
+
+# Usage: forgive_skipped_on_main <context> <--junit-file path ...|--scout-failures path ...>
+# Returns 0 when every failure in the given reports is skipped on the target branch but not at
+# the merge base; the caller then treats the run as passed. Annotates the build with the
+# forgiven tests.
+forgive_skipped_on_main() {
+  local context="$1"
+  shift
+
+  resolve_skipped_on_main_target || return 1
+
+  echo "--- [skipped-on-main] evaluating failures in $context against $GITHUB_PR_TARGET_BRANCH"
+  local evaluation
+  if ! evaluation=$(node scripts/check_skipped_on_main \
+    --main-ref "$SKIPPED_ON_MAIN_TARGET_SHA" \
+    --base-ref "$GITHUB_PR_MERGE_BASE" \
+    "$@"); then
+    echo "[skipped-on-main] keeping failures for $context"
+    return 1
+  fi
+  if ! echo "$evaluation" | jq -e . >/dev/null; then
+    echo "[skipped-on-main] evaluator returned invalid JSON; keeping failures for $context"
+    return 1
+  fi
+
+  local forgiven
+  forgiven=$(echo "$evaluation" | jq -r '.knownSkipped[] | "- `\(.failure.file)` — \(.failure.fullTitle // "\(.failure.suite) \(.failure.title)")\(if .issue then " (\(.issue))" else "" end)"')
+
+  echo "[skipped-on-main] all failures in $context are skipped on $GITHUB_PR_TARGET_BRANCH since the merge base — treating as passed"
+  echo "$forgiven"
+
+  buildkite-agent annotate --style warning --context "skipped-on-main-${BUILDKITE_STEP_ID}${context//[^a-zA-Z0-9]/-}" --append <<EOF
+**${context}** — failures ignored because these tests are skipped on \`${GITHUB_PR_TARGET_BRANCH}\` (\`${SKIPPED_ON_MAIN_TARGET_SHA:0:12}\`) but not at the PR merge base (\`${GITHUB_PR_MERGE_BASE:0:12}\`):
+
+${forgiven}
+
+EOF
+  return 0
+}

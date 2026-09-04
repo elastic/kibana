@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/test/skipped_on_main.sh
 
 SCOUT_SERVER_LOG=".scout/server.log"
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
@@ -248,10 +249,27 @@ run_scout_tests() {
   local start_time
   start_time=$(date +%s)
 
+  # marks failure reports written by this config so they can be evaluated in isolation
+  local failures_marker
+  failures_marker=$(mktemp)
+
   set +e
   env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
   local exit_code=$?
   set -e
+
+  if [[ $exit_code -ne 0 ]] && skipped_on_main_applicable; then
+    local failure_args=()
+    local failures_file
+    while IFS= read -r failures_file; do
+      failure_args+=(--scout-failures "$failures_file")
+    done < <(find .scout/reports -path '*scout-playwright-test-failures-*' -name 'scout-failures-*.ndjson' -newer "$failures_marker" 2>/dev/null)
+
+    if [[ ${#failure_args[@]} -gt 0 ]] && forgive_skipped_on_main "$config_path" "${failure_args[@]}"; then
+      exit_code=0
+    fi
+  fi
+  rm -f "$failures_marker"
 
   local elapsed=$(( $(date +%s) - start_time ))
   local duration
