@@ -22,7 +22,7 @@ import { ADDED_TO_LIBRARY, INSPECT, OPEN_IN_LENS } from './translations';
 
 export const DEFAULT_ACTIONS: VisualizationContextMenuActions[] = [
   VisualizationContextMenuActions.inspect,
-  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToCase,
   VisualizationContextMenuActions.saveToLibrary,
   VisualizationContextMenuActions.openInLens,
 ];
@@ -46,8 +46,8 @@ const ACTION_DEFINITION: Record<
     type: 'actionButton',
     order: 4,
   },
-  [VisualizationContextMenuActions.addToExistingCase]: {
-    id: VisualizationContextMenuActions.addToExistingCase,
+  [VisualizationContextMenuActions.addToCase]: {
+    id: VisualizationContextMenuActions.addToCase,
     getDisplayName: () => ADD_TO_CASE,
     getIconType: () => 'casesApp',
     type: 'actionButton',
@@ -109,7 +109,7 @@ export const useActions = ({
     );
   }, [attributes, navigateToPrefilledEditor, timeRange]);
 
-  const { disabled: isAddToExistingCaseDisabled, onAddToExistingCaseClicked } =
+  const { disabled: isAddToCaseDisabled, onAddToExistingCaseClicked: onAddToCaseClicked } =
     useAddToExistingCase({
       lensAttributes: attributes,
       timeRange,
@@ -130,14 +130,13 @@ export const useActions = ({
           isCompatible: async () => withActions.includes(VisualizationContextMenuActions.inspect),
         }),
         createAction({
-          ...ACTION_DEFINITION[VisualizationContextMenuActions.addToExistingCase],
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.addToCase],
           execute: async () => {
-            onAddToExistingCaseClicked();
+            onAddToCaseClicked();
             topValuesPopover.closePopover();
           },
-          isDisabled: () => isAddToExistingCaseDisabled,
-          isCompatible: async () =>
-            withActions.includes(VisualizationContextMenuActions.addToExistingCase),
+          isDisabled: () => isAddToCaseDisabled,
+          isCompatible: async () => withActions.includes(VisualizationContextMenuActions.addToCase),
           order: 2,
         }),
         createAction({
@@ -172,8 +171,8 @@ export const useActions = ({
       disableVisualizations,
       extraActions,
       inspectActionProps,
-      isAddToExistingCaseDisabled,
-      onAddToExistingCaseClicked,
+      isAddToCaseDisabled,
+      onAddToCaseClicked,
       onOpenInLens,
       openSaveVisualizationFlyout,
       withActions,

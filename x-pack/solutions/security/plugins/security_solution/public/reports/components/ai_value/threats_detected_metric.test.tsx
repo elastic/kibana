@@ -108,7 +108,7 @@ describe('ThreatsDetectedMetric', () => {
         id: 'ThreatsDetectedMetricQuery-area-embeddable',
         inspectTitle: 'Real threats detected',
         withActions: [
-          VisualizationContextMenuActions.addToExistingCase,
+          VisualizationContextMenuActions.addToCase,
           VisualizationContextMenuActions.inspect,
         ],
       }),

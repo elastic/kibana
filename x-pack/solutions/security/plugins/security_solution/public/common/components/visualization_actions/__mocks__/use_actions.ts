@@ -5,7 +5,7 @@
  * 2.0.
  */
 export const VISUALIZATION_CONTEXT_MENU_TRIGGER = 'VISUALIZATION_CONTEXT_MENU_TRIGGER';
-export const DEFAULT_ACTIONS = ['inspect', 'addToExistingCase', 'saveToLibrary', 'openInLens'];
+export const DEFAULT_ACTIONS = ['inspect', 'addToCase', 'saveToLibrary', 'openInLens'];
 export const MOCK_ACTIONS = [
   {
     id: 'inspect',
@@ -17,7 +17,7 @@ export const MOCK_ACTIONS = [
     execute: jest.fn(),
   },
   {
-    id: 'addToExistingCase',
+    id: 'addToCase',
     getDisplayName: () => 'Add to case',
     getIconType: () => 'casesApp',
     type: 'actionButton',
