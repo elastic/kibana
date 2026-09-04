@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { generateKeyPairSync } from 'crypto';
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
+import {
+  generateKeyPairSync,
+  privateDecrypt,
+  createDecipheriv,
+  constants as cryptoConstants,
+} from 'crypto';
 import {
   shouldExecute,
   applyFilterlist,
@@ -741,14 +746,29 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
     });
   });
 
-  describe('applyFilterlist — encryptDocument mode', () => {
-    const { publicKey } = generateKeyPairSync('rsa', {
+  describe('applyFilterlist in encryptDocument mode', () => {
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: { type: 'spki', format: 'pem' },
       privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
     const keys = { 'test-key': publicKey };
     const query = { encryptionKeyId: 'test-key', encryptDocument: true as const };
+
+    const decryptBlob = (blob: string): unknown => {
+      const [, , encDEK, iv, ciphertext, authTag] = blob.split(':');
+      const dek = privateDecrypt(
+        { key: privateKey, padding: cryptoConstants.RSA_PKCS1_OAEP_PADDING, oaepHash: 'sha256' },
+        Buffer.from(encDEK, 'base64')
+      );
+      const decipher = createDecipheriv('aes-256-gcm', dek, Buffer.from(iv, 'base64'));
+      decipher.setAuthTag(Buffer.from(authTag, 'base64'));
+      const plain = Buffer.concat([
+        decipher.update(Buffer.from(ciphertext, 'base64')),
+        decipher.final(),
+      ]);
+      return JSON.parse(plain.toString('utf8'));
+    };
 
     it('returns an array of v1 wire-format strings when no filterlist rules', async () => {
       const data = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
@@ -775,20 +795,30 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       const result = await applyFilterlist(data, rules, 'salt', query, keys);
 
       expect(result).toHaveLength(1);
-      expect(typeof result[0]).toBe('string');
-      // ciphertext differs per call (fresh IV), so just check it's a wire format string
-      expect((result[0] as string).startsWith('v1:test-key:')).toBe(true);
+      const doc = decryptBlob(result[0] as string);
+      expect(doc).toEqual({ process: { name: 'cmd.exe' } });
     });
 
     it('applies mask to fields with mask action before encrypting', async () => {
-      // Two docs with the same value masked should produce the same masked value inside
-      // the blob (deterministic SHA-256), but different outer ciphertexts (fresh IV).
       const data = [{ 'host.ip': '1.2.3.4' }];
       const rules = { 'host.ip': Action.MASK };
       const result = await applyFilterlist(data, rules, 'salt', query, keys);
 
       expect(result).toHaveLength(1);
-      expect((result[0] as string).startsWith('v1:')).toBe(true);
+      const doc = decryptBlob(result[0] as string) as { host: { ip: string } };
+      // value should be masked (SHA-256 hex), not the original IP
+      expect(doc.host.ip).not.toBe('1.2.3.4');
+      expect(typeof doc.host.ip).toBe('string');
+    });
+
+    it('produces one encrypted blob per rawDoc even when rawDoc is array-shaped', async () => {
+      const arrayDoc = [{ 'process.name': 'cmd.exe' }, { 'process.name': 'bash' }];
+      const result = await applyFilterlist([arrayDoc, arrayDoc], {}, 'salt', query, keys);
+
+      expect(result).toHaveLength(2);
+      for (const item of result) {
+        expect((item as string).startsWith('v1:test-key:')).toBe(true);
+      }
     });
 
     it('throws when encryptDocument is true but encryptionKeyId is missing', async () => {

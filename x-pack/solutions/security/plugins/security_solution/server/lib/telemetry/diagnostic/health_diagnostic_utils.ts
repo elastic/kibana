@@ -70,12 +70,14 @@ export async function applyFilterlist(
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
 
-  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  const needsDEK =
+    query?.encryptDocument === true ||
+    Object.values(rules).some((action) => action === Action.ENCRYPT);
   let dek: Nullable<Buffer>;
   let encryptedDEK: Nullable<Buffer>;
   let keyId: string | undefined;
 
-  if (hasEncryptAction) {
+  if (needsDEK) {
     if (!query?.encryptionKeyId) {
       throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
     }
@@ -83,7 +85,6 @@ export async function applyFilterlist(
       throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
     }
 
-    // same DEK for all the data
     keyId = query.encryptionKeyId;
     const publicKey = encryptionPublicKeys[keyId];
     dek = generateDEK();
@@ -181,25 +182,17 @@ export async function applyFilterlist(
   };
 
   if (query?.encryptDocument === true) {
-    if (!query.encryptionKeyId) {
-      throw new Error('encryptionKeyId is required when encryptDocument is true');
+    if (!dek || !encryptedDEK || !keyId) {
+      throw new Error('Encryption configuration not initialized');
     }
-    if (!encryptionPublicKeys?.[query.encryptionKeyId]) {
-      throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
-    }
-    const docKeyId = query.encryptionKeyId;
-    const docPublicKey = encryptionPublicKeys[docKeyId];
-    const docDek = generateDEK();
-    const docEncryptedDEK = encryptDEKWithRSA(docDek, docPublicKey);
     const hasRules = Object.keys(rules).length > 0;
-
     const result: string[] = [];
     for (const rawDoc of data) {
       const doc = unflatten(rawDoc as AnyObject);
       const subDoc = hasRules ? await applyFilterToDoc(doc) : doc;
-      result.push(encryptDocumentAsJson(subDoc, docDek, docEncryptedDEK, docKeyId));
+      result.push(encryptDocumentAsJson(subDoc, dek, encryptedDEK, keyId));
     }
-    docDek.fill(0);
+    dek.fill(0);
     return result;
   }
 
@@ -218,6 +211,7 @@ export async function applyFilterlist(
     }
   }
 
+  dek?.fill(0);
   return filteredResult;
 }
 
