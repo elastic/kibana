@@ -33,6 +33,15 @@ export const SetAlertsStatusByQuery = z.object({
   query: z.object({}).catchall(z.unknown()),
   status: AlertStatus,
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+  /**
+   * Optional map of field name to runtime field type. For each entry, a
+   * runtime field of the specified type is created reading its value from
+   * `_source[fieldName]` and included in the query as `runtime_mappings`.
+   * Use this to reference fields stored on the alert `_source` that are not
+   * part of the alerts index mapping, for example, custom fields added via
+   * data view runtime fields.
+   */
+  runtime_fields: z.record(z.string()).optional(),
 });
 
 export type SetAlertsStatusRequestBody = z.infer<typeof SetAlertsStatusRequestBody>;
