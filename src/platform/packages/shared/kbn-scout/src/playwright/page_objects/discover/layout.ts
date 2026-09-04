@@ -435,7 +435,6 @@ export abstract class LayoutMixin extends SaveMixin {
 
   // ── ES|QL controls ─────────────────────────────────────────────────────────
 
-
   /**
    * Creates an ES|QL control from the editor: types a query ending in a variable position,
    * picks "Create control" from the suggestion widget and saves the flyout. Returns once
@@ -506,7 +505,6 @@ export abstract class LayoutMixin extends SaveMixin {
   };
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
-
 
   async waitUntilFieldListHasCountOfFields() {
     await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
