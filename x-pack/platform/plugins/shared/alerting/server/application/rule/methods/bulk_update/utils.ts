@@ -190,7 +190,8 @@ export const prepareUpdate = async <Params extends RuleParams>({
     const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyAttributes.uiamApiKey,
-      context.isServerless
+      context.isServerless,
+      context.shouldGrantUiam
     );
 
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);

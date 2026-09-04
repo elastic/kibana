@@ -230,27 +230,35 @@ describe('apiKeyAsAlertAttributes', () => {
 });
 
 describe('shouldAddMissingUiamKeyTag', () => {
-  test('returns true when all conditions are met: serverless, no uiamApiKey', () => {
-    expect(shouldAddMissingUiamKeyTag(null, true)).toBe(true);
+  test('returns true when all conditions are met: serverless, UIAM granted, no uiamApiKey', () => {
+    expect(shouldAddMissingUiamKeyTag(null, true, true)).toBe(true);
   });
 
   test('returns true when uiamApiKey is undefined and other conditions are met', () => {
-    expect(shouldAddMissingUiamKeyTag(undefined, true)).toBe(true);
+    expect(shouldAddMissingUiamKeyTag(undefined, true, true)).toBe(true);
   });
 
   test('returns false when not serverless', () => {
-    expect(shouldAddMissingUiamKeyTag(null, false)).toBe(false);
+    expect(shouldAddMissingUiamKeyTag(null, false, true)).toBe(false);
   });
 
   test('returns false when uiamApiKey exists', () => {
-    expect(shouldAddMissingUiamKeyTag('some-key', true)).toBe(false);
+    expect(shouldAddMissingUiamKeyTag('some-key', true, true)).toBe(false);
+  });
+
+  test('returns false when UIAM keys are not granted in this deployment', () => {
+    expect(shouldAddMissingUiamKeyTag(null, true, false)).toBe(false);
+  });
+
+  test('returns false when shouldGrantUiam is undefined', () => {
+    expect(shouldAddMissingUiamKeyTag(null, true, undefined)).toBe(false);
   });
 });
 
 describe('addMissingUiamKeyTagIfNeeded', () => {
   test('adds tag when all conditions are met', () => {
     const tags = ['existing-tag'];
-    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true, true)).toEqual([
       'existing-tag',
       MISSING_UIAM_API_KEY_TAG,
     ]);
@@ -258,17 +266,22 @@ describe('addMissingUiamKeyTagIfNeeded', () => {
 
   test('does not add tag when not serverless', () => {
     const tags = ['existing-tag'];
-    expect(addMissingUiamKeyTagIfNeeded(tags, null, false)).toEqual(['existing-tag']);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, false, true)).toEqual(['existing-tag']);
   });
 
   test('does not add tag when uiamApiKey exists', () => {
     const tags = ['existing-tag'];
-    expect(addMissingUiamKeyTagIfNeeded(tags, 'some-key', true)).toEqual(['existing-tag']);
+    expect(addMissingUiamKeyTagIfNeeded(tags, 'some-key', true, true)).toEqual(['existing-tag']);
+  });
+
+  test('does not add tag when UIAM keys are not granted in this deployment', () => {
+    const tags = ['existing-tag'];
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true, false)).toEqual(['existing-tag']);
   });
 
   test('does not add duplicate tag if tag already exists', () => {
     const tags = ['existing-tag', MISSING_UIAM_API_KEY_TAG];
-    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true, true)).toEqual([
       'existing-tag',
       MISSING_UIAM_API_KEY_TAG,
     ]);
@@ -276,12 +289,14 @@ describe('addMissingUiamKeyTagIfNeeded', () => {
 
   test('works with empty tags array', () => {
     const tags: string[] = [];
-    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([MISSING_UIAM_API_KEY_TAG]);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true, true)).toEqual([
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
   });
 
   test('does not mutate original tags array', () => {
     const tags = ['existing-tag'];
-    const result = addMissingUiamKeyTagIfNeeded(tags, null, true);
+    const result = addMissingUiamKeyTagIfNeeded(tags, null, true, true);
     expect(tags).toEqual(['existing-tag']);
     expect(result).not.toBe(tags);
   });

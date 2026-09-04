@@ -105,7 +105,8 @@ export const prepareRule = async <Params extends RuleParams>({
     const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyProps.uiamApiKey,
-      context.isServerless
+      context.isServerless,
+      context.shouldGrantUiam
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

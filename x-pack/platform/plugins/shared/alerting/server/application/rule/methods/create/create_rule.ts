@@ -229,7 +229,8 @@ export async function createRule<Params extends RuleParams = never>(
   const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     data.tags,
     apiKeyProps.uiamApiKey,
-    context.isServerless
+    context.isServerless,
+    context.shouldGrantUiam
   );
 
   // Convert domain rule object to ES rule attributes

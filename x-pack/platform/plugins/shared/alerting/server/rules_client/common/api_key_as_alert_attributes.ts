@@ -106,13 +106,18 @@ export function apiKeyAsRuleDomainProperties(
  * Determines if the missing UIAM API key tag should be added to a rule.
  * The tag is added when:
  * - The environment is serverless
+ * - UIAM API keys are granted in this deployment (`xpack.security.uiam.enabled`)
  * - uiamApiKey is not set (null/undefined)
+ *
+ * Without the `shouldGrantUiam` check every rule would get the tag on deployments where
+ * UIAM is off, since none of them has a UIAM key to begin with.
  */
 export function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
-  isServerless: boolean
+  isServerless: boolean,
+  shouldGrantUiam: boolean | undefined
 ): boolean {
-  return isServerless && !uiamApiKey;
+  return isServerless && !!shouldGrantUiam && !uiamApiKey;
 }
 
 /**
@@ -122,9 +127,10 @@ export function shouldAddMissingUiamKeyTag(
 export function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
-  isServerless: boolean
+  isServerless: boolean,
+  shouldGrantUiam: boolean | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless)) {
+  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

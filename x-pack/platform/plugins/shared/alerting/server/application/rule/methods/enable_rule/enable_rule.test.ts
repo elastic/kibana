@@ -793,6 +793,7 @@ describe('enable()', () => {
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -834,6 +835,7 @@ describe('enable()', () => {
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
       });
@@ -883,6 +885,7 @@ describe('enable()', () => {
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
