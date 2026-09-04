@@ -235,7 +235,6 @@ const v3ApiSchema = z
     responsePathKey: z.string().optional(),
     integrations: v3IntegrationsSchema,
     encryptionKeyId: z.string().min(1).optional(),
-    expiresAt: expiresAtSchema,
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -266,7 +265,6 @@ const v3ApiSchema = z
     if (data.responsePathKey !== undefined) q.responsePathKey = data.responsePathKey;
     if (data.integrations !== undefined) q.integrations = data.integrations;
     if (data.encryptionKeyId !== undefined) q.encryptionKeyId = data.encryptionKeyId;
-    if (data.expiresAt !== undefined) q.expiresAt = data.expiresAt;
     return q;
   });
 
