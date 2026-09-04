@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { MaintenanceWindowStatus } from '../../common';
@@ -28,7 +28,6 @@ import { LicensePrompt } from './license_prompt';
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
     application: { capabilities },
-    chrome,
     docLinks,
   } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
@@ -73,26 +72,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
 
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
   const showCreateInHeader = !showEmptyPrompt && hasLicense && writeWindowMaintenance;
-
-  // if the user is read only then display the glasses badge in the global navigation header
-  const setBadge = useCallback(() => {
-    if (readOnly) {
-      chrome.setBadge({
-        text: i18n.READ_ONLY_BADGE_TEXT,
-        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'readOnly',
-      });
-    }
-  }, [chrome, readOnly]);
-
-  useEffect(() => {
-    setBadge();
-
-    // remove the icon after the component unmounts
-    return () => {
-      chrome.setBadge();
-    };
-  }, [setBadge, chrome]);
 
   const onPageChange = useCallback(
     ({ page: { index, size } }: { page: { index: number; size: number } }) => {

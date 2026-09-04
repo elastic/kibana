@@ -32,9 +32,6 @@ export interface AppMockRenderer {
   coreStart: CoreStart;
   queryClient: QueryClient;
   AppWrapper: FC<PropsWithChildren<unknown>>;
-  mocked: {
-    setBadge: jest.Mock;
-  };
 }
 
 export const createAppMockRenderer = ({
@@ -60,7 +57,6 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const mockedSetBadge = jest.fn();
   const core = coreMock.createStart();
   const services = {
     ...core,
@@ -75,10 +71,6 @@ export const createAppMockRenderer = ({
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
-    chrome: {
-      ...core.chrome,
-      setBadge: mockedSetBadge,
-    },
   };
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) =>
     core.rendering.addContext(
@@ -104,8 +96,5 @@ export const createAppMockRenderer = ({
     render,
     queryClient,
     AppWrapper,
-    mocked: {
-      setBadge: mockedSetBadge,
-    },
   };
 };
