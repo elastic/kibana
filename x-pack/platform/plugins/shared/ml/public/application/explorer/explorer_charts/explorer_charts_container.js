@@ -104,6 +104,7 @@ function ExplorerChartContainer({
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
   const [mapsLink, setMapsLink] = useState('');
+  const { euiTheme } = useEuiTheme();
 
   const {
     services: {
@@ -117,7 +118,7 @@ function ExplorerChartContainer({
 
   const getMapsLink = useCallback(async () => {
     const { queryString, query } = getEntitiesQuery(series);
-    const initialLayers = getInitialAnomaliesLayers(series.jobId);
+    const initialLayers = getInitialAnomaliesLayers(series.jobId, euiTheme);
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator.getLocation({
@@ -128,7 +129,7 @@ function ExplorerChartContainer({
 
     return location;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [series?.jobId, timeRange]);
+  }, [series?.jobId, timeRange, euiTheme]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -191,7 +192,6 @@ function ExplorerChartContainer({
 
   const chartRef = useRef(null);
 
-  const { euiTheme } = useEuiTheme();
   const chartTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
