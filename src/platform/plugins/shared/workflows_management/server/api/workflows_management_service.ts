@@ -146,7 +146,7 @@ export interface SearchWorkflowExecutionsParams {
   /** Datemath upper bound for filtering by startedAt. */
   startedBefore?: string;
   /** Opaque `search_after` sort values from a prior page. */
-  searchAfter?: unknown[];
+  searchAfter?: estypes.FieldValue[];
 }
 
 export class WorkflowsService {

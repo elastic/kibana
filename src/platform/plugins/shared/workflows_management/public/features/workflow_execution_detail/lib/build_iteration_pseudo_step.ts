@@ -55,7 +55,7 @@ const formatIterationLabel = (n: number): string =>
   });
 
 export const resolveForeachItem = (
-  foreachStep: WorkflowStepExecutionDto | undefined,
+  foreachStep: Pick<WorkflowStepExecutionDto, 'state'> | undefined,
   iterationIndex: number
 ): unknown => {
   const state = foreachStep?.state as
@@ -137,9 +137,8 @@ export const buildIterationPseudoStep = (
     status,
     input: item as WorkflowStepExecutionDto['input'],
     output: undefined,
-    error: null,
     usage,
-    executionTimeMs: executionTimeMs > 0 ? executionTimeMs : null,
+    executionTimeMs: executionTimeMs > 0 ? executionTimeMs : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId ?? '',
@@ -147,5 +146,5 @@ export const buildIterationPseudoStep = (
     globalExecutionIndex: -1,
     stepExecutionIndex: iterationIndex,
     topologicalIndex: -1,
-  } as WorkflowStepExecutionDto;
+  };
 };

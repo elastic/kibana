@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, type TextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
   buildDiagnosisAttachments,
@@ -101,7 +101,8 @@ describe('buildDiagnosisAttachments', () => {
     const [group] = buildDiagnosisAttachments(basePackage({ stepInput: hugeInput }));
     const inputAttachment = group.items.find((i) => i.id?.includes('input'));
     expect(inputAttachment?.description).toMatch(/truncated/i);
-    const parsed = JSON.parse(String(inputAttachment?.data?.content ?? '{}'));
+    const attachmentData = inputAttachment?.data as TextAttachmentData | undefined;
+    const parsed = JSON.parse(attachmentData?.content ?? '{}');
     expect(parsed.truncated).toBe(true);
   });
 });

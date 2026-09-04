@@ -8,6 +8,7 @@
  */
 
 import type {
+  FieldValue,
   QueryDslQueryContainer,
   SearchResponse,
   Sort,
@@ -32,7 +33,7 @@ interface SearchWorkflowExecutionsParams {
   from?: number;
   page?: number;
   /** When set, uses cursor pagination instead of `from`. */
-  searchAfter?: unknown[];
+  searchAfter?: FieldValue[];
 }
 
 /** Fields required to build {@link WorkflowExecutionListDto} without fetching full execution snapshots. */

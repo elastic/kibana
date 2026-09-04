@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
 import type {
@@ -209,11 +210,11 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
           const workflow = await api.getWorkflow(workflowId, spaceId);
           assertCanReadManagedWorkflowExecution(request, workflow);
           const executedBy = request.query.executedBy;
-          let searchAfter: unknown[] | undefined;
+          let searchAfter: FieldValue[] | undefined;
           if (request.query.searchAfter) {
             try {
-              const parsed = JSON.parse(request.query.searchAfter);
-              if (!Array.isArray(parsed)) {
+              const parsed: unknown = JSON.parse(request.query.searchAfter);
+              if (!Array.isArray(parsed) || !parsed.every(isSearchAfterFieldValue)) {
                 return response.badRequest({
                   body: 'searchAfter must be a JSON array of sort values',
                 });
@@ -271,4 +272,13 @@ function parseExecutionTypes(
   return typeof executionTypes === 'string'
     ? ([executionTypes] as ExecutionType[])
     : executionTypes;
+}
+
+function isSearchAfterFieldValue(value: unknown): value is FieldValue {
+  return (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean' ||
+    typeof value === 'number'
+  );
 }

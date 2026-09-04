@@ -687,13 +687,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const stepAiWithModel = useMemo(() => {
       if (!stepAi) return undefined;
       if (stepAi.model) return stepAi;
-      const config = fetchedConnector?.config as { defaultModel?: unknown } | undefined;
+      const config =
+        fetchedConnector && 'config' in fetchedConnector ? fetchedConnector.config : undefined;
       const defaultModel =
         typeof config?.defaultModel === 'string' && config.defaultModel.length > 0
           ? config.defaultModel
           : undefined;
       return defaultModel ? { ...stepAi, model: defaultModel } : stepAi;
-    }, [fetchedConnector?.config, stepAi]);
+    }, [fetchedConnector, stepAi]);
 
     const showRunModeBadge = runModeInfo?.runMode === 'test' || runModeInfo?.runMode === 'stepTest';
     const showTagsRow = showRunModeBadge || workflowTags.length > 0;

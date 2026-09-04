@@ -156,7 +156,7 @@ describe('searchWorkflowExecutions', () => {
 
   describe('search options', () => {
     it('should sort by createdAt then mapped id, not _id', async () => {
-      mockEsClient.search.mockResolvedValue({
+      mockWorkflowDataClient.search.mockResolvedValue({
         hits: {
           total: { value: 0 },
           hits: [],
@@ -164,13 +164,12 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       await searchWorkflowExecutions({
-        esClient: mockEsClient,
+        workflowExecutionsDataClient: mockWorkflowDataClient,
         logger: mockLogger,
-        workflowExecutionIndex: '.workflows-executions',
         query: { term: { workflowId: 'workflow-1' } },
       });
 
-      expect(mockEsClient.search).toHaveBeenCalledWith(
+      expect(mockWorkflowDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           sort: [{ createdAt: 'desc' }, { id: 'desc' }],
         })

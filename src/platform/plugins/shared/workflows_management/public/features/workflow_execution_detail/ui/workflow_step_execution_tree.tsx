@@ -762,7 +762,7 @@ function convertTreeToOpenNodes(
         usageCallCount: rolledCallCount,
         usageModel: leafUsageModel,
         iterationPinKinds: iterationPin?.kinds,
-        stateTags: rowStateTags,
+        stateTags: rowStateTags ? [...rowStateTags] : undefined,
         onSelect: selectStep,
         isExpandable: childNodesForParent.length > 0,
         isTrigger: isTriggerPseudoStep,

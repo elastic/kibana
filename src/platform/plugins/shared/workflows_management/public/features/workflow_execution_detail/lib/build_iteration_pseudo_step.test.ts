@@ -87,7 +87,7 @@ describe('resolveForeachItem', () => {
       resolveForeachItem(
         {
           state: { items: ['a', 'b'], index: 1, total: 2 },
-        } as WorkflowStepExecutionDto,
+        },
         1
       )
     ).toBe('b');

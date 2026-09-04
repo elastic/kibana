@@ -33,9 +33,9 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
   ({ execution, failedStepId, onOpenFailedStepInEditor }) => {
     const { notifications, application } = useKibana().services;
     const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
-    const { mutateAsync: runWorkflow, isPending: isRerunning } = useRunWorkflow();
+    const { mutateAsync: runWorkflow, isLoading: isRerunning } = useRunWorkflow();
     const { href: executionHref } = useNavigateToExecution({
-      workflowId: execution.workflowId,
+      workflowId: execution.workflowId ?? '',
       executionId: execution.id,
     });
     const [isMenuOpen, setIsMenuOpen] = useState(false);
