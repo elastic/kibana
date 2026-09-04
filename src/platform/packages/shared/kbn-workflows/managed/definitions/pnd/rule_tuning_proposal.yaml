@@ -1,0 +1,419 @@
+version: "1"
+name: Detection Rule Tuning Proposal
+description: >
+  Diagnoses one rule whose alerts analysts closed as false positives, parks on its own
+  approval gate, and applies an approved query change. Launched per rule by the rule
+  tuning sweep so every proposal's gate can be pending at the same time.
+enabled: true
+tags:
+  - security
+  - detection-rule-tuning
+settings:
+  # Keyed per rule so a later sweep cannot open a second gate for a rule whose
+  # proposal is still pending: alerts are only tagged after the gate resolves,
+  # so the harvest keeps returning such a rule until then.
+  concurrency:
+    key: "rule-tuning-proposal-{{ inputs.rule_uuid }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        rule_uuid:
+          type: string
+          maxLength: 512
+          description: >-
+            Saved-object id of the rule incarnation that produced the alerts; keys the
+            per-rule gate and fetches the rule from the detection engine API.
+        fp_count:
+          type: integer
+          minimum: 2
+          description: Unreviewed false-positive alerts that put the rule in the sweep.
+        last_fp_at:
+          type: string
+          format: date-time
+          maxLength: 64
+          description: Timestamp of the newest false positive; anchors both backtest previews.
+        alert_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 512
+          description: >-
+            Document ids of the newest harvested false positives (fp_count can exceed
+            this list). The agent retrieves these by id to ground the diagnosis; they
+            are tagged once the gate resolves, which places the reviewed watermark
+            that retires any older untagged false positives.
+        analysis_window_days:
+          type: integer
+          minimum: 1
+          maximum: 30
+          description: Days of alerts the sweep analyzed. Shown to the diagnosing agent.
+        preview_invocation_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Rule executions each backtest preview simulates.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: >-
+            Execution id of the sweep that launched this proposal. Recorded for
+            traceability only; no step reads it. Empty on a standalone run.
+      # Only the rule identity and alert evidence are required. The operational
+      # parameters default from consts so the sweep and this workflow can upgrade
+      # independently without a one-sided input-validation failure.
+      required:
+        - rule_uuid
+        - fp_count
+        - last_fp_at
+        - alert_ids
+      additionalProperties: false
+outputs:
+  - name: rule_uuid
+    type: string
+  - name: approved
+    type: boolean
+  - name: applied
+    type: boolean
+consts:
+  # Fallbacks for the optional operational inputs; keep in sync with the sweep's
+  # consts in rule_tuning.yaml.
+  analysis_window_days: 14
+  preview_invocation_count: 2
+  # Written onto every alert that reached a decision, alongside the tag naming the
+  # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
+  # the same alerts into the same proposal; consts.reviewed_tag in rule_tuning.yaml
+  # must match this value.
+  reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tag: detection-watch:tuning-dismissed
+  applied_tag: detection-watch:tuning-applied
+  no_items: []
+steps:
+  # Fetched by saved-object id, which pins the exact rule incarnation that produced
+  # the harvested alerts: a rule deleted and recreated under the same signature 404s
+  # here instead of receiving a diagnosis built on its predecessor's alerts.
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: diagnose_rule
+    type: ai.agent
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true }}
+    timeout: "10m"
+    create-conversation: true
+    with:
+      # The 100-id cap must match ALERTS_BY_IDS_MAX in the security_solution skill
+      # (investigate_rule_skill.ts), the most ids one get_alerts_by_ids call accepts.
+      message: |-
+        Use the [/investigate-rule](skill://investigate-rule) skill to investigate
+        rule_id "{{ steps.fetch_rule.output.rule_id }}" ({{ steps.fetch_rule.output.name }}).
+
+        {{ inputs.fp_count }} alerts from this rule were closed as false positives
+        during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
+        {%- if inputs.fp_count > inputs.alert_ids.size %} (newest {{ inputs.alert_ids.size }} of {{ inputs.fp_count }}){%- endif %}:
+        ["{{ inputs.alert_ids | join: '", "' }}"]
+
+        Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
+        tool, passing the rule's investigation_fields as additional_fields, and use
+        them as the confirmed false positives grounding the diagnosis; do not
+        re-derive the closed set. Return one structured tuning proposal.
+
+        These ids are the whole dataset, so do not run the security.alerts queries:
+        they would re-fetch alerts already in hand. Base the volume and entity
+        breakdown on the retrieved alerts and say the counts cover only them.
+
+        This pipeline backtests and applies query changes directly, so prefer
+        change_type "query": narrow the KQL to exclude the confirmed benign
+        pattern while keeping detection coverage. Pick exception, suppression, or
+        threshold only when narrowing the query is genuinely unsafe for this rule,
+        since those stay manual analyst actions. This rule has type
+        "{{ steps.fetch_rule.output.type }}", so propose a query change only when
+        that type is "query".
+
+        Write proposed_query in this rule's language,
+        "{{ steps.fetch_rule.output.language }}". In KQL a quoted value is a phrase
+        and a * inside quotes is a literal asterisk, so every substring match must
+        be unquoted: process.command_line: *create shadow* excludes nothing when
+        written as "*create shadow*". Unquoted values may contain spaces, but a
+        backslash escapes the character after it, so match on a distinctive
+        substring rather than a full path: *corp-agent-signed.msi*, not
+        *\deploy-share\packages\corp-agent-signed.msi*. Keep exact field values
+        (process.name, user.name) quoted; only wildcard matches go unquoted.
+      schema:
+        type: object
+        properties:
+          change_type:
+            type: string
+            enum: [exception, suppression, query, threshold]
+          summary:
+            type: string
+          current_query:
+            type: string
+          proposed_query:
+            type: string
+          exception_condition:
+            type: string
+          rekey_required:
+            type: boolean
+        required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
+
+  # These optional rule modes need fields that cannot be conditionally omitted from
+  # a YAML object, so their query change is not previewed or auto-applied.
+  - name: record_auto_apply_support
+    type: data.set
+    with:
+      supported: >-
+        ${{ steps.fetch_rule.output.data_view_id == null
+          and steps.fetch_rule.output.timestamp_override == null
+          and steps.fetch_rule.output.alert_suppression == null }}
+
+  # One preview worker run backtests both queries. A single synchronous child per
+  # wake-up cycle is safe; two consecutive child calls share one immediate-resume
+  # slot and a lost resume strands this run in waiting_for_child.
+  # Both previews end at the last false positive so the rule's lookback covers the
+  # events analysts judged; anchoring at now can miss those events.
+  - name: run_previews
+    type: workflow.execute
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query'
+        and steps.record_auto_apply_support.output.supported == true }}
+    with:
+      workflow-id: system-security-rule-preview
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        preview_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.fetch_rule.output.query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+          tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+          author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+          false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+          references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
+        proposed_body:
+          type: query
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          severity_mapping: "${{ steps.fetch_rule.output.severity_mapping | default: consts.no_items }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          risk_score_mapping: "${{ steps.fetch_rule.output.risk_score_mapping | default: consts.no_items }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          threat: "${{ steps.fetch_rule.output.threat | default: consts.no_items }}"
+          tags: "${{ steps.fetch_rule.output.tags | default: consts.no_items }}"
+          author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
+          false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
+          references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+          timeframeEnd: "{{ inputs.last_fp_at }}"
+    on-failure:
+      continue: true
+
+  # Preview verdicts come from the worker's outputs; a failed or skipped child
+  # leaves both verdicts false so decide_apply routes away from auto-apply.
+  - name: record_preview_outcome
+    type: data.set
+    with:
+      current_succeeded: >-
+        ${{ steps.run_previews.error == null
+          and steps.run_previews.output.succeeded == true }}
+      current_alert_count: "${{ steps.run_previews.output.alert_count | default: -1 }}"
+      current_is_aborted: "${{ steps.run_previews.output.is_aborted | default: false }}"
+      current_error_text: "{{ steps.run_previews.output.error_text }}"
+      proposed_succeeded: >-
+        ${{ steps.run_previews.error == null
+          and steps.run_previews.output.proposed_succeeded == true }}
+      proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
+      proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
+      proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+
+  # A timeout fails this run before the tag steps, so the alerts stay unreviewed
+  # and the next sweep proposes the rule again with a fresh diagnosis.
+  - name: review_tuning
+    type: waitForApproval
+    if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+    timeout: "72h"
+    with:
+      approveLabel: Approve proposal
+      rejectLabel: Dismiss
+      message: |-
+        Rule tuning proposal for {{ steps.fetch_rule.output.name }}
+        {{ inputs.fp_count }} alerts were closed as false positives in the last
+        {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
+        {% if inputs.fp_count > inputs.alert_ids.size %}
+        The diagnosis examined and this decision tags the newest {{ inputs.alert_ids.size }}
+        of the {{ inputs.fp_count }} false positives; tagging them retires the older
+        ones from future sweeps too.
+        {% endif %}
+
+        {{ steps.diagnose_rule.output.structured_output.summary }}
+
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" and steps.record_auto_apply_support.output.supported %}
+        Current query:
+        {{ steps.diagnose_rule.output.structured_output.current_query }}
+
+        Proposed query:
+        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+
+        Backtest ({{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions of interval {{ steps.fetch_rule.output.interval }},
+        lookback {{ steps.fetch_rule.output.from }}, ending at the newest false positive
+        {{ inputs.last_fp_at }} — usually a much shorter span than the false positives cover):
+        current {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %},
+        proposed {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}.
+        {% if steps.record_preview_outcome.output.current_error_text != '' %}
+        Current query preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
+        {% endif %}
+        {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
+        Proposed query preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
+        {% endif %}
+        Approving applies the proposed query only if both backtests succeeded and the
+        rule has not been edited since this diagnosis. Otherwise no rule or alert tags
+        change, and a later sweep can retry with current data.
+        {% else %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
+        Proposed query:
+        {{ steps.diagnose_rule.output.structured_output.proposed_query }}
+
+        This rule uses a data view, timestamp override, or alert suppression, so it
+        is not previewed or applied automatically.
+        {% endif %}
+        {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+        Proposed exception:
+        {{ steps.diagnose_rule.output.structured_output.exception_condition }}
+        {% endif %}
+        This {{ steps.diagnose_rule.output.structured_output.change_type }} proposal
+        is not applied automatically; apply it manually in the Detection Rules UI if
+        appropriate. Approving does not tag the alerts, so a later sweep can propose
+        this rule again.
+        {% endif %}
+
+        {% if steps.diagnose_rule.output.conversation_id %}
+        Continue investigation: /s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
+        {% endif %}
+
+  # The gate can stay open for 72h; re-read the rule so an analyst edit made in the
+  # meantime is not clobbered by a stale proposal.
+  - name: refetch_rule
+    type: kibana.request
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.proposed_query != ''
+        and steps.fetch_rule.output.type == 'query'
+        and steps.record_auto_apply_support.output.supported == true }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: decide_apply
+    type: data.set
+    with:
+      eligible: >-
+        ${{ steps.review_tuning.output.response.approved == true
+          and steps.diagnose_rule.output.structured_output.proposed_query != ''
+          and steps.fetch_rule.output.type == 'query'
+          and steps.record_auto_apply_support.output.supported == true
+          and steps.record_preview_outcome.output.current_succeeded == true
+          and steps.record_preview_outcome.output.current_is_aborted == false
+          and steps.record_preview_outcome.output.proposed_succeeded == true
+          and steps.record_preview_outcome.output.proposed_is_aborted == false
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at }}
+
+  - name: apply_query_tuning
+    type: kibana.request
+    if: "${{ steps.decide_apply.output.eligible == true }}"
+    with:
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        id: "{{ steps.refetch_rule.output.id }}"
+        query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
+
+  # Mirrors apply_query_tuning's condition plus its error check, so the tag steps
+  # and the `applied` output cannot claim a change that never landed.
+  - name: record_outcome
+    type: data.set
+    with:
+      rule_patched: >-
+        ${{ steps.decide_apply.output.eligible == true
+          and steps.apply_query_tuning.error == null }}
+
+  - name: mark_alerts_dismissed
+    type: security.setAlertTags
+    if: "${{ steps.review_tuning.output.response.approved == false }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      # Listed item by item because security.setAlertTags takes an array here and its
+      # input schema is a union, so a whole-array template fails workflow validation.
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.dismissed_tag }}"
+
+  - name: mark_alerts_applied
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.review_tuning.output.response.approved == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'query'
+        and steps.record_outcome.output.rule_patched == true }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.reviewed_tag }}"
+        - "{{ consts.applied_tag }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      rule_uuid: "{{ inputs.rule_uuid }}"
+      approved: "${{ steps.review_tuning.output.response.approved == true }}"
+      applied: "${{ steps.record_outcome.output.rule_patched }}"

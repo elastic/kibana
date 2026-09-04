@@ -1,280 +1,279 @@
 version: "1"
 name: Detection Rule Tuning Worker
 description: >
-  Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
-  and applies an approved query change.
+  Harvests rules whose alerts analysts closed as false positives, fans out one
+  tuning proposal workflow per rule so every proposal holds its own approval gate,
+  and joins once every gate has settled to report the decision totals.
 enabled: true
 tags:
   - security
   - detection-rule-tuning
 settings:
+  # A sweep lives as long as its slowest gate (up to 72h) and the key is one global
+  # bucket, so a single max would let one space's pending gate drop every other
+  # space's scheduled sweep for three days. Five lanes keep that from starving the
+  # fleet while still bounding how many joins wait at once.
+  # Overlap is safe now that the harvest skips rules with an in-flight proposal;
+  # for sweeps that start close enough together to miss that, the proposal's own
+  # per-rule drop concurrency stops the duplicate before it can rediagnose.
   concurrency:
     key: detection-rule-tuning
     strategy: drop
-    max: 1
+    max: 5
 triggers:
+  # The per-space Rule Tuning worker owns the 2h schedule. This global sweep stays
+  # manual-only so there is one scheduler authority and no cross-space task collision.
   - type: manual
     inputs:
       properties:
         min_fp_count:
+          type: integer
+          # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
+          # which would fail the proposal's array input schema.
+          minimum: 2
+          maximum: 100
+          description: Overrides the minimum unreviewed false-positive alerts a rule needs before it is diagnosed.
+        min_fp_rate_pct:
           type: number
-          default: 1
-          description: Minimum false-positive alerts a rule needs before it is diagnosed.
+          minimum: 0
+          maximum: 100
+          description: Overrides the minimum share of a rule's alerts, in percent, that analysts closed as false positives.
+        analysis_window_days:
+          type: integer
+          minimum: 1
+          maximum: 30
+          description: Overrides how many days of alerts feed the analysis.
         preview_invocation_count:
-          type: number
-          default: 2
-          description: Rule executions each backtest preview simulates.
-        lookback_hours:
-          type: number
-          default: 24
-          description: How far back to look for alerts analysts closed as false positives.
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Overrides the rule executions each backtest preview simulates.
+        max_rules_per_sweep:
+          type: integer
+          minimum: 1
+          # Can only lower the cap: the fan-out's parallel slots are sized for the
+          # default, so a larger value could not open every gate at once.
+          maximum: 10
+          description: Overrides how many tuning proposals one sweep may launch, up to the default of 10.
       additionalProperties: false
 outputs:
-  - name: rules_examined
+  - name: proposals_requested
+    type: number
+  - name: proposals_approved
+    type: number
+  - name: proposals_failed
+    type: number
+  - name: rules_applied
     type: number
   - name: harvest_failed
     type: boolean
 consts:
+  # Worker settings. Scheduled runs carry no inputs, so every use goes through
+  # `inputs.x | default: consts.x`; a manual run can override any of them.
+  analysis_window_days: 14
+  min_fp_count: 10
+  min_fp_rate_pct: 50
+  max_rules_per_sweep: 10
+  # The max number of rules to consider for tuning.
+  max_candidate_rules: 20
+  # Ids handed to the diagnosing agent and tagged once the gate resolves; must
+  # match ALERTS_BY_IDS_MAX in the investigate-rule skill (investigate_rule_skill.ts).
+  max_diagnosis_ids: 100
+  preview_invocation_count: 2
   # Liquid has no array literal, so `| default: []` yields undefined rather than an
   # empty array. A const is the only way to spell an empty-array fallback.
   no_rows: []
-  # Written onto every alert that reached a decision, and filtered out by the harvest,
-  # so a later sweep cannot rediagnose the same alerts into the same proposal.
   reviewed_tag: detection-watch:tuning-reviewed
-  dismissed_tag: detection-watch:tuning-dismissed
-  applied_tag: detection-watch:tuning-applied
-  dismissed_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-dismissed
-  applied_tags:
-    - detection-watch:tuning-reviewed
-    - detection-watch:tuning-applied
 steps:
+  # A proposal can outlive its sweep (sweep cancelled or failed while the child sits
+  # at its gate, or a proposal started by hand). Its rule would be re-harvested until
+  # the gate resolves, wasting one of the max_rules_per_sweep slots on a branch the
+  # child's per-rule drop concurrency then kills. Listing in-flight proposals up front
+  # lets the harvest skip those rules at the source. Fails open: without this data the
+  # sweep still runs and the drop concurrency remains the backstop.
+  - name: list_active_proposals
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/workflows/workflow/system-security-rule-tuning-proposal/executions?statuses=pending&statuses=waiting&statuses=waiting_for_input&statuses=waiting_for_child&statuses=running&statuses=queued&size=100"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  # The list response carries each execution's concurrencyGroupKey
+  # (`rule-tuning-proposal-<rule uuid>`), not its inputs. Liquid cannot transform array
+  # elements one by one, so the keys are joined, stripped of the prefix, and split
+  # back. Size is computed on its own because comparison operators cannot follow a
+  # filter chain.
+  - name: collect_active_rules
+    type: data.set
+    with:
+      parsed: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-proposal-' | split: ',' }}"
+      parsed_count: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-proposal-' | split: ',' | size }}"
+      expected: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | size }}"
+
+  # A key containing the `,` separator would corrupt the split into fragments that
+  # could match unrelated rules (uuids never do, but the keys are external data), so
+  # the parse only counts when it yields exactly one id per execution. Skipped
+  # otherwise; the harvest then falls back to no filter.
+  - name: resolve_active_rules
+    type: data.set
+    if: "${{ steps.collect_active_rules.output.parsed_count == steps.collect_active_rules.output.expected }}"
+    with:
+      rule_uuids: "${{ steps.collect_active_rules.output.parsed }}"
+
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
   # `allow_partial_results: false` because a partial aggregation would both undercount
   # fp_count and return a short alert_ids list, leaving alerts that drove a decision
-  # untagged. The 1000-id slice keeps the bulk tag request inside Kibana's payload
-  # limit; a rule noisier than that surfaces again on the next sweep.
+  # untagged.
+  # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
+  # includes reviewed false positives so processing a batch does not dilute the rule's
+  # measured FP rate; `fp_count` and `alert_ids` include only work still to review.
+  # `alert_ids` holds only the newest 100 unreviewed FPs: TOP sorts by the collected
+  # value itself, so recency needs sortable `timestamp|id` keys, expanded back to
+  # plain ids by stripping the fixed 18-char prefix (17-digit timestamp plus the
+  # separator, hence SUBSTRING from 19). Tagging those 100 places the reviewed
+  # watermark at the newest FP, which retires the older untagged ones too.
+  # The DSL filter carries every per-document exclusion (window, building blocks,
+  # in-flight rules), pushed down to Lucene before ES|QL sees a row. Skipping an
+  # in-flight rule here, before STATS/LIMIT, frees its sweep slot for the
+  # next-noisiest one; the empty-array `terms` matches nothing, which makes that
+  # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
+  # inconsistent, or no proposal is pending.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
       allow_partial_results: false
+      filter:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
+          must_not:
+            - exists:
+                field: kibana.alert.building_block_type
+            - terms:
+                kibana.alert.rule.uuid: "${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }} METADATA _id
-        | WHERE `kibana.alert.workflow_status` == "closed"
-          AND `kibana.alert.workflow_reason` == "false_positive"
-          AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
-          AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
-        | STATS fp_count = COUNT(*), last_fp_at = MAX(@timestamp), alert_ids = MV_SLICE(VALUES(_id), 0, 999) BY `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, `kibana.alert.rule.rule_id`
-        | WHERE fp_count >= {{ inputs.min_fp_count }}
-        | KEEP `kibana.alert.rule.uuid`, `kibana.alert.rule.name`, fp_count, `kibana.alert.rule.rule_id`, last_fp_at, alert_ids
+        | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
+            AND `kibana.alert.workflow_reason` == "false_positive"
+        | INLINE STATS reviewed_watermark = MAX(@timestamp)
+            WHERE MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
+          BY `kibana.alert.rule.uuid`
+        | EVAL is_unreviewed_fp = is_fp
+            AND (reviewed_watermark IS NULL OR @timestamp > reviewed_watermark)
+        | EVAL fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)
+        | STATS total_count = COUNT(*),
+            fp_rate_count = COUNT(*) WHERE is_fp,
+            fp_count = COUNT(*) WHERE is_unreviewed_fp,
+            last_fp_at = MAX(@timestamp) WHERE is_unreviewed_fp,
+            recent_keys = TOP(fp_recency_key, {{ consts.max_diagnosis_ids }}, "desc") WHERE is_unreviewed_fp
+          BY `kibana.alert.rule.uuid`
+        | WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
+          AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT fp_count DESC
-        | LIMIT 10
+        | LIMIT {{ consts.max_candidate_rules }}
+        | MV_EXPAND recent_keys
+        | EVAL alert_id = SUBSTRING(recent_keys, 19)
+        | STATS fp_count = MAX(fp_count),
+            last_fp_at = MAX(last_fp_at),
+            alert_ids = VALUES(alert_id)
+          BY `kibana.alert.rule.uuid`
+        | SORT fp_count DESC
+        | KEEP `kibana.alert.rule.uuid`, fp_count, last_fp_at, alert_ids
     on-failure:
       continue: true
 
-  # No iteration-timeout: an enclosing step-timeout zone would cut short the 72h
-  # approval gate below. Runaway work is bounded by the agent step's own timeout.
-  - name: tune_each_rule
-    type: foreach
-    foreach: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows }}"
-    steps:
-      - name: fetch_rule
-        type: kibana.request
-        with:
-          method: GET
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ foreach.item.3 }}"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-        on-failure:
-          continue: true
-
-      - name: diagnose_rule
-        type: ai.agent
-        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
-        timeout: "10m"
-        create-conversation: true
-        with:
-          message: |-
-            Use the [/investigate-rule](skill://investigate-rule) skill to investigate
-            rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}).
-
-            {{ foreach.item.2 }} alerts from this rule were closed as false positives
-            during the last {{ inputs.lookback_hours }} hours. Return one structured
-            tuning proposal.
-
-            This pipeline backtests and applies query changes directly, so prefer
-            change_type "query": narrow the KQL to exclude the confirmed benign
-            pattern while keeping detection coverage. Pick exception, suppression, or
-            threshold only when narrowing the query is genuinely unsafe for this rule,
-            since those stay manual analyst actions. This rule has type
-            "{{ steps.fetch_rule.output.type }}", so propose a query change only when
-            that type is "query".
-          schema:
-            type: object
-            properties:
-              change_type:
-                type: string
-                enum: [exception, suppression, query, threshold]
-              summary:
-                type: string
-              current_query:
-                type: string
-              proposed_query:
-                type: string
-              exception_condition:
-                type: string
-              rekey_required:
-                type: boolean
-            required: [change_type, summary, current_query, proposed_query, exception_condition, rekey_required]
-
-      # Both previews end at the last false positive, not at now, so the rule's own
-      # `from` lookback covers the events analysts judged. Anchoring at now would
-      # backtest a window where those events no longer exist.
-      - name: preview_current_query
-        type: workflow.execute
-        if: >-
-          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query' }}
-        with:
-          workflow-id: system-security-rule-preview
-          inputs:
-            space_id: "{{ workflow.spaceId }}"
-            preview_body:
-              type: query
-              name: "{{ steps.fetch_rule.output.name }}"
-              description: "{{ steps.fetch_rule.output.description }}"
-              query: "{{ steps.fetch_rule.output.query }}"
-              language: "{{ steps.fetch_rule.output.language }}"
-              index: "${{ steps.fetch_rule.output.index }}"
-              severity: "{{ steps.fetch_rule.output.severity }}"
-              risk_score: "${{ steps.fetch_rule.output.risk_score }}"
-              interval: "{{ steps.fetch_rule.output.interval }}"
-              from: "{{ steps.fetch_rule.output.from }}"
-              to: "{{ steps.fetch_rule.output.to }}"
-              invocationCount: "${{ inputs.preview_invocation_count }}"
-              timeframeEnd: "{{ foreach.item.4 }}"
-
-      - name: preview_proposed_query
-        type: workflow.execute
-        if: >-
-          ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query' }}
-        with:
-          workflow-id: system-security-rule-preview
-          inputs:
-            space_id: "{{ workflow.spaceId }}"
-            preview_body:
-              type: query
-              name: "{{ steps.fetch_rule.output.name }}"
-              description: "{{ steps.fetch_rule.output.description }}"
-              query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-              language: "{{ steps.fetch_rule.output.language }}"
-              index: "${{ steps.fetch_rule.output.index }}"
-              severity: "{{ steps.fetch_rule.output.severity }}"
-              risk_score: "${{ steps.fetch_rule.output.risk_score }}"
-              interval: "{{ steps.fetch_rule.output.interval }}"
-              from: "{{ steps.fetch_rule.output.from }}"
-              to: "{{ steps.fetch_rule.output.to }}"
-              invocationCount: "${{ inputs.preview_invocation_count }}"
-              timeframeEnd: "{{ foreach.item.4 }}"
-
-      - name: review_tuning
-        type: waitForApproval
-        if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
-        timeout: "72h"
-        with:
-          approveLabel: Apply tuning
-          rejectLabel: Dismiss
-          message: |-
-            Rule tuning proposal for {{ foreach.item.1 }}
-            {{ foreach.item.2 }} alerts were closed as false positives.
-
-            {{ steps.diagnose_rule.output.structured_output.summary }}
-
-            {% if steps.diagnose_rule.output.structured_output.change_type == "query" %}
-            Current query:
-            {{ steps.diagnose_rule.output.structured_output.current_query }}
-
-            Proposed query:
-            {{ steps.diagnose_rule.output.structured_output.proposed_query }}
-
-            Backtest:
-            current {% if steps.preview_current_query.output.succeeded and steps.preview_current_query.output.is_aborted == false %}{{ steps.preview_current_query.output.alert_count }}{% else %}inconclusive{% endif %},
-            proposed {% if steps.preview_proposed_query.output.succeeded and steps.preview_proposed_query.output.is_aborted == false %}{{ steps.preview_proposed_query.output.alert_count }}{% else %}inconclusive{% endif %}.
-            {% if steps.preview_current_query.output.error_text != '' %}
-            Current query preview errors: {{ steps.preview_current_query.output.error_text }}
-            {% endif %}
-            {% if steps.preview_proposed_query.output.error_text != '' %}
-            Proposed query preview errors: {{ steps.preview_proposed_query.output.error_text }}
-            {% endif %}
-            {% else %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "exception" %}
-            Proposed exception:
-            {{ steps.diagnose_rule.output.structured_output.exception_condition }}
-            {% endif %}
-            Apply this {{ steps.diagnose_rule.output.structured_output.change_type }}
-            proposal manually in the Detection Rules UI. Approving records the handoff;
-            it does not change the rule.
-            {% endif %}
-
-            {% if steps.diagnose_rule.output.conversation_id %}
-            Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
-            {% endif %}
-
-      - name: apply_query_tuning
-        type: kibana.request
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == true
-            and steps.preview_proposed_query.output.is_aborted == false }}
-        with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
-            id: "{{ foreach.item.0 }}"
-            query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
-
-      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
-      # harvest's KEEP projects: the alert_ids multivalue.
-      - name: mark_alerts_dismissed
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.dismissed_tags }}"
-        on-failure:
-          continue: true
-
-      - name: mark_alerts_applied
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == true }}"
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add: "${{ consts.applied_tags }}"
-        on-failure:
-          continue: true
-
-  # Size is computed on its own because comparison operators cannot follow a filter chain.
-  - name: count_examined_rules
+  # Get the candidates from the harvest and the enabled rules.
+  - name: collect_candidates
     type: data.set
     with:
-      rules_examined: "${{ steps.harvest_fp_alerts_by_rule.output.values | size | default: 0 }}"
+      count: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | size }}"
+      fanout_limit: "${{ inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep }}"
+      filter_kql: '(alert.attributes.enabled: true) AND ({% for row in steps.harvest_fp_alerts_by_rule.output.values %}alert.id: ("alert:{{ row[0] }}"){% unless forloop.last %} OR {% endunless %}{% endfor %})'
+
+  - name: list_enabled_candidates
+    type: kibana.request
+    if: "${{ steps.collect_candidates.output.count > 0 }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find?page=1&per_page={{ consts.max_candidate_rules }}&filter={{ steps.collect_candidates.output.filter_kql | url_encode }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  - name: resolve_enabled_rules
+    type: data.set
+    if: "${{ steps.list_enabled_candidates.output.data != null }}"
+    with:
+      verdict: "${{ steps.list_enabled_candidates.output.data | map: 'id' | join: ',' | prepend: 'enabled:' }}"
+
+  # Only enabled rules are included in the fan-out.
+  - name: resolve_fanout_rows
+    type: data.set
+    with:
+      verdict: "${{ steps.resolve_enabled_rules.output.verdict }}"
+      rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
+
+  # One proposal execution per rule, launched synchronously inside a parallel
+  # branch so this sweep joins once every gate has settled. The gate itself cannot
+  # live in this run: waitForApproval is rejected inside a parallel branch, and one
+  # execution has exactly one resume slot. Each child parks on its own gate for up
+  # to 72h while its branch sits in WAITING_FOR_CHILD.
+  # No `timeout` or `branch-timeout` here: either one aborts the branch and cancels
+  # the child while the approver is still thinking. The gate's own 72h timeout is
+  # the only clock.
+  - name: run_proposals
+    type: parallel
+    foreach: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows }}"
+    # Settled: one dropped or failed proposal must not skip the other rules'
+    # gates. Failures stay visible in the aggregate results and counts.
+    mode: settled
+    concurrency:
+      # Must cover consts.max_rules_per_sweep (the input can only lower the cap)
+      # so every gate opens at once.
+      max: 10
+      # A branch parked in WAITING_FOR_CHILD frees its slot.
+      count-waiting: false
+    steps:
+      # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
+      # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
+      - name: run_proposal
+        type: workflow.execute
+        with:
+          workflow-id: system-security-rule-tuning-proposal
+          inputs:
+            rule_uuid: "{{ foreach.item.0 }}"
+            fp_count: "${{ foreach.item.1 }}"
+            last_fp_at: "{{ foreach.item.2 }}"
+            alert_ids: "${{ foreach.item.3 }}"
+            analysis_window_days: "${{ inputs.analysis_window_days | default: consts.analysis_window_days }}"
+            preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
+            parent_run_id: "{{ execution.id }}"
+
+  # Fan-in: every branch has settled, so each child either resolved its gate and
+  # tagged its alerts, or failed (its error stays in the aggregate results). A
+  # branch output is the child's workflow.output payload: rule_uuid, approved, applied.
+  # Size is computed on its own because comparison operators cannot follow a filter chain.
+  - name: summarize_decisions
+    type: data.set
+    with:
+      proposals_requested: "${{ steps.resolve_fanout_rows.output.rows | size | default: 0 }}"
+      proposals_failed: "${{ steps.run_proposals.output.failed | default: 0 }}"
+      proposals_approved: "${{ steps.run_proposals.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
+      rules_applied: "${{ steps.run_proposals.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      rules_examined: "${{ steps.count_examined_rules.output.rules_examined }}"
+      proposals_requested: "${{ steps.summarize_decisions.output.proposals_requested }}"
+      proposals_approved: "${{ steps.summarize_decisions.output.proposals_approved }}"
+      proposals_failed: "${{ steps.summarize_decisions.output.proposals_failed }}"
+      rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
       harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"

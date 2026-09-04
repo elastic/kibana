@@ -26,17 +26,19 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  const ruleWorkflowInstalls = await Promise.allSettled(
-    PND_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
-  );
-  for (const [index, result] of ruleWorkflowInstalls.entries()) {
-    if (result.status === 'rejected') {
+  // Install dependencies before their callers so a definition upgrade cannot
+  // activate a parent whose child still has the previous input contract.
+  for (const id of PND_RULE_WORKFLOW_IDS) {
+    try {
+      await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    } catch (error) {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND rule workflow "${PND_RULE_WORKFLOW_IDS[index]}": ${
-          result.reason instanceof Error ? result.reason.message : String(result.reason)
+        `Failed to install managed PND rule workflow "${id}": ${
+          error instanceof Error ? error.message : String(error)
         }`
       );
+      break;
     }
   }
 

@@ -1,18 +1,29 @@
 version: "1"
 name: Rule Tuning
-description: Detection Watch rule-tuning worker stub.
+description: >
+  Per-space Detection rule-tuning worker. Dispatches the global tuning sweep,
+  which diagnoses noisy rules and holds one approval gate per proposal.
 enabled: false
 tags:
   - watch
   - watch-detection
 triggers:
+  # This worker owns the per-space tuning cadence; the sweep it dispatches stays
+  # manual-only so there is one scheduler authority and no cross-space collision.
+  - type: scheduled
+    with:
+      every: "2h"
   - type: manual
 consts:
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
 steps:
-  - name: stub
-    type: console
+  # Async: the sweep joins on its proposal gates and can park for up to 72h.
+  # A synchronous call would park this worker run with it and stack every later
+  # scheduled run behind a pending gate. Tuning thresholds (FP count, FP rate,
+  # analysis window, preview depth) live as consts on the sweep itself.
+  - name: run_rule_tuning
+    type: workflow.executeAsync
     with:
-      message: "Rule Tuning worker stub"
+      workflow-id: system-security-rule-tuning

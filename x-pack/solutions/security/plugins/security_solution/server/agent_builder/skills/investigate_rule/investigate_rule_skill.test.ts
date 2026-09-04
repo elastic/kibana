@@ -52,8 +52,31 @@ describe('investigateRuleSkill', () => {
     it('returns the expected inline tools', async () => {
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
       expect(inlineTools).toBeDefined();
-      expect(inlineTools).toHaveLength(1);
-      expect(inlineTools![0].id).toBe('investigate-rule.resolve_rule_attachment');
+      expect(inlineTools!.map((tool) => tool.id)).toEqual([
+        'investigate-rule.resolve_rule_attachment',
+        'investigate-rule.get_alerts_by_ids',
+      ]);
+    });
+
+    it('tells the agent to use provided alert ids instead of re-deriving the closed set', () => {
+      expect(investigateRuleSkill.content).toContain('investigate-rule.get_alerts_by_ids');
+      expect(investigateRuleSkill.content).toContain('do not re-derive the closed set');
+    });
+
+    // Supplied ids are the caller's whole dataset, so a security.alerts round trip only
+    // re-fetches alerts the agent already holds.
+    it('drops the alert queries when the caller supplies ids', () => {
+      expect(investigateRuleSkill.content).toContain('do **not** call `security.alerts`');
+      expect(investigateRuleSkill.content).toContain(
+        'Fall back to the two queries below **only** when the tool errors'
+      );
+    });
+
+    // Without the noise query there is no whole-rule picture, so the output must not
+    // read as if the supplied alerts were everything the rule produced.
+    it('requires the id-scoped analysis to state its own boundary', () => {
+      expect(investigateRuleSkill.content).toContain('across the N alerts supplied');
+      expect(investigateRuleSkill.content).toContain("you did not look at the rule's other alerts");
     });
   });
 
@@ -72,7 +95,9 @@ describe('investigateRuleSkill', () => {
     beforeEach(async () => {
       jest.clearAllMocks();
       const inlineTools = await investigateRuleSkill.getInlineTools?.();
-      tool = inlineTools![0] as BuiltinSkillBoundedTool;
+      tool = inlineTools!.find(
+        ({ id }) => id === 'investigate-rule.resolve_rule_attachment'
+      ) as BuiltinSkillBoundedTool;
     });
 
     interface AttachmentResultData {
@@ -156,6 +181,143 @@ describe('investigateRuleSkill', () => {
 
       expect(result.results[0].type).toBe(ToolResultType.error);
       expect((result.results[0].data as { message: string }).message).toContain('unavailable');
+    });
+  });
+
+  // ── get_alerts_by_ids ───────────────────────────────────────────────────────
+  //
+  // Deterministic by-id retrieval for callers that already hold alert document
+  // ids (e.g. the rule tuning workflow passes the harvested false positives),
+  // so the agent grounds the diagnosis on exactly those alerts instead of
+  // re-deriving the closed set through a natural-language query.
+
+  describe('get_alerts_by_ids inline tool', () => {
+    const { mockEsClient, mockRequest, mockLogger } = createToolTestMocks();
+    let tool: BuiltinSkillBoundedTool;
+
+    beforeEach(async () => {
+      jest.clearAllMocks();
+      const inlineTools = await investigateRuleSkill.getInlineTools?.();
+      tool = inlineTools!.find(
+        ({ id }) => id === 'investigate-rule.get_alerts_by_ids'
+      ) as BuiltinSkillBoundedTool;
+    });
+
+    const makeCtx = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+    it('fetches the requested ids from the space alerts index with the diagnosis fields', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 0 },
+        hits: {
+          hits: [
+            {
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default',
+              _source: {
+                'host.name': 'ci-runner',
+                'kibana.alert.workflow_reason': 'false_positive',
+              },
+            },
+          ],
+        },
+      } as never);
+
+      const result = (await tool.handler(
+        {
+          alert_ids: ['alert-1', 'alert-2'],
+          additional_fields: ['winlog.event_data.TargetUserName'],
+        },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const searchArgs = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+        index: string;
+        size: number;
+        query: unknown;
+        _source: string[];
+      };
+      expect(searchArgs.index).toBe('.alerts-security.alerts-default');
+      expect(searchArgs.size).toBe(2);
+      expect(searchArgs.query).toEqual({ ids: { values: ['alert-1', 'alert-2'] } });
+      expect(searchArgs._source).toEqual(
+        expect.arrayContaining([
+          'kibana.alert.workflow_reason',
+          'kibana.alert.workflow_user',
+          'host.name',
+          'user.name',
+          'winlog.event_data.TargetUserName',
+        ])
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      const data = result.results[0].data as {
+        requested: number;
+        found: number;
+        alerts: Array<Record<string, unknown>>;
+      };
+      expect(data.requested).toBe(2);
+      expect(data.found).toBe(1);
+      expect(data.alerts[0]).toEqual({
+        _id: 'alert-1',
+        'host.name': 'ci-runner',
+        'kibana.alert.workflow_reason': 'false_positive',
+      });
+    });
+
+    it('dedupes repeated ids so found cannot trail requested spuriously', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 0 },
+        hits: { hits: [{ _id: 'alert-1', _source: {} }] },
+      } as never);
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1', 'alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      const searchArgs = mockEsClient.asCurrentUser.search.mock.calls[0][0] as {
+        size: number;
+        query: unknown;
+      };
+      expect(searchArgs.size).toBe(1);
+      expect(searchArgs.query).toEqual({ ids: { values: ['alert-1'] } });
+      expect((result.results[0].data as { requested: number; found: number }).requested).toBe(1);
+    });
+
+    it('returns an error result when Elasticsearch reports partial results', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockResolvedValueOnce({
+        timed_out: false,
+        _shards: { failed: 1 },
+        hits: { hits: [{ _id: 'alert-1', _source: {} }] },
+      } as never);
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toContain('failed_shards=1');
+    });
+
+    it('returns an error result when the search fails', async () => {
+      const ctx = makeCtx();
+      mockEsClient.asCurrentUser.search.mockRejectedValueOnce(new Error('index unavailable'));
+
+      const result = (await tool.handler(
+        { alert_ids: ['alert-1'] },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toContain(
+        'index unavailable'
+      );
     });
   });
 });

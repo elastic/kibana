@@ -19,7 +19,7 @@ export const PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   id: PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: PND_WORKER_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yamlTemplate: (values: CommonWorkerTemplateValues): string =>
     renderCommonWorkerYaml(DETECTION_RULE_TUNING_YAML, values),
 } as const satisfies ManagedWorkflowDefinition<CommonWorkerTemplateValues>;

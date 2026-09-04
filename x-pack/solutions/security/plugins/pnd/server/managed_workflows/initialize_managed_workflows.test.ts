@@ -56,6 +56,7 @@ describe('initializeManagedWorkflows', () => {
 
     await initializeManagedWorkflows({ workflowsExtensions, logger });
 
+    expect(client.install).toHaveBeenCalledTimes(1);
     expect(client.ready).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('rule workflow install failed')

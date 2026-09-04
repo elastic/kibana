@@ -126,7 +126,8 @@ Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on 
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
-- `system-security-rule-tuning` — implementation used by the Detection Rule Tuning Worker
+- `system-security-rule-tuning` — the tuning sweep; the Rule Tuning Worker dispatches it (`workflow.executeAsync`) every 2h per enabled space, and it remains directly callable for manual runs
+- `system-security-rule-tuning-proposal` — launched per noisy rule by the tuning sweep, each run holding its own approval gate
 - `system-security-rule-creation` — implementation used by the Detection Rule Creation Worker
 - `system-security-rule-preview` — called by both of the above
 

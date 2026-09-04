@@ -12,7 +12,54 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { z } from '@kbn/zod/v4';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  SecurityAgentBuilderAttachments,
+} from '../../../../common/constants';
+
+// Most ids one get_alerts_by_ids call accepts. The rule tuning proposal workflow
+// (kbn-workflows managed definitions) slices its harvested ids to this value.
+const ALERTS_BY_IDS_MAX = 100;
+
+/** Fields the confirmed-dispositions analysis in SKILL_CONTENT asks for, fetched as a fixed list. */
+const ALERTS_BY_IDS_FIELDS = [
+  '@timestamp',
+  'message',
+  'kibana.alert.reason',
+  'kibana.alert.workflow_status',
+  'kibana.alert.workflow_reason',
+  'kibana.alert.workflow_user',
+  'kibana.alert.workflow_tags',
+  'kibana.alert.rule.rule_id',
+  'kibana.alert.rule.name',
+  'host.name',
+  'user.name',
+  'source.ip',
+  'event.category',
+  'event.action',
+  'process.name',
+  'process.parent.name',
+  'process.command_line',
+  'file.name',
+  'file.path',
+  'file.hash.sha256',
+  'destination.address',
+  'destination.ip',
+  'destination.port',
+] as const;
+
+const alertsByIdsSchema = z.object({
+  alert_ids: z
+    .array(z.string().max(512))
+    .min(1)
+    .max(ALERTS_BY_IDS_MAX)
+    .describe('Alert document ids (_id) to retrieve'),
+  additional_fields: z
+    .array(z.string().max(256))
+    .max(50)
+    .optional()
+    .describe('Extra field names to return, e.g. the rule investigation_fields'),
+});
 
 const SKILL_CONTENT = `# investigate-rule Skill
 
@@ -71,7 +118,23 @@ version.
 Extract and retain: \`rule_id\`, \`id\`, \`name\`, \`type\`, \`language\`, \`query\`,
 \`index\`, \`interval\`, \`from\`, \`enabled\`, and \`investigation_fields\` when present.
 
-### Step 2: Fetch the Rule's Alerts (two focused queries)
+### Step 2: Fetch the Rule's Alerts
+
+**Before querying anything, check whether the request itself supplies explicit alert
+document ids** (for example, a rule tuning workflow passing the ids of the alerts
+analysts closed as false positives).
+
+**Ids provided — retrieve exactly those, and nothing else.** Call
+\`investigate-rule.get_alerts_by_ids\` with the ids, passing the rule's
+\`investigation_fields\` (from the attachment, Step 1) as \`additional_fields\`. Those
+alerts are your whole dataset: do **not** call \`security.alerts\`, and
+do not re-derive the closed set. The caller already picked the alerts that matter, so
+any query would re-fetch data you are holding. Go to Step 3 and report every count as scoped to this
+set (Step 4 says how). Fall back to the two queries below **only** when the tool errors
+or returns fewer alerts than you asked for — the missing ones may have aged out of the
+index.
+
+**No ids provided — run the two queries below.**
 
 Call the \`security.alerts\` tool **twice**, keeping the two concerns separate so the
 result is unambiguous. Both queries filter to this rule only. Map each identifier to its
@@ -109,9 +172,12 @@ these are the candidates for an exception condition (Step 4), so request exactly
 These are the only alerts you can speak about with certainty — they carry a human verdict.
 
 **Time window (both queries):** set the \`time_window_hours\` parameter (NOT the query
-text) — it defaults to 24. Use 72 or 168 when the user asks about a longer period, and
-retry with a larger value if a query returns nothing (alerts older than the window are
-not searched). Do not put a time range in the query text.
+text) — it defaults to 24. When the request states an explicit analysis window (for
+example, a workflow passing the number of days it harvested over), use that window,
+capped at the 168-hour maximum, and say in the output when the stated window exceeds
+the cap. Otherwise use 72 or 168 when the user asks about a longer period, and retry
+with a larger value if a query returns nothing (alerts older than the window are not
+searched). Do not put a time range in the query text.
 
 Read the results defensively: from the noise query take the total and the dominant
 entities; from the confirmed dispositions query take which entities the closed
@@ -126,6 +192,12 @@ The two queries differ in **certainty**, and the diagnosis must respect that:
 - **Noise query (volume / concentration)** only shows the rule is *loud*. It is **not**
   proof that any specific still-open alert is a false positive — never present
   concentration as a verdict.
+
+**Working from provided ids?** Every alert you hold carries an analyst verdict, so
+Signal A is the whole analysis and Signal B does not apply — you have no open-alert
+data and must not speculate about it. You also cannot see whether a pattern you are
+about to exclude appears on the rule's *other* alerts, which makes the exclusion
+caveat in Step 4 mandatory rather than optional.
 
 Use the two signals below in this order.
 
@@ -206,10 +278,14 @@ The output must always contain these five sections, in order. Use a \`##\` heade
 section (e.g. \`## Alert Volume\`) — **do not use numbered list items for sections**; tables
 placed inside a list item do not render in the Security UI.
 
-### Alert volume and entity breakdown (always required — from the noise query)
+### Alert volume and entity breakdown (always required)
 
-Show the total alert count and status breakdown (open / closed). Then present the
-top entity rankings: top \`host.name\`, top \`user.name\`, top \`source.ip\`. Use a
+When you ran the noise query, show the total alert count and status breakdown
+(open / closed). When you worked from provided ids, rank the entities within that
+set instead and open the section by naming the scope — "across the N alerts supplied"
+— so nobody reads the numbers as the rule's full volume.
+
+Then present the top entity rankings: top \`host.name\`, top \`user.name\`, top \`source.ip\`. Use a
 **bullet list** for each dimension (e.g. \`- svc-ci: 44 (76%)\`) — do not use a table
 for entity rankings; two-column count lists render more reliably as bullets and are
 easier to scan. Tables are reserved for the confirmed-dispositions section where
@@ -248,7 +324,9 @@ options (Signal B).
 - **Caveat — consistent does not mean safe to exclude.** A field can be consistent across
   the confirmed FPs and still appear in real threats (e.g. \`process.parent.name IS
   gitlab-runner\`). The analyst must confirm that excluding the chosen values will not hide
-  genuine activity. Do not decide that for them.
+  genuine activity. Do not decide that for them. When you worked from provided ids, add
+  that you did not look at the rule's other alerts, so how far the pattern reaches beyond
+  this set is unknown.
 
 *Unconfirmed concentration (Signal B) → present options, do not prescribe:* suppression on
 the concentrated entity field (reduces noise, preserves coverage), an exception only if the
@@ -260,6 +338,10 @@ verdicts first.
 State explicitly what is confirmed vs. not. Offer the alert-analysis handoff for
 open alerts: "If you want a true/false-positive verdict on the open alerts, I can
 load the alert-analysis skill."
+
+When you worked from provided ids, name the boundary plainly: the diagnosis covers
+those N alerts, every one of them analyst-confirmed, and the rule's remaining alerts
+were not examined.
 
 ---
 
@@ -382,6 +464,75 @@ export const createInvestigateRuleSkill = (): SkillDefinition<
                   type: ToolResultType.error,
                   data: {
                     message: `Failed to resolve rule ${ruleId}: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                  },
+                },
+              ],
+            };
+          }
+        },
+      },
+      // ── get_alerts_by_ids ────────────────────────────────────────────────────
+      {
+        id: 'investigate-rule.get_alerts_by_ids',
+        type: ToolType.builtin,
+        description:
+          'Retrieves security alerts by their document ids, returning the disposition, entity, and event fields the ' +
+          'diagnosis needs. Call when the request already supplies alert document ids (e.g. a rule tuning workflow ' +
+          'passing harvested false positives) instead of re-querying by rule. Pass the rule investigation_fields ' +
+          'as additional_fields.',
+        schema: alertsByIdsSchema,
+        handler: async (args, context) => {
+          const { alert_ids: alertIds, additional_fields: additionalFields } =
+            alertsByIdsSchema.parse(args);
+          // Deduped so a repeated id cannot make `found < requested`, which the
+          // skill treats as partial results and answers with a fallback query.
+          const ids = [...new Set(alertIds)];
+          try {
+            const response = await context.esClient.asCurrentUser.search<Record<string, unknown>>({
+              index: `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`,
+              size: ids.length,
+              query: { ids: { values: ids } },
+              _source: [...ALERTS_BY_IDS_FIELDS, ...(additionalFields ?? [])],
+            });
+            if (response.timed_out || response._shards.failed > 0) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.error,
+                    data: {
+                      message: `Failed to fetch every alert by id: timed_out=${response.timed_out}, failed_shards=${response._shards.failed}`,
+                    },
+                  },
+                ],
+              };
+            }
+
+            const alerts = response.hits.hits.map((hit) => ({
+              _id: hit._id,
+              ...(hit._source ?? {}),
+            }));
+
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    requested: ids.length,
+                    found: alerts.length,
+                    alerts,
+                  },
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: `Failed to fetch alerts by id: ${
                       error instanceof Error ? error.message : String(error)
                     }`,
                   },
