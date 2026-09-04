@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios from 'axios';
 import * as rx from 'rxjs';
 import _, { cloneDeep } from 'lodash';
 
@@ -347,41 +346,45 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
       const telemetryUrl = senderMetadata.telemetryUrl;
 
-      return await axios
-        .post(telemetryUrl, body, {
-          headers: {
-            ...senderMetadata.telemetryRequestHeaders(),
-            'X-Telemetry-Sender': 'async',
-          },
-          timeout: 10000,
-        })
-        .then((r) => {
-          this.senderUtils?.incrementCounter(
-            TelemetryCounter.HTTP_STATUS,
-            events.length,
-            channel,
-            r.status.toString()
-          );
-
-          if (r.status < 400) {
-            return { events: events.length, channel };
-          } else {
-            this.logger.warn('Unexpected response', {
-              status: r.status,
-            } as LogMeta);
-            throw newFailure(`Got ${r.status}`, channel, events.length);
-          }
-        })
-        .catch((error) => {
-          this.senderUtils?.incrementCounter(
-            TelemetryCounter.RUNTIME_ERROR,
-            events.length,
-            channel
-          );
-
-          this.logger.warn('Runtime error', withErrorMessage(error));
-          throw newFailure(`Error posting events: ${error}`, channel, events.length);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10_000);
+      try {
+        const requestUrl = new URL(telemetryUrl);
+        const { username, password } = requestUrl;
+        requestUrl.username = '';
+        requestUrl.password = '';
+        const headers = new Headers({
+          ...senderMetadata.telemetryRequestHeaders(),
+          'X-Telemetry-Sender': 'async',
         });
+        if ((username || password) && !headers.has('authorization')) {
+          const credentials = `${decodeURIComponent(username)}:${decodeURIComponent(password)}`;
+          headers.set('authorization', `Basic ${Buffer.from(credentials).toString('base64')}`);
+        }
+        const response = await fetch(requestUrl, {
+          method: 'POST',
+          headers,
+          body,
+          signal: controller.signal,
+        });
+        await response.arrayBuffer();
+        if (!response.ok) {
+          throw new Error(`Request failed with status code ${response.status}`);
+        }
+        this.senderUtils?.incrementCounter(
+          TelemetryCounter.HTTP_STATUS,
+          events.length,
+          channel,
+          response.status.toString()
+        );
+        return { events: events.length, channel };
+      } catch (error) {
+        this.senderUtils?.incrementCounter(TelemetryCounter.RUNTIME_ERROR, events.length, channel);
+        this.logger.warn('Runtime error', withErrorMessage(error));
+        throw newFailure(`Error posting events: ${error}`, channel, events.length);
+      } finally {
+        clearTimeout(timeout);
+      }
     } catch (err: unknown) {
       if (isFailure(err)) {
         throw err;
