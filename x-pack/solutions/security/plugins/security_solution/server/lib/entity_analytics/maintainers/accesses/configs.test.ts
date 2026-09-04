@@ -16,9 +16,10 @@ const bucketedConfigs = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
 );
 
 describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
-  it('ships exactly the four expected integrations', () => {
+  it('ships exactly the five expected integrations', () => {
     expect(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'aws_cloudtrail',
+      'crowdstrike_fdr',
       'elastic_defend',
       'system_auth',
       'system_security',
@@ -144,6 +145,11 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     it('elastic_defend does NOT have hostScopedUsersOnly', () => {
       const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'elastic_defend');
       expect(cfg?.hostScopedUsersOnly).toBeUndefined();
+    });
+
+    it('crowdstrike_fdr has hostScopedUsersOnly: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'crowdstrike_fdr');
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
     });
   });
 });

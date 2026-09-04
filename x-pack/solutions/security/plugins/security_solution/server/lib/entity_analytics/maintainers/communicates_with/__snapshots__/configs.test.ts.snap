@@ -42,6 +42,25 @@ TRUE, _euid_branch_1_formula, NULL))
 | LIMIT 3500"
 `;
 
+exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots crowdstrike_fdr: targets-per-actor ES|QL is locked 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-crowdstrike.fdr-__namespace__
+| WHERE event.action == \\"UserLogon\\"
+    AND MV_CONTAINS(TO_STRING(event.category), \\"authentication\\")
+    AND (crowdstrike.LogonType IS NULL OR NOT crowdstrike.LogonType IN (\\"3\\", \\"4\\", \\"5\\", \\"8\\"))
+    AND event.outcome == \\"success\\"
+    AND NOT user.name IN (\\"SYSTEM\\", \\"LOCAL SERVICE\\", \\"NETWORK SERVICE\\", \\"ANONYMOUS LOGON\\")
+    AND NOT user.name LIKE \\"*$\\"
+    AND ((\`user.name\` IS NOT NULL AND \`user.name\` != \\"\\") AND (\`host.id\` IS NOT NULL AND \`host.id\` != \\"\\"))
+| EVAL actorUserId = CONCAT(\\"user:\\", TO_STRING(\`user.name\`), \\"@\\", TO_STRING(\`host.id\`), \\"@local\\")
+| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
+| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(\`host.id\`))
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\"
+| STATS communicates_with = VALUES(targetEntityId) BY actorUserId
+| LIMIT 3500"
+`;
+
 exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-endpoint.events.security-__namespace__
