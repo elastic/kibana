@@ -51,25 +51,29 @@ export const toSigEventDetectionViewSpec = ({
   const details: Array<{ title: string; description: string }> = [
     { title: 'Detection rule', description: ruleName },
   ];
-  if (streamName) details.push({ title: 'Stream', description: streamName });
-  if (timestamp) details.push({ title: 'Detected at', description: timestamp });
+  if (streamName) {
+    details.push({ title: 'Stream', description: streamName });
+  }
+  if (timestamp) {
+    details.push({ title: 'Detected at', description: timestamp });
+  }
 
   return toViewSpec(
     <View title={ruleName} subtitle="Significant event detection">
       {changePointType && (
         <Badge
-          items={[{
-            label: humanize(changePointType) ?? changePointType,
-            tone: changePointTone(changePointType),
-            variant: 'fill',
-          }]}
+          items={[
+            {
+              label: humanize(changePointType) ?? changePointType,
+              tone: changePointTone(changePointType),
+              variant: 'fill',
+            },
+          ]}
         />
       )}
       {description && <Text body={description} />}
       <DescriptionList label="Detection" layout="inline" items={details} />
-      {esqlQuery && (
-        <CodeBlock language="esql" code={esqlQuery} title="ES|QL" collapsible />
-      )}
+      {esqlQuery && <CodeBlock language="esql" code={esqlQuery} title="ES|QL" collapsible />}
     </View>
   ) as ViewSpec;
 };

@@ -52,13 +52,8 @@ export const toWorkflowYamlViewSpec = ({ yaml, name }: WorkflowYamlData): ViewSp
     : [];
 
   return toViewSpec(
-    <View
-      title={name ?? parsed?.name ?? 'Workflow'}
-      subtitle="Workflow definition"
-    >
-      {details.length > 0 && (
-        <DescriptionList label="Workflow" layout="inline" items={details} />
-      )}
+    <View title={name ?? parsed?.name ?? 'Workflow'} subtitle="Workflow definition">
+      {details.length > 0 && <DescriptionList label="Workflow" layout="inline" items={details} />}
       <CodeBlock language="yaml" code={yaml} collapsible />
     </View>
   ) as ViewSpec;

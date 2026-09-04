@@ -27,8 +27,12 @@ interface DiffHunk {
 }
 
 const lineKind = (line: string): DiffLineKind => {
-  if (line.startsWith('+')) return 'add';
-  if (line.startsWith('-')) return 'remove';
+  if (line.startsWith('+')) {
+    return 'add';
+  }
+  if (line.startsWith('-')) {
+    return 'remove';
+  }
   return 'context';
 };
 
@@ -59,10 +63,7 @@ export const toWorkflowYamlDiffViewSpec = ({
   const added = countKind(hunks, 'add');
   const removed = countKind(hunks, 'remove');
   return toViewSpec(
-    <View
-      title={name ? `${name} changes` : 'Workflow changes'}
-      subtitle="Proposed edit"
-    >
+    <View title={name ? `${name} changes` : 'Workflow changes'} subtitle="Proposed edit">
       <Text body={`+${added} added, -${removed} removed`} />
       {hunks.length === 0 ? (
         <Text body="No changes detected." tone="neutral" />

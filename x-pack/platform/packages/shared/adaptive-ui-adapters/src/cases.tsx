@@ -37,8 +37,13 @@ export const toCasesViewSpec = ({ cases, total }: CasesData): ViewSpec =>
           external: true,
           body: item.description,
           pills: [
-            { type: 'badge' as const, label: 'Alerts', count: item.totalAlerts ?? 0, tone: 'warning' as const },
-            { type: 'badge' as const, label: 'Comments', count: item.totalComment ?? 0 },
+            {
+              type: 'badge',
+              label: 'Alerts',
+              count: item.totalAlerts ?? 0,
+              tone: 'warning',
+            },
+            { type: 'badge', label: 'Comments', count: item.totalComment ?? 0 },
           ],
           status: { label: titleCase(item.severity), tone: severityTone(item.severity) },
           action: { label: 'Open case', href: item.url ?? `/app/security/cases/${item.id}` },

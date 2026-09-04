@@ -44,14 +44,22 @@ const HEALTH_TONE: Record<string, Tone> = {
 /** Latency and error rate, joined for one edge chip. `undefined` when neither is reported. */
 const connectionLabel = ({ latency_ms: latency, error_rate: errorRate }: ServiceMapConnection) => {
   const parts: string[] = [];
-  if (latency != null) parts.push(`${latency} ms`);
-  if (errorRate != null) parts.push(`${(errorRate * 100).toFixed(1)}%`);
+  if (latency != null) {
+    parts.push(`${latency} ms`);
+  }
+  if (errorRate != null) {
+    parts.push(`${(errorRate * 100).toFixed(1)}%`);
+  }
   return parts.length === 0 ? undefined : parts.join(' · ');
 };
 
 const errorRateTone = (errorRate?: number): Tone | undefined => {
-  if (errorRate == null) return undefined;
-  if (errorRate >= 0.05) return 'danger';
+  if (errorRate == null) {
+    return undefined;
+  }
+  if (errorRate >= 0.05) {
+    return 'danger';
+  }
   return errorRate >= 0.01 ? 'warning' : undefined;
 };
 
@@ -102,8 +110,20 @@ export const sampleServiceMap: ServiceMapData = {
     { name: 'postgres', type: 'db', health: 'warning' },
   ],
   connections: [
-    { source: 'checkout', target: 'payment-service', latency_ms: 320, error_rate: 0.061, throughput_tpm: 1200 },
+    {
+      source: 'checkout',
+      target: 'payment-service',
+      latency_ms: 320,
+      error_rate: 0.061,
+      throughput_tpm: 1200,
+    },
     { source: 'checkout', target: 'cart', latency_ms: 45, error_rate: 0.001, throughput_tpm: 1800 },
-    { source: 'payment-service', target: 'postgres', latency_ms: 210, error_rate: 0.02, throughput_tpm: 1100 },
+    {
+      source: 'payment-service',
+      target: 'postgres',
+      latency_ms: 210,
+      error_rate: 0.02,
+      throughput_tpm: 1100,
+    },
   ],
 };
