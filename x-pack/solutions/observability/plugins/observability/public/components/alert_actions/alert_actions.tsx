@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { ALERT_UUID, getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
@@ -43,7 +42,6 @@ function InvestigateAlertActionItem({
     useInvestigateAlert({
       alertId,
       onInvestigate: onActionExecuted,
-      queryContext: AlertsQueryContext,
     });
 
   if (!showInvestigateAction) return null;

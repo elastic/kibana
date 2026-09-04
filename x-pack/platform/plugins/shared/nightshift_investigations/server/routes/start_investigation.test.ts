@@ -29,7 +29,7 @@ const getAlertsClient = jest.fn().mockResolvedValue({
 
 beforeEach(() => jest.clearAllMocks());
 
-it('loads the alert and builds the investigation context when none is given', async () => {
+it('loads the alert and builds the investigation context server-side', async () => {
   await expect(
     handler({
       request: {},
@@ -46,23 +46,14 @@ it('loads the alert and builds the investigation context when none is given', as
   });
 });
 
-it('passes a caller-provided context through unchanged', async () => {
-  const context = { alerts: [{ id: 'alert-1' }] };
+it('keeps a caller-provided concurrency key', async () => {
   await handler({
     request: {},
     getInvestigationsClient,
     getAlertsClient,
-    params: {
-      body: { subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1', context },
-    },
+    params: { body: { subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' } },
   } as never);
-  expect(getAlertsClient).not.toHaveBeenCalled();
-  expect(start).toHaveBeenCalledWith({
-    subject: { type: 'alert', id: 'alert-1' },
-    concurrency_key: 'key-1',
-    context,
-    trigger_type: 'manual',
-  });
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ concurrency_key: 'key-1' }));
 });
 
 it('returns service unavailable when alert lookup is not wired', async () => {

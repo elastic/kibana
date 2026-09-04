@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { Context } from 'react';
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { QueryClient } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 
@@ -21,27 +19,22 @@ const getStatusQuery = (alertId: string) => ({
 
 export const useInvestigateAlert = ({
   alertId,
-  enabled = true,
   onInvestigate,
-  queryContext,
 }: {
   alertId?: string;
-  enabled?: boolean;
   onInvestigate?: () => void;
-  queryContext?: Context<QueryClient | undefined>;
 }) => {
   const { http, notifications, nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
-  const queryClient = useQueryClient({ context: queryContext });
-  const canInvestigate = Boolean(enabled && alertId && investigationsClient);
+  const queryClient = useQueryClient();
+  const canInvestigate = Boolean(alertId && investigationsClient);
   const { data: availability } = useQuery({
     queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
     queryFn: ({ signal }) =>
       investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
         signal: signal ?? null,
       }),
-    context: queryContext,
     enabled: canInvestigate,
     retry: false,
     staleTime: 30_000,
@@ -53,7 +46,6 @@ export const useInvestigateAlert = ({
         signal: signal ?? null,
         params: { query: getStatusQuery(alertId ?? '') },
       }),
-    context: queryContext,
     enabled: canInvestigate && availability?.available === true,
     retry: false,
     refetchInterval: (data) =>

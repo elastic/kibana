@@ -202,13 +202,15 @@ describe('ObservabilityActions component', () => {
       <Router history={createMemoryHistory()}>
         <KibanaContextProvider services={mockKibana.services}>
           <AlertsTableContextProvider value={context}>
-            <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-              <AlertActions
-                {...(props as unknown as ComponentProps<
-                  GetObservabilityAlertsTableProp<'renderActionsCell'>
-                >)}
-                services={services}
-              />
+            <QueryClientProvider client={queryClient}>
+              <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+                <AlertActions
+                  {...(props as unknown as ComponentProps<
+                    GetObservabilityAlertsTableProp<'renderActionsCell'>
+                  >)}
+                  services={services}
+                />
+              </QueryClientProvider>
             </QueryClientProvider>
           </AlertsTableContextProvider>
         </KibanaContextProvider>
