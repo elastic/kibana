@@ -41,7 +41,6 @@ const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
 const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
-const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
 const openCreateNewCaseFlyout = jest.fn();
 
 // test component to test the hook integration
