@@ -310,6 +310,33 @@ describe('SchemaMappingsStep flow 3 9.6', () => {
     expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
   });
 
+  it('groups the schema mapping settings in a section that opens by default', () => {
+    const { getByTestId, getByRole } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3_9_6}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'parquet',
+          },
+        }}
+      />
+    );
+
+    const accordion = getByTestId('datasetWizardSchemaSettingsAccordion');
+    const accordionButton = getByRole('button', { name: 'Schema settings (optional)' });
+
+    expect(accordion).toContainElement(accordionButton);
+    expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
+    expect(getByTestId('datasetWizardSettingsSchemaSampleSize')).toBeInTheDocument();
+
+    fireEvent.click(accordionButton);
+    expect(accordionButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('shows schema mapping settings for csv', () => {
     const { getByTestId } = render(
       <TestHarness

@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
@@ -18,17 +17,15 @@ import type {
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
-import type { DatasetSettingsAccordionId, DatasetSettingsFieldId } from './dataset_settings_visibility';
+import { datasetSettingsAccordionButtonCss } from './dataset_settings_section_accordion';
+import type {
+  DatasetSettingsAccordionId,
+  DatasetSettingsFieldId,
+} from './dataset_settings_visibility';
 import {
   getVisibleAccordionsForFormat,
   getVisibleFieldsForAccordion,
 } from './dataset_settings_visibility';
-
-const accordionButtonCss = css`
-  &:hover {
-    text-decoration: none;
-  }
-`;
 
 const APP_MAIN_SCROLL_ID = 'app-main-scroll';
 
@@ -134,7 +131,7 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
         id={accordionDomId}
         element="fieldset"
         borders="horizontal"
-        buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
+        buttonProps={{ paddingSize: 'm', css: datasetSettingsAccordionButtonCss }}
         buttonContent={
           <EuiTitle size="xs">
             <h3>{title}</h3>

@@ -493,6 +493,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Coming soon',
     }),
 
+  schemaSettingsTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaSettingsTitle', {
+      defaultMessage: 'Schema settings (optional)',
+    }),
+
   schemaMappingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsTitle', {
       defaultMessage: 'Schema mappings (optional)',

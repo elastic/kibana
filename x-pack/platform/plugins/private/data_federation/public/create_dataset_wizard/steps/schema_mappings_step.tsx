@@ -8,16 +8,15 @@
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
-import { EuiButtonGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { DatasetSettingDefaultHintsProvider } from '../../create_dataset_flyout/dataset_settings_default_hints';
-import {
-  DatasetSettingsFieldsLayout,
-} from '../../create_dataset_flyout/dataset_settings_fields_layout';
+import { DatasetSettingsFieldsLayout } from '../../create_dataset_flyout/dataset_settings_fields_layout';
+import { DatasetSettingsSectionAccordion } from '../../create_dataset_flyout/dataset_settings_section_accordion';
 import type { DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
@@ -39,7 +38,13 @@ import {
 
 export { isAwsGlueTableSchemaMappingSupported };
 
-const FORMAT_VALUES: Exclude<DatasetFormatFormValue, ''>[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
+const FORMAT_VALUES: Exclude<DatasetFormatFormValue, ''>[] = [
+  'csv',
+  'tsv',
+  'parquet',
+  'ndjson',
+  'orc',
+];
 
 const isKnownFormat = (value: string): value is Exclude<DatasetFormatFormValue, ''> =>
   FORMAT_VALUES.includes(value as Exclude<DatasetFormatFormValue, ''>);
@@ -79,6 +84,10 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
         : [],
     [errorMode, format, hasFormatSelected, isFlow396]
   );
+
+  const schemaSettingsAccordionId = useGeneratedHtmlId({
+    prefix: 'datasetWizardSchemaSettingsAccordion',
+  });
 
   const isAwsGlueTableSupported = useMemo(
     () => isAwsGlueTableSchemaMappingSupported(dataSources, dataSource),
@@ -149,19 +158,25 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
         <>
           <EuiSpacer size="l" />
           <DatasetSettingDefaultHintsProvider format={format} isEnabled>
-            <div data-test-subj="datasetWizardSchemaMappingSettings">
+            <DatasetSettingsSectionAccordion
+              id={schemaSettingsAccordionId}
+              title={datasetWizardStrings.schemaSettingsTitle()}
+              hasPanelBackground={false}
+              initialIsOpen
+              dataTestSubj="datasetWizardSchemaSettingsAccordion"
+              fieldsDataTestSubj="datasetWizardSchemaMappingSettings"
+            >
               <DatasetSettingsFieldsLayout
                 control={control}
                 fields={schemaMappingSettingsFields}
                 testSubjPrefix="datasetWizard"
-                columns={Math.min(schemaMappingSettingsFields.length, 2)}
+                columns={1}
+                rowSpacerSize="m"
                 constrainWidth={false}
                 variant="step"
               />
-            </div>
+            </DatasetSettingsSectionAccordion>
           </DatasetSettingDefaultHintsProvider>
-          <EuiSpacer size="l" />
-          <EuiHorizontalRule />
         </>
       ) : null}
       <EuiSpacer size="l" />
