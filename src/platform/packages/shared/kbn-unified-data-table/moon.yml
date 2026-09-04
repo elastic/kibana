@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/ui-callout'
   - '@kbn/safer-lodash-set'
+  - '@kbn/discover-session-constants'
 tags:
   - shared-browser
   - package
