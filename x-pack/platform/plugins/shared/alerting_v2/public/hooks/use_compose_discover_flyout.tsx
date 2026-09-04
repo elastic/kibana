@@ -32,10 +32,18 @@ import { useCreateActionPolicyDisabledReason } from './use_create_action_policy_
 import { useCreateRule } from './use_create_rule';
 import { useUpdateRule } from './use_update_rule';
 
+/**
+ * A template whose rule carries builder fields has no query of its own — the
+ * server generates it on save — so seed an empty one to open the editor the
+ * form would otherwise refuse to show.
+ */
+const EMPTY_QUERY: RuleApiResponse['query'] = { base: '' };
+
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
   // `null` is the write-side way to say "no delays"; a rule read back never carries it.
   state_transition: template.rule.state_transition ?? undefined,
+  query: template.rule.query ?? EMPTY_QUERY,
   id: '',
   version: 1,
   enabled: false,

@@ -14,6 +14,7 @@ import {
   ruleSavedObjectAttributesSchemaV5,
   ruleSavedObjectAttributesSchemaV6,
   ruleSavedObjectAttributesSchemaV7,
+  ruleSavedObjectAttributesSchemaV8,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 import { migrateDashboardArtifactDataKey } from './migrate_dashboard_artifact_data_key';
@@ -215,6 +216,37 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV7.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV7,
+    },
+  },
+  '10': {
+    // Introduce `metadata.builder_fields`, the structured parameters a rule
+    // builder was configured with. Purely additive and optional, so there is
+    // nothing to backfill: rules created before this version keep only their
+    // `builder_type` and stay readable.
+    //
+    // Mapped as `flattened` so leaf values are searchable as keywords (term,
+    // exists, prefix queries). Typed sub-fields for numeric range queries can
+    // be added per builder type in a future model version.
+    //
+    // Rolling back to model version 9 is safe: that schema ignores unknown
+    // attributes on read, so a rule carrying builder fields still loads, with
+    // the query it was already storing. The flattened mapping is ignored by
+    // older code — unmapped fields in `_source` are harmless.
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              builder_fields: { type: 'flattened', ignore_above: 4096 },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
     },
   },
 };

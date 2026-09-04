@@ -14,6 +14,7 @@ import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
@@ -55,6 +56,7 @@ describe('bindContract', () => {
     container
       .bind(InternalRulesClient)
       .toConstantValue(mockInternalRulesClient as InternalRulesClient);
+    container.bind(BuilderTypeRegistry).toSelf().inSingletonScope();
 
     container.load(new ContainerModule((options) => bindContract(options)));
   });

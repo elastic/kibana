@@ -40,6 +40,7 @@ import {
   injectArtifactReferences,
   rebuildArtifactReferences,
 } from '../artifact_types';
+import { BuilderTypeRegistry } from '../builder_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -93,6 +94,7 @@ import type {
   RuleResponse,
   UpdateRuleParams,
 } from './types';
+import { resolveCreateRuleBuilder, resolveUpdateRuleBuilder } from './builder_resolution';
 import {
   assertImmutableUnchanged,
   validateMergedRuleAttributes,
@@ -219,7 +221,8 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) origin: EventOrigin
+    @inject(EventOriginToken) origin: EventOrigin,
+    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry
   ) {
     this.eventContext = { request, origin };
     this.config = pluginConfigAccessor.get<PluginConfig>();
@@ -411,7 +414,9 @@ export class RulesClient {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
 
-    const attrs = transformCreateRuleBodyToRuleSoAttributes(data, {
+    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data);
+
+    const attrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled,
       createdBy: actor,
       createdAt: nowIso,
@@ -741,7 +746,9 @@ export class RulesClient {
       });
     }
 
-    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
+    const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs);
+
+    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, resolved, {
       updatedBy: actor,
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
@@ -1817,7 +1824,10 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
+    // PUT replaces the whole resource, so the body alone decides whether the
+    // rule is builder-managed — no need to reconcile against what is stored.
+    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, parsed);
+    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
