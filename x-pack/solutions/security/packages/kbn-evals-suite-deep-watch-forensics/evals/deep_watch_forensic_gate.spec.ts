@@ -67,7 +67,7 @@ const scoreFromTask = (name: string, pick: (output: DeepWatchTaskOutput) => numb
  * (at least one correct open AND one correct close) is asserted after the
  * run rather than reported as an accuracy number.
  */
-evaluate.describe('Deep Watch forensic gate', { tag: [tags.stateful.classic] }, () => {
+evaluate.describe('Deep Watch forensic gate', { tag: tags.stateful.classic }, () => {
   evaluate(
     'runs forensic reconstruction exactly when triage confirms an incident',
     async ({ executorClient, esClient, fetch, log }: DeepWatchEvalContext) => {
