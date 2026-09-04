@@ -1,0 +1,106 @@
+{
+  "sha1": "43c02a2dfd98455d0812209f9fd54ad4730dc990",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4d1218a90d47d4d-f516b1f17d085ef",
+      "title": "Threat Intel - report ingest API ingests a pasted report, then dedups an identical repeat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/report_ingest.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "4d1218a90d47d4d-35b6f23f231b0cb",
+      "title": "Threat Intel - report ingest API rejects a report body that fails schema validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/report_ingest.spec.ts",
+        "line": 64,
+        "column": 27
+      }
+    },
+    {
+      "id": "4d1218a90d47d4d-53949f0f794f735",
+      "title": "Threat Intel - report ingest API extracts indicators from pasted text without calling a model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/report_ingest.spec.ts",
+        "line": 84,
+        "column": 5
+      }
+    },
+    {
+      "id": "2c0bd8a3a597e52-7d3321514ba68c7",
+      "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/source_catalog.spec.ts",
+        "line": 42,
+        "column": 45
+      }
+    },
+    {
+      "id": "2c0bd8a3a597e52-d4894bee88697ad",
+      "title": "Threat Intel - source catalog API stays consistent on a second call once the alias is memoized",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/source_catalog.spec.ts",
+        "line": 63,
+        "column": 28
+      }
+    },
+    {
+      "id": "2c0bd8a3a597e52-0f54cc42eb18431",
+      "title": "Threat Intel - source catalog API returns 404 when updating a source that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/source_catalog.spec.ts",
+        "line": 84,
+        "column": 26
+      }
+    },
+    {
+      "id": "2c0bd8a3a597e52-57f339f81c76436",
+      "title": "Threat Intel - source catalog API denies a read-only Security user write access to the source catalog",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/threat_intel/api/tests/source_catalog.spec.ts",
+        "line": 99,
+        "column": 5
+      }
+    }
+  ]
+}
