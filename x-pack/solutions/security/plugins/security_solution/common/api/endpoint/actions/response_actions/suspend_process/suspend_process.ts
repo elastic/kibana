@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (suspend_process.schema.yaml) and the zod schema generated from it (suspend_process.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const SuspendProcessRouteRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.oneOf([
-      schema.object({ pid: schema.number({ min: 1 }) }),
-      schema.object({ entity_id: schema.string({ minLength: 1, maxLength: 256 }) }),
-    ]),
-  }),
-};
-
-export type SuspendProcessRequestBody = TypeOf<typeof SuspendProcessRouteRequestSchema.body>;
+export {
+  SuspendProcessRouteRequestSchema,
+  type SuspendProcessRequestBody,
+} from '@kbn/security-solution-endpoint-common';

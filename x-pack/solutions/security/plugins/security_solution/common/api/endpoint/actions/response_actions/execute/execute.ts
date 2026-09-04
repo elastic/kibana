@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
-import { BaseActionRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (execute.schema.yaml) and the zod schema generated from it (execute.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const ExecuteActionRequestSchema = {
-  body: schema.object({
-    ...BaseActionRequestSchema,
-    parameters: schema.object({
-      command: schema.string({
-        minLength: 1,
-        maxLength: 8192,
-        validate: (value) => {
-          if (!value.trim().length) {
-            return 'command cannot be an empty string';
-          }
-        },
-      }),
-      /**
-       * The max timeout value before the command is killed. Number represents **seconds**
-       */
-      timeout: schema.maybe(schema.number({ min: 1 })),
-    }),
-  }),
-};
-
-export type ExecuteActionRequestBody = TypeOf<typeof ExecuteActionRequestSchema.body>;
+export {
+  ExecuteActionRequestSchema,
+  type ExecuteActionRequestBody,
+} from '@kbn/security-solution-endpoint-common';

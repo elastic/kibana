@@ -8826,6 +8826,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-endpoint-common@link:x-pack/platform/packages/shared/kbn-security-solution-endpoint-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-ess@link:x-pack/solutions/security/plugins/security_solution_ess":
   version "0.0.0"
   uid ""

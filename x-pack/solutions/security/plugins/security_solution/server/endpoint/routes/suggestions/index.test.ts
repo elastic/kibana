@@ -29,7 +29,7 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';

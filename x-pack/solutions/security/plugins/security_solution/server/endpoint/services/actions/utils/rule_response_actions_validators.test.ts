@@ -18,7 +18,7 @@ import {
   validateRuleResponseActions,
 } from './rule_response_actions_validators';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
+import type { EndpointAuthz } from '@kbn/security-solution-endpoint-common';
 import { getRuleMock } from '../../../../lib/detection_engine/routes/__mocks__/request_responses';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
 import { getQueryRuleParams } from '../../../../lib/detection_engine/rule_schema/model/rule_schemas.mock';

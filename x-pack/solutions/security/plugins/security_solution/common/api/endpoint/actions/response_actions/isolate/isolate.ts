@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { NoParametersRequestSchema } from '../../common/base';
+// This schema now lives in @kbn/security-solution-endpoint-common so that platform-group
+// modules — Agent Builder and Workflows — can import it; a platform module cannot depend on
+// this plugin, which is group: "security", visibility: "private".
+//
+// The OpenAPI spec (isolate.schema.yaml) and the zod schema generated from it (isolate.gen.ts) stay
+// here: the spec is the source of truth for the public API documentation.
+//
+// Exports are named rather than `export *`, so the surface this module exposes stays explicit.
 
-export const IsolateRouteRequestSchema = NoParametersRequestSchema;
-export type IsolationRouteRequestBody = TypeOf<typeof IsolateRouteRequestSchema.body>;
+export {
+  IsolateRouteRequestSchema,
+  type IsolationRouteRequestBody,
+} from '@kbn/security-solution-endpoint-common';

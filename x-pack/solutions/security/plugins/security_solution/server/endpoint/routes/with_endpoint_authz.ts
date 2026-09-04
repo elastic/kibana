@@ -8,7 +8,7 @@
 import type { RequestHandler, KibanaRequest, Logger } from '@kbn/core/server';
 import { errorHandler } from './error_handler';
 import { stringify } from '../utils/stringify';
-import type { EndpointAuthzKeyList } from '../../../common/endpoint/types/authz';
+import type { EndpointAuthzKeyList } from '@kbn/security-solution-endpoint-common';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import { EndpointAuthorizationError } from '../errors';
 

@@ -2335,6 +2335,8 @@
       "@kbn/security-solution-connectors/*": ["./x-pack/solutions/security/packages/connectors/*"],
       "@kbn/security-solution-distribution-bar": ["./x-pack/solutions/security/packages/distribution-bar"],
       "@kbn/security-solution-distribution-bar/*": ["./x-pack/solutions/security/packages/distribution-bar/*"],
+      "@kbn/security-solution-endpoint-common": ["./x-pack/platform/packages/shared/kbn-security-solution-endpoint-common"],
+      "@kbn/security-solution-endpoint-common/*": ["./x-pack/platform/packages/shared/kbn-security-solution-endpoint-common/*"],
       "@kbn/security-solution-ess": ["./x-pack/solutions/security/plugins/security_solution_ess"],
       "@kbn/security-solution-ess/*": ["./x-pack/solutions/security/plugins/security_solution_ess/*"],
       "@kbn/security-solution-features": ["./x-pack/solutions/security/packages/features"],

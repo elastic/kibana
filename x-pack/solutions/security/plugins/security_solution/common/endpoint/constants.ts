@@ -7,6 +7,11 @@
 
 /** endpoint data streams that are used for host isolation  */
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
+import {
+  BASE_ENDPOINT_ACTION_ROUTE,
+  BASE_ENDPOINT_ROUTE,
+  BASE_INTERNAL_ENDPOINT_ROUTE,
+} from '@kbn/security-solution-endpoint-common';
 import { EndpointSortableField } from './types';
 
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
@@ -64,10 +69,6 @@ export const DEFAULT_DIAGNOSTIC_INDEX_PATTERN = '.logs-endpoint.diagnostic.colle
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
 export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
-// Location from where all Endpoint related APIs are mounted
-export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
-export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
-
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
@@ -85,32 +86,35 @@ export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/sugge
  * Action Response Routes
  */
 
-/** Base Actions route. Used to get a list of all actions and is root to other action related routes */
-export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 export const BASE_INTERNAL_ENDPOINT_ACTION_ROUTE = `/internal${BASE_ENDPOINT_ACTION_ROUTE}`;
 
-export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
-export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`;
-export const GET_PROCESSES_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/running_procs`;
-export const KILL_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/kill_process`;
-export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_process`;
-export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
-export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
-export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
-export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
-export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
-export const MEMORY_DUMP_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/memory_dump`;
-export const CANCEL_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/cancel`;
 export const CUSTOM_SCRIPTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ACTION_ROUTE}/custom_scripts`;
 
-/** Endpoint Actions Routes */
-export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
-export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
-export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
-export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
-export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 // Route that allows read/update the space id that should be used to display orphaned action
 export const ORPHAN_ACTIONS_SPACE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/action/_orphan_actions_space`;
+
+export {
+  ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
+  ACTION_AGENT_FILE_INFO_ROUTE,
+  ACTION_DETAILS_ROUTE,
+  ACTION_STATE_ROUTE,
+  ACTION_STATUS_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
+  BASE_ENDPOINT_ROUTE,
+  BASE_INTERNAL_ENDPOINT_ROUTE,
+  CANCEL_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  MEMORY_DUMP_ROUTE,
+  RUN_SCRIPT_ROUTE,
+  SCAN_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
+} from '@kbn/security-solution-endpoint-common';
 
 /** Scripts Library */
 export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ROUTE}/scripts_library`;
@@ -141,9 +145,16 @@ export const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE = `${BASE_INTERNAL_ENDP
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
 
-/** The list of OS types that support. Value usually found in ECS `host.os.type` */
-export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
-export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+/**
+ * The list of OS types that support. Value usually found in ECS `host.os.type`
+ *
+ * Defined in @kbn/security-solution-endpoint-common and re-exported here so existing import
+ * paths keep working.
+ */
+export {
+  type SupportedHostOsType,
+  SUPPORTED_HOST_OS_TYPE,
+} from '@kbn/security-solution-endpoint-common';
 
 /**
  * Workflow Insights
