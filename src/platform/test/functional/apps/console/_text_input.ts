@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/288645
-  describe.skip('text input', function testTextInput() {
+  describe('text input', function testTextInput() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
