@@ -150,6 +150,7 @@ Use operations[] to:
             modelProvider,
             esClient,
           }),
+          esClient: esClient.asCurrentUser,
         });
 
         // Data-aware default time range computation

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   AttachmentPanel,
@@ -25,6 +27,12 @@ import {
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
+
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  getIndexFields: jest.fn(),
+}));
+
+const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
 const createMockLogger = (): Logger =>
   ({
@@ -2347,6 +2355,87 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     expect(after2.pinned_panels).toHaveLength(2);
+  });
+
+  it('add_controls skips a field that is not aggregatable and records a failure', async () => {
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: {
+        type: 'index',
+        fields: [
+          { path: 'host', type: 'keyword', meta: {} },
+          { path: 'host.keyword', type: 'keyword', meta: {} },
+        ],
+      },
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
+            {
+              type: 'options_list_control',
+              field_name: 'method',
+              index: 'kibana_sample_data_logs',
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((kept.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY host'
+    );
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[1]',
+        error: 'Field "method" is not an aggregatable field on this index.',
+      },
+    ]);
+  });
+
+  it('add_controls rewrites a text field to the aggregatable keyword sibling', async () => {
+    getIndexFieldsMock.mockResolvedValue({
+      kibana_sample_data_logs: {
+        type: 'index',
+        fields: [
+          { path: 'host', type: 'text', meta: {} },
+          { path: 'host.keyword', type: 'keyword', meta: {} },
+        ],
+      },
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'host',
+              index: 'kibana_sample_data_logs',
+              title: 'Host',
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    });
+
+    expect(failures).toEqual([]);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect((control.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY `host.keyword`'
+    );
   });
 
   it('remove_controls removes by id and leaves others intact', async () => {
