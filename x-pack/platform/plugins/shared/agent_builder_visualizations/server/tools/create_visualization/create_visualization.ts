@@ -26,6 +26,7 @@ import {
 import {
   buildLensConfig,
   buildVegaConfig,
+  generateVisualizationEsql,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -55,6 +56,14 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
   return typeof candidate === 'string' ? candidate : undefined;
 };
 
+/**
+ * The generated template can only iterate the rows it receives — it cannot group,
+ * aggregate or sort them — so any shaping the content needs has to happen in the
+ * query itself.
+ */
+const CUSTOM_CONTENT_ESQL_INSTRUCTIONS =
+  'The query results feed an HTML template that can only loop over the returned rows — it cannot aggregate, group, or sort them. Any grouping or aggregation the content needs must happen in the query itself (STATS ... BY ...), and rows should come back already sorted and limited to what the panel will display.';
+
 const getExistingTemplate = (data: VisualizationAttachmentData | undefined): string | undefined => {
   if (!data || !isCustomContentVisualization(data)) {
     return undefined;
@@ -83,7 +92,7 @@ const createVisualizationSchema = z
       .enum(['lens', 'vega', 'custom_content'])
       .optional()
       .describe(
-        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values. Omit this field when updating an existing attachment; edits keep the existing renderer.'
+        '(optional, new visualizations only) Which engine renders the visualization. Use "lens" (the default when omitted) for standard charts. Use "vega" for custom Vega-Lite visualizations — small multiples/faceting, layered or combination charts of different measures, scatter/bubble plots with an encoded size dimension, custom encodings, or when the user explicitly asks for Vega/Vega-Lite. Use "custom_content" only when neither chart grammar fits — HTML/CSS layouts such as KPI scorecards with status badges, health boards, or panels mixing narrative text with live values; pass contentMode: "static" for one that needs no data at all. Omit this field when updating an existing attachment; edits keep the existing renderer.'
       ),
     chartType: z
       .nativeEnum(SupportedChartType)
@@ -96,7 +105,13 @@ const createVisualizationSchema = z
       .max(4096)
       .optional()
       .describe(
-        '(optional) An ES|QL query. For "lens" and "vega", the tool generates the query when this is omitted. For "custom_content" it is NOT generated for you: pass a query built with the generate_esql tool when the panel needs live data, or omit it for static content. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+        '(optional) An ES|QL query. The tool generates one when this is omitted. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
+      ),
+    contentMode: z
+      .enum(['data', 'static'])
+      .optional()
+      .describe(
+        '(optional, "custom_content" only) Whether the panel is backed by data. "data" (the default) generates an ES|QL query when "esql" is omitted. Pass "static" only for content that genuinely has no data — a banner, a legend, an explanatory note. Static is never a fallback: if a query cannot be generated the call fails rather than silently returning an empty panel.'
       ),
     time_range: z
       .object({
@@ -134,6 +149,14 @@ const createVisualizationSchema = z
       ctx.issues.push({
         code: 'custom',
         message: 'renderer must be omitted when updating an existing visualization attachment.',
+        input: ctx.value,
+      });
+    }
+
+    if (ctx.value.contentMode && ctx.value.renderer !== 'custom_content') {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'contentMode only applies to the custom_content renderer.',
         input: ctx.value,
       });
     }
@@ -192,6 +215,7 @@ Ground first: make sure the target index exists and every field you reference is
         renderer: requestedRenderer,
         chartType,
         esql,
+        contentMode,
         attachment_id: attachmentId,
         time_range: requestedTimeRange,
       },
@@ -250,8 +274,36 @@ Ground first: make sure the target index exists and every field you reference is
           const existingEsql = existingData?.esql;
           // Sampling the schema is only worth a round trip when the query is actually
           // changing; a style-only edit refines the existing template in place.
-          const isQueryChanging = esql !== undefined && esql !== existingEsql;
-          const mergedEsql = esql ?? existingEsql;
+          let isQueryChanging = esql !== undefined && esql !== existingEsql;
+          let mergedEsql = esql ?? existingEsql;
+
+          if (contentMode === 'static') {
+            // Explicitly requested: drop any query rather than keeping a stale one.
+            mergedEsql = undefined;
+            isQueryChanging = false;
+          } else if (!mergedEsql) {
+            // Generated rather than left empty. A panel with no data is a deliberate
+            // choice (contentMode: 'static'), never what you get by omitting `esql`.
+            const generated = await generateVisualizationEsql({
+              nlQuery,
+              index,
+              modelProvider,
+              events,
+              logger,
+              esClient,
+              ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
+              extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+            });
+            if (!generated.query) {
+              throw new Error(
+                `Could not generate an ES|QL query for this panel: ${
+                  generated.error ?? 'no query was produced'
+                }. Pass an explicit "esql", or use contentMode: "static" if the panel needs no data.`
+              );
+            }
+            mergedEsql = generated.query;
+            isQueryChanging = true;
+          }
 
           const { template, height } = await resolveTemplate({
             prompt: nlQuery,

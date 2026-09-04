@@ -19,3 +19,8 @@ export type {
   SelectedTimeRange,
 } from './time_range/select_default_time_range';
 export { buildVegaConfig } from './vega';
+export { generateVisualizationEsql } from './shared/generate_visualization_esql';
+export type {
+  GenerateVisualizationEsqlParams,
+  GeneratedVisualizationEsql,
+} from './shared/generate_visualization_esql';

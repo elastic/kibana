@@ -11,6 +11,7 @@ import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations
 import {
   buildLensConfig,
   buildVegaConfig,
+  generateVisualizationEsql,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -19,6 +20,7 @@ import { createVisualizationTool } from './create_visualization';
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
+  generateVisualizationEsql: jest.fn(),
   selectDefaultTimeRange: jest.fn(),
 }));
 
@@ -29,6 +31,7 @@ jest.mock('@kbn/custom-content-server', () => ({
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
+const mockGenerateEsql = generateVisualizationEsql as jest.Mock;
 const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
 const mockResolveTemplate = jest.fn();
 
@@ -89,6 +92,24 @@ describe('createVisualizationTool schema', () => {
   it('allows a new custom content visualization without chartType', () => {
     expect(
       schema.safeParse({ query: 'a status board per host', renderer: 'custom_content' }).success
+    ).toBe(true);
+  });
+
+  it('rejects contentMode on a renderer other than custom_content', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        contentMode: 'static',
+      }).success
+    ).toBe(false);
+
+    expect(
+      schema.safeParse({
+        query: 'a welcome banner',
+        renderer: 'custom_content',
+        contentMode: 'static',
+      }).success
     ).toBe(true);
   });
 
@@ -184,6 +205,7 @@ describe('createVisualizationTool handler', () => {
       to: 'now',
       mode: 'relative',
     });
+    mockGenerateEsql.mockResolvedValue({ query: 'FROM logs | STATS count() BY host' });
     mockResolveTemplate.mockResolvedValue({
       template: '<div>{{ row["host"].value }}</div>',
       height: 420,
@@ -512,12 +534,47 @@ describe('createVisualizationTool handler', () => {
       expect(JSON.stringify(data)).not.toContain('row["host"]');
     });
 
-    it('persists a static panel with no esql', async () => {
-      const { result, attachments } = await runHandler({
-        query: 'a welcome banner',
+    it('generates the ES|QL query when none is supplied', async () => {
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        index: 'logs-*',
         renderer: 'custom_content',
       });
 
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ nlQuery: 'a status board per host', index: 'logs-*' })
+      );
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: 'FROM logs | STATS count() BY host' })
+      );
+
+      const [{ data }] = result.results;
+      expect(data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    // Static is a request, not what you get by forgetting `esql`.
+    it('fails rather than falling back to static when query generation fails', async () => {
+      mockGenerateEsql.mockResolvedValue({ error: 'no suitable index' });
+
+      const { result } = await runHandler({
+        query: 'a status board per host',
+        renderer: 'custom_content',
+      });
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('Could not generate an ES|QL query');
+      expect(mockResolveTemplate).not.toHaveBeenCalled();
+    });
+
+    it('persists a static panel with no esql when contentMode is "static"', async () => {
+      const { result, attachments } = await runHandler({
+        query: 'a welcome banner',
+        renderer: 'custom_content',
+        contentMode: 'static',
+      });
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ prompt: 'a welcome banner', esqlQuery: undefined })
       );
