@@ -33,7 +33,7 @@ export interface UseBulkAlertActionItemsArgs {
   /* End Time of the table being passed to the Events Table */
   to: string;
   /* Sourcerer Scope Id*/
-  scopeId: SourcererScopeName;
+  scopeId?: SourcererScopeName;
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
@@ -42,7 +42,6 @@ export interface UseBulkAlertActionItemsArgs {
 }
 
 export const useBulkAlertActionItems = ({
-  scopeId,
   filters,
   from,
   to,
