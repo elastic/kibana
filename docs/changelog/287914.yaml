@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/287914
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Warn before disabling default status and TLS rules

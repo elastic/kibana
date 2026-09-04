@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/287949
+issues:
+- https://github.com/elastic/kibana/issues/242154
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Cancel async searches on browser nav
+description: Async searches are now proactively cancelled when leaving the Discover and Dashboard apps mid-load via browser navigation (e.g. closing the browser or entering a new URL). This reduces wasteful work in Elasticsearch.

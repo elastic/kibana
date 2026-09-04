@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/287763
+issues:
+- https://github.com/elastic/kibana/issues/287702
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- AI and machine Learning
+title: A2A - add stream mode support

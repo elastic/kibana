@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287576
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Prettify floating action dashboard button

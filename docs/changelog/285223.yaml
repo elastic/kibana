@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/285223
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Persist EUID on alerts at enrichment time to accelerate risk scoring

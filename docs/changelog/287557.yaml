@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/287557
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Validate dataset name for integration package type
+description: '**Fleet**: The \`data_stream.dataset\` field is now validated for all package types in the Fleet policy editor, not only \`type: input\` packages. Integration packages that expose a user-configurable dataset name (such as Custom AWS Logs) will now correctly reject names containing invalid characters (hyphens, spaces, uppercase letters, etc.). If you have existing integration policies with invalid dataset names, you will need to update them manually — a validation error will appear the next time you edit or upgrade those policies.'

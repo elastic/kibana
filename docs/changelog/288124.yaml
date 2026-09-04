@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/288124
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix boolean console args validation

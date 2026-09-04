@@ -1,0 +1,341 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-04
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-04
+hide-features:
+- data-federation
+entries:
+- file:
+    name: 287194.yaml
+    checksum: fbc9d94c63219f4f4eca18d8e2c596c911ed8f02
+  type: enhancement
+  title: Add policy_namespace field to agent status change events
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287194
+  issues:
+  - https://github.com/elastic/kibana/issues/286395
+- file:
+    name: 285223.yaml
+    checksum: bd59291f24ee0cfdfdccd186f51b1ae300379098
+  type: bug-fix
+  title: Persist EUID on alerts at enrichment time to accelerate risk scoring
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285223
+- file:
+    name: 287592.yaml
+    checksum: 87fd57d5922988b67d0eb4b8bad3c8c5916f7363
+  type: bug-fix
+  title: Fix dead isRequestTimeout guard masking transport errors as 500s
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes transform actions (start, stop, delete, reset, schedule now, reauthorize) failing with a generic 500 error when the Elasticsearch request timed out or failed at the transport level; these now report per-transform error messages.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/287592
+  issues:
+  - https://github.com/elastic/kibana/issues/282974
+- file:
+    name: 288124.yaml
+    checksum: a0dfa21bf3e37a074bc467d0c5ee6e0c0035b89b
+  type: bug-fix
+  title: Fix boolean console args validation
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288124
+- file:
+    name: 287576.yaml
+    checksum: 41ade1f33d584ada470d5c7a83174426bcee97cb
+  type: feature
+  title: Prettify floating action dashboard button
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287576
+- file:
+    name: 286849.yaml
+    checksum: f7532cd1664803df24a44474949f5ee8669f258e
+  type: bug-fix
+  title: Fix zombie streams monopolizing Kibana event loop
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286849
+- file:
+    name: 287043.yaml
+    checksum: 6e237a533e245923b74b533b37334e1ba0a1f66e
+  type: enhancement
+  title: Add cases.extendedFieldsUpdated workflow trigger
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: >-
+    ```
+
+    Added the `cases.extendedFieldsUpdated` workflow trigger. This trigger fires whenever one or more extended-field values change on a case — including changes driven by a linked custom-field patch — and carries the list of changed field keys in its payload. Use a `cases.getCase` step to read current values.
+
+    ```
+  prs:
+  - https://github.com/elastic/kibana/pull/287043
+- file:
+    name: 287347.yaml
+    checksum: c835888da7f2ed9beaa541cd077e093e57496e12
+  type: bug-fix
+  title: Merge `variables` from the context override in single step run
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287347
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19105'
+- file:
+    name: 287557.yaml
+    checksum: e7bfd41fc8078bacb5bbb4d9e0c67a2656b12714
+  type: bug-fix
+  title: Validate dataset name for integration package type
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: '**Fleet**: The \`data_stream.dataset\` field is now validated for all package types in the Fleet policy editor, not only \`type: input\` packages. Integration packages that expose a user-configurable dataset name (such as Custom AWS Logs) will now correctly reject names containing invalid characters (hyphens, spaces, uppercase letters, etc.). If you have existing integration policies with invalid dataset names, you will need to update them manually — a validation error will appear the next time you edit or upgrade those policies.'
+  prs:
+  - https://github.com/elastic/kibana/pull/287557
+- file:
+    name: 288163.yaml
+    checksum: ff17e7bc4701750ebce19b8c80564b24482c4ff5
+  type: bug-fix
+  title: Mark Alerting V2 privileges as experimental in Roles UI
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Relabels top level "Alerting" privilege to "Alerting V2" with experimental designation to clarify these privileges are for the experimental alerting system.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288163
+- file:
+    name: 287633.yaml
+    checksum: 82f327ce8e495707798092e4715fb7624c7b69d9
+  type: bug-fix
+  title: Gate Cases tools and skills from es-solution spaces
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Cases tools and skills are no longer registered in Agent Builder or the MCP Server in projects or spaces where the Cases feature is unavailable (e.g. Elasticsearch/Search solution spaces).
+  prs:
+  - https://github.com/elastic/kibana/pull/287633
+- file:
+    name: 287923.yaml
+    checksum: 4cf0a69644e6468c9d03089d95a4708928d04fc8
+  type: bug-fix
+  title: Fix deleting a section leaves panel APIs in children$
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287923
+  issues:
+  - https://github.com/elastic/kibana/issues/287838
+- file:
+    name: 287935.yaml
+    checksum: e179b5ad69564ed2c934def704060aa7e4988843
+  type: bug-fix
+  title: Limit data table cells created by `/internal/canvas/fns` route
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287935
+- file:
+    name: 287763.yaml
+    checksum: e3fc96d7c24a30efac2e71cc54e0d5ccd47814a1
+  type: enhancement
+  title: A2A - add stream mode support
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/287763
+  issues:
+  - https://github.com/elastic/kibana/issues/287702
+- file:
+    name: 283350.yaml
+    checksum: 36e924151b8ba7bacc037eea114d0d75f6f27a4e
+  type: bug-fix
+  title: Enforce required global fields and workflow extended_fields
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: With case templates enabled, API and workflow case creates enforce required global fields. Workflow and public case create/update APIs accept `extended_fields`.
+  prs:
+  - https://github.com/elastic/kibana/pull/283350
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19065'
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19063'
+- file:
+    name: 285139.yaml
+    checksum: 5cc2cae8a66a2e2d8606557aaa7d072c2142c69f
+  type: bug-fix
+  title: Guard nullable columns in graph pinned ESQL predicate
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285139
+  issues:
+  - https://github.com/elastic/kibana/issues/268111
+  - https://github.com/elastic/kibana/issues/272474
+- file:
+    name: 288199.yaml
+    checksum: dc95c96efb3a8d6ad70106b7e218e526c32d1098
+  type: bug-fix
+  title: Fix Entity Summary persistency
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288199
+  issues:
+  - https://github.com/elastic/kibana/issues/287784
+- file:
+    name: 288209.yaml
+    checksum: ed3d3cecaa8fa800dc0b78c72d165a595e814aef
+  type: bug-fix
+  title: Quote KQL value in snapshot query to handle ARN identifiers
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288209
+  issues:
+  - https://github.com/elastic/kibana/issues/288195
+- file:
+    name: 287914.yaml
+    checksum: 83d424256411fb8e601831b181fe59018ae9bbab
+  type: enhancement
+  title: Warn before disabling default status and TLS rules
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287914
+- file:
+    name: 286578.yaml
+    checksum: af2aaaf065747985fd7b146f099e3ccb13257190
+  type: bug-fix
+  title: Support context variables in ServiceNow and Jira additional fields
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Context variables can now be used in the `Additional fields` of the ServiceNow ITSM, ServiceNow SecOps and Jira connectors.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286578
+  issues:
+  - '# PRIVATE: https://github.com/elastic/enhancements/issues/26370'
+- file:
+    name: 288107.yaml
+    checksum: 700f2255b592445984fa50d436a98dbeeed8b524
+  type: bug-fix
+  title: Block inference calls to non-default endpoints when default-only is set
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288107
+- file:
+    name: 286860.yaml
+    checksum: 1e6e899f0754f3ffb030579b89ef4cc1513f87f6
+  type: feature
+  title: Consolidate conversation layout attribution
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286860
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/15820'
+- file:
+    name: 287949.yaml
+    checksum: 60d8c5a515d752e4d775a6f15c5bdcc36ca9309f
+  type: enhancement
+  title: Cancel async searches on browser nav
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Async searches are now proactively cancelled when leaving the Discover and Dashboard apps mid-load via browser navigation (e.g. closing the browser or entering a new URL). This reduces wasteful work in Elasticsearch.
+  prs:
+  - https://github.com/elastic/kibana/pull/287949
+  issues:
+  - https://github.com/elastic/kibana/issues/242154
+- file:
+    name: 287420.yaml
+    checksum: 8c17cfa790a7e832b729db50a09b4564d40b6de9
+  type: enhancement
+  title: Add 'Add to chat' button to alert details page
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287420
+  issues:
+  - https://github.com/elastic/kibana/issues/287572
+- file:
+    name: 288075.yaml
+    checksum: 276f0174bbbf3ff153dea85ab877faadb9ee6590
+  type: bug-fix
+  title: Preserve YAML formatting and comments in generated workflow edits
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288075
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19136'
+- file:
+    name: 287986.yaml
+    checksum: f543ac5d7c527980e8a192cedfba1bf285c7ed6a
+  type: bug-fix
+  title: Skip leftover ticks for disabled scheduled workflows
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287986
+  issues:
+  - https://github.com/elastic/kibana/issues/287985
+- file:
+    name: 287713.yaml
+    checksum: 465642b1fab4f4cde678669ad3252db41f85bbed
+  type: feature
+  title: Enable `memory-dump --raw` feature
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287713

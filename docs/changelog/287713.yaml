@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/287713
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: Enable `memory-dump --raw` feature

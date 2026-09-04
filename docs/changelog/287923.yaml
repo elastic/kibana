@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/287923
+issues:
+- https://github.com/elastic/kibana/issues/287838
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Fix deleting a section leaves panel APIs in children$

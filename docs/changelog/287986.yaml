@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287986
+issues:
+- https://github.com/elastic/kibana/issues/287985
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Skip leftover ticks for disabled scheduled workflows

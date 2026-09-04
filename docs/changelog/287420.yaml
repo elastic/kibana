@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287420
+issues:
+- https://github.com/elastic/kibana/issues/287572
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Add 'Add to chat' button to alert details page"

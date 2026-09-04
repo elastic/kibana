@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/288199
+issues:
+- https://github.com/elastic/kibana/issues/287784
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix Entity Summary persistency

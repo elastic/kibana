@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287194
+issues:
+- https://github.com/elastic/kibana/issues/286395
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add policy_namespace field to agent status change events
