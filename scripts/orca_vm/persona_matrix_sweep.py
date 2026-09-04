@@ -466,14 +466,35 @@ def vm_name(model: str, shard: Optional[str] = None) -> str:
 
 
 def provision(model: str, shard: Optional[str] = None) -> str:
-    """Create a D8s_v5 spot VM; return its public IP."""
+    """Create a D8s_v5 VM; return its public IP.
+
+    Priority: Spot when capacity is available, falling back to Regular.
+    2026-09-04: spot capacity for D8s_v5 in the farm region was exhausted
+    (SkuServerAvailableOrAlteredByPlatform surfaced as an az-cli crash that
+    swallowed the error); 16/42 shards were skipped as "prepare failed".
+    SPOT_VM=0 forces Regular; Spot failures auto-fall back to Regular.
+    """
     name = vm_name(model, shard)
     print(f"[provision] {name}", flush=True)
-    az("vm", "create", "-g", RG, "-n", name, "--image", IMAGE, "--size", VM_SIZE,
-       "--eviction-policy", "Deallocate", "--priority", "Spot",
-       "--admin-username", SSH_USER, "--ssh-key-values",
-       os.path.expanduser("~/.ssh/azure_eval_farm.pub"),
-       "--public-ip-sku", "Standard", "--os-disk-size-gb", "128", "--no-wait")
+    use_spot = os.environ.get("SPOT_VM", "1") == "1"
+
+    def _create(priority: str) -> None:
+        args = ["vm", "create", "-g", RG, "-n", name, "--image", IMAGE,
+                "--size", VM_SIZE, "--admin-username", SSH_USER, "--ssh-key-values",
+                os.path.expanduser("~/.ssh/azure_eval_farm.pub"),
+                "--public-ip-sku", "Standard", "--os-disk-size-gb", "128", "--no-wait"]
+        if priority == "Spot":
+            args += ["--eviction-policy", "Deallocate", "--priority", "Spot"]
+        az(*args)
+
+    if use_spot:
+        try:
+            _create("Spot")
+        except (SystemExit, RuntimeError) as e:
+            print(f"[provision] spot create failed ({e}); retrying as Regular", flush=True)
+            _create("Regular")
+    else:
+        _create("Regular")
     for _ in range(60):
         time.sleep(10)
         try:
