@@ -291,18 +291,16 @@ const metricStylingSchema = z
     secondary: z
       .object({
         /**
-         * Label configuration
+         * Label configuration. The label text is the secondary metric operation name.
          */
         label: z
           .object({
             /**
              * Whether to display the label
              */
-            visible: z
-              .boolean()
-              .default(DEFAULT_SECONDARY_LABEL_VISIBLE)
-              .optional()
-              .meta({ description: 'When `true`, displays the label.' }),
+            visible: z.boolean().default(DEFAULT_SECONDARY_LABEL_VISIBLE).optional().meta({
+              description: 'When `true`, displays the secondary metric name as its label.',
+            }),
             /**
              * Label placement relative to the secondary metric value. Possible values:
              * - 'before': Label appears before the value
@@ -310,7 +308,7 @@ const metricStylingSchema = z
              */
             placement: placementSchema.default(DEFAULT_SECONDARY_LABEL_PLACEMENT).optional().meta({
               description:
-                'Label placement relative to the secondary metric value (before or after).',
+                'Label placement relative to the secondary metric value (before or after). Ignored when the label is not visible.',
             }),
           })
           .strict()

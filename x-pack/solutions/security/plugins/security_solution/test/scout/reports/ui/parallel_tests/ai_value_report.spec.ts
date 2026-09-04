@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
+// tests consistently fail in MKI runs, see https://github.com/elastic/kibana/issues/273847
 spaceTest.describe(
   'AI Value Report',
   {
     tag: [
-      ...tags.stateful.classic,
-      ...tags.serverless.security.complete,
-      ...tags.serverless.security.ease,
+      '@local-stateful-classic',
+      '@local-serverless-security_complete',
+      '@local-serverless-security_ease',
     ],
   },
   () => {

@@ -42,7 +42,7 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
 };
 
 describe('conversation storage mapping', () => {
-  it('maps read_by as a nested field', async () => {
+  it.each(['read_by', 'pinned_by'] as const)('maps %s as a nested field', async (field) => {
     const esClient = createMockEsClient();
     const storage = createStorage({ logger: createLoggerMock(), esClient });
 
@@ -56,7 +56,7 @@ describe('conversation storage mapping', () => {
         created_at: '2026-08-24T00:00:00.000Z',
         updated_at: '2026-08-24T00:00:00.000Z',
         conversation_rounds: [],
-        read_by: [{ userId: 'user-1' }],
+        [field]: [{ userId: 'user-1' }],
       },
     });
 
@@ -65,7 +65,7 @@ describe('conversation storage mapping', () => {
         template: expect.objectContaining({
           mappings: expect.objectContaining({
             properties: expect.objectContaining({
-              read_by: expect.objectContaining({
+              [field]: expect.objectContaining({
                 type: 'nested',
                 dynamic: false,
                 properties: expect.objectContaining({
