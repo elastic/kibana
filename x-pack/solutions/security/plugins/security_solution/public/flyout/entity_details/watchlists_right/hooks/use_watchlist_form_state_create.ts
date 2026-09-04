@@ -14,6 +14,7 @@ import {
   getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
+import { useRuleBasedSourceState } from './use_rule_based_source_state';
 
 export const useCreateWatchlistFormState = (): WatchlistFormState => {
   const defaultWatchlist = useMemo<CreateWatchlistRequestBodyInput>(
@@ -22,7 +23,6 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
   );
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
-  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -42,6 +42,14 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     setWatchlist(defaultWatchlist);
   }, [defaultWatchlist, hasUserEdits]);
 
+  const ruleBasedSource = useRuleBasedSourceState({
+    watchlistName: watchlist.name,
+    isEditMode: false,
+    isManaged: watchlist.managed ?? false,
+    initialEntitySources: watchlist.entitySources,
+    onFieldChange: setWatchlistField,
+  });
+
   const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
   const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
   const isDisabled =
@@ -49,7 +57,8 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     isNameTooLong ||
     isDescriptionTooLong ||
     isRiskModifierInvalid ||
-    !isSourceValid;
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,
@@ -61,6 +70,6 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     isDescriptionTooLong,
     isRiskModifierInvalid,
     setWatchlistField,
-    setSourceValid,
+    ruleBasedSource,
   };
 };

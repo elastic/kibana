@@ -6,15 +6,18 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  PND_MANAGED_WATCH_WORKFLOW_IDS,
-  PND_WATCH_FLOOR_WORKFLOW_ID,
-  PND_RULE_WORKFLOW_IDS,
-} from '@kbn/workflows/managed';
+import { PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { ManagedWorkflowInstanceState } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { initializeManagedWorkflows } from './initialize_managed_workflows';
+
+const makeState = (spaceId: string) => ({
+  workflowId: `wf-${spaceId}`,
+  spaceId,
+  definitionId: 'some-worker',
+  templateValues: null,
+  documentVersion: 1,
+});
 
 const createDependencies = () => {
   const client = {
@@ -24,7 +27,7 @@ const createDependencies = () => {
     execute: jest.fn(),
     getWorkflowStatus: jest.fn(),
     getInstalledWorkflowState: jest.fn(),
-    listInstalledWorkflowStates: jest.fn(async (): Promise<ManagedWorkflowInstanceState[]> => []),
+    listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
   };
   const workflowsExtensions = {
     initManagedWorkflowsClient: jest.fn(async () => client),
@@ -47,82 +50,6 @@ describe('initializeManagedWorkflows', () => {
     expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
-  it('migrates stored values and removes legacy global watches before ready', async () => {
-    const { client, workflowsExtensions, logger } = createDependencies();
-    client.listInstalledWorkflowStates = jest.fn(async () => [
-      {
-        workflowId: `${PND_WATCH_FLOOR_WORKFLOW_ID}-space-a`,
-        spaceId: 'space-a',
-        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
-        templateValues: { autonomyLevel: 'assisted' },
-        documentVersion: 7,
-      },
-      {
-        workflowId: PND_MANAGED_WATCH_WORKFLOW_IDS[1],
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        definitionId: PND_MANAGED_WATCH_WORKFLOW_IDS[1],
-        templateValues: null,
-        documentVersion: 3,
-      },
-    ]);
-
-    await initializeManagedWorkflows({ workflowsExtensions, logger });
-
-    expect(client.install).toHaveBeenCalledWith(PND_WATCH_FLOOR_WORKFLOW_ID, {
-      spaceId: 'space-a',
-      workflowId: `${PND_WATCH_FLOOR_WORKFLOW_ID}-space-a`,
-      values: {
-        settingsVersion: 1,
-        autonomyLevel: 'assisted',
-      },
-    });
-    expect(client.uninstall).toHaveBeenCalledWith(PND_MANAGED_WATCH_WORKFLOW_IDS[1], {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      workflowId: PND_MANAGED_WATCH_WORKFLOW_IDS[1],
-    });
-    expect(client.ready.mock.invocationCallOrder[0]).toBeGreaterThan(
-      client.install.mock.invocationCallOrder.at(-1) ?? 0
-    );
-    expect(client.ready.mock.invocationCallOrder[0]).toBeGreaterThan(
-      client.uninstall.mock.invocationCallOrder[0]
-    );
-  });
-
-  it('degrades without reconciliation when the migration read fails', async () => {
-    const { client, workflowsExtensions, logger } = createDependencies();
-    client.listInstalledWorkflowStates = jest.fn(async () => {
-      throw new Error('storage unavailable');
-    });
-
-    await initializeManagedWorkflows({ workflowsExtensions, logger });
-
-    expect(client.ready).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('reconciliation skipped because initialization degraded')
-    );
-  });
-
-  it('degrades without reconciliation when the installed-state list hits the read cap', async () => {
-    const { client, workflowsExtensions, logger } = createDependencies();
-    client.listInstalledWorkflowStates = jest.fn(async () =>
-      Array.from({ length: 1000 }, (_, index) => ({
-        workflowId: `wf-${index}`,
-        spaceId: 'space-a',
-        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
-        templateValues: {
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-        },
-        documentVersion: 1,
-      }))
-    );
-
-    await initializeManagedWorkflows({ workflowsExtensions, logger });
-
-    expect(client.ready).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1000-document read cap'));
-  });
-
   it('does not reconcile when a required rule workflow install fails', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.install.mockRejectedValueOnce(new Error('rule workflow install failed'));
@@ -135,52 +62,6 @@ describe('initializeManagedWorkflows', () => {
     );
   });
 
-  it('does not reconcile when persisted settings cannot be migrated', async () => {
-    const { client, workflowsExtensions, logger } = createDependencies();
-    client.listInstalledWorkflowStates = jest.fn(async () => [
-      {
-        workflowId: `${PND_WATCH_FLOOR_WORKFLOW_ID}-space-a`,
-        spaceId: 'space-a',
-        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
-        templateValues: {
-          settingsVersion: 2,
-          autonomyLevel: 'manual',
-        },
-        documentVersion: 7,
-      },
-    ]);
-
-    await initializeManagedWorkflows({ workflowsExtensions, logger });
-
-    expect(client.ready).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        `Unsupported settings version for PND watch "${PND_WATCH_FLOOR_WORKFLOW_ID}": 2`
-      )
-    );
-  });
-
-  it('does not reinstall values that already match the current settings shape', async () => {
-    const { client, workflowsExtensions, logger } = createDependencies();
-    client.listInstalledWorkflowStates = jest.fn(async () => [
-      {
-        workflowId: `${PND_WATCH_FLOOR_WORKFLOW_ID}-space-a`,
-        spaceId: 'space-a',
-        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
-        templateValues: {
-          settingsVersion: 1,
-          autonomyLevel: 'manual',
-        },
-        documentVersion: 7,
-      },
-    ]);
-
-    await initializeManagedWorkflows({ workflowsExtensions, logger });
-
-    expect(client.install.mock.calls.map(([id]) => id)).toEqual(PND_RULE_WORKFLOW_IDS);
-    expect(client.ready).toHaveBeenCalledTimes(1);
-  });
-
   it('returns the managed client when ready reconciliation fails', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.ready.mockRejectedValueOnce(new Error('reconciliation failed'));
@@ -188,5 +69,70 @@ describe('initializeManagedWorkflows', () => {
     await expect(initializeManagedWorkflows({ workflowsExtensions, logger })).resolves.toBe(client);
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('reconciliation failed'));
+  });
+
+  describe('ensureAgentForSpace', () => {
+    it('calls ensureAgentForSpace once per unique space from installed worker states', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const ensureAgentForSpace = jest.fn(async () => undefined);
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        makeState('space-a'),
+        makeState('space-b'),
+        makeState('space-a'), // duplicate — should only call once
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
+
+      expect(ensureAgentForSpace).toHaveBeenCalledTimes(2);
+      expect(ensureAgentForSpace).toHaveBeenCalledWith('space-a');
+      expect(ensureAgentForSpace).toHaveBeenCalledWith('space-b');
+    });
+
+    it('excludes the global workflow space', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const ensureAgentForSpace = jest.fn(async () => undefined);
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        makeState(GLOBAL_WORKFLOW_SPACE_ID),
+        makeState('space-a'),
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
+
+      expect(ensureAgentForSpace).toHaveBeenCalledTimes(1);
+      expect(ensureAgentForSpace).toHaveBeenCalledWith('space-a');
+      expect(ensureAgentForSpace).not.toHaveBeenCalledWith(GLOBAL_WORKFLOW_SPACE_ID);
+    });
+
+    it('does not call ensureAgentForSpace when not provided', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      client.listInstalledWorkflowStates.mockResolvedValue([makeState('space-a')]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.listInstalledWorkflowStates).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when ensureAgentForSpace fails for a space', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const ensureAgentForSpace = jest.fn().mockRejectedValueOnce(new Error('agent ensure failed'));
+      client.listInstalledWorkflowStates.mockResolvedValue([makeState('space-a')]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('"space-a"') && expect.stringContaining('agent ensure failed')
+      );
+    });
+
+    it('logs a warning when listInstalledWorkflowStates throws', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const ensureAgentForSpace = jest.fn(async () => undefined);
+      client.listInstalledWorkflowStates.mockRejectedValue(new Error('storage unavailable'));
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger, ensureAgentForSpace });
+
+      expect(ensureAgentForSpace).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('storage unavailable'));
+    });
   });
 });
