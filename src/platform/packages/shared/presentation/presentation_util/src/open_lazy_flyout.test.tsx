@@ -50,6 +50,7 @@ describe('openLazyFlyout', () => {
         className: 'kbnPresentationLazyFlyout',
         'data-test-subj': 'lazyFlyoutTest',
         isResizable: true,
+        minWidth: 400,
         maxWidth: 800,
         size: 500,
         outsideClickCloses: true,
