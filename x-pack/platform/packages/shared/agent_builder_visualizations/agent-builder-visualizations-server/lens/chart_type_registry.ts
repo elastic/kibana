@@ -116,7 +116,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       review: {
         critical: [
-          'A painted dashboard chrome title on a metric is a critical issue — the primary metric name is already the title.',
+          'A title on a metric is a critical issue. The query MUST include the exact phrase "remove the panel title" — on `add_section.panels` when wrapping, otherwise on `edit_panels`.',
           'Invented static colors or BACKGROUND fills on the primary metric are a critical issue.',
         ],
         suggestions: [
@@ -125,7 +125,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       },
       config: {
         rules: [
-          'Do not set a panel chart title on a dashboard; the primary metric painted title is the title.',
+          'Do not set a panel title on a metric — it duplicates the painted metric name. Omit title so the metric is titleless.',
           'A single primary metric is valid, but when meaningful, enrich it from the same ES|QL with a trend background or secondary metric. Never invent another index or field.',
           'Use `type: "bar"` only for meaningful progress-to-max.',
           'For trend/delta secondary metrics, hide the label with `styling.secondary.label.visible: false` and omit `label`. Show labels only for distinct named measures.',
@@ -178,6 +178,10 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         critical: [
           'A solid area fill on the painted chart is a critical issue.',
           'A visible legend on a one-series categorical chart is a critical issue.',
+          'Invented static or custom series colors (explicit hex or `type: "static"`) are a critical issue.',
+        ],
+        suggestions: [
+          'Most time-series line charts should be gradient area. Keep at most one line (the primary overview trend); convert the rest to area with `styling.areas.fill: "gradient"`. Skip bars, categorical charts, and a lone line that is already the only time series.',
         ],
       },
       config: {
@@ -187,11 +191,6 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'For area series, set `styling.areas.fill: "gradient"` rather than solid.',
           'Default legend rules: Place outside at the bottom. Omit legend.layout.type. Do not set legend.visibility unless legend statistics are set - then set it to "visible".',
           seriesStatisticsLensConfigRule,
-        ],
-        coloringRules: [
-          'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
-          'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
-          'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
       },
     },
@@ -217,7 +216,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
     schema: tagcloudConfigSchemaESQL,
     prompt: {
       selection:
-        'Displays terms sized by frequency or value. Choose only when the terms are short strings (tags, status codes, country codes, browsers). Do not use for long text such as error messages, URLs, or log lines — use a table instead.',
+        'Displays terms sized by frequency or value. Choose only when the terms are short strings (tags, status codes, country codes, browsers). Do not use for long text such as URLs, browser agents, or log lines — use a table instead.',
     },
   },
   [SupportedChartType.RegionMap]: {
@@ -256,11 +255,14 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Pie or donut showing part-to-whole proportions as slices. Choose for percentage breakdowns with a limited number of categories, ideally fewer than 7 (e.g. "traffic distribution by browser as a donut").',
       review: {
-        critical: ['Invented per-slice or custom colors are a critical issue.'],
+        critical: [
+          'Invented per-slice or custom colors are a critical issue.',
+          'A pie legend set to visible or hidden is a critical issue — leave legend.visibility omitted or auto.',
+        ],
       },
       config: {
-        coloringRules: [
-          'Omit explicit `color` properties and use the Lens default palette. Only add colors when the user explicitly requests them.',
+        rules: [
+          'Omit `legend.visibility` (or set `auto`). Do not set `visible` or `hidden` — slice labels carry the categories.',
         ],
       },
     },
