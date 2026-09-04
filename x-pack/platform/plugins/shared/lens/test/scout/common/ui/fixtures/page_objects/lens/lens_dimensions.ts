@@ -40,9 +40,27 @@ export class LensDimensions {
   /** Language switcher inside the open dimension Filter by input. */
   readonly dimensionFilterLanguageButton;
   readonly luceneLanguageMenuItem;
+  /** Close (X) control on the open dimension editor flyout. */
+  readonly editorCloseButton;
+  readonly quickFunctionsTab;
+  readonly formulaTab;
+  readonly staticValueTab;
+  /** Number input only — EuiRange also stamps the same test-subj on the slider. */
+  readonly formatDecimalsInput;
+  readonly dimensionColorPicker;
+  readonly dimensionNameInput;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
+    this.editorCloseButton = deps.closeDimensionEditorButton;
+    this.quickFunctionsTab = this.page.testSubj.locator('lens-dimensionTabs-quickFunctions');
+    this.formulaTab = this.page.testSubj.locator('lens-dimensionTabs-formula');
+    this.staticValueTab = this.page.testSubj.locator('lens-dimensionTabs-static_value');
+    this.formatDecimalsInput = this.page.locator(
+      'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
+    );
+    this.dimensionColorPicker = this.page.getByTestId(/indexPattern-dimension-colorPicker/);
+    this.dimensionNameInput = this.page.testSubj.locator('name-input');
     this.timeShift = this.page.testSubj.locator(TIME_SHIFT_TEST_SUBJ);
     this.timeShiftComboInput = this.timeShift.locator('[data-test-subj="comboBoxInput"]');
     this.timeShiftSearchInput = this.timeShift.locator(
@@ -487,6 +505,122 @@ export class LensDimensions {
         });
       },
       { expected: field },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Sets the display name of the currently open dimension.
+   * NameInput remounts when the label commits (`DebouncedInput` key); wait for the value
+   * rather than treating a detached node as success.
+   */
+  async editDimensionLabel(label: string) {
+    await this.dimensionNameInput.waitFor({ state: 'visible' });
+    await this.dimensionNameInput.scrollIntoViewIfNeeded();
+    await this.dimensionNameInput.fill(label);
+    await this.page.waitForFunction(
+      (expected) => {
+        const el = document.querySelector('[data-test-subj="name-input"]');
+        return el instanceof HTMLInputElement && el.value === expected;
+      },
+      label,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+    // The typed value is only in the input: `useDebouncedValue` holds it ~256ms, then commits
+    // the whole column from the state its closure captured. Anything edited in between (format,
+    // color) is silently reverted by that commit, so wait until the label reaches Lens state.
+    // The dimension trigger keeps rendering behind the editor flyout and shows the custom label.
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      (expected) =>
+        Array.from(document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]')).some(
+          (el) => (el.textContent ?? '').replace(/\u200b/g, '').includes(expected)
+        ),
+      label,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Configures the reference (sub-function / field) of the currently open dimension.
+   * Caller must have a reference-based operation editor open (e.g. moving_average).
+   *
+   * `operation` is the sub-function display label (`Sum`, `Unique count`, …), not the
+   * operation id: the reference combo lists labels and EUI matches them exactly.
+   */
+  async configureReference(opts: { operation?: string; field?: string }) {
+    const { operation, field } = opts;
+    if (operation != null) {
+      await this.page.components
+        .comboBox('indexPattern-reference-function')
+        .setSelectedOptions([operation]);
+    }
+    if (field != null) {
+      await this.page.components
+        .comboBox('indexPattern-dimension-field')
+        .setSelectedOptions([field], { timeout: 10_000 });
+      await this.page.waitForFunction(
+        (expected) =>
+          document
+            .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+            ?.getAttribute('data-selected-field') === expected,
+        field,
+        { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+      );
+    }
+  }
+
+  /**
+   * Sets the color of the currently open dimension. EUI may normalize case
+   * (e.g. `#ff0000` → `#FF0000`); wait until the committed value matches ignoring case.
+   */
+  async editDimensionColor(hex: string) {
+    await this.dimensionColorPicker.waitFor({ state: 'visible' });
+    await this.dimensionColorPicker.fill('');
+    await this.dimensionColorPicker.fill(hex);
+    await this.page.waitForFunction(
+      (expected) => {
+        const el = document.querySelector('[data-test-subj*="indexPattern-dimension-colorPicker"]');
+        return el instanceof HTMLInputElement && el.value.toLowerCase() === expected.toLowerCase();
+      },
+      hex,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /** Returns the committed color-picker value of the currently open dimension. */
+  async getDimensionColor(): Promise<string> {
+    await this.dimensionColorPicker.waitFor({ state: 'visible' });
+    return this.dimensionColorPicker.inputValue();
+  }
+
+  /** Locator for the hover-revealed remove control of a dimension panel. */
+  getDimensionRemoveLocator(dimensionTestSubj: string) {
+    return this.page.testSubj.locator(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+  }
+
+  /**
+   * Removes one dimension (the first) in the given panel and waits until its
+   * trigger count drops by one. Caller should hover-assert the remove control
+   * when that visibility is under test.
+   */
+  async removeDimension(dimensionTestSubj: string) {
+    const triggers = this.getDimensionTriggersLocator(dimensionTestSubj);
+    const removeLocator = this.getDimensionRemoveLocator(dimensionTestSubj);
+    const countBefore = await triggers.count();
+    const buttons = await removeLocator.all();
+    const button = buttons[0];
+    if (!button) {
+      throw new Error(`No remove control for "${dimensionTestSubj}"`);
+    }
+    await button.hover();
+    await button.click();
+    await this.page.waitForFunction(
+      ({ panelSubj, expected }) =>
+        document.querySelectorAll(
+          `[data-test-subj="${panelSubj}"] [data-test-subj="lns-dimensionTrigger"]`
+        ).length === expected,
+      { panelSubj: dimensionTestSubj, expected: Math.max(0, countBefore - 1) },
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }

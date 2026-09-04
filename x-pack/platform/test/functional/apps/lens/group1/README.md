@@ -19,7 +19,7 @@ Use the file that matches the main behavior under test:
 
 - `chart_creation.ts`: create, save, reopen, change data view, or edit saved visualization metadata.
 - `layers.ts`: create, duplicate, remove, switch, or validate Lens layers and layer-specific behavior (CCS-only; prefer Scout smokescreen for new coverage).
-- `dimension_editor.ts`: edit dimensions, operations, labels, formats, references, percentile values, or incomplete dimension state.
+- `dimension_editor.ts`: edit dimensions, operations, labels, formats, references, percentile values, or incomplete dimension state (CCS-only; prefer Scout smokescreen for new coverage).
 - `chart_style_settings.ts`: change chart appearance or chart interactions, such as axes, value labels, point visibility, visual options, or legend filtering.
 - `ad_hoc_data_view.ts`: flows specific to ad hoc data views.
 - `multiple_data_views.ts`: flows involving more than one data view.
@@ -27,10 +27,10 @@ Use the file that matches the main behavior under test:
 
 If a test touches several areas, place it where the assertion would be most useful to someone debugging a failure. For example, a test that switches chart types only to reach a style setting belongs in `chart_style_settings.ts`.
 
-Chart-switching and layers coverage now live in Scout, under
-`x-pack/platform/plugins/shared/lens/test/scout/smokescreen`. `chart_switching.ts` and `layers.ts`
-remain here but `index.ts` loads them only for the cross-cluster-search run (`config.ccs.ts`),
-which Scout cannot reproduce yet — do not add new tests to them.
+Chart-switching, layers and dimension-editor coverage now live in Scout, under
+`x-pack/platform/plugins/shared/lens/test/scout/smokescreen`. `chart_switching.ts`, `layers.ts` and
+`dimension_editor.ts` remain here but `index.ts` loads them only for the cross-cluster-search run
+(`config.ccs.ts`), which Scout cannot reproduce yet — do not add new tests to them.
 
 ## Running Locally
 

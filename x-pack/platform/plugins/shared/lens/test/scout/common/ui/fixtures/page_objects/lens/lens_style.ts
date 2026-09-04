@@ -24,6 +24,9 @@ export class LensStyle {
   private readonly colorMappingPalettePicker;
   private readonly legacyPalettePicker;
   readonly referenceLineFillBelowButton;
+  private readonly curveStyleSelect;
+  private readonly missingValuesSuperSelect;
+  readonly missingValuesSelect;
 
   constructor(private readonly page: ScoutPage) {
     this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
@@ -42,6 +45,9 @@ export class LensStyle {
     );
     this.legacyPalettePicker = this.page.testSubj.locator('lns-palettePicker');
     this.referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
+    this.curveStyleSelect = this.page.components.superSelect('lnsCurveStyleSelect');
+    this.missingValuesSuperSelect = this.page.components.superSelect('lnsMissingValuesSelect');
+    this.missingValuesSelect = this.page.testSubj.locator('lnsMissingValuesSelect');
   }
 
   /**
@@ -412,5 +418,19 @@ export class LensStyle {
     await this.page.components
       .comboBox(`lnsXY-annotation-tooltip-field-picker--${existingPickers}`)
       .setSelectedOptions([fieldName]);
+  }
+
+  /**
+   * Sets XY line interpolation from the open style flyout (`Straight`, `Smooth`, `Step`).
+   */
+  async setCurvedLines(label: string) {
+    await this.curveStyleSelect.selectOptionByLabel(label);
+  }
+
+  /**
+   * Sets XY missing-values fitting from the open style flyout (`Hide`, `Zero`, `Linear`, …).
+   */
+  async editMissingValues(label: string) {
+    await this.missingValuesSuperSelect.selectOptionByLabel(label);
   }
 }
