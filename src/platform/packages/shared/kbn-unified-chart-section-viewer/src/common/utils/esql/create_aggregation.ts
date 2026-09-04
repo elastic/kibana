@@ -107,8 +107,12 @@ function buildAggregationNode(
   }
 
   const fn = settings.gaugeAggregation.toUpperCase();
-  const overTimeFn = GAUGE_OVER_TIME_FN[settings.gaugeAggregation].toUpperCase();
-  return synth.exp`${synth.kwd(fn)}(${synth.kwd(overTimeFn)}(${resolvedField}))`;
+  if (instrument === 'gauge') {
+    const overTimeFn = GAUGE_OVER_TIME_FN[settings.gaugeAggregation].toUpperCase();
+    return synth.exp`${synth.kwd(fn)}(${synth.kwd(overTimeFn)}(${resolvedField}))`;
+  }
+
+  return synth.exp`${synth.kwd(fn)}(${resolvedField})`;
 }
 
 /**
@@ -117,7 +121,8 @@ function buildAggregationNode(
  * - For legacy histogram (field type + instrument both histogram): `PERCENTILE(TO_TDIGEST(...), 95)`
  * - For `histogram` instrument: `PERCENTILE(..., 95)` if type is `exponential_histogram` or `tdigest`
  * - `SUM(RATE(...))` for counter instruments
- * - `AVG(AVG_OVER_TIME(...))` for other metric types (gauges)
+ * - `AVG(AVG_OVER_TIME(...))` for gauge instruments
+ * - `AVG(...)` for other metric types that fall through (e.g. traces latency)
  *
  * When multiple field types are present (from different backing indices with conflicting mappings),
  * the aggregation will wrap the field in an appropriate casting function (e.g., TO_DOUBLE) to resolve the ambiguity.

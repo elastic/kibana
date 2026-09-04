@@ -15,7 +15,7 @@ const mockMetric: ParsedMetricItem = {
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
   indexName: 'metrics-*',
   units: ['ms'],
-  metricTypes: ['histogram'],
+  metricTypes: ['gauge'],
   dimensionFields: [
     { name: 'host.name' },
     { name: 'container.id' },
@@ -347,7 +347,7 @@ TS metrics-*
       fieldTypes: [ES_FIELD_TYPES.LONG],
       indexName: 'metrics-*',
       units: ['ms'],
-      metricTypes: ['histogram'],
+      metricTypes: ['gauge'],
       dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
     };
 
@@ -396,7 +396,7 @@ TS metrics-*
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
         indexName: 'metrics-*',
         units: ['ms'],
-        metricTypes: ['histogram'],
+        metricTypes: ['gauge'],
         dimensionFields: [{ name: 'field`with`ticks' }],
       };
 

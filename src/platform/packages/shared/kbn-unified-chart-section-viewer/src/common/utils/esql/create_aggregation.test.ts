@@ -102,6 +102,15 @@ describe('createMetricAggregation', () => {
       });
       expect(result).toBe('AVG(AVG_OVER_TIME(??metricName))');
     });
+
+    it('does not wrap *_OVER_TIME for numeric histogram instruments (e.g. traces latency)', () => {
+      const result = createMetricAggregation({
+        types: [ES_FIELD_TYPES.DOUBLE],
+        instrument: 'histogram',
+        metricName: 'duration_ms',
+      });
+      expect(result).toBe('AVG(duration_ms)');
+    });
   });
 });
 
@@ -150,6 +159,8 @@ describe('createMetricAggregation with gridSettings override', () => {
           counterAggregation: 'sum',
           gaugeAggregation,
           histogramPercentile: 'p95',
+          dimensions: [],
+          searchTerm: '',
         },
       });
       expect(result).toBe(expected);
