@@ -17,7 +17,7 @@ export function buildModelFromConnector(connectorWithId: AvailableConnectorWithI
     connectorId: connectorWithId.id,
     name: connectorWithId.name,
     isPreconfigured: false,
-    isInferenceEndpoint: false,
+    isInferenceEndpoint: true,
     capabilities: {
       contextWindowSize: 32000,
     },
