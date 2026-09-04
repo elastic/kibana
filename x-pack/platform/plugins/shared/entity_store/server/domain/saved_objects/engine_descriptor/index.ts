@@ -31,6 +31,7 @@ export class EngineDescriptorClient {
     const { saved_objects } = await this.soClient.find<EngineDescriptor>({
       type: EngineDescriptorTypeName,
       namespaces: [this.namespace],
+      perPage: 1000,
     });
 
     return saved_objects.map((engine) => engine.attributes);
