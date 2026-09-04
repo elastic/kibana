@@ -72,7 +72,7 @@ describe(`useActions`, () => {
     });
     expect(result.current[0].id).toEqual('inspect');
     expect(result.current[0].order).toEqual(3);
-    expect(result.current[1].id).toEqual('addToExistingCase');
+    expect(result.current[1].id).toEqual('addToCase');
     expect(
       result.current[1].getDisplayName({ trigger: VISUALIZATION_CONTEXT_MENU_TRIGGER })
     ).toEqual('Add to case');
@@ -114,7 +114,7 @@ describe(`useActions`, () => {
 
     expect(result.current[0].id).toEqual('inspect');
     expect(result.current[0].order).toEqual(4);
-    expect(result.current[1].id).toEqual('addToExistingCase');
+    expect(result.current[1].id).toEqual('addToCase');
     expect(result.current[1].order).toEqual(3);
     expect(result.current[2].id).toEqual('saveToLibrary');
     expect(result.current[2].order).toEqual(2);

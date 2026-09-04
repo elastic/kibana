@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {

@@ -34,7 +34,7 @@ interface Props {
 const ID = 'CostSavingsMetricQuery';
 
 const VISUALIZATION_ACTIONS = [
-  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToCase,
   VisualizationContextMenuActions.inspect,
 ];
 

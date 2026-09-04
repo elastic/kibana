@@ -91,7 +91,7 @@ describe('AlertFilteringMetric', () => {
         id: 'AlertFilteringMetricQuery-area-embeddable',
         scopeId: PageScope.alerts,
         withActions: [
-          VisualizationContextMenuActions.addToExistingCase,
+          VisualizationContextMenuActions.addToCase,
           VisualizationContextMenuActions.inspect,
         ],
       }),

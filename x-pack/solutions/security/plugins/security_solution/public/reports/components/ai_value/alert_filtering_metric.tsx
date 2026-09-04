@@ -32,7 +32,7 @@ interface Props {
 const ID = 'AlertFilteringMetricQuery';
 
 const VISUALIZATION_ACTIONS = [
-  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToCase,
   VisualizationContextMenuActions.inspect,
 ];
 

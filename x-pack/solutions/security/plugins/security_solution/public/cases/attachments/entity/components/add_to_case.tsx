@@ -19,6 +19,7 @@ export interface AddToCaseProps {
   ['data-test-subj']?: string;
 }
 
+/** Returns a handler that closes the action menu and opens the case selector for an entity. */
 const useAddToCase = ({ entity, onClick }: AddToCaseProps) => {
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
@@ -29,6 +30,7 @@ const useAddToCase = ({ entity, onClick }: AddToCaseProps) => {
   }, [entity, onClick, selectCaseModal]);
 };
 
+/** Renders an action that attaches an entity to a new or existing case. */
 export const AddToCase: FC<AddToCaseProps> = ({
   entity,
   onClick,

@@ -27,7 +27,7 @@ interface Props {
 const ID = 'ThreatsDetectedMetricQuery';
 
 const VISUALIZATION_ACTIONS = [
-  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToCase,
   VisualizationContextMenuActions.inspect,
 ];
 
