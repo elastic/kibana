@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useMemo } from 'react';
-import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
-import {
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
-} from '../../../common/types/domain/user_action/workflow/constants';
-import { useHttp, useToasts } from '../../common/lib/kibana';
-import { runCaseWorkflow } from './api';
-import * as i18n from './translations';
+import React, { createContext, useContext, useMemo } from 'react';
 
 /** Internal context value — not exported. Consumers use the exported hooks. */
 interface CaseAttachmentWorkflowContextValue {
@@ -46,56 +38,11 @@ export const CaseAttachmentWorkflowProvider: React.FC<CaseAttachmentWorkflowProv
 
 CaseAttachmentWorkflowProvider.displayName = 'CaseAttachmentWorkflowProvider';
 
-export interface UseCaseAlertWorkflowRunParams {
-  /**
-   * The alert id from the row-level context menu. Absent for bulk actions (even single-alert
-   * bulk selections) — the origin type distinguishes the surface, not the cardinality.
-   * - Present → `cases.alert` origin with the named alert id (single-row "Run workflow").
-   * - Absent  → `cases.alerts` origin (toolbar bulk "Run workflow").
-   */
-  alertId?: string;
-}
-
 /**
- * Returns a Cases-routed `RunWorkflowExecutor` when rendered inside a case attachment surface,
- * or `undefined` when rendered outside a case (e.g. the alerts page, flyout).
- *
- * Pass to `RunWorkflowPanel`'s `runWorkflow` prop. When `undefined`, the panel falls back to its
- * built-in executor (the generic Workflows API) with no behaviour change.
+ * Reads the enclosing case id. Returns `undefined` outside a case attachment surface
+ * — unlike `useCasesContext`, absence is a legitimate state (alerts page, flyout),
+ * not a programming error, so this does not throw.
  */
-export const useCaseAlertWorkflowRun = ({
-  alertId,
-}: UseCaseAlertWorkflowRunParams): RunWorkflowExecutor | undefined => {
-  const context = useContext(CaseAttachmentWorkflowContext);
-  const http = useHttp();
-  const toasts = useToasts();
-
-  const executor = useCallback<RunWorkflowExecutor>(
-    async ({ workflowId, inputs }) => {
-      // Guard: caller must only invoke this after checking the hook returned a value.
-      if (!context) throw new Error('Cases attachment workflow context is unavailable.');
-
-      const { caseId } = context;
-      const origin =
-        alertId !== undefined
-          ? { type: ALERT_WORKFLOW_ORIGIN_TYPE, caseId, alertId }
-          : { type: ALERTS_WORKFLOW_ORIGIN_TYPE, caseId };
-
-      const response = await runCaseWorkflow({
-        http,
-        workflowId,
-        body: { caseIds: [caseId], inputs, origin },
-      });
-
-      if (response.activityStatus === 'failed') {
-        toasts.addWarning({ title: i18n.WORKFLOW_ACTIVITY_FAILED });
-      }
-
-      return { workflowExecutionId: response.workflowExecutionId };
-    },
-    [alertId, context, http, toasts]
-  );
-
-  // Return undefined when rendered outside a case — the executor must not be called.
-  return context !== undefined ? executor : undefined;
-};
+export const useCaseAttachmentWorkflowContext = ():
+  | CaseAttachmentWorkflowContextValue
+  | undefined => useContext(CaseAttachmentWorkflowContext);

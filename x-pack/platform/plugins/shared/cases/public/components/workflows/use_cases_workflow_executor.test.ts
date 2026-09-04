@@ -9,7 +9,10 @@ import { renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
-import { useCasesWorkflowExecutor } from './use_cases_workflow_executor';
+import {
+  useCasesWorkflowExecutor,
+  useOptionalCasesWorkflowExecutor,
+} from './use_cases_workflow_executor';
 import * as api from './api';
 
 // Mock dependencies injected via useKibana hooks
@@ -105,5 +108,53 @@ describe('useCasesWorkflowExecutor', () => {
     await expect(result.current({ workflowId: 'wf-1', inputs: {} })).rejects.toThrow(
       'network error'
     );
+  });
+});
+
+describe('useOptionalCasesWorkflowExecutor', () => {
+  const mockHttp = {} as HttpStart;
+  const mockToasts = notificationServiceMock.createStartContract().toasts;
+  const { useHttp, useToasts } = jest.requireMock('../../common/lib/kibana');
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useHttp.mockReturnValue(mockHttp);
+    useToasts.mockReturnValue(mockToasts);
+  });
+
+  it('returns undefined when caseId or origin is undefined', () => {
+    const { result: r1 } = renderHook(() =>
+      useOptionalCasesWorkflowExecutor({ caseId: undefined, origin: undefined })
+    );
+    expect(r1.current).toBeUndefined();
+
+    const { result: r2 } = renderHook(() =>
+      useOptionalCasesWorkflowExecutor({
+        caseId: 'case-1',
+        origin: undefined,
+      })
+    );
+    expect(r2.current).toBeUndefined();
+  });
+
+  it('returns a working executor and posts the correct body when both params are provided', async () => {
+    mockRunCaseWorkflow.mockResolvedValueOnce({
+      workflowExecutionId: 'exec-opt',
+      activityStatus: 'succeeded',
+    });
+
+    const origin = { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'case-1' } as const;
+    const { result } = renderHook(() =>
+      useOptionalCasesWorkflowExecutor({ caseId: 'case-1', origin })
+    );
+
+    const response = await result.current!({ workflowId: 'wf-1', inputs: {} });
+
+    expect(mockRunCaseWorkflow).toHaveBeenCalledWith({
+      http: mockHttp,
+      workflowId: 'wf-1',
+      body: { caseIds: ['case-1'], inputs: {}, origin },
+    });
+    expect(response).toEqual({ workflowExecutionId: 'exec-opt' });
   });
 });

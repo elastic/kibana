@@ -41,6 +41,17 @@ const idField = z.string().min(1).max(MAX_CASE_WORKFLOW_RUN_ID_LENGTH);
  * The API schema carries identifiers only. Display enrichment (alert index, observable
  * typeKey/value) is derived server-side from the case at activity-write time so that
  * client-supplied label text cannot spoof the activity log.
+ *
+ * **Adding a new origin (new attachment surface)** touches three layers, in order:
+ *   common: `constants/workflow.ts` (constant + entry in `CASE_WORKFLOW_ORIGIN_TYPES`),
+ *           this file (new union member), `types/domain/user_action/workflow/constants.ts`
+ *           (re-export), `types/domain/user_action/workflow/v1.ts` (user-action shape).
+ *   public: `components/workflows/use_case_<surface>_workflow_run.ts` (read the
+ *           attachment context, build the origin, delegate to
+ *           `useOptionalCasesWorkflowExecutor`), `components/user_actions/workflow.tsx`
+ *           (activity label), `public/index.tsx` (only if a solution plugin renders it).
+ *   server: `routes/api/internal/run_workflow.ts`, `workflows/execution/validate_origin.ts`,
+ *           `workflows/execution/build_activity_origin.ts`, `workflows/execution/service.ts`.
  */
 export const CaseWorkflowRunOriginSchema = z.discriminatedUnion('type', [
   z

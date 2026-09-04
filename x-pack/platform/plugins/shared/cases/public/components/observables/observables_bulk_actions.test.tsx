@@ -15,6 +15,8 @@ import { mockCase, mockObservables } from '../../containers/mock';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
 jest.mock('../workflows/use_cases_workflow_executor', () => ({
+  // Partial mock — only stubs useCasesWorkflowExecutor; useOptionalCasesWorkflowExecutor is
+  // undefined here. If a future test renders a tree that calls the optional hook, add it.
   useCasesWorkflowExecutor: jest.fn().mockReturnValue(jest.fn()),
 }));
 
