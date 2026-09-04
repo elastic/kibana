@@ -36,6 +36,7 @@ export interface TraceContextLogEventsProps {
   spanId?: string;
   transactionId?: string;
 }
+
 export function TraceContextLogEvents({
   traceId,
   transactionId,
@@ -46,7 +47,19 @@ export function TraceContextLogEvents({
   const { from, to } = dataService.query.timefilter.timefilter.getTime();
 
   const timeRange = useMemo(() => ({ from, to }), [from, to]);
-  const query = useLogsQuery({ traceId, spanId, transactionId });
+
+  // Flattened overview fields can be missing (e.g. partial/OTel docs). Guard before
+  // building ES|QL literals — `esqlString(undefined)` throws on `.replace`.
+  const resolvedTraceId = typeof traceId === 'string' && traceId.length > 0 ? traceId : undefined;
+  const resolvedSpanId = typeof spanId === 'string' && spanId.length > 0 ? spanId : undefined;
+  const resolvedTransactionId =
+    typeof transactionId === 'string' && transactionId.length > 0 ? transactionId : undefined;
+
+  const query = useLogsQuery({
+    traceId: resolvedTraceId ?? '',
+    spanId: resolvedSpanId,
+    transactionId: resolvedTransactionId,
+  });
 
   const savedSearchTimeRange = useMemo(
     () => ({
@@ -56,9 +69,20 @@ export function TraceContextLogEvents({
     [timeRange.from, timeRange.to]
   );
 
+  const whereClause = useMemo(() => {
+    if (!resolvedTraceId || !indexes.logs) {
+      return undefined;
+    }
+    return createTraceContextWhereClause({
+      traceId: resolvedTraceId,
+      spanId: resolvedSpanId,
+      transactionId: resolvedTransactionId,
+    });
+  }, [resolvedTraceId, resolvedSpanId, resolvedTransactionId, indexes.logs]);
+
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.logs,
-    whereClause: createTraceContextWhereClause({ traceId, spanId, transactionId }),
+    whereClause,
     unmappedFieldsPolicy: 'NULLIFY',
   });
 
@@ -80,7 +104,7 @@ export function TraceContextLogEvents({
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
-  if (!LogEvents || !indexes.logs) {
+  if (!LogEvents || !indexes.logs || !resolvedTraceId) {
     return null;
   }
 

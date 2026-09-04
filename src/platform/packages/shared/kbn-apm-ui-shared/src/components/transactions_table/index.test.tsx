@@ -454,4 +454,60 @@ describe('TransactionsTable', () => {
       expect(onSearchQueryChange).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('expand affordance', () => {
+    it('renders a maximize expand button when name onClick is provided', () => {
+      const onClick = jest.fn();
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          columnInteractions={{ name: { onClick } }}
+        />
+      );
+
+      const expandButton = screen.getByTestId('apmTransactionsTableExpandButton');
+      expect(expandButton).toHaveAttribute('aria-label', 'Open transaction details');
+      fireEvent.click(expandButton);
+      expect(onClick).toHaveBeenCalledWith(items[0]);
+    });
+
+    it('renders a minimize button when isExpanded returns true', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          columnInteractions={{
+            name: {
+              onClick: jest.fn(),
+              isExpanded: () => true,
+            },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('apmTransactionsTableExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Close transaction details'
+      );
+    });
+
+    it('does not render an expand button when name uses href', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          columnInteractions={{ name: { href: () => '/apm/tx' } }}
+        />
+      );
+
+      expect(screen.queryByTestId('apmTransactionsTableExpandButton')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -8,7 +8,7 @@
 import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
@@ -112,6 +112,10 @@ export function ServiceFlyout({
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
 
+  // One history key per flyout instance groups nested flyouts (transaction detail,
+  // full trace) into the same EUI back-button stack — same pattern as Discover.
+  const flyoutHistoryKey = useMemo(() => historyKey ?? Symbol('apmServiceFlyout'), [historyKey]);
+
   const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
     telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
@@ -142,6 +146,7 @@ export function ServiceFlyout({
           service,
           capabilities,
           indices,
+          flyoutHistoryKey,
           filters: {
             environment: flyoutEnvironment,
             setEnvironment: setFlyoutEnvironment,
@@ -169,10 +174,10 @@ export function ServiceFlyout({
             ownFocus={false}
             size="m"
             paddingSize="m"
-            resizable
+            // No resizable — pixel-locked width re-clamps under a nested session="start".
             minWidth={660}
             session="start"
-            historyKey={historyKey}
+            historyKey={flyoutHistoryKey}
             flyoutMenuProps={{ title }}
             aria-labelledby={titleId}
           >

@@ -16,30 +16,36 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
+import type { HttpStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useDiscoverHref } from '../../../../shared/links/discover_links/use_discover_href';
+import { getFlyoutDiscoverNavigation } from '../../../../shared/service_flyout/utils/get_flyout_discover_navigation';
+import { useApmIndices } from '../../../../shared/service_flyout/hooks/use_apm_indices';
 
 interface Props {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
+  share?: SharePublicStart;
+  http: HttpStart;
 }
 
-export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo }: Props) {
-  const { share } = useApmPluginContext();
+export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo, share, http }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { indices } = useApmIndices({ http });
 
-  const discoverHref = useDiscoverHref({
+  const { href: discoverHref } = getFlyoutDiscoverNavigation({
+    share,
+    indices,
     indexType: 'traces',
     rangeFrom,
     rangeTo,
     queryParams: { traceId },
   });
 
-  const apmHref = share.url.locators
+  const apmHref = share?.url.locators
     .get<{ traceId: string; rangeFrom: string; rangeTo: string }>(
       TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR
     )

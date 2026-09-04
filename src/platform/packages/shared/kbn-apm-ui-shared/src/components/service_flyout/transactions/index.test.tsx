@@ -87,6 +87,22 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(link.getAttribute('href')).toContain('production');
   });
 
+  it('calls onTransactionClick instead of navigating when provided', () => {
+    const onTransactionClick = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection {...BASE_PROPS} onTransactionClick={onTransactionClick} />
+    );
+
+    const link = screen.getByRole('button', { name: 'GET /api/orders' });
+    expect(link).toBeInTheDocument();
+    expect(link.getAttribute('href')).toBeNull();
+
+    link.click();
+    expect(onTransactionClick).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'GET /api/orders' })
+    );
+  });
+
   it('renders the Open in APM header link when locators are provided', () => {
     render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
 

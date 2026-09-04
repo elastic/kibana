@@ -72,6 +72,7 @@ jest.mock('.', () => ({
     title,
     children,
     dataTestSubj,
+    historyKey,
   }: any) => (
     <div
       data-test-subj="waterfallFlyout"
@@ -79,6 +80,7 @@ jest.mock('.', () => ({
       data-title={title}
       data-has-hit={!!hit}
       data-flyout-test-subj={dataTestSubj}
+      data-history-key={historyKey?.toString()}
     >
       {loading ? (
         <div data-test-subj="loadingSkeleton">Loading...</div>
@@ -327,6 +329,27 @@ describe('DocumentDetailFlyout', () => {
       render(<DocumentDetailFlyout {...defaultLogProps} />);
 
       expect(screen.queryByTestId('logFlyoutContent')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('historyKey', () => {
+    it('forwards historyKey to WaterfallFlyout so nested opens share the Back stack', () => {
+      const historyKey = Symbol('apm-nested-flyout-history');
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'span',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
+      render(<DocumentDetailFlyout {...defaultSpanProps} historyKey={historyKey} />);
+
+      expect(screen.getByTestId('waterfallFlyout')).toHaveAttribute(
+        'data-history-key',
+        historyKey.toString()
+      );
     });
   });
 
