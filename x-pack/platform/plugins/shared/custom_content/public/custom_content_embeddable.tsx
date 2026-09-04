@@ -210,7 +210,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     draftTemplate,
                     draftEsqlQuery,
                     uuid,
-                    titleManager.api.title$.getValue() ?? undefined
+                    titleManager.api.title$.getValue() ?? undefined,
+                    effectiveTimeRange$.getValue()
                   ),
                 ],
               });
@@ -430,7 +431,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           agentBuilder.openChat({
             newConversation: true,
             attachments: [
-              buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
+              buildCustomContentContextAttachment(
+                '',
+                undefined,
+                uuid,
+                panelTitle ?? undefined,
+                effectiveTimeRange$.getValue()
+              ),
             ],
           });
         }, [panelTitle]);

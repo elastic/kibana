@@ -42,4 +42,22 @@ describe('buildCustomContentContextAttachment', () => {
 
     expect(a.id).not.toBe(b.id);
   });
+
+  it('carries the panel time range so the chat preview matches what the user was looking at', () => {
+    const attachment = buildCustomContentContextAttachment(
+      '<div>hi</div>',
+      'FROM logs',
+      'panel-1',
+      'My panel',
+      { from: 'now-7d', to: 'now' }
+    );
+
+    expect(attachment.data?.time_range).toEqual({ from: 'now-7d', to: 'now' });
+  });
+
+  it('omits time_range entirely when the panel has no resolved range', () => {
+    const attachment = buildCustomContentContextAttachment('<div>hi</div>', 'FROM logs', 'panel-1');
+
+    expect(attachment.data).not.toHaveProperty('time_range');
+  });
 });
