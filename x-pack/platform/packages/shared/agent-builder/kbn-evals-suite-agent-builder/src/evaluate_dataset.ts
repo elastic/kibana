@@ -16,7 +16,10 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
-  createIrEvaluators,
+  createPrecisionAtKEvaluator,
+  createRecallAtKEvaluator,
+  createF1AtKEvaluator,
+  createHitRateAtKEvaluator,
   type GroundTruth,
   type ExperimentTask,
   type TaskOutput,
@@ -156,13 +159,19 @@ function configureExperiment({
     };
   };
 
-  const irEvaluators = createIrEvaluators({
+  const irConfig = {
     k: 10,
     relevanceThreshold: 1,
     extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
-  });
+  };
+  const irEvaluators = [
+    createPrecisionAtKEvaluator(irConfig),
+    createRecallAtKEvaluator(irConfig),
+    createF1AtKEvaluator(irConfig),
+    createHitRateAtKEvaluator(irConfig),
+  ];
 
   const selectedEvaluators = selectEvaluators([
     {
