@@ -758,8 +758,6 @@ describe('vetting gate', () => {
   });
 });
 
-// ── Confidence refresh ───────────────────────────────────────────────────────
-
 describe('buildBulkOpsForTest — severity in scriptParams', () => {
   // The scripted upsert ignores the `upsert` document on an update, and the script
   // only touched last_seen, so an IOC first seen in a low-severity report stayed
