@@ -27,8 +27,17 @@ import {
 } from '@kbn/controls-constants';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
-import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import {
+  MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
+  MAX_METRICS_TAB_STATE_STRING_LENGTH,
+} from '@kbn/saved-search-plugin/common';
+import {
+  DiscoverTabType,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_SIMPLE_AGGREGATIONS,
+  UnifiedHistogramSuggestionType,
+} from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 export const MAX_SESSION_TITLE_LENGTH = 256;
@@ -159,11 +168,77 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
+const discoverSessionDefaultProfileSchema = z
+  .object({
+    type: z.literal(DiscoverTabType.Default).meta({
+      description: 'Identifies a tab that uses the default Discover experience.',
+    }),
+  })
+  .strict()
+  .meta({
+    title: 'Default profile',
+    description: 'The standard Discover tab profile, which has no profile-specific state.',
+  });
+
+const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
+
+const histogramPercentileSchema = z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
+  description: 'Percentile displayed for histogram metric fields.',
+});
+
+const discoverSessionMetricsProfileSchema = z
+  .object({
+    type: z.literal(DiscoverTabType.Metrics).meta({
+      description: 'Identifies a tab that uses the Discover metrics experience.',
+    }),
+    dimensions: z
+      .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))
+      .max(MAX_METRICS_TAB_DIMENSIONS)
+      .meta({
+        description: 'Fields used to group metrics in the metrics grid.',
+      }),
+    search_term: z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH).meta({
+      description: 'Search term used to filter metrics in the metrics grid.',
+    }),
+    counter_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to counter metric fields.',
+    }),
+    gauge_aggregation: simpleAggregationSchema.meta({
+      description: 'Aggregation applied to gauge metric fields.',
+    }),
+    histogram_percentile: histogramPercentileSchema,
+  })
+  .strict()
+  .meta({
+    title: 'Metrics profile',
+    description: 'The Discover metrics profile and its persisted grid configuration.',
+  });
+
+export const discoverSessionProfileSchema = z
+  .discriminatedUnion('type', [
+    discoverSessionDefaultProfileSchema,
+    discoverSessionMetricsProfileSchema,
+  ])
+  .meta({
+    id: 'kbn-discover-session-profile',
+    title: 'Discover session profile',
+    description:
+      'The profile used by the tab, including any profile-specific state. ' +
+      'When omitted from a Discover session tab request, it defaults to the `default` profile and is always included in responses.',
+  });
+
+// Existing requests can omit the profile.
+// When omitted, responses and transforms use the default profile.
+const discoverSessionProfileWithDefaultSchema = discoverSessionProfileSchema.default({
+  type: DiscoverTabType.Default,
+});
+
 const discoverSessionClassicTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
     ...classicTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    profile: discoverSessionProfileWithDefaultSchema,
   })
   .strict();
 
@@ -173,13 +248,16 @@ const discoverSessionEsqlTabSchema = z
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
+    profile: discoverSessionProfileWithDefaultSchema,
   })
   .strict();
 
-const discoverSessionApiTabSchema = z.union([
-  discoverSessionClassicTabSchema,
-  discoverSessionEsqlTabSchema,
-]);
+const discoverSessionApiTabSchema = z
+  .union([discoverSessionClassicTabSchema, discoverSessionEsqlTabSchema])
+  .meta({
+    description:
+      'A Discover tab definition. `data_source.type` selects the data source shape, while `profile.type` selects the Discover experience and its state.',
+  });
 
 export const discoverSessionApiDataSchema = z
   .object({
@@ -321,6 +399,7 @@ export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearc
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;
 export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
+export type DiscoverSessionApiProfile = z.output<typeof discoverSessionProfileSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
 
 // Input types (shape accepted by the API, before defaults applied)

@@ -240,6 +240,11 @@ existing payload:
 5. Return both `tabType` and the URL-synced `profileState` definition, when applicable, from the matching
    [data source profile context](./profiles/data_source_profile.ts). A tab with no registered transform has no saved
    `tabTypeState`.
+6. Add or update the corresponding `profile` branch in the
+   [Discover session API schema](/src/platform/plugins/shared/discover/server/api/schema.ts) and map every persisted
+   field in both directions in the
+   [profile transform](/src/platform/plugins/shared/discover/server/api/transforms/transform_profile.ts). Include the
+   complete profile state in the shared fixtures and cover its Saved Object to API to Saved Object round trip.
 
 #### End-to-end example
 

@@ -17,6 +17,7 @@ import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
 import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
+import { transformProfileOut } from './transform_profile';
 import { transformVisContextOut } from './transform_vis_context';
 
 export const transformDiscoverSessionOut = (
@@ -46,6 +47,7 @@ export const transformDiscoverSessionOut = (
       return {
         id: tab.id,
         label: tab.label,
+        profile: transformProfileOut(tab.attributes.tabTypeState),
         ...apiTab,
         hide_chart: tab.attributes.hideChart ?? false,
         hide_table: tab.attributes.hideTable ?? false,
