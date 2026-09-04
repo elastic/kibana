@@ -19,6 +19,7 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeHelpMenuLink,
+  ChromeNewsfeedHandler,
   GlobalSearchConfig,
   ChromeNavLink,
   GlobalHeaderAiButton,
@@ -88,7 +89,7 @@ export interface ChromeState {
   feedbackHandler: State<(() => void) | undefined>;
 
   /** Newsfeed handler registered by the newsfeed plugin */
-  newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
+  newsfeedHandler: State<ChromeNewsfeedHandler | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -144,9 +145,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const feedbackHandler = createState<(() => void) | undefined>(undefined);
 
   // Newsfeed
-  const newsfeedHandler = createState<
-    { open: () => void; hasNew$: Observable<boolean> } | undefined
-  >(undefined);
+  const newsfeedHandler = createState<ChromeNewsfeedHandler | undefined>(undefined);
 
   return {
     visibility,

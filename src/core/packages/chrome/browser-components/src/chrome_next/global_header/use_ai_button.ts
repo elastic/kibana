@@ -16,6 +16,6 @@ const EMPTY: GlobalHeaderAiButton[] = [];
 
 export function useAiButtons(): GlobalHeaderAiButton[] {
   const chrome = useChromeService();
-  const buttons$ = useMemo(() => chrome.next.aiButton.get$(), [chrome]);
+  const buttons$ = useMemo(() => chrome.controls.aiButton.get$(), [chrome]);
   return useObservable(buttons$, EMPTY);
 }

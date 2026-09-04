@@ -8,9 +8,13 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
-import type { ChromeAppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chrome-browser';
+import type {
+  ChromeAppHeaderConfig,
+  ChromeNewsfeedHandler,
+  GlobalHeaderAiButton,
+} from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -80,6 +84,55 @@ export function createChromeApi({
   };
 
   let appHeaderRegistrationId = 0;
+
+  const controls: InternalChromeStart['controls'] = {
+    aiButton: {
+      get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+      register: (button: GlobalHeaderAiButton) => {
+        state.aiButton.update((prev) => new Set([...prev, button]));
+        return () => {
+          state.aiButton.update((prev) => {
+            const nextButtons = new Set(prev);
+            nextButtons.delete(button);
+            return nextButtons;
+          });
+        };
+      },
+    },
+    globalSearch: {
+      get$: () => state.globalSearch.$,
+      set: (config) => state.globalSearch.set(config),
+    },
+    contextSwitcher: {
+      get$: () => state.contextSwitcher.$,
+      set: state.contextSwitcher.set,
+    },
+    projectPicker: {
+      get$: () => state.projectPicker.$,
+      set: state.projectPicker.set,
+    },
+    userMenu: {
+      get$: () => state.userMenu.$,
+      set: (content) => state.userMenu.set(content),
+    },
+  };
+
+  const help: InternalChromeStart['help'] = {
+    registerFeedbackHandler: (handler: () => void) => {
+      state.feedbackHandler.set(handler);
+      return () => {
+        state.feedbackHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getFeedbackHandler$: () => state.feedbackHandler.$,
+    registerNewsfeedHandler: (handler: ChromeNewsfeedHandler) => {
+      state.newsfeedHandler.set(handler);
+      return () => {
+        state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getNewsfeedHandler$: () => state.newsfeedHandler.$,
+  };
 
   const chromeStart: InternalChromeStart = {
     componentDeps,
@@ -179,32 +232,14 @@ export function createChromeApi({
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
+    controls,
+    help,
     next: {
-      aiButton: {
-        get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
-        register: (button: GlobalHeaderAiButton) => {
-          state.aiButton.update((prev) => new Set([...prev, button]));
-          return () => {
-            state.aiButton.update((prev) => {
-              const next = new Set(prev);
-              next.delete(button);
-              return next;
-            });
-          };
-        },
-      },
-      globalSearch: {
-        get$: () => state.globalSearch.$,
-        set: (config) => state.globalSearch.set(config),
-      },
-      contextSwitcher: {
-        get$: () => state.contextSwitcher.$,
-        set: state.contextSwitcher.set,
-      },
-      projectPicker: {
-        get$: () => state.projectPicker.$,
-        set: state.projectPicker.set,
-      },
+      aiButton: controls.aiButton,
+      globalSearch: controls.globalSearch,
+      contextSwitcher: controls.contextSwitcher,
+      projectPicker: controls.projectPicker,
+      userMenu: controls.userMenu,
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,
         set: state.inlineAppHeader.set,
@@ -221,24 +256,10 @@ export function createChromeApi({
           };
         },
       },
-      userMenu: {
-        get$: () => state.userMenu.$,
-        set: (content) => state.userMenu.set(content),
-      },
-      registerFeedbackHandler: (handler: () => void) => {
-        state.feedbackHandler.set(handler);
-        return () => {
-          state.feedbackHandler.update((current) => (current === handler ? undefined : current));
-        };
-      },
-      getFeedbackHandler$: () => state.feedbackHandler.$,
-      registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
-        state.newsfeedHandler.set(handler);
-        return () => {
-          state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
-        };
-      },
-      getNewsfeedHandler$: () => state.newsfeedHandler.$,
+      registerFeedbackHandler: help.registerFeedbackHandler,
+      getFeedbackHandler$: help.getFeedbackHandler$,
+      registerNewsfeedHandler: help.registerNewsfeedHandler,
+      getNewsfeedHandler$: help.getNewsfeedHandler$,
     },
     sidebar,
   };

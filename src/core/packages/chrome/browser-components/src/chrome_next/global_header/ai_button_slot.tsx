@@ -12,7 +12,7 @@ import { HeaderExtension } from '../../shared/header_extension';
 import { useAiButtons } from './use_ai_button';
 
 /**
- * Renders the AI button(s) registered via `chrome.next.aiButton.register`.
+ * Renders the AI button(s) registered via `chrome.controls.aiButton.register`.
  *
  * Stop-gap for the Chrome-Next transition: ideally there is a single chrome-owned AI
  * button, but the legacy header lets each solution register its own and manage its own
