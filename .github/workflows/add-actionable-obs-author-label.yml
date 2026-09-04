@@ -5,7 +5,7 @@ on:
     types: [opened]
 
 jobs:
-  label-actionable-obs-team:
+  label-nightshift-sre-agent-team:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

@@ -1,7 +1,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/evals-suite-significant-events",
-  "owner": "@elastic/obs-sig-events-team",
+  "owner": "@elastic/nightshift-sre-agent-team",
   "group": "platform",
   "visibility": "shared"
 }

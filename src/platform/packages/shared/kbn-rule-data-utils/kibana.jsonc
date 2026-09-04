@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/security-detection-engineering",
     "@elastic/response-ops",
-    "@elastic/actionable-obs-team"
+    "@elastic/nightshift-sre-agent-team"
   ],
   "group": "platform",
   "visibility": "shared"
