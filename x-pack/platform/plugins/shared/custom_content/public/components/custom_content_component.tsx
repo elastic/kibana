@@ -49,7 +49,7 @@ const iframeCss = css({
 });
 
 const IFRAME_TITLE = i18n.translate('xpack.customContent.iframeTitle', {
-  defaultMessage: 'Custom content panel',
+  defaultMessage: 'Custom panel',
 });
 
 export const CustomContentComponent = ({

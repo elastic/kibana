@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { EmbeddableChatAccess } from '@kbn/agent-builder-browser';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { PRETTIFY_DASHBOARD_ACTION_ID } from '@kbn/dashboard-plugin/public';
@@ -16,6 +17,25 @@ import {
   createPrettifyDashboardAction,
   PRETTIFY_DASHBOARD_PROMPT,
 } from './prettify_dashboard_action';
+import { captureDashboardScreenshot, type ImageAttachment } from './capture_dashboard_screenshot';
+import { showScreenshotOverlay } from './screenshot_overlay';
+
+jest.mock('./capture_dashboard_screenshot', () => ({
+  ...jest.requireActual('./capture_dashboard_screenshot'),
+  captureDashboardScreenshot: jest.fn(),
+}));
+
+jest.mock('./screenshot_overlay', () => ({
+  showScreenshotOverlay: jest.fn(),
+}));
+
+const captureDashboardScreenshotMock = captureDashboardScreenshot as jest.MockedFunction<
+  typeof captureDashboardScreenshot
+>;
+
+const showScreenshotOverlayMock = showScreenshotOverlay as jest.MockedFunction<
+  typeof showScreenshotOverlay
+>;
 
 const esqlLens = {
   type: LENS_EMBEDDABLE_TYPE,
@@ -72,6 +92,17 @@ const createDraftAttachmentId = (id = 'draft-attachment-id'): IdGenerator => ({
   next: () => id,
 });
 
+const screenshotAttachment = {
+  id: 'image-1',
+  type: AttachmentType.image,
+  description: 'Dashboard screenshot',
+  data: {
+    file_id: 'file-1',
+    name: 'dashboard-screenshot.png',
+    mime_type: 'image/png' as const,
+  },
+} satisfies ImageAttachment;
+
 const createAction = ({
   openChat = jest.fn(),
   getAgentBuilderAccess = jest.fn(
@@ -82,20 +113,38 @@ const createAction = ({
   ),
   canWriteDashboards = true,
   draftAttachmentId = createDraftAttachmentId(),
+  addWarning = jest.fn(),
 } = {}) => {
+  const files = { filesClientFactory: { asScoped: jest.fn() } } as never;
+  const rendering = {} as never;
+  const toasts = { addWarning } as never;
   return {
     openChat,
     getAgentBuilderAccess,
+    addWarning,
     action: createPrettifyDashboardAction({
       openChat,
       getAgentBuilderAccess,
       canWriteDashboards,
       draftAttachmentId,
+      files,
+      rendering,
+      toasts,
     }),
   };
 };
 
 describe('createPrettifyDashboardAction', () => {
+  let hideScreenshotOverlay: jest.Mock;
+
+  beforeEach(() => {
+    captureDashboardScreenshotMock.mockReset();
+    captureDashboardScreenshotMock.mockResolvedValue(screenshotAttachment);
+    hideScreenshotOverlay = jest.fn();
+    showScreenshotOverlayMock.mockReset();
+    showScreenshotOverlayMock.mockReturnValue(hideScreenshotOverlay);
+  });
+
   it('is compatible when a child uses ES|QL', async () => {
     const { action } = createAction();
 
@@ -205,7 +254,7 @@ describe('createPrettifyDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
-  it('opens chat with a shared draft dashboard attachment', async () => {
+  it('opens chat with the dashboard and a screenshot attachment', async () => {
     const draftAttachmentId = createDraftAttachmentId('shared-draft-id');
     const { action, openChat } = createAction({ draftAttachmentId });
     const dashboardApi = createDashboardApi();
@@ -214,6 +263,7 @@ describe('createPrettifyDashboardAction', () => {
       dashboardApi,
     });
 
+    expect(captureDashboardScreenshotMock).toHaveBeenCalledTimes(1);
     expect(openChat).toHaveBeenCalledTimes(1);
     expect(openChat).toHaveBeenCalledWith({
       newConversation: true,
@@ -235,8 +285,60 @@ describe('createPrettifyDashboardAction', () => {
             ],
           }),
         },
+        screenshotAttachment,
       ],
     });
+  });
+
+  it('opens chat without a screenshot and shows a warning when capture fails', async () => {
+    captureDashboardScreenshotMock.mockRejectedValue(new Error('boom'));
+    const { action, openChat, addWarning } = createAction();
+
+    await action.execute!({
+      dashboardApi: createDashboardApi(),
+    });
+
+    expect(addWarning).toHaveBeenCalledTimes(1);
+    expect(openChat).toHaveBeenCalledTimes(1);
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [expect.objectContaining({ type: DASHBOARD_ATTACHMENT_TYPE })],
+      })
+    );
+  });
+
+  it('blocks the dashboard with an overlay while the screenshot is captured', async () => {
+    let resolveCapture!: (attachment: ImageAttachment) => void;
+    captureDashboardScreenshotMock.mockReturnValue(
+      new Promise((resolve) => {
+        resolveCapture = resolve;
+      })
+    );
+    const { action, openChat } = createAction();
+
+    const pending = action.execute!({ dashboardApi: createDashboardApi() });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(showScreenshotOverlayMock).toHaveBeenCalledTimes(1);
+    expect(hideScreenshotOverlay).not.toHaveBeenCalled();
+
+    resolveCapture(screenshotAttachment);
+    await pending;
+
+    expect(hideScreenshotOverlay).toHaveBeenCalledTimes(1);
+    // the overlay must be gone before the chat flyout opens
+    expect(hideScreenshotOverlay.mock.invocationCallOrder[0]).toBeLessThan(
+      openChat.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('hides the overlay when the screenshot capture fails', async () => {
+    captureDashboardScreenshotMock.mockRejectedValue(new Error('boom'));
+    const { action } = createAction();
+
+    await action.execute!({ dashboardApi: createDashboardApi() });
+
+    expect(hideScreenshotOverlay).toHaveBeenCalledTimes(1);
   });
 
   it('does not open chat when the dashboard is ineligible', async () => {
@@ -249,6 +351,7 @@ describe('createPrettifyDashboardAction', () => {
     });
 
     expect(openChat).not.toHaveBeenCalled();
+    expect(showScreenshotOverlayMock).not.toHaveBeenCalled();
   });
 
   it('uses the prettify action id', () => {

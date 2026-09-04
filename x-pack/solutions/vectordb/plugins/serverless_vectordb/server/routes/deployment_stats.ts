@@ -12,7 +12,7 @@ import { fetchDashboardsCount } from '../lib/dashboards';
 import {
   fetchApiKeysStats,
   fetchIndexStats,
-  hasIndexMonitorPrivilege,
+  fetchMonitorPrivileges,
 } from '../lib/deployment_stats';
 
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
@@ -22,7 +22,7 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
       validate: false,
       security: {
         authz: AuthzDisabled.fromReason(
-          'All counts, except vector count, are scoped to the caller. The vector count is gated by a handler that checks the caller holds the `monitor` privilege on all indices before returning that cluster-wide total. The dashboard count is authorized by the saved objects client'
+          'All counts, except the vector count, are scoped to the caller. The vector count is gated by a handler that checks the caller holds the `monitor` privilege on all indices before returning that cluster-wide total. The newest-index lookup is gated on the caller holding the cluster `monitor` privilege. The dashboard count is authorized by the saved objects client'
         ),
       },
     },
@@ -32,14 +32,17 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const canMonitorAllIndices = await hasIndexMonitorPrivilege(client, logger);
+        const { canMonitorAllIndices, canMonitorCluster } = await fetchMonitorPrivileges(
+          client,
+          logger
+        );
 
         const [
-          { indicesCount, storeSizeBytes, vectorCount, documentsCount },
+          { indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex },
           dashboardsCount,
           { total: apiKeysCount, expiring: expiringApiKeysCount },
         ] = await Promise.all([
-          fetchIndexStats(client, logger, { canMonitorAllIndices }),
+          fetchIndexStats(client, logger, { canMonitorAllIndices, canMonitorCluster }),
           fetchDashboardsCount(savedObjectsClient, logger),
           fetchApiKeysStats(client, logger),
         ]);
@@ -48,13 +51,12 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
           body: {
             indicesCount,
             storeSizeBytes,
-            // Omitted rather than nulled for an unprivileged caller, so the response says nothing
-            // about a stat they can not see.
-            ...(canMonitorAllIndices ? { vectorCount } : {}),
+            vectorCount,
             documentsCount,
             dashboardsCount,
             apiKeysCount,
             expiringApiKeysCount,
+            newIndex,
           },
         });
       } catch (error) {

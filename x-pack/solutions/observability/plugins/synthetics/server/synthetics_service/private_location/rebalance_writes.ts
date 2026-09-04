@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { PackagePolicyPartialUpdate } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
 import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
@@ -13,11 +14,52 @@ import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
 export { configIdOf };
 
 /**
+ * The projection of a package policy that the shard-rebalance path actually
+ * reads.
+ *
+ * Rebalancing only ever re-pins `condition`, so the snapshot no longer has to
+ * carry the whole policy the way it did when the write went through Fleet's
+ * full `bulkUpdate` and had to re-send every attribute. Everything outside this
+ * shape is dead weight in a task that holds every monitor of a location in
+ * memory at once — above all `inputs[].streams[].compiled_stream`, which
+ * carries a browser monitor's inline script.
+ *
+ * Deliberately narrower than `PackagePolicy`: Fleet's `list` types its result as
+ * complete however it is projected, so a field that is read but not fetched
+ * would be `undefined` at runtime with nothing to catch it. Keep in step with
+ * {@link SHARDED_PACKAGE_POLICY_FIELDS}.
+ */
+export type ShardedPackagePolicy = Pick<
+  PackagePolicy,
+  'id' | 'version' | 'spaceIds' | 'name' | 'condition' | 'revision' | 'policy_ids'
+> & {
+  inputs: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>>;
+};
+
+/**
+ * Source filter producing {@link ShardedPackagePolicy}. `id`, `version` and
+ * `spaceIds` are omitted because they come off the saved-object envelope and are
+ * returned whatever the projection.
+ *
+ * `name` is not part of the rebalance decision; it is fetched so both Fleet's
+ * `list` and the write below can keep naming package policies in the
+ * saved-object audit log.
+ */
+export const SHARDED_PACKAGE_POLICY_FIELDS = [
+  'name',
+  'condition',
+  'revision',
+  'policy_ids',
+  'inputs.type',
+  'inputs.enabled',
+];
+
+/**
  * Monitor type of a synthetics package policy, read from its single enabled
  * input (`synthetics/${type}`). Only `browser` vs. lightweight matters for the
  * memory cost model, so anything non-browser is treated as lightweight.
  */
-export const monitorTypeOfPolicy = (pp: PackagePolicy): string =>
+export const monitorTypeOfPolicy = (pp: ShardedPackagePolicy): string =>
   pp.inputs?.some((input) => input.enabled && input.type === 'synthetics/browser')
     ? 'browser'
     : 'http';
@@ -32,7 +74,7 @@ export const monitorTypeOfPolicy = (pp: PackagePolicy): string =>
  * isn't skewed.
  */
 export const toMonitorPlacements = (
-  pkgPolicies: PackagePolicy[],
+  pkgPolicies: ShardedPackagePolicy[],
   locationId: string
 ): MonitorPlacement[] => {
   const byId = new Map<string, MonitorPlacement>();
@@ -51,43 +93,70 @@ export const toMonitorPlacements = (
 };
 
 /**
- * Minimal update payload that only re-targets a package policy to a different
- * agent by rewriting its `${agent.id}` condition. Carries the existing content
- * (inputs/vars/package) and single-policy binding over unchanged and drops
- * saved-object metadata Fleet recomputes on update, so the compiled config stays
- * identical and only the runtime agent condition changes.
+ * A condition-only package-policy write, paired with the agent policies that
+ * must be revision-bumped once it lands.
  *
- * Carries `version` (the optimistic-concurrency token from the snapshot read) so
- * Fleet rejects the write with a conflict if the package policy changed since —
- * a concurrent monitor edit, or the `Sync-Private-Location-Monitors` task writing
- * the same policy on its own schedule. Without it, this full-object rewrite built
- * from a stale snapshot would silently revert that change. On conflict the mover
- * lands in `bulkUpdate`'s failed set and is retried from a fresh read next cycle
- * (the rebalance is idempotent).
+ * The bump targets cannot be read back off the write: `bulkUpdatePartial`
+ * echoes only the attributes that were sent, so `policy_ids` is absent from its
+ * result. They are captured here from the source policy instead.
+ */
+export interface ConditionUpdate {
+  update: PackagePolicyPartialUpdate;
+  agentPolicyIds: string[];
+}
+
+/**
+ * A package policy read back from Fleet always carries its saved-object
+ * `version`, but the type models it as optional. Narrowing here keeps the
+ * optimistic-concurrency token mandatory on the write path rather than
+ * degrading to a blind overwrite when it is somehow absent.
+ */
+const hasVersion = (
+  pkgPolicy: ShardedPackagePolicy
+): pkgPolicy is ShardedPackagePolicy & { version: string } => typeof pkgPolicy.version === 'string';
+
+/**
+ * Minimal write that only re-targets a package policy to a different agent by
+ * rewriting its `${agent.id}` condition. Sends just the changed attribute plus
+ * the revision metadata Fleet's full `bulkUpdate` would have stamped, so the
+ * rest of the stored document (inputs/vars/package/bindings) is left untouched
+ * by the saved-objects merge rather than rewritten from a snapshot.
+ *
+ * `revision` is bumped because it is compiled into the agent's policy document
+ * (`package_policies_to_agent_inputs`), so holding it back would change what
+ * agents receive.
+ *
+ * Carries `version` (the optimistic-concurrency token from the snapshot read)
+ * so Fleet rejects the write with a conflict if the package policy changed
+ * since — a concurrent monitor edit, or the `Sync-Private-Location-Monitors`
+ * task writing the same policy on its own schedule. On conflict the mover lands
+ * in the failed set and is retried from a fresh read next cycle (the rebalance
+ * is idempotent).
+ *
+ * `name` is re-sent unchanged, the one attribute here that is not part of the
+ * move. Saved-object `bulkUpdate` echoes back only the attributes it was given,
+ * not the merged document, so Fleet's `bulkUpdatePartial` reads
+ * `result.attributes.name` as `undefined` and writes a nameless entry to the
+ * saved-object audit log. Sending it keeps those entries identifiable, and
+ * cannot clobber a concurrent rename: `version` would no longer match and the
+ * write would be rejected as a conflict.
  */
 export const toConditionUpdate = (
-  pkgPolicy: PackagePolicy,
+  pkgPolicy: ShardedPackagePolicy & { version: string },
   condition: string | null
-): UpdatePackagePolicyWithId => ({
-  id: pkgPolicy.id,
-  version: pkgPolicy.version,
-  name: pkgPolicy.name,
-  description: pkgPolicy.description,
-  namespace: pkgPolicy.namespace,
-  enabled: pkgPolicy.enabled,
-  is_managed: pkgPolicy.is_managed,
-  package: pkgPolicy.package,
-  inputs: pkgPolicy.inputs,
-  vars: pkgPolicy.vars,
-  output_id: pkgPolicy.output_id,
-  supports_agentless: pkgPolicy.supports_agentless,
-  global_data_tags: pkgPolicy.global_data_tags,
-  elasticsearch: pkgPolicy.elasticsearch,
-  overrides: pkgPolicy.overrides,
-  additional_datastreams_permissions: pkgPolicy.additional_datastreams_permissions,
-  policy_id: pkgPolicy.policy_id,
-  policy_ids: pkgPolicy.policy_ids,
-  condition,
+): ConditionUpdate => ({
+  update: {
+    id: pkgPolicy.id,
+    version: pkgPolicy.version,
+    attributes: {
+      condition,
+      name: pkgPolicy.name,
+      revision: pkgPolicy.revision + 1,
+      updated_at: new Date().toISOString(),
+      updated_by: 'system',
+    },
+  },
+  agentPolicyIds: pkgPolicy.policy_ids ?? [],
 });
 
 /**
@@ -102,11 +171,11 @@ export const toConditionUpdate = (
  * {@link toMonitorPlacements} dedupes them.
  */
 export const toConditionUpdates = (
-  pkgPolicies: PackagePolicy[],
+  pkgPolicies: ShardedPackagePolicy[],
   assignment: ReadonlyMap<string, string>,
   locationId: string
-): Map<string, UpdatePackagePolicyWithId[]> => {
-  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+): Map<string, ConditionUpdate[]> => {
+  const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
     const configId = configIdOf(pkgPolicy.id, locationId);
     if (!configId) {
@@ -119,6 +188,9 @@ export const toConditionUpdates = (
     const desiredCondition = agentIdCondition(desiredAgentId);
     if (pkgPolicy.condition === desiredCondition) {
       continue; // already pinned to the right agent → no write
+    }
+    if (!hasVersion(pkgPolicy)) {
+      continue; // no concurrency token → skip rather than blind-overwrite
     }
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];
@@ -133,12 +205,15 @@ export const toConditionUpdates = (
  * rebalancing is turned off so monitors go back to unfiltered (classic) scheduling.
  */
 export const toClearedConditionUpdates = (
-  pkgPolicies: PackagePolicy[]
-): Map<string, UpdatePackagePolicyWithId[]> => {
-  const bySpace = new Map<string, UpdatePackagePolicyWithId[]>();
+  pkgPolicies: ShardedPackagePolicy[]
+): Map<string, ConditionUpdate[]> => {
+  const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
     if (typeof pkgPolicy.condition !== 'string') {
       continue;
+    }
+    if (!hasVersion(pkgPolicy)) {
+      continue; // no concurrency token → skip rather than blind-overwrite
     }
     const spaceId = pkgPolicy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     const updates = bySpace.get(spaceId) ?? [];

@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-import type { Conversation, RoundCompleteEvent } from '@kbn/agent-builder-common';
+import { lastValueFrom, of, toArray } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type {
+  ChatEvent,
+  Conversation,
+  ConversationRoundAuthor,
+  ConversationRoundStep,
+  RoundCompleteEvent,
+} from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationAccessControlMode,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  TimelineEventType,
+  createConversationAlreadyExistsError,
   createConversationNotFoundError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
-import { getConversation, updateConversation$ } from './conversations';
+import type { ConversationWithOperation } from './conversations';
+import {
+  appendRoundTerminated$,
+  getConversation,
+  persistRoundInput,
+  updateConversation$,
+} from './conversations';
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
@@ -361,6 +379,307 @@ describe('conversations utils', () => {
       const [request] = conversationClient.upsertRound.mock.calls[0];
       expect(request).not.toHaveProperty('rounds');
       expect(request).not.toHaveProperty('title');
+    });
+  });
+
+  describe('persistRoundInput (receipt-time input write)', () => {
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const runReceipt = async ({
+      conversation,
+      conversationClient,
+      roundId = 'round-1',
+      receivedAt = new Date('2024-01-01T00:00:00.000Z'),
+      input = { message: 'hi' },
+      author,
+    }: {
+      conversation: ConversationWithOperation;
+      conversationClient: ReturnType<typeof createConversationClientMock>;
+      roundId?: string;
+      receivedAt?: Date;
+      input?: { message?: string };
+      author?: ConversationRoundAuthor;
+    }) => {
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+      await persistRoundInput({
+        conversation,
+        conversationClient,
+        roundId,
+        receivedAt,
+        input,
+        author,
+      });
+    };
+
+    it('atomically creates the conversation doc with the user_message seeded on CREATE (single write, no separate append)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(
+        createEmptyConversation({ id: 'conv-1', agent_id: 'agent-1' }),
+        'CREATE'
+      );
+
+      await runReceipt({
+        conversation,
+        conversationClient,
+        input: { message: 'raw input' },
+        author: { id: 'u1', username: 'u1' },
+      });
+
+      // Single ES write: the doc is created atomically with the user_message inside
+      // it, so an abort mid-write cannot leave an empty placeholder.
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      const [createArgs] = conversationClient.create.mock.calls[0];
+      expect(createArgs.id).toBe('conv-1');
+      expect(createArgs.title).toBe(DEFAULT_CONVERSATION_TITLE);
+      expect(createArgs.rounds).toEqual([]);
+      expect(createArgs.events).toHaveLength(1);
+      expect(createArgs.events![0]).toMatchObject({
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+        data: { message: 'raw input' },
+      });
+
+      // No separate append on the happy CREATE path — the event is inside the create.
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('skips create for UPDATE but still appends the user_message', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+
+      await runReceipt({ conversation, conversationClient });
+
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      conversationClient.create.mockRejectedValueOnce(
+        createConversationAlreadyExistsError({ conversationId: 'conv-1' })
+      );
+
+      await runReceipt({ conversation, conversationClient });
+
+      // The race loser still has to land the user_message on the winning doc.
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect(appendArgs.events).toHaveLength(1);
+      expect(appendArgs.events[0]).toMatchObject({
+        id: 'round-1::user_message',
+        type: TimelineEventType.userMessage,
+      });
+    });
+
+    it('propagates unexpected create errors', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const boom = new Error('boom');
+      conversationClient.create.mockRejectedValueOnce(boom);
+
+      await expect(
+        persistRoundInput({
+          conversation,
+          conversationClient,
+          roundId: 'round-1',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+        })
+      ).rejects.toBe(boom);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('defaults an undefined message to an empty string so the receipt-time snapshot is a valid RoundInput', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await runReceipt({ conversation, conversationClient, input: {} });
+
+      const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
+      expect((appendArgs.events[0].data as { message: string }).message).toBe('');
+    });
+  });
+
+  describe('appendRoundTerminated$', () => {
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const runEnd = async ({
+      conversation,
+      conversationClient,
+      roundCompleteEvent,
+      title$,
+    }: {
+      conversation: ConversationWithOperation;
+      conversationClient: ReturnType<typeof createConversationClientMock>;
+      roundCompleteEvent: RoundCompleteEvent;
+      title$?: Observable<string>;
+    }): Promise<ChatEvent[]> => {
+      conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
+      return lastValueFrom(
+        appendRoundTerminated$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of(roundCompleteEvent),
+          ...(title$ ? { title$ } : {}),
+        }).pipe(toArray())
+      );
+    };
+
+    it('replaces the round events with the full canonical projection and folds title + status into the same write for CREATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+      const round = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        started_at: '2024-01-01T00:00:00.000Z',
+        time_to_last_token: 1000,
+      });
+
+      const emitted = await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+        title$: of('Generated title'),
+      });
+
+      expect(conversationClient.replaceRoundEvents).toHaveBeenCalledTimes(1);
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(args.id).toBe('conv-1');
+      expect(args.roundId).toBe('round-1');
+      expect(args.title).toBe('Generated title');
+      expect(args.status).toBe(ConversationRoundStatus.completed);
+      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].type).toBe(ChatEventType.conversationCreated);
+    });
+
+    it('emits conversationUpdated for UPDATE', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      const emitted = await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0].type).toBe(ChatEventType.conversationUpdated);
+    });
+
+    it('omits title when no title$ is provided', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'c' }), 'UPDATE');
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(args).not.toHaveProperty('title');
+    });
+
+    it('reconciles attachments against the stored snapshot when the round produced attachments', async () => {
+      const conversationClient = createConversationClientMock();
+      const existingAttachment = { id: 'a', version: 1 } as any;
+      const producedAttachment = { id: 'b', version: 1 } as any;
+      const conversation = withOperation(
+        createEmptyConversation({ id: 'c', attachments: [existingAttachment] }),
+        'UPDATE'
+      );
+      const round = createRound({ id: 'r', status: ConversationRoundStatus.completed });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: {
+            round,
+            resumed: false,
+            attachments: [producedAttachment],
+          },
+        },
+      });
+
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(args.attachments).toEqual({
+        snapshot: [existingAttachment],
+        produced: [producedAttachment],
+      });
+    });
+
+    it('appends the full projected round events (user_message + execution_started + steps + terminated) at round-end', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-steps' }), 'UPDATE');
+      const steps: ConversationRoundStep[] = [
+        { type: ConversationRoundStepType.reasoning, reasoning: 'r' } as ConversationRoundStep,
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 't1',
+          tool_id: 'platform.core.search',
+          params: {},
+          results: [],
+        } as ConversationRoundStep,
+      ];
+      const round = createRound({
+        id: 'round-x',
+        status: ConversationRoundStatus.completed,
+        steps,
+      });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
+      expect(args.roundId).toBe('round-x');
+      expect(args.events.map((event: { type: string; id: string }) => event.type)).toEqual([
+        TimelineEventType.userMessage,
+        TimelineEventType.executionStarted,
+        TimelineEventType.executionStep,
+        TimelineEventType.executionStep,
+        TimelineEventType.executionTerminated,
+      ]);
+      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-x::user_message',
+        'round-x::execution_started',
+        'round-x::step::0',
+        'round-x::step::1',
+        'round-x::execution_terminated',
+      ]);
     });
   });
 });

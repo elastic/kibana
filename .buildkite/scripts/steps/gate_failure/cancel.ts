@@ -92,10 +92,32 @@ function run(): void {
     }
   }
 
+  const canceledDetails = canceled.length
+    ? [
+        '<details><summary>Canceled step keys</summary>',
+        '',
+        ...canceled.map((stepKey) => `- ${stepKey}`),
+        '',
+        '</details>',
+        '',
+      ]
+    : [];
+  const skippedDetails = skipped.length
+    ? [
+        `Already finished: ${skipped.length} step(s).`,
+        '<details><summary>Already-finished step keys</summary>',
+        '',
+        ...skipped.map((stepKey) => `- ${stepKey}`),
+        '',
+        '</details>',
+        '',
+      ]
+    : [];
   const summary = [
     `Check gate **${gateLabel}** failed.`,
-    `Canceled ${canceled.length} step(s): ${canceled.length ? canceled.join(', ') : 'none'}`,
-    ...(skipped.length ? [`Already finished: ${skipped.join(', ')}`] : []),
+    `Canceled ${canceled.length} step(s).`,
+    ...canceledDetails,
+    ...skippedDetails,
     ...(failures.length ? ['Failed to cancel:', ...failures.map((line) => `- ${line}`)] : []),
     ...(selfNote ? [selfNote] : []),
   ].join('\n');
