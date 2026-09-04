@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
-import { codeBlock, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { CodeBlock, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Alternate rendering for the `esql` attachment ([esql_attachment.tsx](../../../../plugins/shared/agent_builder_platform/public/attachment_types/esql_attachment.tsx)):
  * the query as a highlighted `codeBlock` with the optional description as prose
  * above it (the attachment drops `description` from its inline body).
  */
-export const toEsqlViewSpec = ({ query, description }: EsqlAttachmentData): ViewSpec => {
-  const body: BodyNode[] = [];
-  if (description) {
-    body.push(text({ body: description }));
-  }
-  body.push(codeBlock({ language: 'esql', code: query }));
-  return view({ title: 'ES|QL query', body });
-};
+export const toEsqlViewSpec = ({ query, description }: EsqlAttachmentData): ViewSpec =>
+  toViewSpec(
+    <View title="ES|QL query">
+      {description && <Text body={description} />}
+      <CodeBlock language="esql" code={query} />
+    </View>
+  ) as ViewSpec;
 
 export const sampleEsqlAttachment: EsqlAttachmentData = {
   description: 'Top 5 hosts by failed authentications in the last 24 hours.',

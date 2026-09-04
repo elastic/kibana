@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { structuredPatch } from 'diff';
-import { diff, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Diff, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * The `workflow.yaml.diff` attachment payload ([workflow_yaml_diff_attachment_renderer.tsx](../../../../plugins/shared/agent_builder_workflows/public/attachment_types/workflow_yaml_diff_attachment_renderer.tsx)).
@@ -26,12 +27,8 @@ interface DiffHunk {
 }
 
 const lineKind = (line: string): DiffLineKind => {
-  if (line.startsWith('+')) {
-    return 'add';
-  }
-  if (line.startsWith('-')) {
-    return 'remove';
-  }
+  if (line.startsWith('+')) return 'add';
+  if (line.startsWith('-')) return 'remove';
   return 'context';
 };
 
@@ -61,19 +58,19 @@ export const toWorkflowYamlDiffViewSpec = ({
   const hunks = toHunks(beforeYaml, afterYaml);
   const added = countKind(hunks, 'add');
   const removed = countKind(hunks, 'remove');
-
-  const body: BodyNode[] = [text({ body: `+${added} added, -${removed} removed` })];
-  if (hunks.length === 0) {
-    body.push(text({ body: 'No changes detected.', tone: 'neutral' }));
-  } else {
-    body.push(diff({ title: name ?? 'Workflow changes', language: 'yaml', hunks }));
-  }
-
-  return view({
-    title: name ? `${name} changes` : 'Workflow changes',
-    subtitle: 'Proposed edit',
-    body,
-  });
+  return toViewSpec(
+    <View
+      title={name ? `${name} changes` : 'Workflow changes'}
+      subtitle="Proposed edit"
+    >
+      <Text body={`+${added} added, -${removed} removed`} />
+      {hunks.length === 0 ? (
+        <Text body="No changes detected." tone="neutral" />
+      ) : (
+        <Diff title={name ?? 'Workflow changes'} language="yaml" hunks={hunks} />
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleWorkflowYamlDiff: WorkflowYamlDiffData = {

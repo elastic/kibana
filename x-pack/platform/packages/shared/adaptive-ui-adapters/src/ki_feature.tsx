@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, codeBlock, descriptionList, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `platform.ki_feature` attachment data (a Streams "key insight"
@@ -39,39 +40,23 @@ export const toKiFeatureViewSpec = ({
   tags,
   filter,
 }: KiFeatureData): ViewSpec => {
-  const body: BodyNode[] = [];
-
   const badges = [
     ...(type ? [{ label: type, tone: 'primary' as const, variant: 'fill' as const }] : []),
     ...(subtype ? [{ label: subtype, tone: 'neutral' as const, variant: 'hollow' as const }] : []),
   ];
-  if (badges.length > 0) {
-    body.push(badge({ items: badges }));
-  }
-
-  if (description) {
-    body.push(text({ body: description }));
-  }
-
   const details: Array<{ title: string; description: string }> = [];
-  if (streamName) {
-    details.push({ title: 'Stream', description: streamName });
-  }
-  if (confidence != null) {
-    details.push({ title: 'Confidence', description: `${confidence}%` });
-  }
-  if (tags && tags.length > 0) {
-    details.push({ title: 'Tags', description: tags.join(', ') });
-  }
-  if (details.length > 0) {
-    body.push(descriptionList({ label: 'Feature', layout: 'inline', items: details }));
-  }
+  if (streamName) details.push({ title: 'Stream', description: streamName });
+  if (confidence != null) details.push({ title: 'Confidence', description: `${confidence}%` });
+  if (tags && tags.length > 0) details.push({ title: 'Tags', description: tags.join(', ') });
 
-  if (filter) {
-    body.push(codeBlock({ language: 'kql', code: filter, title: 'Filter' }));
-  }
-
-  return view({ title: name, subtitle: 'Key insight feature', body });
+  return toViewSpec(
+    <View title={name} subtitle="Key insight feature">
+      {badges.length > 0 && <Badge items={badges} />}
+      {description && <Text body={description} />}
+      {details.length > 0 && <DescriptionList label="Feature" layout="inline" items={details} />}
+      {filter && <CodeBlock language="kql" code={filter} title="Filter" />}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleKiFeature: KiFeatureData = {

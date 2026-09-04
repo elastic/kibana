@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, callout, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, Callout, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 
 /**
  * Mirror of the `connector_setup` attachment data (Agent Builder platform). Only
@@ -30,27 +31,25 @@ export const toConnectorSetupViewSpec = ({
   reason,
 }: ConnectorSetupData): ViewSpec => {
   const label = connectorType ? `${connectorType} connector` : 'Connector';
-  const body: BodyNode[] = [
-    badge({
-      items: [
-        connected
-          ? { label: 'Connected', tone: 'success', variant: 'fill' }
-          : { label: 'Setup needed', tone: 'warning', variant: 'fill' },
-      ],
-    }),
-  ];
-
-  if (reason) {
-    body.push(
-      callout({
-        tone: connected ? 'success' : 'warning',
-        title: connected ? 'Connector ready' : 'Connector setup required',
-        body: reason,
-      })
-    );
-  }
-
-  return view({ title: label, subtitle: 'Connector setup', body });
+  return toViewSpec(
+    <View title={label} subtitle="Connector setup">
+      <Badge
+        items={[
+          connected
+            ? { label: 'Connected', tone: 'success', variant: 'fill' }
+            : { label: 'Setup needed', tone: 'warning', variant: 'fill' },
+        ]}
+      />
+      {reason && (
+        <Callout
+          tone={connected ? 'success' : 'warning'}
+          title={connected ? 'Connector ready' : 'Connector setup required'}
+        >
+          {reason}
+        </Callout>
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleConnectorSetup: ConnectorSetupData = {

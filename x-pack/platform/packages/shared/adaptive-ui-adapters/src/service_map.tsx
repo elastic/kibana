@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { callout, graph, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { Tone, ViewSpec } from '@kbn/adaptive-ui';
+import { Callout, Graph, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { graphOmissionNote, toGraphTopology } from './shared';
 
 /**
@@ -43,22 +44,14 @@ const HEALTH_TONE: Record<string, Tone> = {
 /** Latency and error rate, joined for one edge chip. `undefined` when neither is reported. */
 const connectionLabel = ({ latency_ms: latency, error_rate: errorRate }: ServiceMapConnection) => {
   const parts: string[] = [];
-  if (latency != null) {
-    parts.push(`${latency} ms`);
-  }
-  if (errorRate != null) {
-    parts.push(`${(errorRate * 100).toFixed(1)}%`);
-  }
+  if (latency != null) parts.push(`${latency} ms`);
+  if (errorRate != null) parts.push(`${(errorRate * 100).toFixed(1)}%`);
   return parts.length === 0 ? undefined : parts.join(' · ');
 };
 
 const errorRateTone = (errorRate?: number): Tone | undefined => {
-  if (errorRate == null) {
-    return undefined;
-  }
-  if (errorRate >= 0.05) {
-    return 'danger';
-  }
+  if (errorRate == null) return undefined;
+  if (errorRate >= 0.05) return 'danger';
   return errorRate >= 0.01 ? 'warning' : undefined;
 };
 
@@ -68,8 +61,6 @@ const errorRateTone = (errorRate?: number): Tone | undefined => {
  * presentational payload survives in the diagram without a companion table.
  */
 export const toServiceMapViewSpec = ({ services, connections }: ServiceMapData): ViewSpec => {
-  const body: BodyNode[] = [];
-
   const topology = toGraphTopology(
     services.map(({ name, type, health }) => ({
       id: name,
@@ -87,18 +78,20 @@ export const toServiceMapViewSpec = ({ services, connections }: ServiceMapData):
         : {}),
     }))
   );
+  const omissionNote = graphOmissionNote(topology);
 
-  if (topology.nodes.length === 0) {
-    body.push(callout({ tone: 'neutral', body: 'This service map has no services to draw.' }));
-  } else {
-    body.push(graph({ label: 'Dependencies', nodes: topology.nodes, edges: topology.edges }));
-    const note = graphOmissionNote(topology);
-    if (note) {
-      body.push(callout({ tone: 'warning', body: note }));
-    }
-  }
-
-  return view({ title: 'Service map', subtitle: 'Service dependencies', body });
+  return toViewSpec(
+    <View title="Service map" subtitle="Service dependencies">
+      {topology.nodes.length === 0 ? (
+        <Callout tone="neutral">This service map has no services to draw.</Callout>
+      ) : (
+        <>
+          <Graph label="Dependencies" nodes={topology.nodes} edges={topology.edges} />
+          {omissionNote && <Callout tone="warning">{omissionNote}</Callout>}
+        </>
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleServiceMap: ServiceMapData = {
@@ -109,20 +102,8 @@ export const sampleServiceMap: ServiceMapData = {
     { name: 'postgres', type: 'db', health: 'warning' },
   ],
   connections: [
-    {
-      source: 'checkout',
-      target: 'payment-service',
-      latency_ms: 320,
-      error_rate: 0.061,
-      throughput_tpm: 1200,
-    },
+    { source: 'checkout', target: 'payment-service', latency_ms: 320, error_rate: 0.061, throughput_tpm: 1200 },
     { source: 'checkout', target: 'cart', latency_ms: 45, error_rate: 0.001, throughput_tpm: 1800 },
-    {
-      source: 'payment-service',
-      target: 'postgres',
-      latency_ms: 210,
-      error_rate: 0.02,
-      throughput_tpm: 1100,
-    },
+    { source: 'payment-service', target: 'postgres', latency_ms: 210, error_rate: 0.02, throughput_tpm: 1100 },
   ],
 };

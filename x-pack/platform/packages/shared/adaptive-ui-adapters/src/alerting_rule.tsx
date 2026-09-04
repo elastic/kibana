@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { badge, codeBlock, descriptionList, text, view } from '@kbn/adaptive-ui/builders';
-import type { BodyNode, ViewSpec } from '@kbn/adaptive-ui';
+import React from 'react';
+import type { ViewSpec } from '@kbn/adaptive-ui';
+import { Badge, CodeBlock, DescriptionList, Text, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { getBreachEsqlQuery, type Query } from '@kbn/alerting-v2-schemas';
 
 /**
@@ -40,44 +41,33 @@ export const toAlertingRuleViewSpec = ({
   query,
   enabled,
 }: AlertingRuleData): ViewSpec => {
-  const body: BodyNode[] = [
-    badge({
-      items: [
-        {
-          label: enabled === false ? 'Disabled' : 'Enabled',
-          tone: enabled === false ? 'neutral' : 'success',
-          variant: 'fill',
-        },
-        ...(kind ? [{ label: kind, tone: 'primary' as const, variant: 'hollow' as const }] : []),
-      ],
-    }),
-  ];
-
   const details: Array<{ title: string; description: string }> = [];
-  if (schedule?.every) {
-    details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
-  }
-  if (timeField) {
-    details.push({ title: 'Time field', description: timeField });
-  }
-  if (metadata.builder_type) {
-    details.push({ title: 'Type', description: metadata.builder_type });
-  }
-  if (details.length > 0) {
-    body.push(descriptionList({ label: 'Rule', layout: 'inline', items: details }));
-  }
+  if (schedule?.every) details.push({ title: 'Schedule', description: `Every ${schedule.every}` });
+  if (timeField) details.push({ title: 'Time field', description: timeField });
+  if (metadata.builder_type) details.push({ title: 'Type', description: metadata.builder_type });
 
-  if (query) {
-    body.push(codeBlock({ language: 'esql', code: getBreachEsqlQuery(query), title: 'Query' }));
-  }
-  if (metadata.description) {
-    body.push(text({ body: metadata.description }));
-  }
-  if (metadata.tags && metadata.tags.length > 0) {
-    body.push(badge({ label: 'Tags', items: metadata.tags.map((label) => ({ label })) }));
-  }
-
-  return view({ title: metadata.name, subtitle: 'Alerting rule', body });
+  return toViewSpec(
+    <View title={metadata.name} subtitle="Alerting rule">
+      <Badge
+        items={[
+          {
+            label: enabled === false ? 'Disabled' : 'Enabled',
+            tone: enabled === false ? 'neutral' : 'success',
+            variant: 'fill',
+          },
+          ...(kind ? [{ label: kind, tone: 'primary' as const, variant: 'hollow' as const }] : []),
+        ]}
+      />
+      {details.length > 0 && (
+        <DescriptionList label="Rule" layout="inline" items={details} />
+      )}
+      {query && <CodeBlock language="esql" code={getBreachEsqlQuery(query)} title="Query" />}
+      {metadata.description && <Text body={metadata.description} />}
+      {metadata.tags && metadata.tags.length > 0 && (
+        <Badge label="Tags" items={metadata.tags.map((label) => ({ label }))} />
+      )}
+    </View>
+  ) as ViewSpec;
 };
 
 export const sampleAlertingRule: AlertingRuleData = {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { itemList, view } from '@kbn/adaptive-ui/builders';
+import React from 'react';
 import type { ViewSpec } from '@kbn/adaptive-ui';
+import { ItemList, View, toViewSpec } from '@kbn/adaptive-ui/jsx';
 import { severityTone, titleCase } from './shared';
 import { type CaseData, sampleCase } from './case';
 
@@ -26,32 +27,25 @@ export interface CasesData {
  * pill row of alert/comment counts, and a trailing severity status.
  */
 export const toCasesViewSpec = ({ cases, total }: CasesData): ViewSpec =>
-  view({
-    title: 'Cases',
-    subtitle: `${total} ${total === 1 ? 'case' : 'cases'}`,
-    body: [
-      itemList({
-        label: 'Cases',
-        items: cases.map((item) => ({
+  toViewSpec(
+    <View title="Cases" subtitle={`${total} ${total === 1 ? 'case' : 'cases'}`}>
+      <ItemList
+        label="Cases"
+        items={cases.map((item) => ({
           identifier: item.incremental_id != null ? `#${item.incremental_id}` : undefined,
           title: item.title,
           external: true,
           body: item.description,
           pills: [
-            {
-              type: 'badge' as const,
-              label: 'Alerts',
-              count: item.totalAlerts ?? 0,
-              tone: 'warning' as const,
-            },
+            { type: 'badge' as const, label: 'Alerts', count: item.totalAlerts ?? 0, tone: 'warning' as const },
             { type: 'badge' as const, label: 'Comments', count: item.totalComment ?? 0 },
           ],
           status: { label: titleCase(item.severity), tone: severityTone(item.severity) },
           action: { label: 'Open case', href: item.url ?? `/app/security/cases/${item.id}` },
-        })),
-      }),
-    ],
-  });
+        }))}
+      />
+    </View>
+  ) as ViewSpec;
 
 export const sampleCases: CasesData = {
   total: 3,
