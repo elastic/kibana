@@ -635,7 +635,9 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request);
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request, {
+        channel: 'kibana_execution_view',
+      });
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -668,7 +670,8 @@ describe('Execution Routes', () => {
       expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
         'wf-1',
         'default',
-        expect.anything()
+        expect.anything(),
+        { channel: 'kibana_execution_view' }
       );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
@@ -892,6 +895,7 @@ describe('Execution Routes', () => {
           token: 'resume-token',
           approved: 'true',
         },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',
@@ -996,6 +1000,7 @@ describe('Execution Routes', () => {
         stepId: 'step-exec-1',
         spaceId: 'default',
         input: { severity: 'high' },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',

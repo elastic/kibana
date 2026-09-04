@@ -316,6 +316,10 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
 export const MAX_USER_ACTION_AUTHOR_LENGTH = 256 as const;
+export const MAX_ACTION_SOURCE_TYPE_LENGTH = 1024 as const;
+export const MAX_ACTION_SOURCE_ID_LENGTH = 512 as const;
+export const MAX_ACTION_SOURCE_NAME_LENGTH = 256 as const;
+export const MAX_ACTION_SOURCE_RUN_ID_LENGTH = 512 as const;
 export const MAX_USER_ACTION_TYPE_LENGTH = 50 as const;
 
 /**
@@ -520,6 +524,19 @@ export const VIEW_TOGGLE_LIST_ID = 'list' as const;
 export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
 
 export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
+
+/**
+ * Template apply events. Each one reports a single confirmed user action that puts a template on a
+ * case, or takes it off again — never a count of cases. The public API, the workflow callers, and
+ * the alerting rule's cases system action all apply templates with no browser in the path, so none
+ * of them appear here. Use the server-side counters for totals; they count every caller.
+ */
+export const CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE =
+  'cases_template_applied_on_create' as const;
+
+export const CASES_TEMPLATE_APPLIED_EVENT_TYPE = 'cases_template_applied' as const;
+
+export const CASES_TEMPLATE_CLEARED_EVENT_TYPE = 'cases_template_cleared' as const;
 
 /**
  * Exporting this to make it easier to track the usage across the codebase

@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AlertEpisodeTags } from './tags';
+import { TagBadges } from './tags';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-describe('AlertEpisodeTags', () => {
+describe('TagBadges', () => {
   it('renders visible tags up to size', () => {
     render(
       <IntlProvider locale="en">
-        <AlertEpisodeTags tags={['alpha', 'beta']} size={2} />
+        <TagBadges tags={['alpha', 'beta']} size={2} />
       </IntlProvider>
     );
     expect(screen.getByText('alpha')).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe('AlertEpisodeTags', () => {
   it('renders overflow count badge when tags exceed size', () => {
     render(
       <IntlProvider locale="en">
-        <AlertEpisodeTags tags={['a', 'b', 'c', 'd', 'e']} size={3} />
+        <TagBadges tags={['a', 'b', 'c', 'd', 'e']} size={3} />
       </IntlProvider>
     );
     expect(screen.getByText('a')).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('AlertEpisodeTags', () => {
 
     render(
       <IntlProvider locale="en">
-        <AlertEpisodeTags tags={['a', 'b', 'c', 'd']} size={2} />
+        <TagBadges tags={['a', 'b', 'c', 'd']} size={2} />
       </IntlProvider>
     );
     await user.click(screen.getByText('+2'));
@@ -47,36 +47,59 @@ describe('AlertEpisodeTags', () => {
     expect(await screen.findByText('d')).toBeInTheDocument();
   });
 
-  describe('inline', () => {
+  it('separates the badges with a real space so the line can break between them', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <TagBadges tags={['a', 'b']} />
+      </IntlProvider>
+    );
+
+    expect(container.firstChild).toHaveTextContent('a b');
+  });
+
+  it('lays the badges out as inline content, so the grid line clamp can count them', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <TagBadges tags={['a', 'b', 'c', 'd']} size={2} />
+      </IntlProvider>
+    );
+
+    expect(container.firstChild?.nodeName).toBe('SPAN');
+    expect(container.querySelector('.euiFlexGroup')).not.toBeInTheDocument();
+    expect(screen.getByText('+2')).toBeInTheDocument();
+  });
+
+  describe('showAll', () => {
     it('renders every tag as its own badge, ignoring size', () => {
       render(
         <IntlProvider locale="en">
-          <AlertEpisodeTags tags={['a', 'b', 'c', 'd', 'e']} size={2} inline />
+          <TagBadges tags={['a', 'b', 'c', 'd', 'e']} size={2} showAll />
         </IntlProvider>
       );
 
       ['a', 'b', 'c', 'd', 'e'].forEach((tag) => expect(screen.getByText(tag)).toBeInTheDocument());
       expect(screen.queryByText('+3')).not.toBeInTheDocument();
     });
-
-    it('separates the badges with a real space so the line can break between them', () => {
-      const { container } = render(
-        <IntlProvider locale="en">
-          <AlertEpisodeTags tags={['a', 'b']} inline />
-        </IntlProvider>
-      );
-
-      expect(container.firstChild).toHaveTextContent('a b');
-    });
   });
 
-  it('renders nothing when tags is omitted', () => {
+  it('renders an em dash when tags is empty', () => {
     const { container } = render(
       <IntlProvider locale="en">
-        <AlertEpisodeTags size={2} />
+        <TagBadges tags={[]} size={2} data-test-subj="tags" />
       </IntlProvider>
     );
 
+    expect(screen.getByTestId('tags')).toHaveTextContent('—');
     expect(container.querySelector('.euiBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders an em dash when tags is omitted', () => {
+    render(
+      <IntlProvider locale="en">
+        <TagBadges size={2} data-test-subj="tags" />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('tags')).toHaveTextContent('—');
   });
 });

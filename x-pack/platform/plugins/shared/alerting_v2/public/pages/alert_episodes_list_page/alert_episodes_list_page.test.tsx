@@ -287,10 +287,26 @@ describe('AlertEpisodesListPage', () => {
       'rule.id',
       'duration',
       'tags',
+      'rule_tags',
       'assignees',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
+  });
+
+  it.each([
+    ['tags', 'Alert tags'],
+    ['rule_tags', 'Rule tags'],
+  ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    expect(customize!({ column: { id: columnId, isSortable: true }, headerRowHeight: 1 })).toEqual({
+      id: columnId,
+      displayAsText: label,
+      isSortable: false,
+    });
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {

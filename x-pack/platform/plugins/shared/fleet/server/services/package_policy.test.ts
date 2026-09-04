@@ -2225,6 +2225,102 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('bulkUpdatePartial', () => {
+    it('should pass only the supplied attributes and version to Saved Objects', async () => {
+      const soClient = createSavedObjectClientMock();
+      const attributes = {
+        condition: "'agent.id' == 'agent-1'",
+        revision: 3,
+        updated_at: '2026-08-18T00:00:00.000Z',
+        updated_by: 'system',
+      };
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            version: 'WzIsMV0=',
+            attributes,
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      const result = await packagePolicyService.bulkUpdatePartial(soClient, [
+        {
+          id: 'test-package-policy',
+          version: 'WzEsMV0=',
+          attributes,
+        },
+      ]);
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: 'test-package-policy',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          version: 'WzEsMV0=',
+          attributes,
+        },
+      ]);
+      expect(result).toEqual({
+        updatedPolicies: [
+          {
+            id: 'test-package-policy',
+            version: 'WzIsMV0=',
+            ...attributes,
+          },
+        ],
+        failedPolicies: [],
+      });
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'update',
+        id: 'test-package-policy',
+        name: undefined,
+        savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+    });
+
+    it('should return per-policy Saved Object failures', async () => {
+      const soClient = createSavedObjectClientMock();
+      const error = {
+        statusCode: 409,
+        error: 'Conflict',
+        message: 'Saved object version conflict',
+      };
+      const update = {
+        id: 'test-package-policy',
+        version: 'WzEsMV0=',
+        attributes: { condition: null },
+      };
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            error,
+          },
+        ],
+      });
+
+      const result = await packagePolicyService.bulkUpdatePartial(soClient, [update]);
+
+      expect(result).toEqual({
+        updatedPolicies: [],
+        failedPolicies: [{ update, error }],
+      });
+    });
+
+    it('should skip Saved Objects when there are no updates', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      await expect(packagePolicyService.bulkUpdatePartial(soClient, [])).resolves.toEqual({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('list', () => {
     it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
       const soClient = createSavedObjectClientMock();

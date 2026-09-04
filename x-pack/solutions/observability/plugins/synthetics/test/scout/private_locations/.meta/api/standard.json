@@ -1,5 +1,5 @@
 {
-  "sha1": "4755bebd22415b81ecc3e47a3a1f81485f50a780",
+  "sha1": "c3e74f04ac43b73e7fdf8675bb4e64424df51fc3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,6 +96,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
         "line": 84,
         "column": 51
+      }
+    },
+    {
+      "id": "a56530651b7f21f-596439d3ed034eb",
+      "title": "DisableScalablePrivateLocation disabling sharding clears a leftover agent pin before the location is persisted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/disable_scalable_private_location.spec.ts",
+        "line": 45,
+        "column": 23
       }
     },
     {

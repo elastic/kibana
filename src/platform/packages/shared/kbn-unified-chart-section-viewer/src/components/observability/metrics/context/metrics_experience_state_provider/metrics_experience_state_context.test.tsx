@@ -356,6 +356,40 @@ describe('MetricsExperienceStateProvider', () => {
       expect(onMetricsSortChange).toHaveBeenCalled();
     });
 
+    it('defaults to enabled when the host provides no featureFlags service', () => {
+      const onMetricsSortChange = jest.fn();
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <MetricsExperienceStateProvider
+            profileId="test-profile"
+            metricsSort={{
+              sortField: METRICS_SORT_BY.recency,
+              sortDirection: METRICS_SORT_DIRECTION.desc,
+            }}
+            onMetricsSortChange={onMetricsSortChange}
+          >
+            {children}
+          </MetricsExperienceStateProvider>
+        ),
+      });
+
+      expect(result.current.metricsSort).toEqual({
+        sortField: METRICS_SORT_BY.recency,
+        sortDirection: METRICS_SORT_DIRECTION.desc,
+      });
+
+      act(() => {
+        result.current.onMetricsSortChange({
+          sortField: METRICS_SORT_BY.alphabetically,
+          sortDirection: METRICS_SORT_DIRECTION.desc,
+        });
+      });
+      expect(onMetricsSortChange).toHaveBeenCalledWith({
+        sortField: METRICS_SORT_BY.alphabetically,
+        sortDirection: METRICS_SORT_DIRECTION.desc,
+      });
+    });
+
     describe('when the sorting feature flag is disabled', () => {
       it('ignores a host-provided non-default sort and falls back to the default', () => {
         const metricsSort: MetricsSort = {
@@ -393,34 +427,6 @@ describe('MetricsExperienceStateProvider', () => {
         expect(onMetricsSortChange).not.toHaveBeenCalled();
         expect(result.current.currentPage).toBe(2);
         expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
-      });
-
-      it('defaults to disabled when the host provides no featureFlags service', () => {
-        const onMetricsSortChange = jest.fn();
-        const { result } = renderHook(() => useMetricsExperienceState(), {
-          wrapper: ({ children }: { children: React.ReactNode }) => (
-            <MetricsExperienceStateProvider
-              profileId="test-profile"
-              metricsSort={{
-                sortField: METRICS_SORT_BY.recency,
-                sortDirection: METRICS_SORT_DIRECTION.desc,
-              }}
-              onMetricsSortChange={onMetricsSortChange}
-            >
-              {children}
-            </MetricsExperienceStateProvider>
-          ),
-        });
-
-        expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
-
-        act(() => {
-          result.current.onMetricsSortChange({
-            sortField: METRICS_SORT_BY.alphabetically,
-            sortDirection: METRICS_SORT_DIRECTION.desc,
-          });
-        });
-        expect(onMetricsSortChange).not.toHaveBeenCalled();
       });
     });
   });

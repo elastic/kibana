@@ -6,9 +6,9 @@
  */
 
 import { Validator } from '@cfworker/json-schema';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { loadSchemaClosure } from './schema_closure';
 import { isRecord } from './types';
-import type { ApiTarget } from './types';
 
 export interface ParamsValidationError {
   path: string;

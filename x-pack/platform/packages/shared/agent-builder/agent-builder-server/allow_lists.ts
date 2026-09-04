@@ -92,6 +92,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.get_migration_rules`,
   `${internalNamespaces.security}.siem_migration.get_rule_migration_stats`,
   `${internalNamespaces.security}.siem_migration.get_rule_migration_translation_stats`,
+  `${internalNamespaces.security}.siem_migration.get_missing_rule_migration_resources`,
+  `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
   `${internalNamespaces.security}.alert-triage`,
 
   // Streams
@@ -150,6 +154,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.security}.alertzero-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -227,6 +232,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'siem-readiness',
   'automatic-migration-rules-start-migration',
   'automatic-migration-rules-summarize',
+  'automatic-migration-rules-stop-migration',
+  'automatic-migration-rules-update-migration',
+  'automatic-migration-rules-delete-migration',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',

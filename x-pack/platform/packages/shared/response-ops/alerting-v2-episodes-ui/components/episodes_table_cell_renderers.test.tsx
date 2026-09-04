@@ -14,6 +14,7 @@ import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from './episodes_table_cell_renderers';
 
@@ -81,6 +82,104 @@ describe('EpisodeTagsCell', () => {
 
     expect(screen.getByText('foo')).toBeInTheDocument();
     expect(screen.getByText('bar')).toBeInTheDocument();
+  });
+
+  it('renders an empty value when the row has no tags', () => {
+    const row = makeRow({ group_hash: 'gh3', last_tags: [] });
+    renderWithI18n(<EpisodeTagsCell {...baseCellProps} row={row} />);
+
+    expect(screen.getByTestId('episodeTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the row has no last_tags field at all', () => {
+    const row = makeRow({ group_hash: 'gh3' });
+    renderWithI18n(<EpisodeTagsCell {...baseCellProps} row={row} />);
+
+    expect(screen.getByTestId('episodeTagsCell')).toHaveTextContent('—');
+  });
+});
+
+describe('EpisodeRuleTagsCell', () => {
+  const makeRuleWithTags = (tags?: string[]): Rule =>
+    ({ metadata: { name: 'rule name', ...(tags ? { tags } : {}) } } as unknown as Rule);
+
+  const ruleTagsCellProps = { ...baseCellProps, columnId: 'rule_tags' };
+
+  it('renders a badge for each tag of the row rule', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags(['production', 'cpu']) }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByText('production')).toBeInTheDocument();
+    expect(screen.getByText('cpu')).toBeInTheDocument();
+  });
+
+  it('renders an empty value when the rule has no tags', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags() }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the rule is not available', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the row has no rule id, without waiting for the rules fetch', () => {
+    const row = makeRow({ 'episode.id': 'ep1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell {...ruleTagsCellProps} row={row} rulesCache={{}} isLoadingRules />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders a skeleton while the row rule is still loading', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell {...ruleTagsCellProps} row={row} rulesCache={{}} isLoadingRules />
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleTagsCell')).not.toBeInTheDocument();
+  });
+
+  it('does not read the episode tags of the row', () => {
+    const row = makeRow({ 'rule.id': 'r1', last_tags: ['episode-only-tag'] });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags(['production']) }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByText('production')).toBeInTheDocument();
+    expect(screen.queryByText('episode-only-tag')).not.toBeInTheDocument();
   });
 });
 

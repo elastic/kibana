@@ -40,6 +40,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
   return {
     ...baseActions,
     [TEST_CONNECTOR_SUB_ACTION]: {
+      scope: 'read',
       handler: spec.test.handler,
       input: z4.unknown().optional(),
     },
