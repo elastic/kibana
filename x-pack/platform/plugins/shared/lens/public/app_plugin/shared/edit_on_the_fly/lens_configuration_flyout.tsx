@@ -185,11 +185,27 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
+        // restore every datasource state from the previous attributes, not only the
+        // active one, so non-active loaded states are not dropped on cancel
+        const allPreviousDatasourceStates = Object.fromEntries(
+          Object.entries(previousAttrs.state.datasourceStates).map(([id, state]) => [
+            id,
+            {
+              isLoading: false,
+              state:
+                datasourceMap[id as LensDatasourceId]?.injectReferencesToLayers?.(
+                  state,
+                  previousAttrs.references
+                ) ?? state,
+            },
+          ])
+        );
         updatePanelState?.(
           currentDatasourceState,
           previousAttrs.state.visualization,
           undefined,
-          previousDatasourceId
+          previousDatasourceId,
+          allPreviousDatasourceStates
         );
       } else {
         updateSuggestion?.(previousAttrs);

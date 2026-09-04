@@ -304,6 +304,37 @@ describe('LensEditConfigurationFlyout', () => {
     expect(updatePanelStateSpy).toHaveBeenCalled();
   });
 
+  it('should restore all previous datasource states on cancel, not only the active one', async () => {
+    const updatePanelStateSpy = jest.fn();
+    const multiDatasourceAttributes = {
+      ...lensAttributes,
+      state: {
+        ...lensAttributes.state,
+        datasourceStates: {
+          formBased: mockFormBasedStateChanged,
+          textBased: mockTextBasedState,
+        },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout({
+      attributes: multiDatasourceAttributes,
+      updatePanelState: updatePanelStateSpy,
+    });
+    await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
+
+    expect(updatePanelStateSpy).toHaveBeenCalledWith(
+      mockFormBasedStateChanged,
+      expect.anything(),
+      undefined,
+      'formBased',
+      {
+        formBased: { isLoading: false, state: mockFormBasedStateChanged },
+        textBased: { isLoading: false, state: mockTextBasedState },
+      }
+    );
+  });
+
   it('should call the updateByRefInput callback with savedObjectId and previous attributes if cancel button is clicked and savedObjectId exists', async () => {
     const updateByRefInputSpy = jest.fn();
 
