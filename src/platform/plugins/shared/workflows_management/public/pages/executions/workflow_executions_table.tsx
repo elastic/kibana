@@ -11,12 +11,14 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFocusTrap,
   EuiPanel,
   EuiSkeletonText,
   EuiTablePagination,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,6 +26,8 @@ import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_ex
 import { useWorkflowExecutionsGridSelection } from './use_workflow_executions_grid_selection';
 import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
 import { WorkflowExecutionsDataGrid } from './workflow_executions_data_grid';
+import type { ExecutionsGroupBy } from './workflow_executions_group_by';
+import { WorkflowExecutionsGroupedView } from './workflow_executions_grouped_view';
 import {
   EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
   EXECUTION_TABLE_DEFAULT_SORT,
@@ -35,6 +39,7 @@ import {
   DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
   WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS,
 } from './workflow_executions_table_config';
+import { WorkflowExecutionsTableEndOfResults } from './workflow_executions_table_end_of_results';
 import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
 import { useSerialPolling } from '../../hooks/use_serial_polling';
@@ -61,6 +66,7 @@ export interface WorkflowExecutionsTableProps {
   liveUpdateIntervalMs?: number;
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
+  onTimeRangeLinkClick?: () => void;
   timeRange: TimeRange;
   spaceId: string;
 }
@@ -71,6 +77,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     liveUpdateIntervalMs,
     onReRunExecution,
     onViewAllExecutionsForWorkflow,
+    onTimeRangeLinkClick,
     query,
     spaceId,
     timeRange,
@@ -88,6 +95,10 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const [sort, setSort] = useState<ExecutionTableSortOrder>(EXECUTION_TABLE_DEFAULT_SORT);
     const [pageSize, setPageSize] = useState(EXECUTION_TABLE_DEFAULT_PAGE_SIZE);
     const [pageIndex, setPageIndex] = useState(0);
+    const [groupBy, setGroupBy] = useState<ExecutionsGroupBy>('none');
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const fullscreenButtonRef = useRef<HTMLButtonElement>(null);
+    const { euiTheme } = useEuiTheme();
     const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
     const telemetry = useTelemetry();
 
@@ -143,9 +154,42 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       setPageIndex(0);
     }, [searchCriteriaKey]);
 
+    useEffect(() => {
+      if (!isFullscreen) {
+        return undefined;
+      }
+
+      const previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setIsFullscreen(false);
+        }
+      };
+
+      window.addEventListener('keydown', onKeyDown);
+      return () => {
+        document.body.style.overflow = previousOverflow;
+        window.removeEventListener('keydown', onKeyDown);
+      };
+    }, [isFullscreen]);
+
+    const wasFullscreenRef = useRef(false);
+    useEffect(() => {
+      if (wasFullscreenRef.current && !isFullscreen) {
+        fullscreenButtonRef.current?.focus();
+      }
+      wasFullscreenRef.current = isFullscreen;
+    }, [isFullscreen]);
+
     const handleRetry = useCallback(() => {
       void refetch();
     }, [refetch]);
+
+    const handleToggleFullscreen = useCallback(() => {
+      setIsFullscreen((prev) => !prev);
+    }, []);
 
     const handleSetColumns = useCallback((nextColumns: string[]) => {
       setVisibleColumns(nextColumns);
@@ -184,6 +228,25 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       [pageSize, total]
     );
     const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
+    const showEndOfResults = isPaginationLimited && pageIndex === maxPageIndex;
+    const isGrouped = groupBy !== 'none';
+
+    const fullscreenCss = useMemo(
+      () =>
+        isFullscreen
+          ? css`
+              position: fixed;
+              inset: 0;
+              z-index: ${euiTheme.levels.mask};
+              background: ${euiTheme.colors.emptyShade};
+              padding: ${euiTheme.size.l};
+              display: flex;
+              flex-direction: column;
+              min-height: 0;
+            `
+          : undefined,
+      [euiTheme.colors.emptyShade, euiTheme.levels.mask, euiTheme.size.l, isFullscreen]
+    );
 
     if (errorMessage) {
       return (
@@ -235,55 +298,62 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     }
 
     return (
-      <div css={tableContainerCss} data-test-subj="workflowExecutionsTable">
-        <div css={gridWrapperCss}>
-          <WorkflowExecutionsDataGrid
-            ariaLabelledBy="workflowExecutionsTableLabel"
-            executions={executions}
-            visibleColumns={visibleColumns}
-            columnWidths={columnWidths}
-            sort={sort}
-            selectedExecutionId={selectedExecutionId}
-            selectionState={selectionState}
-            onOpenExecution={handleOpenExecution}
-            onRefresh={handleRetry}
-            onSetColumns={handleSetColumns}
-            onSort={handleSortWithPageReset}
-            onColumnResize={handleColumnResize}
-            onReRunExecution={onReRunExecution}
-            onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+      <EuiFocusTrap disabled={!isFullscreen} returnFocus={false}>
+        <div
+          css={[tableContainerCss, fullscreenCss]}
+          data-test-subj="workflowExecutionsTable"
+          data-fullscreen={isFullscreen ? 'true' : undefined}
+        >
+          <div css={gridWrapperCss}>
+            <WorkflowExecutionsDataGrid
+              ariaLabelledBy="workflowExecutionsTableLabel"
+              executions={executions}
+              visibleColumns={visibleColumns}
+              columnWidths={columnWidths}
+              sort={sort}
+              selectedExecutionId={selectedExecutionId}
+              selectionState={selectionState}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              totalHits={total}
+              toolbarOnly={isGrouped}
+              groupBy={groupBy}
+              onGroupByChange={setGroupBy}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={handleToggleFullscreen}
+              fullscreenButtonRef={fullscreenButtonRef}
+              onOpenExecution={handleOpenExecution}
+              onRefresh={handleRetry}
+              onSetColumns={handleSetColumns}
+              onSort={handleSortWithPageReset}
+              onColumnResize={handleColumnResize}
+              onReRunExecution={onReRunExecution}
+              onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+            />
+            {isGrouped ? (
+              <WorkflowExecutionsGroupedView
+                executions={executions}
+                groupBy={groupBy}
+                onOpenExecution={handleOpenExecution}
+                onReRunExecution={onReRunExecution}
+                onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+              />
+            ) : null}
+          </div>
+          {showEndOfResults ? (
+            <WorkflowExecutionsTableEndOfResults onTimeRangeLinkClick={onTimeRangeLinkClick} />
+          ) : null}
+          <EuiTablePagination
+            activePage={pageIndex}
+            itemsPerPage={pageSize}
+            itemsPerPageOptions={PAGE_SIZE_OPTIONS}
+            onChangeItemsPerPage={handlePageSizeChange}
+            onChangePage={handlePageChange}
+            pageCount={totalPages}
+            showPerPageOptions
           />
         </div>
-        {isPaginationLimited && (
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            data-test-subj="workflowExecutionsTablePaginationLimit"
-            size="s"
-            title={i18n.translate('workflowsManagement.executionsPage.paginationLimitTitle', {
-              defaultMessage: 'Showing the first {maxRows} executions only',
-              values: { maxRows: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW.toLocaleString() },
-            })}
-          >
-            <p>
-              {i18n.translate('workflowsManagement.executionsPage.paginationLimitBody', {
-                defaultMessage:
-                  'Refine your search or time range to find older executions. Deep pagination beyond {maxRows} results is not supported.',
-                values: { maxRows: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW.toLocaleString() },
-              })}
-            </p>
-          </EuiCallOut>
-        )}
-        <EuiTablePagination
-          activePage={pageIndex}
-          itemsPerPage={pageSize}
-          itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-          onChangeItemsPerPage={handlePageSizeChange}
-          onChangePage={handlePageChange}
-          pageCount={totalPages}
-          showPerPageOptions
-        />
-      </div>
+      </EuiFocusTrap>
     );
   }
 );

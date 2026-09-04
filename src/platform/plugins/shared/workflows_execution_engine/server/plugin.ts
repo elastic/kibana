@@ -45,8 +45,13 @@ import { handlePostExecutionLoop } from './execution_functions/handle_post_execu
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
+import {
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+  UNKNOWN_EXECUTION_IDENTITY,
+} from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
+  failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -165,6 +170,54 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
+  /**
+   * Completes a claimed `workflow:run` / `workflow:resume` task that has no
+   * Task Manager identity by failing the persisted execution instead of leaving
+   * it pending.
+   */
+  private createMissingIdentityTaskRunner({
+    workflowRunId,
+    spaceId,
+    setCustomTaskRunEventFields,
+  }: {
+    workflowRunId: string;
+    spaceId: string;
+    setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
+  }): { run: () => Promise<void>; cancel: () => Promise<void> } {
+    return {
+      run: async () => {
+        const { workflowExecutionRepository, stepExecutionRepository } =
+          this.createScopedRepositories();
+        await failExecutionMissingIdentity({
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          workflowRunId,
+          spaceId,
+          logger: this.logger,
+        });
+        const execution = await getExecutionForTaskRunEvent(
+          workflowExecutionRepository,
+          workflowRunId,
+          spaceId,
+          this.logger
+        );
+        stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+          workflow_execution_id: workflowRunId,
+          workflow_id: execution?.workflowId,
+          space_id: spaceId,
+          outcome: 'failed',
+        });
+      },
+      cancel: async () => {
+        stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+          workflow_execution_id: workflowRunId,
+          space_id: spaceId,
+          outcome: 'cancelled',
+        });
+      },
+    };
+  }
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
@@ -220,11 +273,15 @@ export class WorkflowsExecutionEnginePlugin
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
+          const { workflowRunId, spaceId } = taskInstance.params as StartWorkflowExecutionParams;
           if (!fakeRequest) {
-            throw new Error('Cannot execute a workflow without Kibana Request');
+            return this.createMissingIdentityTaskRunner({
+              workflowRunId,
+              spaceId,
+              setCustomTaskRunEventFields,
+            });
           }
           const taskAbortController = createWorkflowTaskAbortController(signal);
-          const { workflowRunId, spaceId } = taskInstance.params as StartWorkflowExecutionParams;
           return {
             run: async () => {
               // Add queue delay metrics to APM trace for observability
@@ -418,11 +475,15 @@ export class WorkflowsExecutionEnginePlugin
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
+          const { workflowRunId, spaceId } = taskInstance.params as ResumeWorkflowExecutionParams;
           if (!fakeRequest) {
-            throw new Error('Cannot resume a workflow without Kibana Request');
+            return this.createMissingIdentityTaskRunner({
+              workflowRunId,
+              spaceId,
+              setCustomTaskRunEventFields,
+            });
           }
           const taskAbortController = createWorkflowTaskAbortController(signal);
-          const { workflowRunId, spaceId } = taskInstance.params as ResumeWorkflowExecutionParams;
           return {
             run: async () => {
               // Add queue delay metrics to APM trace for observability
@@ -615,15 +676,33 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         maxAttempts: 3,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
-          if (!fakeRequest) {
-            throw new Error('Cannot execute a scheduled workflow without Kibana Request');
-          }
-          const taskAbortController = createWorkflowTaskAbortController(signal);
           const { workflowId, spaceId } = taskInstance.params as {
             workflowId: string;
             spaceId: string;
             triggerType: string;
           };
+          if (!fakeRequest) {
+            this.logger.warn(
+              `Cannot execute scheduled workflow ${workflowId} in space ${spaceId}: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`
+            );
+            return {
+              run: async () => {
+                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                  workflow_id: workflowId,
+                  space_id: spaceId,
+                  outcome: 'failed',
+                });
+              },
+              cancel: async () => {
+                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                  workflow_id: workflowId,
+                  space_id: spaceId,
+                  outcome: 'cancelled',
+                });
+              },
+            };
+          }
+          const taskAbortController = createWorkflowTaskAbortController(signal);
           return {
             run: async () => {
               // Add queue delay metrics to APM trace for observability
@@ -823,6 +902,16 @@ export class WorkflowsExecutionEnginePlugin
                 });
                 workflowExecutionId = workflowExecution.id;
 
+                if (workflowExecution.status === ExecutionStatus.FAILED) {
+                  stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                    workflow_execution_id: workflowExecution.id,
+                    workflow_id: workflowId,
+                    space_id: spaceId,
+                    outcome: 'failed',
+                  });
+                  return;
+                }
+
                 // Check concurrency limits and apply collision strategy if needed
                 const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
                 if (!canProceed) {
@@ -1020,7 +1109,7 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
-      authenticatedUser: string;
+      authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
       return buildWorkflowExecutionDocument({
@@ -1141,6 +1230,12 @@ export class WorkflowsExecutionEnginePlugin
         { refresh: true }
       );
 
+      if (workflowExecution.status === ExecutionStatus.FAILED) {
+        return {
+          workflowExecutionId: workflowExecution.id,
+        };
+      }
+
       const inputsValid = await validateWorkflowInputs(
         workflowExecution,
         workflowExecutionRepository,
@@ -1227,6 +1322,12 @@ export class WorkflowsExecutionEnginePlugin
         request,
         { refresh: 'wait_for' }
       );
+
+      if (workflowExecution.status === ExecutionStatus.FAILED) {
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -1370,6 +1471,10 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
+      const runnable = succeeded.filter(
+        (p) => p.workflowExecution.status !== ExecutionStatus.FAILED
+      );
+
       // Concurrency checks for items in the same group must run sequentially:
       // they read and mutate the same ES state, so running them in parallel
       // would let siblings in one batch see each other as "in flight" and,
@@ -1378,7 +1483,7 @@ export class WorkflowsExecutionEnginePlugin
       // Items without a key, and items in different groups, stay parallel.
       const keylessItems: PreparedItem[] = [];
       const bucketsByGroup = new Map<string, PreparedItem[]>();
-      for (const p of succeeded) {
+      for (const p of runnable) {
         const groupKey = p.workflowExecution.concurrencyGroupKey;
         if (!groupKey) {
           keylessItems.push(p);
@@ -1477,6 +1582,12 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+      if (workflowExecution.status === ExecutionStatus.FAILED) {
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       const taskInstance = {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
@@ -1610,8 +1721,12 @@ export class WorkflowsExecutionEnginePlugin
       const resumedBy =
         options?.resumedBy ??
         (request
-          ? await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client)
-          : 'unknown');
+          ? (await getAuthenticatedUser(
+              request,
+              coreStart.security,
+              coreStart.elasticsearch.client
+            )) ?? UNKNOWN_EXECUTION_IDENTITY
+          : UNKNOWN_EXECUTION_IDENTITY);
       const resumedAt = new Date().toISOString();
 
       const resumeContext = {
