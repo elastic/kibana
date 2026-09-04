@@ -34,8 +34,9 @@ spec:
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite/hooks/pre-command
-              - .buildkite/pipelines/on_merge.yml
+              - .buildkite
+              - package.json
+              - .node-version
             cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
