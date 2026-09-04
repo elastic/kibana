@@ -4,7 +4,7 @@ hoistPattern:
 publicHoistPattern:
   - '*'
 shamefullyHoist: true
-autoInstallPeers: true
+autoInstallPeers: false
 strictPeerDependencies: false
 dedupePeerDependents: true
 verifyDepsBeforeRun: false
