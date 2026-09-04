@@ -74,6 +74,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './workflows';
 
 export { getSpaceUrlPrefix } from './helpers';
 
