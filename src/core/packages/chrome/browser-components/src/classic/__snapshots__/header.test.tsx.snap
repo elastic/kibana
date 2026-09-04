@@ -58,7 +58,7 @@ exports[`Header renders 1`] = `
             <svg
               aria-hidden="true"
               aria-labelledby="elasticMark"
-              class="css-1ks1hwq-logoMarkCss"
+              class="css-1nenti5-logoMarkCss"
               data-test-subj="logoMark"
               fill="none"
               height="19"
