@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser, CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
@@ -23,6 +23,10 @@ interface SetupSavedObjectsParams {
   >;
   savedObjects: CoreSetup['savedObjects'];
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  savedObjectDiffEnabled?: boolean;
+  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffFieldSizeLimit?: number;
+  logger?: Logger;
 }
 
 export function setupSavedObjects({
@@ -30,6 +34,10 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getCurrentUser,
+  savedObjectDiffEnabled,
+  savedObjectDiffTypesToExclude,
+  savedObjectDiffFieldSizeLimit,
+  logger,
 }: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
@@ -58,6 +66,10 @@ export function setupSavedObjects({
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
           typeRegistry,
+          savedObjectDiffEnabled,
+          savedObjectDiffTypesToExclude,
+          savedObjectDiffFieldSizeLimit,
+          logger,
         })
       : undefined;
   });

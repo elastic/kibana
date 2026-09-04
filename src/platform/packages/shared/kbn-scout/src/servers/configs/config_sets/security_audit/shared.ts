@@ -14,4 +14,11 @@ export const securityAuditServerArgs = [
   '--xpack.security.audit.appender.type=file',
   `--xpack.security.audit.appender.fileName=${AUDIT_LOG_PATH}`,
   '--xpack.security.audit.appender.layout.type=json',
+  // Enable saved object diffs so the diff assertions in saved_object_diff.spec.ts have
+  // `kibana.diff` to inspect. `typesToExclude` and a non-default `fieldSizeLimit` (10kb,
+  // below the 48kb default) let the spec verify each config is honored. Array values must
+  // be JSON literals — the CLI runs each arg value through JSON.parse.
+  '--xpack.security.audit.savedObjectDiff.enabled=true',
+  '--xpack.security.audit.savedObjectDiff.typesToExclude=["visualization"]',
+  '--xpack.security.audit.savedObjectDiff.fieldSizeLimit=10kb',
 ];

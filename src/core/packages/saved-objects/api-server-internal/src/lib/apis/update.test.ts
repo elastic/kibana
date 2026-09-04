@@ -959,5 +959,87 @@ describe('#update', () => {
         });
       });
     });
+
+    describe('saved object diff audit events', () => {
+      beforeEach(() => {
+        mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      });
+
+      it('calls emitSavedObjectDiffAuditEvent with diff after successful update when savedObjectDiffEnabled', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        await updateSuccess(client, repository, registry, type, id, { title: 'New Title' });
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: expect.any(Object),
+            after: expect.any(Object),
+          })
+        );
+      });
+
+      it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await updateSuccess(client, repository, registry, type, id, attributes);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('emits an unknown-outcome event when the update fails after authorization', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        // Not-found without upsert throws after authorizeUpdate has run
+        await expect(
+          updateSuccess(client, repository, registry, type, id, attributes, undefined, {
+            mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+          })
+        ).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: { type, id },
+            outcome: 'unknown',
+            after: expect.objectContaining(attributes),
+          })
+        );
+      });
+
+      it('emits a single audit event per successful update', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        await updateSuccess(client, repository, registry, type, id, attributes);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+      });
+
+      it('emits a diff for an upsert that creates the object', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc }));
+
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          type,
+          id,
+          attributes,
+          { upsert: { title: 'created-via-upsert' } },
+          { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse }
+        );
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: {},
+            after: expect.any(Object),
+          })
+        );
+      });
+    });
   });
 });

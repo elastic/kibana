@@ -12,6 +12,7 @@ import type {
   AuthorizeUpdateObject,
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
@@ -32,6 +33,10 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
 } from './utils';
+import type {
+  WriteAuditRecord,
+  SavedObjectAuditDiffRecorder,
+} from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
@@ -47,10 +52,11 @@ import type {
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];
   options: SavedObjectsBulkDeleteOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performBulkDelete = async <T>(
-  { objects, options }: PerformBulkDeleteParams<T>,
+  { objects, options, auditDiffRecorder }: PerformBulkDeleteParams<T>,
   {
     registry,
     helpers,
@@ -141,6 +147,22 @@ export const performBulkDelete = async <T>(
     );
   } else expectedResults = expectedMultiNamespaceResults;
 
+  // Track each authorized object for auditing (flushed by the repository once the
+  // operation settles); bulk delete authorizes both valid and already-errored objects.
+  // `before` is populated by the feature-gated pre-delete fetch; empty attributes
+  // still audit — the delete itself is the audit signal.
+  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  if (auditDiffRecorder) {
+    for (const { value } of expectedResults) {
+      if (value.id) {
+        auditRecordsByKey.set(
+          `${value.type}:${value.id}`,
+          auditDiffRecorder.track({ type: value.type, id: value.id })
+        );
+      }
+    }
+  }
+
   // Filter valid objects
   const validObjects = expectedResults.filter(isRight);
   if (validObjects.length === 0) {
@@ -149,6 +171,48 @@ export const performBulkDelete = async <T>(
       return { ...expectedResult.value, success: false };
     });
     return { statuses: [...savedObjects] };
+  }
+
+  // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
+  // mget keyed by object covers both single- and multi-namespace types correctly, and a
+  // normal (diff-disabled) bulk delete pays nothing extra. Results are matched back to
+  // objects by the returned `_id` (not by array position), so a reordered or partial mget
+  // response can never misattribute one object's attributes to another in the audit log.
+  // Failure-isolated: an mget error must not fail the delete — degrade to no before-state.
+  if (auditDiffRecorder) {
+    try {
+      const beforeAttrsRequests = validObjects.map(({ value: { type, id } }) => ({
+        rawId: serializer.generateRawId(namespace, type, id),
+        type,
+        id,
+      }));
+      const objectByRawId = new Map(beforeAttrsRequests.map((req) => [req.rawId, req]));
+      const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+        {
+          docs: beforeAttrsRequests.map(({ rawId, type }) => ({
+            _id: rawId,
+            _index: commonHelper.getIndexForType(type),
+            _source: [type],
+          })),
+        },
+        { ignore: [404] }
+      );
+      beforeDocs.docs?.forEach((doc) => {
+        if (!isMgetDoc(doc)) return;
+        const target = objectByRawId.get(doc._id);
+        if (!target) return;
+        const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
+        if (attrs) {
+          auditRecordsByKey
+            .get(`${target.type}:${target.id}`)
+            ?.setBefore(attrs as Record<string, unknown>);
+        }
+      });
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
+      );
+    }
   }
 
   // Create the bulkDeleteParams
@@ -211,6 +275,8 @@ export const performBulkDelete = async <T>(
     }
 
     if (rawResponse.result === 'deleted') {
+      auditRecordsByKey.get(`${type}:${id}`)?.succeed();
+
       // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
       if (namespaces) {
         objectsToDeleteAliasesFor.push({

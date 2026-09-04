@@ -228,3 +228,40 @@ export interface GetHistoryResult {
 export interface ChangeHistoryFieldsToMask {
   [Key: string]: boolean | ChangeHistoryFieldsToMask;
 }
+
+/**
+ * A single RFC 6902 operation, extended with the non-standard `oldValue` field
+ * so audit consumers can see the prior value without correlating events.
+ */
+export interface JsonPatchOp {
+  /** The operation performed on the field. */
+  op: 'add' | 'remove' | 'replace';
+  /** RFC 6901 JSON Pointer to the changed field. */
+  path: string;
+  /** The new value (present for `add` and `replace`). */
+  value?: unknown;
+  /** The previous value (present for `remove` and `replace`) — the `oldValue` extension. */
+  oldValue?: unknown;
+}
+
+/**
+ * An unchanged field, emitted so consumers get a complete picture of the
+ * object's field set alongside the changed `ops`.
+ */
+export interface JsonPatchNoOp {
+  /** RFC 6901 JSON Pointer to the unchanged field. */
+  path: string;
+}
+
+/**
+ * An Extended JSON Patch document (RFC 6902 + the `oldValue` extension), as
+ * returned by `computeJsonPatch`.
+ */
+export interface ExtendedJsonPatch {
+  /** Discriminator identifying the schema. */
+  format: 'json_patch_extended';
+  /** One operation per changed field. */
+  ops: JsonPatchOp[];
+  /** One entry per unchanged field. */
+  noOps: JsonPatchNoOp[];
+}

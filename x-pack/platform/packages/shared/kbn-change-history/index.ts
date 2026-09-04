@@ -7,6 +7,7 @@
 
 export type * from './src/types';
 export * from './src/client';
+export { computeJsonPatch } from './src/diff';
 export { CHANGE_HISTORY_AGGREGATE_FIELDS } from './src/types';
 export { DEFAULT_FIELD_AGGREGATION_SIZE } from './src/constants';
 /**

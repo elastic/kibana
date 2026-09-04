@@ -46,11 +46,16 @@ import {
   getSavedObjectFromSource,
   mergeForUpdate,
 } from './utils';
+import type {
+  WriteAuditRecord,
+  SavedObjectAuditDiffRecorder,
+} from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;
   options: SavedObjectsBulkUpdateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 type DocumentToSave = Record<string, unknown>;
@@ -77,12 +82,22 @@ type ExpectedBulkUpdateResult = Either<
     documentToSave: DocumentToSave;
     esRequestIndex: number;
     rawMigratedUpdatedDoc: SavedObjectsRawDoc;
+    beforeAttributes?: Record<string, unknown>;
+    afterAttributes?: Record<string, unknown>;
   }
 >;
 
 export const performBulkUpdate = async <T>(
-  { objects, options }: PerformUpdateParams<T>,
-  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  { objects, options, auditDiffRecorder }: PerformUpdateParams<T>,
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    serializer,
+    logger,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -239,6 +254,23 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
+  // Track each authorized object for auditing (flushed by the repository once the
+  // operation settles). `after` starts as the requested attributes; `before`/`after`
+  // are refined to the preflight/merged attributes during response mapping. Objects
+  // rejected before authorization are not audited.
+  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  if (auditDiffRecorder) {
+    for (const { value } of validObjects) {
+      auditRecordsByKey.set(
+        `${value.type}:${value.id}`,
+        auditDiffRecorder.track(
+          { type: value.type, id: value.id },
+          { after: (value.documentToSave[value.type] ?? {}) as Record<string, unknown> }
+        )
+      );
+    }
+  }
+
   let bulkUpdateRequestIndexCounter = 0;
   const bulkUpdateParams: object[] = [];
 
@@ -361,6 +393,8 @@ export const performBulkUpdate = async <T>(
           documentToSave: expectedBulkGetResult.value.documentToSave,
           rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
           migrationVersionCompatibility,
+          beforeAttributes: migrated.attributes as Record<string, unknown>,
+          afterAttributes: updatedAttributes as Record<string, unknown>,
         };
 
         bulkUpdateParams.push(
@@ -397,15 +431,30 @@ export const performBulkUpdate = async <T>(
         return expectedResult.value as SavedObjectErrorResult;
       }
 
-      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
-        expectedResult.value;
+      const {
+        type,
+        id,
+        documentToSave,
+        esRequestIndex,
+        rawMigratedUpdatedDoc,
+        beforeAttributes,
+        afterAttributes,
+      } = expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
+
+      // Refine the audit record with the preflight/merged attributes; success is
+      // only recorded below, once ES confirms this object's write.
+      const auditRecord = auditRecordsByKey.get(`${type}:${id}`);
+      auditRecord?.setBefore((beforeAttributes ?? {}) as Record<string, unknown>);
+      auditRecord?.setAfter((afterAttributes ?? {}) as Record<string, unknown>);
 
       const error = getBulkOperationError(type, id, rawResponse);
       if (error) {
         return { type, id, error };
       }
+
+      auditRecord?.succeed();
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 

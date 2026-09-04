@@ -607,6 +607,28 @@ export interface ISavedObjectsSecurityExtension {
   ) => void;
 
   /**
+   * Emits a post-operation audit event for a saved object write when saved object diff
+   * auditing is enabled (in that mode the pre-operation audit event is suppressed, so this
+   * is the operation's only audit record). The outcome is 'success' when the write
+   * completed, or 'unknown' when it was attempted but did not complete. Independently of
+   * the outcome, the event carries an attribute diff (`kibana.diff`) of the (attempted)
+   * change whenever `before`/`after` attributes are provided.
+   */
+  emitSavedObjectDiffAuditEvent: (params: {
+    action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
+    savedObject: { type: string; id: string; name?: string };
+    outcome: 'success' | 'unknown';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    fieldsToRedact?: string[];
+  }) => void;
+
+  /**
+   * Whether saved object diff computation is enabled for audit events.
+   */
+  readonly savedObjectDiffEnabled: boolean;
+
+  /**
    * Retrieves the current user from the request context if available
    */
   getCurrentUser: () => AuthenticatedUser | null;

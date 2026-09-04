@@ -591,6 +591,37 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: xpack.security.audit.savedObjectDiff.enabled
+        description: |
+          Set to `true` to record saved object create, update, and delete audit events after the operation completes, including a field-level diff of the object's attributes in the `kibana.diff` field. When enabled, each write emits a single audit event reflecting its result — `event.outcome: success` with the diff once the write is confirmed, or `event.outcome: unknown`, carrying the attempted change, when the write did not complete — in place of the pre-operation event. Failed authorization is still audited with `event.outcome: failure` as usual. Requires `xpack.security.audit.enabled` to be `true`. **Default:** `false`
+
+          Diffs cover attributes only (not references, spaces, or access control). `incrementCounter` mutations and writes from clients that exclude the security extension (for example connectors and rules) do not emit diffs. Upsert that creates an object still uses `event.action: saved_object_update` with an empty before-state. A create that overwrites an existing object (for example, saved object import with `overwrite`) still uses `event.action: saved_object_create`, but its diff records the previous state: `replace` and `remove` operations preserve the overwritten values in `oldValue`, while a create of a new object contains only `add` operations. Large objects may list every unchanged leaf path under `kibana.diff.noOps`; `fieldSizeLimit` only caps individual attribute values, not total event size. A `success` event without a diff means the type is listed in `typesToExclude` or diff computation failed (details are written to the {{kib}} server log).
+
+          Do not use `xpack.security.audit.ignore_filters` to drop `event.outcome: unknown` events solely to reduce volume — for a write that fails after authorization, that event is its only audit trail.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.typesToExclude[]
+        description: |
+          List of saved object types to exclude from diff generation. Excluded types still emit their normal audit events, but without the `kibana.diff` field. **Default:** `[]`
+        datatype: string
+        default: "[]"
+        applies_to:
+          stack: preview
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.fieldSizeLimit
+        description: |
+          Maximum serialized size of an individual attribute value included in a diff. Values larger than this are replaced with the placeholder `Value above fieldSizeLimit` to keep per-field values bounded. Accepts a byte-size value (for example, `48kb`). Does not limit the number of `noOps` entries. **Default:** `48kb`
+        datatype: string
+        default: 48kb
+        applies_to:
+          stack: preview
+          self: preview
+
   - group: File appender
     id: audit-logging-file-appender
     description: |

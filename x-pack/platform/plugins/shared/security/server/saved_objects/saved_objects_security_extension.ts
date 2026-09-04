@@ -8,6 +8,7 @@
 import type { EcsEvent } from '@elastic/ecs';
 import type { Payload } from '@hapi/boom';
 
+import { computeJsonPatch, type ExtendedJsonPatch } from '@kbn/change-history';
 import type { SavedObjectsClient } from '@kbn/core/server';
 import {
   type Either,
@@ -55,6 +56,7 @@ import type {
   ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
@@ -76,6 +78,10 @@ interface Params {
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectDiffEnabled?: boolean;
+  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffFieldSizeLimit?: number;
+  logger?: Logger;
 }
 
 /**
@@ -152,6 +158,11 @@ export interface AddAuditEventParams {
    * the audit event
    */
   error?: Error;
+  /**
+   * Configuration diff for saved object mutations.
+   * Extended JSON Patch format (RFC 6902 + oldValue).
+   */
+  savedObjectDiff?: ExtendedJsonPatch;
 }
 
 /**
@@ -315,6 +326,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
+  public readonly savedObjectDiffEnabled: boolean;
+  private readonly savedObjectDiffTypesToExclude: Set<string>;
+  private readonly savedObjectDiffFieldSizeLimit?: number;
+  private readonly logger?: Logger;
 
   constructor({
     actions,
@@ -323,12 +338,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     checkPrivileges,
     getCurrentUser,
     typeRegistry,
+    savedObjectDiffEnabled = false,
+    savedObjectDiffTypesToExclude = [],
+    savedObjectDiffFieldSizeLimit,
+    logger,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
+    this.savedObjectDiffEnabled = savedObjectDiffEnabled;
+    this.savedObjectDiffTypesToExclude = new Set(savedObjectDiffTypesToExclude);
+    this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
+    this.logger = logger;
 
     this.typeRegistry = typeRegistry;
     this.accessControlService = new AccessControlService({ typeRegistry });
@@ -595,6 +618,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  /**
+   * When saved object diff auditing is enabled, write operations (create/update/delete)
+   * are audited after the ES write succeeds (via `emitSavedObjectDiffAuditEvent`), so the
+   * pre-operation 'unknown'-outcome event is suppressed ('on_success' bypasses only the
+   * success path of enforcement — authorization failures are still audited here as usual).
+   */
+  private writeAuditBypass(): 'on_success' | 'never' {
+    return this.savedObjectDiffEnabled ? 'on_success' : 'never';
+  }
+
   private allAccessControlObjectsAreInaccessible(
     allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
     inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
@@ -820,15 +853,96 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   private addAuditEvent(params: AddAuditEventParams): void {
     if (this.auditLogger.enabled) {
-      const { savedObject, ...rest } = params;
+      const { savedObject, savedObjectDiff, ...rest } = params;
 
       const auditEvent = savedObjectEvent({
         savedObject: this.maybeRedactSavedObject(savedObject),
+        savedObjectDiff,
         ...rest,
       });
 
       this.auditLogger.log(auditEvent);
     }
+  }
+
+  emitSavedObjectDiffAuditEvent(params: {
+    action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
+    savedObject: { type: string; id: string; name?: string };
+    /** 'success' when the write completed; 'unknown' when it was attempted but did not complete. */
+    outcome: 'success' | 'unknown';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    fieldsToRedact?: string[];
+  }): void {
+    // Only emit when the feature is enabled. The caller also gates on
+    // `savedObjectDiffEnabled`, but checking here keeps the public method
+    // correct on its own.
+    if (!this.savedObjectDiffEnabled) {
+      return;
+    }
+
+    const { type, id } = params.savedObject;
+
+    // The diff is independent of the outcome: it describes the (attempted) change,
+    // including on 'unknown'-outcome events. The pre-operation audit event is
+    // suppressed in this mode, so this event is the operation's only audit record:
+    // excluded types still emit it, they just don't carry the attribute diff.
+    // For the same reason the event must survive a diff computation failure — the
+    // diff is best-effort enrichment, so an error here degrades to an event without
+    // `kibana.diff` rather than a missing audit record.
+    // `before`/`after` are the object's attributes (not the full SO), so there
+    // are no system-managed root fields to filter out here.
+    let savedObjectDiff: ExtendedJsonPatch | undefined;
+    if (!this.savedObjectDiffTypesToExclude.has(type)) {
+      try {
+        savedObjectDiff = computeJsonPatch({
+          a: params.before,
+          b: params.after,
+          // ESO attributes are compared as ciphertext here; forwarding them as
+          // fieldsToRedact hides their values in the emitted diff. Because ESO
+          // encryption is non-deterministic, an encrypted attribute included in a
+          // write may surface as a (redacted) change even when its plaintext is
+          // unchanged.
+          fieldsToRedact: params.fieldsToRedact,
+          fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
+        });
+      } catch (error) {
+        // Use String(error) rather than error.message, which would throw if a
+        // non-Error (e.g. null) was thrown.
+        this.logger?.error(
+          `Failed to compute the saved object diff for the ${
+            params.action
+          } audit event of ${type} [id=${id}]: ${String(error)}`
+        );
+      }
+    }
+
+    // Resolve the object name from its attributes (create/update populate `after`,
+    // delete populates `before`) so the event is self-contained like the other audit
+    // events, falling back to the caller-provided name when the attributes don't
+    // yield one (or resolution fails). `addAuditEvent` handles name redaction.
+    let name = params.savedObject.name;
+    try {
+      const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
+      name =
+        SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
+          attributes: attributesForName,
+        }) ?? params.savedObject.name;
+    } catch (error) {
+      this.logger?.error(
+        `Failed to resolve the saved object name for the ${
+          params.action
+        } audit event of ${type} [id=${id}]: ${String(error)}`
+      );
+    }
+
+    this.addAuditEvent({
+      // `action` is the narrow SO-diff union; cast to the internal AuditAction enum.
+      action: params.action as AuditAction,
+      savedObject: { type, id, name },
+      outcome: params.outcome,
+      savedObjectDiff,
+    });
   }
 
   private async checkPrivileges(
@@ -918,7 +1032,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: spacesToAuthorize,
       enforceMap,
       options: { allowGlobalResource: true },
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+        bypass: this.writeAuditBypass(),
+      },
     });
 
     return authorizationResult;
@@ -979,7 +1096,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(enforceMap.keys()),
       spaces: spacesToAuthorize,
       enforceMap,
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+        bypass: this.writeAuditBypass(),
+      },
     });
 
     return authorizationResult;
@@ -1035,6 +1155,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap,
       auditOptions: {
         objects,
+        bypass: this.writeAuditBypass(),
       },
     });
   }

@@ -16,6 +16,7 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
@@ -23,10 +24,11 @@ export interface PerformDeleteParams<T = unknown> {
   type: string;
   id: string;
   options: SavedObjectsDeleteOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performDelete = async <T>(
-  { type, id, options }: PerformDeleteParams<T>,
+  { type, id, options, auditDiffRecorder }: PerformDeleteParams<T>,
   {
     registry,
     helpers,
@@ -48,6 +50,8 @@ export const performDelete = async <T>(
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
+  let deleteBeforeAttributes: Record<string, unknown> = {};
+
   if (securityExtension) {
     const nameAttribute = registry.getNameAttribute(type);
 
@@ -58,12 +62,19 @@ export const performDelete = async <T>(
         _source_includes: [
           ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
           'accessControl',
+          // Only fetch the full attributes (needed for the saved object diff) when the
+          // feature is enabled, to avoid paying that cost on every delete.
+          ...(auditDiffRecorder ? [type] : []),
         ],
       },
       { ignore: [404], meta: true }
     );
 
     const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+    deleteBeforeAttributes = (savedObjectResponse.body._source?.[type] ?? {}) as Record<
+      string,
+      unknown
+    >;
     const name = securityExtension.includeSavedObjectNames()
       ? SavedObjectsUtils.getName(nameAttribute, saveObject)
       : undefined;
@@ -77,6 +88,11 @@ export const performDelete = async <T>(
   }
 
   const rawId = serializer.generateRawId(namespace, type, id);
+
+  // Track the delete for auditing (flushed by the repository once the operation
+  // settles). The before-attributes were captured by the feature-gated fetch above;
+  // empty attributes still audit — the delete itself is the audit signal.
+  const auditRecord = auditDiffRecorder?.track({ type, id }, { before: deleteBeforeAttributes });
   let preflightResult: PreflightCheckNamespacesResult | undefined;
 
   if (registry.isMultiNamespace(type)) {
@@ -119,6 +135,8 @@ export const performDelete = async <T>(
 
   const deleted = body.result === 'deleted';
   if (deleted) {
+    auditRecord?.succeed();
+
     const namespaces = preflightResult?.savedObjectNamespaces;
     if (namespaces) {
       // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.

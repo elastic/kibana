@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -24,6 +25,7 @@ import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -31,10 +33,11 @@ export interface PerformCreateParams<T = unknown> {
   type: string;
   attributes: T;
   options: SavedObjectsCreateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performCreate = async <T>(
-  { type, attributes, options }: PerformCreateParams<T>,
+  { type, attributes, options, auditDiffRecorder }: PerformCreateParams<T>,
   {
     registry,
     helpers,
@@ -42,6 +45,7 @@ export const performCreate = async <T>(
     client,
     serializer,
     migrator,
+    logger,
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
@@ -148,6 +152,13 @@ export const performCreate = async <T>(
     },
   });
 
+  // Track the write for auditing (flushed by the repository once the operation
+  // settles). `after` starts as the requested attributes and is refined to the
+  // migrated (stored) attributes below.
+  const auditRecord = auditDiffRecorder?.track(
+    { type, id },
+    { after: attributes as unknown as Record<string, unknown> }
+  );
   if (preflightResult?.error) {
     // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
@@ -179,6 +190,7 @@ export const performCreate = async <T>(
     ...(Array.isArray(references) && { references }),
     ...(accessControlToWrite && { accessControl: accessControlToWrite }),
   });
+  auditRecord?.setAfter((migrated.attributes ?? {}) as Record<string, unknown>);
 
   /**
    * If a validation has been registered for this type, we run it against the migrated attributes.
@@ -189,6 +201,29 @@ export const performCreate = async <T>(
   validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
+
+  // When overwriting, fetch the previous attributes so the diff is replace/remove ops
+  // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
+  // get error degrades to before={} (create-shaped diff) instead of failing the write.
+  if (overwrite && auditDiffRecorder) {
+    try {
+      const existing = await client.get<SavedObjectsRawDocSource>(
+        {
+          id: raw._id,
+          index: commonHelper.getIndexForType(type),
+          _source_includes: [type],
+        },
+        { ignore: [404], meta: true }
+      );
+      auditRecord?.setBefore((existing.body._source?.[type] ?? {}) as Record<string, unknown>);
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on overwrite create ${type}:${id}: ${String(
+          error
+        )}`
+      );
+    }
+  }
 
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,
@@ -208,6 +243,8 @@ export const performCreate = async <T>(
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
   }
+
+  auditRecord?.succeed();
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(
     serializerHelper.rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),

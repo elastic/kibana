@@ -788,6 +788,75 @@ describe('#bulkUpdate', () => {
       });
     });
 
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff with before/after attributes when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('emits unknown-outcome events for every object when the bulk request fails', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
+        client.bulk.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.bulkUpdate([obj1, obj2])).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: { type: obj1.type, id: obj1.id },
+            outcome: 'unknown',
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: { type: obj2.type, id: obj2.id },
+            outcome: 'unknown',
+          })
+        );
+      });
+
+      it('does not fail the bulk update when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(
+          bulkUpdateSuccess(client, repository, registry, [obj1, obj2])
+        ).resolves.toBeDefined();
+      });
+    });
+
     describe('security', () => {
       it('correctly passes params to securityExtension.authorizeBulkUpdate', async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);

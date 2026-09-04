@@ -23,10 +23,18 @@ export interface SanitizeFieldsOpts {
 const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
   !!fields && Object.keys(fields).length > 0;
 
+/**
+ * Whether `key` is `prefix` itself or a dot-path descendant of it, e.g.
+ * `matchesPrefix('user.email', 'user')` is `true` but
+ * `matchesPrefix('username', 'user')` is `false`.
+ */
+export const matchesPrefix = (key: string, prefix: string): boolean =>
+  key === prefix || key.startsWith(`${prefix}.`);
+
 const matcher = (fields: ChangeHistoryFieldsToMask) => {
   const flat = flatten(fields);
   return (key: string) =>
-    Object.entries(flat).some(([k, v]) => Boolean(v) && (key === k || key.startsWith(`${k}.`)));
+    Object.entries(flat).some(([k, v]) => Boolean(v) && matchesPrefix(key, k));
 };
 
 /**

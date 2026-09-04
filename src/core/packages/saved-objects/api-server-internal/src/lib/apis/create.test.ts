@@ -53,6 +53,7 @@ import {
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
   ACCESS_CONTROL_TYPE,
+  getMockGetResponse,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -948,6 +949,81 @@ describe('#create', () => {
           typeMigrationVersion: '1.1.1',
           managed: false,
         });
+      });
+    });
+
+    describe('saved object diff audit events', () => {
+      beforeEach(() => {
+        mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      });
+
+      it('calls emitSavedObjectDiffAuditEvent with before={} and after=attributes when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        await createSuccess(type, attributes, { id });
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: {},
+            after: expect.any(Object),
+          })
+        );
+      });
+
+      it('fetches before-state on overwrite when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+
+        await createSuccess(type, { title: 'new-title' }, { id, overwrite: true });
+
+        expect(client.get).toHaveBeenCalledWith(
+          expect.objectContaining({ _source_includes: [type] }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.any(Object),
+          })
+        );
+      });
+
+      it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await createSuccess(type, attributes, { id });
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the create when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(createSuccess(type, attributes, { id })).resolves.toBeDefined();
+      });
+
+      it('emits an unknown-outcome event when the create fails after authorization', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.create.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.create(type, attributes, { id })).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: { type, id },
+            outcome: 'unknown',
+            before: {},
+            after: expect.objectContaining(attributes),
+          })
+        );
       });
     });
   });

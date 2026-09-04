@@ -5,29 +5,10 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-
-import { apiTest, AUDIT_LOG_PATH, tags } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-const waitForAuditEvent = async (
-  filter: (event: Record<string, unknown>) => boolean,
-  timeoutMs = 10_000
-): Promise<Record<string, unknown>> => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const lines = readFileSync(AUDIT_LOG_PATH, 'utf8').split('\n').filter(Boolean);
-      const events = lines.map((l) => JSON.parse(l) as Record<string, unknown>);
-      const match = events.reverse().find(filter);
-      if (match) return match;
-    } catch {
-      // file not yet created — retry
-    }
-    await new Promise((r) => setTimeout(r, 300));
-  }
-  throw new Error(`Timed out waiting for matching audit event in ${AUDIT_LOG_PATH}`);
-};
+import { waitForAuditEvent } from '../helpers/audit_log';
 
 apiTest.describe(
   'Audit log — ECS field shape (local file appender)',
