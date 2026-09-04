@@ -20,7 +20,6 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
   TypedLensSerializedState,
   DatasourceMap,
-  DatasourceStates,
   VisualizationMap,
   LensAppServices,
   LensStoreDeps,
@@ -28,7 +27,6 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
-  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -43,7 +41,7 @@ import {
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
-import type { EditConfigPanelProps } from './types';
+import type { EditConfigPanelProps, LensPanelStateUpdater } from './types';
 import { LensDocumentService } from '../../../persistence';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
@@ -66,17 +64,12 @@ function LoadingSpinnerWithOverlay() {
   );
 }
 
-type UpdaterType = (
-  datasourceState: unknown,
-  visualizationState: unknown,
-  visualizationType?: string,
-  datasourceId?: LensDatasourceId,
-  allDatasourceStates?: DatasourceStates
-) => void;
-
 // exported for testing
 export const updatingMiddleware =
-  (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
+  (updater: LensPanelStateUpdater) =>
+  (store: MiddlewareAPI) =>
+  (next: Dispatch) =>
+  (action: Action) => {
     const {
       datasourceStates: prevDatasourceStates,
       visualization: prevVisualization,
