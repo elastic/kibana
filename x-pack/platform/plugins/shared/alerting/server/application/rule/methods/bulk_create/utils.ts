@@ -102,11 +102,10 @@ export const prepareRule = async <Params extends RuleParams>({
     const throttle = data.throttle ?? null;
     const { systemActions: _sa, actions: _a, ...restData } = data;
 
-    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
       data.tags,
       apiKeyProps.uiamApiKey,
-      context.isServerless,
-      context.featureFlags
+      context.isServerless
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

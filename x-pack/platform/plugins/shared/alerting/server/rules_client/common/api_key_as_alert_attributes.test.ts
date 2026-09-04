@@ -12,7 +12,6 @@ import {
   addMissingUiamKeyTagIfNeeded,
 } from './api_key_as_alert_attributes';
 import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 
 describe('apiKeyAsAlertAttributes', () => {
   test('return attributes', () => {
@@ -230,87 +229,59 @@ describe('apiKeyAsAlertAttributes', () => {
   });
 });
 
-const featureFlags = coreFeatureFlagsMock.createStart();
-
 describe('shouldAddMissingUiamKeyTag', () => {
-  test('returns true when all conditions are met: serverless, feature flag enabled, no uiamApiKey', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, true, featureFlags)).toBe(true);
+  test('returns true when all conditions are met: serverless, no uiamApiKey', () => {
+    expect(shouldAddMissingUiamKeyTag(null, true)).toBe(true);
   });
 
-  test('returns true when uiamApiKey is undefined and other conditions are met', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(undefined, true, featureFlags)).toBe(true);
+  test('returns true when uiamApiKey is undefined and other conditions are met', () => {
+    expect(shouldAddMissingUiamKeyTag(undefined, true)).toBe(true);
   });
 
-  test('returns false when not serverless', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag(null, false, featureFlags)).toBe(false);
+  test('returns false when not serverless', () => {
+    expect(shouldAddMissingUiamKeyTag(null, false)).toBe(false);
   });
 
-  test('returns false when feature flag is disabled', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    expect(await shouldAddMissingUiamKeyTag(null, true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when uiamApiKey exists', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    expect(await shouldAddMissingUiamKeyTag('some-key', true, featureFlags)).toBe(false);
-  });
-
-  test('returns false when neither serverless nor feature flag are enabled', async () => {
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    expect(await shouldAddMissingUiamKeyTag(null, false, featureFlags)).toBe(false);
+  test('returns false when uiamApiKey exists', () => {
+    expect(shouldAddMissingUiamKeyTag('some-key', true)).toBe(false);
   });
 });
 
 describe('addMissingUiamKeyTagIfNeeded', () => {
-  test('adds tag when all conditions are met', async () => {
+  test('adds tag when all conditions are met', () => {
     const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, featureFlags);
-    expect(result).toEqual(['existing-tag', MISSING_UIAM_API_KEY_TAG]);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
   });
 
-  test('does not add tag when not serverless', async () => {
+  test('does not add tag when not serverless', () => {
     const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, false, featureFlags);
-    expect(result).toEqual(['existing-tag']);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, false)).toEqual(['existing-tag']);
   });
 
-  test('does not add tag when feature flag is disabled', async () => {
+  test('does not add tag when uiamApiKey exists', () => {
     const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(false);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, featureFlags);
-    expect(result).toEqual(['existing-tag']);
+    expect(addMissingUiamKeyTagIfNeeded(tags, 'some-key', true)).toEqual(['existing-tag']);
   });
 
-  test('does not add tag when uiamApiKey exists', async () => {
-    const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, 'some-key', true, featureFlags);
-    expect(result).toEqual(['existing-tag']);
-  });
-
-  test('does not add duplicate tag if tag already exists', async () => {
+  test('does not add duplicate tag if tag already exists', () => {
     const tags = ['existing-tag', MISSING_UIAM_API_KEY_TAG];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, featureFlags);
-    expect(result).toEqual(['existing-tag', MISSING_UIAM_API_KEY_TAG]);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([
+      'existing-tag',
+      MISSING_UIAM_API_KEY_TAG,
+    ]);
   });
 
-  test('works with empty tags array', async () => {
+  test('works with empty tags array', () => {
     const tags: string[] = [];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, featureFlags);
-    expect(result).toEqual([MISSING_UIAM_API_KEY_TAG]);
+    expect(addMissingUiamKeyTagIfNeeded(tags, null, true)).toEqual([MISSING_UIAM_API_KEY_TAG]);
   });
 
-  test('does not mutate original tags array', async () => {
+  test('does not mutate original tags array', () => {
     const tags = ['existing-tag'];
-    featureFlags.getBooleanValue.mockResolvedValue(true);
-    const result = await addMissingUiamKeyTagIfNeeded(tags, null, true, featureFlags);
+    const result = addMissingUiamKeyTagIfNeeded(tags, null, true);
     expect(tags).toEqual(['existing-tag']);
     expect(result).not.toBe(tags);
   });

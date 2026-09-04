@@ -266,11 +266,10 @@ async function updateAttributes({
     attributes.throttle ?? null
   );
 
-  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+  const tagsWithUiamCheck = addMissingUiamKeyTagIfNeeded(
     attributes.tags,
     apiKeyAttributes?.uiamApiKey,
-    context.isServerless,
-    context.featureFlags
+    context.isServerless
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted
