@@ -45,6 +45,14 @@ export const WATCH_LOAD_ERROR_BODY = i18n.translate('xpack.pnd.watches.detailLoa
   defaultMessage: 'Something went wrong while fetching this watch. Try again.',
 });
 
+export const WORKERS_LOAD_ERROR_TITLE = i18n.translate('xpack.pnd.watches.workersLoadError.title', {
+  defaultMessage: 'Unable to load workers',
+});
+
+export const WORKERS_LOAD_ERROR_BODY = i18n.translate('xpack.pnd.watches.workersLoadError.body', {
+  defaultMessage: 'Something went wrong while fetching workers for this watch. Try again.',
+});
+
 export const RETRY = i18n.translate('xpack.pnd.watches.retry', {
   defaultMessage: 'Retry',
 });
