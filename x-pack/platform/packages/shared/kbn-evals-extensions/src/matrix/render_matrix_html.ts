@@ -538,9 +538,17 @@ const renderModelCard = (
               }
               if (trace?.answer) {
                 body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
-              } else if (trace) {
+              } else if (trace?.question || (trace?.stepCount ?? 0) > 0) {
                 body +=
                   '<div class="answer"><p class="empty">No final answer message captured.</p></div>';
+              } else if (trace && Object.keys(trace.scores ?? {}).length > 0) {
+                // Trace entry carries only evaluator scores — no question, no
+                // steps. Extra-suite columns (rule/dashboard translation,
+                // attack discovery) are code-evaluated with no agent
+                // conversation; "No final answer captured" reads like a
+                // capture failure there. Say what actually happened.
+                body +=
+                  '<p class="empty">No agent trace — this suite is evaluated without a conversational agent.</p>';
               } else {
                 body += '<p class="empty">Trace unavailable.</p>';
               }

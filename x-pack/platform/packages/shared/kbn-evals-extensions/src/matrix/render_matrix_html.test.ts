@@ -203,6 +203,27 @@ describe('renderMatrixHtml', () => {
     expect(html).toContain('Trace unavailable');
   });
 
+  it('labels scored-but-traceless cells as code-evaluated, not trace-unavailable', () => {
+    // Extra-suite columns (rule/dashboard translation, attack discovery) are
+    // scored without an agent conversation: the trace entry carries only
+    // evaluator scores (no question, no steps). "No final answer captured"
+    // reads as a capture failure there; the label must say the suite has no
+    // conversational agent.
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        stepCount: 0,
+        toolCount: 0,
+        scores: { 'Translation Result': 1 },
+        repetitions: 1,
+        repTrails: [[]],
+      },
+    };
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain(
+      'No agent trace — this suite is evaluated without a conversational agent'
+    );
+  });
+
   it('renders each variant card with its own per-example score, not the column aggregate', () => {
     const configWithPrefixes: MatrixConfig = {
       ...mockConfig,

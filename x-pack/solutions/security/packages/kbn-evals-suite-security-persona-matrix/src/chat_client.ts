@@ -39,6 +39,13 @@ export interface ConverseResponse {
   errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
   conversationId?: string;
   traceId?: string | null;
+  /**
+   * Where `messages[last].message` came from. 'last_assistant_step' means the
+   * converse response carried no final message and the last non-empty
+   * assistant reasoning/output step was used verbatim instead — surfaced so
+   * reports can label the fallback instead of presenting it as a true answer.
+   */
+  messageSource: 'response' | 'last_assistant_step';
   /** Reproducibility metadata persisted in task.output on every score doc. */
   sampling: {
     connectorId: string;
@@ -86,8 +93,28 @@ export class PersonaMatrixChatClient {
         body: JSON.stringify(body),
       });
 
-      const message = resp.response?.message ?? '';
       const steps = resp.steps ?? [];
+      // Final-answer fallback: some models end on a tool call (no closing
+      // assistant turn), so response.message is "". Downstream, a blank final
+      // message renders "No final answer message captured" and the answer-
+      // based LLM judges see an empty answer. Use the LAST non-empty assistant
+      // reasoning/output step verbatim — never synthesized — and mark it as a
+      // fallback so the trace card can label it honestly.
+      let message = resp.response?.message ?? '';
+      let messageSource: 'response' | 'last_assistant_step' = 'response';
+      if (!message.trim()) {
+        const lastAssistant = [...steps].reverse().find((step) => {
+          const text =
+            step.type === 'reasoning' ? step.reasoning : step.type === 'output' ? step.output : '';
+          return typeof text === 'string' && text.trim().length > 0;
+        });
+        if (lastAssistant) {
+          const text =
+            lastAssistant.type === 'reasoning' ? lastAssistant.reasoning : lastAssistant.output;
+          message = typeof text === 'string' ? text : '';
+          messageSource = message.trim() ? 'last_assistant_step' : 'response';
+        }
+      }
       const trajectoryFingerprint = createHash('sha256')
         .update(
           JSON.stringify(
@@ -102,6 +129,7 @@ export class PersonaMatrixChatClient {
         messages: [{ message }],
         steps,
         errors: [],
+        messageSource,
         conversationId: resp.conversation_id,
         traceId: resp.trace_id ?? null,
         sampling: {
