@@ -1,0 +1,43 @@
+{
+  "sha1": "d7c0c95a6077dc870d15e6fcc55851cd544588c4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a89b3be0b8cbaeb-5092ac1fe8dbb30",
+      "title": "Load logstash + discover archives for discover_customization_examples",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "examples/discover_customization_examples/test/scout_examples/ui/tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "291f18519ba1f87-87c221a6daa77db",
+      "title": "Discover customization examples CustomDataViewPicker loads a saved session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/discover_customization_examples/test/scout_examples/ui/tests/customizations.spec.ts",
+        "line": 17,
+        "column": 76
+      }
+    },
+    {
+      "id": "ae1fd29de8e8a95-d3da924ae7106cf",
+      "title": "Unload discover archives for discover_customization_examples",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "examples/discover_customization_examples/test/scout_examples/ui/tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

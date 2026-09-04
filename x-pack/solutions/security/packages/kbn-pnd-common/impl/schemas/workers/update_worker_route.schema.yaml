@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Update PND Worker API endpoint
+  version: '1'
+paths:
+  /internal/pnd/workers/{workerId}:
+    patch:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: UpdateWorker
+      description: >-
+        Update one managed Worker. Settings writes carry the revision returned by GET/list for
+        best-effort stale-read detection; this is not an atomic write guard. A settings save
+        installs the Worker if needed and resynchronizes enablement through the request-bound
+        Workflows CRUD path.
+      summary: Update worker
+      tags:
+        - PND API
+      parameters:
+        - name: workerId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Managed Worker workflow id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: >-
+                    Enables or disables the Worker. Enabling an uninstalled Worker first installs
+                    its per-space managed document with defaults.
+                settingsRevision:
+                  type: integer
+                  format: int64
+                  minimum: 0
+                  nullable: true
+                  description: >-
+                    Revision returned by list/GET. Required when any settings field is present;
+                    null asserts that the per-space managed Worker has not been installed yet.
+                autonomyLevel:
+                  $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchAutonomyLevel'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  worker:
+                    $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
+                required:
+                  - worker
+        '409':
+          description: The settings changed before this request began applying its patch
+        '400':
+          description: The settings patch is unsupported or omitted its revision
+        '404':
+          description: Unknown Worker

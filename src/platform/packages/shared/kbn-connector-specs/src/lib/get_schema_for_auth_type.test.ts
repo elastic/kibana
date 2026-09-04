@@ -59,6 +59,22 @@ describe('getSchemaForAuthType()', () => {
     });
   });
 
+  test('carries isKibanaManaged into the schema meta so the form can skip the option', () => {
+    const { schema } = getSchemaForAuthType({ type: 'relay', defaults: {} });
+
+    expect(schema.meta()).toEqual({
+      authMode: 'shared',
+      label: 'Elastic app (bot user)',
+      isKibanaManaged: true,
+    });
+  });
+
+  test('omits isKibanaManaged for an auth type that Kibana does not manage', () => {
+    const { schema } = getSchemaForAuthType({ type: 'basic', defaults: {} });
+
+    expect(schema.meta()).not.toHaveProperty('isKibanaManaged');
+  });
+
   test('ignores defaults for key that is not in auth type schema', () => {
     const { schema } = getSchemaForAuthType({
       type: 'api_key_header',

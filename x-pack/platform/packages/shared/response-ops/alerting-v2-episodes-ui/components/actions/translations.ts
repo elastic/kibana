@@ -116,14 +116,14 @@ export const TAGS_MORE_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAGS_ACTION_EDIT_TAGS = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.editTags',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
 export const TAGS_ACTION_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
-    defaultMessage: 'Edit Tags',
+    defaultMessage: 'Edit alert tags',
   }
 );
 
@@ -227,14 +227,15 @@ export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
 export const BULK_TAGS_MODAL_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.title',
   {
-    defaultMessage: 'Set tags for selected episodes',
+    defaultMessage: 'Set alert tags for selected episodes',
   }
 );
 
 export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
   'xpack.alertingV2.episodesUi.bulkTagsModal.replaceWarning',
   {
-    defaultMessage: 'These tags will replace any existing tags on all selected episodes.',
+    defaultMessage:
+      'These alert tags will replace any existing alert tags on all selected episodes.',
   }
 );
 
