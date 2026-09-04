@@ -349,5 +349,8 @@ describe('createVisualizationGraph', () => {
     for (const layer of validated.layers ?? []) {
       expect(layer.data_source).toEqual({ type: 'esql', query: canonicalQuery });
     }
+    expect(finalState.validatedConfig).not.toHaveProperty('axis');
+    expect(finalState.validatedConfig).not.toHaveProperty('legend');
+    expect(finalState.validatedConfig).not.toHaveProperty('styling');
   });
 });

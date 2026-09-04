@@ -7,9 +7,11 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getChartTypeConfigPromptContent } from './chart_type_guidance';
+import {
+  getChartStyleRulesPromptContent,
+  getChartTypeConfigPromptContent,
+} from './chart_type_guidance';
 import { getColorPalettesPromptContent } from './color_palettes';
-import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -46,8 +48,7 @@ ${existingConfig}
 2. The configuration is built around this query; its result columns are the only columns available to bind: ${esqlQueryJson}
 3. For ES|QL column bindings use { column: '<esql column name>', ...other options }, and every bound column must be one produced by that query.
 4. Follow the schema definition strictly, with the single exception that you must omit the 'data_source' field.`,
-    titleRulesPromptContent,
-    numberFormatRulesPromptContent,
+    getChartStyleRulesPromptContent(chartType),
     getColorPalettesPromptContent(chartType),
     getChartTypeConfigPromptContent(chartType),
     `Your task is to generate a ${chartType} visualization configuration based on the following information:
@@ -56,7 +57,7 @@ ${existingConfig}
 ${nlQuery}
 </user_query>
 
-Generate the ${chartType} visualization configuration.
+Generate the ${chartType} visualization configuration, applying the chart style rules above explicitly in the config.
 
 IMPORTANT: Return ONLY a JSON object wrapped in a markdown code block. The "authoring_note" must be one factual sentence describing the final chart and notable presentation choices, such as omitted titles or hidden legends. Do not include reasoning. The "config" must contain only the Lens configuration:
 \`\`\`json

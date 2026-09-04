@@ -79,6 +79,17 @@ describe('custom_content panel schemas', () => {
     ).toBe(false);
   });
 
+  it('accepts a vis config-source edit_panels item', () => {
+    expect(
+      editPanelItemSchema.safeParse({
+        source: 'config' as const,
+        type: 'vis' as const,
+        panelId: 'panel-123',
+        config: { changes: [{ operation: 'set', path: 'title', value: '' }] },
+      }).success
+    ).toBe(true);
+  });
+
   it('accepts a custom_content edit_panels item', () => {
     expect(
       editPanelItemSchema.safeParse({

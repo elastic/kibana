@@ -14,6 +14,11 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
+import {
+  editLensPresentation,
+  editVegaPresentation,
+  lensPresentationEditSchema,
+} from '@kbn/agent-builder-visualizations-server';
 import { definePanelType } from '../panel_type';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
 
@@ -191,18 +196,36 @@ export const editPanelRequestInputSchema = panelRequestBaseSchema
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;
 
-/**
- * Registry entry for the `vis` panel type. A by-value (`source: 'config'`) vis
- * panel can carry either a Lens API config or a Vega `{ spec }` config, so the
- * embeddable is chosen from the config shape: a `spec` string routes to the Vega
- * embeddable, everything else stays Lens. Vis is not editable via a
- * `source: 'config'` edit (edits go through `source: 'request'`), so
- * `validateConfigEdit` is intentionally omitted.
- */
+/** Visualization edits apply explicit set/remove operations and validate the resulting config. */
+export const editVisPanelConfigInputSchema = z.object({
+  source: z.literal('config'),
+  type: z.literal('vis'),
+  panelId: z.string().max(256).describe('Existing Lens or Vega panel id to update.'),
+  config: lensPresentationEditSchema.describe(
+    'Presentation-only changes to an existing Lens API panel; unmentioned settings are preserved. Queries, data sources, filters, and chart families must stay unchanged (use source: "request" for those). Vega panels accept only title, description, and hide_title.'
+  ),
+});
+
 export const visPanelDefinition = definePanelType({
   embeddableType: LENS_EMBEDDABLE_TYPE,
   buildPanelContent: (config) => {
     const isVegaConfig = typeof (config as { spec?: unknown })?.spec === 'string';
     return { type: isVegaConfig ? VEGA_VIS_TYPE : LENS_EMBEDDABLE_TYPE, config };
   },
+  validateConfigEdit: (existingPanel) => {
+    const isLens = existingPanel.type === LENS_EMBEDDABLE_TYPE;
+    const isVega = existingPanel.type === VEGA_VIS_TYPE;
+    if (!isLens && !isVega) {
+      return {
+        ok: false,
+        error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as a visualization. Use source: "config" with type: "markdown" or type: "custom_content" for those panels.`,
+      };
+    }
+
+    return { ok: true };
+  },
+  applyConfigEdit: (existingPanel, edit) =>
+    existingPanel.type === VEGA_VIS_TYPE
+      ? editVegaPresentation(existingPanel.config, edit)
+      : editLensPresentation(existingPanel.config, edit),
 });

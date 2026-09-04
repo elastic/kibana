@@ -19,19 +19,22 @@ Use these sizes — **do not make metric or gauge panels full-width**:
   - 8 metrics in a row: each \`w: 6, h: 5\`
   - 6 metrics in a row: each \`w: 8, h: 5\`
   - 4 metrics in a row: each \`w: 12, h: 5\`
+- **Metric with breakdown** → \`w: 12, h: 8–12\`. Needs room for the breakdown tiles — larger than a single KPI. Do not keep these at \`w: 6\`.
 - **Gauge** → \`w: 12, h: 8\`. Fit up to 4 per row.
-- **XY (line / area / bar)** → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
-- **Heatmap** → \`w: 24, h: 10\`. Needs height for the color matrix.
+- **XY (line / area / bar)** → \`w: 24, h: 10\`.
+- **Heatmap** → \`w: 24, h: 10\`.
 - **Tagcloud** → \`w: 24, h: 10\`.
-- **Pie** → \`w: 12, h: 10\`.
+- **Pie** → \`w: 12 or 24, h: 10\`.
+- **Region map** → \`w: 24, h: 10\`. Stay at least 24 wide.
 - **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
 - **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-- **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
+- **Datatable** → \`w: 48, h: 12–16\` on its own row so columns are readable, or \`w: 24\` when sharing a row with another half-width panel. Never narrower than \`w: 24\`; do not shrink a table to fill a leftover sliver.
 
 Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 **Grid Packing Rules:**
 
+- **Pack comparable panels evenly:** Prefer equal widths and heights within a row. A lone trend or table may use the full width. A sparse final KPI/gauge row may leave trailing space; keep its panels equally sized rather than stretching only the last one. Never add charts just to fill a row.
 - **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
   placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
 - **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
@@ -40,24 +43,27 @@ Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
 
 ### Positioning rules
 
-Always set \`x\` and \`y\` so panels tile with **no gaps**:
+Avoid interior gaps and overlaps; trailing space on sparse KPI rows is allowed:
 
 1. **Fill rows left to right.** Start at \`x: 0\`. The next panel's \`x\` = previous panel's \`x + w\`. When a panel would exceed column 48, start a new row.
 2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
 3. **Same \`h\` per row** when possible, so rows align cleanly.
 4. Panels' \`x + w\` must never exceed 48.
-5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
+5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below — but never fill a KPI-row gap with a different chart type (table, trend, pie), and never drop a datatable into a gap narrower than \`w: 24\`. Start a new row instead. Choose \`w\` and \`h\` to fit the available space.
 6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
 
 ### Reflow after removals
 
-- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
-- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
+- If removing a panel leaves a gap in a row, shift the affected neighboring panels left with \`update_panel_layouts\` and updated \`x\` values.
+- If removing a panel leaves later rows with unnecessary empty space above them, move the affected panels with \`update_panel_layouts\` and updated \`y\` values.
+- On any update, inspect the whole dashboard but reflow only the affected rows and sections. Preserve already-good placement.
+- Do not invent custom packing: never leave a hole under a shorter panel, and never stretch a table or trend to fill leftover height next to KPIs. Put KPIs in one even row; other chart types start on the next row.
 
 ### Section grid rules
 
 - When using \`add_section\`, each section has its own coordinate space.
 - Panels nested under \`add_section.panels\` use that same section-relative coordinate space.
+- When moving panels into a section with \`update_panel_layouts\`, panel \`grid\` is section-relative (same as \`add_section.panels\`).
 - Panel coordinates inside a section are section-relative: each section starts at \`y: 0\`. The same 48-column grid and sizing guidance apply within each section.
 - A section occupies exactly one row (\`h: 1\`) in the outer dashboard grid. When placing widgets after a section, compute the next outer \`y\` as \`section.grid.y + 1\` (not by summing internal panel heights).
 - Internal section panel heights affect layout inside the section only; they do not increase the section's outer-grid height.
@@ -65,6 +71,8 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 - **Inserting above existing sections:** Top-level panels and sections share the same outer grid coordinates. If a section occupies \`y: 0\`, a new top-level panel at \`y: 0\` will collide and be pushed **below** the section. To place a panel above an existing section, first \`remove_section\` (with \`panelAction: "promote"\` or \`"delete"\`) and re-add it via \`add_section\` at a higher \`y\` to make room, then add the panel at the freed \`y\`.
 
 ### Example: 4 KPI metrics + 2 time-series charts + 1 breakdown bar chart
+
+The last \`xy-bar\` is alone on its row, so it stretches to \`w: 48\`.
 
 \`\`\`
 metric  (x:0,  y:0,  w:12, h:5)
