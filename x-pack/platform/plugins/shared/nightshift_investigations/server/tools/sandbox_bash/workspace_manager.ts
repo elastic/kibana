@@ -42,8 +42,15 @@ export class WorkspaceManager {
   }
 
   private presign(method: 'GET' | 'PUT' | 'HEAD', conversationId: string): string {
+    // For HEAD checks from Kibana, use s3_endpoint. For sandbox PUT/GET, use
+    // s3_sandbox_endpoint (falls back to s3_endpoint) so that containers can reach
+    // MinIO even when the host URL isn't resolvable from inside Docker.
+    const endpoint =
+      method === 'HEAD'
+        ? (this.config.s3_endpoint ?? 'https://s3.amazonaws.com')
+        : (this.config.s3_sandbox_endpoint ?? this.config.s3_endpoint ?? 'https://s3.amazonaws.com');
     return presignS3Url({
-      endpoint: this.config.s3_endpoint ?? 'https://s3.amazonaws.com',
+      endpoint,
       bucket: this.config.sandbox_workspace_bucket!,
       key: this.objectKey(conversationId),
       method,

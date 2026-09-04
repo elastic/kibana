@@ -25,7 +25,13 @@ const sandboxConfigSchema = schema.object({
   // S3/MinIO workspace persistence — optional. When set, sandbox /workspace is
   // snapshotted to S3 after each write tool call and restored on reconnect.
   sandbox_workspace_bucket: schema.maybe(schema.string()),
+  // Endpoint Kibana uses when issuing its own S3 requests (e.g. HEAD object-exists check).
   s3_endpoint: schema.maybe(schema.string()),
+  // Endpoint embedded in presigned URLs that the sandbox containers will use for GET/PUT.
+  // Required when Kibana and the sandbox run in different network namespaces (e.g. Docker
+  // dev where 'localhost' in the container refers to the container, not the host).
+  // Falls back to s3_endpoint when absent.
+  s3_sandbox_endpoint: schema.maybe(schema.string()),
   s3_access_key_id: schema.maybe(schema.string()),
   s3_secret_access_key: schema.maybe(schema.string()),
   s3_region: schema.string({ defaultValue: 'us-east-1' }),
