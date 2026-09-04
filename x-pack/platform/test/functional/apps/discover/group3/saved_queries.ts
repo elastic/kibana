@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIXED. Saved-query CRUD through the popover is already covered in
+ * Scout by src/platform/plugins/shared/unified_search/test/scout/ui/tests/saved_query_menu_crud.spec.ts;
+ * only the cross-space sharing case is unique to this file.
+ */
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -47,6 +53,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Manage saved queries', () => {
+      /**
+       * Migration recommendation: API TEST, then DELETE. The multi-space saved-object contract
+       * (create query, share to second space, delete space, verify query survives) is entirely
+       * expressible via `kbnClient` calls without a browser: create the SO, share it with the
+       * Spaces API, delete the space, assert the SO still exists and is accessible in the original
+       * space. The Discover UI itself has no unique rendering logic for this scenario, so a browser
+       * test would duplicate what the SO/Spaces API contract already guarantees.
+       */
       it('delete saved query shared in multiple spaces', async () => {
         // Navigate to Discover & create a saved query
         await common.navigateToApp('discover');
@@ -74,6 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryMissingOrFail(savedQueryName);
       });
 
+      /**
+       * Migration recommendation: DELETE. Covered by the 'update the loaded query and re-load it'
+       * step of saved_query_menu_crud.spec.ts, which additionally asserts the persisted query
+       * string — this test only asserts the query still appears in the list.
+       */
       it('updates a saved query', async () => {
         const name = `${savedQueryName}-update`;
 
