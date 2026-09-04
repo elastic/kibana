@@ -14,6 +14,7 @@ import { createAndLoginUserWithCustomRole, deleteAndLogoutUser } from './helpers
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
   const ui = getService('observabilityAIAssistantUI');
@@ -85,10 +86,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
             shouldUseHashForSubUrl: false,
           });
-          const chatInputElement = await testSubjects.find(ui.pages.conversations.chatInput);
           await testSubjects.existOrFail(ui.pages.conversations.chatInput);
-          const isDisabled = await chatInputElement.getAttribute('disabled');
-          expect(isDisabled).to.be(null);
+          await retry.waitFor('chat input to become enabled', async () =>
+            testSubjects.isEnabled(ui.pages.conversations.chatInput)
+          );
         });
       });
     });
